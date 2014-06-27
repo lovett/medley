@@ -42,7 +42,7 @@ class Medley(object):
 
 
 if __name__ == '__main__':
-    configFile = os.path.join(os.path.dirname(__file__), 'config.py')
+    configFile = os.path.join(os.path.dirname(__file__), 'medley.conf')
     cherrypy.quickstart(Medley(), config=configFile)
 else:
     cherrypy.tree.mount(Medley())

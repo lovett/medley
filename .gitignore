@@ -8,5 +8,5 @@ include
 lib
 *.db
 .Python
-config.py
+medley.conf
 *.pyc

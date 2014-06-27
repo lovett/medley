@@ -1,16 +1,40 @@
-* SETUP
+* Setup
+Clone the repository somewhere sensible, then set up a virtualenv. 
 
-Create a system user for the application:
+This is a Python 3 application, so be careful to install and invoke
+virtualenv against Python 3 and not Python 2. 
 
+Then activate the virtualenv and install requirements via pip.
+
+For example:
+
+#+begin_src shell
+virtualenv-3.4 .
+source bin/activate
+pip install -r requirements.txt
+cp sample.conf medley.conf
+#+end_src
+
+
+* Init Script
+
+The provided init script assumes a Debian environment and expects the
+application to reside under /srv/medley
+
+#+begin_src shell
+sudo cp init /etc/init.d/medley
+sudo update-rc.d medley defaults
+#+end_src
+
+* System user
+
+#+begin_src shell
 sudo adduser medley --system --ingroup proxy --home /srv/medley
+#+end_src
 
 The user is added to the proxy group because so that it can interact with pdnsd.
 
-The adduser command will warn that the specified home directory does not belong to the user being created, but ignore that.
+The adduser command will warn that the specified home directory does
+not belong to the user being created, but ignore that.
 
-Copy the file init to /etc/init.d/medley and then run
-
-sudo update-rc.d medley defaults
-
-If medley located somewhere other than /srv/medley, edit the paths in the init file accordingly.
 
