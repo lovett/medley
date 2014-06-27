@@ -1,0 +1,16 @@
+* SETUP
+
+Create a system user for the application:
+
+sudo adduser medley --system --ingroup proxy --home /srv/medley
+
+The user is added to the proxy group because so that it can interact with pdnsd.
+
+The adduser command will warn that the specified home directory does not belong to the user being created, but ignore that.
+
+Copy the file init to /etc/init.d/medley and then run
+
+sudo update-rc.d medley defaults
+
+If medley located somewhere other than /srv/medley, edit the paths in the init file accordingly.
+

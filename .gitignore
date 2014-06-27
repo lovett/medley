@@ -1,0 +1,12 @@
+.DS_Store
+._*
+.\#*
+\#*
+__pycache__
+bin
+include
+lib
+*.db
+.Python
+config.py
+*.pyc
