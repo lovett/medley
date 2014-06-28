@@ -13,12 +13,12 @@
 # Author: Bill Lovett <bill@ilovett.com>
 #
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="medley web server"
-NAME=medley
+DESC="cherryd web server running medley"
+NAME=cherryd
 PIDFILE=/var/run/$NAME.pid
 DAEMON=/usr/local/bin/cherryd
-DAEMON_ARGS="-c /srv/medley/config.py -d -p $PIDFILE -i medley"
-SCRIPTNAME=/etc/init.d/$NAME
+DAEMON_ARGS="-c /srv/medley/medley.conf -d -p $PIDFILE -i medley"
+SCRIPTNAME=/etc/init.d/medley
 
 
 # Exit if the package is not installed
