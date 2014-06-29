@@ -10,7 +10,8 @@ class Medley(object):
         cur = db.cursor()
 
         cur.execute("CREATE TABLE IF NOT EXISTS ipinform (token TEXT, hostname TEXT)")
-        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_ipinform_token ON iplog (token)")
+        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_ipinform_token ON ipinform (token)")
+        db.commit()
 
         return cur
 
@@ -31,7 +32,7 @@ class Medley(object):
         else:
             ip = cherrypy.request.headers["REMOTE-ADDR"]
 
-        cur.execute("SELECT hostname FROM iplog WHERE token=?", (token,))
+        cur.execute("SELECT hostname FROM ipinform WHERE token=?", (token,))
         row = cur.fetchone()
 
         if (row):
