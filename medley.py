@@ -3,6 +3,7 @@ import sqlite3
 import os.path
 import subprocess
 import sys
+import pwd
 
 class Medley(object):
     def getCursor(self, config):
@@ -47,4 +48,6 @@ if __name__ == '__main__':
     conf = os.path.join(pwd, 'medley.conf')
     cherrypy.quickstart(Medley(), config=conf)
 else:
+    user = pwd.getpwnam("medley")
+    cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
     cherrypy.tree.mount(Medley())
