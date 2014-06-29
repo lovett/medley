@@ -1,6 +1,7 @@
 import cherrypy
 import sqlite3
 import os.path
+import os
 import subprocess
 import sys
 import pwd
@@ -51,4 +52,6 @@ else:
     user = pwd.getpwnam("medley")
     cherrypy.engine.autoreload.unsubscribe()
     cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
-    cherrypy.tree.mount(Medley())
+    app = cherrypy.tree.mount(Medley())
+    os.makedirs("/var/log/medley", exist_ok=True)
+
