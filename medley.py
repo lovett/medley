@@ -49,5 +49,6 @@ if __name__ == '__main__':
     cherrypy.quickstart(Medley(), config=conf)
 else:
     user = pwd.getpwnam("medley")
+    cherrypy.engine.autoreload.unsubscribe()
     cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
     cherrypy.tree.mount(Medley())
