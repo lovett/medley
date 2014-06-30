@@ -6,7 +6,7 @@ import subprocess
 import sys
 import pwd
 
-class Medley(object):
+class MedleyServer(object):
     def getCursor(self, config):
         db = sqlite3.connect(config['filename'])
         cur = db.cursor()
@@ -43,15 +43,15 @@ class Medley(object):
         else:
             raise cherrypy.HTTPError(400, "Invalid token")
 
+app = cherrypy.tree.mount(MedleyServer())
 
-if __name__ == '__main__':
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    conf = os.path.join(pwd, 'medley.conf')
-    cherrypy.quickstart(Medley(), config=conf)
-else:
-    user = pwd.getpwnam("medley")
-    cherrypy.engine.autoreload.unsubscribe()
-    cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
-    app = cherrypy.tree.mount(Medley())
-    os.makedirs("/var/log/medley", exist_ok=True)
-
+#if __name__ == '__main__':
+    #pwd = os.path.dirname(os.path.abspath(__file__))
+    #conf = os.path.join(pwd, 'medley.conf')
+    #cherrypy.quickstart(MedleyServer(), config=conf)
+#else:
+    #user = pwd.getpwnam("medley")
+    #cherrypy.engine.autoreload.unsubscribe()
+    #cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
+    #app = cherrypy.tree.mount(MedleyServer())
+    #os.makedirs("/var/log/medley", exist_ok=True)
