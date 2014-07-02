@@ -1,33 +1,16 @@
 import cherrypy
-import sqlite3
 import os.path
 import os
-import subprocess
 import sys
 import pwd
 
 class MedleyServer(object):
-    def getCursor(self, config):
-        db = sqlite3.connect(config['filename'])
-        cur = db.cursor()
-
-        cur.execute("CREATE TABLE IF NOT EXISTS ipinform (token TEXT, hostname TEXT)")
-        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_ipinform_token ON ipinform (token)")
-        db.commit()
-
-        return cur
-
     @cherrypy.expose
     def index(self):
         return "hello"
 
     @cherrypy.expose
-    def ipinform(self, token=""):
-
-        if not token:
-            raise cherrypy.HTTPError(400, "Token not specified")
-
-        cur = self.getCursor(cherrypy.request.app.config['db'])
+    def ip(self, token=""):
 
         ip = None
         for header in ["X-REAL-IP", "REMOTE-ADDR"]:
@@ -39,21 +22,28 @@ class MedleyServer(object):
         if not ip:
             raise cherrypy.HTTPError(400, "Unable to determine IP")
 
-        cur.execute("SELECT hostname FROM ipinform WHERE token=?", (token,))
-        row = cur.fetchone()
+        if not token:
+            return ip
 
-        if (row):
-            subprocess.call(["pdnsd-ctl", "add", "a", ip, row[0]]);
-            return "ok"
-        else:
+        host = cherrypy.request.app.config["ip_tokens"].get(token)
+
+        if not host:
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
-#app = cherrypy.tree.mount(MedleyServer())
+        try:
+            dnsCommand = cherrypy.request.app.config["ip_dns"].get("command")
+            dnsCommand[dnsCommand.find("$ip")] = ip
+            dnsCommand[dnsCommand.find("$host")] = host
+            cherrypy._cpcompat_subprocess.call(dnsCommand);
+        except ValueError:
+            pass
+        finally:
+            return "ok"
 
-#if __name__ == '__main__':
-    #pwd = os.path.dirname(os.path.abspath(__file__))
-    #conf = os.path.join(pwd, 'medley.conf')
-    #cherrypy.quickstart(MedleyServer(), config=conf)
+if __name__ == '__main__':
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    conf = os.path.join(pwd, 'medley.conf')
+    cherrypy.quickstart(MedleyServer(), config=conf)
 #else:
     #user = pwd.getpwnam("medley")
     #cherrypy.engine.autoreload.unsubscribe()

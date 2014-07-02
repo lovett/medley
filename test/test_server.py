@@ -19,18 +19,26 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request('/')
         self.assertEqual(response.status, '200 OK')
 
-    def test_ipinformToken(self):
-        """ ipinform should reject tokenless requests """
-        response = self.request('/ipinform')
-        self.assertEqual(response.status, '400 Bad Request')
+    def test_ipNoToken(self):
+        """ /ip should emit the caller's IP if a token is not specified """
+        response = self.request('/ip', headers={"REMOTE-ADDR": "1.1.1.1"})
+        self.assertEqual(response.status, '200 OK')
+        self.assertEqual(response.body, [b"1.1.1.1"])
 
-    def test_ipinformIpHeader(self):
-        """ ipinform should error if it can't identify the request ip """
-        response = self.request('/ipinform/test')
-        self.assertEqual(response.status, '400 Bad Request')
+    def test_ipValidToken(self):
+        """ /ip should return successfully if a valid token is specified """
+        response = self.request('/ip/test', headers={"REMOTE-ADDR": "1.1.1.1"})
+        self.assertEqual(response.status, '200 OK')
 
-        response = self.request('/ipinform/test', headers={"REMOTE-ADDR": "1.1.1.1"})
+    def test_ipInvalidToken(self):
+        """ /ip should fail if an invalid token is specified """
+        response = self.request('/ip/invalid', headers={"REMOTE-ADDR": "1.1.1.1"})
         self.assertEqual(response.status, '404 Not Found')
+
+    def test_ipNoIp(self):
+        """ /ip should fail if it can't identify the request ip """
+        response = self.request('/ip/test')
+        self.assertEqual(response.status, '400 Bad Request')
 
 if __name__ == '__main__':
     import unittest
