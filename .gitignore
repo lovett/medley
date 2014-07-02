@@ -3,10 +3,9 @@
 .\#*
 \#*
 __pycache__
-bin
-include
-lib
 *.db
 .Python
 medley.conf
 *.pyc
+.coverage
+htmlcov

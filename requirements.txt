@@ -1,3 +1,4 @@
 CherryPy==3.3.0
+coverage==3.7.1
 py==1.4.20
 pytest==2.5.2

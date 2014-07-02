@@ -29,10 +29,15 @@ class MedleyServer(object):
 
         cur = self.getCursor(cherrypy.request.app.config['db'])
 
-        if "X-Real-IP" in cherrypy.request.headers:
-            ip = cherrypy.request.headers["X-REAL-IP"]
-        else:
-            ip = cherrypy.request.headers["REMOTE-ADDR"]
+        ip = None
+        for header in ["X-REAL-IP", "REMOTE-ADDR"]:
+            try:
+                ip = cherrypy.request.headers[header]
+            except KeyError:
+                pass
+
+        if not ip:
+            raise cherrypy.HTTPError(400, "Unable to determine IP")
 
         cur.execute("SELECT hostname FROM ipinform WHERE token=?", (token,))
         row = cur.fetchone()
@@ -41,9 +46,9 @@ class MedleyServer(object):
             subprocess.call(["pdnsd-ctl", "add", "a", ip, row[0]]);
             return "ok"
         else:
-            raise cherrypy.HTTPError(400, "Invalid token")
+            raise cherrypy.HTTPError(404, "Unrecognized token")
 
-app = cherrypy.tree.mount(MedleyServer())
+#app = cherrypy.tree.mount(MedleyServer())
 
 #if __name__ == '__main__':
     #pwd = os.path.dirname(os.path.abspath(__file__))
