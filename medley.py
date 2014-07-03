@@ -32,10 +32,10 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
         dnsCommand = cherrypy.request.app.config["ip_dns"].get("command")
-        dnsCommand[dnsCommand.index("$ip")] = ip
-        dnsCommand[dnsCommand.index("$host")] = host
-
-        subprocess.call(dnsCommand);
+        if dnsCommand:
+            dnsCommand[dnsCommand.index("$ip")] = ip
+            dnsCommand[dnsCommand.index("$host")] = host
+            subprocess.call(dnsCommand);
 
         return "ok"
 
