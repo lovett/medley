@@ -13,11 +13,11 @@
 # Author: Bill Lovett <bill@ilovett.com>
 #
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="cherryd web server running medley"
-NAME=cherryd
+DESC="medley webserver"
+NAME=medley
 PIDFILE=/var/run/$NAME.pid
-DAEMON=/usr/local/bin/cherryd
-DAEMON_ARGS="-c /srv/medley/medley.conf -d -p $PIDFILE -i medley"
+DAEMON=/usr/bin/python3
+DAEMON_ARGS="/srv/medley/medley.py"
 SCRIPTNAME=/etc/init.d/medley
 
 
@@ -40,8 +40,6 @@ SCRIPTNAME=/etc/init.d/medley
 #
 do_start()
 {
-        export PYTHONPATH=/srv/medley:$PYTHONPATH
-
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
