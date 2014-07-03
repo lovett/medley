@@ -1,8 +1,8 @@
 import cherrypy
 import os.path
 import os
-import sys
 import pwd
+import subprocess
 
 class MedleyServer(object):
     @cherrypy.expose
@@ -10,12 +10,13 @@ class MedleyServer(object):
         return "hello"
 
     @cherrypy.expose
+    @cherrypy.tools.json_out()
     def ip(self, token=""):
-
         ip = None
-        for header in ["X-REAL-IP", "REMOTE-ADDR"]:
+        for header in ("X-Real-Ip", "Remote-Addr"):
             try:
                 ip = cherrypy.request.headers[header]
+                break
             except KeyError:
                 pass
 
@@ -30,15 +31,18 @@ class MedleyServer(object):
         if not host:
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
-        try:
-            dnsCommand = cherrypy.request.app.config["ip_dns"].get("command")
-            dnsCommand[dnsCommand.find("$ip")] = ip
-            dnsCommand[dnsCommand.find("$host")] = host
-            cherrypy._cpcompat_subprocess.call(dnsCommand);
-        except ValueError:
-            pass
-        finally:
-            return "ok"
+        dnsCommand = cherrypy.request.app.config["ip_dns"].get("command")
+        dnsCommand[dnsCommand.index("$ip")] = ip
+        dnsCommand[dnsCommand.index("$host")] = host
+
+        subprocess.call(dnsCommand);
+
+        return "ok"
+
+    @cherrypy.expose
+    @cherrypy.tools.json_out()
+    def headers(self):
+        return cherrypy.request.headers
 
 if __name__ == "__main__":
     appRoot = os.path.dirname(os.path.abspath(__file__))
