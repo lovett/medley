@@ -40,13 +40,28 @@ class MedleyServer(object):
         finally:
             return "ok"
 
-if __name__ == '__main__':
-    pwd = os.path.dirname(os.path.abspath(__file__))
-    conf = os.path.join(pwd, 'medley.conf')
-    cherrypy.quickstart(MedleyServer(), config=conf)
-#else:
-    #user = pwd.getpwnam("medley")
-    #cherrypy.engine.autoreload.unsubscribe()
-    #cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=user.pw_uid, gid=user.pw_gid).subscribe()
-    #app = cherrypy.tree.mount(MedleyServer())
-    #os.makedirs("/var/log/medley", exist_ok=True)
+if __name__ == "__main__":
+    appRoot = os.path.dirname(os.path.abspath(__file__))
+    appConfig = os.path.join(appRoot, "medley.conf")
+    cherrypy.config.update(appConfig)
+
+    # attempt to drop privileges if daemonized
+    user = cherrypy.config.get("server.user")
+    if user:
+        try:
+            account = pwd.getpwnam(user)
+            cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=account.pw_uid, gid=account.pw_gid).subscribe()
+        except KeyError:
+            cherrypy.log.error("Unable to look up the user '{}'. Not dropping privileges.".format(user), "APP")
+            pass
+
+    daemonize = cherrypy.config.get("server.daemonize")
+    if daemonize:
+        cherrypy.config.update({'log.screen': False})
+        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
+
+    pidFile = cherrypy.config.get("server.pid")
+    if pidFile:
+        cherrypy.process.plugins.PIDFile(cherrypy.engine, pidFile).subscribe()
+
+    cherrypy.quickstart(MedleyServer(), "/", appConfig)
