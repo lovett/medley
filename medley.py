@@ -50,7 +50,7 @@ if __name__ == "__main__":
     if user:
         try:
             account = pwd.getpwnam(user)
-            cherrypy.process.plugins.DropPrivileges(cherrypy.engine, uid=account.pw_uid, gid=account.pw_gid).subscribe()
+            cherrypy.process.plugins.DropPrivileges(cherrypy.engine, umask=0o022, uid=account.pw_uid, gid=account.pw_gid).subscribe()
         except KeyError:
             cherrypy.log.error("Unable to look up the user '{}'. Not dropping privileges.".format(user), "APP")
             pass
