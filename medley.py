@@ -69,17 +69,41 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def phone(self, number):
-        """
-        Given a US phone number, return the corresponding state its area code belongs to.
-        """
+        """ Given a US phone number, return the state its area code belongs to
+        and a description of the area it covers. """
+
         number = re.sub("\D", "", number)
         number = number.lstrip("1")
 
         areaCode = number[:3]
 
+        if len(areaCode) is not 3:
+            raise cherrypy.HTTPError(400, "Invalid number")
+
+        sparql = """
+        PREFIX dbprop: <http://dbpedia.org/property/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX dbo: <http://dbpedia.org/ontology/>
+
+        SELECT ?state, ?comment, ?redirect WHERE {{
+          {{
+            ?label rdfs:label "Area code {0}"@en ;
+            rdfs:comment ?comment; dbprop:state ?state
+            filter (isLiteral(?comment) && langMatches(lang(?comment), "en"))
+            filter (isLiteral(?state) && langMatches(lang(?state), "en"))
+            .
+          }}
+          UNION
+          {{
+            ?label rdfs:label "Area code {0}"@en ;
+            dbo:wikiPageRedirects ?redirect .
+          }}
+        }}
+        """.format(areaCode)
+
         params = {
-            "default-graph-uri": "http://dbpedia.org",
-            "query": "select * where { dbpedia:Area_code_%s geo:lat ?lat; geo:long ?long }" % (areaCode),
+            "query": sparql,
             "format": "json",
             "timeout": "1000"
         }
@@ -91,22 +115,37 @@ class MedleyServer(object):
 
         firstResult = sparqlResult["results"]["bindings"][0]
 
-        params = {
-            "latlng": "%s,%s" % (firstResult["lat"].get("value"),
-                                 firstResult["long"].get("value")),
-            "result_type": "locality|administrative_area_level_1",
-            "key": cherrypy.request.app.config["google"].get("api.key")
-        }
+        if "redirect" in firstResult:
+            sparql = """
+            PREFIX dbo: <http://dbpedia.org/ontology/>
+            PREFIX dbprop: <http://dbpedia.org/property/>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            SELECT ?state, ?comment {{
+              <{0}> rdfs:comment ?comment ; dbprop:state ?state
+              filter(isLiteral(?comment) && langMatches(lang(?comment), "en"))
+              filter(isLiteral(?state) && langMatches(lang(?state), "en"))
+            }}
+            """.format(firstResult["redirect"].get("value"))
 
-        geoQuery = "https://maps.googleapis.com/maps/api/geocode/json?%s" % urllib.parse.urlencode(params)
+            params["query"] = sparql
+            sparqlQuery = "http://dbpedia.org/sparql?%s" % urllib.parse.urlencode(params)
 
-        with urllib.request.urlopen(geoQuery) as request:
-            geoResult = json.loads(request.read().decode("utf-8"))
+            with urllib.request.urlopen(sparqlQuery) as request:
+                sparqlResult = json.loads(request.read().decode("utf-8"))
+                firstResult = sparqlResult["results"]["bindings"][0]
+
+        commentSentences = firstResult["comment"].get("value").split(". ")
+
+        # Filter noise
+        commentSentences = [x for x in commentSentences
+                            if re.search(" in (red|blue) (is|are)",x) is None
+                            and not re.match("The map to the right", x)
+                            and not re.match("Error: ", x)]
 
         return {
-            "location": geoResult["results"][0]["formatted_address"],
-            "reverseLookup": "http://www.whitepages.com/phone/%s" % (number),
-            "wikipedia": "http://en.wikipedia.org/wiki/Area_code_%s" % (areaCode)
+            "state": firstResult["state"].get("value"),
+            "reverseLookup": "http://www.whitepages.com/phone/{}".format(number),
+            "comment": ". ".join(commentSentences)
         }
 
 if __name__ == "__main__":
