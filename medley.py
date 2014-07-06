@@ -9,6 +9,9 @@ import re
 import urllib
 import urllib.parse
 import json
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
 
 class MedleyServer(object):
     @cherrypy.expose
@@ -147,6 +150,14 @@ class MedleyServer(object):
             "reverseLookup": "http://www.whitepages.com/phone/{}".format(number),
             "comment": ". ".join(commentSentences)
         }
+
+    @cherrypy.expose
+    def highlight(self, extension, content):
+        if extension == "json":
+            content = json.dumps(json.loads(content), sort_keys=True, indent=4)
+
+        lexer = get_lexer_by_name(extension)
+        return highlight(content, lexer, HtmlFormatter(full=True))
 
 if __name__ == "__main__":
     appRoot = os.path.dirname(os.path.abspath(__file__))
