@@ -2,9 +2,8 @@ CherryPy==3.3.0
 Pygments==1.6
 cov-core==1.13.0
 coverage==3.7.1
-geoip2==0.5.1
-maxminddb==0.3.3
 py==1.4.20
+pygeoip==0.3.1
 pytest==2.5.2
 pytest-cov==1.7.0
 requests==2.3.0
