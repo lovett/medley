@@ -3,7 +3,7 @@ import os.path
 import os
 import pwd
 import subprocess
-import geoip2.database
+import pygeoip
 import csv
 import re
 import urllib
@@ -58,15 +58,17 @@ class MedleyServer(object):
     def geoip(self, address):
         dbPath = cherrypy.request.app.config["geo"].get("ip.city")
 
-        reader = geoip2.database.Reader(dbPath)
-        response = reader.city(address)
-        reader.close()
+        reader = pygeoip.GeoIP(dbPath)
+        response = reader.record_by_addr(address)
 
         return {
-            "country": response.country.name,
-            "city": response.city.name,
-            "timezone": response.location.time_zone,
-            "latlong": [response.location.latitude, response.location.longitude]
+            "country": response["country_name"],
+            "country_code": response["country_code"],
+            "city": response["city"],
+            "region_code": response["region_code"],
+            "area_code": response["area_code"],
+            "timezone": response["time_zone"],
+            "latlong": [response["latitude"], response["longitude"]]
         }
 
     @cherrypy.expose
