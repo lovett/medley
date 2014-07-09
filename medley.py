@@ -9,6 +9,7 @@ import re
 import urllib
 import urllib.parse
 import json
+import copy
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -67,7 +68,7 @@ class MedleyServer(object):
         if not host:
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
-        dnsCommand = cherrypy.request.app.config["ip_dns"].get("command")
+        dnsCommand = copy.copy(cherrypy.request.app.config["ip_dns"].get("command"))
         if dnsCommand:
             dnsCommand[dnsCommand.index("$ip")] = ip
             dnsCommand[dnsCommand.index("$host")] = host
