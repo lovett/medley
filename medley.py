@@ -13,14 +13,41 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 
+
+def negotiable(media=["text/html", "application/json"], charset="utf=8"):
+    """Pick a representation for the requested resource
+
+    This is a CherryPy custom tool. It combines cherrypy.tools.accept
+    and cherrypy.tools.json_out, so that json is emitted only if the
+    client accepts it.
+
+    The selected media type is added to the request object as
+    cherrypy.request.negotiated."""
+
+    if isinstance(media, str):
+        media = [media]
+
+    req = cherrypy.request
+    tools = cherrypy.tools
+    req.negotiated = tools.accept.callable(media)
+
+    if req.negotiated == "application/json":
+        tools.json_out.callable()
+    elif req.negotiated == "text/plain":
+        cherrypy.response.headers["Content-Type"] = "text/plain; charset={}".format(charset)
+
+cherrypy.tools.negotiable = cherrypy.Tool('on_start_resource', negotiable)
+
 class MedleyServer(object):
+
     @cherrypy.expose
     def index(self):
         return "hello"
 
     @cherrypy.expose
-    @cherrypy.tools.json_out()
+    @cherrypy.tools.negotiable(media="text/plain")
     def ip(self, token=""):
+
         ip = None
         for header in ("X-Real-Ip", "Remote-Addr"):
             try:
@@ -49,12 +76,12 @@ class MedleyServer(object):
         return "ok"
 
     @cherrypy.expose
-    @cherrypy.tools.json_out()
+    @cherrypy.tools.negotiable()
     def headers(self):
         return cherrypy.request.headers
 
     @cherrypy.expose
-    @cherrypy.tools.json_out()
+    @cherrypy.tools.negotiable()
     def geoip(self, address):
         dbPath = cherrypy.request.app.config["geo"].get("ip.city")
 
@@ -72,7 +99,7 @@ class MedleyServer(object):
         }
 
     @cherrypy.expose
-    @cherrypy.tools.json_out()
+    @cherrypy.tools.negotiable()
     def phone(self, number):
         """ Given a US phone number, return the state its area code belongs to
         and a description of the area it covers. """
@@ -154,6 +181,7 @@ class MedleyServer(object):
         }
 
     @cherrypy.expose
+    @cherrypy.tools.negotiable(media="text/html")
     def highlight(self, extension, content):
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
