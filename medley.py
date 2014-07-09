@@ -13,7 +13,7 @@ import copy
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
-
+from titlecase import titlecase
 
 def negotiable(media=["text/html", "application/json"], charset="utf=8"):
     """Pick a representation for the requested resource
@@ -189,6 +189,19 @@ class MedleyServer(object):
 
         lexer = get_lexer_by_name(extension)
         return highlight(content, lexer, HtmlFormatter(full=True))
+
+    @cherrypy.expose
+    @cherrypy.tools.negotiable(media="text/plain")
+    def lettercase(self, style, value):
+        if style == "title":
+            return titlecase(value.lower())
+
+        if style == "lower":
+            return value.lower()
+
+        if style == "upper":
+            return value.upper()
+
 
 if __name__ == "__main__":
     appRoot = os.path.dirname(os.path.abspath(__file__))
