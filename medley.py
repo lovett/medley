@@ -89,6 +89,16 @@ class MedleyServer(object):
         reader = pygeoip.GeoIP(dbPath)
         response = reader.record_by_addr(address)
 
+        whois = subprocess.Popen(["whois", address], stdout=subprocess.PIPE)
+        out, err = whois.communicate()
+        out = out.decode('UTF-8')
+        orgNames = [line for line in out.split("\n") if re.match("OrgName:", line)]
+        orgNames = [re.sub("OrgName:\s+", "", line) for line in orgNames]
+        if len(orgNames) > 0:
+            org = orgNames.pop()
+        else:
+            org = None
+
         return {
             "country": response["country_name"],
             "country_code": response["country_code"],
@@ -96,7 +106,8 @@ class MedleyServer(object):
             "region_code": response["region_code"],
             "area_code": response["area_code"],
             "timezone": response["time_zone"],
-            "latlong": [response["latitude"], response["longitude"]]
+            "latlong": [response["latitude"], response["longitude"]],
+            "organization": org
         }
 
     @cherrypy.expose
