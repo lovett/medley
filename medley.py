@@ -14,6 +14,14 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 from titlecase import titlecase
+import jinja2
+from jinja2plugin import Jinja2TemplatePlugin
+from jinja2tool import Jinja2Tool
+
+# templating
+templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
+Jinja2TemplatePlugin(cherrypy.engine, templateEnv).subscribe()
+cherrypy.tools.template = Jinja2Tool()
 
 def negotiable(media=["text/html", "application/json"], charset="utf=8"):
     """Pick a representation for the requested resource
@@ -42,11 +50,15 @@ cherrypy.tools.negotiable = cherrypy.Tool('on_start_resource', negotiable)
 class MedleyServer(object):
 
     @cherrypy.expose
+    @cherrypy.tools.template(template="index.html")
     def index(self):
-        return "hello"
+        return {
+            'msg': 'Hello!'
+        }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/plain")
+    @cherrypy.tools.encode()
     def ip(self, token=""):
 
         ip = None
@@ -78,11 +90,23 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="headers.html")
     def headers(self):
-        return cherrypy.request.headers
+        """ Display all the headers that were provided by the client."""
+
+        if cherrypy.request.negotiated == "application/json":
+            return cherrypy.request.headers
+        else:
+            headers = cherrypy.request.headers.output()
+            headers.sort(key=lambda tup: tup[0])
+            return {
+                "page_title": "Headers",
+                "headers": headers
+            }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.encode()
     def geoip(self, address):
         dbPath = cherrypy.request.app.config["geo"].get("ip.city")
 
@@ -112,6 +136,7 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.encode()
     def phone(self, number):
         """ Given a US phone number, return the state its area code belongs to
         and a description of the area it covers. """
@@ -194,6 +219,7 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
+    @cherrypy.tools.encode()
     def highlight(self, extension, content):
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
@@ -203,6 +229,7 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/plain")
+    @cherrypy.tools.encode()
     def lettercase(self, style, value):
         if style == "title":
             return titlecase(value.lower())

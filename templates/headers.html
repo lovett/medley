@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block body %}
+<table class="ui table segment">
+    <tbody>
+        {% for key, value in headers %}
+        <tr>
+            <th>{{ key.decode('utf-8') }}</th>
+            <td>{{ value.decode('utf-8') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

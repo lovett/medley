@@ -1,0 +1,11 @@
+BODY {
+    font-family: 'Source Code Pro', sans-serif;
+}
+
+TH {
+    white-space: pre;
+}
+
+TD {
+    word-break: break-all;
+}
