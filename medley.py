@@ -7,6 +7,7 @@ import pygeoip
 import csv
 import re
 import urllib
+import urllib.request
 import urllib.parse
 import json
 import copy
@@ -133,6 +134,21 @@ class MedleyServer(object):
             "latlong": [response["latitude"], response["longitude"]],
             "organization": org
         }
+
+    @cherrypy.expose
+    @cherrypy.tools.encode()
+    def geoupdate(self):
+        """ Download the current version of the GeoLite Legacy City database from maxmind.com """
+
+        url = cherrypy.request.app.config["geo"].get("ip.city.url")
+        destination = cherrypy.request.app.config["geo"].get("ip.city.filename")
+
+        gzFile = "{}/{}".format(os.path.dirname(destination), os.path.basename(url))
+
+        urllib.request.urlcleanup()
+        urllib.request.urlretrieve(url, gzFile)
+        subprocess.check_call(["gunzip", "-f", gzFile]);
+        return "ok"
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
