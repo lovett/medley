@@ -81,7 +81,7 @@ class MedleyServer(object):
         if not host:
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
-        dnsCommand = copy.copy(cherrypy.request.app.config["ip_dns"].get("command"))
+        dnsCommand = copy.copy(cherrypy.config.get("ip.dns.command"))
         if dnsCommand:
             dnsCommand[dnsCommand.index("$ip")] = ip
             dnsCommand[dnsCommand.index("$host")] = host
@@ -109,7 +109,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
     def geoip(self, address):
-        dbPath = cherrypy.request.app.config["geo"].get("ip.city")
+        dbPath = cherrypy.config.get("geoip.city.filename")
 
         reader = pygeoip.GeoIP(dbPath)
         response = reader.record_by_addr(address)
@@ -140,8 +140,8 @@ class MedleyServer(object):
     def geoupdate(self):
         """ Download the current version of the GeoLite Legacy City database from maxmind.com """
 
-        url = cherrypy.request.app.config["geo"].get("ip.city.url")
-        destination = cherrypy.request.app.config["geo"].get("ip.city.filename")
+        url = cherrypy.config.get("geoip.city.url")
+        destination = cherrypy.config.get("geoip.city.filename")
 
         gzFile = "{}/{}".format(os.path.dirname(destination), os.path.basename(url))
 
