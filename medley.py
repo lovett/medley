@@ -55,10 +55,39 @@ class MedleyServer(object):
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
     def azure(self, event):
-        jsonString = json.dumps(cherrypy.request.json, sort_keys=True, indent=4)
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, prefix="medley-azure-") as tmp:
-            print(jsonString, file=tmp)
-            return "ok"
+
+        endpoint = cherrypy.config.get("notifier.url")
+
+        if not endpoint:
+            raise cherrypy.HTTPError(410, "This endpoint is not active")
+
+        body = cherrypy.request.json
+
+        notification = {
+            "group": "azure",
+            "url": cherrypy.config.get("azure.url.deployments").format(body["siteName"]),
+            "body": body["message"]
+        }
+
+        if body["status"] == "success" and body["complete"] == True:
+            notification["title"] = "Deployment to {} is complete".format(body["siteName"])
+        else:
+            notification["title"] = "Deployment to {} is {}".format(body["siteName"], body["status"])
+
+        encodedNotification = urllib.parse.urlencode(notification).encode('utf-8')
+
+        headers= {
+            "X-Token": cherrypy.config.get("notifier.token")
+        }
+
+
+
+        request = urllib.request.Request(endpoint, data=encodedNotification, headers=headers)
+
+        response = urllib.request.urlopen(request)
+        response.close()
+        return "ok"
+
 
     @cherrypy.expose
     @cherrypy.tools.template(template="index.html")
