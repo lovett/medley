@@ -1,4 +1,6 @@
 CherryPy==3.3.0
+Jinja2==2.5
+MarkupSafe==0.23
 Pygments==1.6
 cov-core==1.13.0
 coverage==3.7.1
