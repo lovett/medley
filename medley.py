@@ -11,6 +11,7 @@ import urllib.request
 import urllib.parse
 import json
 import copy
+import tempfile
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -49,6 +50,15 @@ def negotiable(media=["text/html", "application/json"], charset="utf=8"):
 cherrypy.tools.negotiable = cherrypy.Tool('on_start_resource', negotiable)
 
 class MedleyServer(object):
+
+    @cherrypy.expose
+    @cherrypy.tools.encode()
+    @cherrypy.tools.json_in()
+    def azure(self, event):
+        jsonString = json.dumps(cherrypy.request.json, sort_keys=True, indent=4)
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, prefix="medley-azure-") as tmp:
+            print(jsonString, file=tmp)
+            return "ok"
 
     @cherrypy.expose
     @cherrypy.tools.template(template="index.html")
