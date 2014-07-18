@@ -21,7 +21,9 @@ from jinja2plugin import Jinja2TemplatePlugin
 from jinja2tool import Jinja2Tool
 
 # templating
-templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader("templates"))
+templateDir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
+templateEnv = jinja2.Environment(loader=jinja2.FileSystemLoader(templateDir))
+
 Jinja2TemplatePlugin(cherrypy.engine, templateEnv).subscribe()
 cherrypy.tools.template = Jinja2Tool()
 
