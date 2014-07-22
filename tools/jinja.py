@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
 # taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973a/web/templating/jinja2_templating
 import cherrypy
 
-__all__ = ['Jinja2Tool']
-
-class Jinja2Tool(cherrypy.Tool):
+class Tool(cherrypy.Tool):
     def __init__(self):
         cherrypy.Tool.__init__(self, 'before_finalize',
                                self._render,

@@ -1,17 +1,15 @@
-# -*- coding: utf-8 -*-
 # taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973a/web/templating/jinja2_templating
 import cherrypy
-from jinja2 import Environment, FileSystemLoader
+import jinja2
 from cherrypy.process import plugins
 
-__all__ = ['Jinja2TemplatePlugin']
-
-class Jinja2TemplatePlugin(plugins.SimplePlugin):
+class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
-    def __init__(self, bus, env):
+    def __init__(self, bus, path):
+        self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
+
         plugins.SimplePlugin.__init__(self, bus)
-        self.env = env
 
     def start(self):
         """
