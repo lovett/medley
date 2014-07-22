@@ -3,10 +3,10 @@
 {% block body %}
 <table class="ui table segment">
     <tbody>
-        {% for key, value in headers %}
+        {% for key, value in data %}
         <tr>
-            <th>{{ key.decode('utf-8') }}</th>
-            <td>{{ value.decode('utf-8') }}</td>
+            <th>{{ key }}</th>
+            <td>{{ value }}</td>
         </tr>
         {% endfor %}
     </tbody>

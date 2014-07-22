@@ -70,15 +70,18 @@ class MedleyServer(object):
 
 
     @cherrypy.expose
-    @cherrypy.tools.template(template="index.html")
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template='index.html')
     def index(self):
-        return {
-            'msg': 'Hello!'
-        }
+        if cherrypy.request.negotiated == 'text/plain':
+            return 'hello'
+        else:
+            return {
+                'message': 'hello'
+            }
 
     @cherrypy.expose
-    @cherrypy.tools.negotiable(media="text/plain")
-    @cherrypy.tools.encode()
+    @cherrypy.tools.negotiable(media='text/plain')
     def ip(self, token=""):
 
         ip = None
@@ -110,23 +113,26 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="headers.html")
+    @cherrypy.tools.template(template="2col.html")
     def headers(self):
         """ Display all the headers that were provided by the client."""
 
         if cherrypy.request.negotiated == "application/json":
             return cherrypy.request.headers
         else:
-            headers = cherrypy.request.headers.output()
+            headers = [(key.decode('utf-8'), value.decode('utf-8'))
+                       for key, value in cherrypy.request.headers.output()]
+
             headers.sort(key=lambda tup: tup[0])
+
             return {
                 "page_title": "Headers",
-                "headers": headers
+                "data": headers
             }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.encode()
+    @cherrypy.tools.template(template="2col.html")
     def geoip(self, address):
         dbPath = cherrypy.config.get("geoip.city.filename")
 
@@ -143,16 +149,27 @@ class MedleyServer(object):
         else:
             org = None
 
-        return {
+        data =  {
             "country": response["country_name"],
             "country_code": response["country_code"],
             "city": response["city"],
             "region_code": response["region_code"],
             "area_code": response["area_code"],
             "timezone": response["time_zone"],
-            "latlong": [response["latitude"], response["longitude"]],
+            "latitude": response["latitude"],
+            "longitude": response["longitude"],
             "organization": org
         }
+
+        if cherrypy.request.negotiated == "application/json":
+            return data
+        if cherrypy.request.negotiated == "text/plain":
+            return "{}, {}".format(data["city"], data["country"])
+        else:
+            return {
+                "page_title": "GeoIP",
+                "data": data.items()
+            }
 
     @cherrypy.expose
     @cherrypy.tools.encode()
@@ -254,7 +271,6 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
-    @cherrypy.tools.encode()
     def highlight(self, extension, content):
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
@@ -264,7 +280,6 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/plain")
-    @cherrypy.tools.encode()
     def lettercase(self, style, value):
         if style == "title":
             return titlecase(value.lower())
