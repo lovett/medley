@@ -49,10 +49,14 @@ class MedleyServer(object):
             "body": body["message"]
         }
 
+        notification["title"] = "Deployment to {}".format(body["siteName"])
+
         if body["status"] == "success" and body["complete"] == True:
-            notification["title"] = "Deployment to {} is complete".format(body["siteName"])
+            notification["title"] += " is complete"
+        elif body["status"] == "failed":
+            notification["title"] += " has failed"
         else:
-            notification["title"] = "Deployment to {} is {}".format(body["siteName"], body["status"])
+            notification["title"] += " is {}".format(body["status"])
 
         encodedNotification = urllib.parse.urlencode(notification).encode('utf-8')
 
@@ -60,10 +64,7 @@ class MedleyServer(object):
             "X-Token": cherrypy.config.get("notifier.token")
         }
 
-
-
         request = urllib.request.Request(endpoint, data=encodedNotification, headers=headers)
-
         response = urllib.request.urlopen(request)
         response.close()
         return "ok"
