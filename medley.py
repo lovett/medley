@@ -4,14 +4,12 @@ import os
 import pwd
 import subprocess
 import pygeoip
-import csv
 import re
 import urllib
 import urllib.request
 import urllib.parse
 import json
 import copy
-import tempfile
 import plugins.jinja
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -27,29 +25,29 @@ cherrypy.tools.template = tools.jinja.Tool()
 class MedleyServer(object):
 
     def __init__(self):
-        templateDir = cherrypy.config.get("templates.dir")
-        plugins.jinja.Plugin(cherrypy.engine, templateDir).subscribe()
+        template_dir = cherrypy.config.get("templates.dir")
+        plugins.jinja.Plugin(cherrypy.engine, template_dir).subscribe()
 
 
     @cherrypy.expose
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
     def azure(self, event):
-
+        """Relay deployment notifications from Azure"""
         endpoint = cherrypy.config.get("notifier.url")
 
         if not endpoint:
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
+        deployment_url = cherrypy.config.get("azure.url.deployments")
         body = cherrypy.request.json
 
         notification = {
             "group": "azure",
-            "url": cherrypy.config.get("azure.url.deployments").format(body["siteName"]),
-            "body": body["message"]
+            "url": deployment_url.format(body["siteName"]),
+            "body": body["message"],
+            "title": "Deployment to {}".format(body["siteName"])
         }
-
-        notification["title"] = "Deployment to {}".format(body["siteName"])
 
         if body["status"] == "success" and body["complete"] == True:
             notification["title"] += " is complete"
@@ -58,13 +56,17 @@ class MedleyServer(object):
         else:
             notification["title"] += " is {}".format(body["status"])
 
-        encodedNotification = urllib.parse.urlencode(notification).encode('utf-8')
+        encoded_notification = urllib.parse.urlencode(notification)
+        encoded_notification = encoded_notification.encode('utf-8')
 
-        headers= {
+        headers = {
             "X-Token": cherrypy.config.get("notifier.token")
         }
 
-        request = urllib.request.Request(endpoint, data=encodedNotification, headers=headers)
+        request = urllib.request.Request(endpoint,
+                                         data=encoded_notification,
+                                         headers=headers)
+
         response = urllib.request.urlopen(request)
         response.close()
         return "ok"
@@ -74,6 +76,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template='index.html')
     def index(self):
+        """The application homepage"""
         if cherrypy.request.negotiated == 'text/plain':
             return 'hello'
         else:
@@ -84,31 +87,33 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable(media='text/plain')
     def ip(self, token=""):
+        """A basic dynamic DNS setup. Update a local nameserver based on the
+        caller's IP address"""
 
-        ip = None
+        ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
             try:
-                ip = cherrypy.request.headers[header]
+                ip_address = cherrypy.request.headers[header]
                 break
             except KeyError:
                 pass
 
-        if not ip:
+        if not ip_address:
             raise cherrypy.HTTPError(400, "Unable to determine IP")
 
         if not token:
-            return ip
+            return ip_address
 
         host = cherrypy.request.app.config["ip_tokens"].get(token)
 
         if not host:
             raise cherrypy.HTTPError(404, "Unrecognized token")
 
-        dnsCommand = copy.copy(cherrypy.config.get("ip.dns.command"))
-        if dnsCommand:
-            dnsCommand[dnsCommand.index("$ip")] = ip
-            dnsCommand[dnsCommand.index("$host")] = host
-            subprocess.call(dnsCommand);
+        dns_command = copy.copy(cherrypy.config.get("ip.dns.command"))
+        if dns_command:
+            dns_command[dns_command.index("$ip")] = ip_address
+            dns_command[dns_command.index("$host")] = host
+            subprocess.call(dns_command)
 
         return "ok"
 
@@ -135,22 +140,23 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="2col.html")
     def geoip(self, address):
-        dbPath = cherrypy.config.get("geoip.city.filename")
+        """Determine the geographic location of an IP address"""
+        db_path = cherrypy.config.get("geoip.city.filename")
 
-        reader = pygeoip.GeoIP(dbPath)
+        reader = pygeoip.GeoIP(db_path)
         response = reader.record_by_addr(address)
 
         whois = subprocess.Popen(["whois", address], stdout=subprocess.PIPE)
-        out, err = whois.communicate()
-        out = out.decode('UTF-8')
-        orgNames = [line for line in out.split("\n") if re.match("OrgName:", line)]
-        orgNames = [re.sub("OrgName:\s+", "", line) for line in orgNames]
-        if len(orgNames) > 0:
-            org = orgNames.pop()
+        out = whois.communicate()
+        out = out.decode("UTF-8").split("\n")
+        org_names = [line for line in out if re.match("OrgName:", line)]
+        org_names = [re.sub(r"OrgName:\s+", "", line) for line in org_names]
+        if len(org_names) > 0:
+            org = org_names.pop()
         else:
             org = None
 
-        data =  {
+        data = {
             "country": response["country_name"],
             "country_code": response["country_code"],
             "city": response["city"],
@@ -175,16 +181,18 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.encode()
     def geoupdate(self):
-        """ Download the current version of the GeoLite Legacy City database from maxmind.com """
+        """Download the current version of the GeoLite Legacy City database
+        from maxmind.com"""
 
         url = cherrypy.config.get("geoip.city.url")
         destination = cherrypy.config.get("geoip.city.filename")
 
-        gzFile = "{}/{}".format(os.path.dirname(destination), os.path.basename(url))
+        gz_file = "{}/{}".format(os.path.dirname(destination),
+                                 os.path.basename(url))
 
         urllib.request.urlcleanup()
-        urllib.request.urlretrieve(url, gzFile)
-        subprocess.check_call(["gunzip", "-f", gzFile]);
+        urllib.request.urlretrieve(url, gz_file)
+        subprocess.check_call(["gunzip", "-f", gz_file])
         return "ok"
 
     @cherrypy.expose
@@ -194,12 +202,12 @@ class MedleyServer(object):
         """ Given a US phone number, return the state its area code belongs to
         and a description of the area it covers. """
 
-        number = re.sub("\D", "", number)
+        number = re.sub(r"\D", "", number)
         number = number.lstrip("1")
 
-        areaCode = number[:3]
+        area_code = number[:3]
 
-        if len(areaCode) is not 3:
+        if len(area_code) is not 3:
             raise cherrypy.HTTPError(400, "Invalid number")
 
         sparql = """
@@ -222,7 +230,7 @@ class MedleyServer(object):
             dbo:wikiPageRedirects ?redirect .
           }}
         }}
-        """.format(areaCode)
+        """.format(area_code)
 
         params = {
             "query": sparql,
@@ -230,14 +238,15 @@ class MedleyServer(object):
             "timeout": "1000"
         }
 
-        sparqlQuery = "http://dbpedia.org/sparql?%s" % urllib.parse.urlencode(params)
+        sparql_query = "http://dbpedia.org/sparql?"
+        sparql_query += urllib.parse.urlencode(params)
 
-        with urllib.request.urlopen(sparqlQuery) as request:
-            sparqlResult = json.loads(request.read().decode("utf-8"))
+        with urllib.request.urlopen(sparql_query) as request:
+            sparql_result = json.loads(request.read().decode("utf-8"))
 
-        firstResult = sparqlResult["results"]["bindings"][0]
+        first_result = sparql_result["results"]["bindings"][0]
 
-        if "redirect" in firstResult:
+        if "redirect" in first_result:
             sparql = """
             PREFIX dbo: <http://dbpedia.org/ontology/>
             PREFIX dbprop: <http://dbpedia.org/property/>
@@ -247,32 +256,38 @@ class MedleyServer(object):
               filter(isLiteral(?comment) && langMatches(lang(?comment), "en"))
               filter(isLiteral(?state) && langMatches(lang(?state), "en"))
             }}
-            """.format(firstResult["redirect"].get("value"))
+            """.format(first_result["redirect"].get("value"))
 
             params["query"] = sparql
-            sparqlQuery = "http://dbpedia.org/sparql?%s" % urllib.parse.urlencode(params)
+            sparql_query = "http://dbpedia.org/sparql?"
+            sparql_query += urllib.parse.urlencode(params)
 
-            with urllib.request.urlopen(sparqlQuery) as request:
-                sparqlResult = json.loads(request.read().decode("utf-8"))
-                firstResult = sparqlResult["results"]["bindings"][0]
+            with urllib.request.urlopen(sparql_query) as request:
+                sparql_result = json.loads(request.read().decode("utf-8"))
+                first_result = sparql_result["results"]["bindings"][0]
 
-        commentSentences = firstResult["comment"].get("value").split(". ")
+        comment_sentences = first_result["comment"].get("value").split(". ")
 
         # Filter noise
-        commentSentences = [x for x in commentSentences
-                            if re.search(" in (red|blue) (is|are)",x) is None
-                            and not re.match("The map to the right", x)
-                            and not re.match("Error: ", x)]
+        comment_sentences = [x for x in comment_sentences
+                             if re.search(" in (red|blue) (is|are)", x) is None
+                             and not re.match("The map to the right", x)
+                             and not re.match("Error: ", x)]
+
+        reverse_lookup_url = "http://www.whitepages.com/phone/"
+        reverse_lookup_url += number
 
         return {
-            "state": firstResult["state"].get("value"),
-            "reverseLookup": "http://www.whitepages.com/phone/{}".format(number),
-            "comment": ". ".join(commentSentences)
+            "state": first_result["state"].get("value"),
+            "reverseLookup": reverse_lookup_url,
+            "comment": ". ".join(comment_sentences)
         }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
     def highlight(self, extension, content):
+        """Apply syntax highlighting to the provided content and then render
+        it as HTML"""
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
 
@@ -282,6 +297,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/plain")
     def lettercase(self, style, value):
+        """Convert a string value to lowercase, uppercase, or titlecase"""
         if style == "title":
             return titlecase(value.lower())
 
@@ -293,27 +309,32 @@ class MedleyServer(object):
 
 
 if __name__ == "__main__":
-    appRoot = os.path.dirname(os.path.abspath(__file__))
-    appConfig = os.path.join(appRoot, "medley.conf")
-    cherrypy.config.update(appConfig)
+    APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+    APP_CONFIG = os.path.join(APP_ROOT, "medley.conf")
+    cherrypy.config.update(APP_CONFIG)
 
     # attempt to drop privileges if daemonized
-    user = cherrypy.config.get("server.user")
-    if user:
-        try:
-            account = pwd.getpwnam(user)
-            cherrypy.process.plugins.DropPrivileges(cherrypy.engine, umask=0o022, uid=account.pw_uid, gid=account.pw_gid).subscribe()
-        except KeyError:
-            cherrypy.log.error("Unable to look up the user '{}'. Not dropping privileges.".format(user), "APP")
-            pass
+    USER = cherrypy.config.get("server.user")
 
-    daemonize = cherrypy.config.get("server.daemonize")
-    if daemonize:
+    if USER:
+        try:
+            ACCOUNT = pwd.getpwnam(USER)
+            PLUGIN = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
+                                                             umask=0o022,
+                                                             uid=ACCOUNT.pw_uid,
+                                                             gid=ACCOUNT.pw_gid)
+            PLUGIN.subscribe()
+        except KeyError:
+            MESSAGE = "Unknown user '{}'. Not dropping privileges.".format(USER)
+            cherrypy.log.error(MESSAGE, "APP")
+
+    DAEMONIZE = cherrypy.config.get("server.daemonize")
+    if DAEMONIZE:
         cherrypy.config.update({'log.screen': False})
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
-    pidFile = cherrypy.config.get("server.pid")
-    if pidFile:
-        cherrypy.process.plugins.PIDFile(cherrypy.engine, pidFile).subscribe()
+    PID_FILE = cherrypy.config.get("server.pid")
+    if PID_FILE:
+        cherrypy.process.plugins.PIDFile(cherrypy.engine, PID_FILE).subscribe()
 
-    cherrypy.quickstart(MedleyServer(), "/", appConfig)
+    cherrypy.quickstart(MedleyServer(), "/", APP_CONFIG)
