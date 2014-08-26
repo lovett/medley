@@ -6,11 +6,12 @@ from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
 
 def setup_module():
-    conf = os.path.realpath("medley.conf")
+    config_file = os.path.realpath("medley.conf")
+    cherrypy.config.update(config_file)
 
-    app = cherrypy.tree.mount(MedleyServer(), '/', config=conf)
+    app = cherrypy.tree.mount(MedleyServer(), script_name="", config=config_file)
 
-    confExtra = {
+    config_extra = {
         '/ip': {
             'tools.auth_basic.checkpassword': cherrypy.lib.auth_basic.checkpassword_dict({
                 "test":"test"
@@ -20,7 +21,9 @@ def setup_module():
             'test': 'test.example.com'
         }
     }
-    app.merge(confExtra)
+
+    app.merge(config_extra)
+
     cherrypy.engine.start()
 
 def teardown_module():

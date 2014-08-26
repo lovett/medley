@@ -337,4 +337,4 @@ if __name__ == "__main__":
     if PID_FILE:
         cherrypy.process.plugins.PIDFile(cherrypy.engine, PID_FILE).subscribe()
 
-    cherrypy.quickstart(MedleyServer(), "/", APP_CONFIG)
+    cherrypy.quickstart(MedleyServer(), script_name="", config=APP_CONFIG)
