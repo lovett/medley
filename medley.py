@@ -33,7 +33,7 @@ class MedleyServer(object):
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
     def azure(self, event):
-        """Relay deployment notifications from Azure"""
+        """ Relay deployment notifications from Azure """
         endpoint = cherrypy.config.get("notifier.url")
 
         if not endpoint:
@@ -74,21 +74,22 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template='index.html')
+    @cherrypy.tools.template(template="index.html")
     def index(self):
-        """The application homepage"""
-        if cherrypy.request.negotiated == 'text/plain':
-            return 'hello'
+        """ The application homepage """
+        if cherrypy.request.negotiated == "text/plain":
+            return "hello"
         else:
             return {
-                'message': 'hello'
+                "message": "hello"
             }
 
     @cherrypy.expose
-    @cherrypy.tools.negotiable(media='text/plain')
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="index.html")
     def ip(self, token=""):
-        """A basic dynamic DNS setup. Update a local nameserver based on the
-        caller's IP address"""
+        """ A dynamic DNS service. Update a local nameserver based on the
+        caller's IP address """
 
         ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
@@ -102,7 +103,12 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Unable to determine IP")
 
         if not token:
-            return ip_address
+            if cherrypy.request.negotiated == "text/plain":
+                return ip_address
+            else:
+                return {
+                    "message": ip_address
+                }
 
         host = cherrypy.request.app.config["ip_tokens"].get(token)
 
@@ -115,13 +121,18 @@ class MedleyServer(object):
             dns_command[dns_command.index("$host")] = host
             subprocess.call(dns_command)
 
-        return "ok"
+        if cherrypy.request.negotiated == "text/plain":
+            return "ok"
+        else:
+            return {
+                "message": "ok"
+            }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="2col.html")
     def headers(self):
-        """ Display all the headers that were provided by the client."""
+        """ Display all the headers that were provided by the client """
 
         if cherrypy.request.negotiated == "application/json":
             return cherrypy.request.headers
@@ -140,7 +151,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="2col.html")
     def geoip(self, address):
-        """Determine the geographic location of an IP address"""
+        """ Determine the geographic location of an IP address """
         db_path = cherrypy.config.get("geoip.city.filename")
 
         reader = pygeoip.GeoIP(db_path)
@@ -181,8 +192,8 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.encode()
     def geoupdate(self):
-        """Download the current version of the GeoLite Legacy City database
-        from maxmind.com"""
+        """ Download the current version of the GeoLite Legacy City database
+        from maxmind.com """
 
         url = cherrypy.config.get("geoip.city.url")
         destination = cherrypy.config.get("geoip.city.filename")
@@ -286,8 +297,8 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
     def highlight(self, extension, content):
-        """Apply syntax highlighting to the provided content and then render
-        it as HTML"""
+        """ Apply syntax highlighting to the provided content and then render
+        it as HTML """
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
 
@@ -297,7 +308,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/plain")
     def lettercase(self, style, value):
-        """Convert a string value to lowercase, uppercase, or titlecase"""
+        """ Convert a string value to lowercase, uppercase, or titlecase """
         if style == "title":
             return titlecase(value.lower())
 
