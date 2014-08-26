@@ -29,39 +29,18 @@ def setup_module():
 def teardown_module():
     cherrypy.engine.exit()
 
-def getResponseBody(response):
-    return response.collapse_body().decode("utf-8")
-
-def getResponseBodyJson(response):
-    body = getResponseBody(response)
-    return json.loads(body)
-
-def getStatusCode(response):
-    segments = response.status.split(" ")
-    return int(segments[0])
-
 class TestMedleyServer(BaseCherryPyTestCase):
     def test_indexReturnsHtml(self):
         """ The index returns html by default """
-        headers = {
-            "Accept": "*/*"
-        }
-        response = self.request("/", headers=headers)
-        body = getResponseBody(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertTrue("<html>" in body)
+        response = self.request("/")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
 
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
-        headers = {
-            "Accept": "application/json"
-        }
-        response = self.request("/", headers=headers)
-        body = getResponseBodyJson(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(body["message"], "hello")
+        response = self.request("/", as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["message"], "hello")
 
     def test_ipWithoutTokenRequiresAuth(self):
         """ Calling /ip without a token requires authentication """
@@ -69,8 +48,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Remote-Addr": "1.1.1.1"
         }
         response = self.request("/ip", headers=headers)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 401)
+        self.assertEqual(response.code, 401)
 
     def test_ipNoToken(self):
         """ Calling /ip without a token should emit the caller's IP """
@@ -79,11 +57,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip", headers=headers)
-        body = getResponseBody(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertTrue("<html>" in body)
-        self.assertTrue("1.1.1.1" in body)
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
+        self.assertTrue("1.1.1.1" in response.body)
 
     def test_ipNoTokenJson(self):
         """ The /ip endpoint returns json if requested """
@@ -92,11 +68,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0",
             "Accept": "application/json"
         }
-        response = self.request("/ip", headers=headers)
-        body = getResponseBodyJson(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(body["message"], "1.1.1.1")
+        response = self.request("/ip", headers=headers, as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["message"], "1.1.1.1")
 
     def test_ipNoTokenPlain(self):
         """ The /ip endpoint returns plain text if requested """
@@ -106,10 +80,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Accept": "text/plain"
         }
         response = self.request("/ip", headers=headers)
-        body = getResponseBody(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(body, "1.1.1.1")
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, "1.1.1.1")
 
 
     def test_ipRightHeader(self):
@@ -120,35 +92,28 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip", headers=headers)
-        body = getResponseBody(response)
-        self.assertTrue("2.2.2.2" in body)
+        self.assertTrue("2.2.2.2" in response.body)
 
     def test_ipValidToken(self):
         """ /ip returns html by default when a valid token is provided """
         headers = {
             "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip/test", headers=headers)
-        body = getResponseBody(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertTrue("<html>" in body)
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
 
     def test_ipValidTokenJson(self):
         """ /ip returns json if requested when a valid token is provided """
         headers = {
             "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
             "Authorization": "Basic dGVzdDp0ZXN0",
             "Accept": "application/json"
         }
         response = self.request("/ip/test", headers=headers)
-        body = getResponseBodyJson(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(body["message"], "ok")
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["message"], "ok")
 
     def test_ipValidTokenPlain(self):
         """ /ip returns plain text if requested when a valid token is provided """
@@ -159,10 +124,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Accept": "text/plain"
         }
         response = self.request("/ip/test", headers=headers)
-        body = getResponseBody(response)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 200)
-        self.assertEqual(body, "ok")
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, "ok")
 
     def test_ipInvalidToken(self):
         """ /ip should fail if an invalid token is specified """
@@ -172,8 +135,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip/invalid", headers=headers)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 404)
+        self.assertEqual(response.code, 404)
 
     def test_ipNoIp(self):
         """ /ip should fail if it can't identify the request ip """
@@ -181,8 +143,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip/test", headers=headers)
-        status_code = getStatusCode(response)
-        self.assertEqual(status_code, 400)
+        self.assertEqual(response.code, 400)
 
 if __name__ == "__main__":
     import unittest
