@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block page_title %}GeoIP{% if address %} for {{ address }} {% endif %}{% endblock %}
+{% block page_title %}Whois{% if address %} for {{ address }} {% endif %}{% endblock %}
 
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
@@ -12,9 +12,9 @@
 <header>
 
     {% if not address %}
-    <h1>GeoIP Lookup</h1>
+    <h1>Whois Lookup</h1>
 
-    <form method="get" action="/geoip">
+    <form method="get" action="/whois">
         <div class="ui massive icon input">
             <input type="text" id="address" name="address" placeholder="IP Address" autofocus/>
             <i class="search icon"></i>
@@ -22,7 +22,7 @@
     </form>
     {% else %}
 
-    <p class="next-action"><a href="/geoip">Locate another address</a></p>
+    <p class="next-action"><a href="/whois">Locate another address</a></p>
 
 
     {% if country_name == "United States" and city and region_code %}

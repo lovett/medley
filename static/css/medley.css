@@ -16,10 +16,6 @@ TD {
     word-break: break-word;
 }
 
-H1 {
-    margin: 0;
-}
-
 HEADER {
     background-color: #efefef;
     padding: 1em;
@@ -28,6 +24,7 @@ HEADER {
 
 HEADER H1 {
     font-weight: normal;
+    margin: 0 0 .5em 0;
 }
 
 .next-action {
