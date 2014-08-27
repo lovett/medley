@@ -193,10 +193,9 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="geoip.html")
-    def geoip(self, address=None):
-
-        """ Determine the geographic location of an IP address """
+    @cherrypy.tools.template(template="whois.html")
+    def whois(self, address=None):
+        """ Display whois and geoip data for an IP address """
 
         db_path = cherrypy.config.get("geoip.city.filename")
         reader = pygeoip.GeoIP(db_path)
