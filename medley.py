@@ -15,7 +15,6 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 from titlecase import titlecase
-from ipwhois import IPWhois, IPDefinedError
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -148,10 +147,55 @@ class MedleyServer(object):
                 "data": headers
             }
 
+    def queryWhois(self, address):
+        """ Run a whois query by shelling out. Although there are some
+        whois-related Python modules that could otherwise be used,
+        none were viable for Python 3.2 """
+
+        cherrypy.lib.caching.MemoryCache
+
+        process = subprocess.Popen(["whois", address],
+                                   stdout=subprocess.PIPE)
+        out, err = process.communicate()
+
+        if err:
+            raise cherrypy.HTTPError(500, err)
+
+        whois = out.decode("UTF-8").split("\n")
+
+        # remove legal disclaimers and prefatory comments
+        whois = [line for line in whois if not line.startswith("#")]
+        whois = [line for line in whois if not "copyright terms" in line]
+
+        # whitespace cleanup
+        whois = [line.strip() for line in whois if line]
+
+        # separate label and value for non-comment lines
+        whois = [[line] if line.startswith("%")
+                 else line.split(":", 1)
+                 for line in whois]
+
+        # collapse repeated headers and comment lines
+        previous = None
+        collapsed_whois = []
+        for line in whois:
+            if line[0] == previous:
+                collapsed_whois[-1][-1] += "\n" + line[1]
+            else:
+                collapsed_whois.append(line)
+            previous = line[0]
+
+        whois = collapsed_whois
+
+        return whois
+
+
+
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="geoip.html")
     def geoip(self, address=None):
+
         """ Determine the geographic location of an IP address """
 
         db_path = cherrypy.config.get("geoip.city.filename")
@@ -171,10 +215,7 @@ class MedleyServer(object):
             if data is None:
                 raise cherrypy.HTTPError(404, "No geo records available for " + address)
 
-            try:
-                data["whois"] = IPWhois(address).lookup()
-            except IPDefinedError:
-                pass
+            data["whois"] = self.queryWhois(address)
 
         if cherrypy.request.negotiated == "text/plain":
             return "{}, {}".format(data["city"], data["country"])

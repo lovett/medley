@@ -8,11 +8,12 @@ BODY {
 }
 
 TH {
-    white-space: pre;
+    vertical-align: top;
 }
 
 TD {
-    word-break: break-all;
+    vertical-align: top;
+    word-break: break-word;
 }
 
 H1 {
@@ -27,19 +28,6 @@ HEADER {
 
 HEADER H1 {
     font-weight: normal;
-}
-
-MAIN {
-}
-
-.map {
-    width: 80%;
-    margin: auto;
-}
-
-LABEL.block {
-    margin-bottom: .5em;
-    display: block;
 }
 
 .next-action {

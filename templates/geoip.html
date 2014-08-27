@@ -15,9 +15,10 @@
     <h1>GeoIP Lookup</h1>
 
     <form method="get" action="/geoip">
-        <label for="address" class="block">Enter an IP address to locate:</label>
-        <input type="text" id="address" name="address" placeholder="IP Address" autofocus/>
-        <button>Lookup</button>
+        <div class="ui massive icon input">
+            <input type="text" id="address" name="address" placeholder="IP Address" autofocus/>
+            <i class="search icon"></i>
+        </div>
     </form>
     {% else %}
 
@@ -40,19 +41,36 @@
     <p>Area code: {{ area_code }}</p>
     {% endif %}
 
-    {% if whois %}
-    <p>Network: {{ whois.nets[0].description }}</p>
-    {% endif %}
-
     {% endif %}
 
 </header>
 
-<main>
-    {% if country_name == "United States" and region_code %}
-    <div class="map" data-where="US-{{ region_code }}"></div>
-    {% elif country_code %}
-    <div class="map" data-where="{{ country_code }}"></div>
+<main class="two column stackable divided ui grid">
+    <div class="column">
+        {% if country_name == "United States" and region_code %}
+        <div class="map" data-where="US-{{ region_code }}"></div>
+        {% elif country_code %}
+        <div class="map" data-where="{{ country_code }}"></div>
+        {% endif %}
+    </div>
+    {% if whois %}
+
+    <div class="wide column">
+        <table class="ui small table">
+            <tbody>
+                {% for line in whois %}
+
+                <tr>
+                    <th {% if not line[1] %}colspan="2"{% endif %}>{{ line[0] }}</th>
+                    {% if line[1] %}
+                    <td>{{ line[1]|urlize(30) }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
     {% endif %}
 </main>
 
