@@ -145,6 +145,13 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip/test", headers=headers)
         self.assertEqual(response.code, 400)
 
+    def test_geoipWithoutAddressReturnsHtml(self):
+        """ /geoip returns html by default """
+        response = self.request("/geoip")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
+
+
 if __name__ == "__main__":
     import unittest
     unittest.main()

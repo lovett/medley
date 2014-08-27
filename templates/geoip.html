@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block page_title %}GeoIP for {{ address }}{% endblock %}
+
+{% block scripts %}
+<script src="https://www.google.com/jsapi"></script>
+<script src="/static/js/maps.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<header>
+
+    {% if not address %}
+    <h1>GeoIP Lookup</h1>
+
+    <form method="get" action="/geoip">
+        <label for="address" class="block">Enter an IP address to locate:</label>
+        <input type="text" id="address" name="address" placeholder="IP Address" autofocus/>
+        <button>Lookup</button>
+    </form>
+    {% else %}
+
+    <p class="next-action"><a href="/geoip">Locate another address</a></p>
+
+
+    {% if country_name == "United States" and city and region_code %}
+    <h1>{{ address }}: {{ city }}, {{ region_code }}</h1>
+    {% elif city and country_name %}
+    <h1>{{ address }}: {{ city }}, {{ country_name }}</h1>
+    {% elif country_name %}
+    <h1>{{ address }}: {{ country_name }}</h1>
+    {% endif %}
+
+    {% if metro_code %}
+    <p>Metro: {{ metro_code }}</p>
+    {% endif %}
+
+    {% if area_code %}
+    <p>Area code: {{ area_code }}</p>
+    {% endif %}
+
+    {% if whois %}
+    <p>Network: {{ whois.nets[0].description }}</p>
+    {% endif %}
+
+    {% endif %}
+
+</header>
+
+<main>
+    {% if country_name == "United States" and region_code %}
+    <div class="map" data-where="US-{{ region_code }}"></div>
+    {% elif country_code %}
+    <div class="map" data-where="{{ country_code }}"></div>
+    {% endif %}
+</main>
+
+{% endblock %}

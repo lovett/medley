@@ -1,4 +1,9 @@
+HTML, BODY {
+    height: 100%;
+}
+
 BODY {
+    margin: 0;
     font-family: 'Source Code Pro', sans-serif;
 }
 
@@ -8,4 +13,35 @@ TH {
 
 TD {
     word-break: break-all;
+}
+
+H1 {
+    margin: 0;
+}
+
+HEADER {
+    background-color: #efefef;
+    padding: 1em;
+    border-bottom: 2px solid #666;
+}
+
+HEADER H1 {
+    font-weight: normal;
+}
+
+MAIN {
+}
+
+.map {
+    width: 80%;
+    margin: auto;
+}
+
+LABEL.block {
+    margin-bottom: .5em;
+    display: block;
+}
+
+.next-action {
+    float: right;
 }

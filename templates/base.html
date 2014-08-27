@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ page_title |default('Medley') }}</title>
+        <title>{% block page_title %}Medley{% endblock %}</title>
         <link href="http://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" type="text/css" href="/static/css/semantic.min.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/medley.css" />
     </head>
     <body>
         {% block body %}{% endblock %}
+        {% block scripts %}{% endblock %}
     </body>
 </html>

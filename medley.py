@@ -15,6 +15,7 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 from titlecase import titlecase
+from ipwhois import IPWhois, IPDefinedError
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -149,45 +150,37 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="2col.html")
-    def geoip(self, address):
+    @cherrypy.tools.template(template="geoip.html")
+    def geoip(self, address=None):
         """ Determine the geographic location of an IP address """
+
         db_path = cherrypy.config.get("geoip.city.filename")
-
         reader = pygeoip.GeoIP(db_path)
-        response = reader.record_by_addr(address)
 
-        whois = subprocess.Popen(["whois", address], stdout=subprocess.PIPE)
-        out = whois.communicate()
-        out = out.decode("UTF-8").split("\n")
-        org_names = [line for line in out if re.match("OrgName:", line)]
-        org_names = [re.sub(r"OrgName:\s+", "", line) for line in org_names]
-        if len(org_names) > 0:
-            org = org_names.pop()
+        if not db_path:
+            raise cherrypy.HTTPError(410, "This endpoint is not active")
+
+        if address is None and cherrypy.request.negotiated == "application/json":
+            raise cherrypy.HTTPError(400, "Address not specified")
+
+        if address is None:
+            data = {}
         else:
-            org = None
+            data = reader.record_by_addr(address)
 
-        data = {
-            "country": response["country_name"],
-            "country_code": response["country_code"],
-            "city": response["city"],
-            "region_code": response["region_code"],
-            "area_code": response["area_code"],
-            "timezone": response["time_zone"],
-            "latitude": response["latitude"],
-            "longitude": response["longitude"],
-            "organization": org
-        }
+            if data is None:
+                raise cherrypy.HTTPError(404, "No geo records available for " + address)
 
-        if cherrypy.request.negotiated == "application/json":
-            return data
+            try:
+                data["whois"] = IPWhois(address).lookup()
+            except IPDefinedError:
+                pass
+
         if cherrypy.request.negotiated == "text/plain":
             return "{}, {}".format(data["city"], data["country"])
         else:
-            return {
-                "page_title": "GeoIP",
-                "data": data.items()
-            }
+            data["address"] = address
+            return data
 
     @cherrypy.expose
     @cherrypy.tools.encode()
