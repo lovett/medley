@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block page_title %}GeoIP for {{ address }}{% endblock %}
+{% block page_title %}GeoIP{% if address %} for {{ address }} {% endif %}{% endblock %}
 
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
