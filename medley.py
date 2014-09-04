@@ -197,24 +197,21 @@ class MedleyServer(object):
     def whois(self, address=None):
         """ Display whois and geoip data for an IP address """
 
-        db_path = cherrypy.config.get("geoip.city.filename")
-        reader = pygeoip.GeoIP(db_path)
-
-        if not db_path:
-            raise cherrypy.HTTPError(410, "This endpoint is not active")
+        data = {}
 
         if address is None and cherrypy.request.negotiated == "application/json":
             raise cherrypy.HTTPError(400, "Address not specified")
 
-        if address is None:
-            data = {}
-        else:
+        # geoip lookup
+        try:
+            geo_db = cherrypy.config.get("geoip.city.filename")
+            reader = pygeoip.GeoIP(geo_db)
             data = reader.record_by_addr(address)
+        except:
+            pass
 
-            if data is None:
-                raise cherrypy.HTTPError(404, "No geo records available for " + address)
-
-            data["whois"] = self.queryWhois(address)
+        # whois lookup
+        data["whois"] = self.queryWhois(address)
 
         if cherrypy.request.negotiated == "text/plain":
             return "{}, {}".format(data["city"], data["country"])
