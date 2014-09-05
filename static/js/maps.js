@@ -63,7 +63,6 @@ var drawMaps = function () {
         };
 
         if (where.substr(0, 2) === 'US') {
-            console.log(where);
             options.resolution = 'provinces';
             options.region = where;
         } else {

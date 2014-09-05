@@ -11,6 +11,7 @@ import urllib.parse
 import json
 import copy
 import plugins.jinja
+import us
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -238,15 +239,24 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.encode()
-    def phone(self, number):
+    @cherrypy.tools.template(template="phone.html")
+    def phone(self, number=None):
         """ Given a US phone number, return the state its area code belongs to
         and a description of the area it covers. """
+
+        data = {}
+
+        if number is None and cherrypy.request.negotiated != "text/html":
+            raise cherrypy.HTTPError(400, "Address not specified")
+
+        if number is None:
+            return data
 
         number = re.sub(r"\D", "", number)
         number = number.lstrip("1")
 
         area_code = number[:3]
+        number_formatted = re.sub(r"(\d\d\d)(\d\d\d)(\d\d\d\d)", r"(\1) \2-\3", number)
 
         if len(area_code) is not 3:
             raise cherrypy.HTTPError(400, "Invalid number")
@@ -282,8 +292,11 @@ class MedleyServer(object):
         sparql_query = "http://dbpedia.org/sparql?"
         sparql_query += urllib.parse.urlencode(params)
 
-        with urllib.request.urlopen(sparql_query) as request:
-            sparql_result = json.loads(request.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(sparql_query, timeout=7) as request:
+                sparql_result = json.loads(request.read().decode("utf-8"))
+        except:
+            raise cherrypy.HTTPError(500, "timeout while querying dbpedia.org")
 
         first_result = sparql_result["results"]["bindings"][0]
 
@@ -309,20 +322,26 @@ class MedleyServer(object):
 
         comment_sentences = first_result["comment"].get("value").split(". ")
 
-        # Filter noise
+        # Filter out noise
         comment_sentences = [x for x in comment_sentences
                              if re.search(" in (red|blue) (is|are)", x) is None
                              and not re.match("The map to the right", x)
                              and not re.match("Error: ", x)]
 
-        reverse_lookup_url = "http://www.whitepages.com/phone/"
-        reverse_lookup_url += number
+        state_abbreviation = first_result["state"].get("value")
+        state_name = us.states.lookup(state_abbreviation).name
 
-        return {
-            "state": first_result["state"].get("value"),
-            "reverseLookup": reverse_lookup_url,
-            "comment": ". ".join(comment_sentences)
-        }
+        if cherrypy.request.negotiated == "text/plain":
+            return state_name
+        else:
+            data["number"] = number
+            data["number_formatted"] = number_formatted
+            data["state_abbreviation"] = state_abbreviation
+            data["state_name"] = state_name
+            data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
+            data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(number_formatted)
+            data["comment"] = ". ".join(comment_sentences[:2])
+            return data
 
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")

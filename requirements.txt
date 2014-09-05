@@ -7,6 +7,7 @@ astroid==1.2.1
 cov-core==1.13.0
 coverage==3.7.1
 httplib2==0.9
+jellyfish==0.2.1
 logilab-common==0.62.1
 py==1.4.20
 pygeoip==0.3.1
@@ -15,3 +16,4 @@ pytest==2.5.2
 pytest-cov==1.7.0
 requests==2.3.0
 titlecase==0.6.0
+us==0.8.0

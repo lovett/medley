@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block page_title %}Phone Lookup{% if number %} for {{ number_formatted }} {% endif %}{% endblock %}
+
+{% block scripts %}
+<script src="https://www.google.com/jsapi"></script>
+<script src="/static/js/maps.js"></script>
+{% endblock %}
+
+{% block body %}
+
+<header>
+
+    {% if number %}
+    <p class="next-action"><a href="/phone">Look up another number</a></p>
+    <h1>{{ number_formatted }} is in {{ state_name }}</h1>
+    <p>
+        Search
+        <a href="{{ whitepages_url }}" target="_blank">Whitepages</a>,
+        <a href="{{ bing_url}}" target="_blank">Bing</a>
+    </p>
+    {% else %}
+    <h1>Phone Lookup</h1>
+
+    <form method="get" action="/phone">
+        <div class="ui massive icon input">
+            <input type="text" id="number" name="number" placeholder="Phone number" autofocus/>
+            <i class="search icon"></i>
+        </div>
+    </form>
+    {% endif %}
+
+</header>
+
+{% if number %}
+<main class="two column stackable ui grid">
+    <div class="wide column">
+        {{ comment }}
+    </div>
+    <div class="column">
+        <div class="map" data-where="US-{{ state_abbreviation }}"></div>
+    </div>
+</main>
+{% endif %}
+
+{% endblock %}
