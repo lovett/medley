@@ -162,33 +162,44 @@ class MedleyServer(object):
         if err:
             raise cherrypy.HTTPError(500, err)
 
-        whois = out.decode("UTF-8").split("\n")
+        try:
+            out_raw = out.decode("utf-8")
+        except UnicodeDecodeError:
+            out_raw = out.decode("latin1")
 
-        # remove legal disclaimers and prefatory comments
-        whois = [line for line in whois if not line.startswith("#")]
-        whois = [line for line in whois if not "copyright terms" in line]
+        out_raw = out_raw.split("\n")
 
-        # whitespace cleanup
-        whois = [line.strip() for line in whois if line]
+        out_filtered = []
+        for line in out_raw:
+            line = line.strip()
 
-        # separate label and value for non-comment lines
-        whois = [[line] if line.startswith("%")
-                 else line.split(":", 1)
-                 for line in whois]
+            # remove comments
+            if line.startswith(("#", "%")):
+                continue
+
+            # separate label and value for non-comment lines
+            line = re.sub("\s+", " ", line)
+            fields = line.split(": ", 1)
+
+            # skip lines with no value
+            if len(fields) == 1:
+                continue
+
+            out_filtered.append(fields)
+
+        print(out_filtered)
 
         # collapse repeated headers and comment lines
         previous = None
-        collapsed_whois = []
-        for line in whois:
+        out_collapsed = []
+        for line in out_filtered:
             if line[0] == previous:
-                collapsed_whois[-1][-1] += "\n" + line[1]
+                out_collapsed[-1][-1] += "\n" + line[1]
             else:
-                collapsed_whois.append(line)
+                out_collapsed.append(line)
             previous = line[0]
 
-        whois = collapsed_whois
-
-        return whois
+        return out_collapsed
 
 
 
@@ -198,26 +209,33 @@ class MedleyServer(object):
     def whois(self, address=None):
         """ Display whois and geoip data for an IP address """
 
-        data = {}
-
         if address is None and cherrypy.request.negotiated == "application/json":
             raise cherrypy.HTTPError(400, "Address not specified")
+
+        data = {
+            "address": address
+        }
 
         # geoip lookup
         try:
             geo_db = cherrypy.config.get("geoip.city.filename")
             reader = pygeoip.GeoIP(geo_db)
-            data = reader.record_by_addr(address)
+            data["geo"] = reader.record_by_addr(address)
         except:
-            pass
+            data["geo"] = None
 
         # whois lookup
-        data["whois"] = self.queryWhois(address)
+        if address:
+            data["whois"] = self.queryWhois(address)
 
         if cherrypy.request.negotiated == "text/plain":
-            return "{}, {}".format(data["city"], data["country"])
+            if "city" in data["geo"] and "country_name" in data["geo"]:
+                return "{}, {}".format(data["city"], data["country_name"])
+            elif "country_name" in data["geo"]:
+                return data["country_name"]
+            else:
+                return "Unknown"
         else:
-            data["address"] = address
             return data
 
     @cherrypy.expose

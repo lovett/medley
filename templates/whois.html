@@ -25,36 +25,30 @@
     <p class="next-action"><a href="/whois">Locate another address</a></p>
 
 
-    {% if country_name == "United States" and city and region_code %}
-    <h1>{{ address }}: {{ city }}, {{ region_code }}</h1>
-    {% elif city and country_name %}
-    <h1>{{ address }}: {{ city }}, {{ country_name }}</h1>
-    {% elif country_name %}
-    <h1>{{ address }}: {{ country_name }}</h1>
+    {% if geo.country_name == "United States" and geo.city and geo.region_code %}
+    <h1>{{ address }}: {{ geo.city }}, {{ geo.region_code }}</h1>
+    {% elif geo.city and geo.country_name %}
+    <h1>{{ address }}: {{ geo.city }}, {{ geo.country_name }}</h1>
+    {% elif geo.country_name %}
+    <h1>{{ geo.address }}: {{ geo.country_name }}</h1>
+    {% else %}
+    <h1>{{ address }}: location unknown</h1>
     {% endif %}
 
-    {% if metro_code %}
-    <p>Metro: {{ metro_code }}</p>
+    {% if geo.metro_code %}
+    <p>Metro: {{ geo.metro_code }}</p>
     {% endif %}
 
-    {% if area_code %}
-    <p>Area code: {{ area_code }}</p>
+    {% if geo.area_code %}
+    <p>Area code: {{ geo.area_code }}</p>
     {% endif %}
 
     {% endif %}
 
 </header>
 
-<main class="two column stackable divided ui grid">
-    <div class="column">
-        {% if country_name == "United States" and region_code %}
-        <div class="map" data-where="US-{{ region_code }}"></div>
-        {% elif country_code %}
-        <div class="map" data-where="{{ country_code }}"></div>
-        {% endif %}
-    </div>
+<main class="{% if geo.country_code and whois %}two{% endif %} column stackable ui grid">
     {% if whois %}
-
     <div class="wide column">
         <table class="ui small table">
             <tbody>
@@ -70,7 +64,16 @@
             </tbody>
         </table>
     </div>
+    {% endif %}
 
+    {% if geo.country_code or geo.region_code %}
+    <div class="column">
+        {% if geo.country_name == "United States" and geo.region_code %}
+        <div class="map" data-where="US-{{ geo.region_code }}"></div>
+        {% elif geo.country_code %}
+        <div class="map" data-where="{{ geo.country_code }}"></div>
+        {% endif %}
+    </div>
     {% endif %}
 </main>
 
