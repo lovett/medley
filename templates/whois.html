@@ -9,7 +9,7 @@
 
 {% block body %}
 
-<header>
+<header style="background-color:#a0dcb6">
 
     {% if not address %}
     <h1>Whois Lookup</h1>
@@ -22,7 +22,7 @@
     </form>
     {% else %}
 
-    <p class="next-action"><a href="/whois">Locate another address</a></p>
+    <p class="next-action"><a href="/whois">Find another address</a></p>
 
 
     {% if geo.country_name == "United States" and geo.city and geo.region_code %}

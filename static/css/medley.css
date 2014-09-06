@@ -22,6 +22,10 @@ HEADER {
     border-bottom: 2px solid #666;
 }
 
+HEADER A {
+    color: black;
+}
+
 HEADER H1 {
     font-weight: normal;
     margin: 0 0 .5em 0;

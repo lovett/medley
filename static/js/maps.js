@@ -39,7 +39,7 @@ var getSubcontinentCode = function (countryCode) {
 
 
 var drawMaps = function () {
-
+    var baseColor = document.getElementsByTagName('HEADER')[0].style.backgroundColor;
     var maps = document.getElementsByClassName('map');
 
     Array.prototype.forEach.call(maps, function (node) {
@@ -48,8 +48,7 @@ var drawMaps = function () {
         var region = node.getAttribute('data-region');
         var location = node.getAttribute('data-location');
         var options = {
-            colorAxis: {colors: ['#3399cc']},
-            datalessRegionColor: '#eef3f6',
+            colorAxis: {colors: [baseColor]},
             legend: 'none',
             enableRegionInteractivity: false,
             tooltip: {
