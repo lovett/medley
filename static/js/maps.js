@@ -43,18 +43,13 @@ var drawMaps = function () {
     var maps = document.getElementsByClassName('map');
 
     Array.prototype.forEach.call(maps, function (node) {
-        var where = node.getAttribute('data-where');
-
-
-         var dataTable = google.visualization.arrayToDataTable([
-             ['Location', 'ColorIndex'],
-             [where, 0]
-         ]);
-
+        var latitude = parseFloat(node.getAttribute('data-latitude'), 10);
+        var longitude = parseFloat(node.getAttribute('data-longitude'), 10);
+        var region = node.getAttribute('data-region');
+        var location = node.getAttribute('data-location');
         var options = {
             colorAxis: {colors: ['#3399cc']},
             datalessRegionColor: '#eef3f6',
-            displayMode: 'regions',
             legend: 'none',
             enableRegionInteractivity: false,
             tooltip: {
@@ -62,11 +57,25 @@ var drawMaps = function () {
             }
         };
 
-        if (where.substr(0, 2) === 'US') {
-            options.resolution = 'provinces';
-            options.region = where;
+        if (latitude && longitude) {
+            var dataTable = google.visualization.arrayToDataTable([
+                ['Latitude', 'Longitude', 'ColorIndex', 'Size'],
+                [latitude, longitude, 0, 1]
+            ]);
+            options.displayMode = 'markers';
         } else {
-            options.region = getSubcontinentCode(where);
+            var dataTable = google.visualization.arrayToDataTable([
+                ['Location', 'ColorIndex', 'Size'],
+                [location, 0, 1]
+            ]);
+            options.displayMode = 'regions';
+        }
+
+        if (region.substr(0, 2) === 'US') {
+            options.resolution = 'provinces';
+            options.region = region;
+        } else {
+            options.region = getSubcontinentCode(region);
         }
 
         var map = new google.visualization.GeoChart(node);

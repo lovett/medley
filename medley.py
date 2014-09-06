@@ -165,7 +165,7 @@ class MedleyServer(object):
         try:
             out_raw = out.decode("utf-8")
         except UnicodeDecodeError:
-            out_raw = out.decode("latin1")
+            out_raw = out.decode("iso-8859-1")
 
         out_raw = out_raw.split("\n")
 
@@ -178,12 +178,15 @@ class MedleyServer(object):
                 continue
 
             # separate label and value for non-comment lines
-            line = re.sub("\s+", " ", line)
+            line = re.sub(r"\s+", " ", line)
             fields = line.split(": ", 1)
 
             # skip lines with no value
             if len(fields) == 1:
                 continue
+
+            fields[0] = re.sub(r"([a-z])([A-Z][a-z])", r"\1 \2", fields[0]).title()
+
 
             out_filtered.append(fields)
 
@@ -227,6 +230,13 @@ class MedleyServer(object):
         # whois lookup
         if address:
             data["whois"] = self.queryWhois(address)
+
+        # google charts parameters
+        if data["geo"]:
+            data["map_region"] = data["geo"]["country_code"]
+            if data["map_region"] == "US":
+                data["map_region"] += "-" + data["geo"]["region_code"]
+
 
         if cherrypy.request.negotiated == "text/plain":
             if "city" in data["geo"] and "country_name" in data["geo"]:

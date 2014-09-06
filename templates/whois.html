@@ -50,7 +50,7 @@
 <main class="{% if geo.country_code and whois %}two{% endif %} column stackable ui grid">
     {% if whois %}
     <div class="wide column">
-        <table class="ui small table">
+        <table class="ui small table topalign">
             <tbody>
                 {% for line in whois %}
 
@@ -66,13 +66,9 @@
     </div>
     {% endif %}
 
-    {% if geo.country_code or geo.region_code %}
+    {% if geo.latitude and geo.longitude %}
     <div class="column">
-        {% if geo.country_name == "United States" and geo.region_code %}
-        <div class="map" data-where="US-{{ geo.region_code }}"></div>
-        {% elif geo.country_code %}
-        <div class="map" data-where="{{ geo.country_code }}"></div>
-        {% endif %}
+        <div class="map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
     </div>
     {% endif %}
 </main>

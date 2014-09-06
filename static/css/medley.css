@@ -30,3 +30,8 @@ HEADER H1 {
 .next-action {
     float: right;
 }
+
+.ui.table.topalign TD,
+.ui.table.topalign TH {
+    vertical-align: top;
+}
