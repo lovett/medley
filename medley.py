@@ -11,7 +11,7 @@ import urllib.parse
 import json
 import copy
 import plugins.jinja
-import us
+import util.geo
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -353,7 +353,7 @@ class MedleyServer(object):
                              and not re.match("Error: ", x)]
 
         state_abbreviation = first_result["state"].get("value")
-        state_name = us.states.lookup(state_abbreviation).name
+        state_name = util.geo.AmericanStates.abbrevToName(state_abbreviation)
 
         if cherrypy.request.negotiated == "text/plain":
             return state_name
