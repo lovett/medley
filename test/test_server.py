@@ -42,14 +42,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["message"], "hello")
 
-    def test_ipWithoutTokenRequiresAuth(self):
-        """ Calling /ip without a token requires authentication """
-        headers = {
-            "Remote-Addr": "1.1.1.1"
-        }
-        response = self.request("/ip", headers=headers)
-        self.assertEqual(response.code, 401)
-
     def test_ipNoToken(self):
         """ Calling /ip without a token should emit the caller's IP """
         headers = {
@@ -70,7 +62,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         }
         response = self.request("/ip", headers=headers, as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["message"], "1.1.1.1")
+        self.assertEqual(response.body["address"], "1.1.1.1")
 
     def test_ipNoTokenPlain(self):
         """ The /ip endpoint returns plain text if requested """
@@ -135,7 +127,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Authorization": "Basic dGVzdDp0ZXN0"
         }
         response = self.request("/ip/invalid", headers=headers)
-        self.assertEqual(response.code, 404)
+        self.assertEqual(response.code, 400)
 
     def test_ipNoIp(self):
         """ /ip should fail if it can't identify the request ip """

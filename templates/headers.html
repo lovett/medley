@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 
-{% block page_title %}Headers{% endblock %}
+{% set page_title = "Request Headers" %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
 
 {% block body %}
 <header style="background-color:#cbc1d5">
-    <h1>Headers</h1>
+    <h1>{{ page_title }}</h1>
 </header>
 <main>
     <table class="ui table topalign">

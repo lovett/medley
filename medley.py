@@ -87,11 +87,10 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="index.html")
-    def ip(self, token=""):
+    @cherrypy.tools.template(template="ip.html")
+    def ip(self, token=None):
         """ A dynamic DNS service. Update a local nameserver based on the
         caller's IP address """
-
         ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
             try:
@@ -107,14 +106,11 @@ class MedleyServer(object):
             if cherrypy.request.negotiated == "text/plain":
                 return ip_address
             else:
-                return {
-                    "message": ip_address
-                }
+                return {"address": ip_address}
 
         host = cherrypy.request.app.config["ip_tokens"].get(token)
-
         if not host:
-            raise cherrypy.HTTPError(404, "Unrecognized token")
+            raise cherrypy.HTTPError(400, "Invalid token")
 
         dns_command = copy.copy(cherrypy.config.get("ip.dns.command"))
         if dns_command:
@@ -125,9 +121,7 @@ class MedleyServer(object):
         if cherrypy.request.negotiated == "text/plain":
             return "ok"
         else:
-            return {
-                "message": "ok"
-            }
+            return { "message": "ok" }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
