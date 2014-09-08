@@ -151,6 +151,32 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertTrue("<html>" in response.body)
 
+    def test_headersReturnsHtml(self):
+        """ The headers endpoint returns html by default """
+        response = self.request("/headers")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
+
+    def test_headersReturnsJson(self):
+        """ The headers endpoint returns json if requested """
+        response = self.request("/headers", as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertTrue("Accept" in response.body)
+
+    def test_headersReturnsPlain(self):
+        """ The headers endpoint returns plain text if requested """
+        headers = {
+            "Accept": "text/plain"
+        }
+        response = self.request("/headers", headers=headers)
+        self.assertEqual(response.code, 200)
+        self.assertTrue("Accept" in response.body)
+
+    def test_headersNoArgs(self):
+        """ The headers endpoint does not take arguments """
+        response = self.request("/headers/test")
+        self.assertEqual(response.code, 404)
+
 
 if __name__ == "__main__":
     import unittest

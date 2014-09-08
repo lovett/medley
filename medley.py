@@ -131,20 +131,22 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="2col.html")
+    @cherrypy.tools.template(template="headers.html")
     def headers(self):
         """ Display all the headers that were provided by the client """
 
         if cherrypy.request.negotiated == "application/json":
             return cherrypy.request.headers
+
+        headers = [(key.decode('utf-8'), value.decode('utf-8'))
+                   for key, value in cherrypy.request.headers.output()]
+        headers.sort(key=lambda tup: tup[0])
+
+        if cherrypy.request.negotiated == "text/plain":
+            headers = ["{}: {}".format(key, value) for key, value in headers]
+            return "\n".join(headers)
         else:
-            headers = [(key.decode('utf-8'), value.decode('utf-8'))
-                       for key, value in cherrypy.request.headers.output()]
-
-            headers.sort(key=lambda tup: tup[0])
-
             return {
-                "page_title": "Headers",
                 "data": headers
             }
 
