@@ -12,6 +12,7 @@ import json
 import copy
 import plugins.jinja
 import util.geo
+import base64
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -60,8 +61,10 @@ class MedleyServer(object):
         encoded_notification = urllib.parse.urlencode(notification)
         encoded_notification = encoded_notification.encode('utf-8')
 
+        basic_auth = "%s:%s" % (cherrypy.config.get('notifier.user'), cherrypy.config.get('notifier.pass'))
+        basic_auth = basic_auth.encode('utf-8')
         headers = {
-            "X-Token": cherrypy.config.get("notifier.token")
+            "Authorization": "Basic %s" % base64.b64encode(basic_auth).decode("ascii")
         }
 
         request = urllib.request.Request(endpoint,
