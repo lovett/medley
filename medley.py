@@ -40,7 +40,6 @@ class MedleyServer(object):
 
         if not endpoint:
             raise cherrypy.HTTPError(410, "This endpoint is not active")
-
         deployment_url = cherrypy.config.get("azure.url.deployments")
         body = cherrypy.request.json
 
@@ -78,13 +77,14 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="index.html")
+    @cherrypy.tools.template(template="generic.html")
     def index(self):
-        """ The application homepage """
+        """The application homepage is just a hello world"""
         if cherrypy.request.negotiated == "text/plain":
             return "hello"
         else:
             return {
+                "page_title": "Medley",
                 "message": "hello"
             }
 
@@ -92,8 +92,10 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
     def ip(self, token=None):
-        """ A dynamic DNS service. Update a local nameserver based on the
-        caller's IP address """
+        """A combination dynamic DNS and what-is-my-ip service.  If a token is
+        provided, updates the local nameserver with the caller's
+        address. If no token, returns the caller's address."""
+
         ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
             try:
@@ -124,13 +126,13 @@ class MedleyServer(object):
         if cherrypy.request.negotiated == "text/plain":
             return "ok"
         else:
-            return { "message": "ok" }
+            return { "result": "ok" }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="headers.html")
     def headers(self):
-        """ Display all the headers that were provided by the client """
+        """Display the incoming request's headers"""
 
         if cherrypy.request.negotiated == "application/json":
             return cherrypy.request.headers
@@ -144,7 +146,7 @@ class MedleyServer(object):
             return "\n".join(headers)
         else:
             return {
-                "data": headers
+                "headers": headers
             }
 
     def queryWhois(self, address):
@@ -208,27 +210,27 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
-    def whois(self, address=None):
-        """ Display whois and geoip data for an IP address """
+    def whois(self, ip=None):
+        """ Display whois and geoip data for an IP ip """
 
-        if address is None and cherrypy.request.negotiated == "application/json":
-            raise cherrypy.HTTPError(400, "Address not specified")
+        if ip is None and cherrypy.request.negotiated == "application/json":
+            raise cherrypy.HTTPError(400, "Ip not specified")
 
         data = {
-            "address": address
+            "ip": ip
         }
 
         # geoip lookup
         try:
             geo_db = cherrypy.config.get("geoip.city.filename")
             reader = pygeoip.GeoIP(geo_db)
-            data["geo"] = reader.record_by_addr(address)
+            data["geo"] = reader.record_by_addr(ip)
         except:
             data["geo"] = None
 
         # whois lookup
-        if address:
-            data["whois"] = self.queryWhois(address)
+        if ip:
+            data["whois"] = self.queryWhois(ip)
 
         # google charts parameters
         if data["geo"]:
@@ -248,13 +250,16 @@ class MedleyServer(object):
             return data
 
     @cherrypy.expose
-    @cherrypy.tools.encode()
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="generic.html")
     def geoupdate(self):
-        """ Download the current version of the GeoLite Legacy City database
-        from maxmind.com """
+        """Download the latest GeoLite Legacy City database from maxmind.com"""
 
         url = cherrypy.config.get("geoip.city.url")
         destination = cherrypy.config.get("geoip.city.filename")
+
+        if not (url and destination):
+            raise cherrypy.HTTPError(410, "This endpoint is not active")
 
         gz_file = "{}/{}".format(os.path.dirname(destination),
                                  os.path.basename(url))
@@ -262,14 +267,17 @@ class MedleyServer(object):
         urllib.request.urlcleanup()
         urllib.request.urlretrieve(url, gz_file)
         subprocess.check_call(["gunzip", "-f", gz_file])
-        return "ok"
+        return {
+            "page_title": "Geoupdate",
+            "message": "ok"
+        }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
     def phone(self, number=None):
-        """ Given a US phone number, return the state its area code belongs to
-        and a description of the area it covers. """
+        """Given a US phone number, return the state its area code belongs to
+        and a description of the area it covers."""
 
         data = {}
 
@@ -367,7 +375,7 @@ class MedleyServer(object):
             data["state_name"] = state_name
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
             data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(number_formatted)
-            data["comment"] = ". ".join(comment_sentences[:2])
+            data["comment"] = ". ".join(comment_sentences[:2]) + "."
             return data
 
     @cherrypy.expose

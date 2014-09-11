@@ -28,7 +28,15 @@ HEADER A {
 
 HEADER H1 {
     font-weight: normal;
-    margin: 0 0 .5em 0;
+    margin: 0;
+}
+
+HEADER P {
+    margin: 0;
+}
+
+HEADER .supplemental {
+    display: inline;
 }
 
 .next-action {
@@ -38,4 +46,9 @@ HEADER H1 {
 .ui.table.topalign TD,
 .ui.table.topalign TH {
     vertical-align: top;
+}
+
+
+.ui.segment.map {
+    padding: .5em;
 }

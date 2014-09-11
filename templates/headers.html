@@ -1,17 +1,12 @@
 {% extends "base.html" %}
 
-{% set page_title = "Request Headers" %}
+{% set page_title = "Headers" %}
 
-{% block page_title %}{{ page_title }}{% endblock %}
-
-{% block body %}
-<header style="background-color:#cbc1d5">
-    <h1>{{ page_title }}</h1>
-</header>
-<main>
-    <table class="ui table topalign">
+{% block page_body %}
+<div class="sixteen wide column">
+    <table class="ui table segment topalign">
         <tbody>
-            {% for key, value in data %}
+            {% for key, value in headers %}
             <tr>
                 <th>{{ key }}</th>
                 <td>{{ value }}</td>
@@ -19,5 +14,5 @@
             {% endfor %}
         </tbody>
     </table>
-</main>
+</div>
 {% endblock %}

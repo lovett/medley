@@ -1,76 +1,74 @@
 {% extends "base.html" %}
 
-{% block page_title %}Whois{% if address %} for {{ address }} {% endif %}{% endblock %}
+{% if not ip %}
+{% set page_title = "Whois Lookup" %}
+{% elif geo.country_name == "United States" and geo.city and geo.region_code %}
+{% set page_title = ip + " is in " + geo.city + ", " + geo.region_code %}
+{% elif geo.city and geo.country_name %}
+{% set page_title = ip + " is in " + geo.city + ", " + geo.country_anme %}
+{% elif geo.country_name %}
+{% set page_title = ip + " is in " + geo.country_name %}
+{% else %}
+{% set page_title = ip %}
+{% endif %}
 
 {% block scripts %}
+{% if ip %}
 <script src="https://www.google.com/jsapi"></script>
 <script src="/static/js/maps.js"></script>
+{% endif %}
 {% endblock %}
 
-{% block body %}
+{% block page_header %}
 
-<header style="background-color:#a0dcb6">
+{% if ip %}
+<p class="next-action"><a href="/whois">Find another ip</a></p>
 
-    {% if not address %}
-    <h1>Whois Lookup</h1>
+{% if geo.area_code %}
+<p class="supplemental">Area code {{ geo.area_code }}.</p>
+{% endif %}
 
-    <form method="get" action="/whois">
-        <div class="ui massive icon input">
-            <input type="text" id="address" name="address" placeholder="IP Address" autofocus/>
-            <i class="search icon"></i>
-        </div>
-    </form>
-    {% else %}
+{% if geo.metro_code %}
+<p class="supplemental">Part of metro {{ geo.metro_code }}.</p>
+{% endif %}
 
-    <p class="next-action"><a href="/whois">Find another address</a></p>
+{% endif %}
 
+{% endblock %}
 
-    {% if geo.country_name == "United States" and geo.city and geo.region_code %}
-    <h1>{{ address }}: {{ geo.city }}, {{ geo.region_code }}</h1>
-    {% elif geo.city and geo.country_name %}
-    <h1>{{ address }}: {{ geo.city }}, {{ geo.country_name }}</h1>
-    {% elif geo.country_name %}
-    <h1>{{ geo.address }}: {{ geo.country_name }}</h1>
-    {% else %}
-    <h1>{{ address }}: location unknown</h1>
-    {% endif %}
+{% block page_body %}
 
-    {% if geo.metro_code %}
-    <p>Metro: {{ geo.metro_code }}</p>
-    {% endif %}
+{% if not ip %}
+<form class="sixteen wide column" method="get" action="/whois">
+    <div class="ui massive icon input">
+        <input type="text" id="ip" name="ip" placeholder="IP Address" autofocus/>
+        <i class="search icon"></i>
+    </div>
+</form>
+{% endif %}
 
-    {% if geo.area_code %}
-    <p>Area code: {{ geo.area_code }}</p>
-    {% endif %}
-
-    {% endif %}
-
-</header>
-
-<main class="{% if geo.country_code and whois %}two{% endif %} column stackable ui grid">
+{% if ip %}
+<div class="eight wide column">
     {% if whois %}
-    <div class="wide column">
-        <table class="ui small table topalign">
-            <tbody>
-                {% for line in whois %}
-
-                <tr>
-                    <th {% if not line[1] %}colspan="2"{% endif %}>{{ line[0] }}</th>
-                    {% if line[1] %}
-                    <td>{{ line[1]|urlize(30) }}</td>
-                    {% endif %}
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <table class="ui small table segment topalign">
+        <tbody>
+            {% for line in whois %}
+            <tr>
+                <th class="five wide" {% if not line[1] %}colspan="2"{% endif %}>{{ line[0] }}</th>
+                {% if line[1] %}
+                <td class="eleven wide">{{ line[1]|urlize(30) }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% endif %}
-
+</div>
+<div class="eight wide column">
     {% if geo.latitude and geo.longitude %}
-    <div class="column">
-        <div class="map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
-    </div>
+    <div class="ui segment map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
     {% endif %}
-</main>
+</div>
+{% endif %}
 
 {% endblock %}

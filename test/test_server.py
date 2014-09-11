@@ -105,7 +105,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         }
         response = self.request("/ip/test", headers=headers)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["message"], "ok")
+        self.assertEqual(response.body["result"], "ok")
 
     def test_ipValidTokenPlain(self):
         """ /ip returns plain text if requested when a valid token is provided """
@@ -138,7 +138,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 400)
 
     def test_whoisWithoutAddressReturnsHtml(self):
-        """ /geoip returns html by default """
+        """ /whois returns html by default """
         response = self.request("/whois")
         self.assertEqual(response.code, 200)
         self.assertTrue("<html>" in response.body)
@@ -148,6 +148,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/headers")
         self.assertEqual(response.code, 200)
         self.assertTrue("<html>" in response.body)
+        self.assertTrue("<table>" in response.body)
 
     def test_headersReturnsJson(self):
         """ The headers endpoint returns json if requested """

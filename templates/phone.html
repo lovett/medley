@@ -1,46 +1,38 @@
 {% extends "base.html" %}
 
-{% block page_title %}Phone Lookup{% if number %} for {{ number_formatted }} {% endif %}{% endblock %}
+{% if number %}
+{% set page_title = number_formatted + " is in " + state_name %}
+{% else %}
+{% set page_title = "Phone Lookup" %}
+{% endif %}
 
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
 <script src="/static/js/maps.js"></script>
 {% endblock %}
 
-{% block body %}
-
-<header style="background-color:#b5d1f4">
-
-    {% if number %}
-    <p class="next-action"><a href="/phone">Find another number</a></p>
-    <h1>{{ number_formatted }} is in {{ state_name }}</h1>
-    <p>
-        Search
-        <a href="{{ whitepages_url }}" target="_blank">Whitepages</a>,
-        <a href="{{ bing_url}}" target="_blank">Bing</a>
-    </p>
-    {% else %}
-    <h1>Phone Lookup</h1>
-
-    <form method="get" action="/phone">
-        <div class="ui massive icon input">
-            <input type="text" id="number" name="number" placeholder="Phone number" autofocus/>
-            <i class="search icon"></i>
-        </div>
-    </form>
-    {% endif %}
-
-</header>
-
+{% block page_header %}
 {% if number %}
-<main class="two column stackable ui grid">
-    <div class="wide column">
-        {{ comment }}
-    </div>
-    <div class="column">
-        <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
-    </div>
-</main>
+<p class="next-action"><a href="/phone">Find another number</a></p>
+<p class="supplemental"><a href="{{ whitepages_url }}" target="_blank">Search Whitepages.com</a></p>
+<p class="supplemental"><a href="{{ bing_url}}" target="_blank">Search Bing</a></p>
 {% endif %}
+{% endblock %}
 
+{% block page_body %}
+{% if number %}
+<div class="eight wide column">
+    {{ comment }}
+</div>
+<div class="eight wide column">
+    <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
+</div>
+{% else %}
+<form class="sixteen wide column" method="get" action="/phone">
+    <div class="ui massive icon input">
+        <input type="text" id="number" name="number" placeholder="Number" autofocus/>
+        <i class="search icon"></i>
+    </div>
+</form>
+{% endif %}
 {% endblock %}

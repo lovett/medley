@@ -1,24 +1,21 @@
 {% extends "base.html" %}
 
-{% block page_title %}IP Address{% endblock %}
+{% set page_title = "Headers" %}
 
-{% block scripts %}
-{% endblock %}
+{% block page_body %}
 
-{% block body %}
+{% if result %}
+<div class="sixteen wide column">
+    <p>{{ result }}</p>
+</div>
+{% else %}
+<div class="sixteen wide column">
+    <p>Your IP Address is {{ address }}</p>
 
-<header style="background-color: #ffffcc">
-    <h1>IP Address</h1>
-</header>
+    <p><a href="/headers">Request headers</a></p>
 
-<main class="ui page grid">
-    <div class="sixteen wide column">
-        <p>Your IP Address is {{ address }}</p>
-
-        <p><a href="/headers">View request headers</a></p>
-
-        <p><a href="/whois/{{address}}">Whois lookup</a></p>
-    </div>
-</main>
+    <p><a href="/whois/{{address}}">Whois lookup</a></p>
+</div>
+{% endif %}
 
 {% endblock %}

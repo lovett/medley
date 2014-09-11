@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{% block page_title %}Medley{% endblock %}</title>
+        <title>{{ page_title }}</title>
         <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" type="text/css" href="/static/css/semantic.min.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/medley.css" />
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header>
+            <h1>{{ page_title }}</h1>
+            {% block page_header %}{% endblock %}
+        </header>
+        <main class="ui grid">{% block page_body %}{% endblock %}</main>
         {% block scripts %}{% endblock %}
     </body>
 </html>

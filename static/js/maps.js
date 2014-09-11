@@ -39,7 +39,7 @@ var getSubcontinentCode = function (countryCode) {
 
 
 var drawMaps = function () {
-    var baseColor = document.getElementsByTagName('HEADER')[0].style.backgroundColor;
+    var baseColor = '#336699';
     var maps = document.getElementsByClassName('map');
 
     Array.prototype.forEach.call(maps, function (node) {
