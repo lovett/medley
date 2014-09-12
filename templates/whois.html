@@ -22,8 +22,6 @@
 {% block page_header %}
 
 {% if ip %}
-<p class="next-action"><a href="/whois">Find another ip</a></p>
-
 {% if geo.area_code %}
 <p class="supplemental">Area code {{ geo.area_code }}.</p>
 {% endif %}
@@ -32,7 +30,10 @@
 <p class="supplemental">Part of metro {{ geo.metro_code }}.</p>
 {% endif %}
 
+<p class="next-action"><a href="/whois">Find another ip</a></p>
+
 {% endif %}
+
 
 {% endblock %}
 
