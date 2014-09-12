@@ -5,7 +5,7 @@
 {% elif geo.country_name == "United States" and geo.city and geo.region_code %}
 {% set page_title = ip + " is in " + geo.city + ", " + geo.region_code %}
 {% elif geo.city and geo.country_name %}
-{% set page_title = ip + " is in " + geo.city + ", " + geo.country_anme %}
+{% set page_title = ip + " is in " + geo.city + ", " + geo.country_name %}
 {% elif geo.country_name %}
 {% set page_title = ip + " is in " + geo.country_name %}
 {% else %}
