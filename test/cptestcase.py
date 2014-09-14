@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973aa271e6b68a8bc187e53615674c5e/testing/unit/serverless/
-from io import StringIO
+from io import BytesIO
 import unittest
 import urllib
 import json
@@ -21,7 +21,8 @@ __all__ = ['BaseCherryPyTestCase']
 class BaseCherryPyTestCase(unittest.TestCase):
     def request(self, path='/', method='GET', app_path='',
                 scheme='http', proto='HTTP/1.1', data=None,
-                headers=None, as_json=False, **kwargs):
+                headers=None, as_json=False, as_plain=False,
+                **kwargs):
         """ CherryPy does not have a facility for serverless unit testing.
         This recipe demonstrates a way of simulating an incoming
         request.
@@ -38,6 +39,8 @@ class BaseCherryPyTestCase(unittest.TestCase):
 
         if as_json:
             h["Accept"] = "application/json"
+        elif as_plain:
+            h["Accept"] = "text/plain"
 
         if headers is not None:
             h.update(headers)
@@ -46,7 +49,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         # we urlencode the named arguments in **kwargs
         # and set the content-type header
         if method in ('POST', 'PUT') and not data:
-            data = urllib.parse.urlencode(kwargs)
+            data = urllib.parse.urlencode(kwargs).encode('utf-8')
             kwargs = None
             h['content-type'] = 'application/x-www-form-urlencoded'
 
@@ -60,7 +63,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         fd = None
         if data is not None:
             h['content-length'] = '%d' % len(data)
-            fd = StringIO(data)
+            fd = BytesIO(data)
 
         # Get our application and run the request against it
         app = cherrypy.tree.apps.get(app_path)
@@ -81,7 +84,6 @@ class BaseCherryPyTestCase(unittest.TestCase):
                 fd = None
 
         if response.status.startswith('500'):
-            print(response.body)
             raise AssertionError("Unexpected error")
 
         # A generic object is easier to work and customize than the

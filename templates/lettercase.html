@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% set page_title = "Lettercase" %}
+
+{% block page_header %}
+{% endblock %}
+
+{% block page_body %}
+<form class="sixteen wide column ui form" method="post" action="/lettercase">
+        <div class="grouped inline fields">
+            <div class="ui massive input">
+                <input type="text" id="number" name="value" value="{{ value|default('', true) }}" autofocus/>
+            </div>
+
+            <p>Convert to:</p>
+            {% for option in styles %}
+            <div class="field">
+                <fieldgroup class="ui radio checkbox">
+                    <input id="{{ option }}" type="radio" name="style" value="{{ option }}" {% if option == style %}checked{% endif %}/>
+                    <label for="{{ option }}" class="ui radio checkbox">{{ option|title }}</label>
+                </fieldgroup>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="ui submit button">Submit</button>
+    </div>
+</form>
+
+{% if result %}
+<div class="sixteen wide column">
+    <div class="ui segment">
+        <h2 class="ui green header">Result</h2>
+        {{ result }}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

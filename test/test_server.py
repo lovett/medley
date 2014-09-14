@@ -68,10 +68,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """ The /ip endpoint returns plain text if requested """
         headers = {
             "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0",
-            "Accept": "text/plain"
+            "Authorization": "Basic dGVzdDp0ZXN0"
         }
-        response = self.request("/ip", headers=headers)
+        response = self.request("/ip", headers=headers, as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "1.1.1.1")
 
@@ -113,9 +112,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "Remote-Addr": "1.1.1.1",
             "X-REAL-IP": "2.2.2.2",
             "Authorization": "Basic dGVzdDp0ZXN0",
-            "Accept": "text/plain"
         }
-        response = self.request("/ip/test", headers=headers)
+        response = self.request("/ip/test", headers=headers, as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "ok")
 
@@ -148,7 +146,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/headers")
         self.assertEqual(response.code, 200)
         self.assertTrue("<html>" in response.body)
-        self.assertTrue("<table>" in response.body)
+        self.assertTrue("<table" in response.body)
 
     def test_headersReturnsJson(self):
         """ The headers endpoint returns json if requested """
@@ -158,10 +156,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_headersReturnsPlain(self):
         """ The headers endpoint returns plain text if requested """
-        headers = {
-            "Accept": "text/plain"
-        }
-        response = self.request("/headers", headers=headers)
+        response = self.request("/headers", as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertTrue("Accept" in response.body)
 
@@ -169,6 +164,53 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """ The headers endpoint does not take arguments """
         response = self.request("/headers/test")
         self.assertEqual(response.code, 404)
+
+    def test_lettercaseReturnsHtml(self):
+        """ The lettercase endpoints returns html by default """
+        response = self.request("/lettercase")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<html>" in response.body)
+        self.assertTrue("<form" in response.body)
+
+    def test_lettercaseReturnsJson(self):
+        """ The lettercase endpoint returns json if requested """
+        response = self.request("/lettercase", as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertTrue(response.body["result"] == "")
+
+    def test_lettercaseConvertsToLowercase(self):
+        kwargs = {
+            "style": "lower",
+            "value": "TEST"
+        }
+        response = self.request(path="/lettercase",
+                                method="POST",
+                                as_plain=True,
+                                **kwargs)
+        self.assertEqual(response.body, "test")
+
+    def test_lettercaseConvertsToUppercase(self):
+        kwargs = {
+            "style": "upper",
+            "value": "test"
+        }
+        response = self.request(path="/lettercase",
+                                method="POST",
+                                as_plain=True,
+                                **kwargs)
+        self.assertEqual(response.body, "TEST")
+
+    def test_lettercaseConvertsToTitle(self):
+        kwargs = {
+            "style": "title",
+            "value": "this iS a TEst 1999"
+        }
+        response = self.request(path="/lettercase",
+                                method="POST",
+                                as_plain=True,
+                                **kwargs)
+        self.assertEqual(response.body, "This Is A Test 1999")
+
 
 
 if __name__ == "__main__":

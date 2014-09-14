@@ -16,7 +16,6 @@ import base64
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
-from titlecase import titlecase
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -390,17 +389,34 @@ class MedleyServer(object):
         return highlight(content, lexer, HtmlFormatter(full=True))
 
     @cherrypy.expose
-    @cherrypy.tools.negotiable(media="text/plain")
-    def lettercase(self, style, value):
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="lettercase.html")
+    def lettercase(self, style=None, value=""):
         """ Convert a string value to lowercase, uppercase, or titlecase """
-        if style == "title":
-            return titlecase(value.lower())
 
-        if style == "lower":
-            return value.lower()
+        result = ""
+        if style and value:
+            if style == "title":
+                result = value.title()
+            elif style == "lower":
+                result = value.lower()
+            elif style == "upper":
+                result = value.upper()
 
-        if style == "upper":
-            return value.upper()
+        if cherrypy.request.negotiated == "text/plain":
+            return result
+        elif cherrypy.request.negotiated == "application/json":
+            return {
+                "result": result
+            }
+        else:
+            return {
+                "value": value,
+                "result": result,
+                "styles": ("title", "lower", "upper"),
+                "style": style or "title"
+            }
+
 
 
 if __name__ == "__main__":
