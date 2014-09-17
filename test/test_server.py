@@ -3,6 +3,7 @@ import os.path
 import sqlite3
 import json
 import httpretty
+import mock
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
 
@@ -20,7 +21,7 @@ def setup_module():
         },
         "ip_tokens": {
             "test": "test.example.com"
-        }
+        },
     }
 
     app.merge(config_extra)
@@ -91,7 +92,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip", headers=headers)
         self.assertTrue("2.2.2.2" in response.body)
 
-    def test_ipValidToken(self):
+    def test_ipValidTokenHtml(self):
         """ /ip returns html by default when a valid token is provided """
         headers = {
             "Remote-Addr": "1.1.1.1",
@@ -123,6 +124,28 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "ok")
 
+    def testipValidTokenUpdatesDns(self):
+        """ /ip calls the configured DNS update command via subprocess if given a valid token """
+        remote_address = "127.0.0.1"
+        token = "test2"
+        host = "test2.example.com"
+        expected_command = ["pdnsd-ctl", "add", "a", remote_address, host]
+        configured_command = expected_command[:]
+        configured_command[3] = "$ip"
+        configured_command[4] = "$host"
+        cherrypy.config["ip.dns.command"] = configured_command
+
+        application = cherrypy.tree.apps[""]
+        application.config["ip_tokens"][token] = host
+
+        headers = {
+            "Remote-Addr": remote_address,
+            "Authorization": "Basic dGVzdDp0ZXN0"
+        }
+        with mock.patch("medley.subprocess") as subprocess:
+            response = self.request("/ip/" + token, headers=headers)
+            subprocess.call.assert_called_once_with(expected_command)
+
     def test_ipInvalidToken(self):
         """ /ip should fail if an invalid token is specified """
         headers = {
@@ -132,6 +155,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
         }
         response = self.request("/ip/invalid", headers=headers)
         self.assertEqual(response.code, 400)
+
+    def testipInvalidTokenNoDns(self):
+        """ /ip should not shell out if given an invalid token """
+        headers = {
+            "Remote-Addr": "1.1.1.1",
+            "X-REAL-IP": "2.2.2.2",
+            "Authorization": "Basic dGVzdDp0ZXN0"
+        }
+        with mock.patch("medley.subprocess") as subprocess:
+            response = self.request("/ip/invalid", headers=headers)
+            self.assertFalse(subprocess.called)
 
     def test_ipNoIp(self):
         """ /ip should fail if it can't identify the request ip """
