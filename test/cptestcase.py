@@ -83,8 +83,6 @@ class BaseCherryPyTestCase(unittest.TestCase):
                 fd.close()
                 fd = None
 
-        if response.status.startswith('500'):
-            raise AssertionError("Unexpected error")
 
         # A generic object is easier to work and customize than the
         # CherryPy response

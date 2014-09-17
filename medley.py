@@ -260,12 +260,17 @@ class MedleyServer(object):
         if not (url and destination):
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
-        gz_file = "{}/{}".format(os.path.dirname(destination),
-                                 os.path.basename(url))
-
         urllib.request.urlcleanup()
-        urllib.request.urlretrieve(url, gz_file)
-        subprocess.check_call(["gunzip", "-f", gz_file])
+        urllib.request.urlretrieve(url, destination)
+
+        if destination.endswith(".gz"):
+            try:
+                subprocess.check_call(["gunzip", "-f", destination])
+            except subprocess.CalledProcessError:
+                raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
+            finally:
+                os.unlink(destination)
+
         return {
             "page_title": "Geoupdate",
             "message": "ok"

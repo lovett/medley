@@ -2,6 +2,7 @@ import cherrypy
 import os.path
 import sqlite3
 import json
+import httpretty
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
 
@@ -42,6 +43,12 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["message"], "hello")
 
+    def test_indexReturnsJson(self):
+        """ The index returns json if requested """
+        response = self.request("/", as_plain=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, "hello")
+
     def test_ipNoToken(self):
         """ Calling /ip without a token should emit the caller's IP """
         headers = {
@@ -73,7 +80,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip", headers=headers, as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "1.1.1.1")
-
 
     def test_ipRightHeader(self):
         """ /ip should prefer X-Real-Ip header to Remote-Addr header """
@@ -179,6 +185,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertTrue(response.body["result"] == "")
 
     def test_lettercaseConvertsToLowercase(self):
+        """ The lettercase endpoint converts an input string to lowercase """
         kwargs = {
             "style": "lower",
             "value": "TEST"
@@ -190,6 +197,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "test")
 
     def test_lettercaseConvertsToUppercase(self):
+        """ The lettercase endpoint converts an input string to uppercase """
         kwargs = {
             "style": "upper",
             "value": "test"
@@ -201,6 +209,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "TEST")
 
     def test_lettercaseConvertsToTitle(self):
+        """ The lettercase endpoint converts an input string to title case """
         kwargs = {
             "style": "title",
             "value": "this iS a TEst 1999"
@@ -210,6 +219,39 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 as_plain=True,
                                 **kwargs)
         self.assertEqual(response.body, "This Is A Test 1999")
+
+    def test_geoupdateReturns410IfNoUrl(self):
+        """ The geoupdate endpoint returns 410 if geoip.city.url is not configured """
+        cherrypy.config["geoip.city.url"] = None
+        cherrypy.config["geoip.city.filename"] = "geoupdate_test.gz"
+        response = self.request(path="/geoupdate")
+        self.assertEqual(response.code, 410)
+
+    def test_geoupdateReturns410IfNoDestination(self):
+        """ The geoupdate endpoint returns 410 if geoip.city.filename is not configured """
+        cherrypy.config["geoip.city.url"] = "http://example.com/test.gz"
+        cherrypy.config["geoip.city.filename"] = None
+        response = self.request(path="/geoupdate")
+        self.assertEqual(response.code, 410)
+
+    @httpretty.activate
+    def test_geoupdateReturns500IfGzipFails(self):
+        """ The geoupdate endpoint returns 500 if the database cannot be gunzipped """
+        cherrypy.config["geoip.city.url"] = "http://example.com/test.gz"
+        cherrypy.config["geoip.city.filename"] = "geoupdate_test.gz"
+        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.city.url"])
+        response = self.request(path="/geoupdate")
+        self.assertEqual(response.code, 500)
+
+    @httpretty.activate
+    def test_geoupdateReturns200(self):
+        """ The geoupdate endpoint returns 200 if the database is downloaded  """
+        cherrypy.config["geoip.city.url"] = "http://example.com/test"
+        cherrypy.config["geoip.city.filename"] = "geoupdate_test"
+        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.city.url"])
+        response = self.request(path="/geoupdate")
+        self.assertEqual(response.code, 200)
+
 
 
 
