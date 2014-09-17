@@ -48,3 +48,24 @@ HEADER .supplemental {
 .ui.segment.map {
     padding: .5em;
 }
+
+INPUT[type=submit] {
+    padding: 0 1em;
+    font-size: 4em;
+}
+
+.field SELECT {
+    font-size: 1em;
+}
+
+.ui.focusable.button {
+}
+.ui.focusable.blue.button:focus {
+    background-color: green;
+}
+
+.results {
+    margin-top: 2em;
+    padding: 2em 1em;
+    background-color: #f5f5f5;
+}
