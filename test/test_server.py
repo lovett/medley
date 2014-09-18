@@ -1,6 +1,5 @@
 import cherrypy
 import os.path
-import sqlite3
 import json
 import httpretty
 import mock
@@ -32,11 +31,17 @@ def teardown_module():
     cherrypy.engine.exit()
 
 class TestMedleyServer(BaseCherryPyTestCase):
-    def test_indexReturnsHtml(self):
-        """ The index returns html by default """
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
+    def test_endpointsReturnHTML(self):
+        """ Endpoints return HTML by default """
+        headers = {
+            "Remote-Addr": "1.1.1.1",
+        }
+
+        endpoints = ["/", "/ip", "/headers", "/phone", "/whois"]
+        for endpoint in endpoints:
+            response = self.request(endpoint, headers=headers)
+            self.assertEqual(response.code, 200)
+            self.assertTrue("<main" in response.body)
 
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
@@ -58,7 +63,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         }
         response = self.request("/ip", headers=headers)
         self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
         self.assertTrue("1.1.1.1" in response.body)
 
     def test_ipNoTokenJson(self):
@@ -100,7 +104,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         }
         response = self.request("/ip/test", headers=headers)
         self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
+        self.assertTrue("<main" in response.body)
 
     def test_ipValidTokenJson(self):
         """ /ip returns json if requested when a valid token is provided """
@@ -175,17 +179,10 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip/test", headers=headers)
         self.assertEqual(response.code, 400)
 
-    def test_whoisWithoutAddressReturnsHtml(self):
-        """ /whois returns html by default """
-        response = self.request("/whois")
-        self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
-
     def test_headersReturnsHtml(self):
         """ The headers endpoint returns html by default """
         response = self.request("/headers")
         self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
         self.assertTrue("<table" in response.body)
 
     def test_headersReturnsJson(self):
@@ -206,10 +203,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 404)
 
     def test_lettercaseReturnsHtml(self):
-        """ The lettercase endpoints returns html by default """
+        """ The lettercase endpoint template includes a form by default """
         response = self.request("/lettercase")
         self.assertEqual(response.code, 200)
-        self.assertTrue("<html>" in response.body)
         self.assertTrue("<form" in response.body)
 
     def test_lettercaseReturnsJson(self):
@@ -286,6 +282,112 @@ class TestMedleyServer(BaseCherryPyTestCase):
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request(path="/geoupdate")
         self.assertEqual(response.code, 200)
+
+    def test_whoisJsonWithoutIp(self):
+        """ The /whois endpoint returns 400 if called as json without an IP"""
+        response = self.request(path="/whois", as_json=True)
+        self.assertEqual(response.code, 400)
+        self.assertTrue("message" in response.body)
+
+    def test_whoisPlainWithoutIp(self):
+        """ The /whois endpoint returns 400 if called as plain without an IP"""
+        response = self.request(path="/whois", as_plain=True)
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisGeoipQuery(self, queryWhoisMock):
+        """ The /whois endpoint calls the geoip database """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {}
+        queryWhoisMock.return_value = {}
+        ip = "1.1.1.1"
+        with mock.patch("medley.pygeoip.GeoIP") as pygeoip_mock:
+            pygeoip_mock.return_value = reader
+            response = self.request(path="/whois/" + ip, as_json=True)
+            reader.record_by_addr.assert_called_once_with(ip)
+            queryWhoisMock.assert_called_once_with(ip)
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisPopulateUsMapParams(self, queryWhoisMock):
+        """ The /whois endpoint defines the map region for a US IP as US-{state abbrev} """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {
+            "country_code": "US",
+            "region_code": "NY"
+        }
+        queryWhoisMock.return_value = {}
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP.return_value = reader
+            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            self.assertEqual(response.body["map_region"], "US-NY")
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisPopulateNonUsMapParams(self, queryWhoisMock):
+        """ The /whois endpoint defines the map region for a non-US IP as a 2-letter ISO code """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {
+            "country_code": "AU"
+        }
+        queryWhoisMock.return_value = {}
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP.return_value = reader
+            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            self.assertEqual(response.body["map_region"], "AU")
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisSkipsGeoipQuery(self, queryWhoisMock):
+        """ The /whois endpoint returns if the geoip query fails """
+        queryWhoisMock.return_value = {}
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
+            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            self.assertTrue(response.code, 200)
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock):
+        """ The /whois endpoint returns if the geoip query fails """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {
+            "city": "test city",
+            "country_code": "AA",
+            "region_code": "BB",
+            "country_name": "test country"
+        }
+        queryWhoisMock.return_value = {}
+
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP.return_value = reader
+            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            self.assertEqual(response.body, "test city, test country")
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisPlainReturnsCountry(self, queryWhoisMock):
+        """ The /whois endpoint returns if the geoip query fails """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {
+            "country_code": "AA",
+            "region_code": "BB",
+            "country_name": "test country"
+        }
+        queryWhoisMock.return_value = {}
+
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP.return_value = reader
+            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            self.assertEqual(response.body, "test country")
+
+    @mock.patch("medley.MedleyServer.queryWhois")
+    def test_whoisPlainReturnsUnknown(self, queryWhoisMock):
+        """ The /whois endpoint returns if the geoip query fails """
+        reader = mock.MagicMock()
+        reader.record_by_addr.return_value = {}
+        queryWhoisMock.return_value = {}
+
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP.return_value = reader
+            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            self.assertEqual(response.body, "Unknown")
+
 
 if __name__ == "__main__":
     import unittest

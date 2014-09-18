@@ -209,25 +209,35 @@ class MedleyServer(object):
     def whois(self, ip=None):
         """ Display whois and geoip data for an IP ip """
 
-        if ip is None and cherrypy.request.negotiated == "application/json":
-            raise cherrypy.HTTPError(400, "Ip not specified")
-
         data = {
             "ip": ip,
             "geo": None
         }
 
-        # whois lookup
-        if ip:
-            db_path = cherrypy.config.get("database.directory");
-            db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
-            if db_path.endswith(".gz"):
-                db_path = db_path[0:-3]
+        if ip is None:
+            if cherrypy.request.negotiated == "application/json":
+                cherrypy.response.status = 400
+                return {
+                    "message": "IP address not specfified"
+                }
+            if cherrypy.request.negotiated == "text/plain":
+                raise cherrypy.HTTPError(400, "Ip not specified")
+            else:
+                return data
 
+        # whois lookup
+        db_path = cherrypy.config.get("database.directory")
+        db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
+        if db_path.endswith(".gz"):
+            db_path = db_path[0:-3]
+
+        try:
             reader = pygeoip.GeoIP(db_path)
             data["geo"] = reader.record_by_addr(ip)
+        except:
+            pass
 
-            data["whois"] = self.queryWhois(ip)
+        data["whois"] = self.queryWhois(ip)
 
         # google charts parameters
         if data["geo"]:
@@ -238,9 +248,9 @@ class MedleyServer(object):
 
         if cherrypy.request.negotiated == "text/plain":
             if "city" in data["geo"] and "country_name" in data["geo"]:
-                return "{}, {}".format(data["city"], data["country_name"])
+                return "{}, {}".format(data["geo"]["city"], data["geo"]["country_name"])
             elif "country_name" in data["geo"]:
-                return data["country_name"]
+                return data["geo"]["country_name"]
             else:
                 return "Unknown"
         else:
