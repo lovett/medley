@@ -40,11 +40,14 @@
 {% block page_body %}
 
 {% if not ip %}
-<form class="sixteen wide column" method="get" action="/whois">
-    <div class="ui massive icon input">
-        <input type="text" id="ip" name="ip" placeholder="IP Address" autofocus/>
-        <i class="search icon"></i>
+<form class="ui form sixteen wide column" method="get" action="/whois">
+    <div class="field">
+        <div class="ui input">
+            <label for="ip">IP Address</label>
+            <input type="text" id="ip" name="ip" autofocus/>
+        </div>
     </div>
+    {% include "submit.html" %}
 </form>
 {% endif %}
 

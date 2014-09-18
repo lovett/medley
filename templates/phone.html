@@ -28,11 +28,13 @@
     <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
 </div>
 {% else %}
-<form class="sixteen wide column" method="get" action="/phone">
-    <div class="ui massive icon input">
-        <input type="text" id="number" name="number" placeholder="Number" autofocus/>
-        <i class="search icon"></i>
+<form class="ui form sixteen wide column" method="get" action="/phone">
+    <div class="field">
+        <label for="number">Number:</label>
+        <input type="text" id="number" name="number" autofocus/>
     </div>
+
+    {% include "submit.html" %}
 </form>
 {% endif %}
 {% endblock %}

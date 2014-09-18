@@ -19,9 +19,8 @@
             {% endfor %}
         </select>
     </div>
-    <div class="ui center aligned grid">
-        <input type="submit" value="Submit" class="ui blue focusable button"/>
-    </div>
+    {% include "submit.html" %}
+</form>
 
 {% if result %}
     <div class="results">
