@@ -11,7 +11,6 @@ import urllib.parse
 import json
 import copy
 import plugins.jinja
-import util.geo
 import base64
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -286,104 +285,99 @@ class MedleyServer(object):
 
         data = {}
 
-        if number is None and cherrypy.request.negotiated != "text/html":
-            raise cherrypy.HTTPError(400, "Address not specified")
-
         if number is None:
-            return data
+            if cherrypy.request.negotiated != "text/html":
+                raise cherrypy.HTTPError(400, "Address not specified")
+            else:
+                return data
 
         number = re.sub(r"\D", "", number)
-        number = number.lstrip("1")
-
+        number = re.sub(r"^1(\d{10})", r"\1", number)
         area_code = number[:3]
-        number_formatted = re.sub(r"(\d\d\d)(\d\d\d)(\d\d\d\d)", r"(\1) \2-\3", number)
 
         if len(area_code) is not 3:
             raise cherrypy.HTTPError(400, "Invalid number")
 
-        sparql = """
-        PREFIX dbprop: <http://dbpedia.org/property/>
-        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        area_code_query = """
+        PREFIX dbp: <http://dbpedia.org/property/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        PREFIX dbo: <http://dbpedia.org/ontology/>
-
-        SELECT ?state, ?comment, ?redirect WHERE {{
-          {{
-            ?label rdfs:label "Area code {0}"@en ;
-            rdfs:comment ?comment; dbprop:state ?state
-            filter (isLiteral(?comment) && langMatches(lang(?comment), "en"))
-            filter (isLiteral(?state) && langMatches(lang(?state), "en"))
-            .
-          }}
-          UNION
-          {{
-            ?label rdfs:label "Area code {0}"@en ;
-            dbo:wikiPageRedirects ?redirect .
-          }}
-        }}
+        SELECT ?state_abbrev, CONCAT("US-", ?state_abbrev) as ?isocode, ?comment WHERE {{
+            ?s dbp:this ?o .
+            ?s dbp:state ?state_abbrev .
+            ?s rdfs:comment ?comment
+            FILTER (regex(?o, "{0}", "i"))
+            FILTER (langMatches(lang(?state_abbrev), "en"))
+        }} LIMIT 1
         """.format(area_code)
 
         params = {
-            "query": sparql,
+            "query": area_code_query,
             "format": "json",
             "timeout": "1000"
         }
 
-        sparql_query = "http://dbpedia.org/sparql?"
-        sparql_query += urllib.parse.urlencode(params)
+        query = "http://dbpedia.org/sparql?"
+        query += urllib.parse.urlencode(params)
 
         try:
-            with urllib.request.urlopen(sparql_query, timeout=7) as request:
-                sparql_result = json.loads(request.read().decode("utf-8"))
+            with urllib.request.urlopen(query, timeout=7) as request:
+                result = json.loads(request.read().decode("utf-8"))
+            first_result = result["results"]["bindings"][0]
+            state_abbrev = first_result["state_abbrev"].get("value")
+            isocode = first_result["isocode"].get("value")
+            comment = first_result["comment"].get("value").split(". ")
+        except IndexError:
+            state_abbrev = None
+            isocode = None
+            comment = []
         except:
-            raise cherrypy.HTTPError(500, "timeout while querying dbpedia.org")
+            raise cherrypy.HTTPError(500, "The area code query to dbpedia timed out")
 
-        first_result = sparql_result["results"]["bindings"][0]
-
-        if "redirect" in first_result:
-            sparql = """
-            PREFIX dbo: <http://dbpedia.org/ontology/>
-            PREFIX dbprop: <http://dbpedia.org/property/>
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            SELECT ?state, ?comment {{
-              <{0}> rdfs:comment ?comment ; dbprop:state ?state
-              filter(isLiteral(?comment) && langMatches(lang(?comment), "en"))
-              filter(isLiteral(?state) && langMatches(lang(?state), "en"))
-            }}
-            """.format(first_result["redirect"].get("value"))
-
-            params["query"] = sparql
-            sparql_query = "http://dbpedia.org/sparql?"
-            sparql_query += urllib.parse.urlencode(params)
-
-            with urllib.request.urlopen(sparql_query) as request:
-                sparql_result = json.loads(request.read().decode("utf-8"))
-                first_result = sparql_result["results"]["bindings"][0]
-
-        comment_sentences = first_result["comment"].get("value").split(". ")
-
-        # Filter out noise
-        comment_sentences = [x for x in comment_sentences
-                             if re.search(" in (red|blue) (is|are)", x) is None
-                             and not re.match("The map to the right", x)
-                             and not re.match("Error: ", x)]
-
-        comment = ". ".join(comment_sentences[:2])
+        # Take the first two sentences from the comment
+        comment = [sentence for sentence in comment
+                   if re.search(" in (red|blue) (is|are)", sentence) is None
+                   and not re.match("The map to the right", sentence)
+                   and not re.match("Error: ", sentence)][:2]
+        comment = ". ".join(comment)
         if not comment.endswith("."):
             comment += "."
 
-        state_abbreviation = first_result["state"].get("value")
-        state_name = util.geo.AmericanStates.abbrevToName(state_abbreviation)
+        if not isocode:
+            state_name = None
+            comment = "The location of this number could not be found."
+        else:
+            state_name_query = """
+            PREFIX dbp: <http://dbpedia.org/property/>
+            SELECT ?name WHERE {{
+                 ?s dbp:isocode "{0}"@en .
+                 ?s dbp:name ?name .
+            }} LIMIT 1
+            """.format(isocode)
+
+
+            params["query"] = state_name_query
+            query = "http://dbpedia.org/sparql?"
+            query += urllib.parse.urlencode(params)
+
+            try:
+                with urllib.request.urlopen(query, timeout=7) as request:
+                    result = json.loads(request.read().decode("utf-8"))
+                first_result = result["results"]["bindings"][0]
+                state_name = first_result["name"].get("value")
+            except IndexError:
+                state_name = None
+            except:
+                raise cherrypy.HTTPError(500, "The state name query to dbpedia timed out")
 
         if cherrypy.request.negotiated == "text/plain":
             return state_name
         else:
             data["number"] = number
-            data["number_formatted"] = number_formatted
-            data["state_abbreviation"] = state_abbreviation
+            data["number_formatted"] = re.sub(r"(\d\d\d)(\d\d\d)(\d\d\d\d)", r"(\1) \2-\3", number)
+            data["state_abbreviation"] = state_abbrev
             data["state_name"] = state_name
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
-            data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(number_formatted)
+            data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(data["number_formatted"])
             data["comment"] = comment
             return data
 
