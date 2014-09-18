@@ -255,39 +255,37 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "This Is A Test 1999")
 
     def test_geoupdateReturns410IfNoUrl(self):
-        """ The geoupdate endpoint returns 410 if geoip.city.url is not configured """
-        cherrypy.config["geoip.city.url"] = None
-        cherrypy.config["geoip.city.filename"] = "geoupdate_test.gz"
+        """ The geoupdate endpoint returns 410 if geoip.download.url is not configured """
+        cherrypy.config["geoip.download.url"] = None
+        cherrypy.config["database.directory"] = "/tmp"
         response = self.request(path="/geoupdate")
         self.assertEqual(response.code, 410)
 
-    def test_geoupdateReturns410IfNoDestination(self):
-        """ The geoupdate endpoint returns 410 if geoip.city.filename is not configured """
-        cherrypy.config["geoip.city.url"] = "http://example.com/test.gz"
-        cherrypy.config["geoip.city.filename"] = None
+    def test_geoupdateReturns410IfNoDatabaseDirectory(self):
+        """ The geoupdate endpoint returns 410 if database.directory is not configured """
+        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
+        cherrypy.config["database.directory"] = None
         response = self.request(path="/geoupdate")
         self.assertEqual(response.code, 410)
 
     @httpretty.activate
     def test_geoupdateReturns500IfGzipFails(self):
-        """ The geoupdate endpoint returns 500 if the database cannot be gunzipped """
-        cherrypy.config["geoip.city.url"] = "http://example.com/test.gz"
-        cherrypy.config["geoip.city.filename"] = "geoupdate_test.gz"
-        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.city.url"])
+        """ The geoupdate endpoint returns 500 if the database cannot be gunzipped.
+        Although we are mocking the download url, we're not getting back a gzipped file. """
+        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
+        cherrypy.config["database.directory"] = "/tmp"
+        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request(path="/geoupdate")
         self.assertEqual(response.code, 500)
 
     @httpretty.activate
     def test_geoupdateReturns200(self):
         """ The geoupdate endpoint returns 200 if the database is downloaded  """
-        cherrypy.config["geoip.city.url"] = "http://example.com/test"
-        cherrypy.config["geoip.city.filename"] = "geoupdate_test"
-        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.city.url"])
+        cherrypy.config["geoip.download.url"] = "http://example.com/test"
+        cherrypy.config["database.directory"] = "/tmp"
+        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request(path="/geoupdate")
         self.assertEqual(response.code, 200)
-
-
-
 
 if __name__ == "__main__":
     import unittest

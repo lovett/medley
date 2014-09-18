@@ -190,8 +190,6 @@ class MedleyServer(object):
 
             out_filtered.append(fields)
 
-        print(out_filtered)
-
         # collapse repeated headers and comment lines
         previous = None
         out_collapsed = []
@@ -216,19 +214,20 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Ip not specified")
 
         data = {
-            "ip": ip
+            "ip": ip,
+            "geo": None
         }
-
-        # geoip lookup
-        try:
-            geo_db = cherrypy.config.get("geoip.city.filename")
-            reader = pygeoip.GeoIP(geo_db)
-            data["geo"] = reader.record_by_addr(ip)
-        except:
-            data["geo"] = None
 
         # whois lookup
         if ip:
+            db_path = cherrypy.config.get("database.directory");
+            db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
+            if db_path.endswith(".gz"):
+                db_path = db_path[0:-3]
+
+            reader = pygeoip.GeoIP(db_path)
+            data["geo"] = reader.record_by_addr(ip)
+
             data["whois"] = self.queryWhois(ip)
 
         # google charts parameters
@@ -254,22 +253,24 @@ class MedleyServer(object):
     def geoupdate(self):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
-        url = cherrypy.config.get("geoip.city.url")
-        destination = cherrypy.config.get("geoip.city.filename")
+        url = cherrypy.config.get("geoip.download.url")
+        directory = cherrypy.config.get("database.directory")
 
-        if not (url and destination):
+        if not (url and directory):
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
-        urllib.request.urlcleanup()
-        urllib.request.urlretrieve(url, destination)
+        download_path = "{}/{}".format(directory.rstrip("/"),
+                                 os.path.basename(url))
 
-        if destination.endswith(".gz"):
+        urllib.request.urlcleanup()
+        urllib.request.urlretrieve(url, download_path)
+
+        if download_path.endswith(".gz"):
             try:
-                subprocess.check_call(["gunzip", "-f", destination])
+                subprocess.check_call(["gunzip", "-f", download_path])
             except subprocess.CalledProcessError:
+                os.unlink(download_path)
                 raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
-            finally:
-                os.unlink(destination)
 
         return {
             "page_title": "Geoupdate",
