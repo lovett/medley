@@ -24,7 +24,13 @@ HEADER {
 
 HEADER A {
     color: black;
+    text-decoration: none;
 }
+
+HEADER A:hover {
+    text-decoration: underline;
+}
+
 
 HEADER H1 {
     font-weight: normal;
@@ -36,6 +42,7 @@ HEADER P {
 }
 
 HEADER .supplemental {
+    margin-right: 1em;
     display: inline;
 }
 

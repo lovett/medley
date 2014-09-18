@@ -13,9 +13,13 @@
 
 {% block page_header %}
 {% if number %}
-<p class="next-action"><a href="/phone">Find another number</a></p>
+
+{% if number|length > 3 %}
 <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank">Search Whitepages.com</a></p>
 <p class="supplemental"><a href="{{ bing_url}}" target="_blank">Search Bing</a></p>
+{% endif %}
+<p class="supplemental"><a href="/phone">Find another number</a></p>
+
 {% endif %}
 {% endblock %}
 

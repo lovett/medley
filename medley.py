@@ -368,6 +368,10 @@ class MedleyServer(object):
                              and not re.match("The map to the right", x)
                              and not re.match("Error: ", x)]
 
+        comment = ". ".join(comment_sentences[:2])
+        if not comment.endswith("."):
+            comment += "."
+
         state_abbreviation = first_result["state"].get("value")
         state_name = util.geo.AmericanStates.abbrevToName(state_abbreviation)
 
@@ -380,7 +384,7 @@ class MedleyServer(object):
             data["state_name"] = state_name
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
             data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(number_formatted)
-            data["comment"] = ". ".join(comment_sentences[:2]) + "."
+            data["comment"] = comment
             return data
 
     @cherrypy.expose
