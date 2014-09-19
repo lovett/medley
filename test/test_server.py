@@ -47,13 +47,13 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """ The index returns json if requested """
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["message"], "hello")
+        self.assertTrue("endpoints" in response.body)
 
-    def test_indexReturnsJson(self):
+    def test_indexReturnsPlain(self):
         """ The index returns json if requested """
         response = self.request("/", as_plain=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body, "hello")
+        self.assertTrue("/" in response.body)
 
     def test_ipNoToken(self):
         """ Calling /ip without a token should emit the caller's IP """

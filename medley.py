@@ -12,6 +12,7 @@ import json
 import copy
 import plugins.jinja
 import base64
+import inspect
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -33,7 +34,7 @@ class MedleyServer(object):
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
     def azure(self, event):
-        """ Relay deployment notifications from Azure """
+        """Relay deployment notifications from Azure"""
         endpoint = cherrypy.config.get("notifier.url")
 
         if not endpoint:
@@ -75,15 +76,28 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="generic.html")
+    @cherrypy.tools.template(template="index.html")
     def index(self):
-        """The application homepage is just a hello world"""
+        """The application homepage lists the available endpoints"""
+
+        endpoints = []
+        for name, value in inspect.getmembers(self, inspect.ismethod):
+            if name == "index":
+                continue
+
+            if getattr(value, "exposed", False):
+                endpoints.append((name, value.__doc__))
+
         if cherrypy.request.negotiated == "text/plain":
-            return "hello"
+            output = ""
+            for name, description in endpoints:
+                output += "/" + name + "\n"
+                output += description + "\n\n"
+            return output
         else:
             return {
                 "page_title": "Medley",
-                "message": "hello"
+                "endpoints": endpoints,
             }
 
     @cherrypy.expose
@@ -92,7 +106,7 @@ class MedleyServer(object):
     def ip(self, token=None):
         """A combination dynamic DNS and what-is-my-ip service.  If a token is
         provided, updates the local nameserver with the caller's
-        address. If no token, returns the caller's address."""
+        address. If no token, returns the caller's address"""
 
         ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
@@ -148,9 +162,9 @@ class MedleyServer(object):
             }
 
     def queryWhois(self, address):
-        """ Run a whois query by shelling out. Although there are some
+        """Run a whois query by shelling out. Although there are some
         whois-related Python modules that could otherwise be used,
-        none were viable for Python 3.2 """
+        none were viable for Python 3.2"""
 
         cherrypy.lib.caching.MemoryCache
 
@@ -207,7 +221,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
     def whois(self, ip=None):
-        """ Display whois and geoip data for an IP ip """
+        """Display whois and geoip data for an IP"""
 
         data = {
             "ip": ip,
@@ -291,7 +305,7 @@ class MedleyServer(object):
     @cherrypy.tools.template(template="phone.html")
     def phone(self, number=None):
         """Given a US phone number, return the state its area code belongs to
-        and a description of the area it covers."""
+        and a description of the area it covers"""
 
         data = {}
 
@@ -394,8 +408,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
     def highlight(self, extension, content):
-        """ Apply syntax highlighting to the provided content and then render
-        it as HTML """
+        """Syntax highlight the given input and render as HTML"""
         if extension == "json":
             content = json.dumps(json.loads(content), sort_keys=True, indent=4)
 
@@ -406,7 +419,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="lettercase.html")
     def lettercase(self, style=None, value=""):
-        """ Convert a string value to lowercase, uppercase, or titlecase """
+        """Convert a string value to lowercase, uppercase, or titlecase"""
 
         result = ""
         if style and value:
