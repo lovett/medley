@@ -13,6 +13,7 @@ import copy
 import plugins.jinja
 import base64
 import inspect
+import util.phone
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -319,8 +320,7 @@ class MedleyServer(object):
             else:
                 return data
 
-        number = re.sub(r"\D", "", number)
-        number = re.sub(r"^1(\d{10})", r"\1", number)
+        number = util.phone.sanitize(number)
         area_code = number[:3]
 
         if len(area_code) is not 3:
@@ -401,7 +401,7 @@ class MedleyServer(object):
             return state_name or "Unknown"
         else:
             data["number"] = number
-            data["number_formatted"] = re.sub(r"(\d\d\d)(\d\d\d)(\d\d\d\d)", r"(\1) \2-\3", number)
+            data["number_formatted"] = util.phone.format(number)
             data["state_abbreviation"] = state_abbrev
             data["state_name"] = state_name
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
