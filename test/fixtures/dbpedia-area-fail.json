@@ -1,0 +1,3 @@
+
+{ "head": { "link": [], "vars": ["state_abbrev", "comment"] },
+  "results": { "distinct": false, "ordered": true, "bindings": [ ] } }

@@ -13,6 +13,9 @@ def setup_module():
     app = cherrypy.tree.mount(MedleyServer(), script_name="", config=config_file)
 
     config_extra = {
+        "global": {
+            "request.show_tracebacks": False,
+        },
         "/ip": {
             "tools.auth_basic.checkpassword": cherrypy.lib.auth_basic.checkpassword_dict({
                 "test":"test"
@@ -20,7 +23,7 @@ def setup_module():
         },
         "ip_tokens": {
             "test": "test.example.com"
-        },
+        }
     }
 
     app.merge(config_extra)
@@ -254,14 +257,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """ The geoupdate endpoint returns 410 if geoip.download.url is not configured """
         cherrypy.config["geoip.download.url"] = None
         cherrypy.config["database.directory"] = "/tmp"
-        response = self.request(path="/geoupdate")
+        response = self.request("/geoupdate")
         self.assertEqual(response.code, 410)
 
     def test_geoupdateReturns410IfNoDatabaseDirectory(self):
         """ The geoupdate endpoint returns 410 if database.directory is not configured """
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
         cherrypy.config["database.directory"] = None
-        response = self.request(path="/geoupdate")
+        response = self.request("/geoupdate")
         self.assertEqual(response.code, 410)
 
     @httpretty.activate
@@ -271,7 +274,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
         cherrypy.config["database.directory"] = "/tmp"
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
-        response = self.request(path="/geoupdate")
+        response = self.request("/geoupdate")
         self.assertEqual(response.code, 500)
 
     @httpretty.activate
@@ -280,18 +283,18 @@ class TestMedleyServer(BaseCherryPyTestCase):
         cherrypy.config["geoip.download.url"] = "http://example.com/test"
         cherrypy.config["database.directory"] = "/tmp"
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
-        response = self.request(path="/geoupdate")
+        response = self.request("/geoupdate")
         self.assertEqual(response.code, 200)
 
     def test_whoisJsonWithoutIp(self):
         """ The /whois endpoint returns 400 if called as json without an IP"""
-        response = self.request(path="/whois", as_json=True)
+        response = self.request("/whois", as_json=True)
         self.assertEqual(response.code, 400)
         self.assertTrue("message" in response.body)
 
     def test_whoisPlainWithoutIp(self):
         """ The /whois endpoint returns 400 if called as plain without an IP"""
-        response = self.request(path="/whois", as_plain=True)
+        response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -303,7 +306,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         ip = "1.1.1.1"
         with mock.patch("medley.pygeoip.GeoIP") as pygeoip_mock:
             pygeoip_mock.return_value = reader
-            response = self.request(path="/whois/" + ip, as_json=True)
+            response = self.request("/whois/" + ip, as_json=True)
             reader.record_by_addr.assert_called_once_with(ip)
             queryWhoisMock.assert_called_once_with(ip)
 
@@ -318,7 +321,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         queryWhoisMock.return_value = {}
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP.return_value = reader
-            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "US-NY")
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -331,7 +334,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         queryWhoisMock.return_value = {}
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP.return_value = reader
-            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "AU")
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -340,7 +343,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         queryWhoisMock.return_value = {}
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            response = self.request(path="/whois/1.1.1.1", as_json=True)
+            response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertTrue(response.code, 200)
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -357,7 +360,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP.return_value = reader
-            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test city, test country")
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -373,7 +376,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP.return_value = reader
-            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test country")
 
     @mock.patch("medley.MedleyServer.queryWhois")
@@ -385,8 +388,146 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP.return_value = reader
-            response = self.request(path="/whois/1.1.1.1", as_plain=True)
+            response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "Unknown")
+
+    def test_phoneNoNumberJson(self):
+        """ /phone returns 400 if called as json without a number"""
+        response = self.request("/phone", as_json=True)
+        self.assertEqual(response.code, 400)
+        self.assertTrue("message" in response.body)
+
+    def test_phoneNoNumberPlain(self):
+        """ /phone returns 400 if called as text without a number """
+        response = self.request("/phone", as_plain=True)
+        self.assertEqual(response.code, 400)
+
+    def test_phoneInvalidNumberJson(self):
+        """ /phone returns 400 if called as json with an invalid number """
+        response = self.request("/phone/1", as_json=True)
+        self.assertEqual(response.code, 400)
+        self.assertTrue("message" in response.body)
+
+    def test_phoneInvalidNumberPlain(self):
+        """ /phone returns 400 if called as plain with an invalid number """
+        response = self.request("/phone/1", as_plain=True)
+        self.assertEqual(response.code, 400)
+
+    @httpretty.activate
+    def test_phoneValidAreaCodeJson(self):
+        """The /phone queries dbpedia twice and returns the state name for the
+        given area code as a json object if requested as json"""
+
+        area_code_response = ""
+        state_name_response = ""
+        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
+            area_code_response=fixture.read()
+
+        with open ("test/fixtures/dbpedia-state-success.json", "r") as fixture:
+            state_name_response=fixture.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               responses=[
+                                   httpretty.Response(body=area_code_response, status=200),
+                                   httpretty.Response(body=state_name_response, status=200)
+                               ])
+
+        response = self.request("/phone/212", as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["state_name"], "New York")
+
+    @httpretty.activate
+    def test_phoneValidAreaCodePlain(self):
+        """/phone queries dbpedia twice and sets the request body to the state
+        name if requsted as plain"""
+
+        area_code_response = ""
+        state_name_response = ""
+        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
+            area_code_response=fixture.read()
+
+        with open ("test/fixtures/dbpedia-state-success.json", "r") as fixture:
+            state_name_response=fixture.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               responses=[
+                                   httpretty.Response(body=area_code_response, status=200),
+                                   httpretty.Response(body=state_name_response, status=200)
+                               ])
+
+        response = self.request("/phone/212", as_plain=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, "New York")
+
+    @httpretty.activate
+    def test_phoneInvalidAreaCodeJson(self):
+        """The /phone endpoint queries dbpedia once if the specified area code
+        is invalid"""
+
+        fixture = ""
+        with open ("test/fixtures/dbpedia-area-fail.json", "r") as fixture_file:
+            fixture=fixture_file.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               body=fixture,
+                               content_type="application/json")
+
+        response = self.request("/phone/123", as_json=True)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["state_abbreviation"], None)
+
+    @httpretty.activate
+    def test_phoneInvalidAreaCodePlain(self):
+        """The /phone endpoint returns "Unknown" for an invalid area code when
+        requested as plain"""
+
+        fixture = ""
+        with open ("test/fixtures/dbpedia-area-fail.json", "r") as fixture_file:
+            fixture=fixture_file.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               body=fixture,
+                               content_type="application/json")
+
+        response = self.request("/phone/123", as_plain=True)
+        self.assertEqual(response.code, 200)
+        print(response.body)
+        self.assertEqual(response.body, "Unknown")
+
+    @httpretty.activate
+    def test_phoneAreaCodeFail(self):
+        """The /phone endpoint returns successfully if the dbpedia area code
+        query fails"""
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               status=500)
+
+        response = self.request("/phone/123")
+        self.assertEqual(response.code, 200)
+
+    @httpretty.activate
+    def test_phoneStateNameFail(self):
+        """The /phone endpoint returns successfully if the dbpedia state name query fails"""
+
+        area_code_response = ""
+        state_name_response = ""
+        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
+            area_code_response=fixture.read()
+
+        httpretty.register_uri(httpretty.GET,
+                               "http://dbpedia.org/sparql",
+                               responses=[
+                                   httpretty.Response(body=area_code_response, status=200),
+                                   httpretty.Response(body="", status=500)
+                               ])
+
+        response = self.request("/phone/212")
+        self.assertEqual(response.code, 200)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+
+{ "head": { "link": [], "vars": ["state_abbrev", "comment"] },
+  "results": { "distinct": false, "ordered": true, "bindings": [
+    { "state_abbrev": { "type": "literal", "xml:lang": "en", "value": "NY" }	, "comment": { "type": "literal", "xml:lang": "en", "value": "Area codes 212 and 646 are the area codes for most of the borough of Manhattan in New York City. By area, it is one of the smallest area code regions in North America. It is overlaid by area code 917, which covers the entirety of New York City." }} ] } }

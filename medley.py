@@ -166,8 +166,6 @@ class MedleyServer(object):
         whois-related Python modules that could otherwise be used,
         none were viable for Python 3.2"""
 
-        cherrypy.lib.caching.MemoryCache
-
         process = subprocess.Popen(["whois", address],
                                    stdout=subprocess.PIPE)
         out, err = process.communicate()
@@ -310,8 +308,14 @@ class MedleyServer(object):
         data = {}
 
         if number is None:
-            if cherrypy.request.negotiated != "text/html":
-                raise cherrypy.HTTPError(400, "Address not specified")
+            message = "Phone number not specified"
+            if cherrypy.request.negotiated == "application/json":
+                cherrypy.response.status = 400
+                return {
+                    "message": message
+                }
+            elif cherrypy.request.negotiated == "text/plain":
+                raise cherrypy.HTTPError(400, message)
             else:
                 return data
 
@@ -320,12 +324,18 @@ class MedleyServer(object):
         area_code = number[:3]
 
         if len(area_code) is not 3:
-            raise cherrypy.HTTPError(400, "Invalid number")
+            if cherrypy.request.negotiated == "application/json":
+                cherrypy.response.status = 400
+                return {
+                    "message": "Invalid number"
+                }
+            else:
+                raise cherrypy.HTTPError(400, "Invalid number")
 
         area_code_query = """
         PREFIX dbp: <http://dbpedia.org/property/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        SELECT ?state_abbrev, CONCAT("US-", ?state_abbrev) as ?isocode, ?comment WHERE {{
+        SELECT ?state_abbrev, ?comment WHERE {{
             ?s dbp:this ?o .
             ?s dbp:state ?state_abbrev .
             ?s rdfs:comment ?comment
@@ -348,14 +358,14 @@ class MedleyServer(object):
                 result = json.loads(request.read().decode("utf-8"))
             first_result = result["results"]["bindings"][0]
             state_abbrev = first_result["state_abbrev"].get("value")
-            isocode = first_result["isocode"].get("value")
+            isocode = "US-" + state_abbrev
             comment = first_result["comment"].get("value").split(". ")
-        except IndexError:
+        except:
             state_abbrev = None
             isocode = None
             comment = []
-        except:
-            raise cherrypy.HTTPError(500, "The area code query to dbpedia timed out")
+            state_name = None
+            comment = "The location of this number could not be found."
 
         # Take the first two sentences from the comment
         comment = [sentence for sentence in comment
@@ -366,10 +376,7 @@ class MedleyServer(object):
         if not comment.endswith("."):
             comment += "."
 
-        if not isocode:
-            state_name = None
-            comment = "The location of this number could not be found."
-        else:
+        if isocode:
             state_name_query = """
             PREFIX dbp: <http://dbpedia.org/property/>
             SELECT ?name WHERE {{
@@ -377,7 +384,6 @@ class MedleyServer(object):
                  ?s dbp:name ?name .
             }} LIMIT 1
             """.format(isocode)
-
 
             params["query"] = state_name_query
             query = "http://dbpedia.org/sparql?"
@@ -388,13 +394,11 @@ class MedleyServer(object):
                     result = json.loads(request.read().decode("utf-8"))
                 first_result = result["results"]["bindings"][0]
                 state_name = first_result["name"].get("value")
-            except IndexError:
-                state_name = None
             except:
-                raise cherrypy.HTTPError(500, "The state name query to dbpedia timed out")
+                state_name = "Unknown"
 
         if cherrypy.request.negotiated == "text/plain":
-            return state_name
+            return state_name or "Unknown"
         else:
             data["number"] = number
             data["number_formatted"] = re.sub(r"(\d\d\d)(\d\d\d)(\d\d\d\d)", r"(\1) \2-\3", number)
