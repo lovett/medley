@@ -2,6 +2,7 @@ import cherrypy
 import os.path
 import json
 import httpretty
+import helpers
 import mock
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
@@ -418,13 +419,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """The /phone queries dbpedia twice and returns the state name for the
         given area code as a json object if requested as json"""
 
-        area_code_response = ""
-        state_name_response = ""
-        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
-            area_code_response=fixture.read()
-
-        with open ("test/fixtures/dbpedia-state-success.json", "r") as fixture:
-            state_name_response=fixture.read()
+        area_code_response = helpers.getFixture("dbpedia-area-success.json")
+        state_name_response = helpers.getFixture("dbpedia-state-success.json")
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -442,13 +438,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """/phone queries dbpedia twice and sets the request body to the state
         name if requsted as plain"""
 
-        area_code_response = ""
-        state_name_response = ""
-        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
-            area_code_response=fixture.read()
-
-        with open ("test/fixtures/dbpedia-state-success.json", "r") as fixture:
-            state_name_response=fixture.read()
+        area_code_response = helpers.getFixture("dbpedia-area-success.json")
+        state_name_response = helpers.getFixture("dbpedia-state-success.json")
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -466,13 +457,11 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """The /phone endpoint queries dbpedia once if the specified area code
         is invalid"""
 
-        fixture = ""
-        with open ("test/fixtures/dbpedia-area-fail.json", "r") as fixture_file:
-            fixture=fixture_file.read()
+        area_code_response = helpers.getFixture("dbpedia-area-fail.json")
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
-                               body=fixture,
+                               body=area_code_response,
                                content_type="application/json")
 
         response = self.request("/phone/123", as_json=True)
@@ -484,13 +473,11 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """The /phone endpoint returns "Unknown" for an invalid area code when
         requested as plain"""
 
-        fixture = ""
-        with open ("test/fixtures/dbpedia-area-fail.json", "r") as fixture_file:
-            fixture=fixture_file.read()
+        area_code_response = helpers.getFixture("dbpedia-area-fail.json")
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
-                               body=fixture,
+                               body=area_code_response,
                                content_type="application/json")
 
         response = self.request("/phone/123", as_plain=True)
@@ -508,25 +495,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                status=500)
 
         response = self.request("/phone/123")
-        self.assertEqual(response.code, 200)
-
-    @httpretty.activate
-    def test_phoneStateNameFail(self):
-        """The /phone endpoint returns successfully if the dbpedia state name query fails"""
-
-        area_code_response = ""
-        state_name_response = ""
-        with open ("test/fixtures/dbpedia-area-success.json", "r") as fixture:
-            area_code_response=fixture.read()
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               responses=[
-                                   httpretty.Response(body=area_code_response, status=200),
-                                   httpretty.Response(body="", status=500)
-                               ])
-
-        response = self.request("/phone/212")
         self.assertEqual(response.code, 200)
 
 

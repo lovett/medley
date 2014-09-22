@@ -332,81 +332,18 @@ class MedleyServer(object):
             else:
                 raise cherrypy.HTTPError(400, "Invalid number")
 
-        area_code_query = """
-        PREFIX dbp: <http://dbpedia.org/property/>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        SELECT ?state_abbrev, ?comment WHERE {{
-            ?s dbp:this ?o .
-            ?s dbp:state ?state_abbrev .
-            ?s rdfs:comment ?comment
-            FILTER (regex(?o, "{0}", "i"))
-            FILTER (langMatches(lang(?state_abbrev), "en"))
-        }} LIMIT 1
-        """.format(area_code)
-
-        params = {
-            "query": area_code_query,
-            "format": "json",
-            "timeout": "1000"
-        }
-
-        query = "http://dbpedia.org/sparql?"
-        query += urllib.parse.urlencode(params)
-
-        try:
-            with urllib.request.urlopen(query, timeout=7) as request:
-                result = json.loads(request.read().decode("utf-8"))
-            first_result = result["results"]["bindings"][0]
-            state_abbrev = first_result["state_abbrev"].get("value")
-            isocode = "US-" + state_abbrev
-            comment = first_result["comment"].get("value").split(". ")
-        except:
-            state_abbrev = None
-            isocode = None
-            comment = []
-            state_name = None
-            comment = "The location of this number could not be found."
-
-        # Take the first two sentences from the comment
-        comment = [sentence for sentence in comment
-                   if re.search(" in (red|blue) (is|are)", sentence) is None
-                   and not re.match("The map to the right", sentence)
-                   and not re.match("Error: ", sentence)][:2]
-        comment = ". ".join(comment)
-        if not comment.endswith("."):
-            comment += "."
-
-        if isocode:
-            state_name_query = """
-            PREFIX dbp: <http://dbpedia.org/property/>
-            SELECT ?name WHERE {{
-                 ?s dbp:isocode "{0}"@en .
-                 ?s dbp:name ?name .
-            }} LIMIT 1
-            """.format(isocode)
-
-            params["query"] = state_name_query
-            query = "http://dbpedia.org/sparql?"
-            query += urllib.parse.urlencode(params)
-
-            try:
-                with urllib.request.urlopen(query, timeout=7) as request:
-                    result = json.loads(request.read().decode("utf-8"))
-                first_result = result["results"]["bindings"][0]
-                state_name = first_result["name"].get("value")
-            except:
-                state_name = "Unknown"
+        location = util.phone.findAreaCode(area_code)
 
         if cherrypy.request.negotiated == "text/plain":
-            return state_name or "Unknown"
+            return location.state_name
         else:
             data["number"] = number
             data["number_formatted"] = util.phone.format(number)
-            data["state_abbreviation"] = state_abbrev
-            data["state_name"] = state_name
+            data["state_abbreviation"] = location.state_abbreviation
+            data["state_name"] = location.state_name
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
             data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(data["number_formatted"])
-            data["comment"] = comment
+            data["comment"] = location.comment
             return data
 
     @cherrypy.expose
