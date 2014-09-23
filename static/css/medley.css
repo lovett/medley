@@ -65,8 +65,6 @@ INPUT[type=submit] {
     font-size: 1em;
 }
 
-.ui.focusable.button {
-}
 .ui.focusable.blue.button:focus {
     background-color: green;
 }
@@ -75,4 +73,25 @@ INPUT[type=submit] {
     margin-top: 2em;
     padding: 2em 1em;
     background-color: #f5f5f5;
+}
+
+.svg-arrow {
+    display: block;
+    float: left;
+    margin-right: .5em;
+    margin-top: .25em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 2em;
+    height: 2em;
+    background-size: 100%;
+    text-indent: -9999px;
+}
+
+.svg-arrow.back {
+    background-image: url('../arrow-left.svg');
+}
+
+.svg-arrow.home {
+    background-image: url('../arrow-up.svg');
 }

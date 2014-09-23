@@ -8,6 +8,14 @@
     </head>
     <body>
         <header>
+            {% if back_link %}
+            <a class="svg-arrow back" href="{{ back_link }}" title="Back to the main page">Back</a>
+            {% endif %}
+
+            {% if home_link %}
+            <a class="svg-arrow home" href="/" title="Return to the homepage">Home</a>
+            {% endif %}
+
             <h1>{{ page_title }}</h1>
             {% block page_header %}{% endblock %}
         </header>

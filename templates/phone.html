@@ -1,9 +1,12 @@
 {% extends "base.html" %}
 
+
 {% if state_name %}
 {% set page_title = number_formatted + " is in " + state_name %}
+{% set back_link = "/whois" %}
 {% else %}
 {% set page_title = "Phone Lookup" %}
+{% set home_link = True %}
 {% endif %}
 
 {% block scripts %}
@@ -18,7 +21,6 @@
 <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank">Search Whitepages.com</a></p>
 <p class="supplemental"><a href="{{ bing_url}}" target="_blank">Search Bing</a></p>
 {% endif %}
-<p class="supplemental"><a href="/phone">Find another number</a></p>
 
 {% endif %}
 {% endblock %}

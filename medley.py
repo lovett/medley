@@ -255,7 +255,8 @@ class MedleyServer(object):
 
         return {
             "page_title": "Geoupdate",
-            "message": "ok"
+            "message": "ok",
+            "home_link": True
         }
 
     @cherrypy.expose

@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
+{% set back_link = "/whois" %}
+
 {% if not ip %}
 {% set page_title = "Whois Lookup" %}
+{% set home_link = True %}
+{% set back_link = None %}
 {% elif geo.country_name == "United States" and geo.city and geo.region_code %}
 {% set page_title = ip + " is in " + geo.city + ", " + geo.region_code %}
 {% elif geo.city and geo.country_name %}
@@ -29,8 +33,6 @@
 {% if geo.metro_code %}
 <p class="supplemental">Part of metro {{ geo.metro_code }}.</p>
 {% endif %}
-
-<p class="next-action"><a href="/whois">Find another ip</a></p>
 
 {% endif %}
 
