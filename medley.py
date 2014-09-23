@@ -162,60 +162,6 @@ class MedleyServer(object):
                 "headers": headers
             }
 
-    def queryWhois(self, address):
-        """Run a whois query by shelling out. Although there are some
-        whois-related Python modules that could otherwise be used,
-        none were viable for Python 3.2"""
-
-        process = subprocess.Popen(["whois", address],
-                                   stdout=subprocess.PIPE)
-        out, err = process.communicate()
-
-        if err:
-            raise cherrypy.HTTPError(500, err)
-
-        try:
-            out_raw = out.decode("utf-8")
-        except UnicodeDecodeError:
-            out_raw = out.decode("iso-8859-1")
-
-        out_raw = out_raw.split("\n")
-
-        out_filtered = []
-        for line in out_raw:
-            line = line.strip()
-
-            # remove comments
-            if line.startswith(("#", "%")):
-                continue
-
-            # separate label and value for non-comment lines
-            line = re.sub(r"\s+", " ", line)
-            fields = line.split(": ", 1)
-
-            # skip lines with no value
-            if len(fields) == 1:
-                continue
-
-            fields[0] = re.sub(r"([a-z])([A-Z][a-z])", r"\1 \2", fields[0]).title()
-
-
-            out_filtered.append(fields)
-
-        # collapse repeated headers and comment lines
-        previous = None
-        out_collapsed = []
-        for line in out_filtered:
-            if line[0] == previous:
-                out_collapsed[-1][-1] += "\n" + line[1]
-            else:
-                out_collapsed.append(line)
-            previous = line[0]
-
-        return out_collapsed
-
-
-
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
@@ -250,7 +196,7 @@ class MedleyServer(object):
         except:
             pass
 
-        data["whois"] = self.queryWhois(ip)
+        data["whois"] = util.whois.query(ip)
 
         # google charts parameters
         if data["geo"]:
