@@ -7,9 +7,15 @@ import mock
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
 
-def setup_module():
+@mock.patch("medley.memcache.Client")
+def setup_module(memcacheClient):
     config_file = os.path.realpath("medley.conf")
     cherrypy.config.update(config_file)
+
+    # Force all get and set calls to memcache to return None
+    instance = memcacheClient.return_value
+    instance.get.return_value = None
+    instance.set.return_value = None
 
     app = cherrypy.tree.mount(MedleyServer(), script_name="", config=config_file)
 
@@ -164,7 +170,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip/invalid", headers=headers)
         self.assertEqual(response.code, 400)
 
-    def testipInvalidTokenNoDns(self):
+    def test_ipInvalidTokenNoDns(self):
         """ /ip should not shell out if given an invalid token """
         headers = {
             "Remote-Addr": "1.1.1.1",
@@ -482,7 +488,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         response = self.request("/phone/123", as_plain=True)
         self.assertEqual(response.code, 200)
-        print(response.body)
         self.assertEqual(response.body, "Unknown")
 
     @httpretty.activate

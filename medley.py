@@ -14,6 +14,8 @@ import plugins.jinja
 import base64
 import inspect
 import util.phone
+import util.whois
+import memcache
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -24,9 +26,13 @@ cherrypy.tools.negotiable = tools.negotiable.Tool()
 import tools.jinja
 cherrypy.tools.template = tools.jinja.Tool()
 
+
+
 class MedleyServer(object):
+    mc = None
 
     def __init__(self):
+        self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
         template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, template_dir).subscribe()
 
@@ -196,7 +202,14 @@ class MedleyServer(object):
         except:
             pass
 
-        data["whois"] = util.whois.query(ip)
+        key = "whois:{}".format(ip)
+        cached_value = self.mc.get(key)
+
+        if cached_value:
+            data["whois"] = cached_value
+        else:
+            data["whois"] = util.whois.query(ip)
+            self.mc.set(key, data["whois"])
 
         # google charts parameters
         if data["geo"]:
@@ -278,7 +291,14 @@ class MedleyServer(object):
             else:
                 raise cherrypy.HTTPError(400, "Invalid number")
 
-        location = util.phone.findAreaCode(area_code)
+        key = "phone:{}".format(area_code)
+        cached_value = self.mc.get(key)
+
+        if cached_value:
+            location = cached_value
+        else:
+            location = util.phone.findAreaCode(area_code)
+            self.mc.set(key, location)
 
         if cherrypy.request.negotiated == "text/plain":
             return location.state_name
