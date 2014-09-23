@@ -29,9 +29,18 @@ def query(address):
             continue
 
         # separate label and value for non-comment lines
-        line = re.sub(r"\s+", " ", line)
+        line = re.sub(r"\s+", " ", line).strip()
         fields = line.split(": ", 1)
 
+        # Discard blank lines
+        if fields[0] == "":
+            continue
+
+        # Discard labelled lines with no value
+        if len(fields) == 1 and ":" in fields[0]:
+            continue
+
+        # Preserve unlabelled lines
         if len(fields) == 1:
             fields.append(None)
         else:

@@ -88,8 +88,8 @@ class TestUtilWhois(unittest.TestCase):
         self.assertEqual(result[0][0], "Org Name")
 
     @mock.patch("util.whois.subprocess.Popen")
-    def test_queryKeyWithoutValue(self, popen):
-        """Lines that aren't in key-value format are preserved"""
+    def test_queryUnlabelledLine(self, popen):
+        """Unlabelled lines are preserved"""
         address = "999.999.999.999"
         response = b"No match found for 999.999.999.999."
         popen.return_value = mock.Mock()
@@ -99,6 +99,19 @@ class TestUtilWhois(unittest.TestCase):
         result = util.whois.query(address)
         self.assertEqual(result[0][0], response.decode("utf-8"))
         self.assertEqual(result[0][1], None)
+
+    @mock.patch("util.whois.subprocess.Popen")
+    def test_queryKeyWithoutValue(self, popen):
+        """Lines without values are removed"""
+        address = "127.0.0.1"
+        popen.return_value = mock.Mock()
+        popen.return_value.returncode = 0
+        popen.return_value.communicate = mock.Mock()
+        popen.return_value.communicate.return_value = [b"Test:\nFoo: bar", None]
+        result = util.whois.query(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
 
 
 if __name__ == '__main__':

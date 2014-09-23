@@ -58,8 +58,10 @@
         <tbody>
             {% for line in whois %}
             <tr>
-                <th class="five wide" {% if not line[1] %}colspan="2"{% endif %}>{{ line[0] }}</th>
-                {% if line[1] %}
+                {% if not line[1] %}
+                <td class="eleven wide" colspan="2">{{ line[0] }}</td>
+                {% else %}
+                <th class="five wide">{{ line[0] }}</th>
                 <td class="eleven wide">{{ line[1]|urlize(30) }}</td>
                 {% endif %}
             </tr>
