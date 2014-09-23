@@ -5,6 +5,8 @@ import urllib.parse
 import json
 import collections
 
+Location = collections.namedtuple('Location', ['state_abbreviation', 'state_name', 'comment'])
+
 def sanitize(number=""):
     """Strip non-numeric characters from a numeric string"""
     number = re.sub(r"\D", "", number)
@@ -29,7 +31,7 @@ def findAreaCode(area_code):
     assert len(area_code) == 3, "Wrong length area code"
     assert re.match("\d+$", area_code) is not None, "Non-numeric area code"
 
-    query = """
+    sparql = """
     PREFIX dbp: <http://dbpedia.org/property/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     SELECT ?state_abbrev, ?comment WHERE {{
@@ -42,14 +44,12 @@ def findAreaCode(area_code):
     """.format(area_code)
 
     params = urllib.parse.urlencode({
-        "query": query,
+        "query": sparql,
         "format": "json",
         "timeout": "1000"
     })
 
     query = "http://dbpedia.org/sparql?{0}".format(params)
-
-    Location = collections.namedtuple('Location', ['state_abbreviation', 'state_name', 'comment'])
 
     try:
         with urllib.request.urlopen(query, timeout=7) as request:
@@ -71,7 +71,7 @@ def findAreaCode(area_code):
 def stateName(abbreviation=None):
     """Query dbpedia for the name of US state by its abbreviation"""
 
-    query = """
+    sparql = """
     PREFIX dbp: <http://dbpedia.org/property/>
     SELECT ?name WHERE {{
         ?s dbp:isocode "US-{0}"@en .
@@ -79,12 +79,13 @@ def stateName(abbreviation=None):
     }} LIMIT 1
     """.format(abbreviation)
 
-    query = "http://dbpedia.org/sparql?"
-    query += urllib.parse.urlencode({
-        "query": query,
+    params = urllib.parse.urlencode({
+        "query": sparql,
         "format": "json",
         "timeout": "1000"
     })
+
+    query = "http://dbpedia.org/sparql?{0}".format(params)
 
     try:
         with urllib.request.urlopen(query, timeout=7) as request:
