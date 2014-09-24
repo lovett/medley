@@ -40,6 +40,7 @@ def findAreaCode(area_code):
         ?s rdfs:comment ?comment
         FILTER (regex(?o, "{0}", "i"))
         FILTER (langMatches(lang(?state_abbrev), "en"))
+        FILTER (langMatches(lang(?comment), "en"))
     }} LIMIT 1
     """.format(area_code)
 
@@ -76,6 +77,7 @@ def stateName(abbreviation=None):
     SELECT ?name WHERE {{
         ?s dbp:isocode "US-{0}"@en .
         ?s dbp:name ?name .
+        FILTER (langMatches(lang(?name), "en"))
     }} LIMIT 1
     """.format(abbreviation)
 
