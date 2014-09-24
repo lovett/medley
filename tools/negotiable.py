@@ -6,7 +6,7 @@ class Tool(cherrypy.Tool):
                                self._negotiate,
                                priority=10)
 
-    def _negotiate(self, media=["text/html", "application/json", "text/plain"], charset="utf=8"):
+    def _negotiate(self, media=["text/html", "application/json", "text/plain"], charset="utf-8"):
         """Pick a representation for the requested resource
 
         This is a CherryPy custom tool. It combines cherrypy.tools.accept
@@ -28,3 +28,5 @@ class Tool(cherrypy.Tool):
         elif req.negotiated == "text/plain":
             cherrypy.response.headers["Content-Type"] = "text/plain; charset={}".format(charset)
             tools.encode.callable()
+        else:
+            cherrypy.response.headers["Content-Type"] = "text/html; charset={}".format(charset)
