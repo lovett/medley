@@ -4,6 +4,9 @@ import urllib.request
 import urllib.parse
 import json
 import collections
+import sqlite3
+import socket
+import util.sqlite_converters
 
 Location = collections.namedtuple('Location', ['state_abbreviation', 'state_name', 'comment'])
 
@@ -64,6 +67,10 @@ def findAreaCode(area_code):
                         state_name=stateName(abbrev),
                         comment=abbreviateComment(comment))
 
+    except socket.timeout:
+        return Location(state_abbreviation=None,
+                        state_name="Not available",
+                        comment="The area code lookup for this number timed out.")
     except (IndexError, urllib.error.HTTPError):
         return Location(state_abbreviation=None,
                         state_name="Unknown",
@@ -93,7 +100,9 @@ def stateName(abbreviation=None):
         with urllib.request.urlopen(query, timeout=7) as request:
             result = json.loads(request.read().decode("utf-8"))
         return result["results"]["bindings"][0]["name"]["value"]
-    except (IndexError, urllib.error.HTTPError):
+    except socket.timeout:
+        return "Not available"
+    except (IndexError, urllib.error.HTTPError, socket.timeout):
         return "Unknown"
 
 def abbreviateComment(comment):
@@ -110,3 +119,38 @@ def abbreviateComment(comment):
         abbreviated_comment += "."
 
     return abbreviated_comment
+
+def callHistory(database, caller, limit=0, offset=0):
+    """Get call history from an Asterisk sqlite3 CDR database."""
+
+    sqlite3.register_converter("date", util.sqlite_converters.convert_date)
+    sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
+    sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
+
+    conn = sqlite3.connect(database, detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT count(*) as count FROM cdr WHERE src=?", (caller,))
+    count = cur.fetchone()[0]
+
+    if count == 0:
+        conn.close()
+        return ([], 0)
+
+    params = []
+    query = """SELECT calldate as "date [date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr WHERE src=? ORDER BY calldate DESC"""
+    params.append(caller)
+
+    if limit > 0:
+        query += " LIMIT ?"
+        params.append(limit)
+
+    if limit > 0 and offset > 0:
+        query += " OFFSET ?"
+        params.append(offset)
+
+    cur.execute(query, params)
+    result = (cur.fetchall(), count)
+
+    conn.close()
+    return result

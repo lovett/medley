@@ -264,7 +264,7 @@ class MedleyServer(object):
     @cherrypy.tools.template(template="phone.html")
     def phone(self, number=None):
         """Given a US phone number, return the state its area code belongs to
-        and a description of the area it covers"""
+        and a description of the area it covers as well as a recent call history"""
 
         data = {}
 
@@ -301,9 +301,14 @@ class MedleyServer(object):
             location = util.phone.findAreaCode(area_code)
             self.mc.set(key, location)
 
+        history_db = "{}/{}".format(cherrypy.config.get("database.directory"),
+                                    cherrypy.config.get("asterisk.cdr_db"))
+        history = util.phone.callHistory(history_db, number, 5)
+
         if cherrypy.request.negotiated == "text/plain":
             return location.state_name
         else:
+            data["history"] = history[0]
             data["number"] = number
             data["number_formatted"] = util.phone.format(number)
             data["state_abbreviation"] = location.state_abbreviation

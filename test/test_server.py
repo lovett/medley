@@ -420,13 +420,15 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/phone/1", as_plain=True)
         self.assertEqual(response.code, 400)
 
+    @mock.patch("medley.util.phone.callHistory")
     @httpretty.activate
-    def test_phoneValidAreaCodeJson(self):
+    def test_phoneValidAreaCodeJson(self, callHistory):
         """The /phone queries dbpedia twice and returns the state name for the
         given area code as a json object if requested as json"""
 
         area_code_response = helpers.getFixture("dbpedia-area-success.json")
         state_name_response = helpers.getFixture("dbpedia-state-success.json")
+        callHistory.return_value = ([], 0)
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -439,13 +441,15 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["state_name"], "New York")
 
+    @mock.patch("medley.util.phone.callHistory")
     @httpretty.activate
-    def test_phoneValidAreaCodePlain(self):
+    def test_phoneValidAreaCodePlain(self, callHistory):
         """/phone queries dbpedia twice and sets the request body to the state
         name if requsted as plain"""
 
         area_code_response = helpers.getFixture("dbpedia-area-success.json")
         state_name_response = helpers.getFixture("dbpedia-state-success.json")
+        callHistory.return_value = ([], 0)
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -458,12 +462,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "New York")
 
+    @mock.patch("medley.util.phone.callHistory")
     @httpretty.activate
-    def test_phoneInvalidAreaCodeJson(self):
+    def test_phoneInvalidAreaCodeJson(self, callHistory):
         """The /phone endpoint queries dbpedia once if the specified area code
         is invalid"""
 
         area_code_response = helpers.getFixture("dbpedia-area-fail.json")
+        callHistory.return_value = ([], 0)
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -474,12 +480,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["state_abbreviation"], None)
 
+    @mock.patch("medley.util.phone.callHistory")
     @httpretty.activate
-    def test_phoneInvalidAreaCodePlain(self):
+    def test_phoneInvalidAreaCodePlain(self, callHistory):
         """The /phone endpoint returns "Unknown" for an invalid area code when
         requested as plain"""
 
         area_code_response = helpers.getFixture("dbpedia-area-fail.json")
+        callHistory.return_value = ([], 0)
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
@@ -490,18 +498,19 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "Unknown")
 
+    @mock.patch("medley.util.phone.callHistory")
     @httpretty.activate
-    def test_phoneAreaCodeFail(self):
+    def test_phoneAreaCodeFail(self, callHistory):
         """The /phone endpoint returns successfully if the dbpedia area code
         query fails"""
 
+        callHistory.return_value = ([], 0)
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
                                status=500)
 
         response = self.request("/phone/123")
         self.assertEqual(response.code, 200)
-
 
 if __name__ == "__main__":
     import unittest

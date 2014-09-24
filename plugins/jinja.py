@@ -9,6 +9,8 @@ class Plugin(plugins.SimplePlugin):
     def __init__(self, bus, path):
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
 
+        self.env.filters["datetime"] = self.datetime_filter
+
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
@@ -34,3 +36,17 @@ class Plugin(plugins.SimplePlugin):
         >>> template = cherrypy.engine.publish('lookup-template', 'index.html').pop()
         """
         return self.env.get_template(name)
+
+    def datetime_filter(self, value, format="locale"):
+        """
+        Format a datetime as a date string based on the specified format.
+        """
+        if format == "locale":
+            directives = "%c"
+        elif format == "date-full":
+            directives = "%A %b %d, %Y"
+        elif format == "time12":
+            directives = "%I:%m %p"
+        else:
+            directives = format
+        return value.strftime(directives)

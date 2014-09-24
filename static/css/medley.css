@@ -95,3 +95,11 @@ INPUT[type=submit] {
 .svg-arrow.home {
     background-image: url('../arrow-up.svg');
 }
+
+.recent-calls LI TIME {
+    display: block;
+}
+
+.recent-calls LI DIV {
+    font-size: .75em;
+}

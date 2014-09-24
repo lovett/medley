@@ -2,8 +2,8 @@
 
 
 {% if state_name %}
-{% set page_title = number_formatted + " is in " + state_name %}
-{% set back_link = "/whois" %}
+{% set page_title = "Phone Lookup for " + number_formatted %}
+{% set back_link = "/phone" %}
 {% else %}
 {% set page_title = "Phone Lookup" %}
 {% set home_link = True %}
@@ -28,7 +28,33 @@
 {% block page_body %}
 {% if number %}
 <div class="eight wide column">
-    {{ comment }}
+    {% if history|length > 0 %}
+
+    <h1 class="ui top attached small inverted green header">Caller ID</h1>
+    <div class="ui segment attached">
+        {{ history[0]["clid"] }}
+    </div>
+
+    <h1 class="ui top attached small inverted green header">Recent Calls</h1>
+    <div class="ui segment attached">
+        <ul class="ui list recent-calls">
+            {% for entry in history %}
+            <li>
+                <time>{{ entry["date"]|datetime("time12")}} on {{ entry["date"]|datetime("date-full") }}</time>
+                <div>Called {{ entry["dst"]}} for {{ entry["duration"] }} ending with {{ entry["lastapp"] }}</div>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <h1 class="ui top attached small inverted green header">
+        Locatation: {{ state_name }}
+    </h1>
+    <div class="ui segment attached">
+        <p>{{ comment }}</p>
+    </div>
+
 </div>
 <div class="eight wide column">
     <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
