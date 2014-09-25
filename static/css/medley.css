@@ -77,7 +77,7 @@ INPUT[type=submit] {
 
 .svg-arrow {
     display: block;
-    float: left;
+    float: right;
     margin-right: .5em;
     margin-top: .25em;
     background-repeat: no-repeat;

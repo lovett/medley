@@ -175,26 +175,38 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
-    def whois(self, ip=None):
-        """Display whois and geoip data for an IP"""
+    def whois(self, address=None):
+        """Display whois and geoip data for an IP address or hostname"""
 
-        data = {
-            "ip": ip,
-            "geo": None
-        }
-
-        if ip is None:
+        if address is None:
             if cherrypy.request.negotiated == "application/json":
                 cherrypy.response.status = 400
                 return {
-                    "message": "IP address not specfified"
+                    "message": "Address not specfified"
                 }
             if cherrypy.request.negotiated == "text/plain":
-                raise cherrypy.HTTPError(400, "Ip not specified")
+                raise cherrypy.HTTPError(400, "Address not specified")
             else:
-                return data
+                return {}
 
-        # whois lookup
+        # Address must have at least one dot, whether IP or otherwise
+        address_clean = re.sub(r"[^\w.-]", "", address.lower())
+        if address_clean.count(".") < 1:
+            return {
+                "error": "Invalid address"
+            }
+
+        # IP and reverse host
+        ip = util.whois.resolveHost(address_clean)
+
+        data = {
+            "geo": None,
+            "address": address_clean,
+            "ip": ip,
+            "reverse_host": util.whois.reverseLookup(ip)
+        }
+
+        # Geoip
         db_path = cherrypy.config.get("database.directory")
         db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
         if db_path.endswith(".gz"):
@@ -202,24 +214,30 @@ class MedleyServer(object):
 
         try:
             reader = pygeoip.GeoIP(db_path)
-            data["geo"] = reader.record_by_addr(ip)
+            data["geo"] = reader.record_by_addr(data["ip"])
         except:
-            pass
+            data["geo"] = None
 
-        key = "whois:{}".format(ip)
+        key = "whois:{}".format(data["ip"])
         cached_value = self.mc.get(key)
 
+        # Whois
         if cached_value:
             data["whois"] = cached_value
         else:
-            data["whois"] = util.whois.query(ip)
-            self.mc.set(key, data["whois"], self.mc_expire)
+            try:
+                data["whois"] = util.whois.query(data["ip"])
+                self.mc.set(key, data["whois"], self.mc_expire)
+            except AssertionError:
+                data["whois"] = None
 
-        # google charts parameters
-        if data["geo"]:
+        # Google charts
+        try:
             data["map_region"] = data["geo"]["country_code"]
             if data["map_region"] == "US":
                 data["map_region"] += "-" + data["geo"]["region_code"]
+        except:
+            data["map_region"] = None
 
 
         if cherrypy.request.negotiated == "text/plain":

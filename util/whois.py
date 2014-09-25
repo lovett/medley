@@ -1,5 +1,7 @@
 import subprocess
+import socket
 import re
+
 def query(address):
     """Run a whois query by shelling out. The output is filtered to
     improve readability. Returns a list of key value pairs.
@@ -7,6 +9,7 @@ def query(address):
     Although there are some whois Python modules, none proved viable
     for Python 3.2"""
 
+    assert address is not None
     assert len(address) > 0, "Invalid address"
 
     process = subprocess.Popen(["whois", address],
@@ -59,3 +62,21 @@ def query(address):
             previous = line[0]
 
     return out_collapsed
+
+def resolveHost(host):
+    """Resolve a hostname to its IP address"""
+
+    try:
+        result = socket.gethostbyname_ex(host)
+        return result[2][0]
+    except:
+        return None
+
+def reverseLookup(ip):
+    """Find the hostname associated with the given IP"""
+
+    try:
+        result = socket.gethostbyaddr(ip)
+        return result[0]
+    except:
+        return None
