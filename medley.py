@@ -32,7 +32,11 @@ class MedleyServer(object):
     mc = None
 
     def __init__(self):
-        self.mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+        memcache_host = cherrypy.config.get("memcache.host")
+        self.mc = memcache.Client([memcache_host], debug=0)
+
+        self.mc_expire = cherrypy.config.get("memcache.expire")
+
         template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, template_dir).subscribe()
 
@@ -209,7 +213,7 @@ class MedleyServer(object):
             data["whois"] = cached_value
         else:
             data["whois"] = util.whois.query(ip)
-            self.mc.set(key, data["whois"])
+            self.mc.set(key, data["whois"], self.mc_expire)
 
         # google charts parameters
         if data["geo"]:
@@ -299,7 +303,7 @@ class MedleyServer(object):
             location = cached_value
         else:
             location = util.phone.findAreaCode(area_code)
-            self.mc.set(key, location)
+            self.mc.set(key, location, self.mc_expire)
 
         history_db = "{}/{}".format(cherrypy.config.get("database.directory"),
                                     cherrypy.config.get("asterisk.cdr_db"))
