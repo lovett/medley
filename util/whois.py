@@ -1,6 +1,7 @@
 import subprocess
 import socket
 import re
+import urllib3
 
 def query(address):
     """Run a whois query by shelling out. The output is filtered to
@@ -78,5 +79,18 @@ def reverseLookup(ip=None):
     try:
         result = socket.gethostbyaddr(ip)
         return result[0]
+    except:
+        return None
+
+def externalIp():
+    """ Get the current external IP via DNS-O-Matic"""
+
+    http = urllib3.PoolManager()
+    try:
+        response = http.request("GET", "http://myip.dnsomatic.com/")
+        if response.status == 200:
+            return response.data.decode("UTF-8")
+        else:
+            return None
     except:
         return None

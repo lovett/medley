@@ -29,6 +29,7 @@ def setup_module(memcacheClient):
             })
         },
         "ip_tokens": {
+            "external": "external.example.com",
             "test": "test.example.com"
         }
     }
@@ -108,6 +109,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenHtml(self):
         """ /ip returns html by default when a valid token is provided """
+        cherrypy.config["ip.dns.command"] = None
         headers = {
             "Remote-Addr": "1.1.1.1",
             "Authorization": "Basic dGVzdDp0ZXN0"
@@ -118,6 +120,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenJson(self):
         """ /ip returns json if requested when a valid token is provided """
+        cherrypy.config["ip.dns.command"] = None
         headers = {
             "Remote-Addr": "1.1.1.1",
             "Authorization": "Basic dGVzdDp0ZXN0",
@@ -129,6 +132,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenPlain(self):
         """ /ip returns plain text if requested when a valid token is provided """
+        cherrypy.config["ip.dns.command"] = None
         headers = {
             "Remote-Addr": "1.1.1.1",
             "X-REAL-IP": "2.2.2.2",
@@ -511,6 +515,71 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         response = self.request("/phone/123")
         self.assertEqual(response.code, 200)
+
+    @mock.patch("medley.util.whois.externalIp")
+    def test_externalIpSuccessPlain(self, externalIp):
+        """The /external-ip endpoint returns an IP address when the
+        DNS-O-Matic query succeeds"""
+        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        address = "1.1.1.1"
+        externalIp.return_value = address
+
+        response = self.request("/external-ip", as_plain=True)
+        self.assertEqual(response.body, address)
+
+    @mock.patch("medley.util.whois.externalIp")
+    def test_externalIpSuccessJson(self, externalIp):
+        """The /external-ip endpoint returns an IP address when the
+        DNS-O-Matic query succeeds"""
+        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        address = "1.1.1.1"
+        externalIp.return_value = address
+
+        response = self.request("/external-ip", as_json=True)
+        self.assertEqual(response.body["ip"], address)
+
+    @mock.patch("medley.util.whois.externalIp")
+    def test_externalIpFail(self, externalIp):
+        """The /external-ip endpoint returns the string "not available" when the
+        DNS-O-Matic query fails"""
+        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        externalIp.return_value = None
+
+        response = self.request("/external-ip", as_plain=True)
+        self.assertEqual(response.body, "not available")
+
+    @mock.patch("medley.util.whois.externalIp")
+    def test_externalIpNoHost(self, externalIp):
+        """The /external-ip endpoint returns 500 if an external hostname has not been defined"""
+        cherrypy.request.app.config["ip_tokens"]["external"] = None
+        externalIp.return_value = None
+
+        response = self.request("/external-ip", as_plain=True)
+        self.assertEqual(response.code, 500)
+
+    @mock.patch("medley.util.whois.externalIp")
+    def test_externalIpUpdatesDns(self, externalIp):
+        """The /external-ip endpoint updates the local DNS server, setting the
+        IP returned by DNS-O-Matic to the valid of the ip token "external"."""
+        address = "1.1.1.1"
+        host = "external.example.com"
+        expected_command = ["pdnsd-ctl", "add", "a", address, host]
+
+        configured_command = expected_command[:]
+        configured_command[3] = "$ip"
+        configured_command[4] = "$host"
+
+        cherrypy.config["ip.dns.command"] = configured_command
+        cherrypy.request.app.config["ip_tokens"]["external"] = host
+
+        externalIp.return_value = address
+
+        application = cherrypy.tree.apps[""]
+        application.config["ip_tokens"]["external"] = host
+
+        with mock.patch("medley.subprocess") as subprocess:
+            response = self.request("/external-ip")
+            subprocess.call.assert_called_once_with(expected_command)
 
 if __name__ == "__main__":
     import unittest

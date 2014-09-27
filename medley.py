@@ -113,6 +113,49 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="generic.html")
+    def external_ip(self):
+        """Determine the local machine's external IP"""
+
+        host = cherrypy.request.app.config["ip_tokens"].get("external")
+        if not host:
+            raise cherrypy.HTTPError(500, "External IP hostname not defined")
+
+        dns_command = copy.copy(cherrypy.config.get("ip.dns.command"))
+
+        key = "external_ip"
+        cached_value = self.mc.get(key)
+
+        if cached_value:
+            ip = cached_value
+        else:
+            try:
+                ip = util.whois.externalIp()
+                # cache for 10 minutes
+                self.mc.set(key, ip, 600)
+            except:
+                ip = None
+
+        if ip is not None:
+            if dns_command:
+                dns_command[dns_command.index("$ip")] = ip
+                dns_command[dns_command.index("$host")] = host
+                subprocess.call(dns_command)
+        else:
+            ip = "not available"
+
+        if cherrypy.request.negotiated == "text/plain":
+            return ip
+        elif cherrypy.request.negotiated == "application/json":
+            return { "ip": ip }
+        else:
+            return {
+                "page_title": "External IP",
+                "message": ip
+            }
+
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
     def ip(self, token=None):
         """A combination dynamic DNS and what-is-my-ip service.  If a token is

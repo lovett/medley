@@ -2,7 +2,9 @@ import util.whois
 import unittest
 import pytest
 import mock
+import httpretty
 import helpers
+import urllib3
 
 class TestUtilWhois(unittest.TestCase):
 
@@ -175,6 +177,37 @@ class TestUtilWhois(unittest.TestCase):
         result = util.whois.reverseLookup(None)
         self.assertIsNone(result)
 
+    @httpretty.activate
+    def test_externalIpSuccess(self):
+        """A successful call to DNS-O-Matic returns an IP address"""
+        address = "1.1.1.1"
+        httpretty.register_uri(httpretty.GET,
+                               "http://myip.dnsomatic.com/",
+                               body=address,
+                               status=200)
+
+        response = util.whois.externalIp()
+        self.assertEqual(response, address)
+
+    @httpretty.activate
+    def test_externalIpFail(self):
+        """An unsuccessful call to DNS-O-Matic returns None"""
+        httpretty.register_uri(httpretty.GET,
+                               "http://myip.dnsomatic.com/",
+                               status=500)
+
+        response = util.whois.externalIp()
+        self.assertIsNone(response)
+
+    @mock.patch("urllib3.PoolManager")
+    def test_externalIpException(self, poolManager):
+        """An unsuccessful call to DNS-O-Matic returns None"""
+
+        instance = poolManager.return_value
+        instance.request.return_value = urllib3.exceptions.TimeoutError
+
+        response = util.whois.externalIp()
+        self.assertIsNone(response)
 
 if __name__ == '__main__':
     unittest.main()
