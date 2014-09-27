@@ -19,7 +19,7 @@ def query(address):
     try:
         out_raw = out.decode("utf-8")
     except UnicodeDecodeError:
-        out_raw = out.decode("iso-8859-1")
+        out_raw = out.decode("latin-1")
 
     out_raw = out_raw.split("\n")
 
@@ -63,7 +63,7 @@ def query(address):
 
     return out_collapsed
 
-def resolveHost(host):
+def resolveHost(host=None):
     """Resolve a hostname to its IP address"""
 
     try:
@@ -72,7 +72,7 @@ def resolveHost(host):
     except:
         return None
 
-def reverseLookup(ip):
+def reverseLookup(ip=None):
     """Find the hostname associated with the given IP"""
 
     try:
