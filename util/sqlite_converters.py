@@ -36,7 +36,7 @@ def convert_duration(s):
     if len(result) == 0:
         result.append("0 {}".format(seconds_label))
 
-    return " ".join(result)
+    return ", ".join(result)
 
 def convert_callerid(s):
     return re.sub(r'"(.*?)".*', r"\1", s.decode("utf-8"))
