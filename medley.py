@@ -156,6 +156,46 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="mismatch.html")
+    def dnsmatch(self, token=None):
+        """Determine whether two or more hosts resolve to the same address in DNS"""
+
+        data = {}
+
+        if not token:
+            raise cherrypy.HTTPError(400, "No token provided")
+
+        commands = cherrypy.request.app.config["dns_hosts"].get(token)
+
+        if not commands:
+            raise cherrypy.HTTPError(400, "Invalid token")
+
+        def runCommand(command):
+            process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            out, err = process.communicate()
+            return out.strip().decode("utf-8")
+
+        results = [runCommand(command) for command in commands]
+
+        data["results"] = results
+        data["commands"] = commands
+
+        if len(set(results)) == 1:
+            data["result"] = "ok"
+        else:
+            data["result"] = "mismatch"
+
+        if cherrypy.request.negotiated == "text/html":
+            data["page_title"] = "DNS Match"
+            return data
+        elif cherrypy.request.negotiated == "application/json":
+            return data
+        else:
+            return data["result"]
+
+
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
     def ip(self, token=None):
         """A combination dynamic DNS and what-is-my-ip service.  If a token is

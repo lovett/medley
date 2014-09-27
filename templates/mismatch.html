@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block page_body %}
+<div class="sixteen wide column">
+    <h1 class="ui top attached small inverted {% if result == "ok"%}green{%else%}red{%endif%} header">{{ result|capitalize}}</h1>
+    <table class="ui segment attached table">
+        <tbody>
+            {% for command in commands %}
+            <tr>
+                <td>{{ command|join(" ") }}</td>
+                <td>{{ results[loop.index0] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
