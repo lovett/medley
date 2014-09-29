@@ -1,0 +1,4 @@
+{% for command in commands %}
+{{ command|join(" ") }}
+{{ results[loop.index0] }}
+{% endfor %}

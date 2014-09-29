@@ -15,6 +15,7 @@ import base64
 import inspect
 import util.phone
 import util.whois
+import util.email
 import memcache
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -157,8 +158,8 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
-    def dnsmatch(self, token=None):
-        """Determine whether two or more hosts resolve to the same address in DNS"""
+    def dnsmatch(self, token=None, email=None):
+        """Determine whether two or more hosts resolve to the same address"""
 
         data = {}
 
@@ -184,6 +185,20 @@ class MedleyServer(object):
             data["result"] = "ok"
         else:
             data["result"] = "mismatch"
+
+        # Email delivery is only triggered via POST
+        if cherrypy.request.method != "POST":
+            email = None
+
+        # Email delivery only recurs when there is a mismatch
+        if email and data["result"] == "mismatch":
+            config = {
+                "template_dir": self.template_dir,
+                "template": "dnsmatch.email",
+                "subject": "DNS mismatch",
+                "smtp": cherrypy.request.app.config["smtp"]
+            }
+            util.email.sendMessage(config, data)
 
         if cherrypy.request.negotiated == "text/html":
             data["page_title"] = "DNS Match"
