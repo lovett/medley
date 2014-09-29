@@ -109,7 +109,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenHtml(self):
         """ /ip returns html by default when a valid token is provided """
-        cherrypy.config["ip.dns.command"] = None
+        cherrypy.config["ip.dns.command"] = []
         headers = {
             "Remote-Addr": "1.1.1.1",
             "Authorization": "Basic dGVzdDp0ZXN0"
@@ -120,7 +120,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenJson(self):
         """ /ip returns json if requested when a valid token is provided """
-        cherrypy.config["ip.dns.command"] = None
+        cherrypy.config["ip.dns.command"] = []
         headers = {
             "Remote-Addr": "1.1.1.1",
             "Authorization": "Basic dGVzdDp0ZXN0",
@@ -132,7 +132,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipValidTokenPlain(self):
         """ /ip returns plain text if requested when a valid token is provided """
-        cherrypy.config["ip.dns.command"] = None
+        cherrypy.config["ip.dns.command"] = []
         headers = {
             "Remote-Addr": "1.1.1.1",
             "X-REAL-IP": "2.2.2.2",

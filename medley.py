@@ -9,7 +9,6 @@ import urllib
 import urllib.request
 import urllib.parse
 import json
-import copy
 import plugins.jinja
 import base64
 import inspect
@@ -121,7 +120,7 @@ class MedleyServer(object):
         if not host:
             raise cherrypy.HTTPError(500, "External IP hostname not defined")
 
-        dns_command = copy.copy(cherrypy.config.get("ip.dns.command"))
+        dns_command = cherrypy.config.get("ip.dns.command")[:]
 
         key = "external_ip"
         cached_value = self.mc.get(key)
@@ -237,7 +236,7 @@ class MedleyServer(object):
         if not host:
             raise cherrypy.HTTPError(400, "Invalid token")
 
-        dns_command = copy.copy(cherrypy.config.get("ip.dns.command"))
+        dns_command = cherrypy.config.get("ip.dns.command")[:]
         if dns_command:
             dns_command[dns_command.index("$ip")] = ip_address
             dns_command[dns_command.index("$host")] = host
