@@ -14,8 +14,7 @@ import plugins.jinja
 import base64
 import inspect
 import util.phone
-import util.whois
-import util.email
+import util.net
 import memcache
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -131,7 +130,7 @@ class MedleyServer(object):
             ip = cached_value
         else:
             try:
-                ip = util.whois.externalIp()
+                ip = util.net.externalIp()
                 # cache for 10 minutes
                 self.mc.set(key, ip, 600)
             except:
@@ -198,7 +197,7 @@ class MedleyServer(object):
                 "subject": "DNS mismatch",
                 "smtp": cherrypy.request.app.config["smtp"]
             }
-            util.email.sendMessage(config, data)
+            util.net.sendMessage(config, data)
 
         if cherrypy.request.negotiated == "text/html":
             data["page_title"] = "DNS Match"
@@ -295,13 +294,13 @@ class MedleyServer(object):
             }
 
         # IP and reverse host
-        ip = util.whois.resolveHost(address_clean)
+        ip = util.net.resolveHost(address_clean)
 
         data = {
             "geo": None,
             "address": address_clean,
             "ip": ip,
-            "reverse_host": util.whois.reverseLookup(ip)
+            "reverse_host": util.net.reverseLookup(ip)
         }
 
         # Geoip
@@ -324,7 +323,7 @@ class MedleyServer(object):
             data["whois"] = cached_value
         else:
             try:
-                data["whois"] = util.whois.query(data["ip"])
+                data["whois"] = util.net.query(data["ip"])
                 self.mc.set(key, data["whois"], self.mc_expire)
             except AssertionError:
                 data["whois"] = None

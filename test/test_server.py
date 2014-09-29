@@ -308,7 +308,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisGeoipQuery(self, queryWhoisMock):
         """ The /whois endpoint calls the geoip database """
         reader = mock.MagicMock()
@@ -321,7 +321,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             reader.record_by_addr.assert_called_once_with(ip)
             queryWhoisMock.assert_called_once_with(ip)
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisPopulateUsMapParams(self, queryWhoisMock):
         """ The /whois endpoint defines the map region for a US IP as US-{state abbrev} """
         reader = mock.MagicMock()
@@ -335,7 +335,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "US-NY")
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisPopulateNonUsMapParams(self, queryWhoisMock):
         """ The /whois endpoint defines the map region for a non-US IP as a 2-letter ISO code """
         reader = mock.MagicMock()
@@ -348,7 +348,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "AU")
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisSkipsGeoipQuery(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         queryWhoisMock.return_value = {}
@@ -357,7 +357,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertTrue(response.code, 200)
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()
@@ -374,7 +374,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test city, test country")
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisPlainReturnsCountry(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()
@@ -390,7 +390,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test country")
 
-    @mock.patch("util.whois.query")
+    @mock.patch("util.net.query")
     def test_whoisPlainReturnsUnknown(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()
@@ -516,7 +516,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/phone/123")
         self.assertEqual(response.code, 200)
 
-    @mock.patch("medley.util.whois.externalIp")
+    @mock.patch("medley.util.net.externalIp")
     def test_externalIpSuccessPlain(self, externalIp):
         """The /external-ip endpoint returns an IP address when the
         DNS-O-Matic query succeeds"""
@@ -527,7 +527,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/external-ip", as_plain=True)
         self.assertEqual(response.body, address)
 
-    @mock.patch("medley.util.whois.externalIp")
+    @mock.patch("medley.util.net.externalIp")
     def test_externalIpSuccessJson(self, externalIp):
         """The /external-ip endpoint returns an IP address when the
         DNS-O-Matic query succeeds"""
@@ -538,7 +538,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/external-ip", as_json=True)
         self.assertEqual(response.body["ip"], address)
 
-    @mock.patch("medley.util.whois.externalIp")
+    @mock.patch("medley.util.net.externalIp")
     def test_externalIpFail(self, externalIp):
         """The /external-ip endpoint returns the string "not available" when the
         DNS-O-Matic query fails"""
@@ -548,7 +548,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/external-ip", as_plain=True)
         self.assertEqual(response.body, "not available")
 
-    @mock.patch("medley.util.whois.externalIp")
+    @mock.patch("medley.util.net.externalIp")
     def test_externalIpNoHost(self, externalIp):
         """The /external-ip endpoint returns 500 if an external hostname has not been defined"""
         cherrypy.request.app.config["ip_tokens"]["external"] = None
@@ -557,7 +557,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/external-ip", as_plain=True)
         self.assertEqual(response.code, 500)
 
-    @mock.patch("medley.util.whois.externalIp")
+    @mock.patch("medley.util.net.externalIp")
     def test_externalIpUpdatesDns(self, externalIp):
         """The /external-ip endpoint updates the local DNS server, setting the
         IP returned by DNS-O-Matic to the valid of the ip token "external"."""
