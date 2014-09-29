@@ -42,6 +42,24 @@ def teardown_module():
     cherrypy.engine.exit()
 
 class TestMedleyServer(BaseCherryPyTestCase):
+    def test_htmlCharset(self):
+        """Requests for text/html content specify charset=utf-8.  Since the
+        charset is applied to all requests via the negotiable tool,
+        only the index endpoint is tested"""
+        response = self.request("/")
+        self.assertEqual(response.headers["content-type"], "text/html;charset=utf-8")
+
+    def test_plainCharset(self):
+        """Requests for text/plain specify charset=utf-8. Only the index endpoint is tested"""
+        response = self.request("/", as_plain=True)
+        self.assertEqual(response.headers["content-type"], "text/plain;charset=utf-8")
+
+    def test_plainCharset(self):
+        """Requests for application/json do not specify a charset in the content-type header. Only the index endpoint is testted"""
+        response = self.request("/", as_json=True)
+        self.assertEqual(response.headers["content-type"], "application/json")
+
+
     def test_endpointsReturnHTML(self):
         """ Endpoints return HTML by default """
         headers = {

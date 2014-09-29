@@ -98,6 +98,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         # Allow the status code of the reponse to be considered
         # separately from its message
         code, message = response.status.split(" ", 1)
+        result.headers = response.headers
         result.code = int(code)
         result.status = message
 

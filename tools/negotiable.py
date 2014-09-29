@@ -26,7 +26,7 @@ class Tool(cherrypy.Tool):
         if req.negotiated == "application/json":
             tools.json_out.callable()
         elif req.negotiated == "text/plain":
-            cherrypy.response.headers["Content-Type"] = "text/plain; charset={}".format(charset)
+            cherrypy.response.headers["Content-Type"] = "text/plain"
             tools.encode.callable()
         else:
-            cherrypy.response.headers["Content-Type"] = "text/html; charset={}".format(charset)
+            cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(charset)
