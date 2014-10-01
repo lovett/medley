@@ -72,15 +72,14 @@ class TestUtilPhone(unittest.TestCase):
 
     @httpretty.activate
     def test_stateNameError(self):
-        """Returns "Unknown" if the dbpediq query fails"""
+        """An exception is thrown if the dbpedia state name query fails"""
 
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
                                body="",
                                status=500)
-
-        response = util.phone.stateName("NY")
-        self.assertEqual(response, "Unknown")
+        with pytest.raises(util.phone.PhoneException) as err:
+            location = util.phone.stateName("NY")
 
     def test_areaCodeEmpty(self):
         """An empty area code throws an exception"""
@@ -109,8 +108,8 @@ class TestUtilPhone(unittest.TestCase):
                                ])
 
         location = util.phone.findAreaCode("212")
-        self.assertEqual(location.state_name, "New York")
-        self.assertEqual(location.state_abbreviation, "NY")
+        self.assertEqual(location["state_name"], "New York")
+        self.assertEqual(location["state_abbreviation"], "NY")
 
     @httpretty.activate
     def test_areaCodeInvalid(self):
@@ -124,23 +123,20 @@ class TestUtilPhone(unittest.TestCase):
                                status=200)
 
         location = util.phone.findAreaCode("000")
-        self.assertEqual(location.state_name, "Unknown")
-        self.assertEqual(location.state_abbreviation, None)
-        self.assertTrue("could not be found" in location.comment)
+        self.assertEqual(location["state_name"], "Unknown")
+        self.assertEqual(location["state_abbreviation"], None)
+        self.assertTrue("could not be found" in location["comment"])
 
     @httpretty.activate
     def test_areaCodeError(self):
-        """A named tuple is returned if the dbpedia area code query fails"""
-
+        """An exception is thrown if the dbpedia area code query fails"""
         httpretty.register_uri(httpretty.GET,
                                "http://dbpedia.org/sparql",
                                body="",
                                status=500)
 
-        location = util.phone.findAreaCode("000")
-        self.assertEqual(location.state_name, "Unknown")
-        self.assertEqual(location.state_abbreviation, None)
-        self.assertTrue("could not be found" in location.comment)
+        with pytest.raises(util.phone.PhoneException) as err:
+            location = util.phone.findAreaCode("000")
 
     def test_abbreviateCommentTruncation(self):
         """A comment with two sentences is reduced to the first two"""

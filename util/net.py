@@ -6,6 +6,9 @@ import jinja2
 from email.mime.text import MIMEText
 import smtplib
 
+class NetException(Exception):
+    pass
+
 def query(address):
     """Run a whois query by shelling out. The output is filtered to
     improve readability. Returns a list of key value pairs.
@@ -95,7 +98,8 @@ def externalIp():
             return response.data.decode("UTF-8")
         else:
             return None
-    except:
+    except urllib3.exceptions.HTTPError:
+        raise NetException
         return None
 
 def sendMessage(message_data, template_data, debug=False):

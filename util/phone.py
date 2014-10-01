@@ -3,12 +3,12 @@ import urllib
 import urllib.request
 import urllib.parse
 import json
-import collections
 import sqlite3
 import socket
 import util.sqlite_converters
 
-Location = collections.namedtuple('Location', ['state_abbreviation', 'state_name', 'comment'])
+class PhoneException(Exception):
+    pass
 
 def sanitize(number=""):
     """Strip non-numeric characters from a numeric string"""
@@ -28,7 +28,10 @@ def format(number=""):
         return number
 
 def findAreaCode(area_code):
-    """Query dbpedia for the geographic location of an American telephone area code"""
+    """Query dbpedia for the geographic location of an American telephone area code
+
+    Returns a dictionary with keys for state abbreviation, full name, and comment.
+    """
 
     # area code should be a 3 digit string
     assert len(area_code) == 3, "Wrong length area code"
@@ -63,18 +66,19 @@ def findAreaCode(area_code):
         abbrev = first_result["state_abbrev"]["value"]
         comment = first_result["comment"]["value"]
 
-        return Location(state_abbreviation=abbrev,
-                        state_name=stateName(abbrev),
-                        comment=abbreviateComment(comment))
-
-    except socket.timeout:
-        return Location(state_abbreviation=None,
-                        state_name="Not available",
-                        comment="The area code lookup for this number timed out.")
-    except (IndexError, urllib.error.HTTPError):
-        return Location(state_abbreviation=None,
-                        state_name="Unknown",
-                        comment="The location of this number could not be found.")
+        return {
+            "state_abbreviation": abbrev,
+            "state_name": stateName(abbrev),
+            "comment": abbreviateComment(comment)
+        }
+    except IndexError:
+        return {
+            "state_abbreviation": None,
+            "state_name": "Unknown",
+            "comment": "The location of this number could not be found."
+        }
+    except (socket.timeout, urllib.error.HTTPError):
+        raise PhoneException("Dbpedia area code query failed")
 
 def stateName(abbreviation=None):
     """Query dbpedia for the name of US state by its abbreviation"""
@@ -100,10 +104,10 @@ def stateName(abbreviation=None):
         with urllib.request.urlopen(query, timeout=7) as request:
             result = json.loads(request.read().decode("utf-8"))
         return result["results"]["bindings"][0]["name"]["value"]
-    except socket.timeout:
-        return "Not available"
-    except (IndexError, urllib.error.HTTPError, socket.timeout):
+    except IndexError:
         return "Unknown"
+    except (socket.timeout, urllib.error.HTTPError):
+        raise PhoneException("Dbpedia state name query failed")
 
 def abbreviateComment(comment):
     """Extract the first two meaningful sentences from a dbpedia comment field"""

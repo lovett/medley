@@ -416,24 +416,27 @@ class MedleyServer(object):
         if cached_value:
             location = cached_value
         else:
-            location = util.phone.findAreaCode(area_code)
-            self.mc.set(key, location, self.mc_expire)
+            try:
+                location = util.phone.findAreaCode(area_code)
+                self.mc.set(key, location, self.mc_expire)
+            except (AssertionError, util.phone.PhoneException):
+                location = {}
 
         history_db = "{}/{}".format(cherrypy.config.get("database.directory"),
                                     cherrypy.config.get("asterisk.cdr_db"))
         history = util.phone.callHistory(history_db, number, 5)
 
         if cherrypy.request.negotiated == "text/plain":
-            return location.state_name
+            return location.get("state_name")
         else:
             data["history"] = history[0]
             data["number"] = number
             data["number_formatted"] = util.phone.format(number)
-            data["state_abbreviation"] = location.state_abbreviation
-            data["state_name"] = location.state_name
+            data["state_abbreviation"] = location.get("state_abbreviation")
+            data["state_name"] = location.get("state_name")
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
             data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(data["number_formatted"])
-            data["comment"] = location.comment
+            data["comment"] = location.get("comment")
             return data
 
     @cherrypy.expose
