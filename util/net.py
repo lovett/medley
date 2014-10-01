@@ -31,15 +31,61 @@ def whois(address):
     out_raw = out_raw.split("\n")
 
     out_filtered = []
+    skip_until_blank = False
     for line in out_raw:
         line = line.strip()
 
-        # remove comments
+        if skip_until_blank:
+            if line.strip() != "":
+                continue
+            else:
+                skip_until_blank = False
+
+
+        # Skip header lines
+        if line.startswith("Whois Server Version"):
+            continue
+
+        # Skip prefatory notices
+        if "can now be registered" in line:
+            skip_until_blank = True
+            continue
+
+        # Skip legalese
+        if line.startswith("NOTICE:"):
+            skip_until_blank = True
+            continue
+        if line.startswith("TERMS OF USE:"):
+            skip_until_blank = True
+            continue
+        if " is provided by " in line or " is provided to you " in line:
+            skip_until_blank = True
+            continue
+        if " reserve the right to " in line:
+            skip_until_blank = True
+            continue
+
+        if line.startswith("Get Noticed on the Internet"):
+            skip_until_blank = True
+            continue
+
+        if line.startswith("Please note:"):
+            skip_until_blank = True
+            continue
+
+        if "database contains ONLY" in line:
+            continue
+        if line == "Registrars.":
+            continue
+
+
+        # Remove comments
         if line.startswith(("#", "%")):
             continue
 
         # separate label and value for non-comment lines
         line = re.sub(r"\s+", " ", line).strip()
+        line = line.lstrip(">>>").strip("<<<")
         fields = line.split(": ", 1)
 
         # Discard blank lines
