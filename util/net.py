@@ -1,7 +1,7 @@
 import subprocess
 import socket
 import re
-import urllib3
+import requests
 import jinja2
 from email.mime.text import MIMEText
 import smtplib
@@ -77,7 +77,7 @@ def resolveHost(host=None):
         result = socket.gethostbyname_ex(host)
         return result[2][0]
     except:
-        return None
+        pass
 
 def reverseLookup(ip=None):
     """Find the hostname associated with the given IP"""
@@ -86,21 +86,17 @@ def reverseLookup(ip=None):
         result = socket.gethostbyaddr(ip)
         return result[0]
     except:
-        return None
+        pass
 
 def externalIp():
     """ Get the current external IP via DNS-O-Matic"""
 
-    http = urllib3.PoolManager()
     try:
-        response = http.request("GET", "http://myip.dnsomatic.com/")
-        if response.status == 200:
-            return response.data.decode("UTF-8")
-        else:
-            return None
-    except urllib3.exceptions.HTTPError:
-        raise NetException
-        return None
+        response = requests.get("http://myip.dnsomatic.com", timeout=3)
+        response.raise_for_status()
+        return response.text
+    except Exception:
+        pass
 
 def sendMessage(message_data, template_data, debug=False):
     """Compose an email message from a Jinja template and send via

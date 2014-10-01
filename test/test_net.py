@@ -4,7 +4,7 @@ import pytest
 import mock
 import httpretty
 import helpers
-import urllib3
+import requests
 
 class TestUtilWhois(unittest.TestCase):
 
@@ -195,17 +195,13 @@ class TestUtilWhois(unittest.TestCase):
         httpretty.register_uri(httpretty.GET,
                                "http://myip.dnsomatic.com/",
                                status=500)
-
         response = util.net.externalIp()
         self.assertIsNone(response)
 
-    @mock.patch("urllib3.PoolManager")
-    def test_externalIpException(self, poolManager):
+    @mock.patch("requests.get")
+    def test_externalIpException(self, getMock):
         """An unsuccessful call to DNS-O-Matic returns None"""
-
-        instance = poolManager.return_value
-        instance.request.return_value = urllib3.exceptions.TimeoutError
-
+        getMock.return_value = requests.exceptions.Timeout
         response = util.net.externalIp()
         self.assertIsNone(response)
 
