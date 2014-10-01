@@ -322,7 +322,7 @@ class MedleyServer(object):
             data["whois"] = cached_value
         else:
             try:
-                data["whois"] = util.net.query(data["ip"])
+                data["whois"] = util.net.whois(data["ip"])
                 self.mc.set(key, data["whois"], self.mc_expire)
             except AssertionError:
                 data["whois"] = None

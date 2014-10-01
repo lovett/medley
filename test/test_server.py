@@ -326,7 +326,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisGeoipQuery(self, queryWhoisMock):
         """ The /whois endpoint calls the geoip database """
         reader = mock.MagicMock()
@@ -339,7 +339,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             reader.record_by_addr.assert_called_once_with(ip)
             queryWhoisMock.assert_called_once_with(ip)
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisPopulateUsMapParams(self, queryWhoisMock):
         """ The /whois endpoint defines the map region for a US IP as US-{state abbrev} """
         reader = mock.MagicMock()
@@ -353,7 +353,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "US-NY")
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisPopulateNonUsMapParams(self, queryWhoisMock):
         """ The /whois endpoint defines the map region for a non-US IP as a 2-letter ISO code """
         reader = mock.MagicMock()
@@ -366,7 +366,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertEqual(response.body["map_region"], "AU")
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisSkipsGeoipQuery(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         queryWhoisMock.return_value = {}
@@ -375,7 +375,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_json=True)
             self.assertTrue(response.code, 200)
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()
@@ -392,7 +392,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test city, test country")
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisPlainReturnsCountry(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()
@@ -408,7 +408,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "test country")
 
-    @mock.patch("util.net.query")
+    @mock.patch("util.net.whois")
     def test_whoisPlainReturnsUnknown(self, queryWhoisMock):
         """ The /whois endpoint returns if the geoip query fails """
         reader = mock.MagicMock()

@@ -8,26 +8,26 @@ import requests
 
 class TestUtilWhois(unittest.TestCase):
 
-    def test_queryBlankIp(self):
+    def test_whoisBlankIp(self):
         """A query with no address throws an exception"""
         with pytest.raises(AssertionError) as err:
-            result = util.net.query("")
+            result = util.net.whois("")
         self.assertEqual(str(err.value), "Invalid address")
 
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryDecodeLatin(self, popen):
+    def test_whoisDecodeLatin(self, popen):
         """Whois output successfully decodes as latin-1"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
         popen.return_value.returncode = 0
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = ["Test: Autónoma".encode("latin-1"), ""]
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][1], "Autónoma")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryValidIp(self, popen):
+    def test_whoisValidIp(self, popen):
         """A query with a nonblank ip invokes whois"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
@@ -35,12 +35,12 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertTrue(popen.called)
         popen.assert_called_once_with(["whois", address], stdout=-1)
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryStripComments(self, popen):
+    def test_whoisStripComments(self, popen):
         """Comment lines are removed from whois query output"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
@@ -48,11 +48,11 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"# This is a comment\n % This is another comment", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result, [])
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryKeyValue(self, popen):
+    def test_whoisKeyValue(self, popen):
         """Whois output is returned as a list of key value pairs"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
@@ -60,12 +60,12 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Foo: bar", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][0], "Foo")
         self.assertEqual(result[0][1], "bar")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryAppendedValue(self, popen):
+    def test_whoisAppendedValue(self, popen):
         """If a key appears multiple times in the whois output, its value gets
         appended to the first instance"""
         address = "127.0.0.1"
@@ -74,11 +74,11 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Foo: bar\nFoo: boo", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][1], "bar\nboo")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryCapitalization(self, popen):
+    def test_whoisCapitalization(self, popen):
         """Keys are capitalized"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
@@ -86,11 +86,11 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"foo: bar", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][0], "Foo")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryReadableKeys(self, popen):
+    def test_whoisReadableKeys(self, popen):
         """Keys are made human readable"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
@@ -98,11 +98,11 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"OrgName: bar", ""]
 
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][0], "Org Name")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryUnlabelledLine(self, popen):
+    def test_whoisUnlabelledLine(self, popen):
         """Unlabelled lines are preserved"""
         address = "999.999.999.999"
         response = b"No match found for 999.999.999.999."
@@ -110,19 +110,19 @@ class TestUtilWhois(unittest.TestCase):
         popen.return_value.returncode = 0
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [response, ""]
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][0], response.decode("utf-8"))
         self.assertEqual(result[0][1], None)
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_queryKeyWithoutValue(self, popen):
+    def test_whoisKeyWithoutValue(self, popen):
         """Lines without values are removed"""
         address = "127.0.0.1"
         popen.return_value = mock.Mock()
         popen.return_value.returncode = 0
         popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Test:\nFoo: bar", None]
-        result = util.net.query(address)
+        result = util.net.whois(address)
         self.assertEqual(result[0][0], "Foo")
         self.assertEqual(result[0][1], "bar")
 

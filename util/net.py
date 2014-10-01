@@ -9,7 +9,7 @@ import smtplib
 class NetException(Exception):
     pass
 
-def query(address):
+def whois(address):
     """Run a whois query by shelling out. The output is filtered to
     improve readability. Returns a list of key value pairs.
 
