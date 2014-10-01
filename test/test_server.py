@@ -3,6 +3,7 @@ import os.path
 import json
 import httpretty
 import helpers
+import urllib.parse
 import mock
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
@@ -315,14 +316,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/geoupdate")
         self.assertEqual(response.code, 200)
 
-    def test_whoisJsonWithoutIp(self):
-        """ The /whois endpoint returns 400 if called as json without an IP"""
+    def test_whoisJsonWithoutAddress(self):
+        """ The /whois endpoint returns 400 if called as json without an address"""
         response = self.request("/whois", as_json=True)
         self.assertEqual(response.code, 400)
         self.assertTrue("message" in response.body)
 
-    def test_whoisPlainWithoutIp(self):
-        """ The /whois endpoint returns 400 if called as plain without an IP"""
+    def test_whoisPlainWithoutAddress(self):
+        """ The /whois endpoint returns 400 if called as plain without an address"""
         response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
@@ -419,6 +420,51 @@ class TestMedleyServer(BaseCherryPyTestCase):
             pygeoip_mock.GeoIP.return_value = reader
             response = self.request("/whois/1.1.1.1", as_plain=True)
             self.assertEqual(response.body, "Unknown")
+
+    @mock.patch("util.net.whois")
+    def test_whoisInputIp(self, queryWhoisMock):
+        """ The /whois endpoint accepts an IP address as input """
+        queryWhoisMock.return_value = {}
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
+            response = self.request("/whois/1.1.1.1", as_json=True)
+            self.assertEqual(response.body["ip"], "1.1.1.1")
+
+    @mock.patch("util.net.resolveHost")
+    @mock.patch("util.net.whois")
+    def test_whoisInputHostname(self, whoisMock, resolveHostMock):
+        """ The /whois endpoint accepts a hostname as input """
+        whoisMock.return_value = {}
+        resolveHostMock.return_value = "1.1.1.1"
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
+            response = self.request("/whois/example.com", as_json=True)
+            self.assertEqual(response.body["ip"], "1.1.1.1")
+
+    @mock.patch("util.net.resolveHost")
+    @mock.patch("util.net.whois")
+    def test_whoisInputUrl(self, whoisMock, resolveHostMock):
+        """ The /whois endpoint accepts a full URL as input """
+        whoisMock.return_value = {}
+        resolveHostMock.return_value = "1.1.1.1"
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
+            address = urllib.parse.quote_plus("http://example.com/foo/bar?a=1")
+            response = self.request("/whois/" + address, as_json=True)
+            self.assertEqual(response.body["ip"], "1.1.1.1")
+            self.assertEqual(response.body["address"], "example.com")
+
+    @mock.patch("util.net.resolveHost")
+    @mock.patch("util.net.whois")
+    def test_whoisInputHostAlias(self, whoisMock, resolveHostMock):
+        """ The /whois endpoint accepts a full URL as input """
+        whoisMock.return_value = {}
+        resolveHostMock.return_value = "1.1.1.1"
+        with mock.patch("medley.pygeoip") as pygeoip_mock:
+            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
+            response = self.request("/whois/foo", as_json=True)
+            self.assertEqual(response.body["ip"], "1.1.1.1")
+
 
     def test_phoneNoNumberJson(self):
         """ /phone returns 400 if called as json without a number"""

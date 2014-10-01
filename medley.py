@@ -8,6 +8,7 @@ import re
 import urllib
 import urllib.request
 import urllib.parse
+import ipaddress
 import json
 import plugins.jinja
 import base64
@@ -285,15 +286,20 @@ class MedleyServer(object):
             else:
                 return {}
 
-        # Address must have at least one dot, whether IP or otherwise
-        address_clean = re.sub(r"[^\w.-]", "", address.lower())
-        if address_clean.count(".") < 1:
-            return {
-                "error": "Invalid address"
-            }
+        # Isolate a hostname or IP address
+        ip = None
+        address_unquoted = urllib.parse.unquote_plus(address).lower()
+        address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
+        try:
+            address_clean = str(ipaddress.ip_address(address))
+            ip = address_clean
+        except ValueError:
+            address_parsed = urllib.parse.urlparse(address_clean)
+            if address_parsed.hostname:
+                address_clean = address_parsed.hostname
 
-        # IP and reverse host
-        ip = util.net.resolveHost(address_clean)
+        if ip is None:
+            ip = util.net.resolveHost(address_clean)
 
         data = {
             "geo": None,
@@ -301,6 +307,8 @@ class MedleyServer(object):
             "ip": ip,
             "reverse_host": util.net.reverseLookup(ip)
         }
+
+        print(data)
 
         # Geoip
         db_path = cherrypy.config.get("database.directory")
@@ -314,7 +322,7 @@ class MedleyServer(object):
         except:
             data["geo"] = None
 
-        key = "whois:{}".format(data["ip"])
+        key = "whois:{}".format(data["address"])
         cached_value = self.mc.get(key)
 
         # Whois
@@ -322,7 +330,7 @@ class MedleyServer(object):
             data["whois"] = cached_value
         else:
             try:
-                data["whois"] = util.net.whois(data["ip"])
+                data["whois"] = util.net.whois(data["address"])
                 self.mc.set(key, data["whois"], self.mc_expire)
             except AssertionError:
                 data["whois"] = None
