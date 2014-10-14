@@ -53,6 +53,18 @@ class MedleyServer(object):
         deployment_url = cherrypy.config.get("azure.url.deployments")
         body = cherrypy.request.json
 
+        if not "siteName" in body:
+            raise cherrypy.HTTPError(400, "Site name not specified")
+
+        if not "message" in body:
+            body["message"] = None
+
+        if not "status" in body:
+            body["status"] = "unknown"
+
+        if not "complete" in body:
+            body["complete"] = False
+
         notification = {
             "group": "azure",
             "url": deployment_url.format(body["siteName"]),

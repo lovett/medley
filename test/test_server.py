@@ -23,6 +23,7 @@ def setup_module(memcacheClient):
     config_extra = {
         "global": {
             "request.show_tracebacks": False,
+            "azure.url.deployments": "http://example.com/{}/deployments"
         },
         "/ip": {
             "tools.auth_basic.checkpassword": cherrypy.lib.auth_basic.checkpassword_dict({
@@ -35,6 +36,7 @@ def setup_module(memcacheClient):
         }
     }
 
+    cherrypy.config.update(config_extra)
     app.merge(config_extra)
 
     cherrypy.engine.start()
@@ -71,6 +73,141 @@ class TestMedleyServer(BaseCherryPyTestCase):
             response = self.request(endpoint, headers=headers)
             self.assertEqual(response.code, 200)
             self.assertTrue("<main" in response.body)
+
+
+    def test_azure410IfNoNotifierUrl(self):
+        """ The azure endpoints returns 410 if notifier.url is not configured """
+        cherrypy.config["notifier.url"] = None
+        response = self.request("/azure/foo")
+        self.assertEqual(response.code, 410)
+
+    def test_azure404IfNoEvent(self):
+        """ The azure endpoint returns 404 if the event segment is not in the request url """
+        response = self.request("/azure")
+        self.assertEqual(response.code, 404)
+
+    def test_azureRejectsFormPost(self):
+        """ The azure endpoint rejects application/x-www-form-urlencoded"""
+        kwargs = {
+            "foo": "bar"
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                **kwargs)
+
+        self.assertEqual(response.code, 415)
+
+    @httpretty.activate
+    def test_azureRejectsUnexpectedJson(self):
+        """ The azure endpoint rejects json requests without expected fields """
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        headers = {
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "foo": "bar"
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        self.assertEqual(response.code, 400)
+
+        body = {
+            "siteName": "foo"
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        self.assertEqual(response.code, 200)
+
+    @httpretty.activate
+    def test_azureNotificationTitleSuccess(self):
+        """ The azure endpoint's notification indicates success in the title """
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        headers = {
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "siteName": "foo",
+            "status": "success",
+            "complete": True
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        self.assertEqual(httpretty.last_request().parsed_body["title"][0], "Deployment to foo is complete")
+
+    @httpretty.activate
+    def test_azureNotificationTitleFail(self):
+        """ The azure endpoint's notification indicates failure in the title """
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        headers = {
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "siteName": "foo",
+            "status": "failed",
+            "complete": True
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        self.assertEqual(httpretty.last_request().parsed_body["title"][0], "Deployment to foo has failed")
+
+    @httpretty.activate
+    def test_azureNotificationIncludesExpectedValues(self):
+        """ The azure endpoint notification links to the management console, and sets group to azure """
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        headers = {
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "siteName": "foo",
+            "status": "success",
+            "complete": True
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        print(httpretty.last_request().parsed_body)
+        self.assertTrue(body["siteName"] in httpretty.last_request().parsed_body["url"][0])
+        self.assertEqual(httpretty.last_request().parsed_body["group"][0], "azure")
 
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
