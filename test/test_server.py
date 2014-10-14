@@ -55,11 +55,10 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/", as_plain=True)
         self.assertEqual(response.headers["content-type"], "text/plain;charset=utf-8")
 
-    def test_plainCharset(self):
-        """Requests for application/json do not specify a charset in the content-type header. Only the index endpoint is testted"""
+    def test_jsonCharset(self):
+        """Requests for application/json do not specify a charset in the content-type header. Only the index endpoint is tested"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.headers["content-type"], "application/json")
-
 
     def test_endpointsReturnHTML(self):
         """ Endpoints return HTML by default """
