@@ -8,7 +8,7 @@ import re
 import urllib
 import urllib.request
 import urllib.parse
-import ipaddress
+import IPy
 import json
 import plugins.jinja
 import base64
@@ -302,8 +302,9 @@ class MedleyServer(object):
         ip = None
         address_unquoted = urllib.parse.unquote_plus(address).lower()
         address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
+
         try:
-            address_clean = str(ipaddress.ip_address(address))
+            IPy.IP(address_clean)
             ip = address_clean
         except ValueError:
             address_parsed = urllib.parse.urlparse(address_clean)
