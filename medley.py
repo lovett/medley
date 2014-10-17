@@ -442,9 +442,7 @@ class MedleyServer(object):
             except (AssertionError, util.phone.PhoneException):
                 location = {}
 
-        history_db = "{}/{}".format(cherrypy.config.get("database.directory"),
-                                    cherrypy.config.get("asterisk.cdr_db"))
-        history = util.phone.callHistory(history_db, number, 5)
+        history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
 
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name")
