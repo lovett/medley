@@ -6,7 +6,7 @@ import httpretty
 import helpers
 import requests
 
-class TestUtilWhois(unittest.TestCase):
+class TestUtilNet(unittest.TestCase):
 
     def test_whoisBlankIp(self):
         """A query with no address throws an exception"""
@@ -14,14 +14,10 @@ class TestUtilWhois(unittest.TestCase):
             result = util.net.whois("")
         self.assertEqual(str(err.value), "Invalid address")
 
-
     @mock.patch("util.net.subprocess.Popen")
     def test_whoisDecodeLatin(self, popen):
         """Whois output successfully decodes as latin-1"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = ["Test: Autónoma".encode("latin-1"), ""]
         result = util.net.whois(address)
         self.assertEqual(result[0][1], "Autónoma")
@@ -30,9 +26,6 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisValidIp(self, popen):
         """A query with a nonblank ip invokes whois"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"", ""]
 
         result = util.net.whois(address)
@@ -43,9 +36,6 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisStripComments(self, popen):
         """Comment lines are removed from whois query output"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"# This is a comment\n % This is another comment", ""]
 
         result = util.net.whois(address)
@@ -55,9 +45,6 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisKeyValue(self, popen):
         """Whois output is returned as a list of key value pairs"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Foo: bar", ""]
 
         result = util.net.whois(address)
@@ -69,9 +56,6 @@ class TestUtilWhois(unittest.TestCase):
         """If a key appears multiple times in the whois output, its value gets
         appended to the first instance"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Foo: bar\nFoo: boo", ""]
 
         result = util.net.whois(address)
@@ -81,9 +65,6 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisCapitalization(self, popen):
         """Keys are capitalized"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"foo: bar", ""]
 
         result = util.net.whois(address)
@@ -93,9 +74,6 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisReadableKeys(self, popen):
         """Keys are made human readable"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"OrgName: bar", ""]
 
         result = util.net.whois(address)
@@ -106,9 +84,6 @@ class TestUtilWhois(unittest.TestCase):
         """Unlabelled lines are preserved"""
         address = "999.999.999.999"
         response = b"No match found for 999.999.999.999."
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [response, ""]
         result = util.net.whois(address)
         self.assertEqual(result[0][0], response.decode("utf-8"))
@@ -118,10 +93,61 @@ class TestUtilWhois(unittest.TestCase):
     def test_whoisKeyWithoutValue(self, popen):
         """Lines without values are removed"""
         address = "127.0.0.1"
-        popen.return_value = mock.Mock()
-        popen.return_value.returncode = 0
-        popen.return_value.communicate = mock.Mock()
         popen.return_value.communicate.return_value = [b"Test:\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterPreambles(self, popen):
+        """ Unwanted lines are removed from whois outpu"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"Whois Server Version 2.0\nDomain names in the .com and .net domains can now be registered\n with many different competing registrars. Go to http://www.internic.net\nfor detailed information.\n\n\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterDisclaimers(self, popen):
+        """ Disclaimers are removed from whois output"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"The data in this whois database is provided to you for information\npurposes only,...that is...without prior written\nconsent from us.\n\nWe reserve the right to modify these terms at any time. By submitting\nthis query, you agree to abide by these terms.\n\nVersion 6.3 4/3/2002\n\nGet Noticed on the Internet!  Increase visibility for this domain name by listing it at www.whoisbusinesslistings.com\n\n\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterLegalese(self, popen):
+        """ Legal disclaimers are removed from whois output"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"NOTICE: lorem ipsum\n\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterNotice(self, popen):
+        """ Legal disclaimers starting with NOTICE: are removed from whois output"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"NOTICE: lorem ipsum\n\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterTerms(self, popen):
+        """ Terms of use are removed from whois output"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"TERMS OF USE: lorem ipsum\n\nFoo: bar", None]
+        result = util.net.whois(address)
+        self.assertEqual(result[0][0], "Foo")
+        self.assertEqual(result[0][1], "bar")
+
+    @mock.patch("util.net.subprocess.Popen")
+    def test_whoisFilterNote(self, popen):
+        """ Block starting with 'Please note:' are removed from whois output"""
+        address = "127.0.0.1"
+        popen.return_value.communicate.return_value = [b"Please note: lorem ipsum\n\nFoo: bar", None]
         result = util.net.whois(address)
         self.assertEqual(result[0][0], "Foo")
         self.assertEqual(result[0][1], "bar")
@@ -204,6 +230,79 @@ class TestUtilWhois(unittest.TestCase):
         getMock.return_value = requests.exceptions.Timeout
         response = util.net.externalIp()
         self.assertIsNone(response)
+
+    @mock.patch("util.net.jinja2")
+    @mock.patch("util.net.smtplib")
+    def test_sendMessageLoadsTemplate(self, smtpMock, jinjaMock):
+        """ The template file is loaded from the template directory"""
+        message_data = {
+            "template_dir": "fake_template_dir",
+            "template": "fake.template",
+            "subject": "test",
+            "smtp": {
+                "sender": "foo <foo@127.0.0.1>",
+                "recipients": ["bar@127.0.0.1", "baz@127.0.0.1"],
+                "host": "127.0.0.1",
+                "port": 999,
+                "username": "foo",
+                "password": "bar"
+            }
+        }
+
+        template_data = {
+            "foo": "bar"
+        }
+
+        env = mock.MagicMock()
+        loader = mock.MagicMock()
+        template = mock.MagicMock()
+
+        env.get_template.return_value = template
+        template.render.return_value = "rendered template"
+
+        jinjaMock.FileSystemLoader.return_value = loader
+        jinjaMock.Environment.return_value = env
+
+        mailserver = mock.MagicMock()
+        mailserver.ehlo.return_value = True
+        smtpMock.SMTP.return_value = mailserver
+
+        util.net.sendMessage(message_data, template_data)
+
+        # template directory is passed to jinja loader
+        jinjaMock.FileSystemLoader.assert_called_with(message_data["template_dir"])
+
+        # loader is passed to jinja environment
+        jinjaMock.Environment.assert_called_with(loader=loader)
+
+        # template file is passsed to jinja environment
+        env.get_template.assert_called_with(message_data["template"])
+
+        # template data is passed to template
+        template.render.assert_called_with(template_data)
+
+        # host and port are passed to smtplib
+        smtpMock.SMTP.assert_called_with(message_data["smtp"]["host"],
+                                         message_data["smtp"]["port"])
+
+        # ehlo is called twice, once before starttls and once after
+        self.assertEqual(mailserver.ehlo.call_count, 2)
+        self.assertEqual(mailserver.starttls.call_count, 1)
+
+        mailserver.login.assert_called_with(message_data["smtp"]["username"],
+                                            message_data["smtp"]["password"])
+
+        # first argument to sendmail is sender
+        sendmail_args = mailserver.sendmail.mock_calls[0][1]
+        self.assertEqual(sendmail_args[0], message_data["smtp"]["sender"])
+
+        # second argument to sendmail is recipient
+        self.assertTrue(message_data["smtp"]["recipients"][0] in sendmail_args[1])
+        self.assertTrue(message_data["smtp"]["recipients"][1] in sendmail_args[1])
+
+        self.assertTrue("Subject: " + message_data["subject"] in sendmail_args[2])
+        self.assertTrue("From: " + message_data["smtp"]["sender"] in sendmail_args[2])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -61,7 +61,12 @@ def whois(address):
         if " is provided by " in line or " is provided to you " in line:
             skip_until_blank = True
             continue
+
         if " reserve the right to " in line:
+            skip_until_blank = True
+            continue
+
+        if line.startswith("Version "):
             skip_until_blank = True
             continue
 
@@ -72,12 +77,6 @@ def whois(address):
         if line.startswith("Please note:"):
             skip_until_blank = True
             continue
-
-        if "database contains ONLY" in line:
-            continue
-        if line == "Registrars.":
-            continue
-
 
         # Remove comments
         if line.startswith(("#", "%")):
@@ -144,11 +143,11 @@ def externalIp():
     except Exception:
         pass
 
-def sendMessage(message_data, template_data, debug=False):
-    """Compose an email message from a Jinja template and send via
-    localhost SMTP"""
+def sendMessage(message_data, template_data):
+    """Render an email template and send via SMTP"""
 
-    env = jinja2.Environment(loader=jinja2.FileSystemLoader(message_data["template_dir"]))
+    loader = jinja2.FileSystemLoader(message_data["template_dir"])
+    env = jinja2.Environment(loader=loader)
     template = env.get_template(message_data["template"])
 
     rendered_template = template.render(template_data)
@@ -157,9 +156,6 @@ def sendMessage(message_data, template_data, debug=False):
     message["To"] = ", ".join(message_data["smtp"]["recipients"])
     message["Subject"] = message_data["subject"]
     message["From"] = message_data["smtp"]["sender"]
-
-    if debug:
-        return message.as_string()
 
     mailserver = smtplib.SMTP(message_data["smtp"]["host"],
                               message_data["smtp"]["port"])
