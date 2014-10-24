@@ -30,6 +30,7 @@ cherrypy.tools.template = tools.jinja.Tool()
 
 class MedleyServer(object):
     mc = None
+    template_dir = None
 
     def __init__(self):
         memcache_host = cherrypy.config.get("memcache.host")
@@ -37,8 +38,8 @@ class MedleyServer(object):
 
         self.mc_expire = cherrypy.config.get("memcache.expire")
 
-        template_dir = cherrypy.config.get("templates.dir")
-        plugins.jinja.Plugin(cherrypy.engine, template_dir).subscribe()
+        self.template_dir = cherrypy.config.get("templates.dir")
+        plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
 
 
     @cherrypy.expose
@@ -187,17 +188,17 @@ class MedleyServer(object):
             out, err = process.communicate()
             return out.strip().decode("utf-8")
 
-        results = [runCommand(command) for command in commands]
+        command_results = [runCommand(command) for command in commands]
 
-        data["results"] = results
         data["commands"] = commands
+        data["command_results"] = command_results
 
-        if len(set(results)) == 1:
+        if len(set(command_results)) == 1:
             data["result"] = "ok"
         else:
             data["result"] = "mismatch"
 
-        # Email delivery is only triggered via POST
+        # Email delivery is only triggered from POST requests
         if cherrypy.request.method != "POST":
             email = None
 

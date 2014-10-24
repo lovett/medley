@@ -23,7 +23,10 @@ def setup_module(memcacheClient):
     config_extra = {
         "global": {
             "request.show_tracebacks": False,
-            "azure.url.deployments": "http://example.com/{}/deployments"
+            "azure.url.deployments": "http://example.com/{}/deployments",
+        },
+        "dns_hosts": {
+            "test": ["foo", "bar"]
         },
         "/ip": {
             "tools.auth_basic.checkpassword": cherrypy.lib.auth_basic.checkpassword_dict({
@@ -780,6 +783,76 @@ class TestMedleyServer(BaseCherryPyTestCase):
         with mock.patch("medley.subprocess") as subprocess:
             response = self.request("/external-ip")
             subprocess.call.assert_called_once_with(expected_command)
+
+    def test_dnsmatchNoToken(self):
+        """The /dnsmatch endpoint requires a URL token to determine which
+        hosts to check."""
+        response = self.request("/dnsmatch")
+        self.assertEqual(response.code, 400)
+
+    def test_dnsmatchInvalidToken(self):
+        """The /dnsmatch endpoint rejects URL tokens that are not in the config."""
+        response = self.request("/dnsmatch/foo")
+        self.assertEqual(response.code, 400)
+
+    def test_dnsmatchOk(self):
+        """ If there is no mismatch, /dnsmatch returns a result of ok"""
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
+            response = self.request("/dnsmatch/test", as_json=True)
+            self.assertTrue("result" in response.body)
+            self.assertTrue("commands" in response.body)
+            self.assertTrue("command_results" in response.body)
+            self.assertEqual(response.body["result"], "ok")
+
+    def test_dnsmatchOkPlain(self):
+        """ If there is no mismatch, /dnsmatch returns a result of ok"""
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
+            response = self.request("/dnsmatch/test", as_plain=True)
+            self.assertEqual(response.body, "ok")
+
+    def test_dnsmatchMismatch(self):
+        """ If there is no mismatch, /dnsmatch returns a result of mismatch"""
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"bar", None)]
+            response = self.request("/dnsmatch/test", as_json=True)
+            self.assertTrue("result" in response.body)
+            self.assertTrue("commands" in response.body)
+            self.assertTrue("command_results" in response.body)
+            self.assertEqual(response.body["result"], "mismatch")
+
+    @mock.patch("util.net.sendMessage")
+    def test_dnsmatchEmailOnlyOnPost(self, sendMessage):
+        """ Email is only sent on post requsts."""
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"bar", None)]
+            response = self.request("/dnsmatch/test", as_json=True)
+            self.assertFalse(sendMessage.called)
+
+    @mock.patch("util.net.sendMessage")
+    def test_dnsmatchSendEmail(self, sendMessage):
+        """ Email is only sent on post requsts."""
+
+        kwargs = {
+            "email": "1"
+        }
+
+        sendMessage.return_value = True
+
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"bar", None)]
+
+            response = self.request(path="/dnsmatch/test",
+                                    method="POST",
+                                    **kwargs)
+            self.assertTrue(sendMessage.called)
+
+            args = sendMessage.call_args_list[0][0][0]
+
+            for key, value in args.items():
+                self.assertTrue(value is not None)
+
 
 if __name__ == "__main__":
     import unittest

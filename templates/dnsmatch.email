@@ -1,4 +1,4 @@
 {% for command in commands %}
 {{ command|join(" ") }}
-{{ results[loop.index0] }}
+{{ command_results[loop.index0] }}
 {% endfor %}

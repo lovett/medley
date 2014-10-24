@@ -8,7 +8,7 @@
             {% for command in commands %}
             <tr>
                 <td>{{ command|join(" ") }}</td>
-                <td>{{ results[loop.index0] }}</td>
+                <td>{{ command_results[loop.index0] }}</td>
             </tr>
             {% endfor %}
         </tbody>
