@@ -91,13 +91,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_azureRejectsFormPost(self):
         """ The azure endpoint rejects application/x-www-form-urlencoded"""
-        kwargs = {
-            "foo": "bar"
-        }
-
         response = self.request(path="/azure/test",
                                 method="POST",
-                                **kwargs)
+                                foo="bar")
 
         self.assertEqual(response.code, 415)
 
@@ -388,38 +384,29 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_lettercaseConvertsToLowercase(self):
         """ The lettercase endpoint converts an input string to lowercase """
-        kwargs = {
-            "style": "lower",
-            "value": "TEST"
-        }
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
-                                **kwargs)
+                                style="lower",
+                                value="TEST")
         self.assertEqual(response.body, "test")
 
     def test_lettercaseConvertsToUppercase(self):
         """ The lettercase endpoint converts an input string to uppercase """
-        kwargs = {
-            "style": "upper",
-            "value": "test"
-        }
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
-                                **kwargs)
+                                style="upper",
+                                value="test")
         self.assertEqual(response.body, "TEST")
 
     def test_lettercaseConvertsToTitle(self):
         """ The lettercase endpoint converts an input string to title case """
-        kwargs = {
-            "style": "title",
-            "value": "this iS a TEst 1999"
-        }
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
-                                **kwargs)
+                                style="title",
+                                value="this iS a TEst 1999")
         self.assertEqual(response.body, "This Is A Test 1999")
 
     def test_geoupdateReturns410IfNoUrl(self):
@@ -833,11 +820,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
     @mock.patch("util.net.sendMessage")
     def test_dnsmatchSendEmail(self, sendMessage):
         """ Email is only sent on post requsts."""
-
-        kwargs = {
-            "email": "1"
-        }
-
         sendMessage.return_value = True
 
         with mock.patch("medley.subprocess.Popen") as popen:
@@ -845,7 +827,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
             response = self.request(path="/dnsmatch/test",
                                     method="POST",
-                                    **kwargs)
+                                    email=1)
             self.assertTrue(sendMessage.called)
 
             args = sendMessage.call_args_list[0][0][0]
