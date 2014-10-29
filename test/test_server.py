@@ -208,6 +208,34 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertTrue(body["siteName"] in httpretty.last_request().parsed_body["url"][0])
         self.assertEqual(httpretty.last_request().parsed_body["group"][0], "azure")
 
+    @httpretty.activate
+    @mock.patch("medley.urllib.request.Request")
+    def test_azureMessageFirstLine(self, requestMock):
+        """The body of the notification sent by the azure endpoint only
+        contains the first line of the commit message."""
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        body = {
+            "siteName": "foo",
+            "status": "success",
+            "message": "line1\nline2\nline3",
+            "complete": True
+        }
+
+        requestMock.return_value = True
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers={"Content-type": "application/json"})
+
+        args, kwargs = requestMock.call_args_list[0]
+        notification = urllib.parse.parse_qs(kwargs["data"])
+        self.assertEqual(notification[b"body"], [b"line1"])
+
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
         response = self.request("/", as_json=True)
