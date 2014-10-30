@@ -9,3 +9,4 @@ medley.conf
 *.pyc
 .coverage
 htmlcov
+logfetch.ini
