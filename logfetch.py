@@ -4,15 +4,26 @@ processing.
 This script is currently biased toward getting logs out of Google
 App Engine via the appcfg.py tool.
 
-It also is biased toward running under Python 3. For App Engine, that
-creates some complications since appcfg and the rest of the App Engine
-SDK require Python 2. To remedy, we call appcfg through a separate
-Python 2 process, using a Python 3 subprocess.
+It's also biased toward running from cron.
+
+As with medley, this script expects to run under Python 3. For App
+Engine, that creates some complications since appcfg and the rest of
+the App Engine SDK require Python 2. As a workaround, we run appcfg
+through a separate Python 2 process which is invoked from here via
+subprocess.
 
 Application configuration is taken from the file logfetch.ini in the
-directory that this script resides. Unlike the CherryPy config, this
-should be an INI file in the strict sense with no Python expressions
-and without quoted values.
+directory that this script resides. Unlike the CherryPy config that
+medley uses, this should be an INI file in the strict sense with
+plain, unquoted values rather than Python-compatible expressions.
+
+Appcfg will be invoked with --oauth2 and --noauth_local_webserver. In
+order for this to work, oauth will need to have already been set up.
+To do this, run appcfg directly (the --dry-run argument of this script
+may be useful to see all the arguments). After oauth has been set up,
+you should see a file .appcfg_oauth2_tokens in your home
+directory. These tokens will be picked up by appcfg when executed by
+this script if the user is the same.
 
 """
 
@@ -35,7 +46,7 @@ def main():
     # configuration and validation.
     # The default date is calculated relative to Pacific Time, since
     # that is what App Engine uses.
-    os.environ["TZ"] = "America/Los_Angeles"	
+    os.environ["TZ"] = "America/Los_Angeles"
     today = date.today()
     parser = argparse.ArgumentParser()
     parser.add_argument("site")
