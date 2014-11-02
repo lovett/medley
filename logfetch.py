@@ -2,10 +2,10 @@
 processing.
 
 This script is currently biased toward getting logs out of Google
-AppEngine via the appcfg.py tool.
+App Engine via the appcfg.py tool.
 
-It also is biased toward running under Python 3. For AppEngine, that
-creates some complications since appcfg and the rest of the AppEngine
+It also is biased toward running under Python 3. For App Engine, that
+creates some complications since appcfg and the rest of the App Engine
 SDK require Python 2. To remedy, we call appcfg through a separate
 Python 2 process, using a Python 3 subprocess.
 
@@ -32,7 +32,10 @@ def main():
     # start out in the script directory
     os.chdir(os.path.dirname(os.path.realpath(sys.argv[0])))
 
-    # configuration and validation
+    # configuration and validation.
+    # The default date is calculated relative to Pacific Time, since
+    # that is what App Engine uses.
+    os.environ["TZ"] = "America/Los_Angeles"	
     today = date.today()
     parser = argparse.ArgumentParser()
     parser.add_argument("site")
@@ -77,6 +80,8 @@ def main():
             "--num_days=1",
             "--include_all",
             "--end_date=%s" % log_date.strftime("%Y-%m-%d"),
+            "--noauth_local_webserver",
+            "--oauth2",
             settings["log_file"]
         ]
 
