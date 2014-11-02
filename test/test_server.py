@@ -221,7 +221,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         body = {
             "siteName": "foo",
             "status": "success",
-            "message": "line1\nline2\nline3",
+            "message": "line1 foo bar\nline2 foo bar \nline3 foo bar",
             "complete": True
         }
 
@@ -234,7 +234,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         args, kwargs = requestMock.call_args_list[0]
         notification = urllib.parse.parse_qs(kwargs["data"])
-        self.assertEqual(notification[b"body"], [b"line1"])
+        self.assertEqual(notification[b"body"], [b"line1 foo bar"])
 
     def test_indexReturnsJson(self):
         """ The index returns json if requested """

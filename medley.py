@@ -60,7 +60,7 @@ class MedleyServer(object):
         if not "message" in body:
             body["message"] = None
         else:
-            body["message"] = body["message"].split()[0]
+            body["message"] = body["message"].split("\n")[0]
 
         if not "status" in body:
             body["status"] = "unknown"
