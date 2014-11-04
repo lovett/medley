@@ -44,7 +44,7 @@ def findAreaCode(area_code):
         ?s dbp:this ?o .
         ?s dbp:state ?state_abbrev .
         ?s rdfs:comment ?comment
-        FILTER (regex(?o, "{0}", "i"))
+        FILTER (regex(str(?o), "{0}", "i"))
         FILTER (langMatches(lang(?state_abbrev), "en"))
         FILTER (langMatches(lang(?comment), "en"))
     }} LIMIT 1
