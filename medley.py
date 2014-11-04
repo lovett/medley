@@ -324,8 +324,6 @@ class MedleyServer(object):
             "reverse_host": util.net.reverseLookup(ip)
         }
 
-        print(data)
-
         # Geoip
         db_path = cherrypy.config.get("database.directory")
         db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))

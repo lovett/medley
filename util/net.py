@@ -41,65 +41,25 @@ def whois(address):
             else:
                 skip_until_blank = False
 
-
-        # Skip header lines
-        if line.startswith("Whois Server Version"):
-            continue
-
-        # Skip prefatory notices
-        if "can now be registered" in line:
-            skip_until_blank = True
-            continue
-
-        # Skip legalese
-        if line.startswith("NOTICE:"):
-            skip_until_blank = True
-            continue
-        if line.startswith("TERMS OF USE:"):
-            skip_until_blank = True
-            continue
-        if " is provided by " in line or " is provided to you " in line:
-            skip_until_blank = True
-            continue
-
-        if " reserve the right to " in line:
-            skip_until_blank = True
-            continue
-
-        if line.startswith("Version "):
-            skip_until_blank = True
-            continue
-
-        if line.startswith("Get Noticed on the Internet"):
-            skip_until_blank = True
-            continue
-
-        if line.startswith("Please note:"):
-            skip_until_blank = True
-            continue
-
-        # Remove comments
+        # Skip comments
         if line.startswith(("#", "%")):
             continue
 
-        # separate label and value for non-comment lines
+        # Skip verbose lines
+        if len(line.split()) > 10:
+            skip_until_blank = True
+            continue
+
         line = re.sub(r"\s+", " ", line).strip()
         line = line.lstrip(">>>").strip("<<<")
         fields = line.split(": ", 1)
 
-        # Discard blank lines
-        if fields[0] == "":
-            continue
-
-        # Discard labelled lines with no value
-        if len(fields) == 1 and ":" in fields[0]:
-            continue
-
-        # Preserve unlabelled lines
+        # Skip unlabelled lines
         if len(fields) == 1:
-            fields.append(None)
-        else:
-            fields[0] = re.sub(r"([a-z])([A-Z][a-z])", r"\1 \2", fields[0]).title()
+            continue
+
+        # Remove camel case from labels
+        fields[0] = re.sub(r"([a-z])([A-Z][a-z])", r"\1 \2", fields[0]).title()
 
         out_filtered.append(fields)
 

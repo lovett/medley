@@ -80,16 +80,6 @@ class TestUtilNet(unittest.TestCase):
         self.assertEqual(result[0][0], "Org Name")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_whoisUnlabelledLine(self, popen):
-        """Unlabelled lines are preserved"""
-        address = "999.999.999.999"
-        response = b"No match found for 999.999.999.999."
-        popen.return_value.communicate.return_value = [response, ""]
-        result = util.net.whois(address)
-        self.assertEqual(result[0][0], response.decode("utf-8"))
-        self.assertEqual(result[0][1], None)
-
-    @mock.patch("util.net.subprocess.Popen")
     def test_whoisKeyWithoutValue(self, popen):
         """Lines without values are removed"""
         address = "127.0.0.1"
@@ -117,37 +107,10 @@ class TestUtilNet(unittest.TestCase):
         self.assertEqual(result[0][1], "bar")
 
     @mock.patch("util.net.subprocess.Popen")
-    def test_whoisFilterLegalese(self, popen):
-        """ Legal disclaimers are removed from whois output"""
+    def test_whoisFilterVerbose(self, popen):
+        """ Blocks of lines with high word count are removed"""
         address = "127.0.0.1"
-        popen.return_value.communicate.return_value = [b"NOTICE: lorem ipsum\n\nFoo: bar", None]
-        result = util.net.whois(address)
-        self.assertEqual(result[0][0], "Foo")
-        self.assertEqual(result[0][1], "bar")
-
-    @mock.patch("util.net.subprocess.Popen")
-    def test_whoisFilterNotice(self, popen):
-        """ Legal disclaimers starting with NOTICE: are removed from whois output"""
-        address = "127.0.0.1"
-        popen.return_value.communicate.return_value = [b"NOTICE: lorem ipsum\n\nFoo: bar", None]
-        result = util.net.whois(address)
-        self.assertEqual(result[0][0], "Foo")
-        self.assertEqual(result[0][1], "bar")
-
-    @mock.patch("util.net.subprocess.Popen")
-    def test_whoisFilterTerms(self, popen):
-        """ Terms of use are removed from whois output"""
-        address = "127.0.0.1"
-        popen.return_value.communicate.return_value = [b"TERMS OF USE: lorem ipsum\n\nFoo: bar", None]
-        result = util.net.whois(address)
-        self.assertEqual(result[0][0], "Foo")
-        self.assertEqual(result[0][1], "bar")
-
-    @mock.patch("util.net.subprocess.Popen")
-    def test_whoisFilterNote(self, popen):
-        """ Block starting with 'Please note:' are removed from whois output"""
-        address = "127.0.0.1"
-        popen.return_value.communicate.return_value = [b"Please note: lorem ipsum\n\nFoo: bar", None]
+        popen.return_value.communicate.return_value = [b"Lorem ipsum dolor sit amet, consectetuer adipiscing elit.  Donec at pede.  Nulla posuere.\n\n\nFoo: bar", None]
         result = util.net.whois(address)
         self.assertEqual(result[0][0], "Foo")
         self.assertEqual(result[0][1], "bar")
