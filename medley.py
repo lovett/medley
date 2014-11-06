@@ -457,7 +457,7 @@ class MedleyServer(object):
             data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
             data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(data["number_formatted"])
             data["comment"] = location.get("comment")
-            data["sparql"] = location.get("sparql")
+            data["sparql"] = location.get("sparql", [])
 
             return data
 

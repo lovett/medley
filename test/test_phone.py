@@ -54,8 +54,10 @@ class TestUtilPhone(unittest.TestCase):
                                body=fixture,
                                status=200)
 
-        response = util.phone.stateName("x")
-        self.assertEqual(response, "Unknown")
+        result = util.phone.stateName("x")
+        self.assertTrue("sparql" in result)
+        self.assertTrue("url" in result)
+        self.assertEqual(result["name"], "Not found")
 
     @httpretty.activate
     def test_stateNameValid(self):
@@ -68,8 +70,10 @@ class TestUtilPhone(unittest.TestCase):
                                body=fixture,
                                status=200)
 
-        response = util.phone.stateName("NY")
-        self.assertEqual(response, "New York")
+        result = util.phone.stateName("NY")
+        self.assertTrue("sparql" in result)
+        self.assertTrue("url" in result)
+        self.assertEqual(result["name"], "New York")
 
     @httpretty.activate
     def test_stateNameError(self):

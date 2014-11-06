@@ -56,36 +56,42 @@ def findAreaCode(area_code):
         "timeout": "1000"
     })
 
-    query = "http://dbpedia.org/sparql?{0}".format(params)
+    url = "http://dbpedia.org/sparql?{0}".format(params)
+
+    result = {
+        "sparql": [],
+        "url": [],
+        "state_abbreviation": None,
+        "state_name": "Unknown",
+        "comment": "The location of this number could not be found."
+    }
 
     try:
-        with urllib.request.urlopen(query, timeout=7) as request:
-            result = json.loads(request.read().decode("utf-8"))
+        with urllib.request.urlopen(url, timeout=7) as request:
+            response = json.loads(request.read().decode("utf-8"))
 
-        first_result = result["results"]["bindings"][0]
-        abbrev = first_result["state_abbrev"]["value"]
-        comment = first_result["comment"]["value"]
-
-        state = stateName(abbrev)
-
-        return {
-            "sparql": (sparql, state["sparql"]),
-            "state_abbreviation": abbrev,
-            "state_name": state["name"],
-            "comment": abbreviateComment(comment)
-        }
+        first_result = response["results"]["bindings"][0]
+        result["sparql"].append(sparql)
+        result["url"].append(url)
+        result["state_abbreviation"] = first_result["state_abbrev"]["value"]
+        result["comment"] = abbreviateComment(first_result["comment"]["value"])
     except IndexError:
-        return {
-            "sparql": (sparql),
-            "state_abbreviation": None,
-            "state_name": "Unknown",
-            "comment": "The location of this number could not be found."
-        }
+        return result
     except (socket.timeout, urllib.error.HTTPError):
         raise PhoneException("Dbpedia area code query failed")
 
+
+    try:
+        state_result = stateName(result["state_abbreviation"])
+        result["sparql"].append(state_result["sparql"])
+        result["url"].append(state_result["url"])
+        result["state_name"] = state_result["name"]
+        return result
+    except PhoneException:
+        return result
+
 def stateName(abbreviation=None):
-    """Query dbpedia for the name of US state by its abbreviation"""
+    """Query dbpedia for the name of a US state from its abbreviation"""
 
     sparql = """
     PREFIX dbp: <http://dbpedia.org/property/>
@@ -102,20 +108,20 @@ def stateName(abbreviation=None):
         "timeout": "1000"
     })
 
-    query = "http://dbpedia.org/sparql?{0}".format(params)
+    url = "http://dbpedia.org/sparql?{0}".format(params)
+    result = {
+        "sparql": sparql,
+        "url": url
+    }
 
     try:
-        with urllib.request.urlopen(query, timeout=7) as request:
-            result = json.loads(request.read().decode("utf-8"))
-        return {
-            "name": result["results"]["bindings"][0]["name"]["value"],
-            "sparql": sparql
-        }
+        with urllib.request.urlopen(url, timeout=7) as request:
+            response = json.loads(request.read().decode("utf-8"))
+        result["name"] = response["results"]["bindings"][0]["name"]["value"]
+        return result
     except IndexError:
-        return {
-            "name": "Unknown",
-            "sparql": sparql
-        }
+        result["name"] = "Not found"
+        return result
     except (socket.timeout, urllib.error.HTTPError):
         raise PhoneException("Dbpedia state name query failed")
 
