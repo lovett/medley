@@ -48,7 +48,7 @@
     <h1 class="ui top attached small inverted green header">Sparql</h1>
     <div class="ui segment attached">
         {% for query in sparql %}
-        <pre>{{ query|escape }}</pre>
+        <pre>{{ query|unindent|escape }}</pre>
         {% endfor %}
     </div>
 </div>

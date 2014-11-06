@@ -10,6 +10,7 @@ class Plugin(plugins.SimplePlugin):
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
 
         self.env.filters["datetime"] = self.datetime_filter
+        self.env.filters["unindent"] = self.unindent_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -50,3 +51,11 @@ class Plugin(plugins.SimplePlugin):
         else:
             directives = format
         return value.strftime(directives)
+
+    def unindent_filter(self, string):
+        """Remove leading whitespace from a multiline string without losing indentation"""
+        lines = string.split("\n")
+        indents = [len(line) - len(line.lstrip(" ")) for line in lines]
+        indents.remove(0)
+        unindented = [line.replace(" ", "", min(indents)) for line in lines]
+        return "\n".join(unindented)
