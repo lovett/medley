@@ -28,9 +28,9 @@ def format(number=""):
         return number
 
 def findAreaCode(area_code):
-    """Query dbpedia for the geographic location of an American telephone area code
-
-    Returns a dictionary with keys for state abbreviation, full name, and comment.
+    """Query dbpedia for the geographic location of a North American
+    telephone area code. Returns a dictionary with keys for state
+    abbreviation, full name, and comment.
     """
 
     # area code should be a 3 digit string
@@ -66,13 +66,17 @@ def findAreaCode(area_code):
         abbrev = first_result["state_abbrev"]["value"]
         comment = first_result["comment"]["value"]
 
+        state = stateName(abbrev)
+
         return {
+            "sparql": (sparql, state["sparql"]),
             "state_abbreviation": abbrev,
-            "state_name": stateName(abbrev),
+            "state_name": state["name"],
             "comment": abbreviateComment(comment)
         }
     except IndexError:
         return {
+            "sparql": (sparql),
             "state_abbreviation": None,
             "state_name": "Unknown",
             "comment": "The location of this number could not be found."
@@ -103,9 +107,15 @@ def stateName(abbreviation=None):
     try:
         with urllib.request.urlopen(query, timeout=7) as request:
             result = json.loads(request.read().decode("utf-8"))
-        return result["results"]["bindings"][0]["name"]["value"]
+        return {
+            "name": result["results"]["bindings"][0]["name"]["value"],
+            "sparql": sparql
+        }
     except IndexError:
-        return "Unknown"
+        return {
+            "name": "Unknown",
+            "sparql": sparql
+        }
     except (socket.timeout, urllib.error.HTTPError):
         raise PhoneException("Dbpedia state name query failed")
 

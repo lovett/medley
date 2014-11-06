@@ -103,3 +103,7 @@ INPUT[type=submit] {
 .recent-calls LI DIV {
     font-size: .75em;
 }
+
+PRE {
+    font-size: .85em;
+}

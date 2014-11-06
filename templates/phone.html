@@ -14,27 +14,24 @@
 <script src="/static/js/maps.js"></script>
 {% endblock %}
 
-{% block page_header %}
-{% if number %}
-
-{% if number|length > 3 %}
-<p class="supplemental"><a href="{{ whitepages_url }}" target="_blank">Search Whitepages.com</a></p>
-<p class="supplemental"><a href="{{ bing_url}}" target="_blank">Search Bing</a></p>
-{% endif %}
-
-{% endif %}
-{% endblock %}
-
 {% block page_body %}
 {% if number %}
 <div class="eight wide column">
-    {% if history|length > 0 %}
 
+    {% if history|length > 0 and history[0]["clid"] != number %}
     <h1 class="ui top attached small inverted green header">Caller ID</h1>
     <div class="ui segment attached">
         {{ history[0]["clid"] }}
     </div>
+    {% endif %}
 
+    <h1 class="ui top attached small inverted green header">Links</h1>
+    <div class="ui segment attached">
+        <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank" rel="noreferrer">Search Whitepages.com</a></p>
+        <p class="supplemental"><a href="{{ bing_url }}" target="_blank" rel="noreferrer">Search Bing</a></p>
+    </div>
+
+    {% if history|length > 0 %}
     <h1 class="ui top attached small inverted green header">Recent Calls</h1>
     <div class="ui segment attached">
         <ul class="ui list recent-calls">
@@ -48,16 +45,23 @@
     </div>
     {% endif %}
 
+    <h1 class="ui top attached small inverted green header">Sparql</h1>
+    <div class="ui segment attached">
+        {% for query in sparql %}
+        <pre>{{ query|escape }}</pre>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="eight wide column">
     <h1 class="ui top attached small inverted green header">
         Location: {{ state_name }}
     </h1>
     <div class="ui segment attached">
         <p>{{ comment }}</p>
     </div>
-
-</div>
-<div class="eight wide column">
     <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
+
 </div>
 {% else %}
 <form class="ui form sixteen wide column" method="get" action="/phone">
