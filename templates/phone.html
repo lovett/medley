@@ -19,20 +19,20 @@
 <div class="eight wide column">
 
     {% if history|length > 0 and history[0]["clid"] != number %}
-    <h1 class="ui top attached small inverted green header">Caller ID</h1>
+    <h1 class="ui top attached tiny inverted green header">Caller ID</h1>
     <div class="ui segment attached">
         {{ history[0]["clid"] }}
     </div>
     {% endif %}
 
-    <h1 class="ui top attached small inverted green header">Links</h1>
+    <h1 class="ui top attached tiny inverted green header">Links</h1>
     <div class="ui segment attached">
         <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank" rel="noreferrer">Search Whitepages.com</a></p>
         <p class="supplemental"><a href="{{ bing_url }}" target="_blank" rel="noreferrer">Search Bing</a></p>
     </div>
 
     {% if history|length > 0 %}
-    <h1 class="ui top attached small inverted green header">Recent Calls</h1>
+    <h1 class="ui top attached tiny inverted green header">Recent Calls</h1>
     <div class="ui segment attached">
         <ul class="ui list recent-calls">
             {% for entry in history %}
@@ -45,16 +45,18 @@
     </div>
     {% endif %}
 
-    <h1 class="ui top attached small inverted green header">Sparql</h1>
-    <div class="ui segment attached">
-        {% for query in sparql %}
-        <pre>{{ query|unindent|escape }}</pre>
-        {% endfor %}
+    <div class="ui basic segment">
+        <div class="ui tiny teal button toggle-trigger"><span>Show</span> Sparql Queries</div>
+        <div class="toggle-target hidden">
+            {% for query in sparql %}
+            <pre>{{ query|unindent|escape }}</pre>
+            {% endfor %}
+        </div>
     </div>
 </div>
 
 <div class="eight wide column">
-    <h1 class="ui top attached small inverted green header">
+    <h1 class="ui top attached tiny inverted green header">
         Location: {{ state_name }}
     </h1>
     <div class="ui segment attached">

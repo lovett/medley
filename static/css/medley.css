@@ -107,3 +107,7 @@ INPUT[type=submit] {
 PRE {
     font-size: .85em;
 }
+
+.hidden {
+    display: none;
+}
