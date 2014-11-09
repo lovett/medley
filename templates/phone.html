@@ -57,7 +57,7 @@
 
 <div class="eight wide column">
     <h1 class="ui top attached tiny inverted green header">
-        Location: {{ state_name }}
+        Location{%if  state_name %}: {{ state_name }}{% endif %}
     </h1>
     <div class="ui segment attached">
         <p>{{ comment }}</p>

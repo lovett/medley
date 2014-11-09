@@ -94,11 +94,16 @@ def stateName(abbreviation=None):
     """Query dbpedia for the name of a US state from its abbreviation"""
 
     sparql = """
-    PREFIX dbp: <http://dbpedia.org/property/>
-    SELECT ?name WHERE {{
-        ?s dbp:isocode "US-{0}"@en .
-        ?s dbp:name ?name .
-        FILTER (langMatches(lang(?name), "en"))
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX dbpo: <http://dbpedia.org/ontology/>
+    SELECT ?name, ?actualResource WHERE {{
+        ?s rdfs:label "US-{0}"@en .
+        {{
+            ?s dbpo:wikiPageRedirects ?actualResource .
+            ?actualResource rdfs:label ?redirectsTo .
+            ?actualResource rdfs:label ?name .
+            FILTER (langMatches(lang(?name), "en"))
+        }}
     }} LIMIT 1
     """.format(abbreviation)
 
@@ -120,7 +125,7 @@ def stateName(abbreviation=None):
         result["name"] = response["results"]["bindings"][0]["name"]["value"]
         return result
     except IndexError:
-        result["name"] = "Not found"
+        result["name"] = None
         return result
     except (socket.timeout, urllib.error.HTTPError):
         raise PhoneException("Dbpedia state name query failed")
@@ -128,7 +133,12 @@ def stateName(abbreviation=None):
 def abbreviateComment(comment):
     """Extract the first two meaningful sentences from a dbpedia comment field"""
 
-    abbreviated_comment = [sentence for sentence in comment.split(". ")
+    # Separate collided sentences:
+    # This is the first.This is the second. => This is the first. This is the second.
+    abbreviated_comment = re.sub(r'([^A-Z])\.([^ ])', '\\1. \\2', comment)
+
+    # Remove sentences referring to maps
+    abbreviated_comment = [sentence for sentence in abbreviated_comment.split(". ")
                            if re.search(" in (red|blue) (is|are)", sentence, re.IGNORECASE) is None
                            and not re.match("The map to the right", sentence, re.IGNORECASE)
                            and not re.match("Error: ", sentence, re.IGNORECASE)][:2]

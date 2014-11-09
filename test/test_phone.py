@@ -57,7 +57,7 @@ class TestUtilPhone(unittest.TestCase):
         result = util.phone.stateName("x")
         self.assertTrue("sparql" in result)
         self.assertTrue("url" in result)
-        self.assertEqual(result["name"], "Not found")
+        self.assertTrue(result["name"] is None)
 
     @httpretty.activate
     def test_stateNameValid(self):
