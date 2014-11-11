@@ -129,7 +129,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
-    def external_ip(self):
+    def external_ip(self, silent=False):
         """Determine the local machine's external IP"""
 
         host = cherrypy.request.app.config["ip_tokens"].get("external")
@@ -158,6 +158,11 @@ class MedleyServer(object):
                 subprocess.call(dns_command)
         else:
             ip = "not available"
+
+
+        if silent:
+            cherrypy.response.status = 204
+            return
 
         if cherrypy.request.negotiated == "text/plain":
             return ip
@@ -204,7 +209,7 @@ class MedleyServer(object):
         if cherrypy.request.method != "POST":
             email = None
 
-        # Email delivery only recurs when there is a mismatch
+        # Email delivery only occurs when there is a mismatch
         if email and data["result"] == "mismatch":
             config = {
                 "template_dir": self.template_dir,
@@ -371,7 +376,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
-    def geoupdate(self):
+    def geoupdate(self, silent=False):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
         url = cherrypy.config.get("geoip.download.url")
@@ -392,6 +397,10 @@ class MedleyServer(object):
             except subprocess.CalledProcessError:
                 os.unlink(download_path)
                 raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
+
+        if silent:
+            cherrypy.response.status = 204
+            return
 
         return {
             "page_title": "Geoupdate",

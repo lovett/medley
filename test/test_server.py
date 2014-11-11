@@ -470,6 +470,15 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/geoupdate")
         self.assertEqual(response.code, 200)
 
+    @httpretty.activate
+    def test_geoupdateReturns204(self):
+        """ The geoupdate endpoint returns 204 when silent mode is requested  """
+        cherrypy.config["geoip.download.url"] = "http://example.com/test"
+        cherrypy.config["database.directory"] = "/tmp"
+        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
+        response = self.request("/geoupdate", silent=1)
+        self.assertEqual(response.code, 204)
+
     def test_whoisJsonWithoutAddress(self):
         """ The /whois endpoint returns 400 if called as json without an address"""
         response = self.request("/whois", as_json=True)
@@ -755,6 +764,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         response = self.request("/external-ip", as_json=True)
         self.assertEqual(response.body["ip"], address)
+
+    @mock.patch("medley.util.net.externalIp")
+    def test_externalIpSuccessSilent(self, externalIp):
+        """The /external-ip endpoint returns 204 when silent mode is requested"""
+        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        address = "1.1.1.1"
+        externalIp.return_value = address
+
+        response = self.request("/external-ip", silent=1)
+        self.assertEqual(response.code, 204)
+
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpFail(self, externalIp):
