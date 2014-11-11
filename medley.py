@@ -163,8 +163,7 @@ class MedleyServer(object):
         if silent:
             cherrypy.response.status = 204
             return
-
-        if cherrypy.request.negotiated == "text/plain":
+        elif cherrypy.request.negotiated == "text/plain":
             return ip
         elif cherrypy.request.negotiated == "application/json":
             return { "ip": ip }
@@ -177,7 +176,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
-    def dnsmatch(self, token=None, email=None):
+    def dnsmatch(self, token=None, email=None, silent=False):
         """Determine whether two or more hosts resolve to the same address"""
 
         data = {}
@@ -219,7 +218,10 @@ class MedleyServer(object):
             }
             util.net.sendMessage(config, data)
 
-        if cherrypy.request.negotiated == "text/html":
+        if silent:
+            cherrypy.response.status = 204
+            return
+        elif cherrypy.request.negotiated == "text/html":
             data["page_title"] = "DNS Match"
             return data
         elif cherrypy.request.negotiated == "application/json":

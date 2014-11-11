@@ -477,6 +477,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         cherrypy.config["database.directory"] = "/tmp"
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request("/geoupdate", silent=1)
+        self.assertEqual(response.body, "")
         self.assertEqual(response.code, 204)
 
     def test_whoisJsonWithoutAddress(self):
@@ -773,6 +774,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         externalIp.return_value = address
 
         response = self.request("/external-ip", silent=1)
+        self.assertEqual(response.body, "")
         self.assertEqual(response.code, 204)
 
 
@@ -839,6 +841,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
             self.assertTrue("commands" in response.body)
             self.assertTrue("command_results" in response.body)
             self.assertEqual(response.body["result"], "ok")
+
+    def test_dnsmatchSilent(self):
+        """ In silent mode, /dnsmatch returns 204"""
+        with mock.patch("medley.subprocess.Popen") as popen:
+            popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
+            response = self.request("/dnsmatch/test", silent=1)
+            self.assertEqual(response.body, "")
+            self.assertEqual(response.code, 204)
 
     def test_dnsmatchOkPlain(self):
         """ If there is no mismatch, /dnsmatch returns a result of ok"""
