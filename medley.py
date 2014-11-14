@@ -26,7 +26,8 @@ cherrypy.tools.negotiable = tools.negotiable.Tool()
 import tools.jinja
 cherrypy.tools.template = tools.jinja.Tool()
 
-
+import tools.conditional_auth
+cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
 class MedleyServer(object):
     mc = None
