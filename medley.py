@@ -16,6 +16,7 @@ import inspect
 import util.phone
 import util.net
 import memcache
+import ssl
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
@@ -518,6 +519,14 @@ if __name__ == "__main__":
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     APP_CONFIG = os.path.join(APP_ROOT, "medley.conf")
     cherrypy.config.update(APP_CONFIG)
+
+    # This should force SSL connections to use TLS and not SSLv3, but
+    # appears to have no effect. Do not know why.
+    #if (cherrypy.config.get("server.ssl_certificate")):
+    #    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    #    cherrypy.config.update({
+    #        "server.ssl_context": context
+    #    })
 
     # attempt to drop privileges if daemonized
     USER = cherrypy.config.get("server.user")
