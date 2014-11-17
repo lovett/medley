@@ -67,13 +67,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_endpointsReturnHTML(self):
         """ Endpoints return HTML by default """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-        }
-
         endpoints = ["/", "/ip", "/headers", "/phone", "/whois"]
         for endpoint in endpoints:
-            response = self.request(endpoint, headers=headers)
+            response = self.request(endpoint)
             self.assertEqual(response.code, 200)
             self.assertTrue("<main" in response.body)
 
@@ -250,65 +246,41 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     def test_ipNoToken(self):
         """ Calling /ip without a token should emit the caller's IP """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip", headers=headers)
+        response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"})
         self.assertEqual(response.code, 200)
         self.assertTrue("1.1.1.1" in response.body)
 
     def test_ipNoTokenJson(self):
         """ The /ip endpoint returns json if requested """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0",
-            "Accept": "application/json"
-        }
-        response = self.request("/ip", headers=headers, as_json=True)
+        response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"}, as_json=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["address"], "1.1.1.1")
 
     def test_ipNoTokenPlain(self):
         """ The /ip endpoint returns plain text if requested """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip", headers=headers, as_plain=True)
+        response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"}, as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "1.1.1.1")
 
     def test_ipRightHeader(self):
         """ /ip should prefer X-Real-Ip header to Remote-Addr header """
-        headers = {
+        response = self.request("/ip", headers={
             "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip", headers=headers)
+            "X-REAL-IP": "2.2.2.2"
+        })
         self.assertTrue("2.2.2.2" in response.body)
 
     def test_ipValidTokenHtml(self):
         """ /ip returns html by default when a valid token is provided """
         cherrypy.config["ip.dns.command"] = []
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip/test", headers=headers)
+        response = self.request("/ip/test")
         self.assertEqual(response.code, 200)
         self.assertTrue("<main" in response.body)
 
     def test_ipValidTokenJson(self):
         """ /ip returns json if requested when a valid token is provided """
         cherrypy.config["ip.dns.command"] = []
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "Authorization": "Basic dGVzdDp0ZXN0",
-            "Accept": "application/json"
-        }
-        response = self.request("/ip/test", headers=headers)
+        response = self.request("/ip/test", as_json=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["result"], "ok")
 
@@ -317,8 +289,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         cherrypy.config["ip.dns.command"] = []
         headers = {
             "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
-            "Authorization": "Basic dGVzdDp0ZXN0",
+            "X-REAL-IP": "2.2.2.2"
         }
         response = self.request("/ip/test", headers=headers, as_plain=True)
         self.assertEqual(response.code, 200)
@@ -338,41 +309,24 @@ class TestMedleyServer(BaseCherryPyTestCase):
         application = cherrypy.tree.apps[""]
         application.config["ip_tokens"][token] = host
 
-        headers = {
-            "Remote-Addr": remote_address,
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
         with mock.patch("medley.subprocess") as subprocess:
-            response = self.request("/ip/" + token, headers=headers)
+            response = self.request("/ip/" + token)
             subprocess.call.assert_called_once_with(expected_command)
 
     def test_ipInvalidToken(self):
         """ /ip should fail if an invalid token is specified """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip/invalid", headers=headers)
+        response = self.request("/ip/invalid")
         self.assertEqual(response.code, 400)
 
     def test_ipInvalidTokenNoDns(self):
         """ /ip should not shell out if given an invalid token """
-        headers = {
-            "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2",
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
         with mock.patch("medley.subprocess") as subprocess:
-            response = self.request("/ip/invalid", headers=headers)
+            response = self.request("/ip/invalid")
             self.assertFalse(subprocess.called)
 
     def test_ipNoIp(self):
         """ /ip should fail if it can't identify the request ip """
-        headers = {
-            "Authorization": "Basic dGVzdDp0ZXN0"
-        }
-        response = self.request("/ip/test", headers=headers)
+        response = self.request("/ip/test", headers={"Remote-Addr": None})
         self.assertEqual(response.code, 400)
 
     def test_headersReturnsHtml(self):

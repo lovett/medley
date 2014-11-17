@@ -21,7 +21,7 @@ __all__ = ['BaseCherryPyTestCase']
 class BaseCherryPyTestCase(unittest.TestCase):
     def request(self, path='/', method='GET', app_path='',
                 scheme='http', proto='HTTP/1.1', data=None,
-                headers=None, as_json=False, as_plain=False,
+                headers={}, as_json=False, as_plain=False,
                 **kwargs):
         """ CherryPy does not have a facility for serverless unit testing.
         This recipe demonstrates a way of simulating an incoming
@@ -34,6 +34,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         # Default headers
         h = {
             "Host": "127.0.0.1",
+            "Remote-Addr": "127.0.0.1",
             "Accept": "*/*"
         }
 
@@ -42,8 +43,9 @@ class BaseCherryPyTestCase(unittest.TestCase):
         elif as_plain:
             h["Accept"] = "text/plain"
 
-        if headers is not None:
-            h.update(headers)
+        # Allow default headers to be removed
+        h.update(headers)
+        [h.pop(key) for key, value in headers.items() if value is None]
 
         # If we have a POST/PUT request but no data
         # we urlencode the named arguments in **kwargs
