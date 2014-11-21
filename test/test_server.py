@@ -232,6 +232,33 @@ class TestMedleyServer(BaseCherryPyTestCase):
         notification = urllib.parse.parse_qs(kwargs["data"])
         self.assertEqual(notification[b"body"], [b"line1 foo bar"])
 
+    @httpretty.activate
+    def test_azurePublicAccess(self):
+        """ The azure endpoint does not require authentication"""
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
+
+        headers = {
+            "Remote-Addr": "127.0.0.2",
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "siteName": "foo",
+            "status": "success",
+            "message": "line1 foo bar\nline2 foo bar \nline3 foo bar",
+            "complete": True
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+
+        self.assertEqual(response.code, 200)
+
+
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
         response = self.request("/", as_json=True)
