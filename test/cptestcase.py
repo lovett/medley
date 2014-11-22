@@ -92,7 +92,12 @@ class BaseCherryPyTestCase(unittest.TestCase):
 
         # The response body is not usable as-is, and with json,
         # may need additional parsing.
-        result.body = response.collapse_body().decode("UTF-8")
+        result.body = response.collapse_body()
+
+        try:
+            result.body = result.body.decode("UTF-8")
+        except:
+            pass
 
         if "json" in h["Accept"]:
             result.body = json.loads(result.body)

@@ -259,6 +259,12 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
 
 
+    def test_favicon(self):
+        """The favicon does not require authentication and is returned as an image"""
+        response = self.request(path="/favicon.ico")
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.headers["Content-Type"], "image/x-icon")
+
     def test_indexReturnsJson(self):
         """ The index returns json if requested """
         response = self.request("/", as_json=True)
