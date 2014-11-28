@@ -1,4 +1,5 @@
 import cherrypy
+import time
 import os.path
 import os
 import pwd
@@ -380,7 +381,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
-    def geoupdate(self, silent=False):
+    def geoupdate(self):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
         url = cherrypy.config.get("geoip.download.url")
@@ -392,23 +393,30 @@ class MedleyServer(object):
         download_path = "{}/{}".format(directory.rstrip("/"),
                                  os.path.basename(url))
 
-        urllib.request.urlcleanup()
-        urllib.request.urlretrieve(url, download_path)
 
-        if download_path.endswith(".gz"):
-            try:
-                subprocess.check_call(["gunzip", "-f", download_path])
-            except subprocess.CalledProcessError:
-                os.unlink(download_path)
-                raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
+        try:
+            message = "The database was last downloaded on {}".format(time.ctime(os.path.getmtime(download_path[:-3])))
+        except OSError:
+            message = "The database has not yet been downloaded."
 
-        if silent:
-            cherrypy.response.status = 204
-            return
+        if cherrypy.request.method == "POST":
+            urllib.request.urlcleanup()
+            urllib.request.urlretrieve(url, download_path)
+
+            if download_path.endswith(".gz"):
+                try:
+                    subprocess.check_call(["gunzip", "-f", download_path])
+                except subprocess.CalledProcessError:
+                    os.unlink(download_path)
+                    raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
+
+
+                cherrypy.response.status = 204
+                return
 
         return {
             "page_title": "Geoupdate",
-            "message": "ok",
+            "message": message,
             "home_link": True
         }
 
