@@ -31,6 +31,11 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
+
+def userFacing(f):
+    f.userFacing = True
+    return f
+
 class MedleyServer(object):
     mc = None
     template_dir = None
@@ -103,6 +108,7 @@ class MedleyServer(object):
         return "ok"
 
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="index.html")
@@ -114,7 +120,10 @@ class MedleyServer(object):
             if name == "index":
                 continue
 
-            if getattr(value, "exposed", False):
+            exposed = getattr(value, "exposed", False)
+            userFacing = getattr(value, "userFacing", False)
+
+            if exposed and userFacing:
                 endpoints.append((name, value.__doc__))
 
         if cherrypy.request.negotiated == "text/plain":
@@ -129,6 +138,7 @@ class MedleyServer(object):
                 "endpoints": endpoints,
             }
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -176,6 +186,7 @@ class MedleyServer(object):
                 "message": ip
             }
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
@@ -233,6 +244,7 @@ class MedleyServer(object):
             return data["result"]
 
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
@@ -273,6 +285,7 @@ class MedleyServer(object):
         else:
             return { "result": "ok" }
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="headers.html")
@@ -294,6 +307,7 @@ class MedleyServer(object):
                 "headers": headers
             }
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
@@ -378,6 +392,7 @@ class MedleyServer(object):
         else:
             return data
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -420,6 +435,7 @@ class MedleyServer(object):
             "home_link": True
         }
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
@@ -482,6 +498,7 @@ class MedleyServer(object):
 
             return data
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable(media="text/html")
     def highlight(self, extension, content):
@@ -492,6 +509,7 @@ class MedleyServer(object):
         lexer = get_lexer_by_name(extension)
         return highlight(content, lexer, HtmlFormatter(full=True))
 
+    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="lettercase.html")
