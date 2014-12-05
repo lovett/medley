@@ -206,7 +206,7 @@ class MedleyServer(object):
         def runCommand(command):
             process = subprocess.Popen(command, stdout=subprocess.PIPE)
             out, err = process.communicate()
-            return out.strip().decode("utf-8")
+            return (out.strip().decode("utf-8"), err)
 
         command_results = [runCommand(command) for command in commands]
 

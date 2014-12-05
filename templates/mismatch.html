@@ -2,17 +2,19 @@
 
 {% block page_body %}
 <div class="sixteen wide column">
-    <h1 class="ui top attached small inverted {% if result == "ok"%}green{%else%}red{%endif%} header">{{ result|capitalize}}</h1>
-    <table class="ui segment attached table">
-        <tbody>
-            {% for command in commands %}
-            <tr>
-                <td>{{ command|join(" ") }}</td>
-                <td>{{ command_results[loop.index0] }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <h1 class="ui segment small inverted {% if result == "ok"%}green{%else%}red{%endif%} header">{{ result|capitalize}}</h1>
+
+    {% for command in commands %}
+    <div class="ui segment">
+        <p>{{ command|join(" ") }}</p>
+        <p>{{ command_results[loop.index0][0] }}</p>
+
+        {% if command_results[loop.index0][1] %}
+        <p>{{ command_results[loop.index0][1] }}</p>
+        {% endif %}
+    </div>
+
+    {% endfor %}
 </div>
 
 {% endblock %}
