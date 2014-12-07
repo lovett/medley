@@ -2,7 +2,6 @@ CherryPy==3.6.0
 IPy==0.81
 Jinja2==2.5
 MarkupSafe==0.23
-Pygments==1.6
 argparse==1.2.1
 astroid==1.2.1
 cov-core==1.14.0

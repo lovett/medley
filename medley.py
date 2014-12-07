@@ -18,9 +18,6 @@ import util.phone
 import util.net
 import memcache
 import ssl
-from pygments import highlight
-from pygments.lexers import get_lexer_by_name
-from pygments.formatters import HtmlFormatter
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -497,17 +494,6 @@ class MedleyServer(object):
             data["sparql"] = location.get("sparql", [])
 
             return data
-
-    @userFacing
-    @cherrypy.expose
-    @cherrypy.tools.negotiable(media="text/html")
-    def highlight(self, extension, content):
-        """Syntax highlight the given input and render as HTML"""
-        if extension == "json":
-            content = json.dumps(json.loads(content), sort_keys=True, indent=4)
-
-        lexer = get_lexer_by_name(extension)
-        return highlight(content, lexer, HtmlFormatter(full=True))
 
     @userFacing
     @cherrypy.expose
