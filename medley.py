@@ -393,7 +393,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
-    def geoupdate(self):
+    def geoupdate(self, action=None):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
         url = cherrypy.config.get("geoip.download.url")
@@ -411,10 +411,11 @@ class MedleyServer(object):
         except OSError:
             message = "The database has not yet been downloaded."
 
-        if cherrypy.request.method == "POST":
+        if action == "update":
             urllib.request.urlcleanup()
             urllib.request.urlretrieve(url, download_path)
 
+            # attempt to gunzip
             if download_path.endswith(".gz"):
                 try:
                     subprocess.check_call(["gunzip", "-f", download_path])
@@ -422,9 +423,9 @@ class MedleyServer(object):
                     os.unlink(download_path)
                     raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
 
-
-                cherrypy.response.status = 204
-                return
+            # return a 204 if gunzip was skipped or if it was successful
+            cherrypy.response.status = 204
+            return
 
         return {
             "page_title": "Geoupdate",

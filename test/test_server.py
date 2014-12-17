@@ -439,32 +439,22 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 410)
 
     @httpretty.activate
-    def test_geoupdateReturns500IfGzipFails(self):
+    def test_geoupdateReturns500IfGunzipFails(self):
         """ The geoupdate endpoint returns 500 if the database cannot be gunzipped.
         Although we are mocking the download url, we're not getting back a gzipped file. """
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
         cherrypy.config["database.directory"] = "/tmp"
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
-        response = self.request("/geoupdate")
+        response = self.request("/geoupdate/update")
         self.assertEqual(response.code, 500)
 
     @httpretty.activate
-    def test_geoupdateReturns200(self):
-        """ The geoupdate endpoint returns 200 if the database is downloaded  """
-        cherrypy.config["geoip.download.url"] = "http://example.com/test"
-        cherrypy.config["database.directory"] = "/tmp"
-        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
-        response = self.request("/geoupdate")
-        self.assertEqual(response.code, 200)
-
-    @httpretty.activate
     def test_geoupdateReturns204(self):
-        """ The geoupdate endpoint returns 204 when silent mode is requested  """
+        """ The geoupdate endpoint returns 204 if the database is downloaded  """
         cherrypy.config["geoip.download.url"] = "http://example.com/test"
         cherrypy.config["database.directory"] = "/tmp"
         httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
-        response = self.request("/geoupdate", silent=1)
-        self.assertEqual(response.body, "")
+        response = self.request("/geoupdate/update")
         self.assertEqual(response.code, 204)
 
     def test_whoisJsonWithoutAddress(self):
