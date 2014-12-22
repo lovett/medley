@@ -373,7 +373,7 @@ class MedleyServer(object):
         # Google charts
         try:
             data["map_region"] = data["geo"]["country_code"]
-            if data["map_region"] == "US":
+            if data["map_region"] == "US" and data["geo"]["region_code"]:
                 data["map_region"] += "-" + data["geo"]["region_code"]
         except:
             data["map_region"] = None
