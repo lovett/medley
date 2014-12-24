@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% set page_title = "Visitors" %}
+{% set home_link = True %}
+
+{% block page_header %}
+
+{% endblock %}
+
+{% block page_body %}
+
+<div class="sixteen wide column">
+
+    {% for match in matches %}
+    <pre>{{ match.line }}</pre>
+    {% endfor %}
+</div>
+
+{% endblock %}

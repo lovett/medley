@@ -16,6 +16,7 @@ import base64
 import inspect
 import util.phone
 import util.net
+import util.fs
 import memcache
 import ssl
 
@@ -525,6 +526,23 @@ class MedleyServer(object):
                 "styles": ("title", "lower", "upper"),
                 "style": style or "title"
             }
+
+
+    @userFacing
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="visitors.html")
+    def visitors(self):
+        matches = util.fs.webgrep(
+            cherrypy.config.get("visitors.dir"),
+            cherrypy.config.get("visitors.include"),
+            cherrypy.config.get("visitors.exclude"),
+            cherrypy.config.get("visitors.shun")
+        )
+
+        return {
+            "matches": matches
+        }
 
 
 
