@@ -551,6 +551,10 @@ if __name__ == "__main__":
     APP_CONFIG = os.path.join(APP_ROOT, "medley.conf")
     cherrypy.config.update(APP_CONFIG)
 
+    cherrypy.config.update({
+        "tools.encode.on": False
+    })
+
     # This should force SSL connections to use TLS and not SSLv3, but
     # appears to have no effect. Do not know why.
     #if (cherrypy.config.get("server.ssl_certificate")):
@@ -576,8 +580,18 @@ if __name__ == "__main__":
 
     DAEMONIZE = cherrypy.config.get("server.daemonize")
     if DAEMONIZE:
-        cherrypy.config.update({'log.screen': False})
+        cherrypy.config.update({
+            "log.screen": False,
+            "engine.autoreload.on": False,
+            "request.show_tracebacks": False
+        })
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
+    else:
+        cherrypy.config.update({
+            "log.screen": True,
+            "engine.autoreload.on": True,
+            "request.show_tracebacks": True
+        })
 
     PID_FILE = cherrypy.config.get("server.pid")
     if PID_FILE:
