@@ -16,9 +16,31 @@ var MEDLEY = (function () {
         }
     };
 
+    var shortcuts = function (e) {
+        var href;
+
+        // all shortcuts will use alt and shift
+        if (e.altKey !== true || e.shiftKey !== true) {
+            return;
+        }
+
+        if (e.which === 85) { // u
+            href = jQuery('HEADER .home:first').attr('href');
+            if (href) {
+                window.location.href = href;
+            }
+
+            return;
+        }
+
+        //console.log(e.which);
+    };
+
     return {
         init: function () {
             jQuery('.toggle-trigger').on('click', toggle);
+
+            jQuery(document).on('keydown', shortcuts);
         }
     }
 })();
