@@ -29,6 +29,10 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
+cherrypy.config.update({
+    "tools.encode.on": False
+})
+
 
 def userFacing(f):
     f.userFacing = True
@@ -128,12 +132,14 @@ class MedleyServer(object):
             output = ""
             for name, description in endpoints:
                 output += "/" + name + "\n"
-                output += description + "\n\n"
+                output += str(description) + "\n\n"
             return output
+        elif cherrypy.request.negotiated == "application/json":
+            return endpoints
         else:
             return {
                 "page_title": "Medley",
-                "endpoints": endpoints,
+                "endpoints": endpoints
             }
 
     @userFacing
@@ -480,11 +486,11 @@ class MedleyServer(object):
             except (AssertionError, util.phone.PhoneException):
                 location = {}
 
-        history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
 
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name")
         else:
+            history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
             data["history"] = history[0]
             data["number"] = number
             data["number_formatted"] = util.phone.format(number)
@@ -550,10 +556,6 @@ if __name__ == "__main__":
     APP_ROOT = os.path.dirname(os.path.abspath(__file__))
     APP_CONFIG = os.path.join(APP_ROOT, "medley.conf")
     cherrypy.config.update(APP_CONFIG)
-
-    cherrypy.config.update({
-        "tools.encode.on": False
-    })
 
     # This should force SSL connections to use TLS and not SSLv3, but
     # appears to have no effect. Do not know why.

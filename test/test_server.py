@@ -1,20 +1,18 @@
 import cherrypy
 import os.path
 import json
-import httpretty
-import helpers
 import urllib.parse
 import mock
 from medley import MedleyServer
 from cptestcase import BaseCherryPyTestCase
 
 @mock.patch("medley.memcache.Client")
-def setup_module(memcacheClient):
+def setup_module(memcacheClientMock):
     config_file = os.path.realpath("medley.conf")
     cherrypy.config.update(config_file)
 
     # Force all get and set calls to memcache to return None
-    instance = memcacheClient.return_value
+    instance = memcacheClientMock.return_value
     instance.get.return_value = None
     instance.set.return_value = None
 
@@ -49,57 +47,57 @@ def teardown_module():
 
 class TestMedleyServer(BaseCherryPyTestCase):
     def test_htmlCharset(self):
-        """Requests for text/html content specify charset=utf-8.  Since the
+        """Requests for text/html specify charset=utf-8. Since the
         charset is applied to all requests via the negotiable tool,
         only the index endpoint is tested"""
         response = self.request("/")
         self.assertEqual(response.headers["content-type"], "text/html;charset=utf-8")
 
     def test_plainCharset(self):
-        """Requests for text/plain specify charset=utf-8. Only the index endpoint is tested"""
+        """Requests for text/plain specify charset=utf-8. Since the
+        charset is applied to all requests via the negotiable tool,
+        only the index endpoint is tested"""
         response = self.request("/", as_plain=True)
         self.assertEqual(response.headers["content-type"], "text/plain;charset=utf-8")
 
     def test_jsonCharset(self):
-        """Requests for application/json do not specify a charset in the content-type header. Only the index endpoint is tested"""
+        """Requests for application/json do not specify a charset in the
+        content-type header. Since the charset is applied to all
+        requests via the negotiable tool, only the index endpoint is
+        tested"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.headers["content-type"], "application/json")
 
     def test_endpointsReturnHTML(self):
-        """ Endpoints return HTML by default """
-        endpoints = ["/", "/ip", "/headers", "/phone", "/whois"]
-        for endpoint in endpoints:
-            response = self.request(endpoint)
-            self.assertEqual(response.code, 200)
-            self.assertTrue("<main" in response.body)
-
+        """Endpoints return HTML by default"""
+        response = self.request("/")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("<main" in response.body)
 
     def test_azure410IfNoNotifierUrl(self):
-        """ The azure endpoints returns 410 if notifier.url is not configured """
+        """ /azure returns 410 if notifier.url is not configured """
         cherrypy.config["notifier.url"] = None
         response = self.request("/azure/foo")
         self.assertEqual(response.code, 410)
 
     def test_azure404IfNoEvent(self):
-        """ The azure endpoint returns 404 if the event segment is not in the request url """
+        """ /azure returns 404 if the event segment is not in the request url """
         response = self.request("/azure")
         self.assertEqual(response.code, 404)
 
     def test_azureRejectsFormPost(self):
-        """ The azure endpoint rejects application/x-www-form-urlencoded"""
+        """ /azure rejects application/x-www-form-urlencoded"""
         response = self.request(path="/azure/test",
                                 method="POST",
                                 foo="bar")
 
         self.assertEqual(response.code, 415)
 
-    @httpretty.activate
-    def test_azureRejectsUnexpectedJson(self):
-        """ The azure endpoint rejects json requests without expected fields """
+    @mock.patch("medley.urllib.request")
+    def test_azureRejectsUnexpectedJson(self, requestMock):
+        """ /azure rejects json with unexpected fields """
 
         cherrypy.config["notifier.url"] = "http://example.com"
-
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         headers = {
             "Content-type": "application/json"
@@ -113,27 +111,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
-
+        self.assertFalse(requestMock.urlopen.called)
         self.assertEqual(response.code, 400)
 
-        body = {
-            "siteName": "foo"
-        }
-
-        response = self.request(path="/azure/test",
-                                method="POST",
-                                data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
-
-        self.assertEqual(response.code, 200)
-
-    @httpretty.activate
-    def test_azureNotificationTitleSuccess(self):
-        """ The azure endpoint's notification indicates success in the title """
+    @mock.patch("medley.urllib.request")
+    def test_azureNotificationTitleSuccess(self, requestMock):
+        """ /azure sends a success notification """
 
         cherrypy.config["notifier.url"] = "http://example.com"
-
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         headers = {
             "Content-type": "application/json"
@@ -150,15 +135,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
 
-        self.assertEqual(httpretty.last_request().parsed_body["title"][0], "Deployment to foo is complete")
 
-    @httpretty.activate
-    def test_azureNotificationTitleFail(self):
-        """ The azure endpoint's notification indicates failure in the title """
+        self.assertTrue(requestMock.urlopen.called)
+
+        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
+        self.assertTrue("title=Deployment+to+foo+is+complete" in notification)
+
+    @mock.patch("medley.urllib.request")
+    def test_azureNotificationTitleFail(self, requestMock):
+        """ /azure sends a failre notification """
 
         cherrypy.config["notifier.url"] = "http://example.com"
-
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         headers = {
             "Content-type": "application/json"
@@ -174,16 +161,16 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
+        self.assertTrue(requestMock.urlopen.called)
 
-        self.assertEqual(httpretty.last_request().parsed_body["title"][0], "Deployment to foo has failed")
+        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
+        self.assertTrue("title=Deployment+to+foo+has+failed" in notification)
 
-    @httpretty.activate
-    def test_azureNotificationIncludesExpectedValues(self):
-        """ The azure endpoint notification links to the management console, and sets group to azure """
+    @mock.patch("medley.urllib.request")
+    def test_azureNotificationIncludesExpectedValues(self, requestMock):
+        """ /azure notifications link to the management console and set group to azure"""
 
         cherrypy.config["notifier.url"] = "http://example.com"
-
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         headers = {
             "Content-type": "application/json"
@@ -200,19 +187,18 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
 
-        print(httpretty.last_request().parsed_body)
-        self.assertTrue(body["siteName"] in httpretty.last_request().parsed_body["url"][0])
-        self.assertEqual(httpretty.last_request().parsed_body["group"][0], "azure")
+        self.assertTrue(requestMock.urlopen.called)
 
-    @httpretty.activate
-    @mock.patch("medley.urllib.request.Request")
+        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
+        self.assertTrue(body["siteName"] in notification)
+        self.assertTrue("group=azure" in notification)
+
+    @mock.patch("medley.urllib.request")
     def test_azureMessageFirstLine(self, requestMock):
-        """The body of the notification sent by the azure endpoint only
-        contains the first line of the commit message."""
+        """/azure notification bodies truncate the commit message to the first
+        line"""
 
         cherrypy.config["notifier.url"] = "http://example.com"
-
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         body = {
             "siteName": "foo",
@@ -221,23 +207,21 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "complete": True
         }
 
-        requestMock.return_value = True
 
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
                                 headers={"Content-type": "application/json"})
 
-        args, kwargs = requestMock.call_args_list[0]
-        notification = urllib.parse.parse_qs(kwargs["data"])
-        self.assertEqual(notification[b"body"], [b"line1 foo bar"])
+        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
+        self.assertTrue("body=line1+foo+bar" in notification)
+        self.assertFalse("body=line2+foo+bar" in notification)
 
-    @httpretty.activate
-    def test_azurePublicAccess(self):
-        """ The azure endpoint does not require authentication"""
+    @mock.patch("medley.urllib.request")
+    def test_azurePublicAccess(self, requestMock):
+        """ /azure does not require authentication"""
 
         cherrypy.config["notifier.url"] = "http://example.com"
-        httpretty.register_uri(httpretty.POST, cherrypy.config["notifier.url"])
 
         headers = {
             "Remote-Addr": "127.0.0.2",
@@ -255,48 +239,48 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
-
         self.assertEqual(response.code, 200)
 
 
     def test_favicon(self):
-        """The favicon does not require authentication and is returned as an image"""
+        """/favicon.ico does not require authentication and is returned as an image"""
         response = self.request(path="/favicon.ico")
         self.assertEqual(response.code, 200)
         self.assertEqual(response.headers["Content-Type"], "image/x-icon")
 
     def test_indexReturnsJson(self):
-        """ The index returns json if requested """
+        """ / returns json"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertTrue("endpoints" in response.body)
+        self.assertEqual(response.headers["content-type"], "application/json")
+        self.assertTrue(len(response.body) > 0)
 
     def test_indexReturnsPlain(self):
-        """ The index returns json if requested """
+        """ / returns text"""
         response = self.request("/", as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertTrue("/" in response.body)
 
     def test_ipNoToken(self):
-        """ Calling /ip without a token should emit the caller's IP """
+        """ /ip without a token returns the caller's IP """
         response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"})
         self.assertEqual(response.code, 200)
         self.assertTrue("1.1.1.1" in response.body)
 
     def test_ipNoTokenJson(self):
-        """ The /ip endpoint returns json if requested """
+        """ /ip returns json """
         response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"}, as_json=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["address"], "1.1.1.1")
 
     def test_ipNoTokenPlain(self):
-        """ The /ip endpoint returns plain text if requested """
+        """ /ip returns text"""
         response = self.request("/ip", headers={"Remote-Addr": "1.1.1.1"}, as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "1.1.1.1")
 
     def test_ipRightHeader(self):
-        """ /ip should prefer X-Real-Ip header to Remote-Addr header """
+        """ /ip prefers X-Real-Ip to Remote-Addr header """
         response = self.request("/ip", headers={
             "Remote-Addr": "1.1.1.1",
             "X-REAL-IP": "2.2.2.2"
@@ -304,21 +288,21 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertTrue("2.2.2.2" in response.body)
 
     def test_ipValidTokenHtml(self):
-        """ /ip returns html by default when a valid token is provided """
+        """ /ip returns html when a valid token is provided """
         cherrypy.config["ip.dns.command"] = []
         response = self.request("/ip/test")
         self.assertEqual(response.code, 200)
         self.assertTrue("<main" in response.body)
 
     def test_ipValidTokenJson(self):
-        """ /ip returns json if requested when a valid token is provided """
+        """ /ip returns json when a valid token is provided """
         cherrypy.config["ip.dns.command"] = []
         response = self.request("/ip/test", as_json=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["result"], "ok")
 
     def test_ipValidTokenPlain(self):
-        """ /ip returns plain text if requested when a valid token is provided """
+        """ /ip returns text when a valid token is provided """
         cherrypy.config["ip.dns.command"] = []
         headers = {
             "Remote-Addr": "1.1.1.1",
@@ -328,8 +312,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "ok")
 
-    def testipValidTokenUpdatesDns(self):
-        """ /ip calls the configured DNS update command via subprocess if given a valid token """
+    def test_ipValidTokenUpdatesDns(self):
+        """ /ip calls the configured DNS update command via subprocess when a valid token is provided """
         remote_address = "127.0.0.1"
         token = "test2"
         host = "test2.example.com"
@@ -347,58 +331,58 @@ class TestMedleyServer(BaseCherryPyTestCase):
             subprocess.call.assert_called_once_with(expected_command)
 
     def test_ipInvalidToken(self):
-        """ /ip should fail if an invalid token is specified """
+        """ /ip fails when an invalid token is provided """
         response = self.request("/ip/invalid")
         self.assertEqual(response.code, 400)
 
     def test_ipInvalidTokenNoDns(self):
-        """ /ip should not shell out if given an invalid token """
+        """ /ip does not shell out when an invalid token is provided """
         with mock.patch("medley.subprocess") as subprocess:
             response = self.request("/ip/invalid")
             self.assertFalse(subprocess.called)
 
     def test_ipNoIp(self):
-        """ /ip should fail if it can't identify the request ip """
+        """ /ip fails if the request ip can't be identified"""
         response = self.request("/ip/test", headers={"Remote-Addr": None})
         self.assertEqual(response.code, 400)
 
     def test_headersReturnsHtml(self):
-        """ The headers endpoint returns html by default """
+        """ /headers returns html """
         response = self.request("/headers")
         self.assertEqual(response.code, 200)
         self.assertTrue("<table" in response.body)
 
     def test_headersReturnsJson(self):
-        """ The headers endpoint returns json if requested """
+        """ /headers returns json """
         response = self.request("/headers", as_json=True)
         self.assertEqual(response.code, 200)
         self.assertTrue("Accept" in response.body)
 
     def test_headersReturnsPlain(self):
-        """ The headers endpoint returns plain text if requested """
+        """ /headers returns text """
         response = self.request("/headers", as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertTrue("Accept" in response.body)
 
     def test_headersNoArgs(self):
-        """ The headers endpoint does not take arguments """
+        """ /headers takes no arguments"""
         response = self.request("/headers/test")
         self.assertEqual(response.code, 404)
 
     def test_lettercaseReturnsHtml(self):
-        """ The lettercase endpoint template includes a form by default """
+        """ /lettercase returns an HTML form"""
         response = self.request("/lettercase")
         self.assertEqual(response.code, 200)
         self.assertTrue("<form" in response.body)
 
     def test_lettercaseReturnsJson(self):
-        """ The lettercase endpoint returns json if requested """
+        """ /lettercase returns json """
         response = self.request("/lettercase", as_json=True)
         self.assertEqual(response.code, 200)
         self.assertTrue(response.body["result"] == "")
 
     def test_lettercaseConvertsToLowercase(self):
-        """ The lettercase endpoint converts an input string to lowercase """
+        """ /lettercase converts its input to lowercase """
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
@@ -407,7 +391,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "test")
 
     def test_lettercaseConvertsToUppercase(self):
-        """ The lettercase endpoint converts an input string to uppercase """
+        """ /lettercase converts its input to uppercase """
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
@@ -416,7 +400,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "TEST")
 
     def test_lettercaseConvertsToTitle(self):
-        """ The lettercase endpoint converts an input string to title case """
+        """ /lettercase converts its input to title case """
         response = self.request(path="/lettercase",
                                 method="POST",
                                 as_plain=True,
@@ -425,52 +409,51 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.body, "This Is A Test 1999")
 
     def test_geodbReturns410IfNoUrl(self):
-        """ The geodb endpoint returns 410 if geoip.download.url is not configured """
+        """ /geodb returns 410 if geoip.download.url is not configured """
         cherrypy.config["geoip.download.url"] = None
         cherrypy.config["database.directory"] = "/tmp"
         response = self.request("/geodb")
         self.assertEqual(response.code, 410)
 
     def test_geodbReturns410IfNoDatabaseDirectory(self):
-        """ The geodb endpoint returns 410 if database.directory is not configured """
+        """ /geodb returns 410 if database.directory is not configured """
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
         cherrypy.config["database.directory"] = None
         response = self.request("/geodb")
         self.assertEqual(response.code, 410)
 
-    @httpretty.activate
-    def test_geodbReturns500IfGunzipFails(self):
-        """ The geodb endpoint returns 500 if the database cannot be gunzipped.
-        Although we are mocking the download url, we're not getting back a gzipped file. """
+    @mock.patch("medley.urllib.request")
+    def test_geodbReturns500IfGunzipFails(self, requestMock):
+        """ /geodb returns 500 if the database cannot be gunzipped."""
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
         cherrypy.config["database.directory"] = "/tmp"
-        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request("/geodb/update")
+        self.assertFalse(requestMock.urlopen.called)
         self.assertEqual(response.code, 500)
 
-    @httpretty.activate
-    def test_geodbReturns204(self):
-        """ The geodb endpoint returns 204 if the database is downloaded  """
+    @mock.patch("medley.urllib.request")
+    def test_geodbReturns204(self, requestMock):
+        """ /geodb returns 204 if the database is successfully downloaded  """
         cherrypy.config["geoip.download.url"] = "http://example.com/test"
         cherrypy.config["database.directory"] = "/tmp"
-        httpretty.register_uri(httpretty.GET, cherrypy.config["geoip.download.url"])
         response = self.request("/geodb/update")
+        self.assertTrue(requestMock.urlretrieve.called)
         self.assertEqual(response.code, 204)
 
     def test_whoisJsonWithoutAddress(self):
-        """ The /whois endpoint returns 400 if called as json without an address"""
+        """ /whois returns 400 if called as json without an address"""
         response = self.request("/whois", as_json=True)
         self.assertEqual(response.code, 400)
         self.assertTrue("message" in response.body)
 
     def test_whoisPlainWithoutAddress(self):
-        """ The /whois endpoint returns 400 if called as plain without an address"""
+        """ /whois returns 400 if called as plain without an address"""
         response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
     @mock.patch("util.net.whois")
     def test_whoisGeoipQuery(self, queryWhoisMock):
-        """ The /whois endpoint calls the geoip database """
+        """ /whois calls the geoip database """
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {}
         queryWhoisMock.return_value = {}
@@ -483,7 +466,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisPopulateUsMapParams(self, queryWhoisMock):
-        """ The /whois endpoint defines the map region for a US IP as US-{state abbrev} """
+        """ /whois defines the map region for a US IP US-{state abbrev} """
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {
             "country_code": "US",
@@ -497,7 +480,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisPopulateNonUsMapParams(self, queryWhoisMock):
-        """ The /whois endpoint defines the map region for a non-US IP as a 2-letter ISO code """
+        """ /whois defines the map region for a non-US IP as a 2-letter ISO code """
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {
             "country_code": "AU"
@@ -510,7 +493,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisSkipsGeoipQuery(self, queryWhoisMock):
-        """ The /whois endpoint returns if the geoip query fails """
+        """ /whois returns success if the geoip query fails """
         queryWhoisMock.return_value = {}
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
@@ -519,7 +502,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock):
-        """ The /whois endpoint returns if the geoip query fails """
+        """ /whois returns the city and country name """
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {
             "city": "test city",
@@ -536,7 +519,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisPlainReturnsCountry(self, queryWhoisMock):
-        """ The /whois endpoint returns if the geoip query fails """
+        """ /whois returns the county name if the city is not available"""
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {
             "country_code": "AA",
@@ -552,7 +535,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisPlainReturnsUnknown(self, queryWhoisMock):
-        """ The /whois endpoint returns if the geoip query fails """
+        """ /whois returns "Unknown" if city and country name are not available"""
         reader = mock.MagicMock()
         reader.record_by_addr.return_value = {}
         queryWhoisMock.return_value = {}
@@ -564,7 +547,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.whois")
     def test_whoisInputIp(self, queryWhoisMock):
-        """ The /whois endpoint accepts an IP address as input """
+        """ /whois accepts an IP address as input """
         queryWhoisMock.return_value = {}
         with mock.patch("medley.pygeoip") as pygeoip_mock:
             pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
@@ -574,7 +557,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
     def test_whoisInputHostname(self, whoisMock, resolveHostMock):
-        """ The /whois endpoint accepts a hostname as input """
+        """ /whois accepts a hostname as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
         with mock.patch("medley.pygeoip") as pygeoip_mock:
@@ -585,7 +568,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
     def test_whoisInputUrl(self, whoisMock, resolveHostMock):
-        """ The /whois endpoint accepts a full URL as input """
+        """ /whois accepts a full URL as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
         with mock.patch("medley.pygeoip") as pygeoip_mock:
@@ -598,7 +581,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
     def test_whoisInputHostAlias(self, whoisMock, resolveHostMock):
-        """ The /whois endpoint accepts a full URL as input """
+        """ /whois accepts a host alias as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
         with mock.patch("medley.pygeoip") as pygeoip_mock:
@@ -629,114 +612,84 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/phone/1", as_plain=True)
         self.assertEqual(response.code, 400)
 
-    @mock.patch("medley.util.phone.callHistory")
-    @httpretty.activate
-    def test_phoneValidAreaCodeJson(self, callHistory):
-        """The /phone queries dbpedia twice and returns the state name for the
-        given area code as a json object if requested as json"""
+    @mock.patch("medley.util.phone")
+    def test_phoneValidAreaCodeJson(self, phoneMock):
+        """/phone returns the state name of the given area code as json"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-success.json")
-        state_name_response = helpers.getFixture("dbpedia-state-success.json")
-        callHistory.return_value = ([], 0)
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               responses=[
-                                   httpretty.Response(body=area_code_response, status=200),
-                                   httpretty.Response(body=state_name_response, status=200)
-                               ])
-
+        phoneMock.callHistory.return_value = ([], 0)
+        phoneMock.findAreaCode.return_value = {"state_name": "New York"}
+        phoneMock.sanitize.return_value = "212"
+        phoneMock.format.return_value = "212"
         response = self.request("/phone/212", as_json=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body["state_name"], "New York")
+        self.assertTrue(phoneMock.callHistory.called_once)
+        self.assertTrue(phoneMock.findAreaCode.called_once)
+        self.assertTrue(phoneMock.santize.called_once)
 
-    @mock.patch("medley.util.phone.callHistory")
-    @httpretty.activate
-    def test_phoneValidAreaCodePlain(self, callHistory):
-        """/phone queries dbpedia twice and sets the request body to the state
-        name if requsted as plain"""
+    @mock.patch("medley.util.phone")
+    def test_phoneValidAreaCodePlain(self, phoneMock):
+        """/phone returns the state name of the given area code as text"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-success.json")
-        state_name_response = helpers.getFixture("dbpedia-state-success.json")
-        callHistory.return_value = ([], 0)
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               responses=[
-                                   httpretty.Response(body=area_code_response, status=200),
-                                   httpretty.Response(body=state_name_response, status=200)
-                               ])
-
+        phoneMock.callHistory.return_value = ([], 0)
+        phoneMock.findAreaCode.return_value = {"state_name": "New York"}
+        phoneMock.sanitize.return_value = "212"
+        phoneMock.format.return_value = "212"
         response = self.request("/phone/212", as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "New York")
+        self.assertTrue(phoneMock.callHistory.called_once)
+        self.assertTrue(phoneMock.findAreaCode.called_once)
+        self.assertTrue(phoneMock.santize.called_once)
 
-    @mock.patch("medley.util.phone.callHistory")
-    @httpretty.activate
-    def test_phoneInvalidAreaCodeJson(self, callHistory):
-        """The /phone endpoint queries dbpedia once if the specified area code
-        is invalid"""
+    @mock.patch("medley.util.phone")
+    def test_phoneInvalidAreaCodeJson(self, phoneMock):
+        """/phone returns None as json if the area code is invalid"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-fail.json")
-        callHistory.return_value = ([], 0)
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body=area_code_response,
-                               content_type="application/json")
-
-        response = self.request("/phone/123", as_json=True)
+        phoneMock.callHistory.return_value = ([], 0)
+        phoneMock.findAreaCode.return_value = {"state_name": None}
+        phoneMock.sanitize.return_value = "212"
+        phoneMock.format.return_value = "212"
+        response = self.request("/phone/212", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["state_abbreviation"], None)
+        self.assertEqual(response.body["state_name"], None)
+        self.assertTrue(phoneMock.callHistory.called_once)
+        self.assertTrue(phoneMock.findAreaCode.called_once)
+        self.assertTrue(phoneMock.santize.called_once)
 
-    @mock.patch("medley.util.phone.callHistory")
-    @httpretty.activate
-    def test_phoneInvalidAreaCodePlain(self, callHistory):
-        """The /phone endpoint returns "Unknown" for an invalid area code when
-        requested as plain"""
+    @mock.patch("medley.util.phone")
+    def test_phoneInvalidAreaCodeText(self, phoneMock):
+        """/phone returns None as text if the area code is invalid"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-fail.json")
-        callHistory.return_value = ([], 0)
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body=area_code_response,
-                               content_type="application/json")
-
-        response = self.request("/phone/123", as_plain=True)
+        phoneMock.callHistory.return_value = ([], 0)
+        phoneMock.findAreaCode.return_value = {"state_name": "Unknown"}
+        phoneMock.sanitize.return_value = "212"
+        phoneMock.format.return_value = "212"
+        response = self.request("/phone/212", as_plain=True)
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "Unknown")
-
-    @mock.patch("medley.util.phone.callHistory")
-    @httpretty.activate
-    def test_phoneAreaCodeFail(self, callHistory):
-        """The /phone endpoint returns successfully if the dbpedia area code
-        query fails"""
-
-        callHistory.return_value = ([], 0)
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               status=500)
-
-        response = self.request("/phone/123")
-        self.assertEqual(response.code, 200)
+        self.assertTrue(phoneMock.callHistory.called_once)
+        self.assertTrue(phoneMock.findAreaCode.called_once)
+        self.assertTrue(phoneMock.santize.called_once)
 
     @mock.patch("medley.util.net.externalIp")
-    def test_externalIpSuccessPlain(self, externalIp):
-        """The /external-ip endpoint returns an IP address when the
+    def test_externalIpSuccessPlain(self, externalIpMock):
+        """/external-ip returns an IP address as text when the
         DNS-O-Matic query succeeds"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        cherrypy.config["ip.dns.command"] = []
         address = "1.1.1.1"
-        externalIp.return_value = address
+        externalIpMock.return_value = address
 
         response = self.request("/external-ip", as_plain=True)
         self.assertEqual(response.body, address)
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpSuccessJson(self, externalIp):
-        """The /external-ip endpoint returns an IP address when the
+        """/external-ip returns an IP address as json when the
         DNS-O-Matic query succeeds"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        cherrypy.config["ip.dns.command"] = []
         address = "1.1.1.1"
         externalIp.return_value = address
 
@@ -745,8 +698,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpSuccessSilent(self, externalIp):
-        """The /external-ip endpoint returns 204 when silent mode is requested"""
+        """/external-ip returns 204 when silent mode is requested"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
+        cherrypy.config["ip.dns.command"] = []
         address = "1.1.1.1"
         externalIp.return_value = address
 
@@ -757,7 +711,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpFail(self, externalIp):
-        """The /external-ip endpoint returns the string "not available" when the
+        """/external-ip returns "not available" when the
         DNS-O-Matic query fails"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
         externalIp.return_value = None
@@ -767,7 +721,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpNoHost(self, externalIp):
-        """The /external-ip endpoint returns 500 if an external hostname has not been defined"""
+        """/external-ip returns 500 if an external hostname has not been defined"""
         cherrypy.request.app.config["ip_tokens"]["external"] = None
         externalIp.return_value = None
 
@@ -776,7 +730,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpUpdatesDns(self, externalIp):
-        """The /external-ip endpoint updates the local DNS server, setting the
+        """/external-ip updates the local DNS server, setting the
         IP returned by DNS-O-Matic to the valid of the ip token "external"."""
         address = "1.1.1.1"
         host = "external.example.com"
@@ -799,18 +753,18 @@ class TestMedleyServer(BaseCherryPyTestCase):
             subprocess.call.assert_called_once_with(expected_command)
 
     def test_dnsmatchNoToken(self):
-        """The /dnsmatch endpoint requires a URL token to determine which
+        """/dnsmatch requires a URL token to determine which
         hosts to check."""
         response = self.request("/dnsmatch")
         self.assertEqual(response.code, 400)
 
     def test_dnsmatchInvalidToken(self):
-        """The /dnsmatch endpoint rejects URL tokens that are not in the config."""
+        """/dnsmatch rejects URL tokens that are not in the config."""
         response = self.request("/dnsmatch/foo")
         self.assertEqual(response.code, 400)
 
     def test_dnsmatchOk(self):
-        """ If there is no mismatch, /dnsmatch returns a result of ok"""
+        """ /dnsmatch returns ok if there is no mismatch"""
         with mock.patch("medley.subprocess.Popen") as popen:
             popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
             response = self.request("/dnsmatch/test", as_json=True)
@@ -820,7 +774,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
             self.assertEqual(response.body["result"], "ok")
 
     def test_dnsmatchSilent(self):
-        """ In silent mode, /dnsmatch returns 204"""
+        """ /dnsmatch returns 204 in silent mode"""
         with mock.patch("medley.subprocess.Popen") as popen:
             popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
             response = self.request("/dnsmatch/test", silent=1)
@@ -828,14 +782,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
             self.assertEqual(response.code, 204)
 
     def test_dnsmatchOkPlain(self):
-        """ If there is no mismatch, /dnsmatch returns a result of ok"""
+        """ /dnsmatch returns ok if there is no mismatch"""
         with mock.patch("medley.subprocess.Popen") as popen:
             popen.return_value.communicate.side_effect = [(b"foo", None), (b"foo", None)]
             response = self.request("/dnsmatch/test", as_plain=True)
             self.assertEqual(response.body, "ok")
 
     def test_dnsmatchMismatch(self):
-        """ If there is no mismatch, /dnsmatch returns a result of mismatch"""
+        """ /dnsmatch returns a mismatch"""
         with mock.patch("medley.subprocess.Popen") as popen:
             popen.return_value.communicate.side_effect = [(b"foo", None), (b"bar", None)]
             response = self.request("/dnsmatch/test", as_json=True)
@@ -846,7 +800,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.sendMessage")
     def test_dnsmatchEmailOnlyOnPost(self, sendMessage):
-        """ Email is only sent on post requsts."""
+        """ /dnsmatch sends email on post requests"""
         with mock.patch("medley.subprocess.Popen") as popen:
             popen.return_value.communicate.side_effect = [(b"foo", None), (b"bar", None)]
             response = self.request("/dnsmatch/test", as_json=True)
@@ -854,7 +808,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("util.net.sendMessage")
     def test_dnsmatchSendEmail(self, sendMessage):
-        """ Email is only sent on post requsts."""
+        """ /dnsmatch sends email"""
         sendMessage.return_value = True
 
         with mock.patch("medley.subprocess.Popen") as popen:
