@@ -5,6 +5,7 @@ import mock
 import httpretty
 import helpers
 import requests
+import requests_mock
 
 class TestUtilNet(unittest.TestCase):
 
@@ -166,24 +167,18 @@ class TestUtilNet(unittest.TestCase):
         result = util.net.reverseLookup(None)
         self.assertIsNone(result)
 
-    @httpretty.activate
-    def test_externalIpSuccess(self):
+    @requests_mock.Mocker()
+    def test_externalIpSuccess(self, requestsMock):
         """A successful call to DNS-O-Matic returns an IP address"""
         address = "1.1.1.1"
-        httpretty.register_uri(httpretty.GET,
-                               "http://myip.dnsomatic.com/",
-                               body=address,
-                               status=200)
-
+        requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", text=address)
         response = util.net.externalIp()
         self.assertEqual(response, address)
 
-    @httpretty.activate
-    def test_externalIpFail(self):
+    @requests_mock.Mocker()
+    def test_externalIpFail(self, requestsMock):
         """An unsuccessful call to DNS-O-Matic returns None"""
-        httpretty.register_uri(httpretty.GET,
-                               "http://myip.dnsomatic.com/",
-                               status=500)
+        requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", status_code=500)
         response = util.net.externalIp()
         self.assertIsNone(response)
 
