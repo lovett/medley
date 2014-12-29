@@ -2,9 +2,6 @@ import util.net
 import unittest
 import pytest
 import mock
-import httpretty
-import helpers
-import requests
 import requests_mock
 
 class TestUtilNet(unittest.TestCase):
@@ -179,13 +176,6 @@ class TestUtilNet(unittest.TestCase):
     def test_externalIpFail(self, requestsMock):
         """An unsuccessful call to DNS-O-Matic returns None"""
         requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", status_code=500)
-        response = util.net.externalIp()
-        self.assertIsNone(response)
-
-    @mock.patch("requests.get")
-    def test_externalIpException(self, getMock):
-        """An unsuccessful call to DNS-O-Matic returns None"""
-        getMock.return_value = requests.exceptions.Timeout
         response = util.net.externalIp()
         self.assertIsNone(response)
 

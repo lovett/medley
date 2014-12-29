@@ -1,8 +1,5 @@
 import re
-import urllib
-import urllib.request
-import urllib.parse
-import json
+import requests
 import sqlite3
 import socket
 import util.sqlite_converters
@@ -50,13 +47,11 @@ def findAreaCode(area_code):
     }} LIMIT 1
     """.format(area_code)
 
-    params = urllib.parse.urlencode({
+    payload = {
         "query": sparql,
         "format": "json",
         "timeout": "1000"
-    })
-
-    url = "http://dbpedia.org/sparql?{0}".format(params)
+    }
 
     result = {
         "sparql": [],
@@ -67,19 +62,20 @@ def findAreaCode(area_code):
     }
 
     try:
-        with urllib.request.urlopen(url, timeout=7) as request:
-            response = json.loads(request.read().decode("utf-8"))
-
+        r = requests.get("http://dbpedia.org/sparql", params=payload, timeout=7)
+        r.raise_for_status()
+        response = r.json()
         first_result = response["results"]["bindings"][0]
         result["sparql"].append(sparql)
-        result["url"].append(url)
+        result["url"].append(r.url)
         result["state_abbreviation"] = first_result["state_abbrev"]["value"]
         result["comment"] = abbreviateComment(first_result["comment"]["value"])
     except IndexError:
         return result
-    except (socket.timeout, urllib.error.HTTPError):
+    except requests.exceptions.HTTPError:
         raise PhoneException("Dbpedia area code query failed")
-
+    except requests.exceptions.Timeout:
+        raise PhoneException("Dbpedia area code query timed out")
 
     try:
         state_result = stateName(result["state_abbreviation"])
@@ -107,28 +103,30 @@ def stateName(abbreviation=None):
     }} LIMIT 1
     """.format(abbreviation)
 
-    params = urllib.parse.urlencode({
+    payload = {
         "query": sparql,
         "format": "json",
         "timeout": "1000"
-    })
+    }
 
-    url = "http://dbpedia.org/sparql?{0}".format(params)
     result = {
-        "sparql": sparql,
-        "url": url
+        "sparql": sparql
     }
 
     try:
-        with urllib.request.urlopen(url, timeout=7) as request:
-            response = json.loads(request.read().decode("utf-8"))
+        r = requests.get("http://dbpedia.org/sparql", params=payload, timeout=7)
+        r.raise_for_status()
+        response = r.json()
+        result["url"] = r.url
         result["name"] = response["results"]["bindings"][0]["name"]["value"]
         return result
     except IndexError:
         result["name"] = None
         return result
-    except (socket.timeout, urllib.error.HTTPError):
+    except requests.exceptions.HTTPError:
         raise PhoneException("Dbpedia state name query failed")
+    except requests.exceptions.Timeout:
+        raise PhoneException("Dbpedia state name query timed out")
 
 def abbreviateComment(comment):
     """Extract the first two meaningful sentences from a dbpedia comment field"""

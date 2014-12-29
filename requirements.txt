@@ -7,7 +7,6 @@ astroid==1.2.1
 cov-core==1.14.0
 coverage==3.7.1
 httplib2==0.9
-httpretty==0.8.3
 logilab-common==0.62.1
 mock==1.0.1
 py==1.4.25

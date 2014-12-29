@@ -1,9 +1,9 @@
 import util.phone
 import unittest
 import pytest
-import httpretty
 import helpers
 import mock
+import requests_mock
 
 class TestUtilPhone(unittest.TestCase):
 
@@ -43,46 +43,32 @@ class TestUtilPhone(unittest.TestCase):
         final = util.phone.format(initial)
         self.assertEqual(final, "123-4567")
 
-    @httpretty.activate
-    def test_stateNameInvalid(self):
+    @requests_mock.Mocker()
+    def test_stateNameInvalid(self, requestsMock):
         """An invalid state abbreviation returns "Unknown" as the state name"""
-
         fixture = helpers.getFixture("dbpedia-state-fail.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body=fixture,
-                               status=200)
-
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
         result = util.phone.stateName("x")
         self.assertTrue("sparql" in result)
         self.assertTrue("url" in result)
         self.assertTrue(result["name"] is None)
 
-    @httpretty.activate
-    def test_stateNameValid(self):
+    @requests_mock.Mocker()
+    def test_stateNameValid(self, requestsMock):
         """A valid state abbreviation returns the correct state name"""
 
         fixture = helpers.getFixture("dbpedia-state-success.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body=fixture,
-                               status=200)
-
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
         result = util.phone.stateName("NY")
         self.assertTrue("sparql" in result)
         self.assertTrue("url" in result)
         self.assertEqual(result["name"], "New York")
 
-    @httpretty.activate
-    def test_stateNameError(self):
+    @requests_mock.Mocker()
+    def test_stateNameError(self, requestsMock):
         """An exception is thrown if the dbpedia state name query fails"""
 
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body="",
-                               status=500)
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", status_code=500)
         with pytest.raises(util.phone.PhoneException) as err:
             location = util.phone.stateName("NY")
 
@@ -98,47 +84,37 @@ class TestUtilPhone(unittest.TestCase):
             location = util.phone.findAreaCode("abc")
         self.assertEqual(str(err.value), "Non-numeric area code")
 
-    @httpretty.activate
-    def test_areaCodeValid(self):
+    @requests_mock.Mocker()
+    def test_areaCodeValid(self, requestsMock):
         """A named tuple is returned if the area code is valid"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-success.json")
-        state_name_response = helpers.getFixture("dbpedia-state-success.json")
-
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               responses=[
-                                   httpretty.Response(body=area_code_response, status=200),
-                                   httpretty.Response(body=state_name_response, status=200)
-                               ])
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", [
+            {"text": helpers.getFixture("dbpedia-area-success.json")},
+            {"text": helpers.getFixture("dbpedia-state-success.json")}
+        ])
 
         location = util.phone.findAreaCode("212")
         self.assertEqual(location["state_name"], "New York")
         self.assertEqual(location["state_abbreviation"], "NY")
 
-    @httpretty.activate
-    def test_areaCodeInvalid(self):
+    @requests_mock.Mocker()
+    def test_areaCodeInvalid(self, requestsMock):
         """A named tuple is returned if the area code is invalid"""
 
-        area_code_response = helpers.getFixture("dbpedia-area-fail.json")
+        fixture = helpers.getFixture("dbpedia-area-fail.json")
 
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body=area_code_response,
-                               status=200)
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
 
         location = util.phone.findAreaCode("000")
         self.assertEqual(location["state_name"], "Unknown")
         self.assertEqual(location["state_abbreviation"], None)
         self.assertTrue("could not be found" in location["comment"])
 
-    @httpretty.activate
-    def test_areaCodeError(self):
+    @requests_mock.Mocker()
+    def test_areaCodeError(self, requestsMock):
         """An exception is thrown if the dbpedia area code query fails"""
-        httpretty.register_uri(httpretty.GET,
-                               "http://dbpedia.org/sparql",
-                               body="",
-                               status=500)
+
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", status_code=500)
 
         with pytest.raises(util.phone.PhoneException) as err:
             location = util.phone.findAreaCode("000")
