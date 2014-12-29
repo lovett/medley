@@ -36,11 +36,28 @@ var MEDLEY = (function () {
         //console.log(e.which);
     };
 
+    var selectAll = function (e) {
+        var range;
+        e.preventDefault();
+        var target = jQuery(jQuery(this).attr('data-selection-target'));
+        if (document.selection) {
+            range = document.body.createTextRange();
+            range.moveToElementText(target.get(0));
+            range.select();
+        } else if (window.getSelection) {
+            range = document.createRange();
+            range.selectNode(target.get(0));
+            window.getSelection().addRange(range);
+        }
+    };
+
     return {
         init: function () {
             jQuery('.toggle-trigger').on('click', toggle);
 
             jQuery(document).on('keydown', shortcuts);
+
+            jQuery('.select-all').on('click', selectAll);
         }
     }
 })();

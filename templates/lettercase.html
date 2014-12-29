@@ -25,7 +25,9 @@
 
 {% if result %}
 <div class="results sixteen wide column">
-    <p>{{ result }}</p>
+    <a href="#" data-selection-target="#result" class="select-all">Select All</a>
+    <div class="ui divider"></div>
+    <div id="result">{{ result }}</div>
 </div>
 {% endif %}
 </form>
