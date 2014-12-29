@@ -10,7 +10,7 @@
 <form class="sixteen wide column ui form" method="post" action="/lettercase">
     <div class="field">
         <label for="value">Input:</label>
-        <textarea id="value" name="value" value="{{ value|default('', true) }}" autofocus></textarea>
+        <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
     </div>
     <div class="field">
         <label for="style">Convert to:</label>
