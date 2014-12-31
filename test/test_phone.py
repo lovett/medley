@@ -45,7 +45,7 @@ class TestUtilPhone(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_stateNameInvalid(self, requestsMock):
-        """An invalid state abbreviation returns "Unknown" as the state name"""
+        """An invalid state abbreviation returns Unknown for the state name"""
         fixture = helpers.getFixture("dbpedia-state-fail.json")
         requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
         result = util.phone.stateName("x")
@@ -66,11 +66,19 @@ class TestUtilPhone(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_stateNameError(self, requestsMock):
-        """An exception is thrown if the dbpedia state name query fails"""
+        """An exception is thrown if the dbpedia query fails"""
 
         requestsMock.register_uri("GET", "http://dbpedia.org/sparql", status_code=500)
         with pytest.raises(util.phone.PhoneException) as err:
             location = util.phone.stateName("NY")
+
+    @requests_mock.Mocker()
+    def test_stateNameTimeout(self, requestsMock):
+        """An exception is thrown if the dbpedia query times out"""
+
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql")
+        with pytest.raises(util.phone.PhoneException) as err:
+            location = util.phone.stateName("NY", 0.001)
 
     def test_areaCodeEmpty(self):
         """An empty area code throws an exception"""
@@ -98,11 +106,22 @@ class TestUtilPhone(unittest.TestCase):
         self.assertEqual(location["state_abbreviation"], "NY")
 
     @requests_mock.Mocker()
+    def test_areaCodeValidStateFail(self, requestsMock):
+        """A named tuple is returned if the area code is valid but the state name lookup fails"""
+
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", [
+            {"text": helpers.getFixture("dbpedia-area-success.json")},
+            {"status_code": 500}
+        ])
+
+        location = util.phone.findAreaCode("212")
+        self.assertEqual(location["state_name"], "Unknown")
+
+    @requests_mock.Mocker()
     def test_areaCodeInvalid(self, requestsMock):
         """A named tuple is returned if the area code is invalid"""
 
         fixture = helpers.getFixture("dbpedia-area-fail.json")
-
         requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
 
         location = util.phone.findAreaCode("000")
@@ -115,9 +134,15 @@ class TestUtilPhone(unittest.TestCase):
         """An exception is thrown if the dbpedia area code query fails"""
 
         requestsMock.register_uri("GET", "http://dbpedia.org/sparql", status_code=500)
-
         with pytest.raises(util.phone.PhoneException) as err:
             location = util.phone.findAreaCode("000")
+
+    @requests_mock.Mocker()
+    def test_areaCodeTimeout(self, requestsMock):
+        """An exception is thrown if the dbpedia area code query times out"""
+        requestsMock.register_uri("GET", "http://dbpedia.org/sparql")
+        with pytest.raises(util.phone.PhoneException) as err:
+            location = util.phone.findAreaCode("000", 0.001)
 
     def test_abbreviateCommentTruncation(self):
         """A comment with two sentences is reduced to the first two"""
