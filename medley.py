@@ -62,21 +62,21 @@ class MedleyServer(object):
         if not endpoint:
             raise cherrypy.HTTPError(410, "This endpoint is not active")
         deployment_url = cherrypy.config.get("azure.url.deployments")
-        body = cherrypy.request.json
 
-        if not "siteName" in body:
+        body = {
+            "siteName": None,
+            "message": None,
+            "status": "unknown",
+            "complete": False
+        }
+
+        body.update(cherrypy.request.json)
+
+        if body["siteName"] is None:
             raise cherrypy.HTTPError(400, "Site name not specified")
 
-        if not "message" in body:
-            body["message"] = None
-        else:
+        if body["message"]:
             body["message"] = body["message"].split("\n")[0]
-
-        if not "status" in body:
-            body["status"] = "unknown"
-
-        if not "complete" in body:
-            body["complete"] = False
 
         notification = {
             "group": "azure",

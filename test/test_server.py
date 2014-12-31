@@ -143,7 +143,7 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
     @mock.patch("medley.urllib.request")
     def test_azureNotificationTitleFail(self, requestMock):
-        """ /azure sends a failre notification """
+        """ /azure sends a failure notification """
 
         cherrypy.config["notifier.url"] = "http://example.com"
 
@@ -165,6 +165,31 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
         self.assertTrue("title=Deployment+to+foo+has+failed" in notification)
+
+    @mock.patch("medley.urllib.request")
+    def test_azureNotificationTitleOther(self, requestMock):
+        """ /azure handles status values other than success and failure"""
+
+        cherrypy.config["notifier.url"] = "http://example.com"
+
+        headers = {
+            "Content-type": "application/json"
+        }
+
+        body = {
+            "siteName": "foo",
+            "status": "argle bargle",
+            "complete": True
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data=json.dumps(body).encode("utf-8"),
+                                headers=headers)
+        self.assertTrue(requestMock.urlopen.called)
+
+        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
+        self.assertTrue("title=Deployment+to+foo+is+argle+bargle" in notification)
 
     @mock.patch("medley.urllib.request")
     def test_azureNotificationIncludesExpectedValues(self, requestMock):
