@@ -3,20 +3,14 @@ import os.path
 import json
 import urllib.parse
 import mock
-from medley import MedleyServer
+import medley
 from cptestcase import BaseCherryPyTestCase
 
-@mock.patch("medley.memcache.Client")
-def setup_module(memcacheClientMock):
+def setup_module():
     config_file = os.path.realpath("medley.conf")
     cherrypy.config.update(config_file)
 
-    # Force all get and set calls to memcache to return None
-    instance = memcacheClientMock.return_value
-    instance.get.return_value = None
-    instance.set.return_value = None
-
-    app = cherrypy.tree.mount(MedleyServer(), script_name="", config=config_file)
+    app = cherrypy.tree.mount(medley.MedleyServer(), script_name="", config=config_file)
 
     config_extra = {
         "global": {
@@ -46,6 +40,10 @@ def teardown_module():
     cherrypy.engine.exit()
 
 class TestMedleyServer(BaseCherryPyTestCase):
+
+    def setup_method(self, method):
+        medley.util.cache.clear()
+
     def test_htmlCharset(self):
         """Requests for text/html specify charset=utf-8. Since the
         charset is applied to all requests via the negotiable tool,

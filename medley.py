@@ -18,7 +18,6 @@ import util.phone
 import util.net
 import util.fs
 import util.cache
-import memcache
 import ssl
 
 import tools.negotiable
@@ -44,11 +43,6 @@ class MedleyServer(object):
     template_dir = None
 
     def __init__(self):
-        memcache_host = cherrypy.config.get("memcache.host")
-        self.mc = memcache.Client([memcache_host], debug=0)
-
-        self.mc_expire = cherrypy.config.get("memcache.expire")
-
         self.template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
 
@@ -358,7 +352,7 @@ class MedleyServer(object):
             data["geo"] = None
 
         key = "whois:{}".format(data["address"])
-        cached_value = self.mc.get(key)
+        cached_value = util.cache.get(key)
 
         # Whois
         if cached_value:
@@ -366,7 +360,7 @@ class MedleyServer(object):
         else:
             try:
                 data["whois"] = util.net.whois(data["address"])
-                self.mc.set(key, data["whois"], self.mc_expire)
+                util.cache.set(key, data["whois"], time.time() + 600)
             except AssertionError:
                 data["whois"] = None
 
@@ -468,20 +462,17 @@ class MedleyServer(object):
                 raise cherrypy.HTTPError(400, "Invalid number")
 
         key = "phone:{}".format(area_code)
-        cached_value = self.mc.get(key)
+        location = util.cache.get(key)
 
-        if cached_value:
-            location = cached_value
-        else:
+        if location is None:
             try:
                 location = util.phone.findAreaCode(area_code)
-                self.mc.set(key, location, self.mc_expire)
+                util.cache.set(key, location, time.time() + 600)
             except (AssertionError, util.phone.PhoneException):
                 location = {}
 
-
         if cherrypy.request.negotiated == "text/plain":
-            return location.get("state_name")
+            return location.get("state_name", "Unknown")
         else:
             history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
             data["history"] = history[0]
