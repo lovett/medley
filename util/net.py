@@ -3,8 +3,8 @@ import socket
 import re
 import requests
 import jinja2
-from email.mime.text import MIMEText
 import smtplib
+from email.mime.text import MIMEText
 
 class NetException(Exception):
     pass

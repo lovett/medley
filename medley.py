@@ -17,6 +17,7 @@ import inspect
 import util.phone
 import util.net
 import util.fs
+import util.cache
 import memcache
 import ssl
 
@@ -156,32 +157,24 @@ class MedleyServer(object):
         dns_command = cherrypy.config.get("ip.dns.command")[:]
 
         key = "external_ip"
-        cached_value = self.mc.get(key)
 
-        if cached_value:
-            ip = cached_value
-        else:
-            try:
-                ip = util.net.externalIp()
-                # cache for 10 minutes
-                self.mc.set(key, ip, 600)
-            except:
-                ip = None
+        ip = util.cache.get(key)
 
-        if ip is not None:
-            if dns_command:
-                dns_command[dns_command.index("$ip")] = ip
-                dns_command[dns_command.index("$host")] = host
-                subprocess.call(dns_command)
-        else:
-            ip = "not available"
+        if ip is None:
+            ip = util.net.externalIp()
+            # cache for 10 minutes
+            util.cache.set(key, ip, time.time() + 600)
 
+        if ip and dns_command:
+            dns_command[dns_command.index("$ip")] = ip
+            dns_command[dns_command.index("$host")] = host
+            subprocess.call(dns_command)
 
         if silent:
             cherrypy.response.status = 204
             return
         elif cherrypy.request.negotiated == "text/plain":
-            return ip
+            return ip or "not available"
         elif cherrypy.request.negotiated == "application/json":
             return { "ip": ip }
         else:
