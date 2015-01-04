@@ -128,3 +128,8 @@ def sendMessage(message_data, template_data):
     mailserver.sendmail(message_data["smtp"]["sender"],
                         ", ".join(message_data["smtp"]["recipients"]),
                         message.as_string())
+
+def sendNotification(message, config):
+    r = requests.post(config["endpoint"], auth=config["auth"], data=message)
+    r.raise_for_status()
+    return True

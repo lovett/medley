@@ -52,56 +52,35 @@ class MedleyServer(object):
     @cherrypy.tools.json_in()
     def azure(self, event):
         """Relay deployment notifications from Azure"""
-        endpoint = cherrypy.config.get("notifier.url")
 
-        if not endpoint:
+        notifier = cherrypy.request.app.config["notifier"]
+
+        if not notifier.get("endpoint"):
             raise cherrypy.HTTPError(410, "This endpoint is not active")
-        deployment_url = cherrypy.config.get("azure.url.deployments")
 
-        body = {
-            "siteName": None,
-            "message": None,
-            "status": "unknown",
-            "complete": False
-        }
+        try:
+            details = cherrypy.request.json
+        except AttributeError:
+            raise cherrypy.HTTPError(400, "Json object not found")
 
-        body.update(cherrypy.request.json)
-
-        if body["siteName"] is None:
+        if not details.get("siteName"):
             raise cherrypy.HTTPError(400, "Site name not specified")
-
-        if body["message"]:
-            body["message"] = body["message"].split("\n")[0]
 
         notification = {
             "group": "azure",
-            "url": deployment_url.format(body["siteName"]),
-            "body": body["message"],
-            "title": "Deployment to {}".format(body["siteName"])
+            "url": cherrypy.request.config.get("deployment_url").format(details["siteName"]),
+            "details": details.get("message", "").split("\n")[0],
+            "title": "Deployment to {}".format(details["siteName"])
         }
 
-        if body["status"] == "success" and body["complete"] == True:
+        if details.get("status") == "success" and details.get("complete") == True:
             notification["title"] += " is complete"
-        elif body["status"] == "failed":
+        elif details.get("status") == "failed":
             notification["title"] += " has failed"
         else:
-            notification["title"] += " is {}".format(body["status"])
+            notification["title"] += " is {}".format(details.get("status", "not specified"))
 
-        encoded_notification = urllib.parse.urlencode(notification)
-        encoded_notification = encoded_notification.encode('utf-8')
-
-        basic_auth = "%s:%s" % (cherrypy.config.get('notifier.user'), cherrypy.config.get('notifier.pass'))
-        basic_auth = basic_auth.encode('utf-8')
-        headers = {
-            "Authorization": "Basic %s" % base64.b64encode(basic_auth).decode("ascii")
-        }
-
-        request = urllib.request.Request(endpoint,
-                                         data=encoded_notification,
-                                         headers=headers)
-
-        response = urllib.request.urlopen(request)
-        response.close()
+        util.net.sendNotification(notification, notifier)
         return "ok"
 
 
