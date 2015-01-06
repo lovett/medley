@@ -58,10 +58,7 @@ class MedleyServer(object):
         if not notifier.get("endpoint"):
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
-        try:
-            details = cherrypy.request.json
-        except AttributeError:
-            raise cherrypy.HTTPError(400, "Json object not found")
+        details = cherrypy.request.json
 
         if not details.get("siteName"):
             raise cherrypy.HTTPError(400, "Site name not specified")
@@ -69,7 +66,7 @@ class MedleyServer(object):
         notification = {
             "group": "azure",
             "url": cherrypy.request.config.get("deployment_url").format(details["siteName"]),
-            "details": details.get("message", "").split("\n")[0],
+            "body": details.get("message", "").split("\n")[0],
             "title": "Deployment to {}".format(details["siteName"])
         }
 

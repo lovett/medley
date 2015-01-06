@@ -40,9 +40,16 @@ def teardown_module():
     cherrypy.engine.exit()
 
 class TestMedleyServer(BaseCherryPyTestCase):
+    app = None
+    config = None
 
     def setup_method(self, method):
+        self.app = cherrypy.tree.apps['']
+        self._config = self.app.config
         medley.util.cache.clear()
+
+    def teardown_method(self, method):
+        self.app.config = self._config
 
     def test_htmlCharset(self):
         """Requests for text/html specify charset=utf-8. Since the
@@ -73,8 +80,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertTrue("<main" in response.body)
 
     def test_azure410IfNoNotifierUrl(self):
-        """ /azure returns 410 if notifier.url is not configured """
-        cherrypy.config["notifier.url"] = None
+        """ /azure returns 410 if notifier endpoint is not defined """
+        self.app.config["notifier"] = {}
         response = self.request("/azure/foo")
         self.assertEqual(response.code, 410)
 
@@ -91,35 +98,28 @@ class TestMedleyServer(BaseCherryPyTestCase):
 
         self.assertEqual(response.code, 415)
 
-    @mock.patch("medley.urllib.request")
-    def test_azureRejectsUnexpectedJson(self, requestMock):
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureRejectsUnexpectedJson(self, sendNotificationMock):
         """ /azure rejects json with unexpected fields """
-
-        cherrypy.config["notifier.url"] = "http://example.com"
-
-        headers = {
-            "Content-type": "application/json"
-        }
-
-        body = {
-            "foo": "bar"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
         }
 
         response = self.request(path="/azure/test",
                                 method="POST",
-                                data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
-        self.assertFalse(requestMock.urlopen.called)
+                                data=json.dumps({"foo":"bar"}).encode("utf-8"),
+                                headers={"Content-type": "application/json"})
+        self.assertFalse(sendNotificationMock.called)
         self.assertEqual(response.code, 400)
 
-    @mock.patch("medley.urllib.request")
-    def test_azureNotificationTitleSuccess(self, requestMock):
+
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureNotificationTitleSuccess(self, sendNotificationMock):
         """ /azure sends a success notification """
+        sendNotificationMock.return_value = True
 
-        cherrypy.config["notifier.url"] = "http://example.com"
-
-        headers = {
-            "Content-type": "application/json"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
         }
 
         body = {
@@ -131,22 +131,16 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
+                                headers={"Content-type": "application/json"})
 
+        notification = sendNotificationMock.call_args[0][0]
+        self.assertEqual(notification["title"], "Deployment to foo is complete")
 
-        self.assertTrue(requestMock.urlopen.called)
-
-        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
-        self.assertTrue("title=Deployment+to+foo+is+complete" in notification)
-
-    @mock.patch("medley.urllib.request")
-    def test_azureNotificationTitleFail(self, requestMock):
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureNotificationTitleFail(self, sendNotificationMock):
         """ /azure sends a failure notification """
-
-        cherrypy.config["notifier.url"] = "http://example.com"
-
-        headers = {
-            "Content-type": "application/json"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
         }
 
         body = {
@@ -158,20 +152,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
-        self.assertTrue(requestMock.urlopen.called)
+                                headers={"Content-type": "application/json"})
 
-        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
-        self.assertTrue("title=Deployment+to+foo+has+failed" in notification)
+        notification = sendNotificationMock.call_args[0][0]
+        self.assertEqual(notification["title"], "Deployment to foo has failed")
 
-    @mock.patch("medley.urllib.request")
-    def test_azureNotificationTitleOther(self, requestMock):
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureNotificationTitleOther(self, sendNotificationMock):
         """ /azure handles status values other than success and failure"""
 
-        cherrypy.config["notifier.url"] = "http://example.com"
-
-        headers = {
-            "Content-type": "application/json"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
         }
 
         body = {
@@ -183,20 +174,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
-        self.assertTrue(requestMock.urlopen.called)
+                                headers={"Content-type": "application/json"})
 
-        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
-        self.assertTrue("title=Deployment+to+foo+is+argle+bargle" in notification)
+        notification = sendNotificationMock.call_args[0][0]
+        self.assertEqual(notification["title"], "Deployment to foo is argle bargle")
 
-    @mock.patch("medley.urllib.request")
-    def test_azureNotificationIncludesExpectedValues(self, requestMock):
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureNotificationIncludesExpectedValues(self, sendNotificationMock):
         """ /azure notifications link to the management console and set group to azure"""
 
-        cherrypy.config["notifier.url"] = "http://example.com"
-
-        headers = {
-            "Content-type": "application/json"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
         }
 
         body = {
@@ -208,20 +196,19 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
-                                headers=headers)
+                                headers={"Content-type": "application/json"})
 
-        self.assertTrue(requestMock.urlopen.called)
+        notification = sendNotificationMock.call_args[0][0]
+        self.assertTrue(body["siteName"] in notification["title"])
+        self.assertEqual(notification["group"], "azure")
 
-        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
-        self.assertTrue(body["siteName"] in notification)
-        self.assertTrue("group=azure" in notification)
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureMessageFirstLine(self, sendNotificationMock):
+        """/azure notification bodies truncate the commit message"""
 
-    @mock.patch("medley.urllib.request")
-    def test_azureMessageFirstLine(self, requestMock):
-        """/azure notification bodies truncate the commit message to the first
-        line"""
-
-        cherrypy.config["notifier.url"] = "http://example.com"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
+        }
 
         body = {
             "siteName": "foo",
@@ -230,21 +217,21 @@ class TestMedleyServer(BaseCherryPyTestCase):
             "complete": True
         }
 
-
         response = self.request(path="/azure/test",
                                 method="POST",
                                 data=json.dumps(body).encode("utf-8"),
                                 headers={"Content-type": "application/json"})
 
-        notification = requestMock.Request.call_args[1]["data"].decode("utf-8")
-        self.assertTrue("body=line1+foo+bar" in notification)
-        self.assertFalse("body=line2+foo+bar" in notification)
+        notification = sendNotificationMock.call_args[0][0]
+        self.assertEqual(notification["body"], "line1 foo bar")
 
-    @mock.patch("medley.urllib.request")
-    def test_azurePublicAccess(self, requestMock):
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azurePublicAccess(self, sendNotificationMock):
         """ /azure does not require authentication"""
 
-        cherrypy.config["notifier.url"] = "http://example.com"
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
+        }
 
         headers = {
             "Remote-Addr": "127.0.0.2",
@@ -263,6 +250,22 @@ class TestMedleyServer(BaseCherryPyTestCase):
                                 data=json.dumps(body).encode("utf-8"),
                                 headers=headers)
         self.assertEqual(response.code, 200)
+
+    @mock.patch("medley.util.net.sendNotification")
+    def test_azureMalformedRequest(self, sendNotificationMock):
+        """ /azure rejects a request with malformed JSON"""
+
+        self.app.config["notifier"] = {
+            "endpoint": "http://example.com"
+        }
+
+        response = self.request(path="/azure/test",
+                                method="POST",
+                                data="{\"foo".encode("utf-8"),
+                                headers={"Content-type": "application/json"})
+
+        self.assertFalse(sendNotificationMock.called)
+        self.assertEqual(response.code, 400)
 
 
     def test_favicon(self):
