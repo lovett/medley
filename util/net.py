@@ -4,7 +4,10 @@ import re
 import requests
 import jinja2
 import smtplib
+import pytz
 from email.mime.text import MIMEText
+from datetime import datetime
+from ua_parser import user_agent_parser
 
 class NetException(Exception):
     pass
@@ -133,3 +136,33 @@ def sendNotification(message, config):
     r = requests.post(config["endpoint"], auth=config["auth"], data=message)
     r.raise_for_status()
     return True
+
+def parse_appengine(line):
+    quoted_fields = re.findall("\"(.*?)\"", line)
+    fields = line.split(" ")
+
+    log_date = datetime.strptime(" ".join(fields[3:5]), "[%d/%b/%Y:%H:%M:%S %z]")
+
+    local_date = log_date.astimezone(pytz.timezone('US/Eastern'))
+
+    agent = user_agent_parser.Parse(quoted_fields[-2])
+
+    referrer = fields[10].replace('"', '')
+    if referrer == "-":
+        referrer = None
+
+
+    return {
+        "ip": fields[0],
+        "date": log_date,
+        "time_string": local_date.strftime('%I:%M:%S %p %Z'),
+        "date_string": local_date.strftime('%Y-%m-%d'),
+        "method": quoted_fields[0].split(" ")[0],
+        "uri": quoted_fields[0].split(" ")[1],
+        "status": fields[8],
+        "bytes": fields[9],
+        "referrer": referrer,
+        "agent": agent,
+        "host": quoted_fields[-1],
+        "line": line
+    }

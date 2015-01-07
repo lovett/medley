@@ -9,11 +9,59 @@
 
 {% block page_body %}
 
+<form class="ui form sixteen wide column" method="get" action="/visitors">
+    <div class="field">
+        <label for="q">Query:</label>
+        <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
+    </div>
+    {% include "submit.html" %}
+</form>
+
+
+
+{% if results != none %}
 <div class="sixteen wide column">
 
-    {% for match in matches %}
-    <pre>{{ match.line }}</pre>
-    {% endfor %}
+    {% if results|length() == 0 %}
+    <p>No results found.</p>
+    {% else %}
+
+    <table class="ui table">
+        <thead>
+            <tr>
+                <th class="four wide">Client</th>
+                <th class="four wide">Date</th>
+                <th>Request</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>
+                    <a href="/visitors?q=include+{{ result.ip }}">{{ result.ip }}</a>
+                    <div title="{{ result.agent["string"]}}">
+                        {{ result.agent["user_agent"]["family"] }} {{ result.agent["user_agent"]["major"] }}
+                        on
+                        {{ result.agent["os"]["family"] }}
+                    </div>
+                    <div>
+                        <a href="/whois/{{ result.ip }}">whois lookup</a>
+                    </div>
+                </td>
+                <td>
+                    {{ result.time_string }}
+                    <div>{{ result.date_string }}</div>
+                </td>
+                <td>
+                    <div>{{ result.method }} {{ result.uri }}</div>
+                    <div>Referrer: {{ result.referrer }}</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 </div>
+{% endif %}
 
 {% endblock %}

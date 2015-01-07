@@ -19,6 +19,8 @@ import util.net
 import util.fs
 import util.cache
 import ssl
+import string
+from datetime import datetime
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -498,16 +500,41 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="visitors.html")
-    def visitors(self):
-        matches = util.fs.webgrep(
-            cherrypy.config.get("visitors.dir"),
-            cherrypy.config.get("visitors.include"),
-            cherrypy.config.get("visitors.exclude"),
-            cherrypy.config.get("visitors.shun")
-        )
+    def visitors(self, q=None):
+        """Search website access logs"""
+
+        if not q:
+            q = datetime.now().strftime("date %Y-%m-%d")
+        else:
+            q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
+
+        logdir = cherrypy.request.config.get("logdir")
+
+        results = None
+
+        filters = {
+            "include": [],
+            "exclude": [],
+            "shun": [],
+            "date":  []
+        }
+
+        for line in q.split("\n"):
+            try:
+                action, value = line.split(" ", 1)
+            except ValueError:
+                continue
+
+            if action in filters.keys():
+                filters[action].append(value)
+
+
+        if q:
+            results = util.fs.appengine_log_grep(logdir, filters)
 
         return {
-            "matches": matches
+            "q": q,
+            "results": results
         }
 
 

@@ -1,8 +1,17 @@
 import re
-import time
+import fnmatch
+import os.path
+import util.net
 
-def webgrep(path, include, exclude=[], shun=[]):
+def appengine_log_grep(logdir, filters):
     matches = []
+
+    files = [os.path.join(dirpath, f)
+             for dirpath, dirnames, files in os.walk(logdir)
+             for f in fnmatch.filter(files, "*.log")]
+
+    if len(filters["date"]) > 0:
+        files = [f for f in files if any(d in f for d in filters["date"])]
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)
@@ -11,27 +20,15 @@ def webgrep(path, include, exclude=[], shun=[]):
                 return True
         return False
 
-    with open(path) as f:
-        for line in f:
-            if filter(line, shun):
-                ip = line[0:line.find(" ")]
-                exclude.append(ip)
 
-            if filter(line, include) and not filter(line, exclude):
-                fields = parse_appengine(line)
-                matches.append(fields)
+    for path in files:
+        with open(path) as f:
+            for line in f:
+                if filter(line, filters["shun"]):
+                    ip = line[0:line.find(" ")]
+                    filters["exclude"].append(ip)
 
+                if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
+                    fields = util.net.parse_appengine(line)
+                    matches.append(fields)
     return matches
-
-def parse_appengine(line):
-    fields = line.split(" ")
-    ip = fields[0]
-    return {
-        "ip": fields[0],
-        "date": time.strptime(" ".join(fields[3:5]), "[%d/%b/%Y:%H:%M:%S %z]"),
-        "method": fields[5],
-        "uri": fields[6],
-        "status": fields[8],
-        "referrer": fields[10],
-        "line": line
-    }
