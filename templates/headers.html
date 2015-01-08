@@ -4,16 +4,19 @@
 {% set home_link = True %}
 
 {% block page_body %}
-<div class="sixteen wide column">
-    <table class="ui table segment topalign">
-        <tbody>
-            {% for key, value in headers %}
-            <tr>
-                <th>{{ key }}</th>
-                <td>{{ value }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+
+<main class="ui page grid stackable">
+    <div class="column">
+        <table class="ui definition table">
+            <tbody>
+                {% for key, value in headers %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
 {% endblock %}

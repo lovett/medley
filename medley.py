@@ -400,7 +400,7 @@ class MedleyServer(object):
             return
 
         return {
-            "page_title": "Geoupdate",
+            "page_title": "Geodb",
             "message": message,
             "home_link": True
         }

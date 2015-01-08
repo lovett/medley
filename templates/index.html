@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 
 {% block page_body %}
-<div class="sixteen wide column">
-    <div class="ui very relaxed divided list">
-        {% for name, description in endpoints %}
-        <div class="item">
+
+<main class="ui page grid stackable">
+    {% for name, description in endpoints %}
+    <div class="eight wide column">
+        <a href="/{{ name }}" class="ui fluid card">
             <div class="content">
-                <a class="header" href="/{{ name }}">{{ name}}</a>
+                <div class="header">{{ name}}</div>
                 <div class="description">{{ description }}</div>
             </div>
-        </div>
-        {% endfor %}
+        </a>
     </div>
-</div>
+    {% endfor %}
+</main>
+
 {% endblock %}

@@ -58,6 +58,8 @@ var MEDLEY = (function () {
             jQuery(document).on('keydown', shortcuts);
 
             jQuery('.select-all').on('click', selectAll);
+
+            jQuery('.ui.radio.checkbox').checkbox();
         }
     }
 })();

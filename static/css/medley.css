@@ -1,10 +1,58 @@
 HTML, BODY {
-    height: 100%;
+    background-color: white;
 }
 
+#page-header {
+    background-color: #efefef;
+    padding: 1em;
+    border-bottom: 2px solid #666;
+    margin-bottom: 1em;
+}
+
+#page-header H1 {
+    margin: 0;
+    font-weight: normal;
+}
+
+#page-header A {
+    color: black;
+    text-decoration: none;
+}
+
+#page-header A:hover {
+    text-decoration: underline;
+}
+
+
+#page-header P {
+    margin: 0;
+}
+
+.svg-arrow {
+    display: block;
+    float: right;
+    margin-right: .5em;
+    margin-top: .25em;
+    background-repeat: no-repeat;
+    background-position: center center;
+    width: 2em;
+    height: 2em;
+    background-size: 100%;
+    text-indent: -9999px;
+}
+
+.svg-arrow.back {
+    background-image: url('../arrow-left.svg');
+}
+
+.svg-arrow.home {
+    background-image: url('../arrow-up.svg');
+}
+
+
+/*
 BODY {
     margin: 0;
-    font-family: 'Source Code Pro', sans-serif;
 }
 
 TH {
@@ -16,35 +64,6 @@ TD {
     word-break: break-word;
 }
 
-HEADER {
-    background-color: #efefef;
-    padding: 1em;
-    border-bottom: 2px solid #666;
-}
-
-HEADER A {
-    color: black;
-    text-decoration: none;
-}
-
-HEADER A:hover {
-    text-decoration: underline;
-}
-
-
-HEADER H1 {
-    font-weight: normal;
-    margin: 0;
-}
-
-HEADER P {
-    margin: 0;
-}
-
-HEADER .supplemental {
-    margin-right: 1em;
-    display: inline;
-}
 
 .ui.table.topalign TD,
 .ui.table.topalign TH {
@@ -75,26 +94,7 @@ INPUT[type=submit] {
     background-color: #f5f5f5;
 }
 
-.svg-arrow {
-    display: block;
-    float: right;
-    margin-right: .5em;
-    margin-top: .25em;
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 2em;
-    height: 2em;
-    background-size: 100%;
-    text-indent: -9999px;
-}
 
-.svg-arrow.back {
-    background-image: url('../arrow-left.svg');
-}
-
-.svg-arrow.home {
-    background-image: url('../arrow-up.svg');
-}
 
 .recent-calls LI TIME {
     display: block;
@@ -111,3 +111,4 @@ PRE {
 .hidden {
     display: none;
 }
+*/

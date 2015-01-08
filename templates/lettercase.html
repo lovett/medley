@@ -4,29 +4,44 @@
 {% set home_link = True %}
 
 {% block page_body %}
-<form class="sixteen wide column ui form" method="post" action="/lettercase">
-    <div class="field">
-        <label for="value">Input:</label>
-        <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
-    </div>
-    <div class="field">
-        <label for="style">Convert to:</label>
-        <select id="style" name="style" class="ui">
-            {% for option in styles %}
-            <option value="{{ option }}" {% if option == style %}selected{% endif %}>{{ option|title }}case</option>
-            {% endfor %}
-        </select>
-    </div>
-    {% include "submit.html" %}
-</form>
+<main class="ui page grid stackable">
+    <form class="ui sixteen wide column form" method="post" action="/lettercase">
+        <div class="field">
+            <label for="value">Input:</label>
+            <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
+        </div>
+        <div class="field">
+            <label for="style">Convert to:</label>
 
-{% if result %}
-<div class="results sixteen wide column">
-    <a href="#" data-selection-target="#result" class="select-all">Select All</a>
-    <div class="ui divider"></div>
-    <div id="result">{{ result }}</div>
-</div>
-{% endif %}
+            <div class="inline fields">
+                {% for option in styles %}
+                <div class="field">
+                    <div class="ui radio checkbox">
+                        <input type="radio" name="style" value="{{ option }}" {% if option == style %}checked{% endif %} />
+                        <label>{{ option|title }}case</label>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <div class="field">
+            <input type="submit" value="Submit" class="ui blue focusable button"/>
+        </div>
+    </form>
+
+
+    {% if result %}
+    <div class="ui sixteen wide column">
+        <div class="ui segment">
+            <a href="#" data-selection-target="#result" class="select-all">Select All</a>
+            <div class="ui divider"></div>
+            <div id="result">{{ result }}</div>
+        </div>
+    </div>
+    {% endif %}
 </form>
+</main>
 
 {% endblock %}
