@@ -6,60 +6,68 @@
 
 {% block page_body %}
 
-<form class="ui form sixteen wide column" method="get" action="/visitors">
-    <div class="field">
-        <label for="q">Query:</label>
-        <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
+<main class="ui page grid stackable">
+    <div class="ui sixteen wide column">
+        <form class="ui form" method="get" action="/visitors">
+            <div class="field">
+                <label for="q">Query:</label>
+                <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
+            </div>
+            <div class="field">
+                <input type="submit" value="Submit" class="ui blue focusable button"/>
+            </div>
+        </form>
     </div>
-    {% include "submit.html" %}
-</form>
 
+    {% if results != none %}
+    <div class="ui sixteen wide column">
 
+        {% if results|length() == 0 %}
+        <div class="ui segment">
+            <p>No results found.</p>
+        </div>
+        {% endif %}
 
-{% if results != none %}
-<div class="sixteen wide column">
+        {% if results|length() > 0 %}
+        <table class="ui table">
+            <thead>
+                <tr>
+                    <th class="two wide">IP</th>
+                    <th class="two wide">Date</th>
+                    <th class="two wide">Time</th>
+                    <th class="four wide">Request</th>
+                    <th class="three wide">Agent</th>
+                    <th class="one wide">Response</th>
+                    <th class="two wide"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in results %}
+                <tr>
+                    <td><a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a></td>
+                    <td><a href="/visitors?q=date+{{ result.date_string }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.date_string }}</a></td>
+                    <td class="right aligned"><span class="nowrap">{{ result.time_string }}</span></td>
+                    <td><a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(50, True) }}</a></td>
+                    <td>{{ result.agent|useragent() }}</td>
+                    <td>{{ result.status }}</td>
+                    <td class="right aligned">
+                        <a href="#" class="row-toggle"><i class="cubes icon"></i><span class="label">more</span></a>
+                    </td>
+                </tr>
+                <tr class="expandable">
+                    <td colspan="6" class="active">
+                        <p><code>{{ result.line }}</code></p>
 
-    {% if results|length() == 0 %}
-    <p>No results found.</p>
-    {% else %}
+                        <p><a href="/whois/{{ result.ip }}"><i class="search icon"></i> whois</a></p>
 
-    <table class="ui table">
-        <thead>
-            <tr>
-                <th class="three wide">Date</th>
-                <th class="two wide">IP</th>
-                <th>Request</th>
-                <th>Response</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for result in results %}
-            <tr>
-                <td>
-                    {{ result.time_string }}
-                    <div>{{ result.date_string }}</div>
-                </td>
-                <td>
-                    <a href="/visitors?q=include+{{ result.ip }}">{{ result.ip }}</a>
-                    <div>
-                        <a href="/whois/{{ result.ip }}">whois lookup</a>
-                    </div>
-                </td>
-                <td>
-                    <div>{{ result.method }} {{ result.uri|truncate(75, True) }}</div>
-                    <div>Referrer: {{ result.referrer }}</div>
-                    <div title="{{ result.agent["string"]}}">
-                        {{ result.agent|useragent() }}
-                    </div>
-
-                </td>
-                <td>{{ result.status }}</td>
-           </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
     {% endif %}
-</div>
-{% endif %}
+</main>
 
 {% endblock %}

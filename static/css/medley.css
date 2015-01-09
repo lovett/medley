@@ -28,6 +28,10 @@ HTML, BODY {
     margin: 0;
 }
 
+.nowrap {
+    white-space: pre;
+}
+
 .svg-arrow {
     display: block;
     float: right;
@@ -47,6 +51,14 @@ HTML, BODY {
 
 .svg-arrow.home {
     background-image: url('../arrow-up.svg');
+}
+
+TR.expandable {
+    display: none;
+}
+
+TR.expandable.expanded {
+    display: table-row;
 }
 
 

@@ -60,6 +60,17 @@ var MEDLEY = (function () {
             jQuery('.select-all').on('click', selectAll);
 
             jQuery('.ui.radio.checkbox').checkbox();
+
+            jQuery('A.row-toggle').on('click', function (e) {
+                var label;
+                e.preventDefault();
+                label = jQuery('.label', this);
+
+                label.text(label.text() === 'more' ? 'less':'more');
+                jQuery('.icon', this).toggleClass('cube cubes');
+                jQuery(this).closest('TR').next('TR.expandable').toggleClass('expanded');
+            });
+
         }
     }
 })();

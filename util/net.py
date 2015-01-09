@@ -155,7 +155,7 @@ def parse_appengine(line):
     return {
         "ip": fields[0],
         "date": log_date,
-        "time_string": local_date.strftime('%I:%M:%S %p %Z'),
+        "time_string": local_date.strftime('%I:%M:%S %p %Z').lstrip("0"),
         "date_string": local_date.strftime('%Y-%m-%d'),
         "method": quoted_fields[0].split(" ")[0],
         "uri": quoted_fields[0].split(" ")[1],
