@@ -115,7 +115,6 @@ class MedleyServer(object):
                 "endpoints": endpoints
             }
 
-    @userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -218,9 +217,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
     def ip(self, token=None):
-        """A combination dynamic DNS and what-is-my-ip service.  If a token is
-        provided, updates the local nameserver with the caller's
-        address. If no token, returns the caller's address"""
+        """Display internal and external IP addresses"""
 
         ip_address = None
         for header in ("X-Real-Ip", "Remote-Addr"):
@@ -234,10 +231,14 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Unable to determine IP")
 
         if not token:
+            external_ip = util.net.externalIp()
             if cherrypy.request.negotiated == "text/plain":
                 return ip_address
             else:
-                return {"address": ip_address}
+                return {
+                    "address": ip_address,
+                    "external_ip": external_ip
+                }
 
         host = cherrypy.request.app.config["ip_tokens"].get(token)
         if not host:
@@ -410,8 +411,7 @@ class MedleyServer(object):
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
     def phone(self, number=None):
-        """Given a US phone number, return the state its area code belongs to
-        and a description of the area it covers as well as a recent call history"""
+        """Get the geographic location and recent call history for a phone number"""
 
         data = {}
 
