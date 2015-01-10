@@ -13,12 +13,8 @@
     <body>
 
         <header id="page-header">
-            {% if back_link %}
-            <a class="svg-arrow back" href="{{ back_link }}" title="Back to the main page">Back</a>
-            {% endif %}
-
             {% if home_link %}
-            <a class="svg-arrow home" href="/" title="Return to the homepage">Home</a>
+            <a href="/" title="Return to the homepage"><i class="large home icon"></i></a>
             {% endif %}
 
             <h1>{{ page_title }}</h1>

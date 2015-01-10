@@ -9,7 +9,15 @@ HTML, BODY {
     margin-bottom: 1em;
 }
 
+#page-header .home {
+    display: inline-block;
+    text-decoration: none;
+    padding-right: 1.5em;
+}
+
 #page-header H1 {
+    display: inline-block;
+    vertical-align: middle;
     margin: 0;
     font-weight: normal;
 }
@@ -32,26 +40,6 @@ HTML, BODY {
     white-space: pre;
 }
 
-.svg-arrow {
-    display: block;
-    float: right;
-    margin-right: .5em;
-    margin-top: .25em;
-    background-repeat: no-repeat;
-    background-position: center center;
-    width: 2em;
-    height: 2em;
-    background-size: 100%;
-    text-indent: -9999px;
-}
-
-.svg-arrow.back {
-    background-image: url('../arrow-left.svg');
-}
-
-.svg-arrow.home {
-    background-image: url('../arrow-up.svg');
-}
 
 TR.expandable {
     display: none;
@@ -64,61 +52,3 @@ TR.expandable.expanded {
 .hidden {
     display: none;
 }
-
-
-/*
-BODY {
-    margin: 0;
-}
-
-TH {
-    vertical-align: top;
-}
-
-TD {
-    vertical-align: top;
-    word-break: break-word;
-}
-
-
-.ui.table.topalign TD,
-.ui.table.topalign TH {
-    vertical-align: top;
-}
-
-
-
-INPUT[type=submit] {
-    padding: 0 1em;
-    font-size: 4em;
-}
-
-.field SELECT {
-    font-size: 1em;
-}
-
-.ui.focusable.blue.button:focus {
-    background-color: green;
-}
-
-.results {
-    margin-top: 2em;
-    padding: 2em 1em;
-    background-color: #f5f5f5;
-}
-
-
-
-.recent-calls LI TIME {
-    display: block;
-}
-
-.recent-calls LI DIV {
-    font-size: .75em;
-}
-
-PRE {
-    font-size: .85em;
-}
-
-*/
