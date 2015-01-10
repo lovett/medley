@@ -12,7 +12,7 @@ HTML, BODY {
 #page-header .home {
     display: inline-block;
     text-decoration: none;
-    padding-right: 1.5em;
+    padding-right: .5em;
 }
 
 #page-header H1 {
