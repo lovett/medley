@@ -1,13 +1,7 @@
 {% extends "base.html" %}
 
-
-{% if state_name %}
-{% set page_title = "Phone Lookup: " + number_formatted %}
-{% set back_link = "/phone" %}
-{% else %}
-{% set page_title = "Phone Lookup" %}
+{% set page_title = "Phone" %}
 {% set home_link = True %}
-{% endif %}
 
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
@@ -15,64 +9,86 @@
 {% endblock %}
 
 {% block page_body %}
-{% if number %}
-<div class="eight wide column">
 
-    {% if history|length > 0 and history[0]["clid"] != number %}
-    <h1 class="ui top attached tiny inverted green header">Caller ID</h1>
-    <div class="ui segment attached">
-        {{ history[0]["clid"] }}
-    </div>
-    {% endif %}
+<main class="ui page grid stackable">
 
-    <h1 class="ui top attached tiny inverted green header">Links</h1>
-    <div class="ui segment attached">
-        <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank" rel="noreferrer">Search Whitepages.com</a></p>
-        <p class="supplemental"><a href="{{ bing_url }}" target="_blank" rel="noreferrer">Search Bing</a></p>
-    </div>
+    <form class="ui form sixteen wide column" method="get" action="/phone">
+        <div class="field">
+            <label for="number">Number</label>
+            <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
+        </div>
+        <div class="field">
+            <input type="submit" value="Submit" class="ui blue focusable button"/>
+        </div>
+    </form>
 
-    {% if history|length > 0 %}
-    <h1 class="ui top attached tiny inverted green header">Recent Calls</h1>
-    <div class="ui segment attached">
-        <ul class="ui list recent-calls">
-            {% for entry in history %}
-            <li>
-                <time>{{ entry["date"]|datetime("time12")}} on {{ entry["date"]|datetime("date-full") }}</time>
-                <div>Called {{ entry["dst"]}} for {{ entry["duration"] }} ending with {{ entry["lastapp"] }}</div>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+    {% if number %}
 
-    <div class="ui basic segment">
-        <div class="ui tiny teal button toggle-trigger"><span>Show</span> Sparql Queries</div>
+    <div class="eight wide column">
+        <div class="ui grid">
+            <div class="ten wide column">
+                <div class="ui segment">
+                    {% if state_name %}
+                    <h2 class="ui tiny centered header">{{ state_name }}</h2>
+                    {% endif %}
+                    <p>{{ comment }}</p>
+                </div>
+            </div>
+            <div class="six wide column">
+                <div class="ui segment">
+                    <h2 class="ui tiny centered header">Search</h2>
+                    <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> whitepages.com</a></p>
+                    <p class="supplemental"><a href="{{ bing_url }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
+                </div>
+            </div>
+        </div>
+
+        {% if history|length > 0 and history[0]["clid"] != number %}
+        <h1 class="ui medium header">Caller ID</h1>
+        <div class="ui segment">
+            {{ history[0]["clid"] }}
+        </div>
+        {% endif %}
+
+        {% if history|length > 0 %}
+        <h1 class="ui medium header">History</h1>
+
+        <table class="ui table">
+            <thead>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Destination</th>
+                <th>Duration</th>
+                <th>End</th>
+            </thead>
+            <tbody>
+                {% for entry in history %}
+                <tr>
+                    <td>{{ entry["date"]|datetime("%Y-%m-%d") }}</td>
+                    <td>{{ entry["date"]|datetime("time12")}}</td>
+                    <td>{{ entry["dst"]}}</td>
+                    <td>{{ entry["duration"] }}</td>
+                    <td>{{ entry["lastapp"] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <a href="#" class="ui tiny toggle-trigger"><span>Show</span> sparql queries</a>
         <div class="toggle-target hidden">
             {% for query in sparql %}
             <pre>{{ query|unindent|escape }}</pre>
             {% endfor %}
         </div>
-    </div>
-</div>
 
-<div class="eight wide column">
-    <h1 class="ui top attached tiny inverted green header">
-        Location{%if  state_name %}: {{ state_name }}{% endif %}
-    </h1>
-    <div class="ui segment attached">
-        <p>{{ comment }}</p>
-    </div>
-    <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
-
-</div>
-{% else %}
-<form class="ui form sixteen wide column" method="get" action="/phone">
-    <div class="field">
-        <label for="number">Number:</label>
-        <input type="text" id="number" name="number" autofocus/>
     </div>
 
-    {% include "submit.html" %}
-</form>
-{% endif %}
+    <div class="eight wide column">
+        <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
+    </div>
+    {% endif %}
+
+</main>
+
 {% endblock %}

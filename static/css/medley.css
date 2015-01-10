@@ -61,6 +61,11 @@ TR.expandable.expanded {
     display: table-row;
 }
 
+.hidden {
+    display: none;
+}
+
+
 /*
 BODY {
     margin: 0;
@@ -116,7 +121,4 @@ PRE {
     font-size: .85em;
 }
 
-.hidden {
-    display: none;
-}
 */
