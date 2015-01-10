@@ -330,10 +330,9 @@ class MedleyServer(object):
         except:
             data["geo"] = None
 
+        # Whois
         key = "whois:{}".format(data["address"])
         cached_value = util.cache.get(key)
-
-        # Whois
         if cached_value:
             data["whois"] = cached_value
         else:

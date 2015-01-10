@@ -1,15 +1,8 @@
 {% extends "base.html" %}
 
-{% set back_link = "/whois" %}
+{% set page_title = "Whois" %}
 
-{% if not address %}
-{% set page_title = "Whois Lookup" %}
 {% set home_link = True %}
-{% set back_link = None %}
-{% else %}
-{% set page_title = "Whois Lookup: " + address|escape  %}
-{% set back_link = "/whois" %}
-{% endif %}
 
 {% block scripts %}
 {% if ip %}
@@ -20,99 +13,113 @@
 
 {% block page_body %}
 
-{% if error %}
-<div class="sixteen wide column">
-    <div class="ui red inverted segment">
-        <p>{{ error }}</p>
-    </div>
-</div>
-{% endif %}
+<main class="ui page grid stackable">
 
-{% if not address %}
-<form class="ui form sixteen wide column" method="get" action="/whois">
-    <div class="field">
-        <div class="ui input">
-            <label for="address">IP Address</label>
-            <input type="text" id="address" name="address" autofocus/>
+    {% if error %}
+    <div class="ui sixteen wide column">
+        <div class="ui red inverted segment">
+            <p>{{ error }}</p>
         </div>
     </div>
-    {% include "submit.html" %}
-</form>
-{% endif %}
+    {% endif %}
 
-{% if address %}
-<div class="eight wide column">
-
-    <h1 class="ui top attached small inverted green header">
-        Location:
-        {% if geo.country_name == "United States" and geo.city and geo.region_code %}
-        {{ geo.city}}, {{geo.region_code }}
-        {% elif geo.city and geo.country_name %}
-        {{ geo.city }}, {{ geo.country_name }}
-        {% elif geo.country_name %}
-        {{ geo.country_name }}
-        {% else %}
-        Unknown
-        {% endif %}
-    </h1>
-    <div class="ui segment attached">
-        <div class="ui list">
-            <div class="item">
-                <div class="content">
-                    <div class="header">Reverse Host</div>
-                    {{ reverse_host }}
-                </div>
+    <div class="ui sixteen wide column">
+        <form class="ui form" method="get" action="/whois">
+            <div class="field">
+                <label for="address">IP or host</label>
+                <input type="text" id="address" name="address" value="{{ address }}" autofocus/>
             </div>
-            <div class="item">
-                <div class="content">
-                    <div class="header">IP</div>
-                    {{ ip }}
-                </div>
+            <div class="field">
+                <input type="submit" value="Submit" class="ui blue focusable button"/>
             </div>
-
-            {% if geo.area_code%}
-            <div class="item">
-                <div class="content">
-                    <div class="header">Area Code</div>
-                    {{ geo.area_code }}
-                </div>
-            </div>
-            {% endif %}
-
-            {% if geo.metro_code %}
-            <div class="item">
-                <div class="content">
-                    <div class="header">Metro</div>
-                    {{ geo.metro_code }}
-                </div>
-            </div>
-            {% endif %}
-        </div>
+        </form>
     </div>
 
-    {% if whois %}
-    <h1 class="ui top attached small inverted green header">Whois</h1>
-    <table class="ui small table attached segment topalign">
-        <tbody>
-            {% for line in whois %}
-            <tr>
-                {% if not line[1] %}
-                <td class="eleven wide" colspan="2">{{ line[0] }}</td>
-                {% else %}
-                <th class="five wide">{{ line[0] }}</th>
-                <td class="eleven wide">{{ line[1]|urlize(30) }}</td>
+    {% if address %}
+    <div class="eight wide column">
+
+        <h1 class="ui medium header">Location</h1>
+        <div class="ui segment">
+            <div class="ui list">
+                <div class="item">
+                    <div class="content">
+                        {% if geo.country_name == "United States" and geo.city and geo.region_code %}
+                        <div class="header">City</div> {{ geo.city}}, {{geo.region_code }}
+                        {% elif geo.city and geo.country_name %}
+                        <div class="header">City</div> {{ geo.city }}, {{ geo.country_name }}
+                        {% elif geo.country_name %}
+                        <div class="header">Country</div> {{ geo.country_name }}
+                        {% else %}
+                        <div class="header">Country</div> Unknown
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="item">
+                    <div class="content">
+                        <div class="header">Reverse Host</div>
+                        {{ reverse_host }}
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="content">
+                        <div class="header">IP</div>
+                        {{ ip }}
+                    </div>
+                </div>
+
+                {% if geo.area_code%}
+                <div class="item">
+                    <div class="content">
+                        <div class="header">Area Code</div>
+                        {{ geo.area_code }}
+                    </div>
+                </div>
                 {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% endif %}
-</div>
-<div class="eight wide column">
-    {% if geo.latitude and geo.longitude %}
-    <div class="ui segment map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
-    {% endif %}
-</div>
-{% endif %}
 
+                {% if geo.metro_code %}
+                <div class="item">
+                    <div class="content">
+                        <div class="header">Metro</div>
+                        {{ geo.metro_code }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if whois %}
+        <h1 class="ui  medium header">Whois</h1>
+        <table class="ui striped table">
+            <tbody>
+                {% for line in whois %}
+                <tr>
+                    {% if not line[1] %}
+                    <td class="eleven wide" colspan="2">{{ line[0] }}</td>
+                    {% else %}
+                    <td class="five wide">{{ line[0] }}</td>
+                    <td class="eleven wide">{{ line[1]|urlize(30) }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
+    {% if geo.latitude and geo.longitude %}
+    <div class="eight wide column">
+        <h1 class="ui medium header">Map</h1>
+        <div class="ui segment">
+            <div class="map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
+        </div>
+
+        <h1 class="ui medium header">Activity</h1>
+        <div class="ui segment">
+            <p><a href="/visitors/?q=include+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+</main>
 {% endblock %}

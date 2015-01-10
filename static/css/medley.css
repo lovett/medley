@@ -61,7 +61,6 @@ TR.expandable.expanded {
     display: table-row;
 }
 
-
 /*
 BODY {
     margin: 0;
@@ -83,9 +82,6 @@ TD {
 }
 
 
-.ui.segment.map {
-    padding: .5em;
-}
 
 INPUT[type=submit] {
     padding: 0 1em;
