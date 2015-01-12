@@ -52,3 +52,7 @@ TR.expandable.expanded {
 .hidden {
     display: none;
 }
+
+.help:hover {
+    cursor: help;
+}

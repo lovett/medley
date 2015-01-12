@@ -1,6 +1,7 @@
 # taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973a/web/templating/jinja2_templating
 import cherrypy
 import jinja2
+import http.client
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -12,6 +13,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["datetime"] = self.datetime_filter
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["useragent"] = self.useragent_filter
+        self.env.filters["status_message"] = self.status_message_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -69,3 +71,7 @@ class Plugin(plugins.SimplePlugin):
             return "{} {}, {}".format(family, version, os)
 
         return agent["string"]
+
+    def status_message_filter(self, code):
+        """Returns the standard status code message for the given integer"""
+        return http.client.responses.get(int(code), "Unknown")
