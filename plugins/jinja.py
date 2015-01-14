@@ -14,6 +14,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["useragent"] = self.useragent_filter
         self.env.filters["status_message"] = self.status_message_filter
+        self.env.filters["nl2br"] = self.nl2br_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -75,3 +76,7 @@ class Plugin(plugins.SimplePlugin):
     def status_message_filter(self, code):
         """Returns the standard status code message for the given integer"""
         return http.client.responses.get(int(code), "Unknown")
+
+    def nl2br_filter(self, s):
+        """Replace newlines with <br/> tags"""
+        return s.replace("\n", "<br/>")
