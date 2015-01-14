@@ -4,7 +4,6 @@ import os.path
 import os
 import pwd
 import subprocess
-import pygeoip
 import re
 import urllib
 import urllib.request
@@ -20,6 +19,7 @@ import util.fs
 import util.cache
 import ssl
 import string
+import pygeoip
 from datetime import datetime
 
 import tools.negotiable
@@ -47,6 +47,13 @@ class MedleyServer(object):
     def __init__(self):
         self.template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
+
+        db_path = cherrypy.config.get("database.directory")
+        db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
+        if db_path.endswith(".gz"):
+            db_path = db_path[0:-3]
+
+        self.geodb = pygeoip.GeoIP(db_path)
 
 
     @cherrypy.expose
@@ -312,23 +319,11 @@ class MedleyServer(object):
             ip = util.net.resolveHost(address_clean)
 
         data = {
-            "geo": None,
+            "geo": self.geodb.record_by_addr(ip),
             "address": address_clean,
             "ip": ip,
             "reverse_host": util.net.reverseLookup(ip)
         }
-
-        # Geoip
-        db_path = cherrypy.config.get("database.directory")
-        db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
-        if db_path.endswith(".gz"):
-            db_path = db_path[0:-3]
-
-        try:
-            reader = pygeoip.GeoIP(db_path)
-            data["geo"] = reader.record_by_addr(data["ip"])
-        except:
-            data["geo"] = None
 
         # Whois
         key = "whois:{}".format(data["address"])
@@ -530,6 +525,10 @@ class MedleyServer(object):
 
         if q:
             results = util.fs.appengine_log_grep(logdir, filters)
+
+        for result in results:
+            geo = self.geodb.record_by_addr(result["ip"])
+            result["geo"] = geo
 
         return {
             "q": q,
