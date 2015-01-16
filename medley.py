@@ -20,7 +20,7 @@ import util.cache
 import ssl
 import string
 import pygeoip
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -498,9 +498,13 @@ class MedleyServer(object):
         """Search website access logs"""
 
         if not q:
-            q = datetime.now().strftime("date %Y-%m-%d")
+            q = "\n".join(cherrypy.request.config.get("default_query"))
         else:
             q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
+
+
+        q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
+        q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
 
         logdir = cherrypy.request.config.get("logdir")
 
