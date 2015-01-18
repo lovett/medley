@@ -17,6 +17,7 @@ import util.phone
 import util.net
 import util.fs
 import util.cache
+import util.db
 import ssl
 import string
 import pygeoip
@@ -489,6 +490,20 @@ class MedleyServer(object):
                 "style": style or "title"
             }
 
+
+    @userFacing
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="later.html")
+    def later(self, action=None, address=None, comments=None, date=None):
+        """Bookmark a page for later viewing"""
+
+        if action == "save" and cherrypy.request.method == "POST":
+            result = util.db.saveBookmark(cherrypy.request.config.get("database"),
+                                          address, comments, date)
+            raise cherrypy.HTTPRedirect("/later")
+        return {
+        }
 
     @userFacing
     @cherrypy.expose

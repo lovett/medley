@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% set page_title = "Later" %}
+
+{% set home_link = True %}
+
+{% block page_body %}
+
+<main class="ui page grid stackable">
+    <div class="ui sixteen wide column">
+        <form class="ui form" method="post" action="/later/save">
+            <div class="field">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" value="{{ address|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <label for="comments">Comments:</label>
+                <textarea id="comments" name="comments">{{ comments|default('', true) }}</textarea>
+            </div>
+            <div class="field">
+                <label for="date">Date:</label>
+                <input type="text" id="date" name="date" value="{{ date }}"/>
+            </div>
+
+            <div class="field">
+                <button class="ui button">Save</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+{% endblock %}
