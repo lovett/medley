@@ -495,14 +495,28 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
-    def later(self, action=None, address=None, comments=None, date=None):
+    def later(self, url=None, comments=None, date=None):
         """Bookmark a page for later viewing"""
 
-        if action == "save" and cherrypy.request.method == "POST":
-            result = util.db.saveBookmark(cherrypy.request.config.get("database"),
-                                          address, comments, date)
-            raise cherrypy.HTTPRedirect("/later")
+        error = None
+
+        if not date or not re.match(r"\d{4}-\d{2}-\d{2}", date):
+            date = datetime.now().strftime("%Y-%m-%d")
+
+        if cherrypy.request.method == "POST":
+            if not url:
+                error = "Address missing"
+            else:
+                result = util.db.saveBookmark(cherrypy.request.config.get("database"),
+                                              url, comments, date)
+
+                return "ok".encode("utf-8")
+
         return {
+            "error": error,
+            "url": url,
+            "date": date,
+            "comments": comments
         }
 
     @userFacing

@@ -4,29 +4,46 @@
 
 {% set home_link = True %}
 
+{% block scripts %}
+<script src="/static/js/later.js"></script>
+{% endblock %}
+
+
 {% block page_body %}
 
 <main class="ui page grid stackable">
+    <div class="ui sixteen wide right aligned column">
+        Bookmarklet:
+        <a href="javascript:void(window.open('http://medley.lovett.link:8085/later?comments=' + window.getSelection().toString() + '&url='+window.location.href, 'later'))">⚡ later</a>
+    </div>
+
     <div class="ui sixteen wide column">
-        <form class="ui form" method="post" action="/later/save">
-            <div class="field">
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="address" value="{{ address|default('', true) }}"/>
+
+        <div class="ui form">
+            <div class="two fields">
+                <div class="field">
+                    <label for="url">URL:</label>
+                    <input type="text" id="url" name="url" value="{{ url|default('', true) }}"/>
+                </div>
+                <div class="field">
+                    <label for="date">Date:</label>
+                    <input type="text" id="date" name="date" value="{{ date }}" placeholder="yyyy-mm-dd"/>
+                </div>
             </div>
             <div class="field">
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true) }}</textarea>
             </div>
-            <div class="field">
-                <label for="date">Date:</label>
-                <input type="text" id="date" name="date" value="{{ date }}"/>
-            </div>
 
             <div class="field">
-                <button class="ui button">Save</button>
+                <button class="ui submit button">Save</button>
+                <div class="ui error message"></div>
+                <div class="hidden ui green message">Success!</div>
             </div>
-        </form>
+        </div>
     </div>
+
 </main>
+
 
 {% endblock %}
