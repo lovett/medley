@@ -19,21 +19,22 @@ var MEDLEY = (function () {
     var shortcuts = function (e) {
         var href;
 
-        // all shortcuts will use alt and shift
-        if (e.altKey !== true || e.shiftKey !== true) {
+        if (e.target.nodeName === 'INPUT' || e.target.nodeName === 'TEXTAREA') {
             return;
         }
 
-        if (e.which === 85) { // u
+        if (e.shiftKey && e.which === 191) { // ?
+            jQuery('#shortcuts').modal('show');
+            return;
+        }
+
+        if (e.shiftKey && e.which === 72) { // H
             href = jQuery('HEADER .home:first').attr('href');
             if (href) {
                 window.location.href = href;
             }
-
             return;
         }
-
-        //console.log(e.which);
     };
 
     var selectAll = function (e) {
@@ -70,7 +71,6 @@ var MEDLEY = (function () {
                 jQuery('.icon', this).toggleClass('cube cubes');
                 jQuery(this).closest('TR').next('TR.expandable').toggleClass('expanded');
             });
-
         }
     }
 })();
