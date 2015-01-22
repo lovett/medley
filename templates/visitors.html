@@ -51,7 +51,13 @@
                     <td><span class="nowrap">{{ result.time_string }}</span></td>
                     <td>
                         <a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(50, True) }}</a>
-                        <p>{{ result.agent|useragent() }}</p>
+                        <p>
+                            {{ result.agent|useragent() }}
+                            {% if result.referrer and result.referrer_domain not in site_domains  %}
+                            <br/>
+                            Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
+                            {% endif %}
+                        </p>
                     </td>
                     <td><span class="help" title="{{ result.status|status_message()}}">{{ result.status }}</span></td>
                     <td class="right aligned">
@@ -70,10 +76,10 @@
                                 <i class="map icon"></i>
 
                                 {% if result.geo.country_code == "US" %}
-                                {{ result.geo.city }}
-                                {{ result.geo.region_code }}
+                                {{ result.geo.city|default("", true) }}
+                                {{ result.geo.region_code|default("", true) }}
                                 {% else %}
-                                {{ result.geo.city }}
+                                {{ result.geo.city|default("", true) }}
                                 {{ result.geo.country_name}}
                                 {% endif %}
                             </div>

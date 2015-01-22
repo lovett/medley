@@ -555,7 +555,6 @@ class MedleyServer(object):
             if action in filters.keys():
                 filters[action].append(value)
 
-
         if q:
             results = util.fs.appengine_log_grep(logdir, filters)
 
@@ -565,7 +564,8 @@ class MedleyServer(object):
 
         return {
             "q": q,
-            "results": results
+            "results": results,
+            "site_domains": cherrypy.request.config.get("site_domains")
         }
 
 

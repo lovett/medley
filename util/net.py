@@ -8,6 +8,7 @@ import pytz
 from email.mime.text import MIMEText
 from datetime import datetime
 from ua_parser import user_agent_parser
+from urllib.parse import urlparse
 
 class NetException(Exception):
     pass
@@ -151,6 +152,7 @@ def parse_appengine(line):
     if referrer == "-":
         referrer = None
 
+    referrer_domain = urlparse(referrer).netloc or None
 
     return {
         "ip": fields[0],
@@ -162,6 +164,7 @@ def parse_appengine(line):
         "status": fields[8],
         "bytes": fields[9],
         "referrer": referrer,
+        "referrer_domain": referrer_domain,
         "agent": agent,
         "host": quoted_fields[-1],
         "line": line
