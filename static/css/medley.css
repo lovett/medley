@@ -64,16 +64,13 @@ TR.expandable.expanded {
 
 /* Use the default selection style */
 ::-webkit-selection {
-    background-color: initial;
-    color: initial;
+    background-color: blanchedalmond;
 }
 
 ::-moz-selection {
-    background-color: initial;
-    color: initial;
+    background-color: blanchedalmond;
 }
 
 ::selection {
-    background-color: initial;
-    color: initial;
+    background-color: blanchedalmond;
 }
