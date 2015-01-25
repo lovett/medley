@@ -56,6 +56,8 @@ class MedleyServer(object):
 
         self.geodb = pygeoip.GeoIP(db_path)
 
+        util.db.setup(cherrypy.config.get("database.directory"))
+
 
     @cherrypy.expose
     @cherrypy.tools.encode()
@@ -507,8 +509,7 @@ class MedleyServer(object):
             if not url:
                 error = "Address missing"
             else:
-                result = util.db.saveBookmark(cherrypy.request.config.get("database"),
-                                              url, comments, date)
+                result = util.db.saveBookmark(url, comments, date)
 
                 return "ok".encode("utf-8")
 
@@ -518,6 +519,47 @@ class MedleyServer(object):
             "date": date,
             "comments": comments
         }
+
+
+
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    def annotation(self, annotation_id):
+        if cherrypy.request.method == "DELETE":
+            if util.db.deleteAnnotation(annotation_id) == 1:
+                return "ok".encode("utf-8")
+
+        raise cherrypy.HTTPError(400)
+
+    @userFacing
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="annotations.html")
+    def annotations(self, key=None, value=None):
+        """A general-purpose key-value store"""
+
+        if key and value and cherrypy.request.method == "POST":
+            util.db.saveAnnotation(key, value)
+            annotations = util.db.getAnnotations(key, limit=1)
+
+            if len(annotations) != 1:
+                raise cherrypy.HTTPError(400)
+
+            if cherrypy.request.negotiated == "application/json":
+
+                return {
+                    "id": annotations[0]["id"],
+                    "key": annotations[0]["key"],
+                    "value": annotations[0]["value"],
+                    "created": annotations[0]["created"].strftime("%A %b %d, %Y %I:%M %p")
+                }
+
+        return {
+            "key": key,
+            "value": value,
+            "annotations": util.db.getAnnotations()
+        }
+
 
     @userFacing
     @cherrypy.expose
@@ -558,9 +600,18 @@ class MedleyServer(object):
         if q:
             results = util.fs.appengine_log_grep(logdir, filters)
 
+        keys = list({"ip:{}".format(result["ip"]) for result in results})
+        annotations = util.db.getAnnotations(keys)
+
+        ip_labels = {}
+        for annotation in annotations:
+            address = annotation["key"][3:]
+            ip_labels[address] = annotation["value"]
+
         for result in results:
             geo = self.geodb.record_by_addr(result["ip"])
             result["geo"] = geo
+            result["ip_label"] = ip_labels.get(result["ip"])
 
         return {
             "q": q,

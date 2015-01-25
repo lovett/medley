@@ -46,6 +46,7 @@
                     <td>
                         <span class="help" title="{{ result.geo.country_name }}"><i class="{{ result.geo.country_code|lower()}} flag"></i></span>
                         <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
+                        <div>{{ result.ip_label|default('', true) }}</div>
                     </td>
                     <td><a href="/visitors?q=date+{{ result.date_string }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.date_string }}</a></td>
                     <td><span class="nowrap">{{ result.time_string }}</span></td>
@@ -69,10 +70,13 @@
                         <p><code>{{ result.line }}</code></p>
 
                         <div class="ui grid">
-                            <div class="right floated right aligned eight wide column">
+                            <div class="right floated right aligned two wide column">
                                 <a href="/whois/{{ result.ip }}"><i class="search icon"></i> whois</a>
                             </div>
-                            <div class="left floated left aligned eight wide column">
+                            <div class="right floated right aligned two wide column">
+                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
+                            </div>
+                            <div class="left floated left aligned twelve wide column">
                                 <i class="map icon"></i>
 
                                 {% if result.geo.country_code == "US" %}

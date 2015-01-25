@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% set page_title = "Annotations" %}
+
+{% set home_link = True %}
+
+{% block scripts %}
+<script src="/static/js/annotations.js"></script>
+{% endblock %}
+
+
+{% block page_body %}
+
+<main class="ui page grid stackable">
+    <div class="ui sixteen wide column">
+        <div class="ui form">
+            <div class="two fields">
+                <div class="field">
+                    <label for="key">Key:</label>
+                    <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+                </div>
+                <div class="field">
+                    <label for="comments">Value:</label>
+                    <input type="text" id="value" name="value" value="{{ value|default('', true) }}" {% if key and not value %}autofocus="autofocus"{% endif %}/>
+                </div>
+            </div>
+            <div class="field">
+                <button class="ui submit button">Add</button>
+                <div class="ui error message"></div>
+                <div class="hidden ui green message">Success!</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui sixteen wide column">
+        <table id="annotations" class="ui sixteen column table">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if not annotations %}
+                <tr>
+                    <td colspan="4">There are no annotations.</td>
+                </tr>
+                {% endif %}
+
+                {% for annotation in annotations %}
+                <tr>
+                    <td>{{ annotation.key }}</td>
+                    <td>{{ annotation.value }}</td>
+                    <td>{{ annotation.created|datetime("datetime12") }}</td>
+                    <td class="right aligned"><a href="#" data-id="{{ annotation.id }}" class="delete" title="Delete annotation"><i class="remove circle icon"></i></a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</main>
+
+
+{% endblock %}
