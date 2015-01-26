@@ -641,7 +641,7 @@ if __name__ == "__main__":
         try:
             ACCOUNT = pwd.getpwnam(USER)
             PLUGIN = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
-                                                             umask=0o022,
+                                                             umask=0o022, # an octal in Python3, not a typo
                                                              uid=ACCOUNT.pw_uid,
                                                              gid=ACCOUNT.pw_gid)
             PLUGIN.subscribe()
@@ -649,20 +649,12 @@ if __name__ == "__main__":
             MESSAGE = "Unknown user '{}'. Not dropping privileges.".format(USER)
             cherrypy.log.error(MESSAGE, "APP")
 
-    DAEMONIZE = cherrypy.config.get("server.daemonize")
-    if DAEMONIZE:
-        cherrypy.config.update({
-            "log.screen": False,
-            "engine.autoreload.on": False,
-            "request.show_tracebacks": False
-        })
+    cherrypy.config.update({
+        "tools.encode.on": False
+    })
+
+    if cherrypy.config.get("server.daemonize"):
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
-    else:
-        cherrypy.config.update({
-            "log.screen": True,
-            "engine.autoreload.on": True,
-            "request.show_tracebacks": True
-        })
 
     PID_FILE = cherrypy.config.get("server.pid")
     if PID_FILE:
