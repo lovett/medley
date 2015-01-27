@@ -4,17 +4,40 @@
 
 {% set home_link = True %}
 
+{% block scripts %}
+<script src="/static/js/visitors.js"></script>
+{% endblock %}
+
 {% block page_body %}
 
 <main class="ui page grid stackable">
     <div class="ui sixteen wide column">
         <form class="ui form" method="get" action="/visitors">
             <div class="field">
+                <label for="saved">Saved Queries</label>
+                <select id="saved">
+                    {% for query in queries %}
+                    <option value="{{ query.value }}">{{ query.key }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="field">
                 <label for="q">Query:</label>
                 <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
+                <div class="shortcuts">
+                    <strong>Shortcuts:</strong>
+                    <a href="#" class="item" data-keyword="date" data-value="today"><i class="calendar icon"></i> Today</a>
+                    <a href="#" class="item" data-keyword="date" data-value="yesterday"><i class="calendar icon"></i> Yesterday</a>
+                </div>
             </div>
-            <div class="field">
-                <button class="ui button">Search</button>
+            <div class="fields">
+                <div class="field">
+                    <button id="submit" class="ui button"><i class="send icon"></i> Run query</button>
+                </div>
+                <div class="field">
+                    <button id="save" class="ui button"><i class="bookmark icon"></i> Save query</button>
+                </div>
             </div>
         </form>
     </div>

@@ -601,12 +601,14 @@ class MedleyServer(object):
             results = util.fs.appengine_log_grep(logdir, filters)
 
         keys = list({"ip:{}".format(result["ip"]) for result in results})
-        annotations = util.db.getAnnotations(keys)
 
+        ip_annotations = util.db.getAnnotations(keys)
         ip_labels = {}
-        for annotation in annotations:
+        for annotation in ip_annotations:
             address = annotation["key"][3:]
             ip_labels[address] = annotation["value"]
+
+        query_annotations = util.db.getAnnotationsByPrefix("visitors")
 
         for result in results:
             geo = self.geodb.record_by_addr(result["ip"])
@@ -616,7 +618,8 @@ class MedleyServer(object):
         return {
             "q": q,
             "results": results,
-            "site_domains": cherrypy.request.config.get("site_domains")
+            "site_domains": cherrypy.request.config.get("site_domains"),
+            "queries": query_annotations
         }
 
 

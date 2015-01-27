@@ -99,6 +99,22 @@ def getAnnotations(keys=[], limit=0):
 
     return cur.fetchall()
 
+def getAnnotationsByPrefix(prefix):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    conn = sqlite3.connect(_databases["annotations"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    prefix = "{}:%".format(prefix)
+
+    sql = """SELECT id, key, value, datetime(created, 'localtime') as 'created [created]'
+    FROM annotations WHERE key LIKE ? ORDER BY key"""
+
+    cur.execute(sql, (prefix,))
+
+    return cur.fetchall()
+
+
 def deleteAnnotation(annotation_id):
     annotation_id = int(annotation_id)
     conn = sqlite3.connect(_databases["annotations"])

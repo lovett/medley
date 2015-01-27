@@ -49,13 +49,13 @@ MEDLEY.annotations = (function () {
                         type: 'POST',
                         dataType: 'json',
                         url: window.location.pathname,
-                        data: $('INPUT', this).serialize()
+                        data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
                         var $successMessage = jQuery('.green.message', $form);
                         var $errorMessage = jQuery('.error.message', $form);
                         var clone = jQuery('#annotations TBODY TR').first().clone();
 
-                        jQuery('INPUT', $form).val('');
+                        jQuery('INPUT, TEXTAREA', $form).val('');
                         $successMessage.removeClass('hidden').fadeOut(5000);
                         clone.find('TD:nth-child(1)').text(data.key);
                         clone.find('TD:nth-child(2)').text(data.value);

@@ -57,6 +57,17 @@ TR.expandable.expanded {
     cursor: help;
 }
 
+.shortcuts {
+    padding: 1em 0;
+    font-size: .85em;
+    text-align: right;
+}
+
+.shortcuts A {
+    margin-left: 1em;
+}
+
+
 /* Use the same focus state for text inputs and texteareas as for buttons */
 .ui.form TEXTAREA:focus, .ui.form INPUT[type=text]:focus {
     box-shadow: 0 0 0 1px transparent inset,0 0 1px rgba(81,167,232,.8) inset,0 0 3px 2px rgba(81,167,232,.8);

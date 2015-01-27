@@ -14,15 +14,13 @@
 <main class="ui page grid stackable">
     <div class="ui sixteen wide column">
         <div class="ui form">
-            <div class="two fields">
-                <div class="field">
-                    <label for="key">Key:</label>
-                    <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
-                </div>
-                <div class="field">
-                    <label for="comments">Value:</label>
-                    <input type="text" id="value" name="value" value="{{ value|default('', true) }}" {% if key and not value %}autofocus="autofocus"{% endif %}/>
-                </div>
+            <div class="field">
+                <label for="key">Key:</label>
+                <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <label for="comments">Value:</label>
+                <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
             </div>
             <div class="field">
                 <button class="ui submit button">Add</button>
