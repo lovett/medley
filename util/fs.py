@@ -2,6 +2,7 @@ import re
 import fnmatch
 import os.path
 import util.net
+import util.parse
 
 def appengine_log_grep(logdir, filters):
     matches = []
@@ -29,6 +30,6 @@ def appengine_log_grep(logdir, filters):
                     filters["exclude"].append(ip)
 
                 if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
-                    fields = util.net.parse_appengine(line)
+                    fields = util.parse.appengine(line)
                     matches.append(fields)
     return matches
