@@ -5,10 +5,12 @@ import requests
 import jinja2
 import smtplib
 import pytz
+import string
 from email.mime.text import MIMEText
 from datetime import datetime
 from ua_parser import user_agent_parser
 from urllib.parse import urlparse
+from pyparsing import *
 
 class NetException(Exception):
     pass
@@ -139,33 +141,65 @@ def sendNotification(message, config):
     return True
 
 def parse_appengine(line):
-    quoted_fields = re.findall("\"(.*?)\"", line)
-    fields = line.split(" ")
+    # Heavily based on  http://pyparsing.wikispaces.com/file/view/httpServerLogParser.py/30166005/httpServerLogParser.py
 
-    log_date = datetime.strptime(" ".join(fields[3:5]), "[%d/%b/%Y:%H:%M:%S %z]")
+    integer = Word(nums)
+    decimal = Word(nums + ".")
+    ipv4 = Combine(integer + "." + integer + "." + integer + "." + integer)
+    ipv6 = Word(alphanums + ":")
+    month = Word(string.ascii_uppercase, string.ascii_lowercase, exact=3)
 
+    tzoffset = Word("+-", nums)
+    timestamp = Group(Suppress("[") +
+                      Combine(integer + "/" + month + "/" + integer + ":" + integer + ":" + integer + ":" + integer + " " + tzoffset) +
+                      Suppress("]"))
+
+    def getCmdFields( s, l, t ):
+        t["method"], t["uri"], t["version"] = t[0].strip('"').split()
+
+    fields = (ipv4 | ipv6).setResultsName("ip")
+    fields += Suppress("-") # ignore ident
+    fields += ("-" | Word( alphas+nums+"@._" )).setResultsName("auth")
+    fields += timestamp.setResultsName("timestamp")
+    fields += dblQuotedString.setResultsName("cmd").setParseAction(getCmdFields)
+    fields += (integer | "-").setResultsName("statusCode")
+    fields += (integer | "-").setResultsName("numBytesSent")
+    fields += ("-" | dblQuotedString).setResultsName("referrer").setParseAction(removeQuotes)
+    fields += ("-" | dblQuotedString).setResultsName("agent").setParseAction(removeQuotes)
+    fields += dblQuotedString.setResultsName("domain").setParseAction(removeQuotes)
+    fields += "ms=" + integer.setResultsName("ms")
+    fields += "cpu_ms=" + integer.setResultsName("cpu_ms")
+    fields += "cpm_usd=" + decimal.setResultsName("cpm_usd")
+    #fields += "pending_msd=" + integer.setResultsName("pending_msd")
+    #fields += "instance=" + Word(string.ascii_lowercase + string.digits).setResultsName("instance")
+    #fields += "app_engine_release=" + decimal.setResultsName("app_engine_release")
+
+    parsed = fields.parseString(line)
+
+    log_date = datetime.strptime(parsed.timestamp[0], "%d/%b/%Y:%H:%M:%S %z")
     local_date = log_date.astimezone(pytz.timezone('US/Eastern'))
 
-    agent = user_agent_parser.Parse(quoted_fields[-2])
+    if parsed.referrer == "-":
+        parsed.referrer = None
+        parsed.referrer_domain = None
+    else:
+        print(parsed.referrer)
+        parsed.referrer_domain = urlparse(parsed.referrer).netloc or None
 
-    referrer = fields[10].replace('"', '')
-    if referrer == "-":
-        referrer = None
-
-    referrer_domain = urlparse(referrer).netloc or None
+    agent = user_agent_parser.Parse(parsed.agent)
 
     return {
-        "ip": fields[0],
+        "ip": parsed.ip,
         "date": log_date,
         "time_string": local_date.strftime('%I:%M:%S %p %Z').lstrip("0"),
         "date_string": local_date.strftime('%Y-%m-%d'),
-        "method": quoted_fields[0].split(" ")[0],
-        "uri": quoted_fields[0].split(" ")[1],
-        "status": fields[8],
-        "bytes": fields[9],
-        "referrer": referrer,
-        "referrer_domain": referrer_domain,
+        "method": parsed.method,
+        "uri": parsed.uri,
+        "status": parsed.statusCode,
+        "bytes": parsed.numBytesSent,
+        "referrer": parsed.referrer,
+        "referrer_domain": parsed.referrer_domain,
         "agent": agent,
-        "host": quoted_fields[-1],
+        "host": parsed.domain,
         "line": line
     }
