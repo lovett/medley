@@ -12,9 +12,6 @@ from ua_parser import user_agent_parser
 from urllib.parse import urlparse
 from pyparsing import *
 
-class NetException(Exception):
-    pass
-
 def whois(address):
     """Run a whois query by shelling out. The output is filtered to
     improve readability. Returns a list of key value pairs.
