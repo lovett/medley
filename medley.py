@@ -18,6 +18,7 @@ import util.net
 import util.fs
 import util.cache
 import util.db
+import util.decorator
 import ssl
 import string
 import pygeoip
@@ -35,11 +36,6 @@ cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 cherrypy.config.update({
     "tools.encode.on": False
 })
-
-
-def userFacing(f):
-    f.userFacing = True
-    return f
 
 class MedleyServer(object):
     mc = None
@@ -93,7 +89,7 @@ class MedleyServer(object):
         return "ok"
 
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="index.html")
@@ -106,9 +102,9 @@ class MedleyServer(object):
                 continue
 
             exposed = getattr(value, "exposed", False)
-            userFacing = getattr(value, "userFacing", False)
+            util.decorator.userFacing = getattr(value, "userFacing", False)
 
-            if exposed and userFacing:
+            if exposed and util.decorator.userFacing:
                 endpoints.append((name, value.__doc__))
 
         if cherrypy.request.negotiated == "text/plain":
@@ -164,7 +160,7 @@ class MedleyServer(object):
                 "message": ip
             }
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
@@ -222,7 +218,7 @@ class MedleyServer(object):
             return data["result"]
 
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
@@ -265,7 +261,7 @@ class MedleyServer(object):
         else:
             return { "result": "ok" }
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="headers.html")
@@ -287,7 +283,7 @@ class MedleyServer(object):
                 "headers": headers
             }
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
@@ -359,7 +355,7 @@ class MedleyServer(object):
         else:
             return data
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -403,7 +399,7 @@ class MedleyServer(object):
             "home_link": True
         }
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
@@ -462,7 +458,7 @@ class MedleyServer(object):
 
             return data
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="lettercase.html")
@@ -493,7 +489,7 @@ class MedleyServer(object):
             }
 
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
@@ -531,7 +527,7 @@ class MedleyServer(object):
 
         raise cherrypy.HTTPError(400)
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="annotations.html")
@@ -561,7 +557,7 @@ class MedleyServer(object):
         }
 
 
-    @userFacing
+    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="visitors.html")
@@ -598,7 +594,7 @@ class MedleyServer(object):
                 filters[action].append(value)
 
         if q:
-            results = util.fs.appengine_log_grep(logdir, filters)
+            results, duration = util.fs.appengine_log_grep(logdir, filters)
 
         keys = list({"ip:{}".format(result["ip"]) for result in results})
 
@@ -618,6 +614,7 @@ class MedleyServer(object):
         return {
             "q": q,
             "results": results,
+            "duration": duration,
             "site_domains": cherrypy.request.config.get("site_domains"),
             "queries": query_annotations
         }

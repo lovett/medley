@@ -116,6 +116,8 @@
                 {% endfor %}
             </tbody>
         </table>
+        <p>This query ran in {{ duration|round(2) }} seconds</p>
+
         {% endif %}
     </div>
     {% endif %}
