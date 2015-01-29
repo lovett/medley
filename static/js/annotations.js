@@ -48,7 +48,7 @@ MEDLEY.annotations = (function () {
                     jQuery.ajax({
                         type: 'POST',
                         dataType: 'json',
-                        url: window.location.pathname,
+                        url: '/annotations',
                         data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
                         var $successMessage = jQuery('.green.message', $form);
