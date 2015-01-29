@@ -52,6 +52,13 @@
         {% endif %}
 
         {% if results|length() > 0 %}
+
+        {% if result_limit < total_matches %}
+        <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
+        {% else %}
+        <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
+        {% endif %}
+
         <table class="ui table">
             <thead>
                 <tr>

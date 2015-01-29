@@ -4,9 +4,12 @@ import os.path
 import util.net
 import util.parse
 import util.decorator
+from collections import namedtuple
+
+GrepResult = namedtuple("GrepResult", "matches count limit")
 
 @util.decorator.timed
-def appengine_log_grep(logdir, filters):
+def appengine_log_grep(logdir, filters, limit=50):
     matches = []
 
     files = [os.path.join(dirpath, f)
@@ -24,6 +27,7 @@ def appengine_log_grep(logdir, filters):
         return False
 
     skips = set()
+    additional_matches = 0
 
     for path in files:
         with open(path) as f:
@@ -38,7 +42,10 @@ def appengine_log_grep(logdir, filters):
                     continue
 
                 if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
-                    fields = util.parse.appengine(line)
-                    matches.append(fields)
+                    if limit == 0 or len(matches) < limit:
+                        fields = util.parse.appengine(line)
+                        matches.append(fields)
+                    else:
+                        additional_matches += 1
 
-    return matches
+    return GrepResult(matches, len(matches) + additional_matches, limit)

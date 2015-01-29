@@ -15,6 +15,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["useragent"] = self.useragent_filter
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
+        self.env.filters["pluralize"] = self.pluralize_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -82,3 +83,7 @@ class Plugin(plugins.SimplePlugin):
     def nl2br_filter(self, s):
         """Replace newlines with <br/> tags"""
         return s.replace("\n", "<br/>")
+
+    def pluralize_filter(self, count, singular, plural):
+        value = singular if count == 1 else plural
+        return "{} {}".format(count, value)
