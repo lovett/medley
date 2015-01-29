@@ -21,15 +21,22 @@ def appengine_log_grep(logdir, filters):
                 return True
         return False
 
+    skips = set()
 
     for path in files:
         with open(path) as f:
             for line in f:
+                ip = line[0:line.find(" ")]
+
+                if ip in skips:
+                    continue
+
                 if filter(line, filters["shun"]):
-                    ip = line[0:line.find(" ")]
-                    filters["exclude"].append(ip)
+                    skips.add(ip)
+                    continue
 
                 if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
                     fields = util.parse.appengine(line)
                     matches.append(fields)
+
     return matches
