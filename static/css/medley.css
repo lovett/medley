@@ -2,6 +2,10 @@ A.focus-candidate .header {
     background-color: green;
 }
 
+CODE {
+    word-break: break-all;
+}
+
 HTML, BODY {
     background-color: white;
 }
