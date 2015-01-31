@@ -14,12 +14,20 @@
 <main class="ui page grid stackable">
     <div class="ui sixteen wide right aligned column">
         Bookmarklet:
-        <a href="javascript:void(window.open('http://medley.lovett.link:8085/later?comments=' + window.getSelection().toString() + '&url='+window.location.href, 'later'))">⚡ later</a>
+        <a href="javascript:void(window.open('http://medley.lovett.link:8085/later?action=edit&comments=' + window.getSelection().toString() + '&url='+window.location.href, 'later'))">⚡ later</a>
     </div>
 
     <div class="ui sixteen wide column">
 
         <div class="ui form">
+
+            <input type="hidden" name="action" value="save" />
+
+            <div class="field">
+                <label for="url">Title:</label>
+                <input type="text" id="title" name="title" value="{{ title|default('', true) }}"/>
+            </div>
+
             <div class="two fields">
                 <div class="field">
                     <label for="url">URL:</label>
@@ -30,6 +38,11 @@
                     <input type="text" id="date" name="date" value="{{ date }}" placeholder="yyyy-mm-dd"/>
                 </div>
             </div>
+            <div class="field">
+                <label for="url">Keywords:</label>
+                <input type="text" id="keywords" name="keywords" value="{{ keywords|default('', true) }}"/>
+            </div>
+
             <div class="field">
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true) }}</textarea>

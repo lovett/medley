@@ -11,6 +11,7 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
+import plugins.urlfetch
 import base64
 import inspect
 import util.phone
@@ -44,6 +45,7 @@ class MedleyServer(object):
     def __init__(self):
         self.template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
+        plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
         db_path = cherrypy.config.get("database.directory")
         db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
@@ -493,7 +495,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
-    def later(self, url=None, comments=None, date=None):
+    def later(self, action="edit", title=None, url=None, date=None, keywords=None, comments=None):
         """Bookmark a page for later viewing"""
 
         error = None
@@ -501,18 +503,27 @@ class MedleyServer(object):
         if not date or not re.match(r"\d{4}-\d{2}-\d{2}", date):
             date = datetime.now().strftime("%Y-%m-%d")
 
+
+        if action == "edit" and url and not title:
+            title = util.net.getHtmlTitleYQL(url)
+
+            if title is None and url.startswith("https:"):
+                title = util.net.getUrlTitleYQL(url.replace("https:", "http:"))
+
         if cherrypy.request.method == "POST":
             if not url:
                 error = "Address missing"
             else:
-                result = util.db.saveBookmark(url, comments, date)
-
+                bookmark_id = util.db.saveBookmark(url, title, comments, keywords, date)
+                cherrypy.engine.publish("bookmark-fetch", bookmark_id)
                 return "ok".encode("utf-8")
 
         return {
             "error": error,
+            "title": title,
             "url": url,
             "date": date,
+            "keywords": keywords,
             "comments": comments
         }
 

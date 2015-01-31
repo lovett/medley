@@ -4,6 +4,7 @@ import re
 import requests
 import jinja2
 import smtplib
+import lxml.html
 from email.mime.text import MIMEText
 
 
@@ -131,3 +132,30 @@ def sendNotification(message, config):
     r = requests.post(config["endpoint"], auth=config["auth"], data=message)
     r.raise_for_status()
     return True
+
+def getHtmlTitleYQL(url):
+
+    query = "select * from html where url='{}' and xpath='//title'".format(url)
+    endpoint = "https://query.yahooapis.com/v1/public/yql?q={}&format=json".format(query)
+
+    try:
+        r = requests.get(endpoint, timeout=2)
+        r.raise_for_status()
+        result = r.json()
+        return result["query"]["results"].get("title")
+    except:
+        return None
+
+
+def getUrl(url):
+    try:
+        r = requests.get(url, timeout=5)
+        r.raise_for_status()
+        return r.text
+    except:
+        return None
+
+
+def htmlToText(html):
+    document = lxml.html.document_fromstring(html)
+    return document.text_content()

@@ -7,13 +7,11 @@ from urllib.parse import urlparse
 _databases = {}
 
 bookmarks_create_sql = """
-CREATE TABLE IF NOT EXISTS bookmarks (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    url VARCHAR(255) NOT NULL,
-    domain VARCHAR(255),
-    comments TEXT,
-    created DATETIME DEFAULT CURRENT_TIMESTAMP
-)
+CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks USING fts4 (
+    url, domain, title, keywords, comments,
+    created DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fulltext, tokenize=porter
+);
 """
 
 annotations_create_sql = """
@@ -37,23 +35,44 @@ def setup(database_dir):
         path = os.path.join(database_dir, name + ".sqlite")
         conn = sqlite3.connect(path)
         cur = conn.cursor()
-        cur.execute(sql)
+        cur.executescript(sql)
         conn.commit()
         conn.close()
         _databases[name] = path
 
-def saveBookmark(url, comments, created=None):
+
+def getBookmarkById(bookmark_id):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    sql = "SELECT * from bookmarks WHERE rowid=?"
+    cur.execute(sql, (bookmark_id,))
+    return cur.fetchone()
+
+
+def saveBookmark(url, title, comments=None, keywords=None, created=None):
 
     parsed_url = urlparse(url)
 
     conn = sqlite3.connect(_databases["bookmarks"])
     cur = conn.cursor()
-    cur.execute("INSERT INTO bookmarks (url, domain, comments, created) VALUES (?, ?, ?, ?)",
-                (url, parsed_url.netloc, comments, created))
+    cur.execute("INSERT INTO bookmarks (url, title, domain, comments, keywords, created) VALUES (?, ?, ?, ?, ?, ?)",
+                (url, title, parsed_url.netloc, comments, keywords, created))
     conn.commit()
     bookmark_id = cur.lastrowid
     conn.close()
     return bookmark_id
+
+def saveBookmarkFulltext(bookmark_id, fulltext):
+    conn = sqlite3.connect(_databases["bookmarks"])
+    cur = conn.cursor()
+    cur.execute("UPDATE bookmarks SET fulltext=? WHERE rowid=?",
+                (fulltext, bookmark_id))
+    conn.commit()
+    conn.close()
+    return True
+
 
 def saveAnnotation(key, value):
 
