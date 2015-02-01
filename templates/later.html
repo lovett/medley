@@ -14,7 +14,8 @@
 <main class="ui page grid stackable">
     <div class="ui sixteen wide right aligned column">
         Bookmarklet:
-        <a href="javascript:void(window.open('http://medley.lovett.link:8085/later?action=edit&comments=' + window.getSelection().toString() + '&url='+window.location.href, 'later'))">⚡ later</a>
+        <a href="javascript:void(window.open('http://medley.lovett.link:8085/later?action=edit&comments=' + window.getSelection().toString() + '&url='+encodeURIComponent(window.location.href), 'later'))">⚡ later</a>
+
     </div>
 
     <div class="ui sixteen wide column">

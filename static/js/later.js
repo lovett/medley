@@ -40,9 +40,14 @@ MEDLEY.later = (function () {
             };
 
             $form.form(validationRules, validationSettings);
+        },
+
+        receiveMessage: function (e) {
+            console.log(e);
         }
     };
 })();
 
 
 jQuery(document).ready(MEDLEY.later.init);
+jQuery(window).on('message', MEDLEY.later.receiveMessage);
