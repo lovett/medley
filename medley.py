@@ -34,10 +34,6 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
-cherrypy.config.update({
-    "tools.encode.on": False
-})
-
 class MedleyServer(object):
     mc = None
     template_dir = None
