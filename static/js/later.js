@@ -1,6 +1,16 @@
 MEDLEY.later = (function () {
     'use strict'
 
+    var applyShortcut;
+
+    applyShortcut = function (e) {
+        var trigger = jQuery(e.target);
+        var target = trigger.closest('.field').find('INPUT');
+        if (trigger.hasClass('remove-querystring')) {
+            target.val(target.val().replace(/\?.*/, ''));
+        }
+    };
+
     return {
         init: function () {
             var $form, validationRules, validationSettings;
@@ -40,14 +50,12 @@ MEDLEY.later = (function () {
             };
 
             $form.form(validationRules, validationSettings);
-        },
 
-        receiveMessage: function (e) {
-            console.log(e);
+            jQuery('.shortcuts').on('click', 'A', applyShortcut);
         }
+
     };
 })();
 
 
 jQuery(document).ready(MEDLEY.later.init);
-jQuery(window).on('message', MEDLEY.later.receiveMessage);
