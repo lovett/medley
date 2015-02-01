@@ -495,7 +495,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
-    def later(self, action="edit", title=None, url=None, date=None, keywords=None, comments=None):
+    def later(self, action="edit", title=None, url=None, date=None, tags=None, comments=None):
         """Bookmark a page for later viewing"""
 
         error = None
@@ -504,18 +504,29 @@ class MedleyServer(object):
             date = datetime.now().strftime("%Y-%m-%d")
 
 
-        if action == "edit" and url and not title:
-            title = util.net.getHtmlTitleYQL(url)
+        if action == "edit" and url:
+            bookmark = util.db.getBookmarkByUrl(url)
 
-            if title is None and url.startswith("https:"):
-                title = util.net.getUrlTitleYQL(url.replace("https:", "http:"))
+            if bookmark is not None:
+                error = "This URL has already been bookmarked"
+                title = bookmark["title"]
+                url = bookmark["url"]
+                date = bookmark["created"]
+                tags = bookmark["tags"]
+                comments = bookmark["comments"]
+
+            if not title:
+                title = util.net.getHtmlTitleYQL(url)
+
+                if title is None and url.startswith("https:"):
+                    title = util.net.getHtmlTitleYQL(url.replace("https:", "http:"))
 
         if cherrypy.request.method == "POST":
             if not url:
                 error = "Address missing"
             else:
-                bookmark_id = util.db.saveBookmark(url, title, comments, keywords, date)
-                cherrypy.engine.publish("bookmark-fetch", bookmark_id)
+                url_id = util.db.saveBookmark(url, title, comments, tags, date)
+                cherrypy.engine.publish("bookmark-fetch", url_id)
                 return "ok".encode("utf-8")
 
         return {
@@ -523,7 +534,7 @@ class MedleyServer(object):
             "title": title,
             "url": url,
             "date": date,
-            "keywords": keywords,
+            "tags": tags,
             "comments": comments
         }
 

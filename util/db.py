@@ -7,11 +7,19 @@ from urllib.parse import urlparse
 _databases = {}
 
 bookmarks_create_sql = """
-CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks USING fts4 (
-    url, domain, title, keywords, comments,
+CREATE TABLE IF NOT EXISTS urls (
+    url UNIQUE,
+    domain,
+    fetched DEFAULT 0
+);
+
+CREATE VIRTUAL TABLE IF NOT EXISTS meta USING fts4 (
+    url_id, title, tags, comments,
     created DATETIME DEFAULT CURRENT_TIMESTAMP,
     fulltext, tokenize=porter
 );
+
+CREATE INDEX IF NOT EXISTS url_domain ON urls (domain);
 """
 
 annotations_create_sql = """
@@ -46,29 +54,44 @@ def getBookmarkById(bookmark_id):
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    sql = "SELECT * from bookmarks WHERE rowid=?"
+    sql = """SELECT u.url, u.domain, m.title, m.created, m.tags, m.comments
+             FROM urls u, meta m
+             WHERE u.rowid=m.url_id and u.rowid=?"""
     cur.execute(sql, (bookmark_id,))
     return cur.fetchone()
 
+def getBookmarkByUrl(url):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    sql = """SELECT u.url, u.domain, m.title, m.created, m.tags, m.comments
+             FROM urls u, meta m
+             WHERE u.url=? AND u.rowid=m.url_id"""
+    cur.execute(sql, (url.lower(),))
+    return cur.fetchone()
 
-def saveBookmark(url, title, comments=None, keywords=None, created=None):
 
+def saveBookmark(url, title, comments=None, tags=None, created=None):
     parsed_url = urlparse(url)
 
     conn = sqlite3.connect(_databases["bookmarks"])
     cur = conn.cursor()
-    cur.execute("INSERT INTO bookmarks (url, title, domain, comments, keywords, created) VALUES (?, ?, ?, ?, ?, ?)",
-                (url, title, parsed_url.netloc, comments, keywords, created))
+    cur.execute("INSERT INTO urls (url, domain) VALUES (?, ?)", (url, parsed_url.netloc))
     conn.commit()
-    bookmark_id = cur.lastrowid
+    url_id = cur.lastrowid
+    cur.execute("""INSERT INTO meta (url_id, title, comments, tags, created)
+                VALUES (?, ?, ?, ?, ?)""",
+                (url_id, title, comments, tags, created))
+    conn.commit()
     conn.close()
-    return bookmark_id
+    return url_id
 
-def saveBookmarkFulltext(bookmark_id, fulltext):
+def saveBookmarkFulltext(url_id, fulltext):
     conn = sqlite3.connect(_databases["bookmarks"])
     cur = conn.cursor()
-    cur.execute("UPDATE bookmarks SET fulltext=? WHERE rowid=?",
-                (fulltext, bookmark_id))
+    cur.execute("UPDATE meta SET fulltext=? WHERE url_id=?",
+                (fulltext, url_id))
     conn.commit()
     conn.close()
     return True

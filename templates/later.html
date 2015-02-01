@@ -19,7 +19,10 @@
 
     <div class="ui sixteen wide column">
 
-        <div class="ui form">
+        <div class="ui {% if error %}error{% endif %} form">
+
+            <div class="ui error message">{{ error }}</div>
+            <div class="hidden ui green message">Success!</div>
 
             <input type="hidden" name="action" value="save" />
 
@@ -39,8 +42,8 @@
                 </div>
             </div>
             <div class="field">
-                <label for="url">Keywords:</label>
-                <input type="text" id="keywords" name="keywords" value="{{ keywords|default('', true) }}"/>
+                <label for="url">Tags:</label>
+                <input type="text" id="tags" name="tags" value="{{ tags|default('', true) }}"/>
             </div>
 
             <div class="field">
@@ -50,8 +53,6 @@
 
             <div class="field">
                 <button class="ui submit button">Save</button>
-                <div class="ui error message"></div>
-                <div class="hidden ui green message">Success!</div>
             </div>
         </div>
     </div>

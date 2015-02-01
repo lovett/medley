@@ -19,9 +19,9 @@ class Plugin(plugins.SimplePlugin):
         self.bus.log("Stopping urlfetch")
         self.bus.unsubscribe("bookmark-fetch", self.fetchBookmark)
 
-    def fetchBookmark(self, bookmark_id):
+    def fetchBookmark(self, url_id):
         """Fetch a URL"""
-        bookmark = util.db.getBookmarkById(bookmark_id)
+        bookmark = util.db.getBookmarkById(url_id)
         doc = util.net.getUrl(bookmark["url"])
         text = util.net.htmlToText(doc)
-        util.db.saveBookmarkFulltext(bookmark_id, text)
+        util.db.saveBookmarkFulltext(url_id, text)

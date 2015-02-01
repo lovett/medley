@@ -5,6 +5,7 @@ import requests
 import jinja2
 import smtplib
 import lxml.html
+import lxml.etree
 from email.mime.text import MIMEText
 
 
@@ -139,7 +140,7 @@ def getHtmlTitleYQL(url):
     endpoint = "https://query.yahooapis.com/v1/public/yql?q={}&format=json".format(query)
 
     try:
-        r = requests.get(endpoint, timeout=2)
+        r = requests.get(endpoint, timeout=5)
         r.raise_for_status()
         result = r.json()
         return result["query"]["results"].get("title")
@@ -158,4 +159,4 @@ def getUrl(url):
 
 def htmlToText(html):
     document = lxml.html.document_fromstring(html)
-    return document.text_content()
+    return " ".join(lxml.etree.XPath("//text()")(document))
