@@ -50,7 +50,7 @@ class Plugin(plugins.SimplePlugin):
             directives = "%A %b %d, %Y %I:%M %p"
         else:
             directives = format
-        return value.strftime(directives)
+        return value.strftime(directives).lstrip("0")
 
     def unindent_filter(self, string):
         """Remove leading whitespace from a multiline string without losing indentation"""

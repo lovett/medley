@@ -23,6 +23,7 @@ import util.decorator
 import ssl
 import string
 import pygeoip
+from collections import defaultdict
 from datetime import datetime, timedelta
 
 import tools.negotiable
@@ -490,15 +491,34 @@ class MedleyServer(object):
     @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="archive.html")
+    def archive(self, date=None, q=None):
+        """View and search saved bookmarks"""
+
+        entries = defaultdict(list)
+
+        if not q:
+            bookmarks = util.db.getRecentBookmarks(limit=50)
+        else:
+            bookmarks = util.db.searchBookmarks(q)
+
+        for bookmark in bookmarks:
+            key = bookmark["created"].strftime("%Y-%m-%d")
+            entries[key].append(bookmark)
+
+        print(entries)
+        return {
+            "entries": entries
+        }
+
+    @util.decorator.userFacing
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
-    def later(self, action="edit", title=None, url=None, date=None, tags=None, comments=None):
-        """Bookmark a page for later viewing"""
+    def later(self, action="edit", title=None, url=None, tags=None, comments=None):
+        """Capture a webpage for future reference"""
 
         error = None
-
-        if not date or not re.match(r"\d{4}-\d{2}-\d{2}", date):
-            date = datetime.now().strftime("%Y-%m-%d")
-
 
         if action == "edit" and url:
             bookmark = util.db.getBookmarkByUrl(url)
@@ -507,7 +527,6 @@ class MedleyServer(object):
                 error = "This URL has already been bookmarked"
                 title = bookmark["title"]
                 url = bookmark["url"]
-                date = bookmark["created"]
                 tags = bookmark["tags"]
                 comments = bookmark["comments"]
 
@@ -521,7 +540,7 @@ class MedleyServer(object):
             if not url:
                 error = "Address missing"
             else:
-                url_id = util.db.saveBookmark(url, title, comments, tags, date)
+                url_id = util.db.saveBookmark(url, title, comments, tags)
                 cherrypy.engine.publish("bookmark-fetch", url_id)
                 return "ok".encode("utf-8")
 
@@ -529,7 +548,6 @@ class MedleyServer(object):
             "error": error,
             "title": title,
             "url": url,
-            "date": date,
             "tags": tags,
             "comments": comments
         }

@@ -28,21 +28,17 @@
             <input type="hidden" name="action" value="save" />
 
             <div class="field">
-                <label for="url">URL:</label>
-                <input type="text" id="url" name="url" value="{{ url|default('', true) }}"/>
+                <label for="url">Title:</label>
+                <input type="text" id="title" name="title" value="{{ title|default('', true) }}"/>
+            </div>
+
+            <div class="field">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="url" value="{{ url|default('', true) }}"/>
                 <p class="shortcuts"><a class="remove-querystring" href="#">Remove querystring</a></p>
             </div>
 
-            <div class="two fields">
-                <div class="field">
-                    <label for="url">Title:</label>
-                    <input type="text" id="title" name="title" value="{{ title|default('', true) }}"/>
-                </div>
-                <div class="field">
-                    <label for="date">Date:</label>
-                    <input type="text" id="date" name="date" value="{{ date }}" placeholder="yyyy-mm-dd"/>
-                </div>
-            </div>
+
             <div class="field">
                 <label for="url">Tags:</label>
                 <input type="text" id="tags" name="tags" value="{{ tags|default('', true) }}"/>

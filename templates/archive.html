@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% set page_title = "Archive" %}
+
+{% set home_link = True %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block page_body %}
+
+<main class="ui page grid stackable">
+    <form class="ui form sixteen wide column" method="get" action="/archive">
+        <div class="fields">
+            <div class="fifteen wide field">
+                <input type="text" id="q" name="q" value="{{ q }}"/>
+            </div>
+            <div class="one wide field">
+                <button class="ui button">Search</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="ui feed sixteen wide column">
+        {% if not entries %}
+        <p>Nothing found</p>
+        {% endif %}
+
+        {% for key, entries in entries.items() %}
+        <h1 class="ui medium header">{{ entries[0].created|datetime("date-full") }}</h1>
+        {% for entry in entries %}
+        <div class="event">
+            <div class="label">
+                <i class="{{entry.record_type}} icon"></i>
+            </div>
+            <div class="content">
+                <div class="date">
+                    {{ entry.created|datetime("time12") }}
+                </div>
+                <div class="summary">
+                    <a href="{{ entry.url }}" rel="noreferrer" target="_blank">{{ entry.title }}</a>
+                </div>
+                <div class="meta">
+                    <a href="http://{{ entry.domain }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
+                </div>
+
+                {% if entry.comments %}
+                <div class="extra text}">
+                    {{ entry.comments }}
+                </div>
+                {% endif %}
+            </div>
+            <!--<div class="label">
+                <img src="/images/avatar/small/elliot.jpg">
+            </div>
+            <div class="content">
+                <div class="summary">
+                    <a class="user">
+                        Elliot Fu
+                    </a> added you as a friend
+                    <div class="date">
+                        1 Hour Ago
+                    </div>
+                </div>
+                <div class="meta">
+                    <a class="like">
+                        <i class="like icon"></i> 4 Likes
+                    </a>
+                </div>
+            </div>-->
+        </div>
+        {% endfor %}
+
+        {% endfor %}
+    </div>
+</main>
+
+{% endblock %}
