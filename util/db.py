@@ -2,6 +2,7 @@ import os.path
 import sqlite3
 import util.sqlite_converters
 import markupsafe
+import pygeoip
 from urllib.parse import urlparse
 
 _databases = {}
@@ -47,6 +48,16 @@ def setup(database_dir):
         conn.close()
         _databases[name] = path
 
+def geoSetup(database_dir, download_url):
+        db_path = database_dir
+        db_path += "/" + os.path.basename(download_url)
+        if db_path.endswith(".gz"):
+            db_path = db_path[0:-3]
+
+        _databases["geo"] = pygeoip.GeoIP(db_path)
+
+def geoip(ip):
+    return _databases["geo"].record_by_addr(ip)
 
 def getBookmarkById(bookmark_id):
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)

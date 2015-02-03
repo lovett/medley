@@ -16,14 +16,12 @@ def setup_module():
         "global": {
             "request.show_tracebacks": False,
             "azure.url.deployments": "http://example.com/{}/deployments",
+            "tools.encode.on": False,
+            "tools.conditional_auth.on": False,
+            "users": {"test":"test"}
         },
         "dns_hosts": {
             "test": ["foo", "bar"]
-        },
-        "/ip": {
-            "tools.auth_basic.checkpassword": cherrypy.lib.auth_basic.checkpassword_dict({
-                "test":"test"
-            })
         },
         "ip_tokens": {
             "external": "external.example.com",
@@ -399,6 +397,8 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """ /lettercase returns an HTML form"""
         response = self.request("/lettercase")
         self.assertEqual(response.code, 200)
+        print("!" * 72)
+        print(response.body)
         self.assertTrue("<form" in response.body)
 
     def test_lettercaseReturnsJson(self):
@@ -477,144 +477,130 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/whois", as_plain=True)
         self.assertEqual(response.code, 400)
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisGeoipQuery(self, queryWhoisMock):
+    def test_whoisGeoipQuery(self, queryWhoisMock, geoipMock):
         """ /whois calls the geoip database """
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {}
         queryWhoisMock.return_value = {}
+        geoipMock.return_value = {}
         ip = "1.1.1.1"
-        with mock.patch("medley.pygeoip.GeoIP") as pygeoip_mock:
-            pygeoip_mock.return_value = reader
-            response = self.request("/whois/" + ip, as_json=True)
-            reader.record_by_addr.assert_called_once_with(ip)
-            queryWhoisMock.assert_called_once_with(ip)
+        response = self.request("/whois/" + ip, as_json=True)
+        geoipMock.assert_called_once_with(ip)
+        queryWhoisMock.assert_called_once_with(ip)
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisPopulateUsMapParams(self, queryWhoisMock):
-        """ /whois defines the map region for a US IP US-{state abbrev} """
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {
+    def test_whoisPopulateUsMapParams(self, queryWhoisMock, geoipMock):
+        """ /whois defines the map region for a US IP as US-{state abbrev} """
+        queryWhoisMock.return_value = {}
+        geoipMock.return_value = {
             "country_code": "US",
             "region_code": "NY"
         }
-        queryWhoisMock.return_value = {}
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP.return_value = reader
-            response = self.request("/whois/1.1.1.1", as_json=True)
-            self.assertEqual(response.body["map_region"], "US-NY")
 
+        response = self.request("/whois/1.1.1.1", as_json=True)
+        self.assertEqual(response.body["map_region"], "US-NY")
+
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisPopulateNonUsMapParams(self, queryWhoisMock):
+    def test_whoisPopulateNonUsMapParams(self, queryWhoisMock, geoipMock):
         """ /whois defines the map region for a non-US IP as a 2-letter ISO code """
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {
+        queryWhoisMock.return_value = {}
+        geoipMock.return_value = {
             "country_code": "AU"
         }
-        queryWhoisMock.return_value = {}
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP.return_value = reader
-            response = self.request("/whois/1.1.1.1", as_json=True)
-            self.assertEqual(response.body["map_region"], "AU")
+        response = self.request("/whois/1.1.1.1", as_json=True)
+        self.assertEqual(response.body["map_region"], "AU")
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisSkipsGeoipQuery(self, queryWhoisMock):
+    def test_whoisSkipsGeoipQuery(self, queryWhoisMock, geoipMock):
         """ /whois returns success if the geoip query fails """
         queryWhoisMock.return_value = {}
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            response = self.request("/whois/1.1.1.1", as_json=True)
-            self.assertTrue(response.code, 200)
+        geoipMock.side_effect = Exception('Force fail')
+        response = self.request("/whois/1.1.1.1", as_json=True)
+        self.assertTrue(response.code, 200)
 
+
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock):
+    def test_whoisPlainReturnsCityAndCountry(self, queryWhoisMock, geoipMock):
         """ /whois returns the city and country name """
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {
+        queryWhoisMock.return_value = {}
+        geoipMock.return_value = {
             "city": "test city",
             "country_code": "AA",
             "region_code": "BB",
             "country_name": "test country"
         }
-        queryWhoisMock.return_value = {}
 
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP.return_value = reader
-            response = self.request("/whois/1.1.1.1", as_plain=True)
-            self.assertEqual(response.body, "test city, test country")
+        response = self.request("/whois/1.1.1.1", as_plain=True)
+        self.assertEqual(response.body, "test city, test country")
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisPlainReturnsCountry(self, queryWhoisMock):
+    def test_whoisPlainReturnsCountry(self, queryWhoisMock, geoipMock):
         """ /whois returns the county name if the city is not available"""
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {
+        geoipMock.return_value = {
             "country_code": "AA",
             "region_code": "BB",
             "country_name": "test country"
         }
         queryWhoisMock.return_value = {}
+        response = self.request("/whois/1.1.1.1", as_plain=True)
+        self.assertEqual(response.body, "test country")
 
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP.return_value = reader
-            response = self.request("/whois/1.1.1.1", as_plain=True)
-            self.assertEqual(response.body, "test country")
-
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisPlainReturnsUnknown(self, queryWhoisMock):
+    def test_whoisPlainReturnsUnknown(self, queryWhoisMock, geoipMock):
         """ /whois returns "Unknown" if city and country name are not available"""
-        reader = mock.MagicMock()
-        reader.record_by_addr.return_value = {}
+        geoipMock.return_value = {}
         queryWhoisMock.return_value = {}
+        response = self.request("/whois/1.1.1.1", as_plain=True)
+        self.assertEqual(response.body, "Unknown")
 
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP.return_value = reader
-            response = self.request("/whois/1.1.1.1", as_plain=True)
-            self.assertEqual(response.body, "Unknown")
-
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.whois")
-    def test_whoisInputIp(self, queryWhoisMock):
+    def test_whoisInputIp(self, queryWhoisMock, geoipMock):
         """ /whois accepts an IP address as input """
         queryWhoisMock.return_value = {}
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            response = self.request("/whois/1.1.1.1", as_json=True)
-            self.assertEqual(response.body["ip"], "1.1.1.1")
+        geoipMock.side_effect = Exception('Force fail')
+        response = self.request("/whois/1.1.1.1", as_json=True)
+        self.assertEqual(response.body["ip"], "1.1.1.1")
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
-    def test_whoisInputHostname(self, whoisMock, resolveHostMock):
+    def test_whoisInputHostname(self, whoisMock, resolveHostMock, geoipMock):
         """ /whois accepts a hostname as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            response = self.request("/whois/example.com", as_json=True)
-            self.assertEqual(response.body["ip"], "1.1.1.1")
+        geoipMock.side_effect = Exception('Force fail')
+        response = self.request("/whois/example.com", as_json=True)
+        self.assertEqual(response.body["ip"], "1.1.1.1")
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
-    def test_whoisInputUrl(self, whoisMock, resolveHostMock):
+    def test_whoisInputUrl(self, whoisMock, resolveHostMock, geoipMock):
         """ /whois accepts a full URL as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            address = urllib.parse.quote_plus("http://example.com/foo/bar?a=1")
-            response = self.request("/whois/" + address, as_json=True)
-            self.assertEqual(response.body["ip"], "1.1.1.1")
-            self.assertEqual(response.body["address"], "example.com")
+        geoipMock.side_effect = Exception('Force fail')
+        response = self.request("/whois/example.com", as_json=True)
+        self.assertEqual(response.body["ip"], "1.1.1.1")
+        self.assertEqual(response.body["address"], "example.com")
 
+    @mock.patch("util.db.geoip")
     @mock.patch("util.net.resolveHost")
     @mock.patch("util.net.whois")
-    def test_whoisInputHostAlias(self, whoisMock, resolveHostMock):
+    def test_whoisInputHostAlias(self, whoisMock, resolveHostMock, geoipMock):
         """ /whois accepts a host alias as input """
         whoisMock.return_value = {}
         resolveHostMock.return_value = "1.1.1.1"
-        with mock.patch("medley.pygeoip") as pygeoip_mock:
-            pygeoip_mock.GeoIP = mock.MagicMock(side_effect=Exception('Force fail'))
-            response = self.request("/whois/foo", as_json=True)
-            self.assertEqual(response.body["ip"], "1.1.1.1")
-
+        geoipMock.side_effect = Exception('Force fail')
+        response = self.request("/whois/foo", as_json=True)
+        self.assertEqual(response.body["ip"], "1.1.1.1")
 
     def test_phoneNoNumberJson(self):
         """ /phone returns 400 if called as json without a number"""

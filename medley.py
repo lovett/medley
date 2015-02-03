@@ -22,7 +22,6 @@ import util.db
 import util.decorator
 import ssl
 import string
-import pygeoip
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -38,20 +37,16 @@ cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 class MedleyServer(object):
     mc = None
     template_dir = None
+    geoip = None
 
     def __init__(self):
         self.template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
         plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
-        db_path = cherrypy.config.get("database.directory")
-        db_path += "/" + os.path.basename(cherrypy.config.get("geoip.download.url"))
-        if db_path.endswith(".gz"):
-            db_path = db_path[0:-3]
-
-        self.geodb = pygeoip.GeoIP(db_path)
-
         util.db.setup(cherrypy.config.get("database.directory"))
+        util.db.geoSetup(cherrypy.config.get("database.directory"),
+                         cherrypy.config.get("geoip.download.url"))
 
 
     @cherrypy.expose
@@ -293,7 +288,7 @@ class MedleyServer(object):
             if cherrypy.request.negotiated == "application/json":
                 cherrypy.response.status = 400
                 return {
-                    "message": "Address not specfified"
+                    "message": "Address not specified"
                 }
             if cherrypy.request.negotiated == "text/plain":
                 raise cherrypy.HTTPError(400, "Address not specified")
@@ -316,8 +311,13 @@ class MedleyServer(object):
         if ip is None:
             ip = util.net.resolveHost(address_clean)
 
+        try:
+            geo = util.db.geoip(ip)
+        except:
+            geo = None
+
         data = {
-            "geo": self.geodb.record_by_addr(ip),
+            "geo": geo,
             "address": address_clean,
             "ip": ip,
             "reverse_host": util.net.reverseLookup(ip)
@@ -644,7 +644,7 @@ class MedleyServer(object):
         query_annotations = util.db.getAnnotationsByPrefix("visitors")
 
         for result in results.matches:
-            geo = self.geodb.record_by_addr(result["ip"])
+            geo = util.db.geoip(result["ip"])
             result["geo"] = geo
             result["ip_label"] = ip_labels.get(result["ip"])
 
