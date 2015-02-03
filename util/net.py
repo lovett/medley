@@ -134,19 +134,20 @@ def sendNotification(message, config):
     r.raise_for_status()
     return True
 
-def getHtmlTitleYQL(url):
+def getUrlTitle(url):
+    """Extract the value of the title tag from a URL"""
+    html = getUrl(url)
+    tree = lxml.html.fromstring(html)
+    title = tree.xpath("//title/text()").pop()
+    return reduceHtmlTitle(title)
 
-    query = "select * from html where url='{}' and xpath='//title'".format(url)
-    endpoint = "https://query.yahooapis.com/v1/public/yql?q={}&format=json".format(query)
-
-    try:
-        r = requests.get(endpoint, timeout=5)
-        r.raise_for_status()
-        result = r.json()
-        return result["query"]["results"].get("title")
-    except:
-        return None
-
+def reduceHtmlTitle(title):
+    for char in "|-:·":
+        separator = " {} ".format(char)
+        if separator in title:
+            segments = title.split(separator)
+            return max(segments, key=len)
+    return title
 
 def getUrl(url):
     try:

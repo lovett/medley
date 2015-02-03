@@ -251,6 +251,40 @@ class TestUtilNet(unittest.TestCase):
         self.assertTrue("Subject: " + message_data["subject"] in sendmail_args[2])
         self.assertTrue("From: " + message_data["smtp"]["sender"] in sendmail_args[2])
 
+    def test_reduceHtmlTitle(self):
+        titles = [
+            # pipe separated, drop tail
+            ("Lorem ipsum dolor sit amet | Lorem ipsum",
+             "Lorem ipsum dolor sit amet"),
+            # pipe separated, drop head
+            ("Lorem ipsum | Lorem ipsum dolor sit amet",
+             "Lorem ipsum dolor sit amet"),
+            # hyphen separated, drop tail
+            ("Lorem ipsum dolor sit amet - Lorem ipsum",
+             "Lorem ipsum dolor sit amet"),
+            # hyphen separated, drop head
+            ("Lorem ipsum - Lorem ipsum dolor sit amet",
+             "Lorem ipsum dolor sit amet"),
+            # colon separated, drop tail
+            ("Lorem ipsum dolor sit amet : lorem",
+             "Lorem ipsum dolor sit amet"),
+            # multiple separators
+            ("Lorem ipsum – Lorem ipsum dolor sit : Lorem ipsum",
+             "Lorem ipsum – Lorem ipsum dolor sit"),
+            # dot separated, drop tail
+            ("Lorem ipsum · foo",
+             "Lorem ipsum"),
+            # no separator
+            ("Lorem", "Lorem"),
+            # three segments
+            ("Lorem ipsum dolor sit amet dolor - example.foo - The Official Blog of example.com",
+             "Lorem ipsum dolor sit amet dolor")
+        ]
+
+        for title in titles:
+            reduction = util.net.reduceHtmlTitle(title[0])
+            self.assertEqual(reduction, title[1])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -29,24 +29,24 @@
 
             <div class="field">
                 <label for="url">Title:</label>
-                <input type="text" id="title" name="title" value="{{ title|default('', true) }}"/>
+                <input type="text" id="title" name="title" value="{{ title|default('', true)|e }}"/>
             </div>
 
             <div class="field">
                 <label for="address">Address:</label>
-                <input type="text" id="address" name="url" value="{{ url|default('', true) }}"/>
+                <input type="text" id="address" name="url" value="{{ url|default('', true)|e }}"/>
                 <p class="shortcuts"><a class="remove-querystring" href="#">Remove querystring</a></p>
             </div>
 
 
             <div class="field">
                 <label for="url">Tags:</label>
-                <input type="text" id="tags" name="tags" value="{{ tags|default('', true) }}"/>
+                <input type="text" id="tags" name="tags" value="{{ tags|default('', true)|e }}"/>
             </div>
 
             <div class="field">
                 <label for="comments">Comments:</label>
-                <textarea id="comments" name="comments">{{ comments|default('', true) }}</textarea>
+                <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
             </div>
 
             <div class="field">
