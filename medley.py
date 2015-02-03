@@ -49,6 +49,7 @@ class MedleyServer(object):
                          cherrypy.config.get("geoip.download.url"))
 
 
+    @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
@@ -83,7 +84,7 @@ class MedleyServer(object):
         return "ok"
 
 
-    @util.decorator.userFacing
+    @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="index.html")
@@ -96,9 +97,9 @@ class MedleyServer(object):
                 continue
 
             exposed = getattr(value, "exposed", False)
-            util.decorator.userFacing = getattr(value, "userFacing", False)
+            hidden = getattr(value, "hide_from_homepage", False)
 
-            if exposed and util.decorator.userFacing:
+            if exposed and not hidden:
                 endpoints.append((name, value.__doc__))
 
         if cherrypy.request.negotiated == "text/plain":
@@ -115,6 +116,7 @@ class MedleyServer(object):
                 "endpoints": endpoints
             }
 
+    @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -154,7 +156,6 @@ class MedleyServer(object):
                 "message": ip
             }
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
@@ -212,7 +213,6 @@ class MedleyServer(object):
             return data["result"]
 
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="ip.html")
@@ -255,7 +255,6 @@ class MedleyServer(object):
         else:
             return { "result": "ok" }
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="headers.html")
@@ -277,7 +276,6 @@ class MedleyServer(object):
                 "headers": headers
             }
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="whois.html")
@@ -354,7 +352,6 @@ class MedleyServer(object):
         else:
             return data
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="generic.html")
@@ -398,7 +395,6 @@ class MedleyServer(object):
             "home_link": True
         }
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
@@ -457,7 +453,6 @@ class MedleyServer(object):
 
             return data
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="lettercase.html")
@@ -488,7 +483,6 @@ class MedleyServer(object):
             }
 
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="archive.html")
@@ -511,7 +505,6 @@ class MedleyServer(object):
             "entries": entries
         }
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="later.html")
@@ -554,6 +547,7 @@ class MedleyServer(object):
 
 
 
+    @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     def annotation(self, annotation_id):
@@ -563,7 +557,6 @@ class MedleyServer(object):
 
         raise cherrypy.HTTPError(400)
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="annotations.html")
@@ -593,7 +586,6 @@ class MedleyServer(object):
         }
 
 
-    @util.decorator.userFacing
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="visitors.html")

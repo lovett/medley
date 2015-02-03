@@ -11,6 +11,6 @@ def timed(f):
 
     return wrapper
 
-def userFacing(f):
-    f.userFacing = True
+def hideFromHomepage(f):
+    f.hide_from_homepage = True
     return f
