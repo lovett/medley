@@ -11,7 +11,6 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
-import plugins.urlfetch
 import base64
 import inspect
 import util.phone
@@ -43,7 +42,6 @@ class MedleyServer(object):
     def __init__(self):
         self.template_dir = cherrypy.config.get("templates.dir")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
-        plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
         util.db.setup(cherrypy.config.get("database.directory"))
         util.db.geoSetup(cherrypy.config.get("database.directory"),
@@ -544,7 +542,13 @@ class MedleyServer(object):
                 error = "Address missing"
             else:
                 url_id = util.db.saveBookmark(url, title, comments, tags)
-                cherrypy.engine.publish("bookmark-fetch", url_id, url, self.cache)
+
+                html = self.cache.get_or_create(
+                    "html:" + url,
+                    lambda: util.net.getUrl(url)
+                )
+                text = util.net.htmlToText(html)
+                util.db.saveBookmarkFulltext(url_id, text)
                 return "ok".encode("utf-8")
 
         return {
