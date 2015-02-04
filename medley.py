@@ -27,6 +27,9 @@ from datetime import datetime, timedelta
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
 
+import tools.response_time
+cherrypy.tools.response_time = tools.response_time.Tool()
+
 import tools.jinja
 cherrypy.tools.template = tools.jinja.Tool()
 
