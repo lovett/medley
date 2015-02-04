@@ -8,7 +8,6 @@ class Plugin(plugins.SimplePlugin):
     def __init(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
 
-
     def start(self):
         """Called when the engine starts"""
         self.bus.log("Starting urlfetch")
@@ -19,9 +18,12 @@ class Plugin(plugins.SimplePlugin):
         self.bus.log("Stopping urlfetch")
         self.bus.unsubscribe("bookmark-fetch", self.fetchBookmark)
 
-    def fetchBookmark(self, url_id):
+    def fetchBookmark(self, url_id, url, cache):
         """Fetch a URL"""
-        bookmark = util.db.getBookmarkById(url_id)
-        doc = util.net.getUrl(bookmark["url"])
-        text = util.net.htmlToText(doc)
+
+        html = cache.get_or_create(
+            "html:" + url,
+            lambda: util.net.getUrl(url)
+        )
+        text = util.net.htmlToText(html)
         util.db.saveBookmarkFulltext(url_id, text)

@@ -532,14 +532,19 @@ class MedleyServer(object):
                 comments = bookmark["comments"]
 
             if not title:
-                title = util.net.getTitleFromUrl(url)
+                html = self.cache.get_or_create(
+                    "html:" + url,
+                    lambda: util.net.getUrl(url)
+                )
+
+                title = util.net.getHtmlTitle(html)
 
         if cherrypy.request.method == "POST":
             if not url:
                 error = "Address missing"
             else:
                 url_id = util.db.saveBookmark(url, title, comments, tags)
-                cherrypy.engine.publish("bookmark-fetch", url_id)
+                cherrypy.engine.publish("bookmark-fetch", url_id, url, self.cache)
                 return "ok".encode("utf-8")
 
         return {

@@ -6,6 +6,7 @@ import jinja2
 import smtplib
 import lxml.html
 import lxml.etree
+import cherrypy
 from email.mime.text import MIMEText
 
 
@@ -137,22 +138,17 @@ def sendNotification(message, config):
     except:
         return False
 
-def getTitleFromUrl(url):
-    """Extract the value of the title tag from a URL"""
-    html = getUrl(url)
-
+def getHtmlTitle(html):
+    """Extract the contents of the title tag from an HTML string"""
     try:
         tree = lxml.html.fromstring(html)
-    except lxml.etree.XMLSyntaxError:
-        return None
-
-    try:
         title = tree.xpath("//title/text()").pop()
         return reduceHtmlTitle(title)
-    except IndexError:
+    except (IndexError, lxml.etree.XMLSyntaxError):
         return None
 
 def reduceHtmlTitle(title):
+    """Remove site identifiers and noise from the title of an HTML document"""
     for char in "|-:·":
         separator = " {} ".format(char)
         if separator in title:
@@ -162,6 +158,9 @@ def reduceHtmlTitle(title):
 
 def getUrl(url):
     """Make a GET request for the specified URL and return its HTML as a string"""
+
+    cherrypy.log("APP", "Requesting {}".format(url))
+
     try:
         r = requests.get(url, timeout=5, allow_redirects=True)
         r.raise_for_status()

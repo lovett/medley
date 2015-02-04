@@ -285,25 +285,25 @@ class TestUtilNet(unittest.TestCase):
             reduction = util.net.reduceHtmlTitle(title[0])
             self.assertEqual(reduction, title[1])
 
-    @mock.patch("util.net.getUrl")
-    def test_getTitleFromUrl(self, getUrlMock):
-        """Title extraction on an HTML document with a title returns a string"""
-        getUrlMock.return_value = "<html><head><title>Foo</title></head></html"
-        result = util.net.getTitleFromUrl("http://example.com")
+    def test_getHtmlTitle(self):
+        """Title extraction from an HTML document with a title returns a string"""
+        html = "<html><head><title>Foo</title></head></html>"
+        result = util.net.getHtmlTitle(html)
         self.assertEqual(result, "Foo")
 
-    @mock.patch("util.net.getUrl")
-    def test_getTitleFromUrlMissing(self, getUrlMock):
-        """Title extraction on an HTML document with no title returns None"""
-        getUrlMock.return_value = "<html></html>"
-        result = util.net.getTitleFromUrl("http://example.com")
+    def test_getHtmlTitleMissing(self):
+        """Title extraction from an HTML document with no title returns None"""
+        result = util.net.getHtmlTitle("<html></html>")
         self.assertIsNone(result)
 
-    @mock.patch("util.net.getUrl")
-    def test_getTitleFromUrlNoTitle(self, getUrlMock):
-        """Title extraction on a blank document returns None"""
-        getUrlMock.return_value = ""
-        result = util.net.getTitleFromUrl("http://example.com")
+    def test_getHtmlTitleBroken(self):
+        """Title extraction from a malformed document returns None"""
+        result = util.net.getHtmlTitle("<html><title")
+        self.assertIsNone(result)
+
+    def test_getHtmlTitleBlank(self):
+        """Title extraction from a blank document returns None"""
+        result = util.net.getHtmlTitle("")
         self.assertIsNone(result)
 
     @requests_mock.Mocker()
