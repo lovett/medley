@@ -324,14 +324,11 @@ class MedleyServer(object):
             except AssertionError:
                 return None
 
-        def whois_cacheable(value):
-            return value is not None
-
         key = "whois:{}".format(data["address"])
 
         data["whois"] = self.cache.get_or_create(
             key, whois_query,
-            should_cache_fn=whois_cacheable
+            should_cache_fn= lambda v: v is not None
         )
 
         # Google charts
@@ -434,13 +431,10 @@ class MedleyServer(object):
             except (AssertionError, util.phone.PhoneException):
                 return {}
 
-        def phone_cacheable(value):
-            return value is not None
-
         key = "phone:{}".format(area_code)
         location = self.cache.get_or_create(
             key, phone_query,
-            should_cache_fn=phone_cacheable
+            should_cache_fn= lambda v: v is not None
         )
 
         if cherrypy.request.negotiated == "text/plain":
@@ -522,7 +516,7 @@ class MedleyServer(object):
         if action == "edit" and url:
             bookmark = util.db.getBookmarkByUrl(url)
 
-            if bookmark is not None:
+            if bookmark:
                 error = "This URL has already been bookmarked"
                 title = bookmark["title"]
                 url = bookmark["url"]
@@ -530,12 +524,18 @@ class MedleyServer(object):
                 comments = bookmark["comments"]
 
             if not title:
-                html = self.cache.get_or_create(
-                    "html:" + url,
-                    lambda: util.net.getUrl(url)
-                )
+                try:
+                    html = self.cache.get_or_create(
+                        "html:" + url,
+                        lambda: util.net.getUrl(url),
+                        should_cache_fn = lambda v: v is not None
+                    )
+                except util.net.NetException as e:
+                    error = str(e)
+                    html = None
 
                 title = util.net.getHtmlTitle(html)
+                title = util.net.reduceHtmlTitle(title)
 
         if cherrypy.request.method == "POST":
             if not url:
@@ -543,10 +543,9 @@ class MedleyServer(object):
             else:
                 url_id = util.db.saveBookmark(url, title, comments, tags)
 
-                html = self.cache.get_or_create(
-                    "html:" + url,
-                    lambda: util.net.getUrl(url)
-                )
+                html = self.cache.get("html:" + url)
+                if not html:
+                    html = util.net.getUrl(url)
                 text = util.net.htmlToText(html)
                 util.db.saveBookmarkFulltext(url_id, text)
                 return "ok".encode("utf-8")

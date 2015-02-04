@@ -9,6 +9,8 @@ import lxml.etree
 import cherrypy
 from email.mime.text import MIMEText
 
+class NetException (Exception):
+    pass
 
 def whois(address):
     """Run a whois query by shelling out. The output is filtered to
@@ -142,13 +144,13 @@ def getHtmlTitle(html):
     """Extract the contents of the title tag from an HTML string"""
     try:
         tree = lxml.html.fromstring(html)
-        title = tree.xpath("//title/text()").pop()
-        return reduceHtmlTitle(title)
-    except (IndexError, lxml.etree.XMLSyntaxError):
+        return tree.xpath("//title/text()").pop()
+    except (TypeError, IndexError, lxml.etree.XMLSyntaxError):
         return None
 
 def reduceHtmlTitle(title):
     """Remove site identifiers and noise from the title of an HTML document"""
+    title = title or ""
     for char in "|-:·":
         separator = " {} ".format(char)
         if separator in title:
@@ -165,8 +167,8 @@ def getUrl(url):
         r = requests.get(url, timeout=5, allow_redirects=True)
         r.raise_for_status()
         return r.text
-    except:
-        return None
+    except requests.exceptions.HTTPError as e:
+        raise NetException(e)
 
 def htmlToText(html):
     """Reduce an HTML document to the text nodes of the body tag"""

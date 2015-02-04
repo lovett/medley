@@ -316,10 +316,17 @@ class TestUtilNet(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_getUrlFail(self, requestsMock):
-        """Fetching an unavailable URL returns None"""
+        """Fetching an unavailable URL throws an exception"""
         requestsMock.register_uri("GET", "http://example.com/", status_code=500)
-        result = util.net.getUrl("http://example.com")
-        self.assertEqual(result, None)
+        with self.assertRaises(util.net.NetException):
+            result = util.net.getUrl("http://example.com")
+
+    @requests_mock.Mocker()
+    def test_getUrlFailClient(self, requestsMock):
+        """Client errors throw an exception"""
+        requestsMock.register_uri("GET", "http://example.com/", status_code=429)
+        with self.assertRaises(util.net.NetException):
+            result = util.net.getUrl("http://example.com")
 
     def test_htmlToTextBodyOnly(self):
         """Text extraction considers body tags only"""
