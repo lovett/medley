@@ -7,19 +7,28 @@ import medley
 from cptestcase import BaseCherryPyTestCase
 
 def setup_module():
+
+    # Global config entries are taken from medley.conf
+    # and then overridden as needed
     config_file = os.path.realpath("medley.conf")
     cherrypy.config.update(config_file)
+    cherrypy.config.update({
+        "request.show_tracebacks": False,
+        "azure.url.deployments": "http://example.com/{}/deployments",
+        "tools.encode.on": False,
+        "tools.conditional_auth.on": False,
+        "users": {"test":"test"},
+        "cache.backend": "dogpile.cache.null"
+    })
 
-    app = cherrypy.tree.mount(medley.MedleyServer(), script_name="", config=config_file)
+    # Application config entries are also taken from medley.conf and
+    # then overridden. It might seem like the global config would be
+    # reverted, but the global section of the file is skipped.
+    app = cherrypy.tree.mount(medley.MedleyServer(), script_name="",
+                              config=config_file)
 
-    config_extra = {
-        "global": {
-            "request.show_tracebacks": False,
-            "azure.url.deployments": "http://example.com/{}/deployments",
-            "tools.encode.on": False,
-            "tools.conditional_auth.on": False,
-            "users": {"test":"test"}
-        },
+    # Application config overrides
+    app.merge({
         "dns_hosts": {
             "test": ["foo", "bar"]
         },
@@ -27,10 +36,7 @@ def setup_module():
             "external": "external.example.com",
             "test": "test.example.com"
         }
-    }
-
-    cherrypy.config.update(config_extra)
-    app.merge(config_extra)
+    })
 
     cherrypy.engine.start()
 
@@ -44,7 +50,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
     def setup_method(self, method):
         self.app = cherrypy.tree.apps['']
         self._config = self.app.config
-        medley.util.cache.clear()
 
     def teardown_method(self, method):
         self.app.config = self._config

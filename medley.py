@@ -17,11 +17,11 @@ import inspect
 import util.phone
 import util.net
 import util.fs
-import util.cache
 import util.db
 import util.decorator
 import ssl
 import string
+import dogpile.cache
 from collections import defaultdict
 from datetime import datetime, timedelta
 
@@ -38,6 +38,7 @@ class MedleyServer(object):
     mc = None
     template_dir = None
     geoip = None
+    cache = dogpile.cache.make_region()
 
     def __init__(self):
         self.template_dir = cherrypy.config.get("templates.dir")
@@ -47,6 +48,8 @@ class MedleyServer(object):
         util.db.setup(cherrypy.config.get("database.directory"))
         util.db.geoSetup(cherrypy.config.get("database.directory"),
                          cherrypy.config.get("geoip.download.url"))
+
+        self.cache.configure_from_config(cherrypy.config, "cache.")
 
 
     @util.decorator.hideFromHomepage
@@ -131,12 +134,7 @@ class MedleyServer(object):
 
         key = "external_ip"
 
-        ip = util.cache.get(key)
-
-        if ip is None:
-            ip = util.net.externalIp()
-            # cache for 10 minutes
-            util.cache.set(key, ip, time.time() + 600)
+        ip = self.cache.get_or_create("external_ip", util.net.externalIp)
 
         if ip and dns_command:
             dns_command[dns_command.index("$ip")] = ip
@@ -322,16 +320,21 @@ class MedleyServer(object):
         }
 
         # Whois
-        key = "whois:{}".format(data["address"])
-        cached_value = util.cache.get(key)
-        if cached_value:
-            data["whois"] = cached_value
-        else:
+        def whois_query():
             try:
-                data["whois"] = util.net.whois(data["address"])
-                util.cache.set(key, data["whois"], time.time() + 600)
+                return util.net.whois(data["address"])
             except AssertionError:
-                data["whois"] = None
+                return None
+
+        def whois_cacheable(value):
+            return value is not None
+
+        key = "whois:{}".format(data["address"])
+
+        data["whois"] = self.cache.get_or_create(
+            key, whois_query,
+            should_cache_fn=whois_cacheable
+        )
 
         # Google charts
         try:
@@ -427,15 +430,20 @@ class MedleyServer(object):
             else:
                 raise cherrypy.HTTPError(400, "Invalid number")
 
-        key = "phone:{}".format(area_code)
-        location = util.cache.get(key)
-
-        if location is None:
+        def phone_query():
             try:
-                location = util.phone.findAreaCode(area_code)
-                util.cache.set(key, location, time.time() + 600)
+                return util.phone.findAreaCode(area_code)
             except (AssertionError, util.phone.PhoneException):
-                location = {}
+                return {}
+
+        def phone_cacheable(value):
+            return value is not None
+
+        key = "phone:{}".format(area_code)
+        location = self.cache.get_or_create(
+            key, phone_query,
+            should_cache_fn=phone_cacheable
+        )
 
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name", "Unknown")
