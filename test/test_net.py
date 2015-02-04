@@ -285,6 +285,82 @@ class TestUtilNet(unittest.TestCase):
             reduction = util.net.reduceHtmlTitle(title[0])
             self.assertEqual(reduction, title[1])
 
+    @mock.patch("util.net.getUrl")
+    def test_getTitleFromUrl(self, getUrlMock):
+        """Title extraction on an HTML document with a title returns a string"""
+        getUrlMock.return_value = "<html><head><title>Foo</title></head></html"
+        result = util.net.getTitleFromUrl("http://example.com")
+        self.assertEqual(result, "Foo")
+
+    @mock.patch("util.net.getUrl")
+    def test_getTitleFromUrlMissing(self, getUrlMock):
+        """Title extraction on an HTML document with no title returns None"""
+        getUrlMock.return_value = "<html></html>"
+        result = util.net.getTitleFromUrl("http://example.com")
+        self.assertIsNone(result)
+
+    @mock.patch("util.net.getUrl")
+    def test_getTitleFromUrlNoTitle(self, getUrlMock):
+        """Title extraction on a blank document returns None"""
+        getUrlMock.return_value = ""
+        result = util.net.getTitleFromUrl("http://example.com")
+        self.assertIsNone(result)
+
+    @requests_mock.Mocker()
+    def test_getUrlSuccess(self, requestsMock):
+        """Fetching a URL returns its text"""
+        doc = "<html><head><title>Hello</title></head><body>World</body></html>"
+        requestsMock.register_uri("GET", "http://example.com/", text=doc)
+        result = util.net.getUrl("http://example.com")
+        self.assertEqual(result, doc)
+
+    @requests_mock.Mocker()
+    def test_getUrlFail(self, requestsMock):
+        """Fetching an unavailable URL returns None"""
+        requestsMock.register_uri("GET", "http://example.com/", status_code=500)
+        result = util.net.getUrl("http://example.com")
+        self.assertEqual(result, None)
+
+    def test_htmlToTextBodyOnly(self):
+        """Text extraction considers body tags only"""
+        doc = "<html><head><title>Hello</title></head><body>World</body></html>"
+        result = util.net.htmlToText(doc)
+        self.assertEqual(result, "World")
+
+    def test_htmlToTextFilterScript(self):
+        """Text extraction removes script tags"""
+        doc = "<html><body><script>World</script></body></html>"
+        result = util.net.htmlToText(doc)
+        self.assertEqual(result, "")
+
+    def test_htmlToTextFilterScript(self):
+        """Text extraction ignores script tags"""
+        doc = "<html><body><script>World</script></body></html>"
+        result = util.net.htmlToText(doc)
+        self.assertEqual(result, "")
+
+    def test_htmlToTextBlank(self):
+        """Text extraction handles an empty string"""
+        doc = ""
+        result = util.net.htmlToText(doc)
+        self.assertEqual(result, "")
+
+    @requests_mock.Mocker()
+    def test_sendNotificationSuccess(self, requestsMock):
+        """sendNotification returns True on success"""
+        endpoint = "http://example.com"
+        requestsMock.register_uri("POST", endpoint)
+        result = util.net.sendNotification({}, {"endpoint": endpoint, "auth": {}})
+        self.assertTrue(result)
+
+    @requests_mock.Mocker()
+    def test_sendNotificationFail(self, requestsMock):
+        """sendNotification returns False on failure"""
+        endpoint = "http://example.com"
+        requestsMock.register_uri("POST", endpoint, status_code=401)
+        result = util.net.sendNotification({}, {"endpoint": endpoint, "auth": {}})
+        self.assertFalse(result)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -130,16 +130,27 @@ def sendMessage(message_data, template_data):
                         message.as_string())
 
 def sendNotification(message, config):
-    r = requests.post(config["endpoint"], auth=config["auth"], data=message)
-    r.raise_for_status()
-    return True
+    try:
+        r = requests.post(config["endpoint"], auth=config["auth"], data=message)
+        r.raise_for_status()
+        return True
+    except:
+        return False
 
-def getUrlTitle(url):
+def getTitleFromUrl(url):
     """Extract the value of the title tag from a URL"""
     html = getUrl(url)
-    tree = lxml.html.fromstring(html)
-    title = tree.xpath("//title/text()").pop()
-    return reduceHtmlTitle(title)
+
+    try:
+        tree = lxml.html.fromstring(html)
+    except lxml.etree.XMLSyntaxError:
+        return None
+
+    try:
+        title = tree.xpath("//title/text()").pop()
+        return reduceHtmlTitle(title)
+    except IndexError:
+        return None
 
 def reduceHtmlTitle(title):
     for char in "|-:·":
@@ -150,14 +161,22 @@ def reduceHtmlTitle(title):
     return title
 
 def getUrl(url):
+    """Make a GET request for the specified URL and return its HTML as a string"""
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=5, allow_redirects=True)
         r.raise_for_status()
         return r.text
     except:
         return None
 
-
 def htmlToText(html):
-    document = lxml.html.document_fromstring(html)
-    return " ".join(lxml.etree.XPath("//text()")(document))
+    """Reduce an HTML document to the text nodes of the body tag"""
+    try:
+        tree = lxml.html.document_fromstring(html)
+    except lxml.etree.XMLSyntaxError:
+        return ""
+
+    for el in tree.xpath("//body/script"):
+        el.getparent().remove(el)
+
+    return " ".join(tree.xpath("//body//text()"))

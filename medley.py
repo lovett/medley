@@ -524,7 +524,7 @@ class MedleyServer(object):
                 comments = bookmark["comments"]
 
             if not title:
-                title = util.net.getUrlTitle(url)
+                title = util.net.getTitleFromUrl(url)
 
         if cherrypy.request.method == "POST":
             if not url:
