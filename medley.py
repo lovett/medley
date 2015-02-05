@@ -11,15 +11,12 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
-import base64
 import inspect
 import util.phone
 import util.net
 import util.fs
 import util.db
 import util.decorator
-import ssl
-import string
 import dogpile.cache
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -503,7 +500,6 @@ class MedleyServer(object):
             key = bookmark["created"].strftime("%Y-%m-%d")
             entries[key].append(bookmark)
 
-        print(entries)
         return {
             "entries": entries
         }
