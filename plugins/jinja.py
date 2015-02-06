@@ -2,6 +2,7 @@
 import cherrypy
 import jinja2
 import http.client
+import pytz
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -11,6 +12,7 @@ class Plugin(plugins.SimplePlugin):
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
 
         self.env.filters["datetime"] = self.datetime_filter
+        self.env.filters["localtime"] = self.localtime_filter
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["useragent"] = self.useragent_filter
         self.env.filters["status_message"] = self.status_message_filter
@@ -38,10 +40,22 @@ class Plugin(plugins.SimplePlugin):
         """
         return self.env.get_template(name)
 
+
+    def localtime_filter(self, value, format="locale"):
+        """Same as datetime_filter, but converts to the application's timezone"""
+        timezone = cherrypy.config.get("timezone")
+
+        local_value = value.astimezone(pytz.timezone(timezone))
+
+        return self.datetime_filter(local_value, format)
+
     def datetime_filter(self, value, format="locale"):
         """Format a datetime as a date string based on the specified format"""
+
         if format == "locale":
             directives = "%c"
+        elif format == "date":
+            directives = "%Y-%m-%d"
         elif format == "date-full":
             directives = "%A %b %d, %Y"
         elif format == "time12":
@@ -50,6 +64,7 @@ class Plugin(plugins.SimplePlugin):
             directives = "%A %b %d, %Y %I:%M %p"
         else:
             directives = format
+
         return value.strftime(directives).lstrip("0")
 
     def unindent_filter(self, string):

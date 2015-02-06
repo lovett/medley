@@ -78,8 +78,8 @@
                         <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
                         <div>{{ result.ip_label|default('', true) }}</div>
                     </td>
-                    <td><a href="/visitors?q=date+{{ result.local_date }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.local_date }}</a></td>
-                    <td><span class="nowrap">{{ result.local_time }}</span></td>
+                    <td><a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a></td>
+                    <td><span class="nowrap">{{ result.timestamp|localtime('time12') }}</span></td>
                     <td>
                         <a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(50, True) }}</a>
                         <p>

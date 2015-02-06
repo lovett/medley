@@ -1,8 +1,10 @@
 import re
+import pytz
 import datetime
 
 def convert_date(s):
-    return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
+    d = datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
+    return pytz.utc.localize(d)
 
 def convert_duration(s):
     seconds = int(s)

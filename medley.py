@@ -18,7 +18,8 @@ import util.fs
 import util.db
 import util.decorator
 import dogpile.cache
-from collections import defaultdict
+import pytz
+from collections import OrderedDict
 from datetime import datetime, timedelta
 
 import tools.negotiable
@@ -489,7 +490,8 @@ class MedleyServer(object):
     def archive(self, date=None, q=None):
         """View and search saved bookmarks"""
 
-        entries = defaultdict(list)
+        entries = OrderedDict()
+        timezone = pytz.timezone(cherrypy.config.get("timezone"))
 
         if not q:
             bookmarks = util.db.getRecentBookmarks(limit=50)
@@ -497,7 +499,12 @@ class MedleyServer(object):
             bookmarks = util.db.searchBookmarks(q)
 
         for bookmark in bookmarks:
-            key = bookmark["created"].strftime("%Y-%m-%d")
+            key = bookmark["created"].astimezone(timezone)
+            key = key.strftime("%Y-%m-%d")
+
+            if not key in entries:
+                entries[key] = []
+
             entries[key].append(bookmark)
 
         return {

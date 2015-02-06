@@ -74,16 +74,12 @@ appengine_grammar += dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums +
 
 # Parsers
 # ------------------------------------------------------------------------
-def appengine(line, local_timezone="US/Eastern"):
+def appengine(line):
     global appengine_grammar
 
     fields = appengine_grammar.parseString(line)
 
     fields.timestamp = datetime.strptime(fields.timestamp, "%d/%b/%Y:%H:%M:%S %z")
-    fields.local_timestamp = fields.timestamp.astimezone(pytz.timezone(local_timezone))
-
-    fields.local_time = fields.local_timestamp.strftime('%I:%M:%S %p %Z').lstrip("0")
-    fields.local_date = fields.local_timestamp.strftime('%Y-%m-%d')
 
     if fields.referrer:
         fields.referrer_domain = urlparse(fields.referrer).netloc or None

@@ -64,8 +64,8 @@
             <tbody>
                 {% for entry in history %}
                 <tr>
-                    <td>{{ entry["date"]|datetime("%Y-%m-%d") }}</td>
-                    <td>{{ entry["date"]|datetime("time12")}}</td>
+                    <td>{{ entry["date"]|localtime("%Y-%m-%d") }}</td>
+                    <td>{{ entry["date"]|localtime("time12")}}</td>
                     <td>{{ entry["dst"]}}</td>
                     <td>{{ entry["duration"] }}</td>
                     <td>{{ entry["lastapp"] }}</td>

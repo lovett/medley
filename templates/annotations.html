@@ -51,7 +51,7 @@
                 <tr>
                     <td>{{ annotation.key }}</td>
                     <td>{{ annotation.value }}</td>
-                    <td>{{ annotation.created|datetime("datetime12") }}</td>
+                    <td>{{ annotation.created|localtime("datetime12") }}</td>
                     <td class="right aligned"><a href="#" data-id="{{ annotation.id }}" class="delete" title="Delete annotation"><i class="remove circle icon"></i></a></td>
                 </tr>
                 {% endfor %}
