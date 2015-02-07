@@ -672,9 +672,22 @@ class MedleyServer(object):
 
 
 if __name__ == "__main__":
-    APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-    APP_CONFIG = os.path.join(APP_ROOT, "medley.conf")
-    cherrypy.config.update(APP_CONFIG)
+    app_root = os.path.dirname(os.path.abspath(__file__))
+
+    # the config file can be specified via environment variable,
+    # or can come from a known location
+    config_locations = [
+        os.environ.get("MEDLEY_CONF", ""),
+        "/etc/medley.conf",
+        os.path.join(app_root, "medley.conf")
+    ]
+
+    config_file = next((l for l in config_locations if os.path.isfile(l)), None)
+
+    if not config_file:
+        raise SystemExit("Unable to start server. Configuration file not found.")
+
+    cherrypy.config.update(config_file)
 
     # attempt to drop privileges if daemonized
     USER = cherrypy.config.get("server.user")
@@ -702,4 +715,4 @@ if __name__ == "__main__":
     if PID_FILE:
         cherrypy.process.plugins.PIDFile(cherrypy.engine, PID_FILE).subscribe()
 
-    cherrypy.quickstart(MedleyServer(), script_name="", config=APP_CONFIG)
+    cherrypy.quickstart(MedleyServer(), script_name="", config=config_file)
