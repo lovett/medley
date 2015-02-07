@@ -29,7 +29,13 @@ def appengine_log_grep(logdir, filters, limit=50):
     skips = set()
     additional_matches = 0
 
+    # put the file list in reverse chronological order
+    # (lexicographically) to get newest results first
+    files.sort(reverse=True)
+
     for path in files:
+        matches_in_file = []
+
         with open(path) as f:
             for line in f:
                 ip = line[0:line.find(" ")]
@@ -42,10 +48,13 @@ def appengine_log_grep(logdir, filters, limit=50):
                     continue
 
                 if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
-                    if limit == 0 or len(matches) < limit:
+                    if limit == 0 or len(matches) + len(matches_in_file) < limit:
                         fields = util.parse.appengine(line)
-                        matches.append(fields)
+                        matches_in_file.append(fields)
                     else:
                         additional_matches += 1
+
+        matches_in_file.reverse()
+        matches.extend(matches_in_file)
 
     return GrepResult(matches, len(matches) + additional_matches, limit)

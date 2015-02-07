@@ -75,8 +75,6 @@ appengine_grammar += dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums +
 # Parsers
 # ------------------------------------------------------------------------
 def appengine(line):
-    global appengine_grammar
-
     fields = appengine_grammar.parseString(line)
 
     fields.timestamp = datetime.strptime(fields.timestamp, "%d/%b/%Y:%H:%M:%S %z")
