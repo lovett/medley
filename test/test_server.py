@@ -1,6 +1,8 @@
 import cherrypy
 import os.path
 import json
+import pytest
+import util.net
 import urllib.parse
 import mock
 import medley
@@ -690,40 +692,13 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertTrue(phoneMock.santize.called_once)
 
     @mock.patch("medley.util.net.externalIp")
-    def test_externalIpSuccessPlain(self, externalIpMock):
-        """/external-ip returns an IP address as text when the
-        DNS-O-Matic query succeeds"""
-        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
-        cherrypy.config["ip.dns.command"] = []
-        address = "1.1.1.1"
-        externalIpMock.return_value = address
-
-        response = self.request("/external-ip", as_plain=True)
-        self.assertEqual(response.body, address)
-
-    @mock.patch("medley.util.net.externalIp")
-    def test_externalIpSuccessJson(self, externalIp):
-        """/external-ip returns an IP address as json when the
-        DNS-O-Matic query succeeds"""
+    def test_externalIpSuccess(self, externalIp):
+        """/external-ip returns 204 on success"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
         cherrypy.config["ip.dns.command"] = []
         address = "1.1.1.1"
         externalIp.return_value = address
-
-        response = self.request("/external-ip", as_json=True)
-        self.assertEqual(response.body["ip"], address)
-
-    @mock.patch("medley.util.net.externalIp")
-    def test_externalIpSuccessSilent(self, externalIp):
-        """/external-ip returns 204 when silent mode is requested"""
-        cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
-        cherrypy.config["ip.dns.command"] = []
-        address = "1.1.1.1"
-        externalIp.return_value = address
-
-        response = self.request("/external-ip", silent=1)
-        self.assertEqual(response.body, "")
-        self.assertEqual(response.code, 204)
+        response = self.request("/external-ip")
 
 
     @mock.patch("medley.util.net.externalIp")
@@ -731,10 +706,9 @@ class TestMedleyServer(BaseCherryPyTestCase):
         """/external-ip returns "not available" when the
         DNS-O-Matic query fails"""
         cherrypy.request.app.config["ip_tokens"]["external"] = "external.example.com"
-        externalIp.return_value = None
-
-        response = self.request("/external-ip", as_plain=True)
-        self.assertEqual(response.body, "not available")
+        externalIp.side_effect = medley.util.net.NetException("Force fail")
+        response = self.request("/external-ip")
+        self.assertEqual(response.code, 500)
 
     @mock.patch("medley.util.net.externalIp")
     def test_externalIpNoHost(self, externalIp):

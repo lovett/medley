@@ -96,15 +96,15 @@ def reverseLookup(ip=None):
     except:
         pass
 
-def externalIp(timeout=3):
+def externalIp(timeout=5):
     """ Get the current external IP via DNS-O-Matic"""
 
     try:
         r = requests.get("http://myip.dnsomatic.com", timeout=timeout)
         r.raise_for_status()
         return r.text
-    except:
-        return None
+    except requests.exceptions.HTTPError:
+        raise NetException("DNS-o-Matic query failed")
 
 def sendMessage(message_data, template_data):
     """Render an email template and send via SMTP"""

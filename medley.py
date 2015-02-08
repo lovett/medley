@@ -121,37 +121,28 @@ class MedleyServer(object):
     @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="generic.html")
-    def external_ip(self, silent=False):
+    def external_ip(self):
         """Determine the local machine's external IP"""
 
-        host = cherrypy.request.app.config["ip_tokens"].get("external")
-        if not host:
-            raise cherrypy.HTTPError(500, "External IP hostname not defined")
+        external_hostname = cherrypy.request.app.config["ip_tokens"].get("external")
+
+        if not external_hostname:
+            raise cherrypy.HTTPError(500, "External IP hostname not configured")
 
         dns_command = cherrypy.config.get("ip.dns.command")[:]
 
-        key = "external_ip"
-
-        ip = self.cache.get_or_create("external_ip", util.net.externalIp)
+        try:
+            ip = util.net.externalIp()
+        except util.net.NetException as e:
+            raise cherrypy.HTTPError(500, str(e))
 
         if ip and dns_command:
             dns_command[dns_command.index("$ip")] = ip
-            dns_command[dns_command.index("$host")] = host
+            dns_command[dns_command.index("$host")] = external_hostname
             subprocess.call(dns_command)
 
-        if silent:
-            cherrypy.response.status = 204
-            return
-        elif cherrypy.request.negotiated == "text/plain":
-            return ip or "not available"
-        elif cherrypy.request.negotiated == "application/json":
-            return { "ip": ip }
-        else:
-            return {
-                "page_title": "External IP",
-                "message": ip
-            }
+        cherrypy.response.status = 204
+        return
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()

@@ -176,8 +176,10 @@ class TestUtilNet(unittest.TestCase):
     def test_externalIpFail(self, requestsMock):
         """An unsuccessful call to DNS-O-Matic returns None"""
         requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", status_code=500)
-        response = util.net.externalIp()
-        self.assertIsNone(response)
+
+        with pytest.raises(util.net.NetException) as err:
+            response = util.net.externalIp()
+            self.assertEqual(str(err.value), "DNS-o-Matic query failed")
 
     @mock.patch("util.net.jinja2")
     @mock.patch("util.net.smtplib")
