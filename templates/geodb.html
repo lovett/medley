@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% set page_title = "GeoDB" %}
+{% set home_link = True %}
+{% set icon = '<i class="icon cloud download"></i>' %}
+
+{% if downloaded %}
+{% set button_action = "Update database" %}
+{% set progress_text = "Update in progres..." %}
+{% else %}
+{% set button_action = "Get database" %}
+{% set progress_text = "Download in progress..." %}
+{% endif %}
+
+{% block scripts %}
+
+{% if allow_update %}
+<script src="/static/js/geodb.js"></script>
+{% endif %}
+
+{% endblock %}
+
+{% block page_body %}
+<main class="ui page grid">
+    <div class="ui sixteen wide center aligned column">
+
+        {% if downloaded %}
+        <p>The database was updated on {{downloaded|datetime("datetime12")}}</p>
+        {% else %}
+        <p>There is no database.</p>
+        {% endif %}
+
+        {% if allow_update %}
+        <button id="update" class="ui large focal button">{{ icon }} {{ button_action }}</button>
+        <p><div id="progress" class="ui inline indeterminate text loader">{{ progress_text }}</div></p>
+        {% else %}
+        <button class="ui disabled large focal button">{{ icon }} Update</button>
+        <p><em>The database shouldn't need to be updated yet.</em></p>
+        {% endif %}
+
+    </div>
+</main>
+
+{% endblock %}

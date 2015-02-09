@@ -93,3 +93,7 @@ TR.expandable.expanded {
 ::selection {
     background-color: blanchedalmond;
 }
+
+.ui.button.focal {
+    margin: 2em 0;
+}

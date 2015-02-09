@@ -54,7 +54,10 @@ def geoSetup(database_dir, download_url):
         if db_path.endswith(".gz"):
             db_path = db_path[0:-3]
 
-        _databases["geo"] = pygeoip.GeoIP(db_path)
+        try:
+            _databases["geo"] = pygeoip.GeoIP(db_path)
+        except FileNotFoundError:
+            _databases["geo"] = None
 
 def geoip(ip):
     return _databases["geo"].record_by_addr(ip)

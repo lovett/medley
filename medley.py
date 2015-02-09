@@ -344,7 +344,7 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="generic.html")
+    @cherrypy.tools.template(template="geodb.html")
     def geodb(self, action=None):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
@@ -355,15 +355,17 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
         download_path = "{}/{}".format(directory.rstrip("/"),
-                                 os.path.basename(url))
-
+                                       os.path.basename(url))
 
         try:
-            message = "The database was last downloaded on {}".format(time.ctime(os.path.getmtime(download_path[:-3])))
-        except OSError:
-            message = "The database has not yet been downloaded."
+            modified = os.path.getmtime(download_path[:-3])
+            downloaded = datetime.fromtimestamp(modified)
+            allow_update = time.time() - modified > 86400
+        except (OSError, FileNotFoundError):
+            downloaded = None
+            allow_update = True
 
-        if action == "update":
+        if cherrypy.request.method == "POST" and action == "update":
             urllib.request.urlcleanup()
             urllib.request.urlretrieve(url, download_path)
 
@@ -375,14 +377,12 @@ class MedleyServer(object):
                     os.unlink(download_path)
                     raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
 
-            # return a 204 if gunzip was skipped or if it was successful
-            cherrypy.response.status = 204
-            return
+                cherrypy.response.status = 204
+                return
 
         return {
-            "page_title": "Geodb",
-            "message": message,
-            "home_link": True
+            "allow_update": allow_update,
+            "downloaded": downloaded
         }
 
     @cherrypy.expose
