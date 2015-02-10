@@ -1,7 +1,7 @@
 import os.path
+import re
 import sqlite3
 import util.sqlite_converters
-import markupsafe
 import pygeoip
 from urllib.parse import urlparse
 
@@ -124,8 +124,8 @@ def saveBookmarkFulltext(url_id, fulltext):
 
 def saveAnnotation(key, value):
 
-    key = markupsafe.escape(key)
-    value = markupsafe.escape(value)
+    key = key.lower().strip()
+    value = value.strip()
 
     conn = sqlite3.connect(_databases["annotations"])
     cur = conn.cursor()
@@ -143,9 +143,7 @@ def getAnnotations(keys=[], limit=0):
     cur = conn.cursor()
 
     if not isinstance(keys, list):
-        keys = [markupsafe.escape(keys)]
-    else:
-        keys = [markupsafe.escape(key) for key in keys]
+        keys = [keys]
 
     sql = "SELECT id, key, value, datetime(created, 'localtime') as 'created [created]' FROM annotations"
 
