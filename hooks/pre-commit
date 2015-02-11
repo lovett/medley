@@ -1,0 +1,9 @@
+#!/bin/sh
+
+#
+# Run pip freeze before every commit to ensure newly installed
+# packages are accounted for.
+#
+
+pip freeze > requirements.txt
+git add requirements.txt
