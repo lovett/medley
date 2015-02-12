@@ -39,6 +39,11 @@ def setup(database_dir):
         "annotations": annotations_create_sql
     }
 
+    try:
+        os.mkdir(database_dir)
+    except OSError:
+        pass
+
     for name, sql in roster.items():
         path = os.path.join(database_dir, name + ".sqlite")
         conn = sqlite3.connect(path)
