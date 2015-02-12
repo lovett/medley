@@ -23,5 +23,5 @@ class Tool(cherrypy.Tool):
             except KeyError:
                 pass
 
-        if address not in whitelist:
+        if not any(address.startswith(item) for item in whitelist):
             cherrypy.tools.auth_basic.callable(realm="medley", checkpassword=self._checkpassword)
