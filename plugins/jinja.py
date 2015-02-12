@@ -3,12 +3,14 @@ import cherrypy
 import jinja2
 import http.client
 import pytz
+import os.path
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
     def __init__(self, bus, path):
+        path = os.path.realpath(path)
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
 
         self.env.filters["datetime"] = self.datetime_filter
