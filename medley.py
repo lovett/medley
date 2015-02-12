@@ -41,15 +41,15 @@ class MedleyServer(object):
     cache = dogpile.cache.make_region()
 
     def __init__(self):
-        self.template_dir = cherrypy.config.get("templates.dir")
+        self.template_dir = os.path.realpath("templates")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
 
-        util.db.setup(cherrypy.config.get("database.directory"))
-        util.db.geoSetup(cherrypy.config.get("database.directory"),
-                         cherrypy.config.get("geoip.download.url"))
+        db_dir = os.path.realpath(cherrypy.config.get("database.directory"))
+
+        util.db.setup(db_dir)
+        util.db.geoSetup(db_dir, cherrypy.config.get("geoip.download.url"))
 
         self.cache.configure_from_config(cherrypy.config, "cache.")
-
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
@@ -373,12 +373,11 @@ class MedleyServer(object):
             if download_path.endswith(".gz"):
                 try:
                     subprocess.check_call(["gunzip", "-f", download_path])
+                    cherrypy.response.status = 204
+                    return
                 except subprocess.CalledProcessError:
                     os.unlink(download_path)
                     raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
-
-                cherrypy.response.status = 204
-                return
 
         return {
             "allow_update": allow_update,
@@ -665,45 +664,59 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # the config file can be specified via environment variable,
-    # or can come from a known location
-    config_locations = [
-        os.environ.get("MEDLEY_CONF", ""),
-        "/etc/medley.conf",
-        os.path.join(app_root, "medley.conf")
-    ]
+    # The default configuration comes from either the application
+    # directory, or from /etc
+    default_config = os.path.join(app_root, "default.conf")
+    if not os.path.isfile(default_config):
+        default_config = "/etc/medley.conf"
 
-    config_file = next((l for l in config_locations if os.path.isfile(l)), None)
+    try:
+        cherrypy.config.update(default_config)
+    except FileNotFoundError:
+        raise SystemExit("Unable to start server. Default configuration file not found.")
 
-    if not config_file:
-        raise SystemExit("Unable to start server. Configuration file not found.")
+    # The default configuration can optionally be overriden by a local config file
+    local_config = os.path.join(app_root, "local.conf")
+    if not os.path.isfile(local_config):
+        local_config = os.environ.get("MEDLEY_CONF", "")
 
-    cherrypy.config.update(config_file)
-
-    # attempt to drop privileges if daemonized
-    USER = cherrypy.config.get("server.user")
-
-    if USER:
-        try:
-            ACCOUNT = pwd.getpwnam(USER)
-            PLUGIN = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
-                                                             umask=0o022, # an octal in Python3, not a typo
-                                                             uid=ACCOUNT.pw_uid,
-                                                             gid=ACCOUNT.pw_gid)
-            PLUGIN.subscribe()
-        except KeyError:
-            MESSAGE = "Unknown user '{}'. Not dropping privileges.".format(USER)
-            cherrypy.log.error(MESSAGE, "APP")
+    try:
+        cherrypy.config.update(local_config)
+    except FileNotFoundError:
+        pass
 
     cherrypy.config.update({
         "tools.encode.on": False
     })
 
+    # attempt to drop privileges if daemonized
+    user = cherrypy.config.get("server.user")
+
+    if user:
+        try:
+            account = pwd.getpwnam(user)
+            plugin = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
+                                                             umask=0o022, # an octal in Python3, not a typo
+                                                             uid=account.pw_uid,
+                                                             gid=account.pw_gid)
+            plugin.subscribe()
+        except KeyError:
+            message = "Unknown user '{}'. Not dropping privileges.".format(USER)
+            cherrypy.log.error(message, "APP")
+
+
     if cherrypy.config.get("server.daemonize"):
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
-    PID_FILE = cherrypy.config.get("server.pid")
-    if PID_FILE:
-        cherrypy.process.plugins.PIDFile(cherrypy.engine, PID_FILE).subscribe()
+    pid_file = cherrypy.config.get("server.pid")
+    if pid_file:
+        cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
 
-    cherrypy.quickstart(MedleyServer(), script_name="", config=config_file)
+    app = cherrypy.tree.mount(MedleyServer(), config=default_config)
+
+    try:
+        app.merge(local_config)
+    except FileNotFoundError:
+        pass
+
+    cherrypy.engine.start()

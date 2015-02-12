@@ -6,16 +6,19 @@ import util.net
 import urllib.parse
 import mock
 import medley
+import tempfile
 from cptestcase import BaseCherryPyTestCase
 
 def setup_module():
 
-    # Global config entries are taken from medley.conf
-    # and then overridden as needed
-    config_file = os.path.realpath("medley.conf")
+    tmp_dir = tempfile.gettempdir()
+
+    # The test config is based on the sample config, with overrides as needed
+    config_file = os.path.realpath("default.conf")
     cherrypy.config.update(config_file)
     cherrypy.config.update({
-        "request.show_tracebacks": False,
+        "log.screen": False,
+        "database.directory": tmp_dir,
         "azure.url.deployments": "http://example.com/{}/deployments",
         "tools.encode.on": False,
         "tools.conditional_auth.on": False,
@@ -459,17 +462,17 @@ class TestMedleyServer(BaseCherryPyTestCase):
     def test_geodbReturns500IfGunzipFails(self, requestMock):
         """ /geodb returns 500 if the database cannot be gunzipped."""
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
-        cherrypy.config["database.directory"] = "/tmp"
-        response = self.request("/geodb/update")
+        response = self.request("/geodb/update", method="POST")
         self.assertFalse(requestMock.urlopen.called)
         self.assertEqual(response.code, 500)
 
+    @mock.patch("medley.subprocess")
     @mock.patch("medley.urllib.request")
-    def test_geodbReturns204(self, requestMock):
+    def test_geodbReturns204(self, requestMock, subprocessMock):
         """ /geodb returns 204 if the database is successfully downloaded  """
-        cherrypy.config["geoip.download.url"] = "http://example.com/test"
-        cherrypy.config["database.directory"] = "/tmp"
-        response = self.request("/geodb/update")
+        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
+        subprocessMock.check_call.return_value = 0
+        response = self.request("/geodb/update", method="POST")
         self.assertTrue(requestMock.urlretrieve.called)
         self.assertEqual(response.code, 204)
 
