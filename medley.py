@@ -664,27 +664,27 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # The default configuration comes from either the application
-    # directory, or from /etc
-    default_config = os.path.join(app_root, "default.conf")
+    # The default configuration comes from /etc/medley.conf or
+    # default.conf in the current directory. This makes running
+    # out of the box easy, and starting from a blank slate possible.
+    default_config = "/etc/medley.conf"
     if not os.path.isfile(default_config):
-        default_config = "/etc/medley.conf"
+        default_config = os.path.join(app_root, "default.conf")
 
     try:
         cherrypy.config.update(default_config)
     except FileNotFoundError:
         raise SystemExit("Unable to start server. Default configuration file not found.")
 
-    # The default configuration can optionally be overriden by a local config file
+    # The default configuration can be selectively overriden by values
+    # in a local config file. This is useful during development.
     local_config = os.path.join(app_root, "local.conf")
-    if not os.path.isfile(local_config):
-        local_config = os.environ.get("MEDLEY_CONF", "")
-
     try:
         cherrypy.config.update(local_config)
     except FileNotFoundError:
         pass
 
+    # Final configuration trumps all other
     cherrypy.config.update({
         "tools.encode.on": False
     })
