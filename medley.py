@@ -664,36 +664,42 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
+    # Default configuration
+    cherrypy.config.update({
+        "tools.encode.on": False
+    })
+    
     # The default configuration comes from /etc/medley.conf or
     # default.conf in the current directory. This makes running
     # out of the box easy, and starting from a blank slate possible.
     default_config = "/etc/medley.conf"
     if not os.path.isfile(default_config):
         default_config = os.path.join(app_root, "default.conf")
-
+        
     try:
+        # The configuration is applied twice, because a single file is
+        # used for both global and application entries
         cherrypy.config.update(default_config)
+        app = cherrypy.tree.mount(MedleyServer(), config=default_config)
     except FileNotFoundError:
         raise SystemExit("Unable to start server. Default configuration file not found.")
 
-    # The default configuration can be selectively overriden by values
-    # in a local config file. This is useful during development.
+    # The default configuration can be selectively overriden, which is
+    # useful during development.
     local_config = os.path.join(app_root, "local.conf")
     try:
         cherrypy.config.update(local_config)
+        app.merge(local_config)
     except FileNotFoundError:
         pass
 
-    # Final configuration trumps all other
-    cherrypy.config.update({
-        "tools.encode.on": False
-    })
 
-    # attempt to drop privileges if daemonized
-    user = cherrypy.config.get("server.user")
-
-    if user:
+    # Attempt to drop privileges if daemonized
+    if cherrypy.config.get("server.daemonize"):
+        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
+        
         try:
+            user = cherrypy.config.get("server.user")
             account = pwd.getpwnam(user)
             plugin = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
                                                              umask=0o022, # an octal in Python3, not a typo
@@ -701,22 +707,10 @@ if __name__ == "__main__":
                                                              gid=account.pw_gid)
             plugin.subscribe()
         except KeyError:
-            message = "Unknown user '{}'. Not dropping privileges.".format(USER)
-            cherrypy.log.error(message, "APP")
+            raise SystemExit("Failed to drop server privileges")
 
-
-    if cherrypy.config.get("server.daemonize"):
-        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
-
-    pid_file = cherrypy.config.get("server.pid")
-    if pid_file:
-        cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
-
-    app = cherrypy.tree.mount(MedleyServer(), config=default_config)
-
-    try:
-        app.merge(local_config)
-    except FileNotFoundError:
-        pass
+        pid_file = cherrypy.config.get("server.pid")
+        if pid_file:
+            cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
 
     cherrypy.engine.start()
