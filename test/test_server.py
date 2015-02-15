@@ -20,7 +20,6 @@ def setup_module():
         "log.screen": False,
         "database.directory": tmp_dir,
         "azure.url.deployments": "http://example.com/{}/deployments",
-        "tools.encode.on": False,
         "tools.conditional_auth.on": False,
         "users": {"test":"test"},
         "cache.backend": "dogpile.cache.null"

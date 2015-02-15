@@ -32,6 +32,11 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
+# Default configuration
+cherrypy.config.update({
+    "tools.encode.on": False
+})
+
 class MedleyServer(object):
     mc = None
     template_dir = None
@@ -668,11 +673,6 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # Default configuration
-    cherrypy.config.update({
-        "tools.encode.on": False
-    })
-
     # The default configuration comes from /etc/medley.conf or
     # default.conf in the current directory. This makes running
     # out of the box easy, and starting from a blank slate possible.
@@ -718,3 +718,4 @@ if __name__ == "__main__":
             cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
 
     cherrypy.engine.start()
+    cherrypy.engine.block()
