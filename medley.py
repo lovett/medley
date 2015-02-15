@@ -359,7 +359,7 @@ class MedleyServer(object):
             modified = os.path.getmtime(download_path.rstrip(".gz"))
             downloaded = datetime.fromtimestamp(modified)
             allow_update = time.time() - modified > 86400
-        except (OSError, FileNotFoundError):
+        except OSError:
             downloaded = None
             allow_update = True
 
