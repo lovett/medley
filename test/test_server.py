@@ -467,13 +467,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 500)
 
     @mock.patch("medley.subprocess")
-    @mock.patch("medley.urllib.request")
-    def test_geodbReturns204(self, requestMock, subprocessMock):
+    @mock.patch("medley.util.net.saveUrl")
+    def test_geodbReturns204(self, saveUrlMock, subprocessMock):
         """ /geodb returns 204 if the database is successfully downloaded  """
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
+        saveUrlMock.return_value = True
         subprocessMock.check_call.return_value = 0
         response = self.request("/geodb/update", method="POST")
-        self.assertTrue(requestMock.urlretrieve.called)
+        self.assertTrue(saveUrlMock.called)
         self.assertEqual(response.code, 204)
 
     def test_whoisJsonWithoutAddress(self):

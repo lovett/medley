@@ -5,8 +5,6 @@ import os
 import pwd
 import subprocess
 import re
-import urllib
-import urllib.request
 import urllib.parse
 import IPy
 import json
@@ -358,7 +356,7 @@ class MedleyServer(object):
                                        os.path.basename(url))
 
         try:
-            modified = os.path.getmtime(download_path[:-3])
+            modified = os.path.getmtime(download_path.rstrip(".gz"))
             downloaded = datetime.fromtimestamp(modified)
             allow_update = time.time() - modified > 86400
         except (OSError, FileNotFoundError):
@@ -366,18 +364,24 @@ class MedleyServer(object):
             allow_update = True
 
         if cherrypy.request.method == "POST" and action == "update":
-            urllib.request.urlcleanup()
-            urllib.request.urlretrieve(url, download_path)
+            try:
+                util.net.saveUrl(url, download_path)
+            except util.net.NetException as e:
+                raise cherrypy.HTTPError(500, str(e))
 
             # attempt to gunzip
             if download_path.endswith(".gz"):
                 try:
                     subprocess.check_call(["gunzip", "-f", download_path])
                     cherrypy.response.status = 204
+
+                    # Re-run setup to ensure the newly downloaded file gets used
+                    util.db.geoSetup(directory, url)
                     return
                 except subprocess.CalledProcessError:
                     os.unlink(download_path)
                     raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
+
 
         return {
             "allow_update": allow_update,
@@ -668,14 +672,14 @@ if __name__ == "__main__":
     cherrypy.config.update({
         "tools.encode.on": False
     })
-    
+
     # The default configuration comes from /etc/medley.conf or
     # default.conf in the current directory. This makes running
     # out of the box easy, and starting from a blank slate possible.
     default_config = "/etc/medley.conf"
     if not os.path.isfile(default_config):
         default_config = os.path.join(app_root, "default.conf")
-        
+
     try:
         # The configuration is applied twice, because a single file is
         # used for both global and application entries
@@ -697,7 +701,7 @@ if __name__ == "__main__":
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
-        
+
         try:
             user = cherrypy.config.get("server.user")
             account = pwd.getpwnam(user)

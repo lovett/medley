@@ -1,6 +1,7 @@
 import subprocess
 import socket
 import re
+import shutil
 import requests
 import jinja2
 import smtplib
@@ -169,6 +170,21 @@ def getUrl(url):
         return r.text
     except requests.exceptions.HTTPError as e:
         raise NetException(e)
+
+def saveUrl(url, destination):
+    """Download a URL, saving the response body to the filesystem"""
+
+    cherrypy.log("APP", "Requesting {}".format(url))
+
+    try:
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+    except requests.exceptions.HTTPError:
+        raise NetException("URL download failed")
+
+    if r.status_code == 200:
+        with open(destination, "wb") as f:
+            shutil.copyfileobj(r.raw, f)
 
 def htmlToText(html):
     """Reduce an HTML document to the text nodes of the body tag"""
