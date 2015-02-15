@@ -61,7 +61,7 @@ def geoSetup(database_dir, download_url):
 
         try:
             _databases["geo"] = pygeoip.GeoIP(db_path)
-        except FileNotFoundError:
+        except IOError:
             _databases["geo"] = None
 
 def geoip(ip):
