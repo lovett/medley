@@ -685,7 +685,7 @@ if __name__ == "__main__":
         # used for both global and application entries
         cherrypy.config.update(default_config)
         app = cherrypy.tree.mount(MedleyServer(), config=default_config)
-    except FileNotFoundError:
+    except:
         raise SystemExit("Unable to start server. Default configuration file not found.")
 
     # The default configuration can be selectively overriden, which is
@@ -694,7 +694,7 @@ if __name__ == "__main__":
     try:
         cherrypy.config.update(local_config)
         app.merge(local_config)
-    except FileNotFoundError:
+    except:
         pass
 
 
