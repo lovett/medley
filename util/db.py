@@ -41,8 +41,11 @@ def setup(database_dir):
 
     try:
         os.mkdir(database_dir)
-    except OSError:
-        pass
+    except OSError as e:
+        if "Permission denied" in str(e):
+            raise e
+        else:
+            pass
 
     for name, sql in roster.items():
         path = os.path.join(database_dir, name + ".sqlite")
