@@ -44,7 +44,7 @@ class MedleyServer(object):
     cache = dogpile.cache.make_region()
 
     def __init__(self):
-        self.template_dir = os.path.realpath("templates")
+        self.template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
         plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
 
         db_dir = os.path.realpath(cherrypy.config.get("database.directory"))
