@@ -32,20 +32,14 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
-# Default configuration
-cherrypy.config.update({
-    "tools.encode.on": False
-})
 
 class MedleyServer(object):
     mc = None
-    template_dir = None
     geoip = None
     cache = dogpile.cache.make_region()
 
     def __init__(self):
-        self.template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
-        plugins.jinja.Plugin(cherrypy.engine, self.template_dir).subscribe()
+        plugins.jinja.Plugin(cherrypy.engine).subscribe()
 
         db_dir = os.path.realpath(cherrypy.config.get("database.directory"))
 
@@ -185,7 +179,7 @@ class MedleyServer(object):
         # Email delivery only occurs when there is a mismatch
         if email and data["result"] == "mismatch":
             config = {
-                "template_dir": self.template_dir,
+                "template_dir": cherrypy.config.get("template_dir"),
                 "template": "dnsmatch.email",
                 "subject": "DNS mismatch",
                 "smtp": cherrypy.request.app.config["smtp"]
