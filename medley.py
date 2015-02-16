@@ -680,13 +680,10 @@ if __name__ == "__main__":
     if not os.path.isfile(default_config):
         default_config = os.path.join(app_root, "default.conf")
 
-    try:
-        # The configuration is applied twice, because a single file is
-        # used for both global and application entries
-        cherrypy.config.update(default_config)
-        app = cherrypy.tree.mount(MedleyServer(), config=default_config)
-    except:
-        raise SystemExit("Unable to start server. Default configuration file not found.")
+    # The configuration is applied twice, because a single file is
+    # used for both global and application entries
+    cherrypy.config.update(default_config)
+    app = cherrypy.tree.mount(MedleyServer(), config=default_config)
 
     # The default configuration can be selectively overriden, which is
     # useful during development.
