@@ -15,7 +15,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="medley webserver"
 NAME=medley
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/medley/$NAME.pid
 VIRTUALENV=/srv/medley
 DAEMON=$VIRTUALENV/bin/python
 SERVER="$VIRTUALENV/medley/medley.py"
@@ -42,14 +42,21 @@ APPDIR=$VIRTUALENV/medley
 #
 do_start()
 {
+
+        mkdir -p /var/run/medley
+        chown medley:medley /var/run/medley
+
+        mkdir -p /var/log/medley
+        chown medley:medley /var/log/medley
+
 	# Return
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
         . $VIRTUALENV/bin/activate
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --chdir $APPDIR --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid medley:medley --chdir $APPDIR --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --chdir $APPDIR --exec $DAEMON -- \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --chuid medley:medley --chdir $APPDIR --exec $DAEMON -- \
 		$SERVER \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready

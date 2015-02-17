@@ -688,21 +688,10 @@ if __name__ == "__main__":
     except:
         pass
 
-
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):
-        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
-        try:
-            user = cherrypy.config.get("server.user")
-            account = pwd.getpwnam(user)
-            plugin = cherrypy.process.plugins.DropPrivileges(cherrypy.engine,
-                                                             umask=0o022, # an octal in Python3, not a typo
-                                                             uid=account.pw_uid,
-                                                             gid=account.pw_gid)
-            plugin.subscribe()
-        except KeyError:
-            raise SystemExit("Failed to drop server privileges")
+        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
         pid_file = cherrypy.config.get("server.pid")
         if pid_file:
