@@ -13,3 +13,4 @@ htmlcov
 logfetch.ini
 db
 *.log
+.vagrant

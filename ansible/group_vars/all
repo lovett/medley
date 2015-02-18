@@ -1,0 +1,17 @@
+---
+project_name: medley
+project_user: "{{ project_name }}"
+project_hostname: "{{ project_name }}.local"
+project_group: medley
+project_repo: https://github.com/lovett/medley.git
+project_root: /srv/{{ project_name }}
+openssl_self_signed:
+  - name: "{{ project_name }}"
+    domains: ["{{ project_hostname }}"]
+    days: 365
+    country:
+    state:
+    city:
+    organization: "{{ project_name }}"
+    unit:
+    email: "medley@localhost"

@@ -1,0 +1,3 @@
+---
+openssl_keys_path: "/etc/ssl/private"
+openssl_certs_path: "/etc/ssl/certs"

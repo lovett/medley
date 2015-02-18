@@ -1,0 +1,20 @@
+---
+- name: Install git package
+  sudo: yes
+  apt: name=git state=present
+
+- name: Checkout head version of master branch
+  sudo: yes
+  sudo_user: "{{ project_user }}"
+  git:
+    repo={{ project_repo }}
+    dest={{ project_root }}/{{ project_name }}
+    version=HEAD
+  notify: restart medley
+
+- name: Make checkout group writable
+  sudo: yes
+  file:
+    path="{{ project_root }}/{{ project_name }}"
+    state=directory
+    mode=0775

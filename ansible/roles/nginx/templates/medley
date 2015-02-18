@@ -1,0 +1,30 @@
+# -*- mode: nginx -*-
+upstream {{ project_name }} {
+    server 127.0.0.2:8085;
+}
+
+server {
+    listen 443;
+
+    ssl on;
+    ssl_certificate {{ openssl_certs_path}}/{{ project_name }}.crt;
+    ssl_certificate_key {{openssl_keys_path}}/{{ project_name }}.key;
+
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+    location / {
+        proxy_pass http://{{ project_name }};
+        proxy_redirect off;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+    }
+
+    location /static/ {
+        root /srv/medley/medley;
+    }
+
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+}

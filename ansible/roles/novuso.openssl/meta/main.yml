@@ -1,0 +1,23 @@
+---
+dependencies: []
+galaxy_info:
+  author: novuso
+  description: SSL certs for RedHat/CentOS/Debian/Ubuntu
+  company: Novuso
+  license: license (MIT)
+  min_ansible_version: 1.6
+  platforms:
+  - name: EL
+    versions:
+    - 6
+    - 7
+  - name: Ubuntu
+    versions:
+    - precise
+    - trusty
+  - name: Debian
+    versions:
+    - squeeze
+    - wheezy
+  categories:
+  - web

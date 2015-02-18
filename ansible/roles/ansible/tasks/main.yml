@@ -1,0 +1,17 @@
+---
+- name: Install python2 packages
+  sudo: yes
+  apt:
+    name={{ item }}
+    state=latest
+  with_items:
+    - python-dev
+    - python-pip
+
+- name: Install ansible
+  sudo: yes
+  pip:
+    executable=/usr/bin/pip
+    name=ansible
+    state=present
+    virtualenv={{ project_root }}

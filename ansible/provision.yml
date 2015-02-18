@@ -1,0 +1,12 @@
+---
+- hosts: all
+  vars:
+  roles:
+    - common
+    - avahi
+    - novuso.openssl
+    - nginx
+    - git
+    - python3
+    - ansible
+    - medley

@@ -1,0 +1,19 @@
+---
+- name: Install nginx
+  sudo: yes
+  apt: name=nginx-light state=latest
+
+- name: Copy nginx configuration for medley
+  sudo: yes
+  template: src=medley dest=/etc/nginx/sites-available/{{ project_name }}
+  notify: restart nginx
+
+- name: Symlink nginx configuration for medley
+  sudo: yes
+  file: path=/etc/nginx/sites-enabled/{{ project_name }} src=/etc/nginx/sites-available/{{ project_name }} state=link
+  notify: restart nginx
+
+- name: nginx default config removal
+  sudo: yes
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify: restart nginx

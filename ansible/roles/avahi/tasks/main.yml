@@ -1,0 +1,4 @@
+---
+- name: Install avahi package
+  sudo: yes
+  apt: name=avahi-utils state=present

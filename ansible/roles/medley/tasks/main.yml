@@ -1,0 +1,13 @@
+---
+- name: Symlink init script
+  sudo: yes
+  file:
+    path="/etc/init.d/{{ project_name }}"
+    src="{{ project_root }}/medley/init"
+    state="link"
+  notify: restart medley
+
+- name: Activate init script
+  sudo: yes
+  command: update-rc.d {{ project_name }} defaults
+  notify: restart medley

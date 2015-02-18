@@ -1,0 +1,37 @@
+---
+- name: Update package index
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=86400
+
+- name: Create application user
+  sudo: yes
+  user:
+    state=present
+    name="{{ project_user }}"
+    createhome=no
+    system=yes
+    shell=/bin/false
+
+- name: Add ansible ssh user to application user group
+  sudo: yes
+  user:
+    name="{{ ansible_ssh_user }}"
+    group="{{ project_user }}"
+    append=yes
+
+- name: Create application directory
+  sudo: yes
+  file:
+    path={{ project_root }}
+    owner={{ project_user }}
+    group={{ project_group }}
+    state=directory
+    mode=0775
+
+- name: Create log directory
+  sudo: yes
+  file:
+    path=/var/log/{{ project_name }}
+    state=directory
+    group={{ project_group }}
+    mode=0775
