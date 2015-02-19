@@ -23,11 +23,8 @@ class Tool(cherrypy.Tool):
     def end_timer(self):
         try:
             duration = time.time() - cherrypy.request._time
-            cherrypy.log("Responded to {} in {:.4f} seconds".format(
-                cherrypy.request.path_info,
-                duration)
-            )
             cherrypy.response.headers["X-Response-Time"] = round(duration, 4)
         except AttributeError:
-            # The timer isn't available on static assets
+            # The timer isn't always active. It won't be started when
+            # serving static assets, for example.
             pass
