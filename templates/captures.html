@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% set page_title = "Captures" %}
+{% set home_link = True %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block page_body %}
+
+<main class="ui page grid stackable">
+
+    <form class="ui form sixteen wide column" method="get" action="/captures">
+        <div class="field">
+            <label for="number">Search</label>
+            <input type="text" id="q" name="q" placeholder="Filter by request line" value="{{ q }}"/>
+        </div>
+        <div class="field">
+            <button class="ui button">Search</button>
+        </div>
+    </form>
+
+    <div class="ui sixteen wide column">
+        {% if captures|length() == 0 %}
+        <p>No captures found.</p>
+        {% endif %}
+
+        {% for capture in captures %}
+        <div class="ui top attached inverted segment">
+            <header>
+                <div class="ui right floated small inverted header">{{ capture.response.status }}</div>
+                <div class="ui left floated small inverted header">{{ capture.created|localtime("datetime12")}}</div>
+            </header>
+        </div>
+        <div class="ui attached segment grid">
+
+            <div class="ui eight wide column">
+                <code>
+                    {{- capture.request_line }}
+                    {% for key, value in capture.request.headers.items() -%}
+                    {{ key }}: {{ value }}
+                    {% endfor -%}
+                </code>
+            </div>
+
+            {% if capture.request.params %}
+            <div class="ui eight wide orange column">
+                <div class="ui tiny header">PARAMS</div>
+                <div class="ui segment">
+                    <p>{{ capture.request.params }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if capture.request.json %}
+            <div class="ui eight wide column">
+                <div class="ui tiny header">JSON</div>
+                <code>{{ capture.request.json }}</code>
+            </div>
+            {% endif %}
+        </div>
+
+        {% endfor %}
+    </div>
+
+</main>
+
+{% endblock %}

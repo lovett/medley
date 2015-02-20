@@ -9,6 +9,7 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
+import plugins.request_logger
 import inspect
 import util.phone
 import util.net
@@ -32,6 +33,8 @@ cherrypy.tools.template = tools.jinja.Tool()
 import tools.conditional_auth
 cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
+import tools.capture
+cherrypy.tools.capture = tools.capture.Tool()
 
 class MedleyServer(object):
     mc = None
@@ -52,6 +55,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.encode()
     @cherrypy.tools.json_in()
+    @cherrypy.tools.capture()
     def azure(self, event):
         """Relay deployment notifications from Azure"""
 
@@ -597,6 +601,17 @@ class MedleyServer(object):
             "annotations": util.db.getAnnotations()
         }
 
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="captures.html")
+    def captures(self, q=None):
+        """Display captured requests"""
+
+        return {
+            "q": q,
+            "captures": util.db.getCaptures(q)
+        }
+
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
@@ -661,7 +676,6 @@ class MedleyServer(object):
             "site_domains": cherrypy.request.config.get("site_domains"),
             "queries": query_annotations
         }
-
 
 
 if __name__ == "__main__":

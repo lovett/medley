@@ -3,6 +3,7 @@ import re
 import sqlite3
 import util.sqlite_converters
 import pygeoip
+import pickle
 from urllib.parse import urlparse
 
 _databases = {}
@@ -31,12 +32,22 @@ CREATE TABLE IF NOT EXISTS annotations (
 )
 """
 
+captures_create_sql = """
+CREATE TABLE IF NOT EXISTS captures (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    request_line, request, response,
+    created DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
+
 def setup(database_dir):
     global _databases
 
     roster = {
         "bookmarks": bookmarks_create_sql,
-        "annotations": annotations_create_sql
+        "annotations": annotations_create_sql,
+        "captures": captures_create_sql
     }
 
     try:
@@ -196,3 +207,59 @@ def deleteAnnotation(annotation_id):
     conn.commit()
     conn.close()
     return deleted_rows
+
+def saveCapture(request, response):
+
+    request_dict = {
+        "headers": request.headers,
+        "params": request.body.params
+    }
+
+    try:
+        request_dict["json"] = request.json
+    except:
+        request_dict["json"] = None
+
+    request_pickle = pickle.dumps(request_dict)
+
+    response_dict = {
+        "status": response.status
+    }
+
+    response_pickle = pickle.dumps(response_dict)
+
+    conn = sqlite3.connect(_databases["captures"])
+    cur = conn.cursor()
+
+    sql = "INSERT INTO captures (request_line, request, response) VALUES (?, ?, ?)"
+    cur.execute(sql, (request.request_line,
+                      sqlite3.Binary(request_pickle),
+                      sqlite3.Binary(response_pickle)))
+
+    insert_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return insert_id
+
+def getCaptures(request_line=None, limit=10):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    sqlite3.register_converter("pickle", util.sqlite_converters.convert_pickled)
+    conn = sqlite3.connect(_databases["captures"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    sql = """SELECT id, request_line, request as 'request [pickle]',
+             response as 'response [pickle]', created as 'created [created]'
+             FROM captures
+             WHERE request_line LIKE ?
+             ORDER BY created DESC
+             LIMIT ?"""
+
+    if request_line:
+        request_line_filter = "%{}%".format(request_line)
+    else:
+        request_line_filter = "%"
+
+    cur.execute(sql, (request_line_filter, limit))
+
+    return cur.fetchall()

@@ -4,10 +4,15 @@ A.focus-candidate .header {
 
 CODE {
     word-break: break-all;
+    white-space: pre-line;
 }
 
 HTML, BODY {
     background-color: white;
+}
+
+HEADER .ui.header {
+    margin-bottom: 0;
 }
 
 #page-header {

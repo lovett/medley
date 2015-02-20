@@ -1,6 +1,7 @@
 import re
 import pytz
 import datetime
+import pickle
 
 def convert_date(s):
     d = datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
@@ -42,3 +43,6 @@ def convert_duration(s):
 
 def convert_callerid(s):
     return re.sub(r'"(.*?)".*', r"\1", s.decode("utf-8"))
+
+def convert_pickled(blob):
+    return pickle.loads(blob)
