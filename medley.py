@@ -9,7 +9,6 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
-import plugins.request_logger
 import inspect
 import util.phone
 import util.net
