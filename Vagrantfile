@@ -15,7 +15,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "public_network"
 
   # There are no shared folders between the guest and host
-  config.vm.synced_folder "../data", "/vagrant_data"
+  #config.vm.synced_folder "../data", "/vagrant_data"
 
   # Provider-specific configuration for RAM and hostname
   config.vm.provider "virtualbox" do |vb|
