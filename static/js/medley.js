@@ -60,6 +60,10 @@ var MEDLEY = (function () {
 
             jQuery('.select-all').on('click', selectAll);
 
+            if (jQuery('#result').html() !== '') {
+                jQuery('#result').prevAll('.select-all').trigger('click');
+            }
+
             jQuery('.ui.radio.checkbox').checkbox();
 
             jQuery('A.row-toggle').on('click', function (e) {
