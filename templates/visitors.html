@@ -16,6 +16,7 @@
             <div class="field">
                 <label for="saved">Saved Queries</label>
                 <select id="saved">
+                    <option value=""></option>
                     {% for query in queries %}
                     <option value="{{ query.value }}">{{ query.key }}</option>
                     {% endfor %}
