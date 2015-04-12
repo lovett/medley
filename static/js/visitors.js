@@ -43,7 +43,8 @@ MEDLEY.visitors = (function () {
         re = new RegExp('^' + keyword + ' .*\n');
         query = query.trim().replace(re, '');
         query = keyword + ' ' + value + '\n' + query;
-        jQuery('#q').val(query).focus();
+        jQuery('#q').val(query);
+        jQuery('#submit').trigger('click');
     };
 
     return {
