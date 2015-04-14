@@ -4,10 +4,8 @@
   apt: name={{ item }} state=latest
   with_items:
     - python3
-    - python3-dev
     - python3-pip
-    - libxml2-dev
-    - libxslt1-dev
+    - python3-lxml
 
 - name: Install virtualenv for python3
   sudo: yes
@@ -17,7 +15,7 @@
     state=present
 
 - name: Create python3 virtualenv
-  shell: "virtualenv --python=python3 --no-site-packages {{ project_root }}"
+  shell: "virtualenv --system-site-packages --python=python3 {{ project_root }}"
   sudo: yes
   sudo_user: "{{ project_user }}"
   args:
