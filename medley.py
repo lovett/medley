@@ -619,17 +619,6 @@ class MedleyServer(object):
     def visitors(self, q=None):
         """Search website access logs"""
 
-        if not q:
-            q = "\n".join(cherrypy.request.config.get("default_query"))
-        else:
-            q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
-
-
-        q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
-        q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
-
-        logdir = cherrypy.request.config.get("logdir")
-
         results = None
 
         filters = {
@@ -638,6 +627,19 @@ class MedleyServer(object):
             "shun": [],
             "date":  []
         }
+
+        saved_queries = util.db.getAnnotationsByPrefix("visitors")
+
+        if not q:
+            try:
+                q = [query["value"] for query in saved_queries
+                     if query["key"] == "visitors:default"][0]
+            except IndexError:
+                q = ""
+
+        q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
+        q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
+        q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
 
         for line in q.split("\n"):
             try:
@@ -648,19 +650,16 @@ class MedleyServer(object):
             if action in filters.keys():
                 filters[action].append(value)
 
-        if q:
-            results, duration = util.fs.appengine_log_grep(logdir, filters, 100)
+        logdir = cherrypy.request.config.get("logdir")
+        results, duration = util.fs.appengine_log_grep(logdir, filters, 100)
 
         keys = list({"ip:{}".format(result["ip"]) for result in results.matches})
-
 
         ip_annotations = util.db.getAnnotations(keys)
         ip_labels = {}
         for annotation in ip_annotations:
             address = annotation["key"][3:]
             ip_labels[address] = annotation["value"]
-
-        query_annotations = util.db.getAnnotationsByPrefix("visitors")
 
         for result in results.matches:
             geo = util.db.geoip(result["ip"])
@@ -674,7 +673,7 @@ class MedleyServer(object):
             "result_limit": results.limit,
             "duration": duration,
             "site_domains": cherrypy.request.config.get("site_domains"),
-            "queries": query_annotations
+            "saved_queries": saved_queries
         }
 
 
