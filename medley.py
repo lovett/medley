@@ -553,6 +553,7 @@ class MedleyServer(object):
                 return "ok".encode("utf-8")
 
         return {
+            "base": cherrypy.config.get("base"),
             "error": error,
             "title": title,
             "url": url,
