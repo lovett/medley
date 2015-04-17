@@ -142,9 +142,10 @@ def saveBookmarkFulltext(url_id, fulltext):
 
 
 def saveAnnotation(key, value):
+    unacceptable_chars = "[^\d\w -:;,\n]+"
 
-    key = key.lower().strip()
-    value = value.strip()
+    key = re.sub(unacceptable_chars, "", key, flags=re.UNICODE).lower().strip()
+    value = re.sub(unacceptable_chars, "", value, flags=re.UNICODE).strip()
 
     conn = sqlite3.connect(_databases["annotations"])
     cur = conn.cursor()
