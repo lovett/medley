@@ -14,8 +14,11 @@ MEDLEY.geodb = (function () {
             }
         }).done(function (data) {
             window.location.reload();
+        }).fail(function (xhr, status, error) {
+            jQuery('#update').removeClass('disabled');
+            jQuery('#progress').removeClass('active');
+            jQuery('.error.message').removeClass('hidden');
         });
-
     };
 
     return {

@@ -33,6 +33,14 @@
         {% if allow_update %}
         <button id="update" class="ui large focal button">{{ icon }} {{ button_action }}</button>
         <p><div id="progress" class="ui inline indeterminate text loader">{{ progress_text }}</div></p>
+
+        <div class="hidden ui negative error message">
+            <div class="header">
+                Unable to update
+            </div>
+            <p>An error occurred while trying to update the database.</p>
+        </div>
+
         {% else %}
         <button class="ui disabled large focal button">{{ icon }} Update</button>
         <p><em>The database shouldn't need to be updated yet.</em></p>
