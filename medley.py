@@ -637,13 +637,14 @@ class MedleyServer(object):
             except IndexError:
                 q = ""
 
+
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
         q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
 
         for line in q.split("\n"):
             try:
-                action, value = line.split(" ", 1)
+                action, value = line.strip().split(" ", 1)
             except ValueError:
                 continue
 
