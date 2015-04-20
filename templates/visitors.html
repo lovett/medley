@@ -124,7 +124,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <p>This query ran in {{ duration|round(2) }} seconds</p>
+        <p>This query ran in {{ duration|round(2) }} seconds (walk: {{ walktime|round(2)}}, parse: {{ parsetime|round(2)}})</p>
 
         {% endif %}
     </div>

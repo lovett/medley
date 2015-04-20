@@ -1,3 +1,4 @@
+import time
 import re
 import fnmatch
 import os.path
@@ -6,15 +7,17 @@ import util.parse
 import util.decorator
 from collections import namedtuple
 
-GrepResult = namedtuple("GrepResult", "matches count limit")
+GrepResult = namedtuple("GrepResult", "matches count limit walktime parsetime")
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, limit=50):
     matches = []
 
+    t0 = time.time()
     files = [os.path.join(dirpath, f)
              for dirpath, dirnames, files in os.walk(logdir)
              for f in fnmatch.filter(files, "*.log")]
+    t1 = time.time()
 
     if len(filters["date"]) > 0:
         files = [f for f in files if any(d in f for d in filters["date"])]
@@ -33,6 +36,7 @@ def appengine_log_grep(logdir, filters, limit=50):
     # (lexicographically) to get newest results first
     files.sort(reverse=True)
 
+    t2 = time.time()
     for path in files:
         matches_in_file = []
 
@@ -57,4 +61,6 @@ def appengine_log_grep(logdir, filters, limit=50):
         matches_in_file.reverse()
         matches.extend(matches_in_file)
 
-    return GrepResult(matches, len(matches) + additional_matches, limit)
+    t3 = time.time()
+
+    return GrepResult(matches, len(matches) + additional_matches, limit, t1 - t0, t3 - t2)
