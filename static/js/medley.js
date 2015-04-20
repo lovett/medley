@@ -3,7 +3,9 @@ var MEDLEY = (function () {
 
     var toggle = function (e) {
         e.preventDefault();
+        console.log('hi');
         var trigger = jQuery(this);
+        console.log(trigger);
         var target = trigger.nextAll('.toggle-target');
         var label = trigger.find('SPAN');
         target.toggleClass('hidden');

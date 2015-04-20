@@ -75,19 +75,24 @@
         </table>
         {% endif %}
 
-        <a href="#" class="ui tiny toggle-trigger"><span>Show</span> sparql queries</a>
-        <div class="toggle-target hidden">
-            {% for query in sparql %}
-            <pre>{{ query|unindent|escape }}</pre>
-            {% endfor %}
-        </div>
-
     </div>
 
     <div class="eight wide column">
         <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
     </div>
     {% endif %}
+
+    <div class="ui sixteen wide column">
+        <a href="#" class="toggle-trigger"><span>Show</span> SPARQL</a>
+        <div class="toggle-target hidden">
+            {% for query in sparql %}
+            <pre>{{ query|unindent|escape }}</pre>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
 
 </main>
 
