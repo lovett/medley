@@ -158,8 +158,12 @@ def callHistory(database, caller, limit=0, offset=0):
     conn = sqlite3.connect(database, detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    cur.execute("SELECT count(*) as count FROM cdr WHERE src=?", (caller,))
-    count = cur.fetchone()[0]
+
+    try:
+        cur.execute("SELECT count(*) as count FROM cdr WHERE src=?", (caller,))
+        count = cur.fetchone()[0]
+    except:
+        count = 0
 
     if count == 0:
         conn.close()
