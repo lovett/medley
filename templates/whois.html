@@ -37,8 +37,7 @@
 
     {% if address %}
     <div class="eight wide column">
-
-        <h1 class="ui medium header">Location</h1>
+        <h1 class="ui medium header">Details</h1>
         <div class="ui segment">
             <div class="ui list">
                 <div class="item">
@@ -107,19 +106,24 @@
         {% endif %}
     </div>
 
-    {% if geo.latitude and geo.longitude %}
     <div class="eight wide column">
-        <h1 class="ui medium header">Map</h1>
+        {% if geo.latitude and geo.longitude %}
+        <h1 class="ui medium header">Location</h1>
         <div class="ui segment">
             <div class="map" data-latitude="{{ geo.latitude }}" data-longitude="{{ geo.longitude }}" data-region="{{ map_region }}"></div>
         </div>
+        {% endif %}
 
         <h1 class="ui medium header">Activity</h1>
         <div class="ui segment">
             <p><a href="/visitors/?q=include+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
+
+            <p><i class="linkify icon"></i> visit over <a href="http://{{ address }}" rel="noreferer">HTTP</a>,
+                <a href="https://{{ address }}" rel="noreferrer">HTTPS</a>
+            </p>
+
         </div>
     </div>
-    {% endif %}
     {% endif %}
 </main>
 {% endblock %}
