@@ -97,7 +97,7 @@
                     <td class="eleven wide" colspan="2">{{ line[0] }}</td>
                     {% else %}
                     <td class="five wide">{{ line[0] }}</td>
-                    <td class="eleven wide">{{ line[1]|urlize(30) }}</td>
+                    <td class="eleven wide">{{ line[1] }}</td>
                     {% endif %}
                 </tr>
                 {% endfor %}
@@ -118,7 +118,7 @@
         <div class="ui segment">
             <p><a href="/visitors/?q=include+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
 
-            <p><i class="linkify icon"></i> visit over <a href="http://{{ address }}" rel="noreferer">HTTP</a>,
+            <p><i class="linkify icon"></i> visit over <a href="{{ address|anonymize }}" rel="noreferer">HTTP</a>,
                 <a href="https://{{ address }}" rel="noreferrer">HTTPS</a>
             </p>
 

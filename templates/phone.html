@@ -37,8 +37,8 @@
             <div class="six wide column">
                 <div class="ui segment">
                     <h2 class="ui tiny centered header">Search</h2>
-                    <p class="supplemental"><a href="{{ whitepages_url }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> whitepages.com</a></p>
-                    <p class="supplemental"><a href="{{ bing_url }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
+                    <p class="supplemental"><a href="{{ whitepages_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> whitepages.com</a></p>
+                    <p class="supplemental"><a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
                 </div>
             </div>
         </div>
@@ -83,12 +83,14 @@
     {% endif %}
 
     <div class="ui sixteen wide column">
+        {% if number %}
         <a href="#" class="toggle-trigger"><span>Show</span> SPARQL</a>
         <div class="toggle-target hidden">
             {% for query in sparql %}
             <pre>{{ query|unindent|escape }}</pre>
             {% endfor %}
         </div>
+        {% endif %}
     </div>
 
 

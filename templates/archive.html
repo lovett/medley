@@ -38,10 +38,10 @@
                     {{ entry.created|localtime("time12") }}
                 </div>
                 <div class="summary">
-                    <a href="{{ entry.url }}" rel="noreferrer" target="_blank">{{ entry.title }}</a>
+                    <a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a>
                 </div>
                 <div class="meta">
-                    <a href="http://{{ entry.domain }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
+                    <a href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
                 </div>
 
                 {% if entry.comments %}

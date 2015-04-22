@@ -20,6 +20,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
         self.env.filters["pluralize"] = self.pluralize_filter
+        self.env.filters["anonymize"] = self.anonymize_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -104,3 +105,14 @@ class Plugin(plugins.SimplePlugin):
     def pluralize_filter(self, count, singular, plural):
         value = singular if count == 1 else plural
         return "{} {}".format(count, value)
+
+    def anonymize_filter(self, url):
+        anonymizer = cherrypy.config.get("anonymizer")
+
+        if not url.startswith("http"):
+            url = "http://" + url
+
+        if not anonymizer:
+            return url
+        else:
+            return "{}{}".format(anonymizer, url)
