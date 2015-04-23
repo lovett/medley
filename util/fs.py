@@ -1,3 +1,5 @@
+import os
+import os.path
 import time
 import re
 import fnmatch
@@ -5,9 +7,20 @@ import os.path
 import util.net
 import util.parse
 import util.decorator
+import hashlib
 from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit walktime parsetime")
+
+
+def hashPath(root, path):
+    m = hashlib.md5()
+
+    m.update(path.encode("utf-8"))
+
+    hex = m.hexdigest()
+
+    return root + "/" + hex[0] + "/" + hex[1] + "/" + hex[2] + "/" + hex + ".log"
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, limit=50):
@@ -21,6 +34,9 @@ def appengine_log_grep(logdir, filters, limit=50):
 
     if len(filters["date"]) > 0:
         files = [f for f in files if any(d in f for d in filters["date"])]
+    elif len(filters["ip"]) > 0:
+        files = [hashPath(logdir + "_split", f) for f in filters["ip"]]
+        files = [f for f in files if os.path.isfile(f)]
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)

@@ -622,6 +622,7 @@ class MedleyServer(object):
         results = None
 
         filters = {
+            "ip": [],
             "include": [],
             "exclude": [],
             "shun": [],
