@@ -12,15 +12,35 @@ from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit walktime parsetime")
 
+def hashPath(root, key, depth=4, extension=".log"):
+    """Convert key to a hash-based file path under root"""
+    m = hashlib.sha1()
+    m.update(key.encode("utf-8"))
+    digest = m.hexdigest()
+    path = "".join((digest[i] + os.sep for i in range(depth)))
+    return os.path.join(root, path, digest + extension)
 
-def hashPath(root, path):
-    m = hashlib.md5()
+def segregateLogLine(root, line, field):
+    """Append line to a file under root based on the hashed value of field"""
+    fields = util.parse.appengine(line)
+    key = fields[field]
+    output_path = util.fs.hashPath(root, key)
 
-    m.update(path.encode("utf-8"))
+    print(output_path)
 
-    hex = m.hexdigest()
+    if os.path.isfile(output_path):
+        with open(output_path) as f:
+            for existing_line in f:
+                if existing_line == line:
+                    return "skip"
 
-    return root + "/" + hex[0] + "/" + hex[1] + "/" + hex[2] + "/" + hex + ".log"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    with open(output_path, "a") as f:
+        f.write(line)
+
+    return "write"
+
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, limit=50):

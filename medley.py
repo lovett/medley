@@ -17,7 +17,7 @@ import util.db
 import util.decorator
 import dogpile.cache
 import pytz
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
 import tools.negotiable
@@ -612,6 +612,46 @@ class MedleyServer(object):
             "captures": util.db.getCaptures(q)
         }
 
+
+    @util.decorator.hideFromHomepage
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.encode()
+    def logsplit(self, date=None, by=None):
+
+        if date is None:
+            date = datetime.now()
+        else:
+            try:
+                date = datetime.strptime(date, "%Y-%m-%d")
+            except:
+                raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
+
+        if by is None:
+            raise cherrypy.HTTPError(400, "Field name to split by not specified")
+
+        log_root = cherrypy.request.app.config["/visitors"].get("logdir")
+        split_root = log_root + "_split"
+
+        log_file = "{}/{}/{}".format(
+            log_root,
+            date.strftime("%Y-%m"),
+            date.strftime("%Y-%m-%d.log"))
+
+        if not os.path.isfile(log_file):
+            raise cherrypy.HTTPError(400, "No logfile for that date")
+
+        counters = defaultdict(int)
+
+        with open(log_file) as f:
+            for line in f:
+                result = util.fs.segregateLogLine(split_root, line, by)
+                counters[result] += 1
+
+        return {
+            "writes": counters["write"],
+            "skips": counters["skip"]
+        }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
