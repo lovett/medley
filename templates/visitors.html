@@ -63,10 +63,11 @@
         <table class="ui table">
             <thead>
                 <tr>
+                    <th class="three wide">Location</th>
                     <th class="three wide">IP</th>
                     <th class="one wide">Date</th>
                     <th class="two wide">Time</th>
-                    <th class="five wide">Request</th>
+                    <th class="four wide">Request</th>
                     <th class="one wide">Response</th>
                     <th class="one wide"></th>
                 </tr>
@@ -76,6 +77,13 @@
                 <tr>
                     <td>
                         <span class="help" title="{{ result.geo.country_name }}"><i class="{{ result.geo.country_code|lower()}} flag"></i></span>
+                        {% if result.geo.country_code == "US" %}
+                        {{ result.geo.region_code|default("", true) }}
+                        {% else %}
+                        {{ result.geo.country_name}}
+                        {% endif %}
+                    </td>
+                    <td>
                         <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
                         <div>{{ result.ip_label|default('', true) }}</div>
                     </td>
@@ -97,26 +105,15 @@
                     </td>
                 </tr>
                 <tr class="expandable">
-                    <td colspan="6" class="active">
+                    <td colspan="7" class="active">
                         <p><code>{{ result.line }}</code></p>
 
                         <div class="ui grid">
                             <div class="right floated right aligned two wide column">
-                                <a href="/whois/{{ result.ip }}"><i class="search icon"></i> whois</a>
-                            </div>
-                            <div class="right floated right aligned two wide column">
-                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
+                                <a href="/whois/{{ result.ip }}" target="_blank"><i class="search icon"></i> whois</a>
                             </div>
                             <div class="left floated left aligned twelve wide column">
-                                <i class="map icon"></i>
-
-                                {% if result.geo.country_code == "US" %}
-                                {{ result.geo.city|default("", true) }}
-                                {{ result.geo.region_code|default("", true) }}
-                                {% else %}
-                                {{ result.geo.city|default("", true) }}
-                                {{ result.geo.country_name}}
-                                {% endif %}
+                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
                             </div>
                         </div>
                     </td>
