@@ -53,6 +53,9 @@ HEADER .ui.header {
     white-space: pre;
 }
 
+.small {
+    font-size: .75em;
+}
 
 TR.expandable {
     display: none;

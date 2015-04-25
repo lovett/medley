@@ -2,7 +2,6 @@ from pyparsing import *
 from datetime import datetime
 from ua_parser import user_agent_parser
 from urllib.parse import urlparse
-import pytz
 import string
 
 # Primitives

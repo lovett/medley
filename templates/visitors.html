@@ -63,10 +63,9 @@
         <table class="ui table">
             <thead>
                 <tr>
-                    <th class="three wide">Location</th>
+                    <th class="one wide">Location</th>
                     <th class="three wide">IP</th>
-                    <th class="one wide">Date</th>
-                    <th class="two wide">Time</th>
+                    <th class="four wide">Date</th>
                     <th class="four wide">Request</th>
                     <th class="one wide">Response</th>
                     <th class="one wide"></th>
@@ -77,21 +76,28 @@
                 <tr>
                     <td>
                         <span class="help" title="{{ result.geo.country_name }}"><i class="{{ result.geo.country_code|lower()}} flag"></i></span>
-                        {% if result.geo.country_code == "US" %}
-                        {{ result.geo.region_code|default("", true) }}
-                        {% else %}
-                        {{ result.geo.country_name}}
+                        {% if result.continent == "NA" %}
+                        {{ result.geo.region_code|default("?", true) }}
                         {% endif %}
                     </td>
                     <td>
                         <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
-                        <div>{{ result.ip_label|default('', true) }}</div>
+                        <p class="small">{{ result.ip_label|default('', true) }}</p>
                     </td>
-                    <td><a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a></td>
-                    <td><span class="nowrap">{{ result.timestamp|localtime('time12') }}</span></td>
+                    <td >
+                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
+                        at {{ result.timestamp|localtime('time12') }}
+
+                        {% if result.geo.time_zone %}
+                        <p class="small">
+                            {{ result.timestamp|localtime('time12', result.geo.time_zone) }} local time
+                        </p>
+                        {% endif %}
+
+                    </td>
                     <td>
-                        <a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(50, True) }}</a>
-                        <p>
+                        <a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                        <p class="small">
                             {{ result.agent|useragent() }}
                             {% if result.referrer and result.referrer_domain not in site_domains  %}
                             <br/>
@@ -105,7 +111,7 @@
                     </td>
                 </tr>
                 <tr class="expandable">
-                    <td colspan="7" class="active">
+                    <td colspan="6" class="active">
                         <p><code>{{ result.line }}</code></p>
 
                         <div class="ui grid">
