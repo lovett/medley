@@ -18,6 +18,9 @@ def hashPath(root, key, depth=4, extension=".log"):
     m.update(key.encode("utf-8"))
     digest = m.hexdigest()
     path = "".join((digest[i] + os.sep for i in range(depth)))
+    print(root)
+    print(key)
+    print(os.path.join(root, path, digest + extension))
     return os.path.join(root, path, digest + extension)
 
 def segregateLogLine(root, line, field):
@@ -26,20 +29,49 @@ def segregateLogLine(root, line, field):
     key = fields[field]
     output_path = util.fs.hashPath(root, key)
 
-    print(output_path)
-
     if os.path.isfile(output_path):
         with open(output_path) as f:
             for existing_line in f:
                 if existing_line == line:
-                    return "skip"
+                    return None
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     with open(output_path, "a") as f:
         f.write(line)
 
-    return "write"
+    return output_path
+
+def sortLog(path, key):
+    index = []
+
+    infile = open(path)
+    while True:
+        offset = infile.tell()
+        line = infile.readline()
+        if not line:
+            break
+
+        length = len(line)
+        fields = util.parse.appengine(line)
+        index.append((fields[key], offset, length))
+
+    sorted_index = index.sort()
+
+    if sorted_index != index:
+        outpath = path + "_sorted"
+        outfile = open(outpath, "w")
+
+
+        for field, offset, length in index:
+            infile.seek(offset)
+            outfile.write(infile.read(length))
+
+        outfile.close()
+        os.rename(outpath, path)
+    infile.close()
+
+
 
 
 @util.decorator.timed
@@ -87,7 +119,7 @@ def appengine_log_grep(logdir, filters, limit=50):
                     skips.add(ip)
                     continue
 
-                if filter(line, filters["include"]) and not filter(line, filters["exclude"]):
+                if not filters["include"] or (filter(line, filters["include"]) and not filter(line, filters["exclude"])):
                     if limit == 0 or len(matches) + len(matches_in_file) < limit:
                         fields = util.parse.appengine(line)
                         matches_in_file.append(fields)

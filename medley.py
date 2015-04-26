@@ -642,11 +642,19 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "No logfile for that date")
 
         counters = defaultdict(int)
+        paths = set()
 
         with open(log_file) as f:
             for line in f:
-                result = util.fs.segregateLogLine(split_root, line, by)
-                counters[result] += 1
+                path = util.fs.segregateLogLine(split_root, line, by)
+                if path:
+                    counters["writes"] += 1
+                    paths.add(path)
+                else:
+                    counters["skip"] += 1
+
+        for path in paths:
+            util.fs.sortLog(path, "timestamp")
 
         return {
             "writes": counters["write"],
