@@ -144,6 +144,7 @@ class MedleyServer(object):
         cherrypy.response.status = 204
         return
 
+
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="mismatch.html")
@@ -297,10 +298,21 @@ class MedleyServer(object):
         if ip is None:
             ip = util.net.resolveHost(address_clean)
 
+        def ipfacts_query():
+            try:
+                return util.db.ipFacts(ip)
+            except:
+                return {}
+
+        ip_facts = self.cache.get_or_create(
+            "ipfacts:{}".format(ip), ipfacts_query,
+            should_cache_fn= lambda v: v is not None
+        )
+
         data = {
             "address": address_clean,
             "ip": ip,
-            "ip_facts": util.db.ipFacts(ip),
+            "ip_facts": ip_facts,
             "reverse_host": util.net.reverseLookup(ip)
         }
 
@@ -699,7 +711,16 @@ class MedleyServer(object):
         results, duration = util.fs.appengine_log_grep(logdir, filters, 100)
 
         for result in results.matches:
-            result["ip_facts"] = util.db.ipFacts(result["ip"])
+            def ipfacts_query():
+                try:
+                    return util.db.ipFacts(result["ip"])
+                except:
+                    return {}
+
+            result["ip_facts"] = self.cache.get_or_create(
+                "ip_facts:{}".format(result["ip"]), ipfacts_query,
+                should_cache_fn= lambda v: len(v) > 0
+            )
 
         return {
             "q": q,
@@ -713,6 +734,32 @@ class MedleyServer(object):
             "saved_queries": saved_queries
         }
 
+    @util.decorator.hideFromHomepage
+    @cherrypy.expose
+    @cherrypy.tools.encode()
+    def awsranges(self, org=None):
+        """Download the current set of AWS IP ranges and store as annotations
+
+        Previously downloaded ranges are removed.
+
+        See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html
+        """
+
+        key = "netblock:aws"
+
+        ranges = util.net.getUrl("https://ip-ranges.amazonaws.com/ip-ranges.json", json=True)
+
+        if not "prefixes" in ranges:
+            raise cherrypy.HTTPError(400, "JSON response contains no prefixes")
+
+        for annotation in util.db.getAnnotationsByPrefix(key):
+            util.db.deleteAnnotation(annotation["id"])
+
+        for prefix in ranges["prefixes"]:
+            util.db.saveAnnotation(key, prefix["ip_prefix"])
+
+        cherrypy.response.status = 204
+        return
 
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))

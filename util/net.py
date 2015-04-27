@@ -159,7 +159,7 @@ def reduceHtmlTitle(title):
             return max(segments, key=len)
     return title
 
-def getUrl(url):
+def getUrl(url, json=False):
     """Make a GET request for the specified URL and return its HTML as a string"""
 
     cherrypy.log("APP", "Requesting {}".format(url))
@@ -167,9 +167,14 @@ def getUrl(url):
     try:
         r = requests.get(url, timeout=5, allow_redirects=True)
         r.raise_for_status()
-        return r.text
+        if json:
+            return r.json()
+        else:
+            return r.text
+
     except requests.exceptions.HTTPError as e:
         raise NetException(e)
+
 
 def saveUrl(url, destination):
     """Download a URL, saving the response body to the filesystem"""

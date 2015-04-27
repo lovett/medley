@@ -81,21 +81,21 @@ def geoSetup(database_dir, download_url):
 
 
 def ipFacts(ip):
-
+    address = netaddr.IPAddress(ip)
+    netblocks = getAnnotationsByPrefix("netblock")
     facts = {}
-    if netaddr.IPAddress(ip) in netaddr.IPNetwork("17.0.0.0/8"):
-        facts["organization"] = "Apple"
-    else:
-        facts["organization"] = None
+
+    for netblock in netblocks:
+        if address in netaddr.IPNetwork(netblock["value"]):
+            facts["organization"] = netblock["key"].split(":")[1]
+            break
 
     annotations = util.db.getAnnotations("ip:{}".format(ip))
-
     if annotations:
         facts["annotations"] = [annotation["value"] for annotation in annotations]
-    else:
-        facts["annotations"] = []
 
     facts["geo"] = _databases["geo"].record_by_addr(ip)
+
     return facts
 
 def getBookmarkById(bookmark_id):
