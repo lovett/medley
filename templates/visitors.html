@@ -75,22 +75,28 @@
                 {% for result in results %}
                 <tr>
                     <td>
-                        <span class="help" title="{{ result.geo.country_name }}"><i class="{{ result.geo.country_code|lower()}} flag"></i></span>
+                        <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
                         {% if result.continent == "NA" %}
-                        {{ result.geo.region_code|default("?", true) }}
+                        {{ result.ip_facts.geo.region_code|default("?", true) }}
                         {% endif %}
                     </td>
                     <td>
                         <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
-                        <p class="small">{{ result.ip_label|default('', true) }}</p>
+                        {% if result.ip_facts.organization %}
+                        <p class="small">{{ result.ip_facts.organization }}</p>
+                        {% endif %}
+
+                        {% for annotation in result.ip_facts.annotations %}
+                        <p class="small">{{ annotation }}</p>
+                        {% endfor %}
                     </td>
                     <td >
                         <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
                         at {{ result.timestamp|localtime('time12') }}
 
-                        {% if result.geo.time_zone %}
+                        {% if result.ip_facts.geo.time_zone %}
                         <p class="small">
-                            {{ result.timestamp|localtime('time12', result.geo.time_zone) }} local time
+                            {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
                         </p>
                         {% endif %}
 

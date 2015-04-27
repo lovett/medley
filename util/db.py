@@ -4,6 +4,7 @@ import sqlite3
 import util.sqlite_converters
 import pygeoip
 import pickle
+import netaddr
 from urllib.parse import urlparse
 
 _databases = {}
@@ -78,8 +79,24 @@ def geoSetup(database_dir, download_url):
         except IOError:
             _databases["geo"] = None
 
-def geoip(ip):
-    return _databases["geo"].record_by_addr(ip)
+
+def ipFacts(ip):
+
+    facts = {}
+    if netaddr.IPAddress(ip) in netaddr.IPNetwork("17.0.0.0/8"):
+        facts["organization"] = "Apple"
+    else:
+        facts["organization"] = None
+
+    annotations = util.db.getAnnotations("ip:{}".format(ip))
+
+    if annotations:
+        facts["annotations"] = [annotation["value"] for annotation in annotations]
+    else:
+        facts["annotations"] = []
+
+    facts["geo"] = _databases["geo"].record_by_addr(ip)
+    return facts
 
 def getBookmarkById(bookmark_id):
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)

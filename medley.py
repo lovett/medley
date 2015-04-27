@@ -297,15 +297,10 @@ class MedleyServer(object):
         if ip is None:
             ip = util.net.resolveHost(address_clean)
 
-        try:
-            geo = util.db.geoip(ip)
-        except:
-            geo = None
-
         data = {
-            "geo": geo,
             "address": address_clean,
             "ip": ip,
+            "ip_facts": util.db.ipFacts(ip),
             "reverse_host": util.net.reverseLookup(ip)
         }
 
@@ -325,9 +320,9 @@ class MedleyServer(object):
 
         # Google charts
         try:
-            data["map_region"] = data["geo"]["country_code"]
-            if data["map_region"] == "US" and data["geo"]["region_code"]:
-                data["map_region"] += "-" + data["geo"]["region_code"]
+            data["map_region"] = data["ip_facts"]["geo"]["country_code"]
+            if data["map_region"] == "US" and data["ip_facts"]["geo"]["region_code"]:
+                data["map_region"] += "-" + data["ip_facts"]["geo"]["region_code"]
         except:
             data["map_region"] = None
 
@@ -703,18 +698,8 @@ class MedleyServer(object):
         logdir = cherrypy.request.config.get("logdir")
         results, duration = util.fs.appengine_log_grep(logdir, filters, 100)
 
-        keys = list({"ip:{}".format(result["ip"]) for result in results.matches})
-
-        ip_annotations = util.db.getAnnotations(keys)
-        ip_labels = {}
-        for annotation in ip_annotations:
-            address = annotation["key"][3:]
-            ip_labels[address] = annotation["value"]
-
         for result in results.matches:
-            geo = util.db.geoip(result["ip"])
-            result["geo"] = geo
-            result["ip_label"] = ip_labels.get(result["ip"])
+            result["ip_facts"] = util.db.ipFacts(result["ip"])
 
         return {
             "q": q,
