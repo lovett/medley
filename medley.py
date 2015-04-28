@@ -17,6 +17,7 @@ import util.db
 import util.decorator
 import dogpile.cache
 import pytz
+import time
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
@@ -745,7 +746,7 @@ class MedleyServer(object):
     @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.encode()
-    def awsranges(self, org=None):
+    def awsranges(self):
         """Download the current set of AWS IP ranges and store as annotations
 
         Previously downloaded ranges are removed.
@@ -754,17 +755,27 @@ class MedleyServer(object):
         """
 
         key = "netblock:aws"
+        fetch_key = "awsranges:lastfetch"
+        min_age = 86400 * 7
+
+        last_fetch = util.db.getAnnotations(fetch_key)
+        if last_fetch:
+            if time.time() - float(last_fetch[0]["value"]) < min_age:
+                raise cherrypy.HTTPError(400, "Ranges have already been downloaded today")
+
 
         ranges = util.net.getUrl("https://ip-ranges.amazonaws.com/ip-ranges.json", json=True)
 
         if not "prefixes" in ranges:
             raise cherrypy.HTTPError(400, "JSON response contains no prefixes")
 
-        for annotation in util.db.getAnnotationsByPrefix(key):
-            util.db.deleteAnnotation(annotation["id"])
+        util.db.deleteAnnotationByKey("netblock:aws")
 
         for prefix in ranges["prefixes"]:
             util.db.saveAnnotation(key, prefix["ip_prefix"])
+
+
+        util.db.saveAnnotation(fetch_key, time.time())
 
         cherrypy.response.status = 204
         return
