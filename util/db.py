@@ -5,6 +5,7 @@ import util.sqlite_converters
 import pygeoip
 import pickle
 import netaddr
+import util.fs
 from urllib.parse import urlparse
 
 _databases = {}
@@ -157,15 +158,17 @@ def saveBookmarkFulltext(url_id, fulltext):
     conn.close()
     return True
 
+def saveAnnotation(key, value, replace=False):
+    #unacceptable_chars = "[^\d\w -:;,\n]+"
 
-def saveAnnotation(key, value):
-    unacceptable_chars = "[^\d\w -:;,\n]+"
-
-    key = re.sub(unacceptable_chars, "", key, flags=re.UNICODE).lower().strip()
-    value = re.sub(unacceptable_chars, "", value, flags=re.UNICODE).strip()
+    #key = re.sub(unacceptable_chars, "", key, flags=re.UNICODE).lower().strip()
+    #value = re.sub(unacceptable_chars, "", value, flags=re.UNICODE).strip()
 
     conn = sqlite3.connect(_databases["annotations"])
     cur = conn.cursor()
+
+    if replace:
+        deleteAnnotationByKey(key)
     cur.execute("INSERT INTO annotations (key, value) VALUES (?, ?)", (key, value))
     conn.commit()
     annotation_id = cur.lastrowid
@@ -201,6 +204,21 @@ def getAnnotations(keys=[], limit=0):
 
     return cur.fetchall()
 
+
+def getAnnotationsByKey(key):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    conn = sqlite3.connect(_databases["annotations"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    sql = """SELECT id, key, value, datetime(created, 'localtime') as 'created [created]'
+    FROM annotations WHERE key LIKE ? ORDER BY key"""
+
+    cur.execute(sql, (key,))
+
+    return cur.fetchall()
+
+
 def getAnnotationsByPrefix(prefix):
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)
     conn = sqlite3.connect(_databases["annotations"], detect_types=sqlite3.PARSE_COLNAMES)
@@ -225,6 +243,15 @@ def deleteAnnotation(annotation_id):
     conn.commit()
     conn.close()
     return deleted_rows
+
+def deleteAnnotationByKey(key):
+    conn = sqlite3.connect(_databases["annotations"])
+    cur = conn.cursor()
+    deleted_rows = cur.execute("DELETE FROM annotations WHERE key=?", (key,)).rowcount
+    conn.commit()
+    conn.close()
+    return deleted_rows
+
 
 def saveCapture(request, response):
 
@@ -281,3 +308,14 @@ def getCaptures(request_line=None, limit=10):
     cur.execute(sql, (request_line_filter, limit))
 
     return cur.fetchall()
+
+def getPathHash(path, prefix):
+    key = "hash:{}:{}".format(prefix, path)
+    value = util.fs.file_hash(path)
+
+    annotation = getAnnotationsByKey(key)
+
+    if not annotation:
+        return None
+    else:
+        return annotation[0]["value"]

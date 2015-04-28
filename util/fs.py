@@ -12,16 +12,25 @@ from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit walktime parsetime")
 
+def file_hash(path):
+    m = hashlib.sha1()
+    with open(path, "rb") as f:
+        while True:
+            data = f.read(8192)
+            if not data:
+                break
+            m.update(data)
+    return m.hexdigest()
+
+
 def hashPath(root, key, depth=4, extension=".log"):
     """Convert key to a hash-based file path under root"""
     m = hashlib.sha1()
     m.update(key.encode("utf-8"))
     digest = m.hexdigest()
     path = "".join((digest[i] + os.sep for i in range(depth)))
-    print(root)
-    print(key)
-    print(os.path.join(root, path, digest + extension))
     return os.path.join(root, path, digest + extension)
+
 
 def segregateLogLine(root, line, field):
     """Append line to a file under root based on the hashed value of field"""
@@ -41,6 +50,7 @@ def segregateLogLine(root, line, field):
         f.write(line)
 
     return output_path
+
 
 def sortLog(path, key):
     index = []
@@ -70,8 +80,6 @@ def sortLog(path, key):
         outfile.close()
         os.rename(outpath, path)
     infile.close()
-
-
 
 
 @util.decorator.timed

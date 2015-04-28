@@ -626,19 +626,19 @@ class MedleyServer(object):
     @cherrypy.tools.encode()
     def logsplit(self, date=None, by=None):
 
-        if date is None:
-            date = datetime.now()
-        else:
-            try:
+        try:
+            if date is None:
+                date = datetime.now()
+            else:
                 date = datetime.strptime(date, "%Y-%m-%d")
-            except:
-                raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
+        except:
+            raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
 
         if by is None:
             raise cherrypy.HTTPError(400, "Field name to split by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-        split_root = log_root + "_split"
+        split_root = log_root + "_split_by_{}".format(by)
 
         log_file = "{}/{}/{}".format(
             log_root,
@@ -647,6 +647,11 @@ class MedleyServer(object):
 
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No logfile for that date")
+
+        current_hash = util.fs.file_hash(log_file)
+
+        if util.db.getPathHash(log_file, by) == current_hash:
+            raise cherrypy.HTTPError(400, "File has already been hashed")
 
         counters = defaultdict(int)
         paths = set()
@@ -662,6 +667,9 @@ class MedleyServer(object):
 
         for path in paths:
             util.fs.sortLog(path, "timestamp")
+
+        annotation_key = "hash:{}:{}".format(by, log_file)
+        util.db.saveAnnotation(annotation_key, current_hash, replace=True)
 
         return {
             "writes": counters["write"],
