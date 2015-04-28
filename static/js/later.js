@@ -7,7 +7,11 @@ MEDLEY.later = (function () {
         var trigger = jQuery(e.target);
         var target = trigger.closest('.field').find('INPUT');
         if (trigger.hasClass('remove-querystring')) {
-            target.val(target.val().replace(/\?.*/, ''));
+            target.val(target.val().replace(/\?[^#]+/, ''));
+        } else if (trigger.hasClass('remove-hash')) {
+            target.val(target.val().replace(/#.*/, ''));
+        } else if (trigger.hasClass('reset')) {
+            target.val(target.attr('data-original-value'));
         }
     };
 

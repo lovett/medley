@@ -34,8 +34,15 @@
 
             <div class="field">
                 <label for="address">Address:</label>
-                <input type="text" id="address" name="url" value="{{ url|default('', true)|e }}"/>
-                <p class="shortcuts"><a class="remove-querystring" href="#">Remove querystring</a></p>
+                <input type="text" id="address" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
+                <p class="shortcuts">
+                    <a class="remove-querystring" href="#">Remove querystring</a>
+                    <a class="remove-hash" href="#">Remove hash</a>
+
+                    {% if url %}
+                    <a class="reset" href="#">Reset</a>
+                    {% endif %}
+                </p>
             </div>
 
 
