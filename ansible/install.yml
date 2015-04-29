@@ -9,3 +9,4 @@
     - python3
     - ansible
     - medley
+    - cron

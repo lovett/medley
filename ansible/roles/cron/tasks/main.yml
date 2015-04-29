@@ -1,0 +1,15 @@
+---
+- name: Install curl
+  sudo: yes
+  apt: name=curl state=present
+
+- name: Update AWS IP ranges every Sunday at 7AM
+  sudo: yes
+  cron:
+    cron_file="{{ project_name }}"
+    name="awsranges"
+    minute="5"
+    hour="7"
+    weekday="0"
+    job="curl -k https://localhost/awsranges > /dev/null"
+    user="{{ project_user }}"
