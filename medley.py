@@ -639,7 +639,7 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Field name to split by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-        split_root = log_root + "_split_by_{}".format(by)
+        split_root = util.fs.getSplitLogRoot(log_root, by)
 
         log_file = "{}/{}/{}".format(
             log_root,

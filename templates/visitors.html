@@ -81,7 +81,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        <a href="/visitors?q=include+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
+                        <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
                         {% if result.ip_facts.organization %}
                         <p class="small">{{ result.ip_facts.organization }}</p>
                         {% endif %}
@@ -91,7 +91,7 @@
                         {% endfor %}
                     </td>
                     <td >
-                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Ainclude+{{ result.method}}+{{result.uri}}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
+                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
                         at {{ result.timestamp|localtime('time12') }}
 
                         {% if result.ip_facts.geo.time_zone %}

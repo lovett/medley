@@ -23,6 +23,10 @@ def file_hash(path):
     return m.hexdigest()
 
 
+def getSplitLogRoot(log_root, split_by):
+    return log_root + "_split_by_{}".format(split_by)
+
+
 def hashPath(root, key, depth=4, extension=".log"):
     """Convert key to a hash-based file path under root"""
     m = hashlib.sha1()
@@ -87,16 +91,18 @@ def appengine_log_grep(logdir, filters, limit=50):
     matches = []
 
     t0 = time.time()
-    files = [os.path.join(dirpath, f)
-             for dirpath, dirnames, files in os.walk(logdir)
-             for f in fnmatch.filter(files, "*.log")]
+    if len(filters["ip"]) > 0:
+        root = getSplitLogRoot(logdir, "ip")
+        files = [hashPath(root, f) for f in filters["ip"]]
+        files = [f for f in files if os.path.isfile(f)]
+    else:
+        files = [os.path.join(dirpath, f)
+                 for dirpath, dirnames, files in os.walk(logdir)
+                 for f in fnmatch.filter(files, "*.log")]
+        files = [f for f in files if any(d in f for d in filters["date"])]
     t1 = time.time()
 
-    if len(filters["date"]) > 0:
-        files = [f for f in files if any(d in f for d in filters["date"])]
-    elif len(filters["ip"]) > 0:
-        files = [hashPath(logdir + "_split", f) for f in filters["ip"]]
-        files = [f for f in files if os.path.isfile(f)]
+    print(files)
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)
