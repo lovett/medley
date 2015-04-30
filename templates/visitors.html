@@ -76,8 +76,8 @@
                 <tr>
                     <td>
                         <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
-                        {% if result.continent == "NA" %}
-                        {{ result.ip_facts.geo.region_code|default("?", true) }}
+                        {% if result.ip_facts.geo.continent == "NA" %}
+                        {{ result.ip_facts.geo.region_code|default("", true) }}
                         {% endif %}
                     </td>
                     <td>
@@ -122,10 +122,18 @@
 
                         <div class="ui grid">
                             <div class="right floated right aligned two wide column">
+                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
+                            </div>
+                            <div class="right floated right aligned two wide column">
                                 <a href="/whois/{{ result.ip }}" target="_blank"><i class="search icon"></i> whois</a>
                             </div>
+
                             <div class="left floated left aligned twelve wide column">
-                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
+
+                                {% if result.ip_facts.geo.city %}
+                                <i class="map icon"></i>
+                                {{ result.ip_facts.geo.city|default("", true) }}
+                                {% endif %}
                             </div>
                         </div>
                     </td>

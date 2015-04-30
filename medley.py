@@ -652,7 +652,7 @@ class MedleyServer(object):
         current_hash = util.fs.file_hash(log_file)
 
         if util.db.getPathHash(log_file, by) == current_hash:
-            raise cherrypy.HTTPError(400, "File has already been hashed")
+            raise cherrypy.HTTPError(400, "File has already been split")
 
         counters = defaultdict(int)
         paths = set()
