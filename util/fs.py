@@ -36,20 +36,36 @@ def hashPath(root, key, depth=4, extension=".log"):
     return os.path.join(root, path, digest + extension)
 
 
-def segregateLogLine(root, line, field):
-    """Append line to a file under root based on the hashed value of field"""
-    fields = util.parse.appengine(line)
-    key = fields[field]
-    output_path = util.fs.hashPath(root, key)
+def segregateLogLine(root, line, field, match=None):
+    """Append line to a file under root
 
+    The file path is determined from the hashed value of field.
+
+    Lines can be appended selectively by specifying match. Matching is
+    string-based and case-insensitive.
+    """
+
+    fields = util.parse.appengine(line)
+
+    # the field isn't present
+    if not field in fields:
+        return None
+
+    # the field doesn't match
+    if match and (match.lower() not in fields[field].lower()):
+        return None
+
+    output_path = util.fs.hashPath(root, fields[field])
+
+    # don't allow dupliate writes
     if os.path.isfile(output_path):
         with open(output_path) as f:
             for existing_line in f:
                 if existing_line == line:
                     return None
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "a") as f:
         f.write(line)
 
@@ -86,6 +102,14 @@ def sortLog(path, key):
     infile.close()
 
 
+def file_list(root, extension=None):
+    if not extension:
+        extension = ".*"
+
+    return [os.path.join(dirpath, f)
+            for dirpath, dirnames, files in os.walk(root)
+            for f in fnmatch.filter(files, extension)]
+
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, limit=50):
     matches = []
@@ -96,9 +120,7 @@ def appengine_log_grep(logdir, filters, limit=50):
         files = [hashPath(root, f) for f in filters["ip"]]
         files = [f for f in files if os.path.isfile(f)]
     else:
-        files = [os.path.join(dirpath, f)
-                 for dirpath, dirnames, files in os.walk(logdir)
-                 for f in fnmatch.filter(files, "*.log")]
+        files = file_list(logdir, "*.log")
         files = [f for f in files if any(d in f for d in filters["date"])]
     t1 = time.time()
 

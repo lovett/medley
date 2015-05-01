@@ -620,12 +620,11 @@ class MedleyServer(object):
             "captures": util.db.getCaptures(q)
         }
 
-
     @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def logsplit(self, date=None, by=None):
+    def logsplit(self, date=None, by=None, match=None):
 
         try:
             if date is None:
@@ -639,7 +638,11 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Field name to split by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-        split_root = util.fs.getSplitLogRoot(log_root, by)
+
+        split_key = by
+        if match:
+            split_key += "_" + match
+        split_root = util.fs.getSplitLogRoot(log_root, split_key)
 
         log_file = "{}/{}/{}".format(
             log_root,
@@ -651,15 +654,15 @@ class MedleyServer(object):
 
         current_hash = util.fs.file_hash(log_file)
 
-        if util.db.getPathHash(log_file, by) == current_hash:
-            raise cherrypy.HTTPError(400, "File has already been split")
+        if os.path.exists(split_root) and util.db.getPathHash(log_file, split_key) == current_hash:
+            raise cherrypy.HTTPError(400, "File has already been split by this key")
 
         counters = defaultdict(int)
         paths = set()
 
         with open(log_file) as f:
             for line in f:
-                path = util.fs.segregateLogLine(split_root, line, by)
+                path = util.fs.segregateLogLine(split_root, line, by, match)
                 if path:
                     counters["writes"] += 1
                     paths.add(path)
@@ -676,6 +679,22 @@ class MedleyServer(object):
             "writes": counters["write"],
             "skips": counters["skip"]
         }
+
+    @util.decorator.hideFromHomepage
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.encode()
+    def loginventory(self):
+        log_root = cherrypy.request.app.config["/visitors"].get("logdir")
+
+        files = util.fs.file_list(log_root, "*.log")
+
+        files = [os.path.basename(f) for f in files]
+
+        if cherrypy.request.negotiated == "text/plain":
+            return "\n".join(files)
+        return files
+
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
