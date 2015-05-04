@@ -6,6 +6,8 @@ import pygeoip
 import pickle
 import netaddr
 import util.fs
+import hashlib
+import util.parse
 from urllib.parse import urlparse
 
 _databases = {}
@@ -41,7 +43,6 @@ CREATE TABLE IF NOT EXISTS captures (
     created DEFAULT CURRENT_TIMESTAMP
 )
 """
-
 
 def setup(database_dir):
     global _databases
@@ -319,3 +320,61 @@ def getPathHash(path, prefix):
         return None
     else:
         return annotation[0]["value"]
+
+def createLogDatabase(path):
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    conn = sqlite3.connect(path)
+    cur = conn.cursor()
+
+    sql = """CREATE TABLE IF NOT EXISTS lines (
+    hash UNIQUE, date INT, value)"""
+    cur.executescript(sql)
+    conn.commit()
+    conn.close()
+
+def segregateLogLine(root, line, field, match=None):
+    """Insert line into an sqlite database under root
+
+    The database file path is determined from the sha1 hash of field.
+
+    Lines can be appended selectively by specifying match. Matching is
+    string-based and case-insensitive.
+    """
+
+    fields = util.parse.appengine(line)
+
+    # the field isn't present
+    if not field in fields:
+        return 0
+
+    # the field doesn't match
+    if match and (match.lower() not in fields[field].lower()):
+        return 0
+
+    db_path = util.fs.hashPath(root, fields[field], extension=".sqlite")
+
+    if not os.path.exists(db_path):
+        createLogDatabase(db_path)
+
+    line_hash = hashlib.sha1()
+    line_hash.update(line.encode("utf-8"))
+
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    sql = "INSERT OR IGNORE INTO lines (hash, date, value) VALUES (?, ?, ?)"
+    insert_count = cur.execute(sql, (line_hash.hexdigest(), fields.timestamp.isoformat(), line)).rowcount
+    conn.commit()
+    return insert_count
+
+def getLogLines(db_path):
+    """Retrieve log lines from an sqlite database
+
+    Returns a cursor object for handling results one at a time.
+    """
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    sql = """SELECT value FROM lines ORDER BY date"""
+    return cur.execute(sql)

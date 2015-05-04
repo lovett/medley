@@ -627,10 +627,7 @@ class MedleyServer(object):
     def logsplit(self, date=None, by=None, match=None):
 
         try:
-            if date is None:
-                date = datetime.now()
-            else:
-                date = datetime.strptime(date, "%Y-%m-%d")
+            date = datetime.strptime(date, "%Y-%m-%d")
         except:
             raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
 
@@ -638,11 +635,6 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Field name to split by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-
-        split_key = by
-        if match:
-            split_key += "_" + match
-        split_root = util.fs.getSplitLogRoot(log_root, split_key)
 
         log_file = "{}/{}/{}".format(
             log_root,
@@ -652,33 +644,22 @@ class MedleyServer(object):
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No logfile for that date")
 
-        current_hash = util.fs.file_hash(log_file)
-
-        if os.path.exists(split_root) and util.db.getPathHash(log_file, split_key) == current_hash:
-            raise cherrypy.HTTPError(400, "File has already been split by this key")
+        split_root = util.fs.getSplitLogRoot(log_root, by, match)
 
         counters = defaultdict(int)
-        paths = set()
 
+        t0 = time.time()
         with open(log_file) as f:
             for line in f:
-                path = util.fs.segregateLogLine(split_root, line, by, match)
-                if path:
-                    counters["writes"] += 1
-                    paths.add(path)
-                else:
+                insert_count = util.db.segregateLogLine(split_root, line, by, match)
+                if insert_count == 0:
                     counters["skip"] += 1
+                else:
+                    counters["write"] += insert_count
 
-        for path in paths:
-            util.fs.sortLog(path, "timestamp")
+        counters["duration"] = time.time() - t0
 
-        annotation_key = "hash:{}:{}".format(by, log_file)
-        util.db.saveAnnotation(annotation_key, current_hash, replace=True)
-
-        return {
-            "writes": counters["write"],
-            "skips": counters["skip"]
-        }
+        return counters
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose

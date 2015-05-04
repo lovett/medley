@@ -6,6 +6,7 @@ import fnmatch
 import os.path
 import util.net
 import util.parse
+import util.db
 import util.decorator
 import hashlib
 from collections import namedtuple
@@ -22,9 +23,11 @@ def file_hash(path):
             m.update(data)
     return m.hexdigest()
 
-
-def getSplitLogRoot(log_root, split_by):
-    return log_root + "_split_by_{}".format(split_by)
+def getSplitLogRoot(log_root, by, match=None):
+    split_name = by
+    if match:
+        split_name += "_" + match
+    return os.path.join(log_root, "split", split_name)
 
 
 def hashPath(root, key, depth=4, extension=".log"):
@@ -34,43 +37,6 @@ def hashPath(root, key, depth=4, extension=".log"):
     digest = m.hexdigest()
     path = "".join((digest[i] + os.sep for i in range(depth)))
     return os.path.join(root, path, digest + extension)
-
-
-def segregateLogLine(root, line, field, match=None):
-    """Append line to a file under root
-
-    The file path is determined from the hashed value of field.
-
-    Lines can be appended selectively by specifying match. Matching is
-    string-based and case-insensitive.
-    """
-
-    fields = util.parse.appengine(line)
-
-    # the field isn't present
-    if not field in fields:
-        return None
-
-    # the field doesn't match
-    if match and (match.lower() not in fields[field].lower()):
-        return None
-
-    output_path = util.fs.hashPath(root, fields[field])
-
-    # don't allow dupliate writes
-    if os.path.isfile(output_path):
-        with open(output_path) as f:
-            for existing_line in f:
-                if existing_line == line:
-                    return None
-
-
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "a") as f:
-        f.write(line)
-
-    return output_path
-
 
 def sortLog(path, key):
     index = []
@@ -117,14 +83,12 @@ def appengine_log_grep(logdir, filters, limit=50):
     t0 = time.time()
     if len(filters["ip"]) > 0:
         root = getSplitLogRoot(logdir, "ip")
-        files = [hashPath(root, f) for f in filters["ip"]]
+        files = [hashPath(root, f, extension=".sqlite") for f in filters["ip"]]
         files = [f for f in files if os.path.isfile(f)]
     else:
         files = file_list(logdir, "*.log")
         files = [f for f in files if any(d in f for d in filters["date"])]
     t1 = time.time()
-
-    print(files)
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)
@@ -140,27 +104,36 @@ def appengine_log_grep(logdir, filters, limit=50):
     # (lexicographically) to get newest results first
     files.sort(reverse=True)
 
+
+    def processLine(line):
+        ip = line[0:line.find(" ")]
+
+        if ip in skips:
+            return False
+
+        if filter(line, filters["shun"]):
+            skips.add(ip)
+            return False
+
+        if not filters["include"] or (filter(line, filters["include"]) and not filter(line, filters["exclude"])):
+            if limit == 0 or len(matches) + len(matches_in_file) < limit:
+                fields = util.parse.appengine(line)
+                matches_in_file.append(fields)
+            else:
+                additional_matches += 1
+
     t2 = time.time()
     for path in files:
         matches_in_file = []
 
-        with open(path) as f:
-            for line in f:
-                ip = line[0:line.find(" ")]
-
-                if ip in skips:
-                    continue
-
-                if filter(line, filters["shun"]):
-                    skips.add(ip)
-                    continue
-
-                if not filters["include"] or (filter(line, filters["include"]) and not filter(line, filters["exclude"])):
-                    if limit == 0 or len(matches) + len(matches_in_file) < limit:
-                        fields = util.parse.appengine(line)
-                        matches_in_file.append(fields)
-                    else:
-                        additional_matches += 1
+        print(path)
+        if path.endswith(".sqlite"):
+            for line in util.db.getLogLines(path):
+                processLine(line["value"])
+        else:
+            with open(path) as f:
+                for line in f:
+                    processLine(line)
 
         matches_in_file.reverse()
         matches.extend(matches_in_file)
