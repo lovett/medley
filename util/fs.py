@@ -27,7 +27,7 @@ def getSplitLogRoot(log_root, by, match=None):
     split_name = by
     if match:
         split_name += "_" + match
-    return os.path.join(log_root, "split", split_name)
+    return os.path.join(log_root, split_name)
 
 
 def hashPath(root, key, depth=4, extension=".log"):
@@ -77,12 +77,12 @@ def file_list(root, extension=None):
             for f in fnmatch.filter(files, extension)]
 
 @util.decorator.timed
-def appengine_log_grep(logdir, filters, limit=50):
+def appengine_log_grep(logdir, split_dir, filters, limit=50):
     matches = []
 
     t0 = time.time()
     if len(filters["ip"]) > 0:
-        root = getSplitLogRoot(logdir, "ip")
+        root = getSplitLogRoot(split_dir, "ip")
         files = [hashPath(root, f, extension=".sqlite") for f in filters["ip"]]
         files = [f for f in files if os.path.isfile(f)]
     else:

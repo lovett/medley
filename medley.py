@@ -635,6 +635,7 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Field name to split by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
+        split_root = cherrypy.request.app.config["/visitors"].get("splitdir")
 
         log_file = "{}/{}/{}".format(
             log_root,
@@ -644,7 +645,7 @@ class MedleyServer(object):
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No logfile for that date")
 
-        split_root = util.fs.getSplitLogRoot(log_root, by, match)
+        split_root = util.fs.getSplitLogRoot(split_root, by, match)
 
         counters = defaultdict(int)
 
@@ -717,7 +718,8 @@ class MedleyServer(object):
                 filters[action].append(value)
 
         logdir = cherrypy.request.config.get("logdir")
-        results, duration = util.fs.appengine_log_grep(logdir, filters, 100)
+        splitdir = cherrypy.request.config.get("splitdir")
+        results, duration = util.fs.appengine_log_grep(logdir, splitdir, filters, 100)
 
         for result in results.matches:
             def ipfacts_query():
