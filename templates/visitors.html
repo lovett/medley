@@ -102,7 +102,7 @@
 
                     </td>
                     <td>
-                        <a href="/visitors?q=include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                         <p class="small">
                             {{ result.agent|useragent() }}
                             {% if result.referrer and result.referrer_domain not in site_domains  %}

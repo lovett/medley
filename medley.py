@@ -707,6 +707,8 @@ class MedleyServer(object):
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
         q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
+        if "," in q:
+            q = q.replace(",", "\n")
 
         for line in q.split("\n"):
             try:
