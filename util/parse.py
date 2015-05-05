@@ -50,8 +50,11 @@ def assignDict(s, l, t):
     l is the location in the string where matching started
     t is the list of the matched tokens, packaged as a ParseResults_ object
     """
+    d = {}
     for k, v, in t[0].items():
-        t[k] = v
+        d[k] = v
+
+    return d
 
 # Grammars
 # ------------------------------------------------------------------------
