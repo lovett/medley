@@ -739,8 +739,6 @@ class MedleyServer(object):
             "total_matches": results.count,
             "result_limit": results.limit,
             "duration": duration,
-            "walktime": results.walktime,
-            "parsetime": results.parsetime,
             "site_domains": cherrypy.request.config.get("site_domains"),
             "saved_queries": saved_queries
         }

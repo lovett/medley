@@ -11,7 +11,7 @@ import util.decorator
 import hashlib
 from collections import namedtuple
 
-GrepResult = namedtuple("GrepResult", "matches count limit walktime parsetime")
+GrepResult = namedtuple("GrepResult", "matches count limit")
 
 def file_hash(path):
     m = hashlib.sha1()
@@ -80,7 +80,6 @@ def file_list(root, extension=None):
 def appengine_log_grep(logdir, split_dir, filters, limit=50):
     matches = []
 
-    t0 = time.time()
     if len(filters["ip"]) > 0:
         root = getSplitLogRoot(split_dir, "ip")
         files = [hashPath(root, f, extension=".sqlite") for f in filters["ip"]]
@@ -88,7 +87,6 @@ def appengine_log_grep(logdir, split_dir, filters, limit=50):
     else:
         files = file_list(logdir, "*.log")
         files = [f for f in files if any(d in f for d in filters["date"])]
-    t1 = time.time()
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)
@@ -122,7 +120,6 @@ def appengine_log_grep(logdir, split_dir, filters, limit=50):
             else:
                 additional_matches += 1
 
-    t2 = time.time()
     for path in files:
         matches_in_file = []
 
@@ -138,6 +135,4 @@ def appengine_log_grep(logdir, split_dir, filters, limit=50):
         matches_in_file.reverse()
         matches.extend(matches_in_file)
 
-    t3 = time.time()
-
-    return GrepResult(matches, len(matches) + additional_matches, limit, t1 - t0, t3 - t2)
+    return GrepResult(matches, len(matches) + additional_matches, limit)
