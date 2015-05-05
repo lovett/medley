@@ -624,7 +624,10 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def logsplit(self, date=None, by=None, match=None):
+    def logsplit(self, date=None, filename=None, by=None, match=None):
+
+        if filename:
+            date = filename.replace(".log", "")
 
         try:
             date = datetime.strptime(date, "%Y-%m-%d")
