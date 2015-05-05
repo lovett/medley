@@ -11,11 +11,11 @@
             <p>{{ result }}</p>
         </div>
         {% else %}
-        <div class="center aligned six wide centered column">
+        <div class="center aligned sixteen wide centered column">
             <div class="ui segment">
-                <p>Your address is {{ address }}</p>
+                <p>Your address is <a href="/whois?address={{address}}">{{ address }}</a></p>
 
-                <p>The external address is {{ external_ip }}</p>
+                <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
             </div>
         </div>
         {% endif %}

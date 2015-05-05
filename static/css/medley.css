@@ -105,3 +105,7 @@ TR.expandable.expanded {
 .ui.button.focal {
     margin: 2em 0;
 }
+
+.ui.table TD {
+    word-wrap: break-word;
+}

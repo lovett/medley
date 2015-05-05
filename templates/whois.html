@@ -87,6 +87,27 @@
             </div>
         </div>
 
+        {% if ip_facts.geo.latitude and ip_facts.geo.longitude %}
+        <h1 class="ui medium header">Location</h1>
+        <div class="ui segment">
+            <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ map_region }}"></div>
+        </div>
+        {% endif %}
+
+        <h1 class="ui medium header">Activity</h1>
+        <div class="ui segment">
+            <p><a href="/visitors/?q=ip+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
+
+            <p><i class="linkify icon"></i> visit over <a href="{{ address|anonymize }}" rel="noreferer">HTTP</a>,
+                <a href="https://{{ address }}" rel="noreferrer">HTTPS</a>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="eight wide column">
         {% if whois %}
         <h1 class="ui  medium header">Whois</h1>
         <table class="ui striped table">
@@ -104,26 +125,6 @@
             </tbody>
         </table>
         {% endif %}
-    </div>
-
-
-    <div class="eight wide column">
-        {% if ip_facts.geo.latitude and ip_facts.geo.longitude %}
-        <h1 class="ui medium header">Location</h1>
-        <div class="ui segment">
-            <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ map_region }}"></div>
-        </div>
-        {% endif %}
-
-        <h1 class="ui medium header">Activity</h1>
-        <div class="ui segment">
-            <p><a href="/visitors/?q=include+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
-
-            <p><i class="linkify icon"></i> visit over <a href="{{ address|anonymize }}" rel="noreferer">HTTP</a>,
-                <a href="https://{{ address }}" rel="noreferrer">HTTPS</a>
-            </p>
-
-        </div>
     </div>
     {% endif %}
 </main>
