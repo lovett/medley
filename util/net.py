@@ -144,7 +144,7 @@ def sendNotification(message, config):
 def getHtmlTitle(html):
     """Extract the contents of the title tag from an HTML string"""
     try:
-        tree = lxml.html.fromstring(html)
+        tree = lxml.html.fromstring(html.encode("utf-8"))
         return tree.xpath("//title/text()").pop()
     except (TypeError, IndexError, lxml.etree.XMLSyntaxError):
         return None
@@ -194,7 +194,7 @@ def saveUrl(url, destination):
 def htmlToText(html):
     """Reduce an HTML document to the text nodes of the body tag"""
     try:
-        tree = lxml.html.document_fromstring(html)
+        tree = lxml.html.document_fromstring(html.encode("utf-8"))
     except lxml.etree.XMLSyntaxError:
         return ""
 
