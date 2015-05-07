@@ -624,7 +624,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def logsplit(self, date=None, filename=None, by=None, match=None):
+    def logshard(self, date=None, filename=None, by=None, match=None):
 
         if filename:
             date = filename.replace(".log", "")
@@ -635,10 +635,11 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
 
         if by is None:
-            raise cherrypy.HTTPError(400, "Field name to split by not specified")
+            raise cherrypy.HTTPError(400, "Field name to shard by not specified")
 
         log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-        split_root = cherrypy.request.app.config["/visitors"].get("splitdir")
+        shard_root = cherrypy.request.app.config["/visitors"].get("sharddir")
+        shard_root = util.fs.getShardRoot(shard_root, by, match)
 
         log_file = "{}/{}/{}".format(
             log_root,
@@ -648,14 +649,12 @@ class MedleyServer(object):
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No logfile for that date")
 
-        split_root = util.fs.getSplitLogRoot(split_root, by, match)
-
         counters = defaultdict(int)
 
         t0 = time.time()
         with open(log_file) as f:
             for line in f:
-                insert_count = util.db.segregateLogLine(split_root, line, by, match)
+                insert_count = util.db.shardLogLine(shard_root, line, by, match)
                 if insert_count == 0:
                     counters["skip"] += 1
                 else:
@@ -723,8 +722,8 @@ class MedleyServer(object):
                 filters[action].append(value)
 
         logdir = cherrypy.request.config.get("logdir")
-        splitdir = cherrypy.request.config.get("splitdir")
-        results, duration = util.fs.appengine_log_grep(logdir, splitdir, filters, 100)
+        sharddir = cherrypy.request.config.get("sharddir")
+        results, duration = util.fs.appengine_log_grep(logdir, sharddir, filters, 100)
 
         for result in results.matches:
             def ipfacts_query():

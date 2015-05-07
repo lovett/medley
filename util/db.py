@@ -334,7 +334,7 @@ def createLogDatabase(path):
     conn.commit()
     conn.close()
 
-def segregateLogLine(root, line, field, match=None):
+def shardLogLine(root, line, field, match=None):
     """Insert line into an sqlite database under root
 
     The database file path is determined from the sha1 hash of field.

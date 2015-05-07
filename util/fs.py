@@ -23,7 +23,7 @@ def file_hash(path):
             m.update(data)
     return m.hexdigest()
 
-def getSplitLogRoot(log_root, by, match=None):
+def getShardRoot(log_root, by, match=None):
     split_name = by
     if match:
         split_name += "_" + match
@@ -81,7 +81,7 @@ def appengine_log_grep(logdir, split_dir, filters, limit=50):
     matches = []
 
     if len(filters["ip"]) > 0:
-        root = getSplitLogRoot(split_dir, "ip")
+        root = getShardRoot(split_dir, "ip")
         files = [hashPath(root, f, extension=".sqlite") for f in filters["ip"]]
         files = [f for f in files if os.path.isfile(f)]
     else:
