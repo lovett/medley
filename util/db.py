@@ -8,7 +8,9 @@ import netaddr
 import util.fs
 import hashlib
 import util.parse
+import functools
 from urllib.parse import urlparse
+from collections import defaultdict
 
 _databases = {}
 
@@ -321,60 +323,61 @@ def getPathHash(path, prefix):
     else:
         return annotation[0]["value"]
 
-def createLogDatabase(path):
+def openLogIndex(db_dir, index_name=None):
+    """Connect to or create an sqlite3 database under db_dir called logindexes.sqlite
+    and create a table named after index_name.
 
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    Each table of this database acts as an index to the lines of one
+    or more log files.
 
-    conn = sqlite3.connect(path)
-    cur = conn.cursor()
+    Each table also has a database-level index on the key field.
 
-    sql = """CREATE TABLE IF NOT EXISTS lines (
-    hash UNIQUE, date INT, value)"""
-    cur.executescript(sql)
-    conn.commit()
-    conn.close()
-
-def shardLogLine(root, line, field, match=None):
-    """Insert line into an sqlite database under root
-
-    The database file path is determined from the sha1 hash of field.
-
-    Lines can be appended selectively by specifying match. Matching is
-    string-based and case-insensitive.
+    Returns the opened connection.
     """
 
-    fields = util.parse.appengine(line)
+    db_path = os.path.join(
+        db_dir,
+        "logindex.sqlite"
+    )
 
-    # the field isn't present
-    if not field in fields:
-        return 0
+    db_conn = sqlite3.connect(db_path)
+    db_conn.execute("PRAGMA synchronous=OFF")
+    db_conn.execute("PRAGMA jounral_mode=MEMORY")
 
-    # the field doesn't match
-    if match and (match.lower() not in fields[field].lower()):
-        return 0
+    if index_name:
+        create_template = """
+        CREATE TABLE IF NOT EXISTS {0} (
+        date, key, offset, UNIQUE(date, key, offset));
+        CREATE INDEX IF NOT EXISTS {0}_key_index ON {0}(key)
+        """
+        sql = create_template.format(index_name)
+        db_conn.executescript(sql)
+        db_conn.commit()
 
-    db_path = util.fs.hashPath(root, fields[field], extension=".sqlite")
+    return db_conn
 
-    if not os.path.exists(db_path):
-        createLogDatabase(db_path)
+def closeLogIndex(db_conn):
+    db_conn.commit()
+    db_conn.close()
 
-    line_hash = hashlib.sha1()
-    line_hash.update(line.encode("utf-8"))
+def indexLogLines(db_conn, index_name, values):
+    template = "INSERT OR IGNORE INTO {} (date, key, offset) VALUES (?, ?, ?)"
+    sql = template.format(index_name)
+    db_conn.executemany(sql, values)
 
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
-    sql = "INSERT OR IGNORE INTO lines (hash, date, value) VALUES (?, ?, ?)"
-    insert_count = cur.execute(sql, (line_hash.hexdigest(), fields.timestamp.isoformat(), line)).rowcount
-    conn.commit()
-    return insert_count
+def getLogOffsets(db_conn, index_name, keys=[]):
+    db_conn.row_factory = sqlite3.Row
+    cur = db_conn.cursor()
+    template = "SELECT date, offset FROM {} WHERE key IN ({})"
+    placeholders = ["?"] * len(keys)
+    sql = template.format(index_name, ",".join(placeholders))
 
-def getLogLines(db_path):
-    """Retrieve log lines from an sqlite database
+    cur.execute(sql, keys)
 
-    Returns a cursor object for handling results one at a time.
-    """
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    sql = """SELECT value FROM lines ORDER BY date"""
-    return cur.execute(sql)
+    offsets = defaultdict(list)
+
+    for row in cur.fetchall():
+        date = row["date"]
+        offsets[date].append(row["offset"])
+
+    return offsets

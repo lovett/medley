@@ -624,7 +624,7 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def logshard(self, date=None, filename=None, by=None, match=None):
+    def logindex(self, date=None, filename=None, by=None, match=None):
 
         if filename:
             date = filename.replace(".log", "")
@@ -637,39 +637,82 @@ class MedleyServer(object):
         if by is None:
             raise cherrypy.HTTPError(400, "Field name to shard by not specified")
 
-        log_root = cherrypy.request.app.config["/visitors"].get("logdir")
-        shard_root = cherrypy.request.app.config["/visitors"].get("sharddir")
-        shard_root = util.fs.getShardRoot(shard_root, by, match)
-
         log_file = "{}/{}/{}".format(
-            log_root,
+            cherrypy.request.app.config["/visitors"].get("log_dir"),
             date.strftime("%Y-%m"),
             date.strftime("%Y-%m-%d.log"))
 
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No logfile for that date")
 
-        counters = defaultdict(int)
-
         t0 = time.time()
-        with open(log_file) as f:
-            for line in f:
-                insert_count = util.db.shardLogLine(shard_root, line, by, match)
-                if insert_count == 0:
-                    counters["skip"] += 1
-                else:
-                    counters["write"] += insert_count
 
-        counters["duration"] = time.time() - t0
+        index_name = by
+        if match:
+            lower_match = match.lower()
+            index_name += "_" + lower_match
 
-        return counters
+        db_conn = util.db.openLogIndex(
+            cherrypy.config.get("database.directory"),
+            index_name
+        )
+
+        value_batch = []
+
+        def addBatch(batch):
+            if len(batch) == 0:
+                return
+
+            util.db.indexLogLines(
+                db_conn,
+                index_name,
+                batch
+            )
+
+            value_batch = []
+
+        with open(log_file, "r") as f:
+            while True:
+                offset = f.tell()
+                line = f.readline()
+                if not line:
+                    break
+
+                fields = util.parse.appengine(line)
+
+                # the field isn't present
+                if not by in fields:
+                    continue
+
+                # the field doesn't match
+                if match and (lower_match not in fields[by].lower()):
+                    continue
+
+                values = (
+                    date.strftime("%Y-%m-%d"),
+                    fields[by],
+                    offset
+                )
+
+                value_batch.append(values)
+
+                if len(value_batch) > 500:
+                    addBatch(value_batch)
+
+        addBatch(value_batch)
+
+        util.db.closeLogIndex(db_conn)
+
+        return {
+            "duration": time.time() - t0
+        }
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
     def loginventory(self):
-        log_root = cherrypy.request.app.config["/visitors"].get("logdir")
+        log_root = cherrypy.request.app.config["/visitors"].get("log_dir")
 
         files = util.fs.file_list(log_root, "*.log")
 
@@ -709,21 +752,33 @@ class MedleyServer(object):
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
         q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
+
         if "," in q:
             q = q.replace(",", "\n")
 
         for line in q.split("\n"):
             try:
-                action, value = line.strip().split(" ", 1)
-            except ValueError:
+                subject, value = line.strip().split(" ", 1)
+                filters[subject].append(value)
+            except (ValueError, KeyError):
                 continue
 
-            if action in filters.keys():
-                filters[action].append(value)
+        log_dir = cherrypy.request.config.get("log_dir")
 
-        logdir = cherrypy.request.config.get("logdir")
-        sharddir = cherrypy.request.config.get("sharddir")
-        results, duration = util.fs.appengine_log_grep(logdir, sharddir, filters, 100)
+        offsets = None
+
+        if len(filters["ip"]) > 0:
+            db_conn = util.db.openLogIndex(
+                cherrypy.config.get("database.directory"),
+            )
+
+            offsets = util.db.getLogOffsets(db_conn, "ip", filters["ip"])
+
+            filters["date"] = offsets.keys()
+            del filters["ip"]
+
+
+        results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
 
         for result in results.matches:
             def ipfacts_query():

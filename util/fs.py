@@ -23,51 +23,6 @@ def file_hash(path):
             m.update(data)
     return m.hexdigest()
 
-def getShardRoot(log_root, by, match=None):
-    split_name = by
-    if match:
-        split_name += "_" + match
-    return os.path.join(log_root, split_name)
-
-
-def hashPath(root, key, depth=4, extension=".log"):
-    """Convert key to a hash-based file path under root"""
-    m = hashlib.sha1()
-    m.update(key.encode("utf-8"))
-    digest = m.hexdigest()
-    path = "".join((digest[i] + os.sep for i in range(depth)))
-    return os.path.join(root, path, digest + extension)
-
-def sortLog(path, key):
-    index = []
-
-    infile = open(path)
-    while True:
-        offset = infile.tell()
-        line = infile.readline()
-        if not line:
-            break
-
-        length = len(line)
-        fields = util.parse.appengine(line)
-        index.append((fields[key], offset, length))
-
-    sorted_index = index.sort()
-
-    if sorted_index != index:
-        outpath = path + "_sorted"
-        outfile = open(outpath, "w")
-
-
-        for field, offset, length in index:
-            infile.seek(offset)
-            outfile.write(infile.read(length))
-
-        outfile.close()
-        os.rename(outpath, path)
-    infile.close()
-
-
 def file_list(root, extension=None):
     if not extension:
         extension = ".*"
@@ -77,16 +32,12 @@ def file_list(root, extension=None):
             for f in fnmatch.filter(files, extension)]
 
 @util.decorator.timed
-def appengine_log_grep(logdir, split_dir, filters, limit=50):
+def appengine_log_grep(logdir, filters, offsets=None, limit=50):
     matches = []
 
-    if len(filters["ip"]) > 0:
-        root = getShardRoot(split_dir, "ip")
-        files = [hashPath(root, f, extension=".sqlite") for f in filters["ip"]]
-        files = [f for f in files if os.path.isfile(f)]
-    else:
-        files = file_list(logdir, "*.log")
-        files = [f for f in files if any(d in f for d in filters["date"])]
+    files = file_list(logdir, "*.log")
+    files = [f for f in files if any(d in f for d in filters["date"])]
+    additional_matches = 0
 
     def filter(line, patterns):
         matches = (re.search(pattern, line) for pattern in patterns)
@@ -96,41 +47,61 @@ def appengine_log_grep(logdir, split_dir, filters, limit=50):
         return False
 
     skips = set()
-    additional_matches = 0
 
     # put the file list in reverse chronological order
     # (lexicographically) to get newest results first
     files.sort(reverse=True)
 
-
     def processLine(line):
         ip = line[0:line.find(" ")]
 
         if ip in skips:
-            return False
+            return 0
 
         if filter(line, filters["shun"]):
             skips.add(ip)
-            return False
+            return 0
 
-        if not filters["include"] or (filter(line, filters["include"]) and not filter(line, filters["exclude"])):
-            if limit == 0 or len(matches) + len(matches_in_file) < limit:
-                fields = util.parse.appengine(line)
-                matches_in_file.append(fields)
-            else:
-                additional_matches += 1
+        if not filters["include"] and not filters["exclude"]:
+            include = True
+        elif not filters["include"] and not filter(line, filters["exclude"]):
+            include = True
+        elif not filters["exclude"] and filter(line, filters["include"]):
+            include = True
+        else:
+            include = False
+
+        if not include:
+            return 0
+
+        if include and len(matches) + len(matches_in_file) > limit:
+            return 1
+
+        fields = util.parse.appengine(line)
+        matches_in_file.append(fields)
+        return 0
+
+    def offsetsByPath(path):
+        if not offsets:
+            return None
+
+        for key, value in offsets.items():
+            if key in path:
+                return value
 
     for path in files:
         matches_in_file = []
 
-        print(path)
-        if path.endswith(".sqlite"):
-            for line in util.db.getLogLines(path):
-                processLine(line["value"])
-        else:
-            with open(path) as f:
+        with open(path) as f:
+            path_offsets = offsetsByPath(path)
+            if not path_offsets:
                 for line in f:
-                    processLine(line)
+                    additional_matches += processLine(line)
+            else:
+                for offset in path_offsets:
+                    f.seek(offset)
+                    line = f.readline()
+                    additional_matches += processLine(line)
 
         matches_in_file.reverse()
         matches.extend(matches_in_file)
