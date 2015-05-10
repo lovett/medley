@@ -77,17 +77,19 @@ appengine_grammar += dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums +
 # Parsers
 # ------------------------------------------------------------------------
 def appengine(line):
-    fields = appengine_grammar.parseString(line.strip())
+    line = line.strip()
+    fields = appengine_grammar.parseString(line).asDict()
 
-    fields.timestamp = datetime.strptime(fields.timestamp, "%d/%b/%Y:%H:%M:%S %z")
+    fields["timestamp"] = datetime.strptime(fields["timestamp"], "%d/%b/%Y:%H:%M:%S %z")
 
-    if fields.referrer:
-        fields.referrer_domain = urlparse(fields.referrer).netloc or None
+    if "referrer" in fields:
+        fields["referrer_domain"] = urlparse(fields["referrer"]).netloc or None
     else:
-        fields.referrer_domain = None
+        fields["referrer_domain"] = None
 
-    fields.agent = user_agent_parser.Parse(fields.agent)
+    fields["line"] = line
 
-    fields.line = line
+    if "agent" in fields:
+        fields["agent"] = user_agent_parser.Parse(fields["agent"])
 
     return fields
