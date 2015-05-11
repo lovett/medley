@@ -15,6 +15,10 @@ HEADER .ui.header {
     margin-bottom: 0;
 }
 
+.ui.form TEXTAREA {
+    height: 2em;
+}
+
 #page-header {
     background-color: #efefef;
     padding: 1em;
@@ -58,6 +62,7 @@ HEADER .ui.header {
 }
 
 TR.expandable {
+    background-color: #ffffcc;
     display: none;
 }
 
@@ -108,4 +113,14 @@ TR.expandable.expanded {
 
 .ui.table TD {
     word-wrap: break-word;
+}
+
+.sleeve {
+    max-width: 100%;
+    overflow: auto;
+}
+
+
+.horizontal.linkset A {
+    margin-left: 2em;
 }

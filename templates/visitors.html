@@ -10,7 +10,7 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
+<main class="ui stackable page grid">
     <div class="ui sixteen wide column">
         <form class="ui form" method="get" action="/visitors">
             <div class="field">
@@ -32,6 +32,7 @@
                     <a href="#" class="ui mini button item" data-keyword="date" data-value="yesterday"><i class="calendar icon"></i> Yesterday</a>
                 </div>
             </div>
+
             <div class="fields">
                 <div class="field">
                     <button id="submit" class="ui button"><i class="send icon"></i> Run query</button>
@@ -43,109 +44,112 @@
         </form>
     </div>
 
-    {% if results != none %}
-    <div class="ui sixteen wide column">
-
-        {% if results|length() == 0 %}
+    {% if results|length() == 0 %}
+    <div class="sixteen wide column">
         <div class="ui segment">
             <p>No results found.</p>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
 
-        {% if results|length() > 0 %}
 
-        {% if result_limit < total_matches %}
-        <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
-        {% else %}
-        <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
-        {% endif %}
+    {% if results|length() > 0 %}
+    <div class="sixteen wide column">
 
-        <table class="ui table">
-            <thead>
-                <tr>
-                    <th class="one wide">Location</th>
-                    <th class="three wide">IP</th>
-                    <th class="four wide">Date</th>
-                    <th class="four wide">Request</th>
-                    <th class="one wide">Response</th>
-                    <th class="one wide"></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in results %}
-                <tr>
-                    <td>
-                        <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
-                        {% if result.ip_facts.geo.continent == "NA" %}
-                        {{ result.ip_facts.geo.region_code|default("", true) }}
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(20, true) }}</a>
-                        {% if result.ip_facts.organization %}
-                        <p class="small">{{ result.ip_facts.organization }}</p>
-                        {% endif %}
+        <div class="ui segment">
+            {% if result_limit < total_matches %}
+            <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
+            {% else %}
+            <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
+            {% endif %}
+        </div>
 
-                        {% for annotation in result.ip_facts.annotations %}
-                        <p class="small">{{ annotation }}</p>
-                        {% endfor %}
-                    </td>
-                    <td >
-                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
-                        at {{ result.timestamp|localtime('time12') }}
-
-                        {% if result.ip_facts.geo.time_zone %}
-                        <p class="small">
-                            {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
-                        </p>
-                        {% endif %}
-
-                    </td>
-                    <td>
-                        <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
-                        <p class="small">
-                            {{ result.agent|useragent() }}
-                            {% if result.referrer and result.referrer_domain not in site_domains  %}
-                            <br/>
-                            Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
+        <div class="sleeve">
+            <table class="ui table unstackable">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>IP</th>
+                        <th>Date</th>
+                        <th>Request</th>
+                        <th>Code</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>
+                            <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
+                            {% if result.ip_facts.geo.continent == "NA" %}
+                            {{ result.ip_facts.geo.region_code|default("", true) }}
                             {% endif %}
-                        </p>
-                    </td>
-                    <td><span class="help" title="{{ result.statusCode|status_message()}}">{{ result.statusCode }}</span></td>
-                    <td class="right aligned">
-                        <a href="#" class="row-toggle"><i class="cubes icon"></i><span class="label">more</span></a>
-                    </td>
-                </tr>
-                <tr class="expandable">
-                    <td colspan="6" class="active">
-                        <p><code>{{ result.line }}</code></p>
+                        </td>
+                        <td>
+                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(15, true) }}</a>
+                            {% if result.ip_facts.organization %}
+                            <p class="small">{{ result.ip_facts.organization }}</p>
+                            {% endif %}
 
-                        <div class="ui grid">
-                            <div class="right floated right aligned two wide column">
-                                <a href="/annotations/ip:{{ result.ip}}"><i class="bookmark icon"></i> annotate</a>
-                            </div>
-                            <div class="right floated right aligned two wide column">
-                                <a href="/whois/{{ result.ip }}" target="_blank"><i class="search icon"></i> whois</a>
-                            </div>
+                            {% for annotation in result.ip_facts.annotations %}
+                            <p class="small">{{ annotation }}</p>
+                            {% endfor %}
+                        </td>
+                        <td nowrap="nowrap">
+                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
+                            at {{ result.timestamp|localtime('time12') }}
 
-                            <div class="left floated left aligned twelve wide column">
+                            {% if result.ip_facts.geo.time_zone %}
+                            <p class="small">
+                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
+                            </p>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                            <p class="small">
+                                {{ result.agent|useragent() }}
+                                {% if result.referrer and result.referrer_domain not in site_domains  %}
+                                <br/>
+                                Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
+                                {% endif %}
+                            </p>
+                        </td>
+                        <td><span class="help" title="{{ result.statusCode|status_message()}}">{{ result.statusCode }}</span></td>
+                        <td class="right aligned">
+                            <a href="#" class="row-toggle"><i class="cubes icon"></i><span class="label">more</span></a>
+                        </td>
+                    </tr>
+                    <tr class="expandable">
+                        <td colspan="6">
+                            <p><code>{{ result.line }}</code></p>
+
+                            <div class="ui grid">
+                                <div class="right floated right aligned eight wide column horizontal linkset">
+                                    <a href="/annotations/ip:{{ result.ip}}"> <i class="bookmark icon"></i> annotate</a>
+                                    <a href="/whois/{{ result.ip }}" target="_blank"><i class="search icon"></i> whois</a>
+                                </div>
 
                                 {% if result.ip_facts.geo.city %}
-                                <i class="map icon"></i>
-                                {{ result.ip_facts.geo.city|default("", true) }}
+                                <div class="left floated eight wide column">
+                                    <i class="map icon"></i>
+                                    {{ result.ip_facts.geo.city|default("", true) }}
+                                </div>
                                 {% endif %}
                             </div>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p>This query ran in {{ duration|round(4) }} seconds</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ui segment">
+            <p>This query ran in {{ duration|round(4) }} seconds</p>
+        </div>
 
         {% endif %}
     </div>
-    {% endif %}
 </main>
 
 {% endblock %}
