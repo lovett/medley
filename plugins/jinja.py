@@ -84,6 +84,9 @@ class Plugin(plugins.SimplePlugin):
         """Format the object returned by ua-parser into a string"""
         out = ""
 
+        if not agent:
+            return ""
+
         if agent["device"]["family"] == "Spider":
             return agent["user_agent"]["family"]
 
