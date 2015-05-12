@@ -589,6 +589,10 @@ class MedleyServer(object):
 
         if key and value and cherrypy.request.method == "POST":
             util.db.saveAnnotation(key, value)
+            self.cache.delete(key)
+            if "ip:" in key:
+                self.cache.delete(key.replace("ip:", "ip_facts:"))
+
             annotations = util.db.getAnnotations(key, limit=1)
 
             if len(annotations) != 1:
