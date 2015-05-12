@@ -299,16 +299,7 @@ class MedleyServer(object):
         if ip is None:
             ip = util.net.resolveHost(address_clean)
 
-        def ipfacts_query():
-            try:
-                return util.db.ipFacts(ip)
-            except:
-                return {}
-
-        ip_facts = self.cache.get_or_create(
-            "ipfacts:{}".format(ip), ipfacts_query,
-            should_cache_fn= lambda v: v is not None
-        )
+        ip_facts = util.db.ipFacts(ip)
 
         data = {
             "address": address_clean,
@@ -590,8 +581,6 @@ class MedleyServer(object):
         if key and value and cherrypy.request.method == "POST":
             util.db.saveAnnotation(key, value)
             self.cache.delete(key)
-            if "ip:" in key:
-                self.cache.delete(key.replace("ip:", "ip_facts:"))
 
             annotations = util.db.getAnnotations(key, limit=1)
 
@@ -785,16 +774,7 @@ class MedleyServer(object):
         results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
 
         for result in results.matches:
-            def ipfacts_query():
-                try:
-                    return util.db.ipFacts(result["ip"])
-                except:
-                    return {}
-
-            result["ip_facts"] = self.cache.get_or_create(
-                "ip_facts:{}".format(result["ip"]), ipfacts_query,
-                should_cache_fn= lambda v: len(v) > 0
-            )
+            result["ip_facts"] = util.db.ipFacts(result["ip"])
 
         return {
             "q": q,
