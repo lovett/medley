@@ -68,12 +68,12 @@
             <table class="ui table unstackable">
                 <thead>
                     <tr>
-                        <th>Location</th>
-                        <th>IP</th>
-                        <th>Date</th>
-                        <th>Request</th>
-                        <th>Code</th>
-                        <th></th>
+                        <th class="one wide">Location</th>
+                        <th class="three wide">IP</th>
+                        <th class="five wide">Date</th>
+                        <th class="five wide">Request</th>
+                        <th class="one wide">Code</th>
+                        <th class="one wide"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -86,7 +86,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(15, true) }}</a>
+                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip }}</a>
                             {% if result.ip_facts.organization %}
                             <p class="small">{{ result.ip_facts.organization }}</p>
                             {% endif %}
@@ -96,7 +96,7 @@
                             {% endfor %}
                         </td>
                         <td nowrap="nowrap">
-                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" class="nowrap" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
+                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
                             at {{ result.timestamp|localtime('time12') }}
 
                             {% if result.ip_facts.geo.time_zone %}
@@ -105,7 +105,7 @@
                             </p>
                             {% endif %}
                         </td>
-                        <td>
+                        <td nowrap="nowrap">
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                             <p class="small">
                                 {{ result.agent|useragent() }}
@@ -122,7 +122,7 @@
                     </tr>
                     <tr class="expandable">
                         <td colspan="6">
-                            <p><code>{{ result.line }}</code></p>
+                            <p class="wordwrap"><code>{{ result.line }}</code></p>
 
                             <div class="ui grid">
                                 <div class="right floated right aligned eight wide column horizontal linkset">

@@ -53,10 +53,6 @@ HEADER .ui.header {
     margin: 0;
 }
 
-.nowrap {
-    white-space: pre;
-}
-
 .small {
     font-size: .75em;
 }
@@ -111,7 +107,7 @@ TR.expandable.expanded {
     margin: 2em 0;
 }
 
-.ui.table TD {
+.ui.table .wordwrap {
     word-wrap: break-word;
 }
 
