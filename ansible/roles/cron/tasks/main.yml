@@ -3,7 +3,7 @@
   sudo: yes
   apt: name=curl state=present
 
-- name: Update AWS IP ranges every Sunday at 7AM
+- name: Update AWS IP ranges
   sudo: yes
   cron:
     cron_file="{{ project_name }}"
@@ -11,5 +11,16 @@
     minute="5"
     hour="7"
     weekday="0"
-    job="curl -k https://localhost/awsranges > /dev/null"
+    job="curl -k 'https://localhost/awsranges' > /dev/null"
+    user="{{ project_user }}"
+
+- name: Update geodb database
+  sudo: yes
+  cron:
+    cron_file="{{ project_name }}"
+    name="geodb_update"
+    minute="3"
+    hour="8"
+    day="10"
+    job="curl -s -k -d 'action=update' 'https://localhost/geodb' > /dev/null"
     user="{{ project_user }}"
