@@ -111,12 +111,18 @@ TR.expandable.expanded {
     word-wrap: break-word;
 }
 
-.sleeve {
-    max-width: 100%;
-    overflow: auto;
-}
-
-
 .horizontal.linkset A {
     margin-left: 2em;
+}
+
+.sleeve {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+@media only screen and (min-width: 40.063em) {
+    .sleeve {
+        min-width: auto;
+        overflow-x: inherit;
+    }
 }
