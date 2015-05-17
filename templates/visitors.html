@@ -57,15 +57,22 @@
     <div class="sixteen wide column">
 
         <div class="ui segment">
-            {% if result_limit < total_matches %}
-            <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
-            {% else %}
-            <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
-            {% endif %}
+            <div class="ui grid">
+                <div class="eight wide column">
+                    {% if result_limit < total_matches %}
+                    <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
+                    {% else %}
+                    <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
+                    {% endif %}
+                </div>
+                <div class="eight wide right aligned column">
+                    <a id="matches-master-toggle" class="master-toggle" href="#"><span class="label">expand</a> all</a>
+                </div>
+            </div>
         </div>
 
         <div class="sleeve">
-            <table class="ui table unstackable">
+            <table id="matches" class="ui table unstackable">
                 <thead>
                     <tr>
                         <th class="one wide">Location</th>
@@ -117,7 +124,7 @@
                         </td>
                         <td><span class="help" title="{{ result.statusCode|status_message()}}">{{ result.statusCode }}</span></td>
                         <td class="right aligned">
-                            <a href="#" class="row-toggle"><i class="cubes icon"></i><span class="label">more</span></a>
+                            <a href="#" class="toggle toggle-next-row"><i class="cubes icon"></i><span class="label">more</span></a>
                         </td>
                     </tr>
                     <tr class="expandable">
