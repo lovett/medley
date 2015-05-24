@@ -382,3 +382,25 @@ def getLogOffsets(db_conn, index_name, keys=[]):
         offsets[date].append(row["offset"])
 
     return offsets
+
+def getMaxOffset(db_conn, index_name, date):
+    db_conn.row_factory = sqlite3.Row
+    cur = db_conn.cursor()
+    template = """SELECT offset
+                  FROM {}
+                  WHERE date=?
+                  ORDER BY offset DESC
+                  LIMIT 1"""
+    sql = template.format(index_name)
+
+
+    date_formatted = date.strftime("%Y-%m-%d")
+
+    cur.execute(sql, (date_formatted,))
+
+    row = cur.fetchone()
+
+    if row:
+        return row["offset"]
+    else:
+        return 0

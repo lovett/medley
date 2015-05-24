@@ -628,7 +628,7 @@ class MedleyServer(object):
             raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
 
         if by is None:
-            raise cherrypy.HTTPError(400, "Field name to shard by not specified")
+            raise cherrypy.HTTPError(400, "Field name to index by not specified")
 
         log_file = "{}/{}/{}".format(
             cherrypy.request.app.config["/visitors"].get("log_dir"),
@@ -636,7 +636,7 @@ class MedleyServer(object):
             date.strftime("%Y-%m-%d.log"))
 
         if not os.path.isfile(log_file):
-            raise cherrypy.HTTPError(400, "No logfile for that date")
+            raise cherrypy.HTTPError(400, "No log for that date")
 
         t0 = time.time()
 
@@ -665,6 +665,12 @@ class MedleyServer(object):
             value_batch = []
 
         with open(log_file, "r") as f:
+            max_offset = util.db.getMaxOffset(
+                db_conn, index_name, date
+            )
+
+            f.seek(max_offset)
+
             while True:
                 offset = f.tell()
                 line = f.readline()
