@@ -638,8 +638,6 @@ class MedleyServer(object):
         if not os.path.isfile(log_file):
             raise cherrypy.HTTPError(400, "No log for that date")
 
-        t0 = time.time()
-
         index_name = by
         if match:
             lower_match = match.lower()
@@ -702,9 +700,8 @@ class MedleyServer(object):
 
         util.db.closeLogIndex(db_conn)
 
-        return {
-            "duration": time.time() - t0
-        }
+        cherrypy.response.status = 204
+        return
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
