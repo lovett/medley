@@ -11,7 +11,7 @@
     minute="5"
     hour="7"
     weekday="0"
-    job="curl -k 'https://localhost/awsranges' > /dev/null"
+    job="curl -k --fail --silent --show-error 'https://localhost/awsranges' 2> >(logger -t medley_awsranges)"
     user="{{ project_user }}"
 
 - name: Update geodb database
@@ -22,5 +22,5 @@
     minute="3"
     hour="8"
     day="10"
-    job="curl -s -k -d 'action=update' 'https://localhost/geodb' > /dev/null"
+    job="curl -k --fail --silent --show-error -d 'action=update' 'https://localhost/geodb' 2> >(logger -t medley_geodb)"
     user="{{ project_user }}"
