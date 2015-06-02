@@ -84,7 +84,7 @@ def geoSetup(database_dir, download_url):
             _databases["geo"] = None
 
 
-@functools.lru_cache(maxsize=128, typed=False)
+@functools.lru_cache(maxsize=128)
 def ipFacts(ip):
     address = netaddr.IPAddress(ip)
     netblocks = getAnnotationsByPrefix("netblock")
