@@ -14,4 +14,4 @@ openssl_self_signed:
     city:
     organization: "{{ project_name }}"
     unit:
-    email: "medley@localhost"
+    email: "medley@{{ project_hostname }}"
