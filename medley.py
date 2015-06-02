@@ -802,13 +802,11 @@ class MedleyServer(object):
 
         key = "netblock:aws"
         fetch_key = "awsranges:lastfetch"
-        min_age = 86400 * 7
-
         last_fetch = util.db.getAnnotations(fetch_key)
-        if last_fetch:
-            if time.time() - float(last_fetch[0]["value"]) < min_age:
-                raise cherrypy.HTTPError(400, "Ranges have already been downloaded today")
 
+        if last_fetch:
+            if (time.time() - float(last_fetch[0]["value"])) < 86400:
+                raise cherrypy.HTTPError(400, "Ranges have already been downloaded today")
 
         ranges = util.net.getUrl("https://ip-ranges.amazonaws.com/ip-ranges.json", json=True)
 
