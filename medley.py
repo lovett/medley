@@ -400,11 +400,17 @@ class MedleyServer(object):
         if cid_number and cid_value:
             update_command = cherrypy.request.config.get("callerid_put")
 
+
+
             if not update_command:
                 raise cherrypy.HTTPError(500, "Callerid update command not specified")
 
-            update_command[update_command.index("$number")] = cid_number
-            update_command[update_command.index("$value")] = cid_value
+            for element in update_command:
+                if "$number" in element:
+                    element = element.replace("$number", cid_number)
+                if "$value" in element:
+                    element = element.replace("$value", cid_value)
+
             subprocess.call(update_command)
             cherrypy.response.status = 204
             return
