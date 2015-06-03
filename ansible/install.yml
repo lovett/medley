@@ -10,3 +10,4 @@
     - ansible
     - medley
     - cron
+    - monit

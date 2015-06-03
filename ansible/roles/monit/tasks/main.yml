@@ -1,0 +1,8 @@
+- name: Install monit
+  sudo: yes
+  apt: name=monit state=latest
+
+- name: Install monit configuration file
+  sudo: yes
+  template: src=medley dest=/etc/monit/conf.d/{{ project_name }}
+  notify: reload monit
