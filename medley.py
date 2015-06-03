@@ -392,10 +392,22 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
-    def phone(self, number=None):
+    def phone(self, number=None, cid_number=None, cid_value=None):
         """Get the geographic location and recent call history for a phone number"""
 
         data = {}
+
+        if cid_number and cid_value:
+            update_command = cherrypy.request.config.get("callerid.put.command")
+
+            if not update_command:
+                raise cherrypy.HTTPError(500, "Callerid update command not specified")
+
+            update_command[update_command.index("$number")] = cid_number
+            update_command[update_command.index("$value")] = cid_value
+            subprocess.call(update_command)
+            cherrypy.response.status = 204
+            return
 
         if number is None:
             message = "Phone number not specified"

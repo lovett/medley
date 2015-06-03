@@ -16,6 +16,20 @@ var MEDLEY = (function () {
         }
     };
 
+    var togglePanel = function (e) {
+        e.preventDefault();
+        var trigger = jQuery(this);
+        var panel = trigger.closest('.panel');
+        panel.parent().find('.panel').toggleClass('hidden');
+    }
+
+    var resetForm = function (e) {
+        e.preventDefault();
+        var form = jQuery(this).closest('FORM');
+        form[0].reset();
+        form.removeClass('error');
+    };
+
     var shortcuts = function (e) {
         var href;
 
@@ -66,7 +80,11 @@ var MEDLEY = (function () {
 
     return {
         init: function () {
+
             jQuery('.toggle-trigger').on('click', toggle);
+            jQuery('.panel-trigger').on('click', togglePanel);
+
+            jQuery('.form-reset').on('click', resetForm);
 
             jQuery(document).on('keydown', shortcuts);
 
@@ -106,7 +124,7 @@ var MEDLEY = (function () {
                     jQuery('.icon', this).removeClass('cube').addClass('cubes');
                 }
             });
-            
+
             jQuery('A.toggle-next-row').on('click', function (e) {
                 var nextRow;
                 e.preventDefault();
@@ -123,14 +141,14 @@ var MEDLEY = (function () {
             jQuery('.master-toggle').on('click expand collapse', function (e) {
                 var label, table;
                 e.preventDefault();
-                
+
                 label = jQuery('.label', this);
                 table = getTableForMasterToggle(this);
 
                 if (e.type === 'expand') {
                     label.text('collapse');
                 }
-                
+
                 if (e.type === 'collapse') {
                     label.text('expand');
                 }

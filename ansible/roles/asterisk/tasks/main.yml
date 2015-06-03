@@ -1,0 +1,11 @@
+---
+- name: Install asterisk package
+  sudo: yes
+  apt: name=asterisk state=present
+
+- name: Add application user to asterisk group
+  sudo: yes
+  user:
+    name="{{ project_user }}"
+    group="asterisk"
+    append=yes

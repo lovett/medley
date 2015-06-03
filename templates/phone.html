@@ -6,7 +6,10 @@
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
 <script src="/static/js/maps.js"></script>
+<script src="/static/js/phone.js"></script>
 {% endblock %}
+
+
 
 {% block page_body %}
 
@@ -25,6 +28,45 @@
     {% if number %}
 
     <div class="eight wide column">
+
+        <h1 class="ui medium header">Caller ID</h1>
+        <div class="ui segment">
+
+            <div class="panel">
+                <div class="ui grid">
+                    <div class="fourteen wide column">
+                        <p id="callerid-display-value">
+                            {% if history|length > 0 and history[0]["clid"] != number %}
+                            {{ history[0]["clid"] }}
+                            {% else %}
+                            Unknown
+                            {% endif %}
+                        </p>
+
+                    </div>
+                    <div class="one wide column">
+                        <a href="#" class="panel-trigger">Edit</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden panel">
+                <form id="caller-id" class="ui form" method="post" action="/phone">
+                    <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
+                    <div class="field">
+                        <input type="text" name="cid_value" value=""/>
+                    </div>
+                    <div class="field">
+                        <button class="ui small button">Update</button>
+                        <a href="#" class="panel-trigger form-reset nudge-right">Cancel</a>
+                    </div>
+                    <div class="ui error message"></div>
+                </form>
+            </div>
+        </div>
+
+
+
         <div class="ui grid">
             <div class="ten wide column">
                 <div class="ui segment">
@@ -42,13 +84,6 @@
                 </div>
             </div>
         </div>
-
-        {% if history|length > 0 and history[0]["clid"] != number %}
-        <h1 class="ui medium header">Caller ID</h1>
-        <div class="ui segment">
-            {{ history[0]["clid"] }}
-        </div>
-        {% endif %}
 
         {% if history|length > 0 %}
         <h1 class="ui medium header">History</h1>

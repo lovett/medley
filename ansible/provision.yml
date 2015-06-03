@@ -11,3 +11,4 @@
     - ansible
     - medley
     - cron
+    - asterisk

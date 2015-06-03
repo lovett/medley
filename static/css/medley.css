@@ -126,3 +126,7 @@ TR.expandable.expanded {
         overflow-x: inherit;
     }
 }
+
+.nudge-right {
+    padding-left: 1em;
+}
