@@ -50,7 +50,10 @@ class Plugin(plugins.SimplePlugin):
         if not timezone:
             timezone = cherrypy.config.get("timezone")
 
-        local_value = value.astimezone(pytz.timezone(timezone))
+        if value.tzinfo:
+            local_value = value.astimezone(pytz.timezone(timezone))
+        else:
+            local_value = pytz.timezone(timezone).localize(value)
 
         return self.datetime_filter(local_value, format)
 

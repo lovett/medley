@@ -3,6 +3,9 @@ import pytz
 import datetime
 import pickle
 
+def convert_naive_date(s):
+    return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
+
 def convert_date(s):
     d = datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
     return pytz.utc.localize(d)

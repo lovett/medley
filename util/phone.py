@@ -151,7 +151,7 @@ def abbreviateComment(comment):
 def callHistory(database, caller, limit=0, offset=0):
     """Get call history from an Asterisk sqlite3 CDR database."""
 
-    sqlite3.register_converter("date", util.sqlite_converters.convert_date)
+    sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
     sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
     sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
 
@@ -170,7 +170,7 @@ def callHistory(database, caller, limit=0, offset=0):
         return ([], 0)
 
     params = []
-    query = """SELECT calldate as "date [date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr WHERE src=? ORDER BY calldate DESC"""
+    query = """SELECT calldate as "date [naive_date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr WHERE src=? ORDER BY calldate DESC"""
     params.append(caller)
 
     if limit > 0:
