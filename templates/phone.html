@@ -72,22 +72,28 @@
         {% if history|length > 0 %}
         <h1 class="ui medium header">Call History</h1>
 
-        <table class="ui table">
+        <table class="ui table unstackable">
             <thead>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Destination</th>
-                <th>Duration</th>
-                <th>End</th>
+                <tr>
+                    <th>Date</th>
+                    <th>Duration</th>
+                    <th>End</th>
+                </tr>
             </thead>
             <tbody>
                 {% for entry in history %}
                 <tr>
-                    <td>{{ entry["date"]|localtime("%Y-%m-%d") }}</td>
-                    <td>{{ entry["date"]|localtime("time12")}}</td>
-                    <td>{{ entry["dst"]}}</td>
-                    <td>{{ entry["duration"] }}</td>
-                    <td>{{ entry["lastapp"] }}</td>
+                    <td nowrap="nowrap">
+                        {{ entry["date"]|localtime("%Y-%m-%d") }}
+                        <p class="small">{{ entry["date"]|localtime("time12")}}</p>
+                    </td>
+                    <td>
+                        {{ entry["duration"] }}
+                    </td>
+                    <td nowrap="nowrap">
+                        {{ entry["lastapp"] }}
+                        <p class="small">{{ entry["dst"]}}</p>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

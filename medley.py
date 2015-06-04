@@ -452,20 +452,15 @@ class MedleyServer(object):
 
         socket = util.phone.asteriskAuthenticate(config)
 
-        if not socket:
-            raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
-
+        if socket:
+            caller_id = util.phone.getCallerId(socket, number)
+        else:
+            caller_id = None
 
         history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
 
-        caller_id = util.phone.getCallerId(socket, number)
-
-        print(caller_id)
-
         if not caller_id and len(history) > 0:
             caller_id = history[0][0]["clid"]
-
-        print(caller_id)
 
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name", "Unknown")

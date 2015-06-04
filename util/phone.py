@@ -208,7 +208,7 @@ def asteriskAuthenticate(config):
 
     if "Message: Authentication accepted" not in response:
         s.close()
-        return false
+        return False
     else:
         return s
 
@@ -229,7 +229,7 @@ def getCallerId(s, number):
     last_line = response.strip().split("\n")[-2]
 
     if "Database entry not found" in last_line:
-        return false
+        return False
     else:
         return last_line.strip().replace("Value: ", "")
 
