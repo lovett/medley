@@ -396,19 +396,20 @@ class MedleyServer(object):
         """Get the geographic location and recent call history for a phone number"""
 
         data = {}
+        config = cherrypy.request.app.config["asterisk"]
 
         if cid_number and cid_value:
-            update_command = cherrypy.request.config.get("callerid_put")
+            socket = util.phone.asteriskAuthenticate(config)
 
+            if not socket:
+                raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
 
+            result = util.phone.setCallerId(socket, cid_number, cid_value)
 
-            if not update_command:
-                raise cherrypy.HTTPError(500, "Callerid update command not specified")
+            if not result:
+                raise cherrypy.HTTPError(500, "Failed to set caller id")
 
-            update_command = [item.replace("$number", cid_number) for item in update_command]
-            update_command = [item.replace("$value", cid_value) for item in update_command]
-
-            subprocess.call(update_command)
+            socket.close()
             cherrypy.response.status = 204
             return
 
@@ -448,10 +449,28 @@ class MedleyServer(object):
             should_cache_fn= lambda v: v is not None
         )
 
+
+        socket = util.phone.asteriskAuthenticate(config)
+
+        if not socket:
+            raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
+
+
+        history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
+
+        caller_id = util.phone.getCallerId(socket, number)
+
+        print(caller_id)
+
+        if not caller_id and len(history) > 0:
+            caller_id = history[0][0]["clid"]
+
+        print(caller_id)
+
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name", "Unknown")
         else:
-            history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
+            data["caller_id"] = caller_id
             data["history"] = history[0]
             data["number"] = number
             data["number_formatted"] = util.phone.format(number)

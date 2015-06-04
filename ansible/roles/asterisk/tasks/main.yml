@@ -3,9 +3,7 @@
   sudo: yes
   apt: name=asterisk state=present
 
-- name: Add application user to asterisk group
+- name: Copy manger credentials
   sudo: yes
-  user:
-    name="{{ project_user }}"
-    group="asterisk"
-    append=yes
+  template: src=medley.conf dest=/etc/asterisk/manager.d/medley.conf
+  notify: restart asterisk

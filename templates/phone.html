@@ -36,13 +36,8 @@
                 <div class="ui grid">
                     <div class="fourteen wide column">
                         <p id="callerid-display-value">
-                            {% if history|length > 0 and history[0]["clid"] != number %}
-                            {{ history[0]["clid"] }}
-                            {% else %}
-                            Unknown
-                            {% endif %}
+                            {{ caller_id|default('Unknown') }}
                         </p>
-
                     </div>
                     <div class="one wide column">
                         <a href="#" class="panel-trigger">Edit</a>
@@ -66,27 +61,16 @@
         </div>
 
 
-
-        <div class="ui grid">
-            <div class="ten wide column">
-                <div class="ui segment">
-                    {% if state_name %}
-                    <h2 class="ui tiny centered header">{{ state_name }}</h2>
-                    {% endif %}
-                    <p>{{ comment }}</p>
-                </div>
-            </div>
-            <div class="six wide column">
-                <div class="ui segment">
-                    <h2 class="ui tiny centered header">Search</h2>
-                    <p class="supplemental"><a href="{{ whitepages_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> whitepages.com</a></p>
-                    <p class="supplemental"><a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
-                </div>
-            </div>
+        {% if state_name %}
+        <h1 class="ui medium header">Location: {{ state_name }}</h1>
+        <div class="ui segment">
+            <h2 class="ui tiny header"></h2>
+            <p>{{ comment }}</p>
         </div>
+        {% endif %}
 
         {% if history|length > 0 %}
-        <h1 class="ui medium header">History</h1>
+        <h1 class="ui medium header">Call History</h1>
 
         <table class="ui table">
             <thead>
@@ -114,6 +98,12 @@
 
     <div class="eight wide column">
         <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
+
+        <h1 class="ui medium header">Links</h1>
+        <div class="ui segment">
+            <p class="supplemental"><a href="{{ whitepages_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> whitepages.com</a></p>
+            <p class="supplemental"><a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
+        </div>
     </div>
     {% endif %}
 

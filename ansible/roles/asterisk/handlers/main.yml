@@ -1,0 +1,4 @@
+---
+- name: restart asterisk
+  sudo: yes
+  service: name=asterisk state=restarted

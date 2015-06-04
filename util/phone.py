@@ -186,3 +186,66 @@ def callHistory(database, caller, limit=0, offset=0):
 
     conn.close()
     return result
+
+def asteriskAuthenticate(config):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((config["host"], config["port"]))
+
+    params = [
+        "Action: login",
+        "Events: off",
+        "Username: {}".format(config["username"]),
+        "Secret: {}".format(config["secret"])
+    ]
+
+    command = "\r\n".join(params) + "\r\n\r\n"
+
+    s.send(command.encode("UTF-8"))
+
+    response = ""
+    while "Message" not in response:
+        response += s.recv(1024).decode("UTF-8")
+
+    if "Message: Authentication accepted" not in response:
+        s.close()
+        return false
+    else:
+        return s
+
+def getCallerId(s, number):
+    params = [
+        "Action: Command",
+        "Command: database get cidname {}".format(number)
+    ]
+
+    command = "\r\n".join(params) + "\r\n\r\n"
+
+    s.send(command.encode("UTF-8"))
+
+    response = ""
+    while "--END COMMAND--" not in response:
+        response += s.recv(1024).decode("UTF-8")
+
+    last_line = response.strip().split("\n")[-2]
+
+    if "Database entry not found" in last_line:
+        return false
+    else:
+        return last_line.strip().replace("Value: ", "")
+
+
+def setCallerId(s, number, value):
+    params = [
+        "Action: Command",
+        "Command: database put cidname {} \"{}\"".format(number, value)
+    ]
+
+    command = "\r\n".join(params) + "\r\n\r\n"
+
+    s.send(command.encode("UTF-8"))
+
+    response = ""
+    while "--END COMMAND--" not in response:
+        response += s.recv(1024).decode("UTF-8")
+
+    return "Updated database successfully" in response
