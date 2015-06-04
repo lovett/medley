@@ -47,6 +47,9 @@ class Plugin(plugins.SimplePlugin):
     def localtime_filter(self, value, format="locale", timezone=None):
         """Same as datetime_filter, but converts to the application's timezone"""
 
+        if not value:
+            return ''
+
         if not timezone:
             timezone = cherrypy.config.get("timezone")
 

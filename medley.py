@@ -11,6 +11,7 @@ import json
 import plugins.jinja
 import inspect
 import util.phone
+import util.asterisk
 import util.net
 import util.fs
 import util.db
@@ -389,6 +390,42 @@ class MedleyServer(object):
             "downloaded": downloaded
         }
 
+    @util.decorator.hideFromHomepage
+    @cherrypy.expose
+    def blacklist(self, action, number):
+
+        config = cherrypy.request.app.config["asterisk"]
+
+        if cherrypy.request.method != "POST":
+            raise cherrypy.HTTPError(405)
+
+
+        if action not in ["add", "remove"]:
+            raise cherrypy.HTTPError(400, "Invalid action")
+
+        number = util.phone.sanitize(number)
+        if not number:
+            raise cherrypy.HTTPError(400, "Invalid number")
+
+        sock = util.asterisk.authenticate(config)
+
+        if not sock:
+            raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
+
+        if action == "remove":
+            result = util.asterisk.blacklistRemove(sock, number)
+        elif action == "add":
+            result = util.asterisk.saveBlacklist(sock, number)
+
+        sock.close()
+
+        if not result:
+            raise cherrypy.HTTPError(500, "Failed to modify blacklist")
+
+        cherrypy.response.status = 204
+        return
+
+
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="phone.html")
@@ -399,17 +436,17 @@ class MedleyServer(object):
         config = cherrypy.request.app.config["asterisk"]
 
         if cid_number and cid_value:
-            socket = util.phone.asteriskAuthenticate(config)
+            sock = util.asterisk.authenticate(config)
 
-            if not socket:
+            if not sock:
                 raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
 
-            result = util.phone.setCallerId(socket, cid_number, cid_value)
+            result = util.asterisk.saveCallerId(sock, cid_number, cid_value)
 
             if not result:
-                raise cherrypy.HTTPError(500, "Failed to set caller id")
+                raise cherrypy.HTTPError(500, "Failed to save caller id")
 
-            socket.close()
+            sock.close()
             cherrypy.response.status = 204
             return
 
@@ -450,17 +487,24 @@ class MedleyServer(object):
         )
 
 
-        socket = util.phone.asteriskAuthenticate(config)
+        sock = util.asterisk.authenticate(config)
 
-        if socket:
-            caller_id = util.phone.getCallerId(socket, number)
+        if sock:
+            caller_id = util.asterisk.getCallerId(sock, number)
+            blacklisted = util.asterisk.getBlacklist(sock, number)
+            sock.close()
         else:
             caller_id = None
+            blacklisted = False
+
 
         history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
 
-        if not caller_id and len(history) > 0:
-            caller_id = history[0][0]["clid"]
+        if not caller_id:
+            try:
+                caller_id = history[0][0]["clid"]
+            except IndexError:
+                caller_id = "Unknown"
 
         if cherrypy.request.negotiated == "text/plain":
             return location.get("state_name", "Unknown")
@@ -468,6 +512,7 @@ class MedleyServer(object):
             data["caller_id"] = caller_id
             data["history"] = history[0]
             data["number"] = number
+            data["blacklisted"] = blacklisted
             data["number_formatted"] = util.phone.format(number)
             data["state_abbreviation"] = location.get("state_abbreviation")
             data["state_name"] = location.get("state_name")

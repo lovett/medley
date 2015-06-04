@@ -60,6 +60,27 @@
             </div>
         </div>
 
+        <h1 class="ui medium header">Blacklist</h1>
+
+        <div class="ui {% if blacklisted %}inverted{% endif %} segment">
+
+            <form class="ui blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                <input type="hidden" name="number" value="{{ number|default('') }}" />
+                <input type="hidden" name="action" value="remove" />
+                <p>Added <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+                <button class="ui mini button">Remove</button>
+                <div class="ui error message"></div>
+            </form>
+
+            <form class="ui blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                <input type="hidden" name="number" value="{{ number|default('') }}" />
+                <input type="hidden" name="action" value="add" />
+                <p>Not blacklisted</p>
+                <button class="ui mini button">Add</button>
+                <div class="ui error message"></div>
+            </form>
+        </div>
+
 
         {% if state_name %}
         <h1 class="ui medium header">Location: {{ state_name }}</h1>
@@ -84,7 +105,7 @@
                 {% for entry in history %}
                 <tr>
                     <td nowrap="nowrap">
-                        {{ entry["date"]|localtime("%Y-%m-%d") }}
+                        {{ entry["date"]|localtime("date") }}
                         <p class="small">{{ entry["date"]|localtime("time12")}}</p>
                     </td>
                     <td>
