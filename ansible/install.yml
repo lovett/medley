@@ -7,7 +7,6 @@
     - nginx
     - git
     - python3
-    - ansible
     - medley
     - cron
     - monit
