@@ -189,7 +189,7 @@ def getAnnotations(keys=[], limit=0):
     if not isinstance(keys, list):
         keys = [keys]
 
-    sql = "SELECT id, key, value, datetime(created, 'localtime') as 'created [created]' FROM annotations"
+    sql = "SELECT id, key, value, created as 'created [created]' FROM annotations"
 
     if keys:
         sql += " WHERE key IN ("
