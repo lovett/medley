@@ -14,8 +14,7 @@
 <main class="ui page grid stackable">
     <div class="ui sixteen wide right aligned column">
         Bookmarklet:
-        <a href="javascript:void(window.open('{{ base }}/later?action=edit&comments=' + window.getSelection().toString() + '&url='+encodeURIComponent(window.location.href), 'later'))">⚡ later</a>
-
+        <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))">⚡ later</a>
     </div>
 
     <div class="ui sixteen wide column">

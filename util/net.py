@@ -152,12 +152,18 @@ def getHtmlTitle(html):
 def reduceHtmlTitle(title):
     """Remove site identifiers and noise from the title of an HTML document"""
     title = title or ""
-    for char in "|-:·":
+    reduced_title = title
+    for char in "|·—:":
         separator = " {} ".format(char)
         if separator in title:
             segments = title.split(separator)
-            return max(segments, key=len)
-    return title
+            reduced_title = max(segments, key=len)
+            break
+
+    if reduced_title == title:
+        return title
+    else:
+        return reduceHtmlTitle(reduced_title)
 
 def getUrl(url, json=False):
     """Make a GET request for the specified URL and return its HTML as a string"""

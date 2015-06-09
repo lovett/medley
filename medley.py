@@ -584,9 +584,14 @@ class MedleyServer(object):
     def later(self, action="edit", title=None, url=None, tags=None, comments=None):
         """Capture a webpage for future reference"""
 
-        error = None
+        if not url:
+            error = "Address missing"
+        else:
+            error = None
 
-        if action == "edit" and url:
+        title = util.net.reduceHtmlTitle(title)
+
+        if not error and cherrypy.request.method == "GET":
             bookmark = util.db.getBookmarkByUrl(url)
 
             if bookmark:
@@ -596,32 +601,12 @@ class MedleyServer(object):
                 tags = bookmark["tags"]
                 comments = bookmark["comments"]
 
-            if not title:
-                try:
-                    html = self.cache.get_or_create(
-                        "html:" + url,
-                        lambda: util.net.getUrl(url),
-                        should_cache_fn = lambda v: v is not None
-                    )
-                except util.net.NetException as e:
-                    error = str(e)
-                    html = None
-
-                title = util.net.getHtmlTitle(html)
-                title = util.net.reduceHtmlTitle(title)
-
-        if cherrypy.request.method == "POST":
-            if not url:
-                error = "Address missing"
-            else:
-                url_id = util.db.saveBookmark(url, title, comments, tags)
-
-                html = self.cache.get("html:" + url)
-                if not html:
-                    html = util.net.getUrl(url)
-                text = util.net.htmlToText(html)
-                util.db.saveBookmarkFulltext(url_id, text)
-                return "ok".encode("utf-8")
+        if not error and cherrypy.request.method == "POST":
+            url_id = util.db.saveBookmark(url, title, comments, tags)
+            html = util.net.getUrl(url)
+            text = util.net.htmlToText(html)
+            util.db.saveBookmarkFulltext(url_id, text)
+            return "ok".encode("utf-8")
 
         return {
             "base": cherrypy.config.get("base"),
