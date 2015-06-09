@@ -10,7 +10,6 @@
     name="{{ project_user }}"
     createhome=yes
     system=yes
-    shell=/bin/false
 
 - name: Add ansible ssh user to application user group
   sudo: yes
