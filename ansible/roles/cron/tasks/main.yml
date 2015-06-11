@@ -24,3 +24,12 @@
     day="10"
     job="curl -k --fail --silent --show-error -d 'action=update' 'https://localhost/geodb'"
     user="{{ project_user }}"
+
+- name: Check external ip
+  sudo: yes
+  cron:
+    cron_file="{{ project_name }}"
+    name="external_ip"
+    minute="45"
+    job="curl -k --fail --silent --show-error 'https://localhost/geodb'"
+    user="{{ project_user }}"
