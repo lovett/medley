@@ -104,8 +104,10 @@ def externalIp(timeout=5):
         r = requests.get("http://myip.dnsomatic.com", timeout=timeout)
         r.raise_for_status()
         return r.text
-    except requests.exceptions.HTTPError:
-        raise NetException("DNS-o-Matic query failed")
+    except requests.exceptions.ConnectionError:
+        raise NetException("Unable to connect to DNS-o-Matic")
+    except requests.exceptions.Timeout:
+        raise NetException("Connection to DNS-o-matic timed out")
 
 def sendMessage(message_data, template_data):
     """Render an email template and send via SMTP"""

@@ -124,27 +124,61 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     def external_ip(self):
-        """Determine the local machine's external IP"""
+        """Determine the local machine's external IP
 
-        external_hostname = cherrypy.request.app.config["ip_tokens"].get("external")
+        Compares the current external ip with a previously saved
+        value. Returns the string "nochg" if they match. Executes a
+        shell command if they do not and returns the string
+        "good". Returns 500 with error message on failure.
+
+        Responses are always served as text/plain
+
+        """
+
+        cherrypy.response.headers["Content-Type"] = "text/plain"
+
+        annotation_key = "ip:external"
+
+        external_hostname = cherrypy.config.get("hostname.external")
 
         if not external_hostname:
-            raise cherrypy.HTTPError(500, "External IP hostname not configured")
+            cherrypy.response.status = 500
+            return "External hostname not configured".encode("UTF-8")
 
-        dns_command = cherrypy.config.get("ip.dns.command")[:]
+        annotations = util.db.getAnnotationsByKey(annotation_key)
+
+        if annotations:
+            last_known_ip = annotations[0]["value"]
+        else:
+            last_known_ip = None
 
         try:
-            ip = util.net.externalIp()
+            current_ip = util.net.externalIp()
         except util.net.NetException as e:
-            raise cherrypy.HTTPError(500, str(e))
+            cherrypy.response.status = 500
+            return str(e).encode("UTF-8")
 
-        if ip and dns_command:
-            dns_command[dns_command.index("$ip")] = ip
-            dns_command[dns_command.index("$host")] = external_hostname
-            subprocess.call(dns_command)
+        if current_ip == last_known_ip:
+            result = "nochg"
+        else:
+            dns_command = cherrypy.config.get("ip.dns.command")[:]
+            dns_command = [field.replace("$ip", current_ip) for field in dns_command]
+            dns_command = [field.replace("$host", external_hostname) for field in dns_command]
 
-        cherrypy.response.status = 204
-        return
+            try:
+                subprocess.check_call(dns_command)
+            except FileNotFoundError as e:
+                cherrypy.response.status = 500
+                return "Unable to run the configured update command".encode("UTF-8")
+            except subprocess.CalledProcessError as e:
+                cherrypy.response.status = 500
+                return str(e).encode("UTF-8")
+
+            util.db.saveAnnotation(annotation_key, current_ip, True)
+
+            result = "good"
+
+        return "{} {}".format(result, current_ip).encode("UTF-8")
 
 
     @cherrypy.expose
