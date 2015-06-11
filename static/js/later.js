@@ -42,8 +42,8 @@ MEDLEY.later = (function () {
                         var $successMessage = jQuery('.green.message', $form);
                         var $errorMessage = jQuery('.error.message', $form);
                         if (data === 'ok') {
-                            jQuery('INPUT, TEXTAREA', $form).val('');
-                            $successMessage.removeClass('hidden').fadeOut(5000);
+                            $successMessage.removeClass('hidden');
+                            window.location.href = '/archive';
                         } else {
                             $form.addClass('error');
                             $successMessage.addClass('hidden');
