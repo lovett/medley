@@ -115,6 +115,9 @@ def getBookmarkById(bookmark_id):
     return cur.fetchone()
 
 def getBookmarkByUrl(url):
+    if not url:
+        return False
+
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row

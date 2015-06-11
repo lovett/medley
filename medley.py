@@ -618,14 +618,11 @@ class MedleyServer(object):
     def later(self, action="edit", title=None, url=None, tags=None, comments=None):
         """Capture a webpage for future reference"""
 
-        if not url:
-            error = "Address missing"
-        else:
-            error = None
+        error = None
 
         title = util.net.reduceHtmlTitle(title)
 
-        if not error and cherrypy.request.method == "GET":
+        if cherrypy.request.method == "GET":
             bookmark = util.db.getBookmarkByUrl(url)
 
             if bookmark:
@@ -635,9 +632,15 @@ class MedleyServer(object):
                 tags = bookmark["tags"]
                 comments = bookmark["comments"]
 
-        if not error and cherrypy.request.method == "POST":
-            url_id = util.db.saveBookmark(url, title, comments, tags)
+        if cherrypy.request.method == "POST" and url:
             html = util.net.getUrl(url)
+
+            if not title:
+                title = getHtmlTitle(html)
+                title = util.net.reduceHtmlTitle(title)
+
+            url_id = util.db.saveBookmark(url, title, comments, tags)
+
             text = util.net.htmlToText(html)
             util.db.saveBookmarkFulltext(url_id, text)
             return "ok".encode("utf-8")
