@@ -173,7 +173,14 @@ def getUrl(url, json=False):
     cherrypy.log("APP", "Requesting {}".format(url))
 
     try:
-        r = requests.get(url, timeout=5, allow_redirects=True)
+        r = requests.get(
+            url,
+            timeout=5,
+            allow_redirects=True,
+            headers = {
+                "User-Agent": "python"
+            }
+        )
         r.raise_for_status()
         if json:
             return r.json()

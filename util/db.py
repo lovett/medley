@@ -146,10 +146,10 @@ def saveBookmark(url, title, comments=None, tags=None):
 
     conn = sqlite3.connect(_databases["bookmarks"])
     cur = conn.cursor()
-    cur.execute("INSERT INTO urls (url, domain) VALUES (?, ?)", (url, parsed_url.netloc))
+    cur.execute("INSERT OR REPLACE INTO urls (url, domain) VALUES (?, ?)", (url, parsed_url.netloc))
     conn.commit()
     url_id = cur.lastrowid
-    cur.execute("""INSERT INTO meta (url_id, title, comments, tags)
+    cur.execute("""INSERT OR REPLACE INTO meta (url_id, title, comments, tags)
                 VALUES (?, ?, ?, ?)""",
                 (url_id, title, comments, tags))
     conn.commit()
