@@ -19,6 +19,7 @@ import util.decorator
 import dogpile.cache
 import pytz
 import time
+import html.parser
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
@@ -620,6 +621,15 @@ class MedleyServer(object):
 
         error = None
 
+        if title:
+            title = html.parser.unescape(title)
+
+        if tags:
+            tags = html.parser.unescape(tags)
+
+        if comments:
+            coments = html.parser.unescape(comments)
+
         title = util.net.reduceHtmlTitle(title)
 
         if cherrypy.request.method == "GET":
@@ -627,21 +637,20 @@ class MedleyServer(object):
 
             if bookmark:
                 error = "This URL has already been bookmarked"
-                title = bookmark["title"]
-                url = bookmark["url"]
-                tags = bookmark["tags"]
-                comments = bookmark["comments"]
+                title = html.parser.unescape(bookmark["title"])
+                tags = html.parser.unescape(bookmark["tags"])
+                comments = html.parser.unescape(bookmark["comments"])
 
         if cherrypy.request.method == "POST" and url:
-            html = util.net.getUrl(url)
+            page = util.net.getUrl(url)
 
             if not title:
-                title = getHtmlTitle(html)
+                title = getHtmlTitle(page)
                 title = util.net.reduceHtmlTitle(title)
 
             url_id = util.db.saveBookmark(url, title, comments, tags)
 
-            text = util.net.htmlToText(html)
+            text = util.net.htmlToText(page)
             util.db.saveBookmarkFulltext(url_id, text)
             return "ok".encode("utf-8")
 
