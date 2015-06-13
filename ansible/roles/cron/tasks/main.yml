@@ -31,5 +31,5 @@
     cron_file="{{ project_name }}"
     name="external_ip"
     minute="45"
-    job="curl -k --fail --silent --show-error 'https://localhost/geodb'"
+    job="curl -k --fail --silent --show-error 'https://localhost/external_ip'"
     user="{{ project_user }}"
