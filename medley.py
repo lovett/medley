@@ -13,6 +13,7 @@ import inspect
 import util.phone
 import util.asterisk
 import util.net
+import util.html
 import util.fs
 import util.db
 import util.decorator
@@ -622,13 +623,13 @@ class MedleyServer(object):
         error = None
 
         if title:
-            title = html.parser.unescape(title)
+            title = util.html.parse_text(title)
 
         if tags:
-            tags = html.parser.unescape(tags)
+            tags = util.html.parse_text(tags)
 
         if comments:
-            coments = html.parser.unescape(comments)
+            coments = util.html.parse_text(comments)
 
         title = util.net.reduceHtmlTitle(title)
 
@@ -637,9 +638,9 @@ class MedleyServer(object):
 
             if bookmark:
                 error = "This URL has already been bookmarked"
-                title = html.parser.unescape(bookmark["title"])
-                tags = html.parser.unescape(bookmark["tags"])
-                comments = html.parser.unescape(bookmark["comments"])
+                title = util.html.parse_text(bookmark["title"])
+                tags = util.html.parse_text(bookmark["tags"])
+                comments = util.html.parse_text(bookmark["comments"])
 
         if cherrypy.request.method == "POST" and url:
             page = util.net.getUrl(url)
