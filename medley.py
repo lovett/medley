@@ -670,8 +670,14 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     def annotation(self, annotation_id):
+
         if cherrypy.request.method == "DELETE":
+            annotation = util.db.getAnnotationById(annotation_id)
             if util.db.deleteAnnotation(annotation_id) == 1:
+
+                if annotation["key"].startswith("ip:"):
+                    util.db.ipFacts.cache_clear()
+
                 return "ok".encode("utf-8")
 
         raise cherrypy.HTTPError(400)
@@ -684,6 +690,10 @@ class MedleyServer(object):
 
         if key and value and cherrypy.request.method == "POST":
             util.db.saveAnnotation(key, value)
+
+            if key.startswith("ip:"):
+                util.db.ipFacts.cache_clear()
+
             self.cache.delete(key)
 
             annotations = util.db.getAnnotations(key, limit=1)

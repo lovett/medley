@@ -83,8 +83,7 @@ def geoSetup(database_dir, download_url):
         except IOError:
             _databases["geo"] = None
 
-
-@functools.lru_cache(maxsize=128)
+@functools.lru_cache()
 def ipFacts(ip):
     address = netaddr.IPAddress(ip)
     netblocks = getAnnotationsByPrefix("netblock")
@@ -211,6 +210,18 @@ def getAnnotations(keys=[], limit=0):
 
     return cur.fetchall()
 
+def getAnnotationById(id):
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
+    conn = sqlite3.connect(_databases["annotations"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    sql = """SELECT id, key, value, datetime(created, 'localtime') as 'created [created]'
+    FROM annotations WHERE id = ?"""
+
+    cur.execute(sql, (id,))
+
+    return cur.fetchone()
 
 def getAnnotationsByKey(key):
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)
