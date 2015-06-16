@@ -21,6 +21,7 @@ import dogpile.cache
 import pytz
 import time
 import html.parser
+import syslog
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 
@@ -45,6 +46,7 @@ class MedleyServer(object):
     cache = dogpile.cache.make_region()
 
     def __init__(self):
+        syslog.open(self.__class__.__name__)
         plugins.jinja.Plugin(cherrypy.engine).subscribe()
 
         db_dir = os.path.realpath(cherrypy.config.get("database.directory"))
@@ -144,8 +146,10 @@ class MedleyServer(object):
         external_hostname = cherrypy.config.get("hostname.external")
 
         if not external_hostname:
+            message = "External hostname not configured"
             cherrypy.response.status = 500
-            return "External hostname not configured".encode("UTF-8")
+            syslog.syslog(syslog.LOG_ERROR, message)
+            return message.encode("UTF-8")
 
         annotations = util.db.getAnnotationsByKey(annotation_key)
 
@@ -180,6 +184,7 @@ class MedleyServer(object):
 
             result = "good"
 
+        syslog.syslog(syslog.LOG_INFO, "External ip lookup complete")
         return "{} {}".format(result, current_ip).encode("UTF-8")
 
 
@@ -388,6 +393,7 @@ class MedleyServer(object):
         directory = cherrypy.config.get("database.directory")
 
         if not (url and directory):
+            syslog.syslog(syslog.LOG_ERROR, "geodb endpoint has not been configured")
             raise cherrypy.HTTPError(410, "This endpoint is not active")
 
         download_path = "{}/{}".format(directory.rstrip("/"),
@@ -411,12 +417,14 @@ class MedleyServer(object):
             if download_path.endswith(".gz"):
                 try:
                     subprocess.check_call(["gunzip", "-f", download_path])
+                    syslog.syslog(syslog.LOG_INFO, "Geodb download complete")
                     cherrypy.response.status = 204
 
                     # Re-run setup to ensure the newly downloaded file gets used
                     util.db.geoSetup(directory, url)
                     return
                 except subprocess.CalledProcessError:
+                    syslog.syslog(syslog.LOG_ERROR, "Failed to gunzip geodb database")
                     os.unlink(download_path)
                     raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
 
@@ -920,6 +928,7 @@ class MedleyServer(object):
 
         if last_fetch:
             if (time.time() - float(last_fetch[0]["value"])) < 86400:
+                syslog.syslog(syslog.LOG_NOTICE, "Rejecting awsranges request - too soon")
                 raise cherrypy.HTTPError(400, "Ranges have already been downloaded today")
 
         ranges = util.net.getUrl("https://ip-ranges.amazonaws.com/ip-ranges.json", json=True)
@@ -934,6 +943,9 @@ class MedleyServer(object):
 
 
         util.db.saveAnnotation(fetch_key, time.time())
+
+
+        syslog.syslog(syslog.LOG_NOTICE, "AWS netblock range download complete")
 
         cherrypy.response.status = 204
         return
