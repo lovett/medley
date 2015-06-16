@@ -675,7 +675,7 @@ class MedleyServer(object):
             annotation = util.db.getAnnotationById(annotation_id)
             if util.db.deleteAnnotation(annotation_id) == 1:
 
-                if annotation["key"].startswith("ip:"):
+                if annotation["key"].startswith("ip:") or annotation["key"].startswith("netblock:"):
                     util.db.ipFacts.cache_clear()
 
                 return "ok".encode("utf-8")
