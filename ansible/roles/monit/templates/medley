@@ -5,3 +5,8 @@ check file medley_messages with path /var/log/messages
 check process nginx with pidfile /var/run/nginx.pid every 2 cycles
     start program = "/etc/init.d/nginx start"
     stop program = "/etc/init.d/nginx stop"
+
+check process medley with pidfile /var/run/medley/medley.pid
+    start program = "/etc/init.d/medley start"
+    stop program = "/etc/init.d/medley stop"
+    if 2 restarts within 2 cycles then unmonitor
