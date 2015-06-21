@@ -840,6 +840,18 @@ class MedleyServer(object):
             return "\n".join(files)
         return files
 
+    @util.decorator.hideFromHomepage
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.encode()
+    def logwalk(self, by, distance=7, match=None):
+        log_files = self.loginventory()
+
+        for log in log_files[-7:]:
+            result = self.logindex(filename=log, by=by, match=match)
+
+        cherrypy.response.status = 200
+        return "ok".encode("UTF-8")
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
