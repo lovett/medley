@@ -844,14 +844,22 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def logwalk(self, by, distance=7, match=None):
+    def logwalk(self, by, distance=7, match=None, all=None):
         log_files = self.loginventory()
 
-        for log in log_files[-7:]:
+        if all:
+            start_index = 0
+        else:
+            start_index = int(distance) * -1
+
+        log_subset = log_files[start_index:]
+
+        for log in log_subset:
             result = self.logindex(filename=log, by=by, match=match)
 
         cherrypy.response.status = 200
-        return "ok".encode("UTF-8")
+        cherrypy.response.headers["Content-Type"] = "text/plain"
+        return "\n".join(log_subset) + "\n\n"
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
