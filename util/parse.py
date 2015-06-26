@@ -4,6 +4,8 @@ from ua_parser import user_agent_parser
 from urllib.parse import urlparse
 import string
 
+#ParserElement.enablePackrat()
+
 # Primitives
 # ------------------------------------------------------------------------
 integer = Word(nums)
@@ -74,8 +76,16 @@ appengine_grammar += ("-" | dblQuotedString).setResultsName("agent").setParseAct
 appengine_grammar += dblQuotedString.setResultsName("host").setParseAction(removeQuotes)
 appengine_grammar += dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums + ".")).setResultsName("stats").setParseAction(assignDict)
 
+# Partial grammar for ip extraction
+ip_grammar = (ipv4 | ipv6).setResultsName("ip")
+
 # Parsers
 # ------------------------------------------------------------------------
+def appengine_ip(line):
+    line = line.strip()
+    return ip_grammar.parseString(line).asDict()
+
+
 def appengine(line):
     line = line.strip()
     fields = appengine_grammar.parseString(line).asDict()

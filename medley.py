@@ -785,6 +785,12 @@ class MedleyServer(object):
                 batch
             )
 
+
+        if by == "ip":
+            indexer = util.parse.appengine_ip
+        else:
+            indexer = util.parse.appengine
+
         with open(log_file, "r") as f:
             max_offset = util.db.getMaxOffset(
                 db_conn, index_name, date
@@ -798,7 +804,7 @@ class MedleyServer(object):
                 if not line:
                     break
 
-                fields = util.parse.appengine(line)
+                fields = indexer(line)
 
                 # the field isn't present
                 if not by in fields:
