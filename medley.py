@@ -739,7 +739,9 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
+    @util.decorator.timed
     def logindex(self, date=None, filename=None, by=None, match=None):
+        start_time = time.time()
 
         if filename:
             date = filename.replace(".log", "")
@@ -771,6 +773,7 @@ class MedleyServer(object):
         )
 
         value_batch = []
+        line_count = 0
 
         def addBatch(batch):
             if len(batch) == 0:
@@ -781,8 +784,6 @@ class MedleyServer(object):
                 index_name,
                 batch
             )
-
-            value_batch = []
 
         with open(log_file, "r") as f:
             max_offset = util.db.getMaxOffset(
@@ -817,13 +818,17 @@ class MedleyServer(object):
 
                 if len(value_batch) > 500:
                     addBatch(value_batch)
+                    line_count += len(value_batch)
+                    value_batch = []
 
         addBatch(value_batch)
+        line_count += len(value_batch)
+        value_batch = []
 
         util.db.closeLogIndex(db_conn)
 
         cherrypy.response.status = 204
-        return
+        return line_count
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
@@ -854,12 +859,14 @@ class MedleyServer(object):
 
         log_subset = log_files[start_index:]
 
+        results = []
         for log in log_subset:
-            result = self.logindex(filename=log, by=by, match=match)
+            lines_processed, duration = self.logindex(filename=log, by=by, match=match)
+            results.append("{}: {} lines in {}".format(log, lines_processed, duration))
 
         cherrypy.response.status = 200
         cherrypy.response.headers["Content-Type"] = "text/plain"
-        return "\n".join(log_subset) + "\n\n"
+        return "\n".join(results) + "\n\n"
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
