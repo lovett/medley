@@ -53,6 +53,12 @@
             <div class="field">
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
+                <p class="shortcuts">
+                    {% if comments %}
+                    <a class="trim-sentence-from-start" href="#">Trim sentence from start</a>
+                    <a class="trim-sentence-from-end" href="#">Trim sentence from end</a>
+                    {% endif %}
+                </p>
             </div>
 
             <div class="field">

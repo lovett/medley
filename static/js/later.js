@@ -5,13 +5,17 @@ MEDLEY.later = (function () {
 
     applyShortcut = function (e) {
         var trigger = jQuery(e.target);
-        var target = trigger.closest('.field').find('INPUT');
+        var target = trigger.closest('.field').find('INPUT,TEXTAREA');
         if (trigger.hasClass('remove-querystring')) {
             target.val(target.val().replace(/\?[^#]+/, ''));
         } else if (trigger.hasClass('remove-hash')) {
             target.val(target.val().replace(/#.*/, ''));
         } else if (trigger.hasClass('reset')) {
             target.val(target.attr('data-original-value'));
+        } else if (trigger.hasClass('trim-sentence-from-start')) {
+            target.val(target.val().replace(/^(.*?\.) ([A-Z].*)/m, '$2'));
+        } else if (trigger.hasClass('trim-sentence-from-end')) {
+            target.val(target.val().replace(/^(.*\.) ([A-Z].*)/m, '$1'));
         }
     };
 
