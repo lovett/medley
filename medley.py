@@ -131,11 +131,8 @@ class MedleyServer(object):
         """Determine the local machine's external IP
 
         Compares the current external ip with a previously saved
-        value. Returns the string "nochg" if they match. Executes a
-        shell command if they do not and returns the string
-        "good". Returns 500 with error message on failure.
-
-        Responses are always served as text/plain
+        value. Returns 204 if they match. Executes a shell command if
+        they do not. Returns 500 with error message on failure.
 
         """
 
@@ -165,27 +162,27 @@ class MedleyServer(object):
             return str(e).encode("UTF-8")
 
         if current_ip == last_known_ip:
-            result = "nochg"
-        else:
-            dns_command = cherrypy.config.get("ip.dns.command")[:]
-            dns_command = [field.replace("$ip", current_ip) for field in dns_command]
-            dns_command = [field.replace("$host", external_hostname) for field in dns_command]
+            cherrypy.response.status = 204
+            return
 
-            try:
-                subprocess.check_call(dns_command)
-            except FileNotFoundError as e:
-                cherrypy.response.status = 500
-                return "Unable to run the configured update command".encode("UTF-8")
-            except subprocess.CalledProcessError as e:
-                cherrypy.response.status = 500
-                return str(e).encode("UTF-8")
+        dns_command = cherrypy.config.get("ip.dns.command")[:]
+        dns_command = [field.replace("$ip", current_ip) for field in dns_command]
+        dns_command = [field.replace("$host", external_hostname) for field in dns_command]
 
-            util.db.saveAnnotation(annotation_key, current_ip, True)
+        try:
+            subprocess.check_call(dns_command)
+        except FileNotFoundError as e:
+            cherrypy.response.status = 500
+            return "Unable to run the configured update command".encode("UTF-8")
+        except subprocess.CalledProcessError as e:
+            cherrypy.response.status = 500
+            return str(e).encode("UTF-8")
 
-            result = "good"
+        util.db.saveAnnotation(annotation_key, current_ip, True)
 
-        syslog.syslog(syslog.LOG_INFO, "External ip lookup complete")
-        return "{} {}".format(result, current_ip).encode("UTF-8")
+        message = "External ip has changed to {}".format(current_i)
+        syslog.syslog(syslog.LOG_INFO, message)
+        return message.encode("UTF-8")
 
 
     @cherrypy.expose
