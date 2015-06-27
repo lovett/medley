@@ -634,7 +634,7 @@ class MedleyServer(object):
             tags = util.html.parse_text(tags)
 
         if comments:
-            coments = util.html.parse_text(comments)
+            comments = util.html.parse_text(comments)
 
         title = util.net.reduceHtmlTitle(title)
 
