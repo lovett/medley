@@ -13,3 +13,7 @@ test: dummy
 install: dummy
 	ansible-playbook ansible/install.yml
 	$(call notify,Medley install complete)
+
+update: dummy
+	ansible-playbook ansible/update.yml
+	$(call notify,Medley update complete)
