@@ -73,8 +73,8 @@ appengine_grammar += ("-" | integer).setResultsName("statusCode").setParseAction
 appengine_grammar += ("-" | integer).setResultsName("numBytesSent").setParseAction(dashToNone)
 appengine_grammar += ("-" | dblQuotedString).setResultsName("referrer").setParseAction(removeQuotes, dashToNone)
 appengine_grammar += ("-" | dblQuotedString).setResultsName("agent").setParseAction(removeQuotes, dashToNone)
-appengine_grammar += dblQuotedString.setResultsName("host").setParseAction(removeQuotes)
-appengine_grammar += dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums + ".")).setResultsName("stats").setParseAction(assignDict)
+appengine_grammar += Optional(dblQuotedString.setResultsName("host").setParseAction(removeQuotes))
+appengine_grammar += Optional(dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums + ".")).setResultsName("stats").setParseAction(assignDict))
 
 # Partial grammar for ip extraction
 ip_grammar = (ipv4 | ipv6).setResultsName("ip")
