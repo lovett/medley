@@ -5,18 +5,25 @@ MEDLEY.later = (function () {
 
     applyShortcut = function (e) {
         var trigger = jQuery(e.target);
-        var target = trigger.closest('.field').find('INPUT,TEXTAREA');
+        var target = trigger.closest('.field').find('INPUT,TEXTAREA').first();
+
         if (trigger.hasClass('remove-querystring')) {
             target.val(target.val().replace(/\?[^#]+/, ''));
+            target.focus();
         } else if (trigger.hasClass('remove-hash')) {
             target.val(target.val().replace(/#.*/, ''));
+            target.focus();
         } else if (trigger.hasClass('reset')) {
             target.val(target.attr('data-original-value'));
         } else if (trigger.hasClass('trim-sentence-from-start')) {
             target.val(target.val().replace(/^(.*?\.) ([A-Z].*)/m, '$2'));
+            target.focus();
         } else if (trigger.hasClass('trim-sentence-from-end')) {
             target.val(target.val().replace(/^(.*\.) ([A-Z].*)/m, '$1'));
-        }
+            target.focus();
+        } else if (trigger.hasClass('trim-all')) {
+            target.val('').focus();
+        }	
     };
 
     return {
