@@ -635,6 +635,7 @@ class MedleyServer(object):
 
         if comments:
             comments = util.html.parse_text(comments)
+            comments = re.sub("\s+", " ", comments)
 
         title = util.net.reduceHtmlTitle(title)
 
