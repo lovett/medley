@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% set page_title = "Topics" %}
+{% set home_link = True %}
+
+{% block scripts %}
+<script src="/static/js/topics.js"></script>
+{% endblock %}
+
+{% block page_body %}
+
+<main class="ui page centered grid">
+    <div class="center aligned one column row">
+        <button class="ui primary button">Walk topics</button>
+    </div>
+
+    <div class="center aligned one column row">
+        <div class="column" id="topics">
+            {% for topic in topics %}
+            <p><a href="https://www.bing.com/search/?q={{ topic }}" rel="noreferer" target="_blank">{{ topic }}</a></p>
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+{% endblock %}

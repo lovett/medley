@@ -24,6 +24,7 @@ import html.parser
 import syslog
 from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 
 import tools.negotiable
 cherrypy.tools.negotiable = tools.negotiable.Tool()
@@ -980,6 +981,36 @@ class MedleyServer(object):
 
         cherrypy.response.status = 204
         return
+
+    @cherrypy.expose
+    @cherrypy.tools.negotiable()
+    @cherrypy.tools.template(template="topics.html")
+    def topics(self):
+        """Scrape news topics from the Bing homepage"""
+
+        key = "topics_html"
+        topics = []
+
+        html = util.db.cacheGet(key)
+
+        if not html:
+            html = util.net.getUrl("http://www.bing.com/hpm")
+            util.db.cacheSet(key, html)
+
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        for link in soup.find(id="crs_pane").find_all("a"):
+            url = urllib.parse.urlparse(link["href"])
+            qs = urllib.parse.parse_qs(url.query)
+
+            if "q" in qs:
+                topics.append(qs["q"][0])
+
+        return {
+            "topics": topics
+        }
+
 
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))

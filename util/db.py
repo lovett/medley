@@ -1,4 +1,5 @@
 import os.path
+import time
 import re
 import sqlite3
 import util.sqlite_converters
@@ -46,13 +47,23 @@ CREATE TABLE IF NOT EXISTS captures (
 )
 """
 
+
+cache_create_sql = """
+CREATE TABLE IF NOT EXISTS cache (
+    key UNIQUE NOT NULL,
+    value, expires,
+    created DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
 def setup(database_dir):
     global _databases
 
     roster = {
         "bookmarks": bookmarks_create_sql,
         "annotations": annotations_create_sql,
-        "captures": captures_create_sql
+        "captures": captures_create_sql,
+        "cache": cache_create_sql
     }
 
     try:
@@ -418,3 +429,28 @@ def getMaxOffset(db_conn, index_name, date):
         return row["offset"]
     else:
         return 0
+
+
+def cacheGet(key):
+    conn = sqlite3.connect(_databases["cache"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    sql = """SELECT value FROM cache WHERE key=?"""
+    cur.execute(sql, (key,))
+    row = cur.fetchone()
+
+    if row:
+        return row["value"]
+    else:
+        return None
+
+def cacheSet(key, value, lifespan_seconds=3600):
+    conn = sqlite3.connect(_databases["cache"])
+    cur = conn.cursor()
+
+    expires = time.time() + int(lifespan_seconds)
+
+    cur.execute("INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)", (key, value, expires))
+    conn.commit()
+    conn.close()
+    return True

@@ -130,3 +130,7 @@ TR.expandable.expanded {
 .nudge-right {
     padding-left: 1em;
 }
+
+.strikeout {
+    text-decoration: line-through;
+}
