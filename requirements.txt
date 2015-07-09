@@ -1,6 +1,7 @@
 CherryPy==3.6.0
 IPy==0.81
 Jinja2==2.5
+beautifulsoup4==4.4.0
 dogpile.cache==0.5.6
 dogpile.core==0.4.1
 httplib2==0.9

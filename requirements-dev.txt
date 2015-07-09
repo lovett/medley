@@ -3,6 +3,7 @@ IPy==0.81
 Jinja2==2.5
 argparse==1.2.1
 astroid==1.2.1
+beautifulsoup4==4.4.0
 cov-core==1.14.0
 coverage==3.7.1
 dogpile.cache==0.5.6
