@@ -409,7 +409,9 @@ def getLogOffsets(db_conn, index_name, keys=[]):
     return offsets
 
 def getMaxOffset(db_conn, index_name, date):
+
     db_conn.row_factory = sqlite3.Row
+
     cur = db_conn.cursor()
     template = """SELECT offset
                   FROM {}
@@ -430,13 +432,16 @@ def getMaxOffset(db_conn, index_name, date):
     else:
         return 0
 
-
 def cacheGet(key):
-    conn = sqlite3.connect(_databases["cache"], detect_types=sqlite3.PARSE_COLNAMES)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
-    sql = """SELECT value FROM cache WHERE key=?"""
-    cur.execute(sql, (key,))
+    """Retrieve a value from the cache by its key"""
+
+    db = sqlite3.connect(_databases["cache"], detect_types=sqlite3.PARSE_COLNAMES)
+    db.row_factory = sqlite3.Row
+
+    cachePurge(key, db)
+
+    cur = db.cursor()
+    db.execute("SELECT value FROM cache WHERE key=?", (key,))
     row = cur.fetchone()
 
     if row:
@@ -445,12 +450,49 @@ def cacheGet(key):
         return None
 
 def cacheSet(key, value, lifespan_seconds=3600):
-    conn = sqlite3.connect(_databases["cache"])
-    cur = conn.cursor()
+    """Add a value to the cache database"""
+
+    db = sqlite3.connect(_databases["cache"])
+    cur = db.cursor()
 
     expires = time.time() + int(lifespan_seconds)
 
     cur.execute("INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)", (key, value, expires))
-    conn.commit()
-    conn.close()
+    db.commit()
+    db.close()
+
+    return True
+
+def cacheDel(key, conn=None):
+    """Delete cache entries by key"""
+
+    if not conn:
+        db = sqlite3.connect(_databases["cache"])
+
+    cur = db.cursor()
+    cur.execute("DELETE FROM cache WHERE key=?", (key,))
+    db.commit()
+
+    if not conn:
+        db.close()
+
+    return True
+
+def cachePurge(key, conn=None):
+    """Delete expired cache entries by key"""
+
+    if not conn:
+        db = sqlite3.connect(_databases["cache"])
+    else:
+        db = conn
+
+    expires = time.time()
+
+    cur = db.cursor()
+    cur.execute("DELETE FROM cache WHERE key=? AND expires < ?", (key, expires))
+    db.commit()
+
+    if not conn:
+        db.close()
+
     return True
