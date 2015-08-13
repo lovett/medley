@@ -1015,11 +1015,13 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # Define base application configuration
+    # Default application directory paths
     #
-    # Some settings aren't worth the trouble of putting in an external
-    # file because they're unlikely to ever change.
+    # These could be overriden in one of the config files, but
+    # populating them here ensures they are relative to the app root.
     cherrypy.config.update({
+        "database_dir": os.path.realpath("db"),
+        "log_dir": os.path.realpath("logs"),
         "template_dir": os.path.realpath("templates")
     })
 
