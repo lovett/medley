@@ -50,7 +50,7 @@ class MedleyServer(object):
         syslog.openlog(self.__class__.__name__)
         plugins.jinja.Plugin(cherrypy.engine).subscribe()
 
-        db_dir = os.path.realpath(cherrypy.config.get("database.directory"))
+        db_dir = os.path.realpath(cherrypy.config.get("database_dir"))
 
         util.db.setup(db_dir)
         util.db.geoSetup(db_dir, cherrypy.config.get("geoip.download.url"))
@@ -388,7 +388,7 @@ class MedleyServer(object):
         """Download the latest GeoLite Legacy City database from maxmind.com"""
 
         url = cherrypy.config.get("geoip.download.url")
-        directory = cherrypy.config.get("database.directory")
+        directory = cherrypy.config.get("database_dir")
 
         if not (url and directory):
             syslog.syslog(syslog.LOG_ERROR, "geodb endpoint has not been configured")
@@ -767,7 +767,7 @@ class MedleyServer(object):
             index_name += "_" + lower_match
 
         db_conn = util.db.openLogIndex(
-            cherrypy.config.get("database.directory"),
+            cherrypy.config.get("database_dir"),
             index_name
         )
 
@@ -919,7 +919,7 @@ class MedleyServer(object):
 
         if len(filters["ip"]) > 0:
             db_conn = util.db.openLogIndex(
-                cherrypy.config.get("database.directory"),
+                cherrypy.config.get("database_dir"),
             )
 
             offsets = util.db.getLogOffsets(db_conn, "ip", filters["ip"])

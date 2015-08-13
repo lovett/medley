@@ -18,7 +18,7 @@ def setup_module():
     cherrypy.config.update(config_file)
     cherrypy.config.update({
         "log.screen": False,
-        "database.directory": tmp_dir,
+        "database_dir": tmp_dir,
         "azure.url.deployments": "http://example.com/{}/deployments",
         "tools.conditional_auth.on": False,
         "users": {"test":"test"},
@@ -446,14 +446,14 @@ class TestMedleyServer(BaseCherryPyTestCase):
     def test_geodbReturns410IfNoUrl(self):
         """ /geodb returns 410 if geoip.download.url is not configured """
         cherrypy.config["geoip.download.url"] = None
-        cherrypy.config["database.directory"] = "/tmp"
+        cherrypy.config["database_dir"] = "/tmp"
         response = self.request("/geodb")
         self.assertEqual(response.code, 410)
 
     def test_geodbReturns410IfNoDatabaseDirectory(self):
-        """ /geodb returns 410 if database.directory is not configured """
+        """ /geodb returns 410 if database_dir is not configured """
         cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
-        cherrypy.config["database.directory"] = None
+        cherrypy.config["database_dir"] = None
         response = self.request("/geodb")
         self.assertEqual(response.code, 410)
 
