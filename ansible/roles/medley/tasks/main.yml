@@ -3,7 +3,7 @@
   sudo: yes
   file:
     path="/etc/init.d/{{ project_name }}"
-    src="{{ project_root }}/medley/init"
+    src="{{ project_root }}/init"
     state="link"
   notify: restart medley
 

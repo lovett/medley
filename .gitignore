@@ -16,3 +16,4 @@ db
 .vagrant
 ansible/*.hosts
 ansible/host_vars
+venv

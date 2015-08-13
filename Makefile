@@ -17,3 +17,7 @@ install: dummy
 update: dummy
 	ansible-playbook ansible/update.yml
 	$(call notify,Medley update complete)
+
+venv: dummy
+	rm -rf venv
+	virtualenv --no-site-packages --prompt="♪ ♪ ♪" venv

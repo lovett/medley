@@ -15,7 +15,7 @@
     state=present
 
 - name: Create python3 virtualenv
-  shell: "virtualenv --system-site-packages --python=python3 {{ project_root }}"
+  shell: "virtualenv --system-site-packages --python=python3 {{ project_root }}/venv"
   sudo: yes
   sudo_user: "{{ project_user }}"
   args:
@@ -25,5 +25,5 @@
   sudo: yes
   sudo_user: "{{ project_user }}"
   pip:
-    requirements={{ project_root}}/{{ project_name }}/requirements.txt
-    virtualenv={{ project_root }}
+    requirements={{ project_root }}/requirements.txt
+    virtualenv={{ project_root }}/venv

@@ -18,15 +18,6 @@
     group="{{ project_user }}"
     append=yes
 
-- name: Create application directory
-  sudo: yes
-  file:
-    path={{ project_root }}
-    owner={{ project_user }}
-    group={{ project_group }}
-    state=directory
-    mode=0775
-
 - name: Create log directory
   sudo: yes
   file:

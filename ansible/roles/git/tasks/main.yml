@@ -3,18 +3,40 @@
   sudo: yes
   apt: name=git state=present
 
+- name: Delete backup
+  sudo: yes
+  file:
+    path={{ project_root }}.bak
+    state=absent
+
+- name: Move current installation to backup
+  sudo: yes
+  shell: mv {{ project_root }} {{ project_root }}.bak
+    creates={{ project_root }}.bak
+    removes={{ project_root }}
+  
+- name: Create application directory
+  sudo: yes
+  file:
+    path={{ project_root }}
+    owner={{ project_user }}
+    group={{ project_group }}
+    state=directory
+    mode=0775
+  
+
 - name: Checkout head version of master branch
   sudo: yes
   sudo_user: "{{ project_user }}"
   git:
     repo={{ project_repo }}
-    dest={{ project_root }}/{{ project_name }}
+    dest={{ project_root }}
     version=HEAD
   notify: restart medley
 
 - name: Make checkout group writable
   sudo: yes
   file:
-    path="{{ project_root }}/{{ project_name }}"
+    path="{{ project_root }}"
     state=directory
     mode=0775

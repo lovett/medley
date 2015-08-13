@@ -13,7 +13,7 @@ server {
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
 
     location /static/ {
-        root /srv/medley/medley;
+        root {{ project_root }};
     }
 
     location / {
