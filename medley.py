@@ -1015,6 +1015,14 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
+    # Define base application configuration
+    #
+    # Some settings aren't worth the trouble of putting in an external
+    # file because they're unlikely to ever change.
+    cherrypy.config.update({
+        "template_dir": os.path.realpath("templates")
+    })
+
     # Application configuration is sourced from multiple files.
     #
     # /etc/medley.conf: The main config is kept outside the app
