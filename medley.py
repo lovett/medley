@@ -1015,30 +1015,51 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # The default configuration comes from /etc/medley.conf or
-    # default.conf in the current directory. This makes running
-    # out of the box easy, and starting from a blank slate possible.
+    # Application configuration is sourced from multiple files.
+    #
+    # /etc/medley.conf: The main config is kept outside the app
+    # root so that it remains untouched during deployment.
+    #
+    # default.conf: The default config is used if the main
+    # config does not exist.
+    #
+    # local.conf: The local config is for overriding selected values
+    # from the default config. It's useful during development when you
+    # want to change a few things without juggling a fully copy of the
+    # default config.
+    #
+    # Since configuration files might contain both global and
+    # application-specific sections, they are first applied globally
+    # and then to the application.
+
     default_config = "/etc/medley.conf"
     if not os.path.isfile(default_config):
         default_config = os.path.join(app_root, "default.conf")
 
-    # The configuration is applied twice, because a single file is
-    # used for both global and application entries
     cherrypy.config.update(default_config)
     app = cherrypy.tree.mount(MedleyServer(), config=default_config)
 
-    # The default configuration can be selectively overriden, which is
-    # useful during development.
     local_config = os.path.join(app_root, "local.conf")
-    try:
+    if os.path.isfile(local_config):
         cherrypy.config.update(local_config)
         app.merge(local_config)
-    except:
-        pass
+
+    # Logging occurs either to stdout or to files. For file logging,
+    # the configuration should specify a value for log_dir and ignore
+    # the log.access_file and log.error.file settings described in the
+    # CherryPy documentation. This allows the application to create
+    # the log directory if needed.
+    if not cherrypy.config.get("log.screen"):
+        log_dir = cherrypy.config.get("log_dir")
+        if not os.path.isdir(log_dir):
+            os.mkdir(log_dir)
+        cherrypy.config.update({
+            "log.access_file": os.path.join(log_dir, "access.log"),
+            "log.error_file": os.path.join(log_dir, "error.log")
+        })
 
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):
-
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
 
         pid_file = cherrypy.config.get("server.pid")
