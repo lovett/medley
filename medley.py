@@ -692,11 +692,11 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="annotations.html")
-    def annotations(self, key=None, value=None):
+    def annotations(self, key=None, value=None, replace=False):
         """A general-purpose key-value store"""
 
         if key and value and cherrypy.request.method == "POST":
-            util.db.saveAnnotation(key, value)
+            util.db.saveAnnotation(key, value, replace)
 
             if key.startswith("ip:"):
                 util.db.ipFacts.cache_clear()
@@ -897,7 +897,6 @@ class MedleyServer(object):
                      if query["key"] == "visitors:default"][0]
             except IndexError:
                 q = ""
-
 
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
