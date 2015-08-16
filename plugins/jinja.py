@@ -4,6 +4,7 @@ import jinja2
 import http.client
 import pytz
 import os.path
+import urllib
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -21,6 +22,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["nl2br"] = self.nl2br_filter
         self.env.filters["pluralize"] = self.pluralize_filter
         self.env.filters["anonymize"] = self.anonymize_filter
+        self.env.filters["urlencode"] = self.urlencode_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -127,3 +129,6 @@ class Plugin(plugins.SimplePlugin):
             return url
         else:
             return "{}{}".format(anonymizer, url)
+
+    def urlencode_filter(self, value):
+        return urllib.parse.quote(value)
