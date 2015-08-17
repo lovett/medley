@@ -115,7 +115,7 @@
                         <td nowrap="nowrap">
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                             <p class="small">
-                                {{ result.agent|useragent() }}
+                                {{ result.agent|useragent()|truncate(50) }}
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
                                 <br/>
                                 Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
