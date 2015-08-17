@@ -880,6 +880,7 @@ class MedleyServer(object):
         """Search website access logs"""
 
         results = None
+        active_query = None
 
         filters = {
             "ip": [],
@@ -891,12 +892,19 @@ class MedleyServer(object):
 
         saved_queries = util.db.getAnnotationsByPrefix("visitors")
 
+        if q:
+            for query in saved_queries:
+                if re.sub("\s", "", q, flags=re.UNICODE) == re.sub("\s", "", query["value"], flags=re.UNICODE):
+                    active_query = query["key"]
+                    break
+
         if not q:
             try:
-                q = [query["value"] for query in saved_queries
+                active_query, q = [(query["key"], query["value"]) for query in saved_queries
                      if query["key"] == "visitors:default"][0]
             except IndexError:
                 q = ""
+
 
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
@@ -934,6 +942,7 @@ class MedleyServer(object):
 
         return {
             "q": q,
+            "active_query": active_query,
             "results": results.matches,
             "total_matches": results.count,
             "result_limit": results.limit,

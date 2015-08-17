@@ -18,7 +18,7 @@
                 <select id="saved">
                     <option value=""></option>
                     {% for query in saved_queries %}
-                    <option value="{{ query.value }}">{{ query.key }}</option>
+                    <option value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key }}</option>
                     {% endfor %}
                 </select>
             </div>

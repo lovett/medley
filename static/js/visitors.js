@@ -1,12 +1,16 @@
 MEDLEY.visitors = (function () {
     'use strict';
 
-    var queryToMultiline, saveQuery, applyShortcut;
+    var queryToMultiline, saveQuery, applyShortcut, resetQueryMenu;
 
     queryToMultiline = function (query) {
         return query.split(',').reduce(function (accumulator, segment) {
             return accumulator + '\n' + segment.trim();
         });
+    };
+
+    resetQueryMenu = function (e) {
+        jQuery('#saved').val('');
     };
 
     saveQuery = function (e) {
@@ -71,6 +75,8 @@ MEDLEY.visitors = (function () {
         init: function () {
             jQuery('#save').on('click', saveQuery);
             jQuery('.shortcuts').on('click', 'A', applyShortcut);
+
+            jQuery('#q').on('keyup', resetQueryMenu);
 
             jQuery('#saved').on('change', function (e) {
                 var query, multiline;
