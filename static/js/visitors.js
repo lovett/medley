@@ -1,7 +1,68 @@
 MEDLEY.visitors = (function () {
     'use strict';
 
-    var queryToMultiline, saveQuery, applyShortcut, resetQueryMenu;
+    var calculateDelta, queryToMultiline, saveQuery, applyShortcut, resetQueryMenu;
+
+    calculateDelta = function (e) {
+        var referenceTimestamp, tbody, trigger;
+
+        e.preventDefault();
+        trigger = jQuery(this);
+        tbody = trigger.closest('TBODY');
+        referenceTimestamp = parseFloat(trigger.attr('data-timestamp-unix'));
+
+        trigger.toggleClass('active');
+        tbody.find('.calc-delta').not(trigger).removeClass('active');
+
+        if (!trigger.hasClass('active')) {
+            tbody.find('.delta .value').html(function () {
+                return jQuery(this).closest('.delta').removeClass('hidden').attr('data-default');
+            });
+            return;
+        } else {
+            tbody.find('.delta').removeClass('hidden');
+            trigger.parent().find('.delta').addClass('hidden');
+        }
+
+        function doubleDigitString(num) {
+            if (num < 10) {
+                return '0' + num.toString();
+            } else {
+                return num.toString();
+            }
+        }
+
+        tbody.find('.calc-delta').html(function () {
+            var el, timestamp, delta, deltaString, units, result;
+
+            el = jQuery(this);
+
+            timestamp = parseFloat(el.attr('data-timestamp-unix'));
+
+            delta = Math.abs(timestamp - referenceTimestamp);
+
+            units = [3600, 60, 1].reduce(function (acc, unit, index, arr) {
+                var div;
+                if (index === arr.length - 1) {
+                    acc.push(delta);
+                } else if (delta > unit) {
+                    div = Math.floor(delta / unit);
+                    delta -= unit * div;
+                    acc.push(div);
+                }
+                return acc;
+            }, []);
+
+            units = units.map(doubleDigitString);
+
+            if (units.length == 1) {
+                result = '0:' + units[0];
+            } else {
+                result = units.join(':').replace(/^0/, '');
+            }
+            el.closest('TD').find('.delta .value').html(result);
+        });
+    };
 
     queryToMultiline = function (query) {
         return query.split(',').reduce(function (accumulator, segment) {
@@ -85,6 +146,8 @@ MEDLEY.visitors = (function () {
                 jQuery('#q').val(multiline);
                 jQuery('#submit').focus();
             });
+
+            jQuery('#matches').on('click', 'A.calc-delta', calculateDelta);
 
         }
     };

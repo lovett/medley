@@ -134,3 +134,11 @@ TR.expandable.expanded {
 .strikeout {
     text-decoration: line-through;
 }
+
+.flag {
+    color: #ccc;
+}
+
+.calc-delta.active .icon {
+    color: green;
+}

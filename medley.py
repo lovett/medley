@@ -937,8 +937,13 @@ class MedleyServer(object):
 
         results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
 
-        for result in results.matches:
+        for index, result in enumerate(results.matches):
             result["ip_facts"] = util.db.ipFacts(result["ip"])
+
+            try:
+                result["delta"] = result["timestamp"] - results.matches[index + 1]["timestamp"]
+            except IndexError:
+                result["delata"] = None
 
         return {
             "q": q,

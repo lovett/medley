@@ -71,6 +71,8 @@
             </div>
         </div>
 
+        <div id="deltas" class="ui segment hidden">
+        </div>
         <div class="sleeve">
             <table id="matches" class="ui table unstackable">
                 <thead>
@@ -85,7 +87,7 @@
                 </thead>
                 <tbody>
                     {% for result in results %}
-                    <tr>
+                    <tr class="result">
                         <td>
                             <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
                             {% if result.ip_facts.geo.continent == "NA" %}
@@ -103,6 +105,7 @@
                             {% endfor %}
                         </td>
                         <td nowrap="nowrap">
+                            <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#"><i class="icon flag"></i></a>
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
                             at {{ result.timestamp|localtime('time12') }}
 
@@ -111,6 +114,8 @@
                                 {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
                             </p>
                             {% endif %}
+
+                            <p class="small delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}"><i class="icon wait"></i> <span class="value">{{ result.delta }}</span></p>
                         </td>
                         <td nowrap="nowrap">
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>

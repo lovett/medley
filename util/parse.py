@@ -1,5 +1,5 @@
 from pyparsing import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from ua_parser import user_agent_parser
 from urllib.parse import urlparse
 import string
@@ -91,6 +91,7 @@ def appengine(line):
     fields = appengine_grammar.parseString(line).asDict()
 
     fields["timestamp"] = datetime.strptime(fields["timestamp"], "%d/%b/%Y:%H:%M:%S %z")
+    fields["timestamp_unix"] = (fields["timestamp"] - datetime(1970,1,1, tzinfo=fields["timestamp"].tzinfo)) / timedelta(seconds=1)
 
     if "referrer" in fields:
         fields["referrer_domain"] = urlparse(fields["referrer"]).netloc or None
