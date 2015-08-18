@@ -88,12 +88,21 @@
                 <tbody>
                     {% for result in results %}
                     <tr class="result">
+                        {% if result.ip == prev_ip %}
+                        <td></td>
+                        {% else %}
                         <td>
                             <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
+
                             {% if result.ip_facts.geo.continent == "NA" %}
                             {{ result.ip_facts.geo.region_code|default("", true) }}
                             {% endif %}
                         </td>
+                        {% endif %}
+
+                        {% if result.ip == prev_ip %}
+                        <td></td>
+                        {% else %}
                         <td>
                             <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip }}</a>
                             {% if result.ip_facts.organization %}
@@ -104,21 +113,28 @@
                             <p class="small">{{ annotation }}</p>
                             {% endfor %}
                         </td>
+                        {% endif %}
                         <td nowrap="nowrap">
                             <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#"><i class="icon flag"></i></a>
+                            {% if result.timestamp|localtime('date') != prev_date %}
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
-                            at {{ result.timestamp|localtime('time12') }}
-
-                            {% if result.ip_facts.geo.time_zone %}
-                            <p class="small">
-                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
-                            </p>
+                            at
                             {% endif %}
+                            {{ result.timestamp|localtime('time12') }}
 
-                            <p class="small delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}"><i class="icon wait"></i> <span class="value">{{ result.delta }}</span></p>
+                            <p class="small">
+                                {% if result.ip_facts.geo.time_zone %}
+                                <i class="icon wait"></i>
+                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local
+                                {% endif %}
+                                <span class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}"><i class="icon">Δ</i><span class="value">{{ result.delta }}</span></span>
+                            </p>
+
                         </td>
                         <td nowrap="nowrap">
                             <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+
+                            {% if result.agent != prev_agent %}
                             <p class="small">
                                 {{ result.agent|useragent()|truncate(50) }}
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
@@ -126,6 +142,7 @@
                                 Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
                                 {% endif %}
                             </p>
+                            {% endif %}
                         </td>
                         <td><span class="help" title="{{ result.statusCode|status_message()}}">{{ result.statusCode }}</span></td>
                         <td class="right aligned">
@@ -151,6 +168,10 @@
                             </div>
                         </td>
                     </tr>
+
+                    {% set prev_ip = result.ip %}
+                    {% set prev_agent = result.agent %}
+                    {% set prev_date = result.timestamp|localtime('date') %}
                     {% endfor %}
                 </tbody>
             </table>

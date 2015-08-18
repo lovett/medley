@@ -111,6 +111,14 @@ TR.expandable.expanded {
     word-wrap: break-word;
 }
 
+.ui.table TD {
+    vertical-align: top;
+}
+
+.ui.table .right {
+    text-align: right;
+}
+
 .horizontal.linkset A {
     margin-left: 2em;
 }

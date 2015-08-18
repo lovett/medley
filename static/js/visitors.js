@@ -60,7 +60,7 @@ MEDLEY.visitors = (function () {
             } else {
                 result = units.join(':').replace(/^0/, '');
             }
-            el.closest('TD').find('.delta .value').html(result);
+            el.closest('TR').find('.delta .value').html(result);
         });
     };
 
