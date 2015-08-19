@@ -9,6 +9,7 @@ import urllib.parse
 import IPy
 import json
 import plugins.jinja
+import pycountry
 import inspect
 import util.phone
 import util.asterisk
@@ -938,12 +939,23 @@ class MedleyServer(object):
         results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
-            result["ip_facts"] = util.db.ipFacts(result["ip"])
+            needs_geo_lookup = "country" not in result
+            result["ip_facts"] = util.db.ipFacts(result["ip"], needs_geo_lookup)
+
+            if not needs_geo_lookup:
+                result["ip_facts"]["geo"]["country_code"] = result["country"]
+                result["ip_facts"]["geo"]["region_code"] = result["region"]
+                result["ip_facts"]["geo"]["city"] = result["city"]
+                result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
+                if "," in result.get("latlong"):
+                    (lat, lng) = result["latlong"].split(",")
+                    result["ip_facts"]["geo"]["latitude"] = lat
+                    result["ip_facts"]["geo"]["longitude"] = lng
 
             try:
                 result["delta"] = result["timestamp"] - results.matches[index + 1]["timestamp"]
             except IndexError:
-                result["delata"] = None
+                result["delta"] = None
 
         return {
             "q": q,

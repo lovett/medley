@@ -54,7 +54,10 @@ def assignDict(s, l, t):
     """
     d = {}
     for k, v, in t[0].items():
-        d[k] = v
+        if v.startswith('"') and v.endswith('"'):
+            d[k] = v[1:-1]
+        else:
+            d[k] = v
 
     return d
 
@@ -74,7 +77,7 @@ appengine_grammar += ("-" | integer).setResultsName("numBytesSent").setParseActi
 appengine_grammar += ("-" | dblQuotedString).setResultsName("referrer").setParseAction(removeQuotes, dashToNone)
 appengine_grammar += ("-" | dblQuotedString).setResultsName("agent").setParseAction(removeQuotes, dashToNone)
 appengine_grammar += Optional(dblQuotedString.setResultsName("host").setParseAction(removeQuotes))
-appengine_grammar += Optional(dictOf(Word(alphas + "_") + Suppress("="), Word(alphanums + ".")).setResultsName("stats").setParseAction(assignDict))
+appengine_grammar += Optional(dictOf(Word(alphanums + "_") + Suppress("="), dblQuotedString).setResultsName("extras").setParseAction(assignDict))
 
 # Partial grammar for ip extraction
 ip_grammar = (ipv4 | ipv6).setResultsName("ip")
@@ -103,4 +106,19 @@ def appengine(line):
     if "agent" in fields:
         fields["agent"] = user_agent_parser.Parse(fields["agent"])
 
+    for key, value in fields["extras"].items():
+        if key == "country" and value == "ZZ":
+            value = None
+        elif key == "city" and value == "?":
+            value = None
+        elif key == "country":
+            value = value.upper()
+        elif key == "city":
+            value = value.title()
+        elif key == "region" and len(value) == 2:
+            value = value.upper()
+
+        fields[key] = value
+
+    del fields["extras"]
     return fields

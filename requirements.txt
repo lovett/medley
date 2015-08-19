@@ -7,6 +7,7 @@ dogpile.core==0.4.1
 httplib2==0.9
 py==1.4.25
 pygeoip==0.3.1
+pycountry==1.14
 pyparsing==2.0.3
 pytz==2014.10
 requests==2.4.3

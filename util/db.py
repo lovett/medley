@@ -95,7 +95,7 @@ def geoSetup(database_dir, download_url):
             _databases["geo"] = None
 
 @functools.lru_cache()
-def ipFacts(ip):
+def ipFacts(ip, geo_lookup=True):
     address = netaddr.IPAddress(ip)
     netblocks = getAnnotationsByPrefix("netblock")
     facts = {}
@@ -109,7 +109,10 @@ def ipFacts(ip):
     if annotations:
         facts["annotations"] = [annotation["value"] for annotation in annotations]
 
-    facts["geo"] = _databases["geo"].record_by_addr(ip)
+    if geo_lookup:
+        facts["geo"] = _databases["geo"].record_by_addr(ip)
+    else:
+        facts["geo"] = {}
 
     return facts
 

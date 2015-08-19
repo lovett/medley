@@ -77,10 +77,10 @@
             <table id="matches" class="ui table unstackable">
                 <thead>
                     <tr>
-                        <th class="one wide">Location</th>
-                        <th class="three wide">IP</th>
-                        <th class="five wide">Date</th>
-                        <th class="five wide">Request</th>
+                        <th class="two wide">Location</th>
+                        <th class="four wide">IP</th>
+                        <th class="four wide">Date</th>
+                        <th class="four wide">Request</th>
                         <th class="one wide">Code</th>
                         <th class="one wide"></th>
                     </tr>
@@ -94,9 +94,18 @@
                         <td>
                             <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
 
-                            {% if result.ip_facts.geo.continent == "NA" %}
+                            {% if result.ip_facts.geo.country_code == "US" %}
                             {{ result.ip_facts.geo.region_code|default("", true) }}
+                            <p class="small">{{ result.ip_facts.geo.city|default("", true) }}</p>
+                            {% else %}
+                            <p class="small">{{ result.ip_facts.geo.country_name }}
+                                {% if result.ip_facts.geo.city %}
+                                <br/>{{ result.ip_facts.geo.city|default("", true) }}
+                                {% endif %}
+                            </p>
                             {% endif %}
+
+
                         </td>
                         {% endif %}
 
@@ -104,7 +113,7 @@
                         <td></td>
                         {% else %}
                         <td>
-                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip }}</a>
+                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(25, true) }}</a>
                             {% if result.ip_facts.organization %}
                             <p class="small">{{ result.ip_facts.organization }}</p>
                             {% endif %}
@@ -158,13 +167,6 @@
                                     <a href="/annotations/ip:{{ result.ip}}"> <i class="bookmark icon"></i> annotate</a>
                                     <a href="/whois/{{ result.ip }}" target="_blank"><i class="search icon"></i> whois</a>
                                 </div>
-
-                                {% if result.ip_facts.geo.city %}
-                                <div class="left floated eight wide column">
-                                    <i class="map icon"></i>
-                                    {{ result.ip_facts.geo.city|default("", true) }}
-                                </div>
-                                {% endif %}
                             </div>
                         </td>
                     </tr>
