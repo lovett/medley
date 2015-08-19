@@ -121,7 +121,7 @@ def getBookmarkById(bookmark_id):
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    sql = """SELECT u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments
+    sql = """SELECT u.rowid, u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments
              FROM urls u, meta m
              WHERE u.rowid=m.url_id and u.rowid=?"""
     cur.execute(sql, (bookmark_id,))
@@ -135,18 +135,27 @@ def getBookmarkByUrl(url):
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    sql = """SELECT u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments
+    sql = """SELECT u.rowid, u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments
              FROM urls u, meta m
              WHERE u.url=? AND u.rowid=m.url_id"""
     cur.execute(sql, (url.lower(),))
     return cur.fetchone()
+
+def deleteBookmark(id):
+    conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("DELETE FROM urls WHERE rowid=?", (int(id),))
+    cur.execute("DELETE FROM meta WHERE url_id=?", (int(id),))
+    conn.commit();
+    return cur.rowcount
 
 def getRecentBookmarks(limit=100):
     sqlite3.register_converter("created", util.sqlite_converters.convert_date)
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    sql = """SELECT u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments, 'bookmark' as record_type
+    sql = """SELECT u.rowid, u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments, 'bookmark' as record_type
              FROM urls u, meta m
              WHERE u.rowid=m.url_id
              ORDER BY u.created DESC

@@ -593,12 +593,17 @@ class MedleyServer(object):
                 "style": style or "title"
             }
 
-
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="archive.html")
-    def archive(self, date=None, q=None):
+    def archive(self, date=None, q=None, action=None, bookmark_id=None):
         """View and search saved bookmarks"""
+
+        if action == "delete" and bookmark_id:
+            util.db.deleteBookmark(bookmark_id)
+            return "OK".encode("UTF-8")
+            cherrypy.response.status = 204
+            return
 
         entries = OrderedDict()
         timezone = pytz.timezone(cherrypy.config.get("timezone"))

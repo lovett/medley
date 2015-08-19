@@ -5,6 +5,7 @@
 {% set home_link = True %}
 
 {% block scripts %}
+<script src="/static/js/archive.js"></script>
 {% endblock %}
 
 {% block page_body %}
@@ -22,9 +23,8 @@
     </form>
 
     <div class="ui feed sixteen wide column">
-        {% if not entries %}
-        <p>Nothing found</p>
-        {% endif %}
+
+        <p {% if entries %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
         {% for key, entries in entries.items() %}
         <h1 class="ui medium header">{{ entries[0].created|localtime("date-full") }}</h1>
@@ -48,7 +48,16 @@
                 <div class="extra text}">
                     {{ entry.comments }}
                 </div>
+
                 {% endif %}
+                <form method="post" action="/archive">
+                    <input type="hidden" name="action" value="delete" />
+                    <input type="hidden" name="bookmark_id" value="{{ entry.rowid }}" />
+                    <noscript><button>Delete</button></noscript>
+                    <a href="#" class="hidden delete">Delete</a>
+                </form>
+
+
             </div>
         </div>
         {% endfor %}
