@@ -1045,32 +1045,30 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # Default application directory paths
-    #
-    # These could be overriden in one of the config files, but
-    # populating them here ensures they are relative to the app root.
+    # Application directory paths have default values that are
+    # relative to the app root.
     cherrypy.config.update({
         "database_dir": os.path.realpath("db"),
         "log_dir": os.path.realpath("logs"),
         "template_dir": os.path.realpath("templates")
     })
 
-    # Application configuration is sourced from multiple files.
+    # Application configuration is sourced from multiple places:
     #
-    # /etc/medley.conf: The main config is kept outside the app
-    # root so that it remains untouched during deployment.
+    #   /etc/medley.conf: The main config. It is kept outside the app
+    #   root so that it remains untouched during deployment.
     #
-    # default.conf: The default config is used if the main
-    # config does not exist.
+    #   default.conf: The default config. Only used if the main
+    #   config does not exist.
     #
-    # local.conf: The local config is for overriding selected values
-    # from the default config. It's useful during development when you
-    # want to change a few things without juggling a fully copy of the
-    # default config.
+    #   local.conf: The local config. Used to override values from the
+    #   main or default config, mainly for the benefit of development
+    #   so that you can change a few values without making a full copy
+    #   of the default config.
     #
-    # Since configuration files might contain both global and
-    # application-specific sections, they are first applied globally
-    # and then to the application.
+    # Since configuration files can contain both global and
+    # application-specific sections, they are first applied to the
+    # CherryPy global config and then again to the application config.
 
     default_config = "/etc/medley.conf"
     if not os.path.isfile(default_config):
@@ -1087,8 +1085,8 @@ if __name__ == "__main__":
     # Logging occurs either to stdout or to files. For file logging,
     # the configuration should specify a value for log_dir and ignore
     # the log.access_file and log.error.file settings described in the
-    # CherryPy documentation. This allows the application to create
-    # the log directory if needed.
+    # CherryPy documentation. This approach allows the application to
+    # create the log directory if it doesn't exist.
     if not cherrypy.config.get("log.screen"):
         log_dir = cherrypy.config.get("log_dir")
         if not os.path.isdir(log_dir):
