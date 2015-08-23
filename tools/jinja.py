@@ -22,3 +22,5 @@ class Tool(cherrypy.Tool):
 
         if template and isinstance(data, dict):
             cherrypy.response.body = template.render(**data).encode('UTF-8')
+
+cherrypy.tools.template = Tool()

@@ -30,3 +30,5 @@ class Tool(cherrypy.Tool):
             tools.encode.callable()
         else:
             cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(charset)
+
+cherrypy.tools.negotiable = Tool()

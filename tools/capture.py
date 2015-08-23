@@ -9,3 +9,5 @@ class Tool(cherrypy.Tool):
                                self._capture)
     def _capture(self):
         util.db.saveCapture(cherrypy.request, cherrypy.response)
+
+cherrypy.tools.capture = Tool()

@@ -27,20 +27,14 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
+
+import apps.demo.controller
+
 import tools.negotiable
-cherrypy.tools.negotiable = tools.negotiable.Tool()
-
 import tools.response_time
-cherrypy.tools.response_time = tools.response_time.Tool()
-
 import tools.jinja
-cherrypy.tools.template = tools.jinja.Tool()
-
 import tools.conditional_auth
-cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
-
 import tools.capture
-cherrypy.tools.capture = tools.capture.Tool()
 
 class MedleyServer(object):
     mc = None

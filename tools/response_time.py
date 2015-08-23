@@ -28,3 +28,5 @@ class Tool(cherrypy.Tool):
             # The timer isn't always active. It won't be started when
             # serving static assets, for example.
             pass
+
+cherrypy.tools.response_time = Tool()
