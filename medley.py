@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 
-import apps.demo.controller
+import apps.headers.main
 
 import tools.negotiable
 import tools.response_time
@@ -43,7 +43,6 @@ class MedleyServer(object):
 
     def __init__(self):
         syslog.openlog(self.__class__.__name__)
-        plugins.jinja.Plugin(cherrypy.engine).subscribe()
 
         db_dir = os.path.realpath(cherrypy.config.get("database_dir"))
 
@@ -279,27 +278,6 @@ class MedleyServer(object):
             return "ok"
         else:
             return { "result": "ok" }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="headers.html")
-    def headers(self):
-        """Display the incoming request's headers"""
-
-        if cherrypy.request.negotiated == "application/json":
-            return cherrypy.request.headers
-
-        headers = [(key.decode('utf-8'), value.decode('utf-8'))
-                   for key, value in cherrypy.request.headers.output()]
-        headers.sort(key=lambda tup: tup[0])
-
-        if cherrypy.request.negotiated == "text/plain":
-            headers = ["{}: {}".format(key, value) for key, value in headers]
-            return "\n".join(headers)
-        else:
-            return {
-                "headers": headers
-            }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
@@ -1042,9 +1020,9 @@ if __name__ == "__main__":
     # Application directory paths have default values that are
     # relative to the app root.
     cherrypy.config.update({
+        "app_roots": [],
         "database_dir": os.path.realpath("db"),
-        "log_dir": os.path.realpath("logs"),
-        "template_dir": os.path.realpath("templates")
+        "log_dir": os.path.realpath("logs")
     })
 
     # Application configuration is sourced from multiple places:
@@ -1076,6 +1054,12 @@ if __name__ == "__main__":
         cherrypy.config.update(local_config)
         app.merge(local_config)
 
+    cherrypy.tree.mount(apps.headers.main.Controller(), '/headers', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
     # Logging occurs either to stdout or to files. For file logging,
     # the configuration should specify a value for log_dir and ignore
     # the log.access_file and log.error.file settings described in the
@@ -1097,6 +1081,8 @@ if __name__ == "__main__":
         pid_file = cherrypy.config.get("server.pid")
         if pid_file:
             cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
+
+    plugins.jinja.Plugin(cherrypy.engine).subscribe()
 
     cherrypy.engine.start()
     cherrypy.engine.block()

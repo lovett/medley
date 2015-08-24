@@ -6,14 +6,16 @@ import pytz
 import os.path
 import urllib
 import datetime
+import os
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
     def __init__(self, bus):
-        path = cherrypy.config.get("template_dir")
-        self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
+        paths = cherrypy.config.get("app_roots")
+        paths.append("templates")
+        self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
 
         self.env.filters["datetime"] = self.datetime_filter
         self.env.filters["localtime"] = self.localtime_filter
