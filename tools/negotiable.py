@@ -20,15 +20,22 @@ class Tool(cherrypy.Tool):
             media = [media]
 
         req = cherrypy.request
-        tools = cherrypy.tools
-        req.negotiated = tools.accept.callable(media)
 
-        if req.negotiated == "application/json":
-            tools.json_out.callable()
-        elif req.negotiated == "text/plain":
+        negotiated = cherrypy.tools.accept.callable(media)
+
+        req.as_json = False
+        req.as_text = False
+        req.as_html = True
+
+        if negotiated == "application/json":
+            req.as_json = True
+            cherrypy.tools.json_out.callable()
+        elif negotiated == "text/plain":
+            req.as_text = True
             cherrypy.response.headers["Content-Type"] = "text/plain"
-            tools.encode.callable()
+            cherrypy.tools.encode.callable()
         else:
+            req.as_html = True
             cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(charset)
 
 cherrypy.tools.negotiable = Tool()

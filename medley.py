@@ -105,13 +105,13 @@ class MedleyServer(object):
             if exposed and not hidden:
                 endpoints.append((name, value.__doc__))
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             output = ""
             for name, description in endpoints:
                 output += "/" + name + "\n"
                 output += str(description) + "\n\n"
             return output
-        elif cherrypy.request.negotiated == "application/json":
+        elif cherrypy.request.as_json:
             return endpoints
         else:
             return {
@@ -228,10 +228,10 @@ class MedleyServer(object):
         if silent:
             cherrypy.response.status = 204
             return
-        elif cherrypy.request.negotiated == "text/html":
+        elif cherrypy.request.as_html:
             data["page_title"] = "DNS Match"
             return data
-        elif cherrypy.request.negotiated == "application/json":
+        elif cherrypy.request.as_json:
             return data
         else:
             return data["result"]
@@ -256,7 +256,7 @@ class MedleyServer(object):
 
         if not token:
             external_ip = util.net.externalIp()
-            if cherrypy.request.negotiated == "text/plain":
+            if cherrypy.request.as_text:
                 return ip_address
             else:
                 return {
@@ -274,7 +274,7 @@ class MedleyServer(object):
             dns_command[dns_command.index("$host")] = host
             subprocess.call(dns_command)
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             return "ok"
         else:
             return { "result": "ok" }
@@ -286,12 +286,12 @@ class MedleyServer(object):
         """Display whois and geoip data for an IP address or hostname"""
 
         if address is None:
-            if cherrypy.request.negotiated == "application/json":
+            if cherrypy.request.as_json:
                 cherrypy.response.status = 400
                 return {
                     "message": "Address not specified"
                 }
-            if cherrypy.request.negotiated == "text/plain":
+            if cherrypy.request.as_text:
                 raise cherrypy.HTTPError(400, "Address not specified")
             else:
                 return {}
@@ -344,7 +344,7 @@ class MedleyServer(object):
             data["map_region"] = None
 
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             if "city" in data["geo"] and "country_name" in data["geo"]:
                 return "{}, {}".format(data["geo"]["city"], data["geo"]["country_name"])
             elif "country_name" in data["geo"]:
@@ -467,12 +467,12 @@ class MedleyServer(object):
 
         if number is None:
             message = "Phone number not specified"
-            if cherrypy.request.negotiated == "application/json":
+            if cherrypy.request.as_json:
                 cherrypy.response.status = 400
                 return {
                     "message": message
                 }
-            elif cherrypy.request.negotiated == "text/plain":
+            elif cherrypy.request.as_text:
                 raise cherrypy.HTTPError(400, message)
             else:
                 return data
@@ -481,7 +481,7 @@ class MedleyServer(object):
         area_code = number[:3]
 
         if len(area_code) is not 3:
-            if cherrypy.request.negotiated == "application/json":
+            if cherrypy.request.as_json:
                 cherrypy.response.status = 400
                 return {
                     "message": "Invalid number"
@@ -519,7 +519,7 @@ class MedleyServer(object):
             except IndexError:
                 caller_id = "Unknown"
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             return location.get("state_name", "Unknown")
         else:
             data["caller_id"] = caller_id
@@ -551,9 +551,9 @@ class MedleyServer(object):
             elif style == "upper":
                 result = value.upper()
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             return result
-        elif cherrypy.request.negotiated == "application/json":
+        elif cherrypy.request.as_json:
             return {
                 "result": result
             }
@@ -686,7 +686,7 @@ class MedleyServer(object):
             if len(annotations) != 1:
                 raise cherrypy.HTTPError(400)
 
-            if cherrypy.request.negotiated == "application/json":
+            if cherrypy.request.as_json:
 
                 return {
                     "id": annotations[0]["id"],
@@ -824,7 +824,7 @@ class MedleyServer(object):
 
         files = [os.path.basename(f) for f in files]
 
-        if cherrypy.request.negotiated == "text/plain":
+        if cherrypy.request.as_text:
             return "\n".join(files)
         return files
 
