@@ -43,6 +43,12 @@
                 <div class="meta">
                     <a href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
                 </div>
+                {% if not entry.has_fulltext %}
+                <div class="meta">
+                    No fulltext available
+                </div>
+                {% endif %}
+
 
                 {% if entry.comments %}
                 <div class="extra text}">

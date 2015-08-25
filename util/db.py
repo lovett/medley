@@ -155,7 +155,7 @@ def getRecentBookmarks(limit=100):
     conn = sqlite3.connect(_databases["bookmarks"], detect_types=sqlite3.PARSE_COLNAMES)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
-    sql = """SELECT u.rowid, u.url, u.domain, m.title, u.created as 'created [created]', m.tags, m.comments, 'bookmark' as record_type
+    sql = """SELECT u.rowid, u.url, u.domain, m.title, case when m.fulltext is null then 0 else 1 end as has_fulltext, u.created as 'created [created]', m.tags, m.comments, 'bookmark' as record_type
              FROM urls u, meta m
              WHERE u.rowid=m.url_id
              ORDER BY u.created DESC

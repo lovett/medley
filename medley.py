@@ -628,7 +628,10 @@ class MedleyServer(object):
                 comments = util.html.parse_text(bookmark["comments"])
 
         if cherrypy.request.method == "POST" and url:
-            page = util.net.getUrl(url)
+            try:
+                page = util.net.getUrl(url)
+            except util.net.NetException:
+                page = None
 
             if not title:
                 title = getHtmlTitle(page)
@@ -636,8 +639,10 @@ class MedleyServer(object):
 
             url_id = util.db.saveBookmark(url, title, comments, tags)
 
-            text = util.net.htmlToText(page)
-            util.db.saveBookmarkFulltext(url_id, text)
+            if page:
+                text = util.net.htmlToText(page)
+                util.db.saveBookmarkFulltext(url_id, text)
+
             return "ok".encode("utf-8")
 
         return {
