@@ -5,12 +5,12 @@ beautifulsoup4==4.4.0
 dogpile.cache==0.5.6
 dogpile.core==0.4.1
 httplib2==0.9
+netaddr==0.7.14
 py==1.4.25
-pygeoip==0.3.1
 pycountry==1.14
+pygeoip==0.3.1
 pyparsing==2.0.3
 pytz==2014.10
 requests==2.4.3
 ua-parser==0.3.6
 urllib3==1.9.1
-netaddr==0.7.14
