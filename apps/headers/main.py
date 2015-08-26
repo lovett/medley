@@ -3,15 +3,15 @@ import os.path
 sys.path.append("../../")
 
 import cherrypy
-
 import tools.negotiable
 import tools.jinja
 
-
-class Controller(object):
+class Controller:
     """Display request headers"""
 
     exposed = True
+
+    user_facing = True
 
     def __init__(self):
         cherrypy.config["app_roots"].append(os.path.dirname(__file__))

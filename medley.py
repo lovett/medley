@@ -95,6 +95,11 @@ class MedleyServer(object):
         """The application homepage lists the available endpoints"""
 
         endpoints = []
+
+        # The old way: apps are defined in the server class and
+        # configured for display on the homepage via decorator. This
+        # should go away once all apps have been refactored out of the
+        # server class.
         for name, value in inspect.getmembers(self, inspect.ismethod):
             if name == "index":
                 continue
@@ -104,6 +109,15 @@ class MedleyServer(object):
 
             if exposed and not hidden:
                 endpoints.append((name, value.__doc__))
+
+        # the new way: apps are discrete classes mounted onto the
+        # server and configured for display on the homepage via a
+        # class attribute
+        for name, controller in cherrypy.tree.apps.items():
+            if getattr(controller.root, "user_facing", False):
+                endpoints.append((name[1:], controller.root.__doc__))
+
+        endpoints.sort(key=lambda tup: tup[0])
 
         if cherrypy.request.as_text:
             output = ""
