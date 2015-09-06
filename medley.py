@@ -29,6 +29,7 @@ from bs4 import BeautifulSoup
 
 
 import apps.headers.main
+import apps.lettercase.main
 
 import tools.negotiable
 import tools.response_time
@@ -552,35 +553,6 @@ class MedleyServer(object):
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="lettercase.html")
-    def lettercase(self, style=None, value=""):
-        """Convert a string value to lowercase, uppercase, or titlecase"""
-
-        result = ""
-        if style and value:
-            if style == "title":
-                result = value.title()
-            elif style == "lower":
-                result = value.lower()
-            elif style == "upper":
-                result = value.upper()
-
-        if cherrypy.request.as_text:
-            return result
-        elif cherrypy.request.as_json:
-            return {
-                "result": result
-            }
-        else:
-            return {
-                "value": value,
-                "result": result,
-                "styles": ("title", "lower", "upper"),
-                "style": style or "title"
-            }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="archive.html")
     def archive(self, date=None, q=None, action=None, bookmark_id=None):
         """View and search saved bookmarks"""
@@ -1074,6 +1046,12 @@ if __name__ == "__main__":
         app.merge(local_config)
 
     cherrypy.tree.mount(apps.headers.main.Controller(), '/headers', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.lettercase.main.Controller(), '/lettercase', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
