@@ -30,6 +30,7 @@ from bs4 import BeautifulSoup
 
 import apps.headers.main
 import apps.lettercase.main
+import apps.ip.main
 
 import tools.negotiable
 import tools.response_time
@@ -250,49 +251,6 @@ class MedleyServer(object):
             return data
         else:
             return data["result"]
-
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="ip.html")
-    def ip(self, token=None):
-        """Display internal and external IP addresses"""
-
-        ip_address = None
-        for header in ("X-Real-Ip", "Remote-Addr"):
-            try:
-                ip_address = cherrypy.request.headers[header]
-                break
-            except KeyError:
-                pass
-
-        if not ip_address:
-            raise cherrypy.HTTPError(400, "Unable to determine IP")
-
-        if not token:
-            external_ip = util.net.externalIp()
-            if cherrypy.request.as_text:
-                return ip_address
-            else:
-                return {
-                    "address": ip_address,
-                    "external_ip": external_ip
-                }
-
-        host = cherrypy.request.app.config["ip_tokens"].get(token)
-        if not host:
-            raise cherrypy.HTTPError(400, "Invalid token")
-
-        dns_command = cherrypy.config.get("ip.dns.command")[:]
-        if dns_command:
-            dns_command[dns_command.index("$ip")] = ip_address
-            dns_command[dns_command.index("$host")] = host
-            subprocess.call(dns_command)
-
-        if cherrypy.request.as_text:
-            return "ok"
-        else:
-            return { "result": "ok" }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
@@ -1052,6 +1010,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.lettercase.main.Controller(), '/lettercase', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.ip.main.Controller(), '/ip', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
