@@ -379,29 +379,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip/test", headers={"Remote-Addr": None})
         self.assertEqual(response.code, 400)
 
-    def test_headersReturnsHtml(self):
-        """ /headers returns html """
-        response = self.request("/headers")
-        self.assertEqual(response.code, 200)
-        self.assertTrue("<table" in response.body)
-
-    def test_headersReturnsJson(self):
-        """ /headers returns json """
-        response = self.request("/headers", as_json=True)
-        self.assertEqual(response.code, 200)
-        self.assertTrue("Accept" in response.body)
-
-    def test_headersReturnsPlain(self):
-        """ /headers returns text """
-        response = self.request("/headers", as_plain=True)
-        self.assertEqual(response.code, 200)
-        self.assertTrue("Accept" in response.body)
-
-    def test_headersNoArgs(self):
-        """ /headers takes no arguments"""
-        response = self.request("/headers/test")
-        self.assertEqual(response.code, 404)
-
     def test_lettercaseReturnsHtml(self):
         """ /lettercase returns an HTML form"""
         response = self.request("/lettercase")
