@@ -379,47 +379,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         response = self.request("/ip/test", headers={"Remote-Addr": None})
         self.assertEqual(response.code, 400)
 
-    def test_lettercaseReturnsHtml(self):
-        """ /lettercase returns an HTML form"""
-        response = self.request("/lettercase")
-        self.assertEqual(response.code, 200)
-        print("!" * 72)
-        print(response.body)
-        self.assertTrue("<form" in response.body)
-
-    def test_lettercaseReturnsJson(self):
-        """ /lettercase returns json """
-        response = self.request("/lettercase", as_json=True)
-        self.assertEqual(response.code, 200)
-        self.assertTrue(response.body["result"] == "")
-
-    def test_lettercaseConvertsToLowercase(self):
-        """ /lettercase converts its input to lowercase """
-        response = self.request(path="/lettercase",
-                                method="POST",
-                                as_plain=True,
-                                style="lower",
-                                value="TEST")
-        self.assertEqual(response.body, "test")
-
-    def test_lettercaseConvertsToUppercase(self):
-        """ /lettercase converts its input to uppercase """
-        response = self.request(path="/lettercase",
-                                method="POST",
-                                as_plain=True,
-                                style="upper",
-                                value="test")
-        self.assertEqual(response.body, "TEST")
-
-    def test_lettercaseConvertsToTitle(self):
-        """ /lettercase converts its input to title case """
-        response = self.request(path="/lettercase",
-                                method="POST",
-                                as_plain=True,
-                                style="title",
-                                value="this iS a TEst 1999")
-        self.assertEqual(response.body, "This Is A Test 1999")
-
     def test_geodbReturns410IfNoUrl(self):
         """ /geodb returns 410 if geoip.download.url is not configured """
         cherrypy.config["geoip.download.url"] = None

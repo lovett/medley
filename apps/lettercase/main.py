@@ -1,5 +1,10 @@
+import sys
+import os.path
+sys.path.append("../../")
+
 import cherrypy
-import os
+import tools.negotiable
+import tools.jinja
 
 class Controller:
     """Convert a string value to lowercase, uppercase, or titlecase"""
