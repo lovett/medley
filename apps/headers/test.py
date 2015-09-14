@@ -14,22 +14,22 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase):
         """It returns HTML by default"""
         response = self.request("/")
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.headers["Content-Type"], "text/html;charset=utf-8")
+        self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("<table" in response.body)
 
     def test_returnsJson(self):
         """It returns JSON if requested"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertTrue(helpers.response_is_json(response))
         header, value = next(pair for pair in response.body if pair[0] == "Accept")
-        self.assertEqual(value, "application/json")
+        self.assertTrue(helpers.response_is_json(response))
 
-    def test_returnsPlain(self):
+    def test_returnsText(self):
         """It returns plain text if requested"""
         response = self.request("/", as_plain=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.headers["Content-Type"], "text/plain;charset=utf-8")
+        self.assertTrue(helpers.response_is_text(response))
         self.assertTrue("Accept" in response.body)
 
     def test_noVars(self):
@@ -45,7 +45,6 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase):
     def test_customHeader(self):
         """It recognizes custom headers"""
         response = self.request("/", headers={"Special_Header": "Special Value"}, as_json=True)
-        print(response.body)
         header, value = next(pair for pair in response.body if pair[0] == "Special_Header")
         self.assertEqual(value, "Special Value")
 

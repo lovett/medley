@@ -14,7 +14,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         """It returns HTML by default"""
         response = self.request("/")
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.headers["Content-Type"], "text/html;charset=utf-8")
+        self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("<form" in response.body)
 
     def test_lowercaseHtml(self):
@@ -23,7 +23,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
                                 method="POST",
                                 style="lower",
                                 value="TEST")
-        self.assertEqual(response.headers["Content-Type"], "text/html;charset=utf-8")
+        self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("""<div id="result">test</div>""" in response.body)
 
     def test_lowercaseJson(self):
@@ -33,17 +33,17 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
                                 as_json=True,
                                 style="lower",
                                 value="TEST")
-        self.assertEqual(response.headers["Content-Type"], "application/json")
+        self.assertTrue(helpers.response_is_json(response))
         self.assertEqual(response.body["result"], "test")
 
-    def test_lowercasePlain(self):
+    def test_lowercaseText(self):
         """It converts input to lowercase and returns plain  text"""
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
                                 style="lower",
                                 value="TEST")
-        self.assertEqual(response.headers["Content-Type"], "text/plain;charset=utf-8")
+        self.assertTrue(helpers.response_is_text(response))
         self.assertEqual(response.body, "test")
 
     def test_uppercase(self):

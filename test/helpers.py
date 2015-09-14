@@ -6,10 +6,12 @@ def getFixture(path):
         return handle.read()
 
 def start_server(app):
+    """Create a cherrypy server for testing with an app mounted at root
+    using method dispatch"""
+
     cherrypy.config.update({
         "app_roots": [],
     })
-
 
     app_config = {
         "/": {
@@ -25,3 +27,23 @@ def start_server(app):
 
 def stop_server():
     cherrypy.engine.exit()
+
+
+def response_is_html(res):
+    """Test a response object for an HTML content type header"""
+    return header_is(res.headers, "Content-Type", "text/html;charset=utf-8")
+
+def response_is_json(res):
+    """Test a response object for an JSON content type header"""
+    return header_is(res.headers, "Content-Type", "application/json")
+
+def response_is_text(res):
+    """Test a response object for a plain text content type header"""
+    return header_is(res.headers, "Content-Type", "text/plain;charset=utf-8")
+
+def header_is(headers, name, value):
+    """Test a dict of headers for an expected name/value pair"""
+    try:
+        return headers[name] == value
+    except KeyError:
+        return false
