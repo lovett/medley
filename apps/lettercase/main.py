@@ -13,20 +13,18 @@ class Controller:
 
     user_facing = True
 
-    def get_styles(self):
-        return ("title", "lower", "upper")
+    styles = ("title", "lower", "upper")
 
     @cherrypy.tools.template(template="lettercase.html")
     @cherrypy.tools.negotiable()
     def GET(self):
         return {
-            "styles": self.get_styles()
+            "styles": self.styles
         }
 
     @cherrypy.tools.template(template="lettercase.html")
     @cherrypy.tools.negotiable()
     def POST(self, style=None, value=""):
-        result = ""
         if style and value:
             if style == "title":
                 result = value.title()
@@ -34,6 +32,8 @@ class Controller:
                 result = value.lower()
             elif style == "upper":
                 result = value.upper()
+            else:
+                result = ""
 
         if cherrypy.request.as_text:
             return result
@@ -45,6 +45,6 @@ class Controller:
             return {
                 "value": value,
                 "result": result,
-                "styles": self.get_styles(),
+                "styles": self.styles,
                 "style": style or "title"
             }
