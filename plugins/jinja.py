@@ -13,8 +13,14 @@ class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
     def __init__(self, bus):
-        paths = cherrypy.config.get("app_roots")
-        paths.append("templates")
+        paths = ["templates"]
+
+        apps = [os.path.join("apps", app)
+                for app in os.listdir("apps")
+                if not app.startswith("__")]
+
+        paths.extend(apps)
+
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
 
         self.env.filters["datetime"] = self.datetime_filter

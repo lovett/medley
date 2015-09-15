@@ -13,9 +13,6 @@ class Controller:
 
     user_facing = True
 
-    def __init__(self):
-        cherrypy.config["app_roots"].append(os.path.dirname(__file__))
-
     def get_styles(self):
         return ("title", "lower", "upper")
 

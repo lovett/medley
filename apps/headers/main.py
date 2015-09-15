@@ -13,9 +13,6 @@ class Controller:
 
     user_facing = True
 
-    def __init__(self):
-        cherrypy.config["app_roots"].append(os.path.dirname(__file__))
-
     @cherrypy.tools.template(template="headers.html")
     @cherrypy.tools.negotiable()
     def GET(self):

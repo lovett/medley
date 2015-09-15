@@ -14,9 +14,6 @@ class Controller:
 
     user_facing = True
 
-    def __init__(self):
-        cherrypy.config["app_roots"].append(os.path.dirname(__file__))
-
     def POST(self, token=None):
         host = cherrypy.request.app.config["ip_tokens"].get(token)
         if not host:

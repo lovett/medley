@@ -9,10 +9,6 @@ def start_server(app):
     """Create a cherrypy server for testing with an app mounted at root
     using method dispatch"""
 
-    cherrypy.config.update({
-        "app_roots": [],
-    })
-
     app_config = {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher(),

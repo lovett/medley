@@ -969,7 +969,6 @@ if __name__ == "__main__":
     # Application directory paths have default values that are
     # relative to the app root.
     cherrypy.config.update({
-        "app_roots": [],
         "database_dir": os.path.realpath("db"),
         "log_dir": os.path.realpath("logs")
     })
