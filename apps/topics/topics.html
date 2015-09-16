@@ -19,6 +19,12 @@
             {% for topic in topics %}
             <p><a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferer" target="_blank">{{ topic }}</a></p>
             {% endfor %}
+
+            {% if cache_date %}
+            <p>Using cached value from {{cache_date}}</p>
+            {% else %}
+            <p>The URL was not cached.</p>
+            {% endif %}
         </div>
     </div>
 </main>

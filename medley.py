@@ -31,6 +31,7 @@ from bs4 import BeautifulSoup
 import apps.headers.main
 import apps.lettercase.main
 import apps.ip.main
+import apps.topics.main
 
 import tools.negotiable
 import tools.response_time
@@ -933,36 +934,6 @@ class MedleyServer(object):
         cherrypy.response.status = 204
         return
 
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="topics.html")
-    def topics(self):
-        """Scrape news topics from the Bing homepage"""
-
-        key = "topics_html"
-        topics = []
-
-        html = util.db.cacheGet(key)
-
-        if not html:
-            html = util.net.getUrl("http://www.bing.com/hpm")
-            util.db.cacheSet(key, html)
-
-
-        soup = BeautifulSoup(html, "html.parser")
-
-        for link in soup.find(id="crs_pane").find_all("a"):
-            url = urllib.parse.urlparse(link["href"])
-            qs = urllib.parse.parse_qs(url.query)
-
-            if "q" in qs:
-                topics.append(qs["q"][0])
-
-        return {
-            "topics": topics
-        }
-
-
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
@@ -1015,6 +986,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.ip.main.Controller(), '/ip', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.topics.main.Controller(), '/topics', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
