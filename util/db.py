@@ -446,18 +446,18 @@ def getMaxOffset(db_conn, index_name, date):
 
 def cacheGet(key):
     """Retrieve a value from the cache by its key"""
-
+    sqlite3.register_converter("created", util.sqlite_converters.convert_date)
     db = sqlite3.connect(_databases["cache"], detect_types=sqlite3.PARSE_COLNAMES)
     db.row_factory = sqlite3.Row
 
     cachePurge(key, db)
 
     cur = db.cursor()
-    db.execute("SELECT value FROM cache WHERE key=?", (key,))
+    cur.execute("SELECT value, created FROM cache WHERE key=?", (key,))
     row = cur.fetchone()
 
     if row:
-        return row["value"]
+        return (row["value"], row["created"])
     else:
         return None
 
@@ -498,10 +498,8 @@ def cachePurge(key, conn=None):
     else:
         db = conn
 
-    expires = time.time()
-
     cur = db.cursor()
-    cur.execute("DELETE FROM cache WHERE key=? AND expires < ?", (key, expires))
+    cur.execute("DELETE FROM cache WHERE key=? AND expires < ?", (key, time.time()))
     db.commit()
 
     if not conn:
