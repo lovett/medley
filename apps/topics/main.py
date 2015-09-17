@@ -38,12 +38,17 @@ class Controller:
 
         soup = bs4.BeautifulSoup(html, "html.parser")
 
-        for link in soup.find(id="crs_pane").find_all("a"):
-            url = urllib.parse.urlparse(link["href"])
-            qs = urllib.parse.parse_qs(url.query)
+        container = soup.find(Id="crs_pane")
 
-            if "q" in qs:
-                topics.append(qs["q"][0])
+        topics = []
+        if container:
+            for link in container.find_all("a"):
+                url = urllib.parse.urlparse(link["href"])
+                qs = urllib.parse.parse_qs(url.query)
+
+                if "q" in qs:
+                    topics.append(qs["q"][0])
+
 
         return {
             "cache_date": cache_date,
