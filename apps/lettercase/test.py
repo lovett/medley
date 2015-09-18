@@ -67,6 +67,22 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
                                 value="this iS a TEst 1999")
         self.assertEqual(response.body, "This Is A Test 1999")
 
+    def test_invalidStyle(self):
+        """It rejects unrecognized values for the style parameter """
+        response = self.request(path="/",
+                               method="POST",
+                               as_plain=True,
+                               style="example",
+                               value="test")
+        self.assertEqual(response.code, 400)
+
+    def test_requiredParams(self):
+        """It requires style and value parameters"""
+        response = self.request(path="/",
+                               method="POST",
+                               as_plain=True)
+        self.assertEqual(response.code, 404)
+
 
 
 if __name__ == "__main__":
