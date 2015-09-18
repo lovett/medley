@@ -1,14 +1,19 @@
 .PHONY: dummy
 
 NOTIFIER := /usr/local/bin/send-notification
-PYTHONPATH := $(CURDIR)
+PYTHONPATH := $(CURDIR):test
 
 define notify
 	$(NOTIFIER) -t "$1" -p 0
 endef
 
 test: dummy
-	PYTHONPATH=$(PYTHONPATH) py.test test/test_server.py
+	rm .coverage
+	rm -rf htmlcov
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/lettercase/main.py apps/lettercase/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/topics/main.py apps/topics/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/headers/main.py apps/headers/test.py
+	coverage html
 
 install: dummy
 	ansible-playbook ansible/install.yml

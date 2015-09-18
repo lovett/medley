@@ -3,13 +3,16 @@ import helpers
 import unittest
 import apps.lettercase.main
 
-def setup_module():
-    helpers.start_server(apps.lettercase.main.Controller)
-
-def teardown_module():
-    helpers.stop_server()
 
 class TestLettercase(cptestcase.BaseCherryPyTestCase):
+    @classmethod
+    def setUpClass(cls):
+        helpers.start_server(apps.lettercase.main.Controller)
+
+    @classmethod
+    def tearDownClass(cls):
+        helpers.stop_server()
+
     def test_returnsHtml(self):
         """It returns HTML by default"""
         response = self.request("/")

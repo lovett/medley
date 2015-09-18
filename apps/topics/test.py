@@ -6,13 +6,15 @@ import mock
 import util.db
 import time
 
-def setup_module():
-    helpers.start_server(apps.topics.main.Controller)
-
-def teardown_module():
-    helpers.stop_server()
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
+    @classmethod
+    def setUpClass(cls):
+        helpers.start_server(apps.topics.main.Controller)
+
+    @classmethod
+    def tearDownClass(cls):
+        helpers.stop_server()
 
     @mock.patch("util.db.cacheGet")
     def test_returnsHtml(self, cacheGetMock):
