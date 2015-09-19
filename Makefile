@@ -25,4 +25,4 @@ update: dummy
 
 venv: dummy
 	rm -rf venv
-	virtualenv --no-site-packages --prompt="♪ ♪ ♪" venv
+	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
