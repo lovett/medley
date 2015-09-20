@@ -3,6 +3,10 @@
 {% set page_title = "Lettercase" %}
 {% set home_link = True %}
 
+{% block scripts %}
+<script src="/static/lettercase/lettercase.js"></script>
+{% endblock %}
+
 {% block page_body %}
 <main class="ui page grid stackable">
     <form class="ui sixteen wide column form" method="post" action="/lettercase">

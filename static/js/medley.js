@@ -51,20 +51,6 @@ var MEDLEY = (function () {
         }
     };
 
-    var selectAll = function (e) {
-        var range;
-        e.preventDefault();
-        var target = jQuery(jQuery(this).attr('data-selection-target'));
-        if (document.selection) {
-            range = document.body.createTextRange();
-            range.moveToElementText(target.get(0));
-            range.select();
-        } else if (window.getSelection) {
-            range = document.createRange();
-            range.selectNode(target.get(0));
-            window.getSelection().addRange(range);
-        }
-    };
 
     function getMasterToggleForTable(table) {
         var toggleId;
@@ -87,12 +73,6 @@ var MEDLEY = (function () {
             jQuery('.form-reset').on('click', resetForm);
 
             jQuery(document).on('keydown', shortcuts);
-
-            jQuery('.select-all').on('click', selectAll);
-
-            if (jQuery('#result').html() !== '') {
-                jQuery('#result').prevAll('.select-all').trigger('click');
-            }
 
             jQuery('.ui.radio.checkbox').checkbox();
 
