@@ -38,7 +38,7 @@ class Controller:
 
         soup = bs4.BeautifulSoup(html, "html.parser")
 
-        container = soup.find(Id="crs_pane")
+        container = soup.find(id="crs_pane")
 
         topics = []
         if container:
@@ -48,7 +48,6 @@ class Controller:
 
                 if "q" in qs:
                     topics.append(qs["q"][0])
-
 
         return {
             "cache_date": cache_date,
