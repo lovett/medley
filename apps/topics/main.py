@@ -6,9 +6,8 @@ import time
 import cherrypy
 import tools.negotiable
 import tools.jinja
-import util.net
+import requests
 import util.db
-
 import urllib.parse
 import bs4
 
@@ -32,7 +31,7 @@ class Controller:
             html = cached_value[0]
             cache_date = cached_value[1]
         else:
-            html = util.net.getUrl("http://www.bing.com/hpm")
+            html = self.fetch("http://www.bing.com/hpm")
             util.db.cacheSet(key, html)
             cache_date = None
 
@@ -53,3 +52,16 @@ class Controller:
             "cache_date": cache_date,
             "topics": topics
         }
+
+    def fetch(self, url):
+        r = requests.get(
+            url,
+            timeout=5,
+            allow_redirects=False,
+            headers = {
+                "User-Agent": "python"
+            }
+        )
+
+        r.raise_for_status()
+        return r.text

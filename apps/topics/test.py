@@ -1,11 +1,11 @@
 import cptestcase
 import helpers
 import unittest
+import responses
 import apps.topics.main
 import mock
 import util.db
 import time
-
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
     @classmethod
@@ -24,29 +24,34 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("<main" in response.body)
+        self.assertTrue("Using cached value" in response.body)
         self.assertTrue(cacheGetMock.called)
 
-    @mock.patch("util.net.getUrl")
+    @responses.activate
     @mock.patch("util.db.cacheSet")
     @mock.patch("util.db.cacheGet")
-    def test_requestsUrl(self, cacheGetMock, cacheSetMock, getUrlMock):
+    def test_requestsUrl(self, cacheGetMock, cacheSetMock):
         """It requests a URL if the cache is empty"""
         cacheGetMock.return_value = None
         cacheSetMock.return_value = None
-        getUrlMock.return_value = "<html></html>"
+
+        response_html = "<html></html>"
+        responses.add(responses.GET, "http://www.bing.com/hpm", body=response_html)
 
         response = self.request("/")
-        self.assertTrue(getUrlMock.called)
+        self.assertEqual(len(responses.calls), 1)
         self.assertTrue(cacheSetMock.called)
+        self.assertTrue("The URL was not cached" in response.body)
 
-    @mock.patch("util.net.getUrl")
+    @responses.activate
     @mock.patch("util.db.cacheSet")
     @mock.patch("util.db.cacheGet")
-    def test_extractsLinks(self, cacheGetMock, cacheSetMock, getUrlMock):
+    def test_extractsLinks(self, cacheGetMock, cacheSetMock):
         """It extracts links from the requested URL and handles escaping"""
         cacheGetMock.return_value = None
         cacheSetMock.return_value = None
-        getUrlMock.return_value = """
+
+        response_html = """
         <html>
         <ul id="crs_pane">
             <li><a href="http://example.com/?q=link1">link1</a></li>
@@ -56,9 +61,10 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
             <li><a href="http://example.com/link5">link5</a></li>
         </ul>
         </html>"""
+        responses.add(responses.GET, "http://www.bing.com/hpm", body=response_html)
 
         response = self.request("/")
-        self.assertTrue(getUrlMock.called)
+        self.assertEqual(len(responses.calls), 1)
 
         # single word query
         self.assertTrue("?q=link1" in response.body)
