@@ -31,5 +31,5 @@
     cron_file="{{ project_name }}"
     name="external_ip"
     minute="45"
-    job="curl -k --fail --silent --show-error 'https://localhost/external_ip'"
+    job="curl -X PUT -d 'token=externa' -k --fail --silent --show-error 'https://localhost/ip'"
     user="{{ project_user }}"

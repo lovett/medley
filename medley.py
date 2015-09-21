@@ -62,7 +62,7 @@ class MedleyServer(object):
     def azure(self, event):
         """Relay deployment notifications from Azure"""
 
-        notifier = cherrypy.request.app.config["notifier"]
+        notifier = cherrypy.config.get("notifier")
 
         if not notifier.get("endpoint"):
             raise cherrypy.HTTPError(410, "This endpoint is not active")

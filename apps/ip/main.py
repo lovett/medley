@@ -7,6 +7,7 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import util.net
+import util.db
 import IPy
 
 class Controller:
@@ -15,6 +16,7 @@ class Controller:
     exposed = True
 
     user_facing = True
+
 
     def validateIp(self, value):
         try:
@@ -30,22 +32,43 @@ class Controller:
                 return cherrypy.request.headers[header]
         return None
 
+    def announceValueChange(self, old_ip, new_ip, host):
+        notifier = cherrypy.config.get("notifier")
+        notification = {
+            "group": "sysdown",
+            "title": "IP address of {} has changed".format(host),
+            "body": "New address is {}. Old address was {}".format(new_ip, old_ip)
+        }
+        util.net.sendNotification(notification, notifier)
 
     def PUT(self, token=None):
+        try:
+            dns_command = cherrypy.config.get("ip.dns.command")[:]
+        except TypeError:
+            cherrypy.response.status = 409
+            return
+
         host = cherrypy.config["ip.tokens"].get(token)
         if not host:
             raise cherrypy.HTTPError(400, "Invalid token")
 
-        try:
-            dns_command = cherrypy.config.get("ip.dns.command")[:]
-        except TypeError:
-            cherrypy.response.status = 404
-            return
+        cache_key = "ip:{}".format(host)
+        cached_value = util.db.cacheGet(cache_key)
 
-        dns_command[dns_command.index("$ip")] = self.ipFromHeader(cherrypy.request.headers)
-        dns_command[dns_command.index("$host")] = host
-        subprocess.call(dns_command)
+        if token == "external":
+            ip_address = util.net.externalIp()
+        else:
+            ip_address = self.ipFromHeader(cherrypy.request.headers)
+
+        if ip_address != cached_value:
+            util.db.cacheSet(cache_key, ip_address, 86400)
+            dns_command[dns_command.index("$ip")] = ip_address
+            dns_command[dns_command.index("$host")] = host
+            subprocess.call(dns_command)
+            self.announceValueChange(cached_value, ip_address, host)
+
         cherrypy.response.status = 201
+
 
     @cherrypy.tools.template(template="ip.html")
     @cherrypy.tools.negotiable()

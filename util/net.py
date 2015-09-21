@@ -136,8 +136,9 @@ def sendMessage(message_data, template_data):
                         message.as_string())
 
 def sendNotification(message, config):
+
     try:
-        r = requests.post(config["endpoint"], auth=config["auth"], data=message)
+        r = requests.post(config[0], auth=config[1:2], data=message)
         r.raise_for_status()
         return True
     except:
