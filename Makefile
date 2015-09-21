@@ -8,11 +8,12 @@ define notify
 endef
 
 test: dummy
-	rm .coverage
+	rm -f .coverage
 	rm -rf htmlcov
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/lettercase/main.py apps/lettercase/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/topics/main.py apps/topics/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/headers/main.py apps/headers/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/ip/main.py apps/ip/test.py
 	coverage html
 
 install: dummy

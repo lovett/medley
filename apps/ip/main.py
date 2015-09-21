@@ -2,10 +2,12 @@ import sys
 import os.path
 sys.path.append("../../")
 
+import subprocess
 import cherrypy
 import tools.negotiable
 import tools.jinja
 import util.net
+import IPy
 
 class Controller:
     """Display the the requester's address and the server's external address"""
@@ -14,34 +16,43 @@ class Controller:
 
     user_facing = True
 
-    def POST(self, token=None):
-        host = cherrypy.request.app.config["ip_tokens"].get(token)
+    def validateIp(self, value):
+        try:
+            IPy.IP(value)
+            return True
+        except:
+            return False
+
+
+    def ipFromHeader(self, headers):
+        for header in ("X-Real-Ip", "Remote-Addr"):
+            if header in headers:
+                return cherrypy.request.headers[header]
+        return None
+
+
+    def PUT(self, token=None):
+        host = cherrypy.config["ip.tokens"].get(token)
         if not host:
             raise cherrypy.HTTPError(400, "Invalid token")
 
-        dns_command = cherrypy.config.get("ip.dns.command")[:]
-        if dns_command:
-            dns_command[dns_command.index("$ip")] = ip_address
-            dns_command[dns_command.index("$host")] = host
-            subprocess.call(dns_command)
+        try:
+            dns_command = cherrypy.config.get("ip.dns.command")[:]
+        except TypeError:
+            cherrypy.response.status = 404
+            return
 
-        if cherrypy.request.as_text:
-            return "ok"
-        else:
-            return { "result": "ok" }
+        dns_command[dns_command.index("$ip")] = self.ipFromHeader(cherrypy.request.headers)
+        dns_command[dns_command.index("$host")] = host
+        subprocess.call(dns_command)
+        cherrypy.response.status = 201
 
     @cherrypy.tools.template(template="ip.html")
     @cherrypy.tools.negotiable()
     def GET(self):
-        ip_address = None
-        for header in ("X-Real-Ip", "Remote-Addr"):
-            try:
-                ip_address = cherrypy.request.headers[header]
-                break
-            except KeyError:
-                pass
+        ip_address = self.ipFromHeader(cherrypy.request.headers)
 
-        if not ip_address:
+        if not self.validateIp(ip_address):
             raise cherrypy.HTTPError(400, "Unable to determine IP")
 
         external_ip = util.net.externalIp()
