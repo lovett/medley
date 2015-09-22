@@ -10,6 +10,7 @@ import util.fs
 import hashlib
 import util.parse
 import functools
+import pickle
 from urllib.parse import urlparse
 from collections import defaultdict
 
@@ -456,8 +457,9 @@ def cacheGet(key):
     cur.execute("SELECT value, created FROM cache WHERE key=?", (key,))
     row = cur.fetchone()
 
+
     if row:
-        return (row["value"], row["created"])
+        return (pickle.loads(row["value"]), row["created"])
     else:
         return None
 
@@ -469,7 +471,7 @@ def cacheSet(key, value, lifespan_seconds=3600):
 
     expires = time.time() + int(lifespan_seconds)
 
-    cur.execute("INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)", (key, value, expires))
+    cur.execute("INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)", (key, pickle.dumps(value), expires))
     db.commit()
     db.close()
 

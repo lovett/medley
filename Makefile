@@ -14,6 +14,7 @@ test: dummy
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/topics/main.py apps/topics/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/headers/main.py apps/headers/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/ip/main.py apps/ip/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/whois/main.py apps/whois/test.py
 	coverage html
 
 install: dummy

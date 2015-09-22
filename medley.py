@@ -32,6 +32,7 @@ import apps.headers.main
 import apps.lettercase.main
 import apps.ip.main
 import apps.topics.main
+import apps.whois.main
 
 import tools.negotiable
 import tools.response_time
@@ -135,81 +136,6 @@ class MedleyServer(object):
                 "page_title": "Medley",
                 "endpoints": endpoints
             }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="whois.html")
-    def whois(self, address=None):
-        """Display whois and geoip data for an IP address or hostname"""
-
-        if address is None:
-            if cherrypy.request.as_json:
-                cherrypy.response.status = 400
-                return {
-                    "message": "Address not specified"
-                }
-            if cherrypy.request.as_text:
-                raise cherrypy.HTTPError(400, "Address not specified")
-            else:
-                return {}
-
-        # Isolate a hostname or IP address
-        ip = None
-        address_unquoted = urllib.parse.unquote_plus(address).lower()
-        address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
-
-        try:
-            IPy.IP(address_clean)
-            ip = address_clean
-        except ValueError:
-            address_parsed = urllib.parse.urlparse(address_clean)
-            if address_parsed.hostname:
-                address_clean = address_parsed.hostname
-
-        if ip is None:
-            ip = util.net.resolveHost(address_clean)
-
-        ip_facts = util.db.ipFacts(ip)
-
-        data = {
-            "address": address_clean,
-            "ip": ip,
-            "ip_facts": ip_facts,
-            "reverse_host": util.net.reverseLookup(ip)
-        }
-
-        # Whois
-        def whois_query():
-            try:
-                return util.net.whois(data["address"])
-            except AssertionError:
-                return None
-
-        key = "whois:{}".format(data["address"])
-
-        data["whois"] = self.cache.get_or_create(
-            key, whois_query,
-            should_cache_fn= lambda v: v is not None
-        )
-
-        # Google charts
-        try:
-            data["map_region"] = data["ip_facts"]["geo"]["country_code"]
-            if data["map_region"] == "US" and data["ip_facts"]["geo"]["region_code"]:
-                data["map_region"] += "-" + data["ip_facts"]["geo"]["region_code"]
-        except:
-            data["map_region"] = None
-
-
-        if cherrypy.request.as_text:
-            if "city" in data["geo"] and "country_name" in data["geo"]:
-                return "{}, {}".format(data["geo"]["city"], data["geo"]["country_name"])
-            elif "country_name" in data["geo"]:
-                return data["geo"]["country_name"]
-            else:
-                return "Unknown"
-        else:
-            return data
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
@@ -875,6 +801,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.topics.main.Controller(), '/topics', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.whois.main.Controller(), '/whois', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
