@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% set page_title = "Annotations" %}
+{% set page_title = "Registry" %}
 
 {% set home_link = True %}
 
 {% block scripts %}
-<script src="/static/js/annotations.js"></script>
+<script src="/static/registry/registry.js"></script>
 {% endblock %}
 
 
@@ -13,7 +13,19 @@
 
 <main class="ui page grid stackable">
     <div class="ui sixteen wide column">
-        <div class="ui form">
+        <form id="search-form" class="ui form">
+            <div class="field">
+                <label for="key">Key:</label>
+                <input type="text" id="searchkey" name="searchkey" value="{{ searchkey|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <button class="ui submit button">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="ui sixteen wide column">
+        <div id="insert-form" class="ui form">
             <div class="field">
                 <label for="key">Key:</label>
                 <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
@@ -31,7 +43,7 @@
     </div>
 
     <div class="ui sixteen wide column">
-        <table id="annotations" class="ui sixteen column table">
+        <table id="records" class="ui sixteen column table">
             <thead>
                 <tr>
                     <th>Key</th>
@@ -41,18 +53,18 @@
                 </tr>
             </thead>
             <tbody>
-                {% if not annotations %}
+                {% if not records %}
                 <tr>
-                    <td colspan="4">There are no annotations.</td>
+                    <td colspan="4">There are no records.</td>
                 </tr>
                 {% endif %}
 
-                {% for annotation in annotations %}
+                {% for record in records %}
                 <tr>
-                    <td>{{ annotation.key }}</td>
-                    <td>{{ annotation.value }}</td>
-                    <td>{{ annotation.created|localtime("datetime12") }}</td>
-                    <td class="right aligned"><a href="#" data-id="{{ annotation.id }}" class="delete" title="Delete annotation"><i class="remove circle icon"></i></a></td>
+                    <td> {{ record.key }}</td>
+                    <td>{{ record.value }}</td>
+                    <td>{{ record.created|localtime("datetime12") }}</td>
+                    <td class="right aligned"><a href="#" data-uid="{{ record.rowid }}" class="delete" title="Delete record"><i class="remove circle icon"></i></a></td>
                 </tr>
                 {% endfor %}
             </tbody>

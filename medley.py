@@ -34,6 +34,7 @@ import apps.ip.main
 import apps.topics.main
 import apps.whois.main
 import apps.geodb.main
+import apps.registry.main
 
 import tools.negotiable
 import tools.response_time
@@ -356,58 +357,6 @@ class MedleyServer(object):
             "url": url,
             "tags": tags,
             "comments": comments
-        }
-
-
-
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    def annotation(self, annotation_id):
-
-        if cherrypy.request.method == "DELETE":
-            annotation = util.db.getAnnotationById(annotation_id)
-            if util.db.deleteAnnotation(annotation_id) == 1:
-
-                if annotation["key"].startswith("ip:") or annotation["key"].startswith("netblock:"):
-                    util.db.ipFacts.cache_clear()
-
-                return "ok".encode("utf-8")
-
-        raise cherrypy.HTTPError(400)
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="annotations.html")
-    def annotations(self, key=None, value=None, replace=False):
-        """A general-purpose key-value store"""
-
-        if key and value and cherrypy.request.method == "POST":
-            util.db.saveAnnotation(key, value, replace)
-
-            if key.startswith("ip:"):
-                util.db.ipFacts.cache_clear()
-
-            self.cache.delete(key)
-
-            annotations = util.db.getAnnotations(key, limit=1)
-
-            if len(annotations) != 1:
-                raise cherrypy.HTTPError(400)
-
-            if cherrypy.request.as_json:
-
-                return {
-                    "id": annotations[0]["id"],
-                    "key": annotations[0]["key"],
-                    "value": annotations[0]["value"],
-                    "created": annotations[0]["created"].strftime("%A %b %d, %Y %I:%M %p")
-                }
-
-        return {
-            "key": key,
-            "value": value,
-            "annotations": util.db.getAnnotations()
         }
 
     @cherrypy.expose
@@ -763,6 +712,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.geodb.main.Controller(), '/geodb', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.registry.main.Controller(), '/registry', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }

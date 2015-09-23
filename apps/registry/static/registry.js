@@ -1,26 +1,26 @@
-MEDLEY.annotations = (function () {
+MEDLEY.registry = (function () {
     'use strict'
 
-    var deleteAnnotation = function (e) {
+    function deleteRecord (e) {
+        var trigger;
+
         e.preventDefault();
 
-        var trigger = jQuery(this)
+        trigger = jQuery(this)
 
         jQuery.ajax({
             type: 'DELETE',
-            url: '/annotation/' + (parseInt(trigger.attr('data-id'), 10) || 0),
+            dataType: 'json',
+            url: '/registry?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
         }).done(function (data) {
-            console.log(data);
-            if (data === "ok") {
-                trigger.closest('TR').remove();
-            }
+            window.location.reload();
         });
-    };
+    }
 
     return {
         init: function () {
             var $form, validationRules, validationSettings;
-            $form = jQuery('.ui.form');
+            $form = jQuery('#insert-form');
 
             validationRules = {
                 'key': {
@@ -46,22 +46,12 @@ MEDLEY.annotations = (function () {
             validationSettings = {
                 'onSuccess': function () {
                     jQuery.ajax({
-                        type: 'POST',
+                        type: 'PUT',
                         dataType: 'json',
-                        url: '/annotations',
+                        url: '/registry',
                         data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
-                        var $successMessage = jQuery('.green.message', $form);
-                        var $errorMessage = jQuery('.error.message', $form);
-                        var clone = jQuery('#annotations TBODY TR').first().clone();
-
-                        jQuery('INPUT, TEXTAREA', $form).val('');
-                        $successMessage.removeClass('hidden').fadeOut(5000);
-                        clone.find('TD:nth-child(1)').text(data.key);
-                        clone.find('TD:nth-child(2)').text(data.value);
-                        clone.find('TD:nth-child(3)').text(data.created);
-                        clone.find('A.delete').attr('data-id', data.id);
-                        jQuery('#annotations TBODY').prepend(clone);
+                        window.location.reload();
                     }).fail(function () {
                         var $successMessage = jQuery('.green.message', $form);
                         var $errorMessage = jQuery('.error.message', $form);
@@ -74,10 +64,10 @@ MEDLEY.annotations = (function () {
 
             $form.form(validationRules, validationSettings);
 
-            jQuery('#annotations').on('click', 'A.delete', deleteAnnotation);
+            jQuery('#records').on('click', 'A.delete', deleteRecord);
         }
     };
 })();
 
 
-jQuery(document).ready(MEDLEY.annotations.init);
+jQuery(document).ready(MEDLEY.registry.init);
