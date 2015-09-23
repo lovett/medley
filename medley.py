@@ -33,6 +33,7 @@ import apps.lettercase.main
 import apps.ip.main
 import apps.topics.main
 import apps.whois.main
+import apps.geodb.main
 
 import tools.negotiable
 import tools.response_time
@@ -136,57 +137,6 @@ class MedleyServer(object):
                 "page_title": "Medley",
                 "endpoints": endpoints
             }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="geodb.html")
-    def geodb(self, action=None):
-        """Download the latest GeoLite Legacy City database from maxmind.com"""
-
-        url = cherrypy.config.get("geoip.download.url")
-        directory = cherrypy.config.get("database_dir")
-
-        if not (url and directory):
-            syslog.syslog(syslog.LOG_ERROR, "geodb endpoint has not been configured")
-            raise cherrypy.HTTPError(410, "This endpoint is not active")
-
-        download_path = "{}/{}".format(directory.rstrip("/"),
-                                       os.path.basename(url))
-
-        try:
-            modified = os.path.getmtime(download_path.rstrip(".gz"))
-            downloaded = datetime.fromtimestamp(modified)
-            allow_update = time.time() - modified > 86400
-        except OSError:
-            downloaded = None
-            allow_update = True
-
-        if cherrypy.request.method == "POST" and action == "update":
-            try:
-                util.net.saveUrl(url, download_path)
-            except util.net.NetException as e:
-                raise cherrypy.HTTPError(500, str(e))
-
-            # attempt to gunzip
-            if download_path.endswith(".gz"):
-                try:
-                    subprocess.check_call(["gunzip", "-f", download_path])
-                    syslog.syslog(syslog.LOG_INFO, "Geodb download complete")
-                    cherrypy.response.status = 204
-
-                    # Re-run setup to ensure the newly downloaded file gets used
-                    util.db.geoSetup(directory, url)
-                    return
-                except subprocess.CalledProcessError:
-                    syslog.syslog(syslog.LOG_ERROR, "Failed to gunzip geodb database")
-                    os.unlink(download_path)
-                    raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
-
-
-        return {
-            "allow_update": allow_update,
-            "downloaded": downloaded
-        }
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
@@ -807,6 +757,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.whois.main.Controller(), '/whois', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.geodb.main.Controller(), '/geodb', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }

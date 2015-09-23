@@ -294,39 +294,6 @@ class TestMedleyServer(BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertTrue("/" in response.body)
 
-    def test_geodbReturns410IfNoUrl(self):
-        """/geodb returns 410 if geoip.download.url is not configured """
-        cherrypy.config["geoip.download.url"] = None
-        cherrypy.config["database_dir"] = "/tmp"
-        response = self.request("/geodb")
-        self.assertEqual(response.code, 410)
-
-    def test_geodbReturns410IfNoDatabaseDirectory(self):
-        """ /geodb returns 410 if database_dir is not configured """
-        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
-        cherrypy.config["database_dir"] = None
-        response = self.request("/geodb")
-        self.assertEqual(response.code, 410)
-
-    @mock.patch("medley.urllib.request")
-    def test_geodbReturns500IfGunzipFails(self, requestMock):
-        """ /geodb returns 500 if the database cannot be gunzipped."""
-        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
-        response = self.request("/geodb/update", method="POST")
-        self.assertFalse(requestMock.urlopen.called)
-        self.assertEqual(response.code, 500)
-
-    @mock.patch("medley.subprocess")
-    @mock.patch("medley.util.net.saveUrl")
-    def test_geodbReturns204(self, saveUrlMock, subprocessMock):
-        """ /geodb returns 204 if the database is successfully downloaded  """
-        cherrypy.config["geoip.download.url"] = "http://example.com/test.gz"
-        saveUrlMock.return_value = True
-        subprocessMock.check_call.return_value = 0
-        response = self.request("/geodb/update", method="POST")
-        self.assertTrue(saveUrlMock.called)
-        self.assertEqual(response.code, 204)
-
     def test_phoneNoNumberJson(self):
         """ /phone returns 400 if called as json without a number"""
         response = self.request("/phone", as_json=True)

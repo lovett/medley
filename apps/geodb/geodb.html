@@ -15,7 +15,7 @@
 {% block scripts %}
 
 {% if allow_update %}
-<script src="/static/js/geodb.js"></script>
+<script src="/static/geodb/geodb.js"></script>
 {% endif %}
 
 {% endblock %}
@@ -25,7 +25,7 @@
     <div class="ui sixteen wide center aligned column">
 
         {% if downloaded %}
-        <p>The database was updated on {{downloaded|datetime("datetime12")}}</p>
+        <p>The database was downloaded on {{downloaded|datetime("datetime12")}}</p>
         {% else %}
         <p>There is no database.</p>
         {% endif %}
@@ -43,7 +43,7 @@
 
         {% else %}
         <button class="ui disabled large focal button">{{ icon }} Update</button>
-        <p><em>The database shouldn't need to be updated yet.</em></p>
+        <p><em>Update disabled to prevent unnecessary download.</em></p>
         {% endif %}
 
     </div>

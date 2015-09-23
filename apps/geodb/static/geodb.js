@@ -7,11 +7,7 @@ MEDLEY.geodb = (function () {
 
         jQuery.ajax({
             type: 'POST',
-            dataType: 'json',
-            url: '/geodb',
-            data: {
-                'action': 'update'
-            }
+            url: '/geodb'
         }).done(function (data) {
             window.location.reload();
         }).fail(function (xhr, status, error) {
