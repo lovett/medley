@@ -73,10 +73,9 @@ class Controller:
         if path.endswith(".gz"):
             try:
                 subprocess.check_call(["gunzip", "-f", path])
-
             except subprocess.CalledProcessError:
-                syslog.syslog(syslog.LOG_ERROR, "Failed to gunzip geodb database")
-                os.unlink(download_path)
+                syslog.syslog(syslog.LOG_ERR, "Failed to gunzip geodb database")
+                os.unlink(path)
                 raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
 
         # Re-run setup to ensure the newly downloaded file gets used
