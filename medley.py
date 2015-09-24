@@ -35,6 +35,7 @@ import apps.topics.main
 import apps.whois.main
 import apps.geodb.main
 import apps.registry.main
+import apps.blacklist.main
 
 import tools.negotiable
 import tools.response_time
@@ -138,42 +139,6 @@ class MedleyServer(object):
                 "page_title": "Medley",
                 "endpoints": endpoints
             }
-
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    def blacklist(self, action, number):
-
-        config = cherrypy.request.app.config["asterisk"]
-
-        if cherrypy.request.method != "POST":
-            raise cherrypy.HTTPError(405)
-
-
-        if action not in ["add", "remove"]:
-            raise cherrypy.HTTPError(400, "Invalid action")
-
-        number = util.phone.sanitize(number)
-        if not number:
-            raise cherrypy.HTTPError(400, "Invalid number")
-
-        sock = util.asterisk.authenticate(config)
-
-        if not sock:
-            raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
-
-        if action == "remove":
-            result = util.asterisk.blacklist_remove(sock, number)
-        elif action == "add":
-            result = util.asterisk.save_blacklist(sock, number)
-
-        sock.close()
-
-        if not result:
-            raise cherrypy.HTTPError(500, "Failed to modify blacklist")
-
-        cherrypy.response.status = 204
-        return
-
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()
@@ -718,6 +683,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.registry.main.Controller(), '/registry', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.blacklist.main.Controller(), '/blacklist', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
