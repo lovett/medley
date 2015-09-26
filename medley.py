@@ -36,6 +36,7 @@ import apps.whois.main
 import apps.geodb.main
 import apps.registry.main
 import apps.blacklist.main
+import apps.awsranges.main
 
 import tools.negotiable
 import tools.response_time
@@ -568,44 +569,6 @@ class MedleyServer(object):
             "saved_queries": saved_queries
         }
 
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.encode()
-    def awsranges(self):
-        """Download the current set of AWS IP ranges and store as annotations
-
-        Previously downloaded ranges are removed.
-
-        See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html
-        """
-
-        key = "netblock:aws"
-        fetch_key = "awsranges:lastfetch"
-        last_fetch = util.db.getAnnotations(fetch_key)
-
-        if last_fetch:
-            if (time.time() - float(last_fetch[0]["value"])) < 86400:
-                syslog.syslog(syslog.LOG_NOTICE, "Rejecting awsranges request - too soon")
-                raise cherrypy.HTTPError(400, "Ranges have already been downloaded today")
-
-        ranges = util.net.getUrl("https://ip-ranges.amazonaws.com/ip-ranges.json", json=True)
-
-        if not "prefixes" in ranges:
-            raise cherrypy.HTTPError(400, "JSON response contains no prefixes")
-
-        util.db.deleteAnnotationByKey("netblock:aws")
-
-        for prefix in ranges["prefixes"]:
-            util.db.saveAnnotation(key, prefix["ip_prefix"])
-
-
-        util.db.saveAnnotation(fetch_key, time.time())
-
-
-        syslog.syslog(syslog.LOG_NOTICE, "AWS netblock range download complete")
-
-        cherrypy.response.status = 204
-        return
 
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
@@ -689,6 +652,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.blacklist.main.Controller(), '/blacklist', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.awsranges.main.Controller(), '/awsranges', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
