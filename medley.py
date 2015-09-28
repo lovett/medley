@@ -37,6 +37,7 @@ import apps.geodb.main
 import apps.registry.main
 import apps.blacklist.main
 import apps.awsranges.main
+import apps.loginventory.main
 
 import tools.negotiable
 import tools.response_time
@@ -441,21 +442,6 @@ class MedleyServer(object):
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.encode()
-    def loginventory(self):
-        log_root = cherrypy.request.app.config["/visitors"].get("log_dir")
-
-        files = util.fs.file_list(log_root, "*.log")
-
-        files = [os.path.basename(f) for f in files]
-
-        if cherrypy.request.as_text:
-            return "\n".join(files)
-        return files
-
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.encode()
     def logwalk(self, by, distance=7, match=None, all=None):
         log_files = self.loginventory()
 
@@ -658,6 +644,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.awsranges.main.Controller(), '/awsranges', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.loginventory.main.Controller(), '/loginventory', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }

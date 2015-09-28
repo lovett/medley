@@ -23,14 +23,6 @@ def file_hash(path):
             m.update(data)
     return m.hexdigest()
 
-def file_list(root, extension=None):
-    if not extension:
-        extension = ".*"
-
-    return [os.path.join(dirpath, f)
-            for dirpath, dirnames, files in os.walk(root)
-            for f in fnmatch.filter(files, extension)]
-
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, offsets=None, limit=50):
     matches = []

@@ -19,6 +19,7 @@ test: dummy
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/registry/main.py apps/registry/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/blacklist/main.py apps/blacklist/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/awsranges/main.py apps/awsranges/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/loginventory/main.py apps/loginventory/test.py
 	coverage html
 
 install: dummy
