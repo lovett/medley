@@ -38,6 +38,7 @@ import apps.registry.main
 import apps.blacklist.main
 import apps.awsranges.main
 import apps.loginventory.main
+import apps.azure.main
 
 import tools.negotiable
 import tools.response_time
@@ -59,42 +60,6 @@ class MedleyServer(object):
         util.db.geoSetup(db_dir, cherrypy.config.get("geoip.download.url"))
 
         self.cache.configure_from_config(cherrypy.config, "cache.")
-
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.encode()
-    @cherrypy.tools.json_in()
-    @cherrypy.tools.capture()
-    def azure(self, event):
-        """Relay deployment notifications from Azure"""
-
-        notifier = cherrypy.config.get("notifier")
-
-        if not notifier.get("endpoint"):
-            raise cherrypy.HTTPError(410, "This endpoint is not active")
-
-        details = cherrypy.request.json
-
-        if not details.get("siteName"):
-            raise cherrypy.HTTPError(400, "Site name not specified")
-
-        notification = {
-            "group": "azure",
-            "url": cherrypy.request.config.get("deployment_url").format(details["siteName"]),
-            "body": details.get("message", "").split("\n")[0],
-            "title": "Deployment to {}".format(details["siteName"])
-        }
-
-        if details.get("status") == "success" and details.get("complete") == True:
-            notification["title"] += " is complete"
-        elif details.get("status") == "failed":
-            notification["title"] += " has failed"
-        else:
-            notification["title"] += " is {}".format(details.get("status", "not specified"))
-
-        util.net.sendNotification(notification, notifier)
-        return "ok"
-
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
@@ -650,6 +615,12 @@ if __name__ == "__main__":
     })
 
     cherrypy.tree.mount(apps.loginventory.main.Controller(), '/loginventory', {
+        "/": {
+            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        }
+    })
+
+    cherrypy.tree.mount(apps.azure.main.Controller(), '/azure', {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
