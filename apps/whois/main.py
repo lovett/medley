@@ -54,8 +54,14 @@ class Controller:
                 address_clean = address_parsed.hostname
             ip = self.resolveHost(address_clean)
 
-        if ip is None:
+        if ip is None and cherrypy.request.as_text:
             raise cherrypy.HTTPError(400, "Invalid address")
+
+        if ip is None:
+            cherrypy.response.status = 400
+            return {
+                "message": "Invalid address"
+            }
 
         cache_key = "whois:{}".format(address_clean)
         cached_value = util.db.cacheGet(cache_key)
@@ -82,7 +88,7 @@ class Controller:
         # Google charts
         try:
             map_region = ip_facts["geo"]["country_code"]
-            if map_region == "US" and ip_facts["geo"]["region_code"]:
+            if map_region == "US" and ip_facts["geo"].get("region_code", None):
                 map_region += "-" + ip_facts["geo"]["region_code"]
         except:
             map_region = None
