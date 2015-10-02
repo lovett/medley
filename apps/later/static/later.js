@@ -1,5 +1,5 @@
 MEDLEY.later = (function () {
-    'use strict'
+    'use strict';
 
     var applyShortcut;
 
@@ -23,13 +23,16 @@ MEDLEY.later = (function () {
             target.focus();
         } else if (trigger.hasClass('trim-all')) {
             target.val('').focus();
-        }	
+        }
     };
 
     return {
         init: function () {
-            var $form, validationRules, validationSettings;
+            var $form, $successMessage, $errorMessage, validationRules, validationSettings;
             $form = jQuery('.ui.form');
+            $successMessage = jQuery('.green.message', $form);
+            $errorMessage = jQuery('.error.message', $form);
+
 
             validationRules = {
                 url: {
@@ -50,16 +53,12 @@ MEDLEY.later = (function () {
                         url: window.location.pathname,
                         data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
-                        var $successMessage = jQuery('.green.message', $form);
-                        var $errorMessage = jQuery('.error.message', $form);
-                        if (data === 'ok') {
-                            $successMessage.removeClass('hidden');
-                            window.location.href = '/archive';
-                        } else {
-                            $form.addClass('error');
-                            $successMessage.addClass('hidden');
-                            $errorMessage.text(data);
-                        }
+                        $successMessage.removeClass('hidden');
+                        window.location.href = '/archive';
+                    }).fail(function (data) {
+                        $form.addClass('error');
+                        $successMessage.addClass('hidden');
+                        $errorMessage.text(data);
                     });
                 }
             };

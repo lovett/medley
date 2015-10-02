@@ -39,6 +39,7 @@ import apps.blacklist.main
 import apps.awsranges.main
 import apps.loginventory.main
 import apps.azure.main
+import apps.later.main
 
 import tools.negotiable
 import tools.response_time
@@ -233,62 +234,6 @@ class MedleyServer(object):
 
         return {
             "entries": entries
-        }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="later.html")
-    def later(self, action="edit", title=None, url=None, tags=None, comments=None):
-        """Capture a webpage for future reference"""
-
-        error = None
-
-        if title:
-            title = util.html.parse_text(title)
-
-        if tags:
-            tags = util.html.parse_text(tags)
-
-        if comments:
-            comments = util.html.parse_text(comments)
-            comments = re.sub("\s+", " ", comments)
-
-        title = util.net.reduceHtmlTitle(title)
-
-        if cherrypy.request.method == "GET":
-            bookmark = util.db.getBookmarkByUrl(url)
-
-            if bookmark:
-                error = "This URL has already been bookmarked"
-                title = util.html.parse_text(bookmark["title"])
-                tags = util.html.parse_text(bookmark["tags"])
-                comments = util.html.parse_text(bookmark["comments"])
-
-        if cherrypy.request.method == "POST" and url:
-            try:
-                page = util.net.getUrl(url)
-            except util.net.NetException:
-                page = None
-
-            if not title:
-                title = getHtmlTitle(page)
-                title = util.net.reduceHtmlTitle(title)
-
-            url_id = util.db.saveBookmark(url, title, comments, tags)
-
-            if page:
-                text = util.net.htmlToText(page)
-                util.db.saveBookmarkFulltext(url_id, text)
-
-            return "ok".encode("utf-8")
-
-        return {
-            "base": cherrypy.config.get("base"),
-            "error": error,
-            "title": title,
-            "url": url,
-            "tags": tags,
-            "comments": comments
         }
 
     @cherrypy.expose
@@ -560,71 +505,15 @@ if __name__ == "__main__":
         cherrypy.config.update(local_config)
         app.merge(local_config)
 
-    cherrypy.tree.mount(apps.headers.main.Controller(), '/headers', {
+    app_config = {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
         }
-    })
+    }
 
-    cherrypy.tree.mount(apps.lettercase.main.Controller(), '/lettercase', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.ip.main.Controller(), '/ip', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.topics.main.Controller(), '/topics', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.whois.main.Controller(), '/whois', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.geodb.main.Controller(), '/geodb', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.registry.main.Controller(), '/registry', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.blacklist.main.Controller(), '/blacklist', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.awsranges.main.Controller(), '/awsranges', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.loginventory.main.Controller(), '/loginventory', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
-
-    cherrypy.tree.mount(apps.azure.main.Controller(), '/azure', {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        }
-    })
+    for name, cls in inspect.getmembers(apps, inspect.ismodule):
+        path = "/{}".format(name)
+        cherrypy.tree.mount(cls.main.Controller(), path, app_config)
 
     # Logging occurs either to stdout or to files. For file logging,
     # the configuration should specify a value for log_dir and ignore

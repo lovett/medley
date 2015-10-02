@@ -21,8 +21,8 @@ class TextParser(html.parser.HTMLParser):
         self.capture(c)
 
 def parse_text(s):
-    p = TextParser(strict=False)
+    p = TextParser()
     p.feed(s)
-    result = p.result
     p.close()
+    result = p.result
     return result

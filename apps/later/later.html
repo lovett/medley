@@ -5,7 +5,7 @@
 {% set home_link = True %}
 
 {% block scripts %}
-<script src="/static/js/later.js"></script>
+<script src="/static/later/later.js"></script>
 {% endblock %}
 
 
@@ -23,8 +23,6 @@
 
             <div class="ui error message">{{ error }}</div>
             <div class="hidden ui green message">Success!</div>
-
-            <input type="hidden" name="action" value="save" />
 
             <div class="field">
                 <label for="url">Title:</label>
