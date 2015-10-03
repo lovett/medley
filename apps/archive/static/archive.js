@@ -7,17 +7,16 @@ MEDLEY.archive = (function () {
         trigger = jQuery(this);
         form = trigger.closest('FORM');
         jQuery.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: $('INPUT', form).serialize()
+            type: 'DELETE',
+            url: '/archive?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
         }).done(function () {
             trigger.closest('.event').remove();
             if (jQuery('MAIN .event').length === 0) {
                 jQuery('.nothing-message').removeClass('hidden');
                 jQuery('MAIN H1').remove();
             }
-        }).fail(function () {
-            console.log('error');
+        }).fail(function (data) {
+            console.log(data.responseText);
         });
     }
 

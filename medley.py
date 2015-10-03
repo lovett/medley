@@ -40,6 +40,7 @@ import apps.awsranges.main
 import apps.loginventory.main
 import apps.azure.main
 import apps.later.main
+import apps.archive.main
 
 import tools.negotiable
 import tools.response_time
@@ -202,39 +203,6 @@ class MedleyServer(object):
             data["sparql"] = location.get("sparql", [])
 
             return data
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="archive.html")
-    def archive(self, date=None, q=None, action=None, bookmark_id=None):
-        """View and search saved bookmarks"""
-
-        if action == "delete" and bookmark_id:
-            util.db.deleteBookmark(bookmark_id)
-            return "OK".encode("UTF-8")
-            cherrypy.response.status = 204
-            return
-
-        entries = OrderedDict()
-        timezone = pytz.timezone(cherrypy.config.get("timezone"))
-
-        if not q:
-            bookmarks = util.db.getRecentBookmarks(limit=50)
-        else:
-            bookmarks = util.db.searchBookmarks(q)
-
-        for bookmark in bookmarks:
-            key = bookmark["created"].astimezone(timezone)
-            key = key.strftime("%Y-%m-%d")
-
-            if not key in entries:
-                entries[key] = []
-
-            entries[key].append(bookmark)
-
-        return {
-            "entries": entries
-        }
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()

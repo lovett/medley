@@ -21,6 +21,7 @@ test: dummy
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/awsranges/main.py apps/awsranges/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/loginventory/main.py apps/loginventory/test.py
 	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/azure/main.py apps/azure/test.py
+	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/archive/main.py apps/archive/test.py
 	coverage html
 
 install: dummy

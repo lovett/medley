@@ -5,16 +5,17 @@
 {% set home_link = True %}
 
 {% block scripts %}
-<script src="/static/js/archive.js"></script>
+<script src="/static/archive/archive.js"></script>
 {% endblock %}
 
 {% block page_body %}
 
 <main class="ui page grid stackable">
+
     <form class="ui form sixteen wide column" method="get" action="/archive">
         <div class="fields">
             <div class="fifteen wide field">
-                <input type="text" id="q" name="q" value="{{ q }}"/>
+                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
             </div>
             <div class="one wide field">
                 <button class="ui button">Search</button>
@@ -56,14 +57,7 @@
                 </div>
 
                 {% endif %}
-                <form method="post" action="/archive">
-                    <input type="hidden" name="action" value="delete" />
-                    <input type="hidden" name="bookmark_id" value="{{ entry.rowid }}" />
-                    <noscript><button>Delete</button></noscript>
-                    <a href="#" class="hidden delete">Delete</a>
-                </form>
-
-
+                <a href="#" class="hidden delete" data-uid="{{ entry.rowid }}">Delete</a>
             </div>
         </div>
         {% endfor %}

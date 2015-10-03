@@ -50,12 +50,13 @@ MEDLEY.later = (function () {
                 'onSuccess': function () {
                     jQuery.ajax({
                         type: 'POST',
-                        url: window.location.pathname,
+                        url: '/archive',
                         data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
                         $successMessage.removeClass('hidden');
                         window.location.href = '/archive';
                     }).fail(function (data) {
+                        console.log(data.responseText);
                         $form.addClass('error');
                         $successMessage.addClass('hidden');
                         $errorMessage.text(data);
