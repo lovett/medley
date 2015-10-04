@@ -1,5 +1,6 @@
 import cherrypy
 import plugins.jinja
+import random
 
 def getFixture(path):
     with open("test/fixtures/" + path) as handle:

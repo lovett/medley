@@ -5,6 +5,7 @@ sys.path.append("../../")
 import re
 import cherrypy
 import tools.jinja
+import tools.negotiable
 import requests
 import util.db
 import apps.archive.models
@@ -45,9 +46,9 @@ class Controller:
 
         if bookmark:
             error = "This URL has already been bookmarked"
-            title = util.html.parse_text(bookmark["title"])
-            tags = util.html.parse_text(bookmark["tags"])
-            comments = util.html.parse_text(bookmark["comments"])
+            title = bookmark.get("title")
+            tags = bookmark.get("tags")
+            comments = bookmark.get("comments")
 
         return {
             "base": cherrypy.config.get("base"),
