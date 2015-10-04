@@ -1,7 +1,7 @@
 argparse==1.2.1
 astroid==1.2.1
 cov-core==1.14.0
-coverage==3.7.1
+coverage==4.0
 flake8==2.4.1
 logilab-common==0.62.1
 lxml==3.4.1

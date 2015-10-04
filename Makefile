@@ -2,28 +2,19 @@
 
 NOTIFIER := /usr/local/bin/send-notification
 PYTHONPATH := $(CURDIR):test
+COVERAGE_DIR := $(CURDIR)/coverage
+
+VPATH = coverage
+
+APP_DIR := $(CURDIR)/apps
+APP_PATHS := $(wildcard $(APP_DIR)/*)
+APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
+APP_NAMES := $(notdir $(APP_PATHS))
+
 
 define notify
 	$(NOTIFIER) -t "$1" -p 0
 endef
-
-test: dummy
-	rm -f .coverage
-	rm -rf htmlcov
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/lettercase/main.py apps/lettercase/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/topics/main.py apps/topics/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/headers/main.py apps/headers/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/ip/main.py apps/ip/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/whois/main.py apps/whois/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/geodb/main.py apps/geodb/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/registry/main.py apps/registry/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/blacklist/main.py apps/blacklist/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/awsranges/main.py apps/awsranges/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/loginventory/main.py apps/loginventory/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/azure/main.py apps/azure/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/archive/main.py apps/archive/test.py
-	PYTHONPATH=$(PYTHONPATH) coverage run --branch -a --source apps/later/main.py apps/later/test.py
-	coverage html
 
 install: dummy
 	ansible-playbook ansible/install.yml
@@ -36,3 +27,44 @@ update: dummy
 venv: dummy
 	rm -rf venv
 	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
+
+
+# Create the coverage directory
+$(COVERAGE_DIR):
+	mkdir $(COVERAGE_DIR)
+
+# Create a coverage file for each app
+#
+# Uses an order-only prerequisite to create the coverage directory.
+%.cov: $(APP_DIR)/%/main.py $(APP_DIR)/%/test.py | $(COVERAGE_DIR)
+	PYTHONPATH=$(PYTHONPATH)  COVERAGE_FILE=$(COVERAGE_DIR)/$*.cov \
+	coverage run --branch --source $(APP_DIR)/$* --omit $(APP_DIR)/$*/test.py $(APP_DIR)/$*/test.py
+
+# Make per-app coverage files combinable
+#
+# Per-app coverage files are combined into a single file. This allows a
+# single report to describe everything, instead of needing one report
+# per app.
+#
+# Combining deletes the original files, which would force make to
+# re-run tests unnecessarily. Combining also hinges on pre-set file
+# name conventions.
+#
+# Copying files makes them recognizable and disposable while keeping
+# the originals intact.
+.coverage.%: %.cov
+	cp $(COVERAGE_DIR)/$*.cov $(COVERAGE_DIR)/.coverage.$*
+
+
+# Generate a HTML coverage report
+htmlcov: $(addprefix .coverage., $(APP_NAMES))
+	rm -f .coverage
+	rm -rf htmlcov
+	coverage combine $(COVERAGE_DIR)
+	coverage html
+
+coverage: $(addprefix .coverage., $(APP_NAMES))
+	rm -f .coverage
+	rm -rf htmlcov
+	coverage combine $(COVERAGE_DIR)
+	coverage report

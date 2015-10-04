@@ -9,6 +9,7 @@ medley.conf
 local.conf
 *.pyc
 .coverage
+coverage
 htmlcov
 logfetch.ini
 db
