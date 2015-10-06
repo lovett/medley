@@ -5,14 +5,12 @@ import os
 import pwd
 import subprocess
 import re
-import urllib.parse
 import IPy
 import json
 import plugins.jinja
 import pycountry
 import inspect
 import util.phone
-import util.asterisk
 import util.net
 import util.html
 import util.fs
@@ -27,7 +25,6 @@ from collections import OrderedDict, defaultdict
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
-
 import apps.headers.main
 import apps.lettercase.main
 import apps.ip.main
@@ -41,6 +38,7 @@ import apps.loginventory.main
 import apps.azure.main
 import apps.later.main
 import apps.archive.main
+import apps.phone.main
 
 import tools.negotiable
 import tools.response_time
@@ -108,101 +106,6 @@ class MedleyServer(object):
                 "page_title": "Medley",
                 "endpoints": endpoints
             }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="phone.html")
-    def phone(self, number=None, cid_number=None, cid_value=None):
-        """Get the geographic location and recent call history for a phone number"""
-
-        data = {}
-        config = cherrypy.request.app.config["asterisk"]
-
-        if cid_number and cid_value:
-            sock = util.asterisk.authenticate(config)
-
-            if not sock:
-                raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
-
-            result = util.asterisk.save_callerid(sock, cid_number, cid_value)
-
-            if not result:
-                raise cherrypy.HTTPError(500, "Failed to save caller id")
-
-            sock.close()
-            cherrypy.response.status = 204
-            return
-
-        if number is None:
-            message = "Phone number not specified"
-            if cherrypy.request.as_json:
-                cherrypy.response.status = 400
-                return {
-                    "message": message
-                }
-            elif cherrypy.request.as_text:
-                raise cherrypy.HTTPError(400, message)
-            else:
-                return data
-
-        number = util.phone.sanitize(number)
-        area_code = number[:3]
-
-        if len(area_code) is not 3:
-            if cherrypy.request.as_json:
-                cherrypy.response.status = 400
-                return {
-                    "message": "Invalid number"
-                }
-            else:
-                raise cherrypy.HTTPError(400, "Invalid number")
-
-        def phone_query():
-            try:
-                return util.phone.findAreaCode(area_code)
-            except (AssertionError, util.phone.PhoneException):
-                return {}
-
-        key = "phone:{}".format(area_code)
-        location = self.cache.get_or_create(
-            key, phone_query,
-            should_cache_fn= lambda v: v is not None
-        )
-
-        sock = util.asterisk.authenticate(config)
-
-        if sock:
-            caller_id = util.asterisk.get_callerid(sock, number)
-            blacklisted = util.asterisk.get_blacklist(sock, number)
-            sock.close()
-        else:
-            caller_id = None
-            blacklisted = None
-
-        history = util.phone.callHistory(cherrypy.config.get("asterisk.cdr_db"), number, 5)
-
-        if not caller_id:
-            try:
-                caller_id = history[0][0]["clid"]
-            except IndexError:
-                caller_id = "Unknown"
-
-        if cherrypy.request.as_text:
-            return location.get("state_name", "Unknown")
-        else:
-            data["caller_id"] = caller_id
-            data["history"] = history[0]
-            data["number"] = number
-            data["blacklisted"] = blacklisted
-            data["number_formatted"] = util.phone.format(number)
-            data["state_abbreviation"] = location.get("state_abbreviation")
-            data["state_name"] = location.get("state_name")
-            data["whitepages_url"] = "http://www.whitepages.com/phone/" + number
-            data["bing_url"] = "https://www.bing.com/search?q=" + urllib.parse.quote_plus(data["number_formatted"])
-            data["comment"] = location.get("comment")
-            data["sparql"] = location.get("sparql", [])
-
-            return data
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()

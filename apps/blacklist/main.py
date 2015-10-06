@@ -3,8 +3,8 @@ import os.path
 sys.path.append("../../")
 
 import cherrypy
-import util.asterisk
 import util.phone
+import apps.phone.models
 
 
 class Controller:
@@ -13,20 +13,6 @@ class Controller:
     exposed = True
 
     user_facing = True
-
-    def authenticate(self):
-        keys = ("username", "secret", "host", "port")
-        config = {}
-
-        for key in keys:
-            config[key] = cherrypy.config.get("asterisk.{}".format(key))
-
-        sock = util.asterisk.authenticate(config)
-
-        if not sock:
-            raise cherrypy.HTTPError(500, "Unable to authenticate with Asterisk")
-
-        return sock
 
     def sanitizeNumber(self, number):
         number = util.phone.sanitize(number)
@@ -39,8 +25,10 @@ class Controller:
 
         number = self.sanitizeNumber(number)
 
-        with self.authenticate() as sock:
-            result = util.asterisk.save_blacklist(sock, number)
+        manager = apps.phone.models.AsteriskManager()
+
+        if manager.authenticate():
+            result = manager.blacklist(number)
 
         if not result:
             raise cherrypy.HTTPError(500, "Failed to modify blacklist")
@@ -50,9 +38,9 @@ class Controller:
         """Remove a number from the blacklist"""
 
         number = self.sanitizeNumber(number)
-
-        with self.authenticate() as sock:
-            result = util.asterisk.blacklist_remove(sock, number)
+        manager = apps.phone.models.AsteriskManager()
+        if manager.authenticate():
+            result = manager.unblacklist(number)
 
         if not result:
             raise cherrypy.HTTPError(500, "Failed to modify blacklist")
