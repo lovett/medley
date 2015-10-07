@@ -34,11 +34,12 @@ import apps.geodb.main
 import apps.registry.main
 import apps.blacklist.main
 import apps.awsranges.main
-import apps.loginventory.main
 import apps.azure.main
 import apps.later.main
 import apps.archive.main
 import apps.phone.main
+import apps.logindex.main
+import apps.logindex.models
 
 import tools.negotiable
 import tools.response_time
@@ -118,135 +119,12 @@ class MedleyServer(object):
             "captures": util.db.getCaptures(q)
         }
 
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.encode()
-    @util.decorator.timed
-    def logindex(self, date=None, filename=None, by=None, match=None):
-        start_time = time.time()
-
-        if filename:
-            date = filename.replace(".log", "")
-
-        try:
-            date = datetime.strptime(date, "%Y-%m-%d")
-        except:
-            raise cherrypy.HTTPError(400, "Date could not be parsed as %Y-%m-%d")
-
-        if by is None:
-            raise cherrypy.HTTPError(400, "Field name to index by not specified")
-
-        log_file = "{}/{}/{}".format(
-            cherrypy.request.app.config["/visitors"].get("log_dir"),
-            date.strftime("%Y-%m"),
-            date.strftime("%Y-%m-%d.log"))
-
-        if not os.path.isfile(log_file):
-            raise cherrypy.HTTPError(400, "No log for that date")
-
-        index_name = by
-        if match:
-            lower_match = match.lower()
-            index_name += "_" + lower_match
-
-        db_conn = util.db.openLogIndex(
-            cherrypy.config.get("database_dir"),
-            index_name
-        )
-
-        value_batch = []
-        line_count = 0
-
-        def addBatch(batch):
-            if len(batch) == 0:
-                return
-
-            util.db.indexLogLines(
-                db_conn,
-                index_name,
-                batch
-            )
-
-
-        if by == "ip":
-            indexer = util.parse.appengine_ip
-        else:
-            indexer = util.parse.appengine
-
-        with open(log_file, "r") as f:
-            max_offset = util.db.getMaxOffset(
-                db_conn, index_name, date
-            )
-
-            f.seek(max_offset)
-
-            while True:
-                offset = f.tell()
-                line = f.readline()
-                if not line:
-                    break
-
-                fields = indexer(line)
-
-                # the field isn't present
-                if not by in fields:
-                    continue
-
-                # the field doesn't match
-                if match and (lower_match not in fields[by].lower()):
-                    continue
-
-                values = (
-                    date.strftime("%Y-%m-%d"),
-                    fields[by],
-                    offset
-                )
-
-                value_batch.append(values)
-
-                if len(value_batch) > 500:
-                    addBatch(value_batch)
-                    line_count += len(value_batch)
-                    value_batch = []
-
-        addBatch(value_batch)
-        line_count += len(value_batch)
-        value_batch = []
-
-        util.db.closeLogIndex(db_conn)
-
-        cherrypy.response.status = 204
-        return line_count
-
-    @util.decorator.hideFromHomepage
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.encode()
-    def logwalk(self, by, distance=7, match=None, all=None):
-        log_files = self.loginventory()
-
-        if all:
-            start_index = 0
-        else:
-            start_index = int(distance) * -1
-
-        log_subset = log_files[start_index:]
-
-        results = []
-        for log in log_subset:
-            lines_processed, duration = self.logindex(filename=log, by=by, match=match)
-            results.append("{}: {} lines in {}".format(log, lines_processed, duration))
-
-        cherrypy.response.status = 200
-        cherrypy.response.headers["Content-Type"] = "text/plain"
-        return "\n".join(results) + "\n\n"
-
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="visitors.html")
     def visitors(self, q=None):
         """Search website access logs"""
+        logman = apps.logindex.models.LogManager()
 
         results = None
         active_query = None
@@ -294,12 +172,7 @@ class MedleyServer(object):
         offsets = None
 
         if len(filters["ip"]) > 0:
-            db_conn = util.db.openLogIndex(
-                cherrypy.config.get("database_dir"),
-            )
-
-            offsets = util.db.getLogOffsets(db_conn, "ip", filters["ip"])
-
+            offsets = logman.getLogOffsets("ip", filters["ip"])
             filters["date"] = offsets.keys()
             del filters["ip"]
 
@@ -314,7 +187,8 @@ class MedleyServer(object):
                 result["ip_facts"]["geo"]["country_code"] = result["country"]
                 result["ip_facts"]["geo"]["region_code"] = result["region"]
                 result["ip_facts"]["geo"]["city"] = result["city"]
-                result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
+                if result["country"]:
+                    result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
                 if "," in result.get("latlong"):
                     (lat, lng) = result["latlong"].split(",")
                     result["ip_facts"]["geo"]["latitude"] = lat

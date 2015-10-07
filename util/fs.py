@@ -9,6 +9,7 @@ import util.parse
 import util.db
 import util.decorator
 import hashlib
+import apps.logindex.models
 from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit")
@@ -25,9 +26,10 @@ def file_hash(path):
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, offsets=None, limit=50):
+    logman = apps.logindex.models.LogManager()
     matches = []
 
-    files = file_list(logdir, "*.log")
+    files = logman.getList(True)
     files = [f for f in files if any(d in f for d in filters["date"])]
     additional_matches = 0
 
