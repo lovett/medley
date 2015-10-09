@@ -27,6 +27,7 @@ import apps.archive.main
 import apps.phone.main
 import apps.logindex.main
 import apps.visitors.main
+import apps.captures.main
 
 import apps.logindex.models
 
@@ -93,18 +94,6 @@ class MedleyServer(object):
                 "page_title": "Medley",
                 "endpoints": endpoints
             }
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="captures.html")
-    def captures(self, q=None):
-        """Display captured requests"""
-
-        return {
-            "q": q,
-            "captures": util.db.getCaptures(q)
-        }
-
 
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
