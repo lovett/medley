@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973aa271e6b68a8bc187e53615674c5e/testing/unit/serverless/
-from io import BytesIO
+from io import BytesIO, StringIO
 import unittest
 import urllib
 import json
@@ -22,7 +22,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
     def request(self, path='/', method='GET', app_path='',
                 scheme='http', proto='HTTP/1.1', data=None,
                 headers={}, as_json=False, as_plain=False,
-                **kwargs):
+                json_body={}, **kwargs):
         """ CherryPy does not have a facility for serverless unit testing.
         This recipe demonstrates a way of simulating an incoming
         request.
@@ -43,6 +43,9 @@ class BaseCherryPyTestCase(unittest.TestCase):
         elif as_plain:
             h["Accept"] = "text/plain"
 
+        if json_body:
+            h["content-type"] = "application/json"
+
         # Allow default headers to be removed
         h.update(headers)
         [h.pop(key) for key, value in headers.items() if value is None]
@@ -53,7 +56,9 @@ class BaseCherryPyTestCase(unittest.TestCase):
         if method in ('POST', 'PUT') and not data:
             data = urllib.parse.urlencode(kwargs).encode('utf-8')
             kwargs = None
-            h['content-type'] = 'application/x-www-form-urlencoded'
+            if not "content-type" in h:
+                h["content-type"] = "application/x-www-form-urlencoded"
+
 
         # If we have named arguments, use them as a querystring
         qs = None
@@ -64,8 +69,11 @@ class BaseCherryPyTestCase(unittest.TestCase):
         # make sure a content length is specified
         fd = None
         if data is not None:
-            h['content-length'] = '%d' % len(data)
+            if json_body:
+                data = json.dumps(json_body).encode("utf-8")
             fd = BytesIO(data)
+            h['content-length'] = '%d' % len(data)
+
 
         # Get our application and run the request against it
         app = cherrypy.tree.apps.get(app_path)
@@ -100,7 +108,10 @@ class BaseCherryPyTestCase(unittest.TestCase):
             pass
 
         if "json" in h["Accept"]:
-            result.body = json.loads(result.body)
+            try:
+                result.body = json.loads(result.body)
+            except JSONDecodeError:
+                pass
 
         # Allow the status code of the reponse to be considered
         # separately from its message
