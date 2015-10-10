@@ -4,7 +4,7 @@ import unittest
 import responses
 import apps.phone.main
 import mock
-import util.db
+import util.cache
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
     @classmethod
@@ -15,7 +15,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.get")
     def test_returnsHtml(self, cacheGetMock):
         """It returns HTML"""
         pass

@@ -7,7 +7,6 @@ import cherrypy
 import tools.jinja
 import tools.negotiable
 import requests
-import util.db
 import apps.archive.models
 import util.html
 import urllib.parse

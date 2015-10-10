@@ -5,7 +5,7 @@ sys.path.append("../../")
 import cherrypy
 import requests
 
-import util.db
+import util.cache
 import apps.registry.models
 import syslog
 
@@ -21,16 +21,17 @@ class Controller:
 
     @cherrypy.tools.encode()
     def GET(self):
+        cache = util.cache.Cache()
 
         ranges = None
         cache_key = "aws_ranges"
-        cached_value = util.db.cacheGet(cache_key)
+        cached_value = cache.get(cache_key)
 
         if cached_value:
             ranges = cached_value[0]
         else:
             ranges = self.fetch("https://ip-ranges.amazonaws.com/ip-ranges.json")
-            util.db.cacheSet(cache_key, ranges)
+            cache.set(cache_key, ranges)
 
         if not ranges or not "prefixes" in ranges:
             raise cherrypy.HTTPError(400, "JSON response contains no prefixes")

@@ -5,7 +5,6 @@ sys.path.append("../../")
 import cherrypy
 import tools.negotiable
 import tools.jinja
-import util.db
 import apps.captures.models
 
 class Controller:

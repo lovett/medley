@@ -9,7 +9,6 @@ import os
 import os.path
 import shutil
 import responses
-import util.db
 import shutil
 import subprocess
 
@@ -73,8 +72,7 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
     @mock.patch("syslog.syslog")
     @mock.patch("subprocess.check_call")
     @mock.patch("shutil.copyfileobj")
-    @mock.patch("util.db.geoSetup")
-    def test_downloadSuccess(self, geoSetupMock, copyMock, callMock, syslogMock):
+    def test_downloadSuccess(self, copyMock, callMock, syslogMock):
         """A 204 is returned if the database is successfully downloaded  """
 
         cherrypy.config["database_dir"] = self.empty_temp_dir
@@ -93,8 +91,7 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
     @mock.patch("syslog.syslog")
     @mock.patch("subprocess.check_call")
     @mock.patch("shutil.copyfileobj")
-    @mock.patch("util.db.geoSetup")
-    def test_downloadNotGzipped(self, geoSetupMock, copyMock, callMock, syslogMock):
+    def test_downloadNotGzipped(self, copyMock, callMock, syslogMock):
         """Gunzipping only occurs on gzipped files"""
 
         cherrypy.config["database_dir"] = self.empty_temp_dir
@@ -117,8 +114,7 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
     @mock.patch("syslog.syslog")
     @mock.patch("subprocess.check_call")
     @mock.patch("shutil.copyfileobj")
-    @mock.patch("util.db.geoSetup")
-    def test_gunzipFailure(self, geoSetupMock, copyMock, callMock, syslogMock, unlinkMock):
+    def test_gunzipFailure(self, copyMock, callMock, syslogMock, unlinkMock):
         """Gunzip failure returns 500"""
 
         callMock.side_effect = subprocess.CalledProcessError(3, '')

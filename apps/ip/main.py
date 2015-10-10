@@ -7,7 +7,7 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import util.net
-import util.db
+import util.cache
 import IPy
 
 class Controller:
@@ -42,6 +42,8 @@ class Controller:
         util.net.sendNotification(notification, notifier)
 
     def PUT(self, token=None):
+        cache = util.cache.Cache()
+
         try:
             dns_command = cherrypy.config.get("ip.dns.command")[:]
         except TypeError:
@@ -53,7 +55,7 @@ class Controller:
             raise cherrypy.HTTPError(400, "Invalid token")
 
         cache_key = "ip:{}".format(host)
-        cached_value = util.db.cacheGet(cache_key)
+        cached_value = cache.get(cache_key)
 
         if token == "external":
             ip_address = util.net.externalIp()
@@ -61,7 +63,7 @@ class Controller:
             ip_address = self.ipFromHeader(cherrypy.request.headers)
 
         if ip_address != cached_value:
-            util.db.cacheSet(cache_key, ip_address, 86400)
+            cache.set(cache_key, ip_address, 86400)
             dns_command[dns_command.index("$ip")] = ip_address
             dns_command[dns_command.index("$host")] = host
             subprocess.call(dns_command)

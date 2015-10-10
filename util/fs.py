@@ -6,23 +6,12 @@ import fnmatch
 import os.path
 import util.net
 import util.parse
-import util.db
 import util.decorator
 import hashlib
 import apps.logindex.models
 from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit")
-
-def file_hash(path):
-    m = hashlib.sha1()
-    with open(path, "rb") as f:
-        while True:
-            data = f.read(8192)
-            if not data:
-                break
-            m.update(data)
-    return m.hexdigest()
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, offsets=None, limit=50):

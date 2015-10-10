@@ -10,8 +10,9 @@ import tools.jinja
 import urllib.parse
 import IPy
 import socket
-import util.db
+import util.cache
 import requests
+import util.ip
 
 class Controller:
     """Display whois and geoip data for an IP address or hostname"""
@@ -24,6 +25,7 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, address=None):
         ip = None
+        cache = util.cache.Cache()
 
         if not address and cherrypy.request.as_json:
             cherrypy.response.status = 400
@@ -64,7 +66,7 @@ class Controller:
             }
 
         cache_key = "whois:{}".format(address_clean)
-        cached_value = util.db.cacheGet(cache_key)
+        cached_value = cache.get(cache_key)
 
         if cached_value:
             whois_result = cached_value[0]
@@ -80,9 +82,9 @@ class Controller:
             )
             r.raise_for_status()
             whois_result = r.json()
-            util.db.cacheSet(cache_key, whois_result)
+            cache.set(cache_key, whois_result)
 
-        ip_facts = util.db.ipFacts(ip)
+        ip_facts = util.ip.facts(ip)
 
 
         # Google charts

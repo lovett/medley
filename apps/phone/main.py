@@ -5,7 +5,7 @@ sys.path.append("../../")
 import cherrypy
 import tools.negotiable
 import tools.jinja
-import util.db
+import util.cache
 import urllib.parse
 import apps.phone.models
 
@@ -29,6 +29,7 @@ class Controller:
     @cherrypy.tools.template(template="phone.html")
     @cherrypy.tools.negotiable()
     def GET(self, number=None, cid_number=None, cid_value=None):
+        cache = util.cache.Cache()
 
         if number is None:
             message = "Phone number not specified"
@@ -55,13 +56,13 @@ class Controller:
                 raise cherrypy.HTTPError(400, "Invalid number")
 
         cache_key = "phone:{}".format(area_code)
-        cached_value = util.db.cacheGet(cache_key)
+        cached_value = cache.get(cache_key)
 
         if cached_value:
             location = cached_value[0]
         else:
             location = util.phone.findAreaCode(area_code)
-            util.db.cacheSet(cache_key, location)
+            cache.set(cache_key, location)
 
 
         manager = apps.phone.models.AsteriskManager()

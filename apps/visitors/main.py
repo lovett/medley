@@ -7,7 +7,7 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import requests
-import util.db
+import util.ip
 import urllib.parse
 import apps.registry.models
 import apps.logindex.models
@@ -84,7 +84,7 @@ class Controller:
 
         for index, result in enumerate(results.matches):
             needs_geo_lookup = "country" not in result
-            result["ip_facts"] = util.db.ipFacts(result["ip"], needs_geo_lookup)
+            result["ip_facts"] = util.ip.facts(result["ip"], needs_geo_lookup)
 
             if not needs_geo_lookup:
                 result["ip_facts"]["geo"]["country_code"] = result["country"]

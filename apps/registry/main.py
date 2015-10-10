@@ -5,7 +5,7 @@ sys.path.append("../../")
 import cherrypy
 import tools.negotiable
 import tools.jinja
-import util.db
+import util.ip
 import apps.registry.models
 
 class Controller:
@@ -37,7 +37,7 @@ class Controller:
         registry = apps.registry.models.Registry()
         newid = registry.add(key, value, replace)
         if key.startswith("ip:"):
-            util.db.ipFacts.cache_clear()
+            util.ip.facts.cache_clear()
 
         if cherrypy.request.as_json:
             return {"id": newid }
@@ -59,4 +59,4 @@ class Controller:
             cherrypy.HTTPError(400)
 
         if record["key"].startswith("ip:") or record["key"].startswith("netblock:"):
-            util.db.ipFacts.cache_clear()
+            util.ip.facts.cache_clear()

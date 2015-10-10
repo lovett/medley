@@ -4,7 +4,7 @@ import unittest
 import responses
 import apps.topics.main
 import mock
-import util.db
+import util.cache
 import time
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
@@ -16,7 +16,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.get")
     def test_returnsHtml(self, cacheGetMock):
         """It returns HTML"""
         cacheGetMock.return_value = ("<html></html>", time.time())
@@ -28,8 +28,8 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(cacheGetMock.called)
 
     @responses.activate
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     def test_requestsUrl(self, cacheGetMock, cacheSetMock):
         """It requests a URL if the cache is empty"""
         cacheGetMock.return_value = None
@@ -44,8 +44,8 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue("The URL was not cached" in response.body)
 
     @responses.activate
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     def test_extractsLinks(self, cacheGetMock, cacheSetMock):
         """It extracts links from the requested URL and handles escaping"""
         cacheGetMock.return_value = None

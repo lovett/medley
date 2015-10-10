@@ -6,7 +6,6 @@ import responses
 import apps.archive.main
 import apps.archive.models
 import mock
-import util.db
 import tempfile
 import time
 import shutil

@@ -7,7 +7,7 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import requests
-import util.db
+import util.cache
 import urllib.parse
 import bs4
 
@@ -21,18 +21,18 @@ class Controller:
     @cherrypy.tools.template(template="topics.html")
     @cherrypy.tools.negotiable()
     def GET(self):
-
+        cache = util.cache.Cache()
         key = "topics_html"
         topics = []
 
-        cached_value = util.db.cacheGet(key)
+        cached_value = cache.get(key)
 
         if cached_value:
             html = cached_value[0]
             cache_date = cached_value[1]
         else:
             html = self.fetch("http://www.bing.com/hpm")
-            util.db.cacheSet(key, html)
+            cache.set(key, html)
             cache_date = None
 
         soup = bs4.BeautifulSoup(html, "html.parser")

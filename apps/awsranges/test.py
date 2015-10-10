@@ -4,7 +4,7 @@ import unittest
 import responses
 import apps.awsranges.main
 import mock
-import util.db
+import util.cache
 import time
 import apps.registry.models
 import syslog
@@ -21,8 +21,8 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     @responses.activate
     @mock.patch("syslog.syslog")
     @mock.patch("apps.registry.models.Registry")
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     def test_savesToRegistry(self, cacheGetMock, cacheSetMock, registryMock, syslogMock):
         """Fetched responses are cached"""
         cacheGetMock.return_value = None
@@ -43,8 +43,8 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     @responses.activate
     @mock.patch("syslog.syslog")
     @mock.patch("apps.registry.models.Registry")
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     def test_readsFromCache(self, cacheGetMock, cacheSetMock, registryMock, syslogMock):
         """No request is made if a cached value is available"""
         cacheGetMock.return_value = ({"prefixes": [{"ip_prefix": "test"}]}, time.time())
@@ -65,8 +65,8 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     @responses.activate
     @mock.patch("syslog.syslog")
     @mock.patch("apps.registry.models.Registry")
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     def test_readsFromCache(self, cacheGetMock, cacheSetMock, registryMock, syslogMock):
         """No request is made if a cached value is available"""
         cacheGetMock.return_value = ({"foo": "bar"}, time.time())

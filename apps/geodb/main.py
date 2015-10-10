@@ -13,7 +13,6 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import requests
-import util.db
 
 class Controller:
     """Download the latest GeoLite Legacy City database from maxmind.com"""
@@ -78,8 +77,6 @@ class Controller:
                 os.unlink(path)
                 raise cherrypy.HTTPError(500, "Database downloaded but gunzip failed")
 
-        # Re-run setup to ensure the newly downloaded file gets used
-        util.db.geoSetup(directory, url)
         syslog.syslog(syslog.LOG_INFO, "GeoIP database downloaded")
         cherrypy.response.status = 204
 

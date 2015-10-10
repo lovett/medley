@@ -5,6 +5,7 @@ import apps.ip.main
 import cherrypy
 import mock
 import util.net
+import util.cache
 
 class TestIp(cptestcase.BaseCherryPyTestCase):
     @classmethod
@@ -88,8 +89,8 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
 
     @mock.patch("util.net.sendNotification")
     @mock.patch("util.net.externalIp")
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
     def test_externalToken(self, callMock, cacheGetMock, cacheSetMock, externalIpMock, notificationMock):
         """It calls the configured DNS update command via subprocess on PUT with a valid token"""
@@ -110,8 +111,8 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(notificationMock.called)
 
 
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
     def test_validTokenUpdatesDns(self, callMock, cacheGetMock, cacheSetMock):
         """It calls the configured DNS update command via subprocess on PUT with a valid token"""
@@ -129,8 +130,8 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
         callMock.assert_called_once_with(expected_command)
 
 
-    @mock.patch("util.db.cacheSet")
-    @mock.patch("util.db.cacheGet")
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
     def test_tokenCachedValue(self, callMock, cacheGetMock, cacheSetMock):
         """It caches the result of previous calls to avoid unnessary subprocess calls."""
