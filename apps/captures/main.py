@@ -6,6 +6,7 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import util.db
+import apps.captures.models
 
 class Controller:
     """Display captured requests"""
@@ -17,7 +18,9 @@ class Controller:
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="captures.html")
     def GET(self, q=None):
+        manager = apps.captures.models.CaptureManager()
+
         return {
             "q": q,
-            "captures": util.db.getCaptures(q)
+            "captures": manager.find(q)
         }

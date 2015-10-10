@@ -9,6 +9,7 @@ import tools.jinja
 import requests
 import util.db
 import urllib.parse
+import apps.registry.models
 import apps.logindex.models
 import pycountry
 import pytz
@@ -26,6 +27,7 @@ class Controller:
     def GET(self, q=None):
 
         logman = apps.logindex.models.LogManager()
+        registry = apps.registry.models.Registry()
 
         results = None
         active_query = None
@@ -38,7 +40,7 @@ class Controller:
             "date":  []
         }
 
-        saved_queries = util.db.getAnnotationsByPrefix("visitors")
+        saved_queries = registry.find(key="visitors", fuzzy=True)
 
         if q:
             for query in saved_queries:

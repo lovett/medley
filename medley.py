@@ -1,16 +1,9 @@
 import cherrypy
 import os.path
 import os
-import pwd
-import json
 import plugins.jinja
 import inspect
-import util.phone
-import util.net
-import util.html
-import util.db
 import util.decorator
-import syslog
 
 import apps.headers.main
 import apps.lettercase.main
@@ -35,19 +28,10 @@ import tools.negotiable
 import tools.response_time
 import tools.jinja
 import tools.conditional_auth
-import tools.capture
 
 class MedleyServer(object):
     mc = None
     geoip = None
-
-    def __init__(self):
-        syslog.openlog(self.__class__.__name__)
-
-        db_dir = os.path.realpath(cherrypy.config.get("database_dir"))
-
-        util.db.setup(db_dir)
-        util.db.geoSetup(db_dir, cherrypy.config.get("geoip.download.url"))
 
     @util.decorator.hideFromHomepage
     @cherrypy.expose
