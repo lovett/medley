@@ -3,7 +3,6 @@ import os.path
 import os
 import plugins.jinja
 import inspect
-import util.decorator
 
 import apps.headers.main
 import apps.lettercase.main
@@ -22,8 +21,6 @@ import apps.logindex.main
 import apps.visitors.main
 import apps.captures.main
 
-import apps.logindex.models
-
 import tools.negotiable
 import tools.response_time
 import tools.jinja
@@ -33,37 +30,19 @@ class MedleyServer(object):
     mc = None
     geoip = None
 
-    @util.decorator.hideFromHomepage
     @cherrypy.expose
     @cherrypy.tools.negotiable()
     @cherrypy.tools.template(template="index.html")
     def index(self):
         """The application homepage lists the available endpoints"""
 
-        endpoints = []
+        user_facing_apps = []
 
-        # The old way: apps are defined in the server class and
-        # configured for display on the homepage via decorator. This
-        # should go away once all apps have been refactored out of the
-        # server class.
-        for name, value in inspect.getmembers(self, inspect.ismethod):
-            if name == "index":
-                continue
-
-            exposed = getattr(value, "exposed", False)
-            hidden = getattr(value, "hide_from_homepage", False)
-
-            if exposed and not hidden:
-                endpoints.append((name, value.__doc__))
-
-        # the new way: apps are discrete classes mounted onto the
-        # server and configured for display on the homepage via a
-        # class attribute
         for name, controller in cherrypy.tree.apps.items():
             if getattr(controller.root, "user_facing", False):
-                endpoints.append((name[1:], controller.root.__doc__))
+                user_facing_apps.append((name[1:], controller.root.__doc__))
 
-        endpoints.sort(key=lambda tup: tup[0])
+        user_facing_apps.sort(key=lambda tup: tup[0])
 
         if cherrypy.request.as_text:
             output = ""
@@ -76,7 +55,7 @@ class MedleyServer(object):
         else:
             return {
                 "page_title": "Medley",
-                "endpoints": endpoints
+                "apps": user_facing_apps
             }
 
 if __name__ == "__main__":

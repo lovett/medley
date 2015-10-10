@@ -10,7 +10,3 @@ def timed(f):
         return (result, t1-t0)
 
     return wrapper
-
-def hideFromHomepage(f):
-    f.hide_from_homepage = True
-    return f
