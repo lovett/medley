@@ -21,7 +21,7 @@
                 {% for option in styles %}
                 <div class="field">
                     <div class="ui radio checkbox">
-                        <input type="radio" name="style" value="{{ option }}" {% if option == style %}checked{% endif %} />
+                        <input type="radio" name="style" value="{{ option }}" {% if option == style or option == default_style %}checked{% endif %} />
                         <label>{{ option|title }}case</label>
                     </div>
                 </div>

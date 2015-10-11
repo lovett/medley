@@ -19,12 +19,13 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self):
         return {
+            "default_style": self.styles[0],
             "styles": self.styles
         }
 
     @cherrypy.tools.template(template="lettercase.html")
     @cherrypy.tools.negotiable()
-    def POST(self, style, value):
+    def POST(self, style=None, value=None):
         if style == "title":
             result = value.title()
         elif style == "lower":
@@ -32,7 +33,7 @@ class Controller:
         elif style == "upper":
             result = value.upper()
         else:
-            raise cherrypy.HTTPError(400, "Invalid style")
+            result = value
 
         if cherrypy.request.as_text:
             return result

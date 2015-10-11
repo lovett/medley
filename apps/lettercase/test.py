@@ -14,14 +14,14 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         helpers.stop_server()
 
     def test_returnsHtml(self):
-        """It returns HTML by default"""
+        """HTML is returned by default"""
         response = self.request("/")
         self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("<form" in response.body)
 
     def test_lowercaseHtml(self):
-        """It converts input to lowercase and returns HTML"""
+        """Input is converted to lowercase and returned as HTML"""
         response = self.request(path="/",
                                 method="POST",
                                 style="lower",
@@ -30,7 +30,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         self.assertTrue("""<div id="result">test</div>""" in response.body)
 
     def test_lowercaseJson(self):
-        """It converts input to lowercase and returns JSON"""
+        """Input is converted to lowercase and returned as JSON"""
         response = self.request(path="/",
                                 method="POST",
                                 as_json=True,
@@ -40,7 +40,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.body["result"], "test")
 
     def test_lowercaseText(self):
-        """It converts input to lowercase and returns plain  text"""
+        """Input is coverted to lowercase and returned as plain text"""
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
@@ -50,7 +50,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.body, "test")
 
     def test_uppercase(self):
-        """It converts input to uppercase"""
+        """Input is converted to uppercase"""
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
@@ -59,7 +59,7 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.body, "TEST")
 
     def test_title(self):
-        """It converts its input to title case """
+        """Input is converted to titlecase"""
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
@@ -68,20 +68,24 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.body, "This Is A Test 1999")
 
     def test_invalidStyle(self):
-        """It rejects unrecognized values for the style parameter """
-        response = self.request(path="/",
-                               method="POST",
-                               as_plain=True,
-                               style="example",
-                               value="test")
-        self.assertEqual(response.code, 400)
+        """Unrecognized values for the style parameter leave the value unmodified"""
+        val = "test"
+        response = self.request(
+            path="/",
+            method="POST",
+            as_plain=True,
+            style="example",
+            value=val
+        )
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body, val)
 
-    def test_requiredParams(self):
-        """It requires style and value parameters"""
+    def test_paramsOptional(self):
+        """Style and value parameters are optional"""
         response = self.request(path="/",
                                method="POST",
                                as_plain=True)
-        self.assertEqual(response.code, 404)
+        self.assertEqual(response.code, 200)
 
 
 
