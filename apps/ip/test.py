@@ -6,8 +6,13 @@ import cherrypy
 import mock
 import util.net
 import util.cache
+import shutil
+import tempfile
+import cherrypy
 
 class TestIp(cptestcase.BaseCherryPyTestCase):
+    temp_dir = None
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.ip.main.Controller)
@@ -17,11 +22,17 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
         helpers.stop_server()
 
     def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="ip-test")
+        cherrypy.config["database_dir"] = self.temp_dir
         cherrypy.config["ip.dns.command"] = ["pdnsd-ctl", "add", "a", "$ip", "$host"]
         cherrypy.config["ip.tokens"] = {
             "external": "external.example.com",
             "test": "test.example.com"
         }
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
 
     @mock.patch("util.net.externalIp")
     def test_returnsHtml(self, externalIpMock):

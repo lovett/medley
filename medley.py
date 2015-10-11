@@ -27,8 +27,6 @@ import tools.jinja
 import tools.conditional_auth
 
 class MedleyServer(object):
-    mc = None
-    geoip = None
 
     @cherrypy.expose
     @cherrypy.tools.negotiable()

@@ -6,8 +6,13 @@ import apps.topics.main
 import mock
 import util.cache
 import time
+import shutil
+import tempfile
+import cherrypy
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
+    temp_dir = None
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.topics.main.Controller)
@@ -26,6 +31,13 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue("<main" in response.body)
         self.assertTrue("Using cached value" in response.body)
         self.assertTrue(cacheGetMock.called)
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
+        cherrypy.config["database_dir"] = self.temp_dir
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
 
     @responses.activate
     @mock.patch("util.cache.Cache.set")

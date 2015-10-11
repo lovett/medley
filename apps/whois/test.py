@@ -8,6 +8,9 @@ import util.cache
 import util.ip
 import time
 import socket
+import shutil
+import tempfile
+import cherrypy
 
 class TestWhois(cptestcase.BaseCherryPyTestCase):
     @classmethod
@@ -17,6 +20,14 @@ class TestWhois(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
+        cherrypy.config["database_dir"] = self.temp_dir
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
 
     def test_jsonRequiresAddress(self):
         """Returns 400 if called as json without an address"""

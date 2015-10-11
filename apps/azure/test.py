@@ -20,7 +20,6 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         response = self.request("/", method="POST", json_body={
             "status": "success"
         })
-        print(response.body)
         self.assertEqual(response.code, 400)
 
     @mock.patch("util.net.sendNotification")

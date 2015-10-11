@@ -8,8 +8,14 @@ import util.cache
 import time
 import apps.registry.models
 import syslog
+import shutil
+import tempfile
+import cherrypy
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
+
+    temp_dir = None
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.awsranges.main.Controller)
@@ -17,6 +23,13 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
+        cherrypy.config["database_dir"] = self.temp_dir
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
 
     @responses.activate
     @mock.patch("syslog.syslog")

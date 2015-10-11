@@ -85,7 +85,6 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(copyMock.called)
         self.assertTrue(callMock.called)
         self.assertTrue(syslogMock.called)
-        self.assertTrue(geoSetupMock.called)
 
     @responses.activate
     @mock.patch("syslog.syslog")
@@ -107,7 +106,6 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(copyMock.called)
         self.assertFalse(callMock.called)
         self.assertTrue(syslogMock.called)
-        self.assertTrue(geoSetupMock.called)
 
     @responses.activate
     @mock.patch("os.unlink")
