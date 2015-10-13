@@ -19,7 +19,12 @@ class Controller:
     def GET(self, q=None):
         manager = apps.captures.models.CaptureManager()
 
+        if q:
+            captures = manager.search(q)
+        else:
+            captures = manager.recent()
+
         return {
             "q": q,
-            "captures": manager.find(q)
+            "captures": captures
         }

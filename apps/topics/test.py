@@ -21,6 +21,13 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
+        cherrypy.config["database_dir"] = self.temp_dir
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
     @mock.patch("util.cache.Cache.get")
     def test_returnsHtml(self, cacheGetMock):
         """It returns HTML"""
@@ -32,12 +39,6 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue("Using cached value" in response.body)
         self.assertTrue(cacheGetMock.called)
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
-        cherrypy.config["database_dir"] = self.temp_dir
-
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
 
     @responses.activate
     @mock.patch("util.cache.Cache.set")

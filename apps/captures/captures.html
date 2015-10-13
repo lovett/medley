@@ -13,7 +13,7 @@
     <form class="ui form sixteen wide column" method="get" action="/captures">
         <div class="field">
             <label for="number">Search</label>
-            <input type="text" id="q" name="q" placeholder="Filter by request line" value="{{ q }}"/>
+            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
         </div>
         <div class="field">
             <button class="ui button">Search</button>

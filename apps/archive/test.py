@@ -6,8 +6,8 @@ import responses
 import apps.archive.main
 import apps.archive.models
 import mock
-import tempfile
 import time
+import tempfile
 import shutil
 import util.sqlite_converters
 

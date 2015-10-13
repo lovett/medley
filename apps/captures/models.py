@@ -60,19 +60,41 @@ class CaptureManager:
         self.conn.commit()
         return insert_id
 
-    def find(self, request_line=None, limit=10):
+    def find(self, search, limit=10):
         sql = """SELECT id, request_line, request as 'request [pickle]',
         response as 'response [pickle]', created as 'created [created]'
         FROM captures
-        WHERE request_line LIKE ?
+        WHERE requesT_line LIKE ?
         ORDER BY created DESC
         LIMIT ?"""
 
-        if request_line:
-            request_line_filter = "%{}%".format(request_line)
-        else:
-            request_line_filter = "%"
+        search_sql = "%{}%".format(search)
 
-        self.cur.execute(sql, (request_line_filter, limit))
+        self.cur.execute(sql, (search_sql, limit))
+
+        return self.cur.fetchall()
+
+    def search(self, search, limit=20):
+        sql = """SELECT id, request_line, request as 'request [pickle]',
+        response as 'response [pickle]', created as 'created [created]'
+        FROM captures
+        WHERE requesT_line LIKE ?
+        ORDER BY created DESC
+        LIMIT ?"""
+
+        search_sql = "%{}%".format(search)
+
+        self.cur.execute(sql, (search_sql, limit))
+
+        return self.cur.fetchall()
+
+    def recent(self, limit=50):
+        sql = """SELECT id, request_line, request as 'request [pickle]',
+        response as 'response [pickle]', created as 'created [created]'
+        FROM captures
+        ORDER BY created DESC
+        LIMIT ?"""
+
+        self.cur.execute(sql, (limit,))
 
         return self.cur.fetchall()
