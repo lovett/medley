@@ -2,6 +2,7 @@ import os.path
 import sqlite3
 import cherrypy
 import util.sqlite_converters
+import pickle
 
 class CaptureManager:
     conn = None
@@ -33,52 +34,30 @@ class CaptureManager:
             self.conn.close()
 
     def add(self, request, response):
-        request_dict = {
+        request_pickle = pickle.dumps({
             "headers": request.headers,
-            "params": request.body.params
-        }
+            "params": request.body.params,
+            "json": request.json
+        })
 
-        try:
-            request_dict["json"] = request.json
-        except:
-            request_dict["json"] = None
-
-            request_pickle = pickle.dumps(request_dict)
-
-        response_dict = {
+        response_pickle = pickle.dumps({
             "status": response.status
-        }
-
-        response_pickle = pickle.dumps(response_dict)
+        })
 
         sql = "INSERT INTO captures (request_line, request, response) VALUES (?, ?, ?)"
         self.cur.execute(sql, (request.request_line,
                                sqlite3.Binary(request_pickle),
                                sqlite3.Binary(response_pickle)))
 
-        insert_id = cur.lastrowid
+        insert_id = self.cur.lastrowid
         self.conn.commit()
         return insert_id
-
-    def find(self, search, limit=10):
-        sql = """SELECT id, request_line, request as 'request [pickle]',
-        response as 'response [pickle]', created as 'created [created]'
-        FROM captures
-        WHERE requesT_line LIKE ?
-        ORDER BY created DESC
-        LIMIT ?"""
-
-        search_sql = "%{}%".format(search)
-
-        self.cur.execute(sql, (search_sql, limit))
-
-        return self.cur.fetchall()
 
     def search(self, search, limit=20):
         sql = """SELECT id, request_line, request as 'request [pickle]',
         response as 'response [pickle]', created as 'created [created]'
         FROM captures
-        WHERE requesT_line LIKE ?
+        WHERE request_line LIKE ?
         ORDER BY created DESC
         LIMIT ?"""
 

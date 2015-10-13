@@ -5,6 +5,7 @@ sys.path.append("../../")
 import time
 import cherrypy
 import util.net
+import tools.capture
 
 class Controller:
     """Relay deployment notifications from Azure"""
@@ -16,7 +17,7 @@ class Controller:
     url_template = "https://manage.windowsazure.com/@exampleUserId#Workspaces/WebsiteExtension/Website/{}/deployments"
 
     @cherrypy.tools.json_in()
-    #@cherrypy.tools.capture()
+    @cherrypy.tools.capture()
     def POST(self):
         notifier = cherrypy.config.get("notifier")
 
