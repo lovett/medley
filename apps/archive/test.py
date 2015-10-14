@@ -28,7 +28,6 @@ class TestArchive(cptestcase.BaseCherryPyTestCase):
         self.temp_dir = tempfile.mkdtemp(prefix="archive-test")
         cherrypy.config["database_dir"] = self.temp_dir
 
-
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 

@@ -10,10 +10,9 @@ MEDLEY.registry = (function () {
 
         jQuery.ajax({
             type: 'DELETE',
-            dataType: 'json',
             url: '/registry?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
         }).done(function (data) {
-            window.location.reload();
+            window.location.href = window.location.pathname;
         });
     }
 
@@ -51,7 +50,9 @@ MEDLEY.registry = (function () {
                         url: '/registry',
                         data: $('INPUT, TEXTAREA', this).serialize()
                     }).done(function (data) {
-                        window.location.reload();
+                        var href = window.location.pathname;
+                        href += '?uid=' + data.uid;
+                        window.location.href = href;
                     }).fail(function () {
                         var $successMessage = jQuery('.green.message', $form);
                         var $errorMessage = jQuery('.error.message', $form);

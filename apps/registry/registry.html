@@ -16,7 +16,7 @@
         <form id="search-form" class="ui form">
             <div class="field">
                 <label for="key">Key:</label>
-                <input type="text" id="searchkey" name="searchkey" value="{{ searchkey|default('', true) }}"/>
+                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
             </div>
             <div class="field">
                 <button class="ui submit button">Search</button>

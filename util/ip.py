@@ -15,7 +15,7 @@ import apps.geodb.models
 def facts(ip, geo_lookup=True):
     registry = apps.registry.models.Registry()
     address = netaddr.IPAddress(ip)
-    netblocks = registry.find(key="netblock")
+    netblocks = registry.search(key="netblock*")
     facts = {}
 
     for netblock in netblocks:

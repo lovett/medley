@@ -36,7 +36,7 @@ class Controller:
             "date":  []
         }
 
-        saved_queries = registry.find(key="visitors", fuzzy=True)
+        saved_queries = registry.search(key="visitors*")
 
         if q:
             for query in saved_queries:

@@ -53,32 +53,46 @@ CREATE TABLE IF NOT EXISTS registry (
         self.conn.commit()
         return deleted_rows
 
-    def find(self, uid=None, key=None, keys=[], fuzzy=False, limit=0):
-        sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry"
+    def find(self, uid=None):
+        sql = """SELECT rowid, key, value, created as 'created [created]'
+        FROM registry
+        WHERE rowid=?"""
 
-        if uid:
-            sql += " WHERE rowid=?"
-            params = (uid,)
-        elif len(keys) > 0:
+        self.cur.execute(sql, (uid,))
+        return self.cur.fetchall()
+
+    def search(self, key=None, keys=[], limit=100):
+        sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry"
+        params = None
+
+        if len(keys) > 0:
             sql += " WHERE key IN ("
             sql += ", ".join("?" * len(keys))
             sql += ")"
-            params = None
-        elif key and not fuzzy:
-            sql += " WHERE key=?"
+        elif key:
+            fuzzy = "*" in key
+            key = key.replace("*", "%")
+
+            if not fuzzy:
+                sql += " WHERE key=?"
+            else:
+                sql += " WHERE KEY LIKE ?"
+
             params = (key,)
-        elif key and fuzzy:
-            sql += " WHERE key LIKE ? OR key LIKE ?"
-            params = ("%{}".format(key), "{}%".format(key))
-
         sql += " ORDER BY rowid DESC"
-
-        if limit:
-            sql += " LIMIT {}".format(limit)
+        sql += " LIMIT {}".format(limit)
 
         if params:
             self.cur.execute(sql, params)
         else:
             self.cur.execute(sql)
 
+        return self.cur.fetchall()
+
+    def recent(self, limit=25):
+        sql = """SELECT rowid, key, value, created as 'created [created]'
+        FROM registry
+        ORDER BY rowid DESC
+        LIMIT ?"""
+        self.cur.execute(sql, (limit,))
         return self.cur.fetchall()

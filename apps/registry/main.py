@@ -15,34 +15,36 @@ class Controller:
 
     @cherrypy.tools.template(template="registry.html")
     @cherrypy.tools.negotiable()
-    def GET(self, searchkey=None):
+    def GET(self, q=None, uid=None):
         registry = apps.registry.models.Registry()
 
-        if searchkey:
-            records = registry.find(key=searchkey, fuzzy=True)
+        if uid:
+            records = registry.find(uid)
+        elif q:
+            records = registry.search(key=q)
         else:
-            records = []
+            records = registry.recent()
 
         return {
-            "searchkey": searchkey,
+            "q": q,
             "records": records
         }
 
     @cherrypy.tools.negotiable()
     def PUT(self, key, value, replace=False):
         registry = apps.registry.models.Registry()
-        newid = registry.add(key, value, replace)
+        uid = registry.add(key, value, replace)
         if key.startswith("ip:"):
             util.ip.facts.cache_clear()
 
-        if cherrypy.request.as_json:
-            return {"id": newid }
+        if cherrypy.request.headers.get("X-Requested-With", None) == "XMLHttpRequest":
+            return {"uid": uid }
         else:
-            raise cherrypy.HTTPRedirect("/registry?id={}".format(newid))
+            raise cherrypy.HTTPRedirect("/registry?uid={}".format(uid))
 
     def DELETE(self, uid):
         registry = apps.registry.models.Registry()
-        records = registry.find(uid=uid)
+        records = registry.find(uid)
 
         if len(records) == 0:
             raise cherrypy.HTTPError(404, "Invalid id")
