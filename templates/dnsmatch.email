@@ -1,9 +1,0 @@
-{% for command in commands %}
-{{ command|join(" ") }}
-{{ command_results[loop.index0][0] }}
-
-{% if command_results[loop.index0][1] %}
-{{ command_results[loop.index0][1] }}
-{% endif %}
-
-{% endfor %}
