@@ -1,7 +1,3 @@
-import sys
-import os.path
-sys.path.append("../../")
-
 import subprocess
 import cherrypy
 import tools.negotiable

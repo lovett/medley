@@ -1,7 +1,3 @@
-import sys
-import os.path
-sys.path.append("../../")
-
 import re
 import subprocess
 import cherrypy

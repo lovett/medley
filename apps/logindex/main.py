@@ -1,8 +1,4 @@
 import sys
-import os.path
-sys.path.append("../../")
-
-import sys
 import syslog
 import time
 import datetime

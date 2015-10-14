@@ -102,8 +102,11 @@ if __name__ == "__main__":
     }
 
     for name, cls in inspect.getmembers(apps, inspect.ismodule):
-        path = "/{}".format(name)
-        cherrypy.tree.mount(cls.main.Controller(), path, app_config)
+        try:
+            path = "/{}".format(name)
+            cherrypy.tree.mount(cls.main.Controller(), path, app_config)
+        except AttributeError:
+            pass
 
     # Logging occurs either to stdout or to files. For file logging,
     # the configuration should specify a value for log_dir and ignore

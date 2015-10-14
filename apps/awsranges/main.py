@@ -1,7 +1,3 @@
-import sys
-import os.path
-sys.path.append("../../")
-
 import cherrypy
 import requests
 

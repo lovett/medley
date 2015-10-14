@@ -1,11 +1,6 @@
-import sys
-import os.path
-sys.path.append("../../")
-
 import cherrypy
 import util.phone
 import apps.phone.models
-
 
 class Controller:
     """Manage an Asterisk blacklist database"""
