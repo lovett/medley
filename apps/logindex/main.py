@@ -39,7 +39,7 @@ class Controller:
         else:
             end_date = start_date
 
-        if by is None:
+        if not by:
             raise cherrypy.HTTPError(400, "Field name to index by not specified")
 
         syslog.openlog(self.syslog_ident)
