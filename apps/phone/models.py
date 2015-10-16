@@ -170,7 +170,6 @@ class AsteriskManager:
 
         return "Updated database successfully" in response
 
-
     def blacklist(self, number):
         """Add a number to the Asterisk blacklist"""
 

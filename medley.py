@@ -20,6 +20,7 @@ import apps.phone.main
 import apps.logindex.main
 import apps.visitors.main
 import apps.captures.main
+import apps.callerid.main
 
 import tools.negotiable
 import tools.response_time

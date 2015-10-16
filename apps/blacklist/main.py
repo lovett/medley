@@ -7,7 +7,7 @@ class Controller:
 
     exposed = True
 
-    user_facing = True
+    user_facing = False
 
     def sanitizeNumber(self, number):
         number = util.phone.sanitize(number)

@@ -15,7 +15,7 @@ MEDLEY.phone = (function () {
         cidValue = form.find('INPUT[name=cid_value]');
 
         jQuery.ajax({
-            type: 'POST',
+            type: 'PUT',
             dataType: 'json',
             url: form.attr('action'),
             data: {
