@@ -21,6 +21,7 @@ class Controller:
     @cherrypy.tools.template(template="visitors.html")
     @cherrypy.tools.negotiable()
     def GET(self, q=None):
+        log_dir = cherrypy.request.config.get("log_dir")
 
         registry = apps.registry.models.Registry()
 
@@ -54,9 +55,8 @@ class Controller:
         q = re.sub("[^\d\w -:;,\n]+", "", q, flags=re.UNICODE)
         q = q.replace("date today", datetime.now().strftime("date %Y-%m-%d"))
         q = q.replace("date yesterday", (datetime.now() - timedelta(days=1)).strftime("date %Y-%m-%d"))
-
-        if "," in q:
-            q = q.replace(",", "\n")
+        q = re.sub(",\s*", "\n", q)
+        q = q.strip()
 
         for line in q.split("\n"):
             try:
@@ -64,8 +64,6 @@ class Controller:
                 filters[subject].append(value)
             except (ValueError, KeyError):
                 continue
-
-        log_dir = cherrypy.request.config.get("log_dir")
 
         offsets = None
 
@@ -75,27 +73,27 @@ class Controller:
             filters["date"] = offsets.keys()
             del filters["ip"]
 
-
         results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
-            needs_geo_lookup = "country" not in result
-            result["ip_facts"] = util.ip.facts(result["ip"], needs_geo_lookup)
+            if not result.get("country"):
+                result["ip_facts"] = util.ip.facts(result["ip"])
+            else:
+                result["ip_facts"] = {}
+                result["ip_facts"]["geo"] = {}
+                result["ip_facts"]["geo"]["country_code"] = result.get("country")
+                result["ip_facts"]["geo"]["region_code"] = result.get("region")
+                result["ip_facts"]["geo"]["city"] = result.get("city")
+                result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
 
-            if not needs_geo_lookup:
-                result["ip_facts"]["geo"]["country_code"] = result["country"]
-                result["ip_facts"]["geo"]["region_code"] = result["region"]
-                result["ip_facts"]["geo"]["city"] = result["city"]
-                if result["country"]:
-                    result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
-                if "," in result.get("latlong"):
-                    (lat, lng) = result["latlong"].split(",")
-                    result["ip_facts"]["geo"]["latitude"] = lat
-                    result["ip_facts"]["geo"]["longitude"] = lng
+            if "," in result.get("latlong", ""):
+                (lat, lng) = result["latlong"].split(",")
+                result["ip_facts"]["geo"]["latitude"] = lat
+                result["ip_facts"]["geo"]["longitude"] = lng
 
             try:
                 result["delta"] = result["timestamp"] - results.matches[index + 1]["timestamp"]
-            except IndexError:
+            except (KeyError, IndexError):
                 result["delta"] = None
 
         return {
