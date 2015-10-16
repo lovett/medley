@@ -7,9 +7,7 @@ import syslog
 
 class Controller:
     """Download the current set of AWS IP ranges and store in registry.
-    Previously downloaded ranges are removed.  See
-    http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html
-    """
+    Previously downloaded ranges are removed."""
 
     exposed = True
 
@@ -17,6 +15,8 @@ class Controller:
 
     @cherrypy.tools.encode()
     def GET(self):
+        """See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html"""
+
         cache = util.cache.Cache()
 
         ranges = None

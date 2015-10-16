@@ -36,26 +36,26 @@ class MedleyServer(object):
         """The application homepage lists the available endpoints"""
 
         user_facing_apps = []
+        service_apps = []
+
 
         for name, controller in cherrypy.tree.apps.items():
+            if not name:
+                continue
+            app = (name[1:], controller.root.__doc__)
             if getattr(controller.root, "user_facing", False):
-                user_facing_apps.append((name[1:], controller.root.__doc__))
+                user_facing_apps.append(app)
+            else:
+                service_apps.append(app)
 
         user_facing_apps.sort(key=lambda tup: tup[0])
+        service_apps.sort(key=lambda tup:tup[0])
 
-        if cherrypy.request.as_text:
-            output = ""
-            for name, description in endpoints:
-                output += "/" + name + "\n"
-                output += str(description) + "\n\n"
-            return output
-        elif cherrypy.request.as_json:
-            return endpoints
-        else:
-            return {
-                "page_title": "Medley",
-                "apps": user_facing_apps
-            }
+        return {
+            "page_title": "Medley",
+            "user_facing_apps": user_facing_apps,
+            "service_apps": service_apps
+        }
 
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
