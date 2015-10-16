@@ -22,7 +22,6 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, q=None):
 
-        logman = apps.logindex.models.LogManager()
         registry = apps.registry.models.Registry()
 
         results = None
@@ -71,6 +70,7 @@ class Controller:
         offsets = None
 
         if len(filters["ip"]) > 0:
+            logman = apps.logindex.models.LogManager()
             offsets = logman.getLogOffsets("ip", filters["ip"])
             filters["date"] = offsets.keys()
             del filters["ip"]

@@ -23,7 +23,7 @@ def facts(ip, geo_lookup=True):
             facts["organization"] = netblock["key"].split(":")[1]
             break
 
-    annotations = registry.find(key="ip:{}".format(ip))
+    annotations = registry.search(key="ip:{}".format(ip))
     if annotations:
         facts["annotations"] = [annotation["value"] for annotation in annotations]
 
