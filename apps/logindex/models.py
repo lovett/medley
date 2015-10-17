@@ -20,7 +20,6 @@ class LogManager:
             cherrypy.config.get("database_dir"),
             "logindex.sqlite"
         )
-        db_conn = sqlite3.connect(db_path)
         self.conn = sqlite3.connect(db_path, detect_types=sqlite3.PARSE_COLNAMES)
         self.conn.execute("PRAGMA synchronous=OFF")
         self.conn.execute("PRAGMA jounral_mode=MEMORY")
