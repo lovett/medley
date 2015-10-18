@@ -33,13 +33,15 @@ MEDLEY.visitors = (function () {
         }
 
         tbody.find('.calc-delta').html(function () {
-            var el, timestamp, delta, deltaString, units, result;
+            var el, timestamp, delta, label, deltaString, units, result;
 
             el = jQuery(this);
 
             timestamp = parseFloat(el.attr('data-timestamp-unix'));
 
-            delta = Math.abs(timestamp - referenceTimestamp);
+            delta = timestamp - referenceTimestamp;
+            label = (delta < 0)? 'earlier':'later';
+            delta = Math.abs(delta);
 
             units = [3600, 60, 1].reduce(function (acc, unit, index, arr) {
                 var div;
@@ -61,6 +63,7 @@ MEDLEY.visitors = (function () {
                 result = units.join(':').replace(/^0/, '');
             }
             el.closest('TR').find('.delta .value').html(result);
+            el.closest('TR').find('.delta .label').html(label);
         });
     };
 

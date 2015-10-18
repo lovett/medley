@@ -71,8 +71,6 @@
             </div>
         </div>
 
-        <div id="deltas" class="ui segment hidden">
-        </div>
         <div class="sleeve">
             <table id="matches" class="ui table unstackable">
                 <thead>
@@ -131,13 +129,15 @@
                             {% endif %}
                             {{ result.timestamp|localtime('time12') }}
 
-                            <p class="small">
+                            <div class="small">
                                 {% if result.ip_facts.geo.time_zone %}
-                                <i class="icon wait"></i>
-                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local
+                                <div>
+                                    <i class="icon wait"></i>
+                                    {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
+                                </div>
                                 {% endif %}
-                                <span class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}"><i class="icon">Δ</i><span class="value">{{ result.delta }}</span></span>
-                            </p>
+                                <div class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}"><i class="icon">Δ</i><span class="value">{{ result.delta }}</span> <span class="label"></span></div>
+                            </div>
 
                         </td>
                         <td nowrap="nowrap">
