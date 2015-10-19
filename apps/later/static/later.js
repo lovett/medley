@@ -1,9 +1,28 @@
 MEDLEY.later = (function () {
     'use strict';
 
-    var applyShortcut;
+    function automaticTags() {
+        var address, tagsField, tags, matches;
+        tagsField = $('#tags');
+        tags = tagsField.val();
+        address = $('#address').val();
 
-    applyShortcut = function (e) {
+        matches = /reddit.com\/(r\/(.*?))\//.exec(address);
+
+        if (matches) {
+            tags += ' ' + matches[1];
+        }
+
+        tagsField.val(tags);
+    }
+
+    function cleanupComments() {
+        if ($('#comments').val().indexOf('reddit: the front page') > -1) {
+            $('#comments').val('');
+        }
+    }
+
+    function applyShortcut(e) {
         var trigger = jQuery(e.target);
         var target = trigger.closest('.field').find('INPUT,TEXTAREA').first();
 
@@ -24,7 +43,7 @@ MEDLEY.later = (function () {
         } else if (trigger.hasClass('trim-all')) {
             target.val('').focus();
         }
-    };
+    }
 
     return {
         init: function () {
@@ -67,6 +86,9 @@ MEDLEY.later = (function () {
             $form.form(validationRules, validationSettings);
 
             jQuery('.shortcuts').on('click', 'A', applyShortcut);
+
+            automaticTags();
+            cleanupComments();
         }
 
     };
