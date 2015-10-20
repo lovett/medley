@@ -4,9 +4,14 @@
 
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" href="/static/visitors/visitors.css"></link>
+{% endblock %}
+
 {% block scripts %}
 <script src="/static/visitors/visitors.js"></script>
 {% endblock %}
+
 
 {% block page_body %}
 
@@ -85,23 +90,24 @@
                 </thead>
                 <tbody>
                     {% for result in results %}
-                    <tr class="result">
+                    <tr class="result code-{{ result.statusCode }}">
                         {% if result.ip == prev_ip %}
                         <td></td>
                         {% else %}
                         <td>
-                            <span class="help" title="{{ result.ip_facts.geo.country_name }}"><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
+                            <span><i class="{{ result.ip_facts.geo.country_code|lower()}} flag"></i></span>
 
-                            {% if result.ip_facts.geo.country_code == "US" %}
-                            {{ result.ip_facts.geo.region_code|default("", true) }}
-                            <p class="small">{{ result.ip_facts.geo.city|default("", true) }}</p>
-                            {% else %}
-                            <p class="small">{{ result.ip_facts.geo.country_name }}
+                            <p class="small">
                                 {% if result.ip_facts.geo.city %}
-                                <br/>{{ result.ip_facts.geo.city|default("", true) }}
+                                {{ result.ip_facts.geo.city|default("", true) }}<br/>
+                                {% endif %}
+
+                                {% if result.ip_facts.geo.country_code == "US" %}
+                                {{ result.ip_facts.geo.region_code|default("", true) }}
+                                {% else %}
+                                {{ result.ip_facts.geo.country_name }}
                                 {% endif %}
                             </p>
-                            {% endif %}
 
 
                         </td>
