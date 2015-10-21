@@ -24,12 +24,31 @@ class AsteriskCdr:
         if self.conn:
             self.conn.close()
 
+    def callCount(self, src=None):
+        query = """SELECT count(*) as count FROM cdr"""
+
+        if src is None:
+            self.cur.execute(query)
+        else:
+            query += " WHERE src=?"
+            self.cur.execute(query, (caller,))
+
+        return self.cur.fetchone()[0]
+
+    def callLog(self, offset=0, limit=50):
+        count = self.callCount()
+
+        if count == 0:
+            return ([], 0)
+
+        query = """SELECT calldate as "date [naive_date]", end as "end_date [naive_date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr ORDER BY calldate DESC LIMIT ? OFFSET ?"""
+
+        self.cur.execute(query, (limit, offset))
+
+        return (self.cur.fetchall(), count)
+
     def callHistory(self, caller, limit=0, offset=0):
-        try:
-            self.cur.execute("SELECT count(*) as count FROM cdr WHERE src=?", (caller,))
-            count = self.cur.fetchone()[0]
-        except:
-            count = 0
+        count = self.callCount(caller)
 
         if count == 0:
             return ([], 0)
