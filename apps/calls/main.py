@@ -19,12 +19,17 @@ class Controller:
 
         (calls, total) = cdr.callLog(offset)
 
-        next_offset = min(offset + len(calls), total)
-        prev_offset = max(offset - len(calls), 0)
+        older_offset = len(calls) + offset
+        if older_offset > total:
+            older_offset = 0
+
+        newer_offset = offset - len(calls)
+
+        print(newer_offset)
 
         return {
             "calls": calls,
             "total": total,
-            "next_offset": next_offset,
-            "prev_offset": prev_offset
+            "newer_offset": newer_offset,
+            "older_offset": older_offset
         }
