@@ -60,6 +60,8 @@ class AsteriskCdr:
     def callHistory(self, caller, limit=0, offset=0):
         count = self.callCount(caller)
 
+        print(count)
+        
         if count == 0:
             return ([], 0)
 
