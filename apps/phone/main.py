@@ -14,7 +14,7 @@ class Controller:
 
     @cherrypy.tools.template(template="phone.html")
     @cherrypy.tools.negotiable()
-    def GET(self, number=None, cid_number=None, cid_value=None):
+    def GET(self, number=None):
         cache = util.cache.Cache()
 
         if number is None:

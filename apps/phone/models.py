@@ -15,6 +15,7 @@ class AsteriskCdr:
         sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
         sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
         sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
+        sqlite3.register_converter("channel", util.sqlite_converters.convert_channel)
 
         self.conn = sqlite3.connect(path, detect_types=sqlite3.PARSE_COLNAMES)
         self.conn.row_factory = sqlite3.Row
@@ -29,11 +30,13 @@ class AsteriskCdr:
 
         if src is None:
             self.cur.execute(query)
-        else:
-            query += " WHERE src=?"
-            self.cur.execute(query, (caller,))
+            return self.cur.fetchone()[0]
 
+        query += " WHERE src=?"
+        self.cur.execute(query, (src,))
         return self.cur.fetchone()[0]
+
+
 
     def callLog(self, offset=0, limit=50):
         count = self.callCount()
@@ -41,7 +44,14 @@ class AsteriskCdr:
         if count == 0:
             return ([], 0)
 
-        query = """SELECT calldate as "date [naive_date]", end as "end_date [naive_date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr ORDER BY calldate DESC LIMIT ? OFFSET ?"""
+        query = """
+        SELECT calldate as "date [naive_date]", end as "end_date [naive_date]",
+        duration as "duration [duration]", clid as "clid [clid]",
+        channel as "abbreviated_channel [channel]",
+        dstchannel as "abbreviated_dstchannel [channel]", *
+        FROM cdr
+        ORDER BY calldate DESC
+        LIMIT ? OFFSET ?"""
 
         self.cur.execute(query, (limit, offset))
 

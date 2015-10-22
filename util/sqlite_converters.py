@@ -49,3 +49,7 @@ def convert_callerid(s):
 
 def convert_pickled(blob):
     return pickle.loads(blob)
+
+def convert_channel(s):
+    decoded_s = s.decode("utf-8")
+    return decoded_s[0:decoded_s.rindex("-")]

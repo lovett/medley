@@ -14,23 +14,27 @@
         {% if calls|length > 0 %}
         <div class="sleeve">
 
-            {% if newer_offset >= 0 %}
-            <a href="/calls?offset={{ newer_offset }}">Newer</a>
-            {% endif %}
+            <div class="ui two column grid">
+                <div class="column">
+                    {% if newer_offset >= 0 %}
+                    <a href="/calls?offset={{ newer_offset }}">Newer</a>
+                    {% endif %}
+                </div>
 
-            {% if older_offset > 0 %}
-            <a href="/calls?offset={{ older_offset }}">Older</a>
-            {% endif %}
+                <div class="right aligned column">
+                    {% if older_offset > 0 %}
+                    <a href="/calls?offset={{ older_offset }}">Older</a>
+                    {% endif %}
+                </div>
+            </div>
 
             <table class="ui table unstackable">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Source</th>
-                        <th>Channel</th>
+                        <th>From</th>
                         <th>Destination</th>
-                        <th>Duration</th>
-                        <th>Last App</th>
+                        <th>Result</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -38,23 +42,17 @@
                     <tr>
                         <td nowrap="nowrap">
                             {{ call["date"]|localtime("date") }}
-                            <p class="small">{{ call["date"]|localtime("time12")}}</p>
+                            <div class="small">{{ call["date"]|localtime("time12")}}</div>
+                            <div class="small">{{ call["duration"] }}</div>
                         </td>
                         <td>
                             {{ call["clid"] }}
-                            <div class="small">{{ call["src"] }}</div>
-                        </td>
-                        <td>
-                            <div class="small">{{ call["channel"] }}</div>
+                            <div class="small"><a href="/phone?number={{ call["src"] }}">{{ call["src"] }}</a></div>
+                            <div class="small">{{ call["abbreviated_channel"] }}</div>
                         </td>
                         <td>
                             {{ call["dst"] }}
-                            <div class="small">{{ call["dstchannel"] }}</div>
-                        </td>
-                        <td>
-                            {{ call["duration"] }}
-                            <p class="small">{{ call["end_date"]|localtime("time12")}}</p>
-
+                            <div class="small">{{ call["abbreviated_dstchannel"]|default('', true) }}</div>
                         </td>
                         <td nowrap="nowrap">
                             {{ call["lastapp"] }}
