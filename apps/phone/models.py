@@ -38,7 +38,7 @@ class AsteriskCdr:
 
 
 
-    def callLog(self, offset=0, limit=50):
+    def callLog(self, exclude=[], offset=0, limit=50):
         count = self.callCount()
 
         if count == 0:
@@ -49,19 +49,26 @@ class AsteriskCdr:
         duration as "duration [duration]", clid as "clid [clid]",
         channel as "abbreviated_channel [channel]",
         dstchannel as "abbreviated_dstchannel [channel]", *
-        FROM cdr
+        FROM cdr"""
+
+        if exclude:
+            query += " WHERE src NOT IN ({}) ".format(",".join("?" * len(exclude)))
+            
+        query += """
         ORDER BY calldate DESC
         LIMIT ? OFFSET ?"""
 
-        self.cur.execute(query, (limit, offset))
+        params = [limit, offset]
+        if exclude:
+            params = exclude + params
+            
+        self.cur.execute(query, params)
 
         return (self.cur.fetchall(), count)
 
     def callHistory(self, caller, limit=0, offset=0):
         count = self.callCount(caller)
 
-        print(count)
-        
         if count == 0:
             return ([], 0)
 

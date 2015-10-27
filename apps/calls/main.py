@@ -3,6 +3,7 @@ import tools.negotiable
 import tools.jinja
 import urllib.parse
 import apps.phone.models
+import apps.registry.models
 
 class Controller:
     """Display call history by date"""
@@ -16,16 +17,17 @@ class Controller:
     def GET(self, offset=0):
         offset = int(offset)
         cdr = apps.phone.models.AsteriskCdr()
+        registry = apps.registry.models.Registry()
 
-        (calls, total) = cdr.callLog(offset)
+        exclusions = [row["value"] for row in registry.search("calls:exclude")]
+
+        (calls, total) = cdr.callLog(offset=offset, exclude=exclusions)
 
         older_offset = len(calls) + offset
         if older_offset > total:
             older_offset = 0
 
         newer_offset = offset - len(calls)
-
-        print(newer_offset)
 
         return {
             "calls": calls,
