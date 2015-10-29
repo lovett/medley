@@ -33,10 +33,11 @@ class AsteriskCdr:
             return self.cur.fetchone()[0]
 
         query += " WHERE src=?"
-        self.cur.execute(query, (src,))
-        return self.cur.fetchone()[0]
-
-
+        try:
+            self.cur.execute(query, (src,))
+            return self.cur.fetchone()[0]
+        except:
+            return 0
 
     def callLog(self, exclude=[], offset=0, limit=50):
         count = self.callCount()
@@ -53,7 +54,7 @@ class AsteriskCdr:
 
         if exclude:
             query += " WHERE src NOT IN ({}) ".format(",".join("?" * len(exclude)))
-            
+
         query += """
         ORDER BY calldate DESC
         LIMIT ? OFFSET ?"""
@@ -61,10 +62,13 @@ class AsteriskCdr:
         params = [limit, offset]
         if exclude:
             params = exclude + params
-            
+
         self.cur.execute(query, params)
 
-        return (self.cur.fetchall(), count)
+        try:
+            return (self.cur.fetchall(), count)
+        except:
+            return ([], count)
 
     def callHistory(self, caller, limit=0, offset=0):
         count = self.callCount(caller)
