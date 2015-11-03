@@ -87,6 +87,18 @@ MEDLEY.later = (function () {
 
             jQuery('.shortcuts').on('click', 'A', applyShortcut);
 
+	    jQuery('#address, #comments').on('input', function (e) {
+		var shortcuts, target, val;
+		target = jQuery(this);
+		shortcuts = target.closest('.field').find('.shortcuts A');
+		val = jQuery.trim(target.val());
+		if (val === '') {
+		    shortcuts.addClass('hidden');
+		} else {
+		    shortcuts.removeClass('hidden');
+		}
+	    });
+
             automaticTags();
             cleanupComments();
         }

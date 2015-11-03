@@ -33,12 +33,9 @@
                 <label for="address">Address:</label>
                 <input type="text" id="address" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
                 <p class="shortcuts">
-                    <a class="remove-querystring" href="#">Remove querystring</a>
-                    <a class="remove-hash" href="#">Remove hash</a>
-
-                    {% if url %}
-                    <a class="reset" href="#">Reset</a>
-                    {% endif %}
+                    <a class="remove-querystring hidden" href="#">Remove querystring</a>
+                    <a class="remove-hash hidden" href="#">Remove hash</a>
+                    <a class="reset hidden" href="#">Clear</a>
                 </p>
             </div>
 
@@ -52,11 +49,9 @@
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
                 <p class="shortcuts">
-                    {% if comments %}
-                    <a class="trim-all" href="#">Clear</a>
-                    <a class="trim-sentence-from-start" href="#">Trim sentence from start</a>
-                    <a class="trim-sentence-from-end" href="#">Trim sentence from end</a>
-                    {% endif %}
+                    <a class="trim-sentence-from-start hidden" href="#">Trim sentence from start</a>
+                    <a class="trim-sentence-from-end hidden" href="#">Trim sentence from end</a>
+                    <a class="trim-all hidden" href="#">Clear</a>
                 </p>
             </div>
 
