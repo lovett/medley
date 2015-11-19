@@ -11,7 +11,7 @@
     minute="5"
     hour="7"
     weekday="0"
-    job="curl -k --fail --silent --show-error 'https://localhost/awsranges'"
+    job="curl -k --fail --silent --show-error 'https://localhost/awsranges' > /dev/null"
     user="{{ project_user }}"
 
 - name: Update geodb database
@@ -31,5 +31,5 @@
     cron_file="{{ project_name }}"
     name="external_ip"
     minute="45"
-    job="curl -X PUT -d 'token=externa' -k --fail --silent --show-error 'https://localhost/ip'"
+    job="curl -X PUT -d 'token=external' -k --fail --silent 'https://localhost/ip' > /dev/null"
     user="{{ project_user }}"
