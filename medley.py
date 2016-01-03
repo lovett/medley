@@ -61,45 +61,63 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # Application directory paths have default values that are
-    # relative to the app root.
+    # When turned on, this breaks templating
     cherrypy.config.update({
-        "database_dir": os.path.realpath("db"),
-        "log_dir": os.path.realpath("logs")
+        "tools.encode.on": False
     })
 
-    # Application configuration is sourced from multiple places:
-    #
-    #   /etc/medley.conf: The main config. It is kept outside the app
-    #   root so that it remains untouched during deployment.
-    #
-    #   default.conf: The default config. Only used if the main
-    #   config does not exist.
-    #
-    #   local.conf: The local config. Used to override values from the
-    #   main or default config, mainly for the benefit of development
-    #   so that you can change a few values without making a full copy
-    #   of the default config.
-    #
-    # Since configuration files can contain both global and
-    # application-specific sections, they are first applied to the
-    # CherryPy global config and then again to the application config.
+    # Load configuration from /etc/medley.conf if it exists, otherwise load
+    # from the application root
+    config_file = "/etc/medley.conf"
+    if not os.path.isfile(config_file):
+        config_file = os.path.join(app_root, "medley.conf")
 
-    default_config = "/etc/medley.conf"
-    if not os.path.isfile(default_config):
-        default_config = os.path.join(app_root, "default.conf")
+    if not os.path.isfile(config_file):
+        raise SystemExit("Exiting because a configuration file could not be found")
 
-    cherrypy.config.update(default_config)
-    app = cherrypy.tree.mount(MedleyServer(), config=default_config)
+    cherrypy.config.update(config_file)
 
-    local_config = os.path.join(app_root, "local.conf")
-    if os.path.isfile(local_config):
-        cherrypy.config.update(local_config)
-        app.merge(local_config)
+    # Create the database directory
+    try:
+        os.mkdir(cherrypy.config.get("database_dir"))
+    except PermissionError:
+        raise SystemExit("Unable to create database directory")
+    except FileExistsError:
+        pass
 
+    # Create the log directory. The configuration file only needs to
+    # specify log_dir if using file logging, not log.access_file and
+    # log.error_file.
+    if not cherrypy.config.get("log.screen"):
+        log_dir = cherrypy.config.get("log_dir")
+        try:
+            os.mkdir(log_dir)
+        except PermissionError:
+            raise SystemExit("Unable to create log directory")
+        except FileExistsError:
+            pass
+
+        cherrypy.config.update({
+            "log.access_file": os.path.join(log_dir, "access.log"),
+            "log.error_file": os.path.join(log_dir, "error.log")
+        })
+
+    # Mount the core server
+    cherrypy.tree.mount(MedleyServer(), config={
+        "/static": {
+            "tools.staticdir.on": True,
+            "tools.staticdir.dir": os.path.realpath("static")
+        }
+    })
+
+    # Mount the apps
     app_config = {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+        },
+        "/static": {
+            "tools.staticdir.on": True,
+            "tools.staticdir.dir": os.path.realpath("static")
         }
     }
 
@@ -109,20 +127,6 @@ if __name__ == "__main__":
             cherrypy.tree.mount(cls.main.Controller(), path, app_config)
         except AttributeError:
             pass
-
-    # Logging occurs either to stdout or to files. For file logging,
-    # the configuration should specify a value for log_dir and ignore
-    # the log.access_file and log.error.file settings described in the
-    # CherryPy documentation. This approach allows the application to
-    # create the log directory if it doesn't exist.
-    if not cherrypy.config.get("log.screen"):
-        log_dir = cherrypy.config.get("log_dir")
-        if not os.path.isdir(log_dir):
-            os.mkdir(log_dir)
-        cherrypy.config.update({
-            "log.access_file": os.path.join(log_dir, "access.log"),
-            "log.error_file": os.path.join(log_dir, "error.log")
-        })
 
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):

@@ -6,7 +6,6 @@ __pycache__
 *.db
 .Python
 medley.conf
-local.conf
 *.pyc
 .coverage
 coverage
