@@ -10,7 +10,7 @@
 - name: Install virtualenv for python3
   sudo: yes
   pip:
-    executable=pip-3.2
+    executable=pip3
     name=virtualenv
     state=present
 
