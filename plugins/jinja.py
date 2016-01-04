@@ -13,10 +13,12 @@ class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
     def __init__(self, bus):
-        paths = ["templates"]
+        app_root = cherrypy.config.get("app_root")
 
-        apps = [os.path.join("apps", app)
-                for app in os.listdir("apps")
+        paths = [os.path.join(app_root, "templates")]
+
+        apps = [os.path.join(app_root, "apps", app)
+                for app in os.listdir(os.path.join(app_root, "apps"))
                 if not app.startswith("__")]
 
         paths.extend(apps)

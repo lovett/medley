@@ -61,9 +61,9 @@ class MedleyServer(object):
 if __name__ == "__main__":
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # When turned on, this breaks templating
     cherrypy.config.update({
-        "tools.encode.on": False
+        "app_root": app_root,
+        "tools.encode.on": False # Needed to get jinja templates working
     })
 
     # Load configuration from /etc/medley.conf if it exists, otherwise load
