@@ -1,3 +1,4 @@
+import os.path
 import cherrypy
 import socket
 import datetime
@@ -11,7 +12,8 @@ class AsteriskCdr:
     cur = None
 
     def __init__(self):
-        path = cherrypy.config.get("asterisk.cdr_db")
+        db_dir = cherrypy.config.get("database_dir")
+        path = os.path.join(db_dir, "asterisk_cdr.sqlite")
         sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
         sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
         sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
