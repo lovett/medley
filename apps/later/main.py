@@ -45,10 +45,7 @@ class Controller:
             tags = bookmark.get("tags")
             comments = bookmark.get("comments")
 
-        base = cherrypy.request.headers.get("X-Forwarded-Host")
-
-        if not base:
-            base = cherrypy.request.headers.get('Host')
+        base = cherrypy.request.headers.get("Host")
 
         if "X-HTTPS" in cherrypy.request.headers:
             base = "https://" + base
