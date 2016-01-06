@@ -131,7 +131,7 @@ class Plugin(plugins.SimplePlugin):
         return "{} {}".format(count, value)
 
     def anonymize_filter(self, url):
-        anonymizer = cherrypy.config.get("anonymizer")
+        anonymizer = cherrypy.config.get("url_anonymizer")
 
         if not url.startswith("http"):
             url = "http://" + url

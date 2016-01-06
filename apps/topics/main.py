@@ -28,7 +28,7 @@ class Controller:
             cache_date = cached_value[1]
         else:
             html = self.fetch("http://www.bing.com/hpm")
-            cache.set(key, html)
+            cache.set(key, html, 60 * 60 * 18)
             cache_date = None
 
         soup = bs4.BeautifulSoup(html, "html.parser")

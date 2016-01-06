@@ -8,3 +8,4 @@ server.socket_port: 8085
 server.daemonize: False
 server.pid: "/var/run/medley/medley.pid"
 timezone: "America/New_York"
+url_anonymizer: None
