@@ -9,12 +9,11 @@
     path={{ project_root }}.bak
     state=absent
 
-- name: Move current installation to backup
+- name: Backup the current installation
   sudo: yes
-  shell: mv {{ project_root }} {{ project_root }}.bak
+  shell: cp -r {{ project_root }} {{ project_root }}.bak
     creates={{ project_root }}.bak
-    removes={{ project_root }}
-  
+
 - name: Create application directory
   sudo: yes
   file:
@@ -23,7 +22,6 @@
     group={{ project_group }}
     state=directory
     mode=0775
-  
 
 - name: Checkout head version of master branch
   sudo: yes
