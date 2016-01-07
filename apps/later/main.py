@@ -41,9 +41,9 @@ class Controller:
 
         if bookmark:
             error = "This URL has already been bookmarked"
-            title = bookmark.get("title")
-            tags = bookmark.get("tags")
-            comments = bookmark.get("comments")
+            title = bookmark["title"]
+            tags = bookmark["tags"]
+            comments = bookmark["comments"]
 
         base = cherrypy.request.headers.get("Host")
 
