@@ -32,7 +32,7 @@ MEDLEY.later = (function () {
         } else if (trigger.hasClass('remove-hash')) {
             target.val(target.val().replace(/#.*/, ''));
             target.focus();
-        } else if (trigger.hasClass('reset')) {
+        } else if (trigger.hasClass('revert')) {
             target.val(target.attr('data-original-value'));
         } else if (trigger.hasClass('trim-sentence-from-start')) {
             target.val(target.val().replace(/^(.*?\.) ([A-Z].*)/m, '$2'));
@@ -41,8 +41,21 @@ MEDLEY.later = (function () {
             target.val(target.val().replace(/^(.*\.) ([A-Z].*)/m, '$1'));
             target.focus();
         } else if (trigger.hasClass('trim-all')) {
-            target.val('').focus();
+            target.val('');
+            target.focus();
         }
+    }
+
+    function toggleShortcuts(e) {
+	var shortcuts, target, val;
+	target = jQuery(this);
+	shortcuts = target.closest('.field').find('.shortcuts A');
+	val = jQuery.trim(target.val());
+	if (val === '') {
+	    shortcuts.addClass('hidden');
+	} else {
+	    shortcuts.removeClass('hidden');
+	}
     }
 
     return {
@@ -75,10 +88,9 @@ MEDLEY.later = (function () {
                         $successMessage.removeClass('hidden');
                         window.location.href = '/archive';
                     }).fail(function (data) {
-                        console.log(data.responseText);
                         $form.addClass('error');
                         $successMessage.addClass('hidden');
-                        $errorMessage.text(data);
+                        $errorMessage.text(data.statusText);
                     });
                 }
             };
@@ -87,17 +99,10 @@ MEDLEY.later = (function () {
 
             jQuery('.shortcuts').on('click', 'A', applyShortcut);
 
-	    jQuery('#address, #comments').on('input', function (e) {
-		var shortcuts, target, val;
-		target = jQuery(this);
-		shortcuts = target.closest('.field').find('.shortcuts A');
-		val = jQuery.trim(target.val());
-		if (val === '') {
-		    shortcuts.addClass('hidden');
-		} else {
-		    shortcuts.removeClass('hidden');
-		}
-	    });
+	    jQuery('#address, #comments').on('input', toggleShortcuts);
+
+            toggleShortcuts.apply('#address');
+            toggleShortcuts.apply('#comments');
 
             automaticTags();
             cleanupComments();
