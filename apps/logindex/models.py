@@ -15,7 +15,7 @@ class LogManager:
     cur = None
     log_dir = None
 
-    def __init__(self):
+    def __init__(self, root):
         db_path = os.path.join(
             cherrypy.config.get("database_dir"),
             "logindex.sqlite"
@@ -25,7 +25,7 @@ class LogManager:
         self.conn.execute("PRAGMA jounral_mode=MEMORY")
         self.conn.row_factory = sqlite3.Row
         self.cur = self.conn.cursor()
-        self.log_dir = cherrypy.config.get("log_dir")
+        self.log_dir = root
 
     def __del__(self):
         if self.conn:

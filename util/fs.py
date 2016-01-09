@@ -15,7 +15,7 @@ GrepResult = namedtuple("GrepResult", "matches count limit")
 
 @util.decorator.timed
 def appengine_log_grep(logdir, filters, offsets=None, limit=50):
-    logman = apps.logindex.models.LogManager()
+    logman = apps.logindex.models.LogManager(logdir)
     matches = []
 
     files = logman.getList(True)

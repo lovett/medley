@@ -24,6 +24,11 @@ class Controller:
         log_dir = cherrypy.request.config.get("log_dir")
 
         registry = apps.registry.models.Registry()
+        roots = registry.search(key="logindex:root")
+        if not roots:
+            raise cherrypy.HTTPError(500, "No log roots found in registry")
+
+        print(roots)
 
         results = None
         active_query = None
@@ -68,12 +73,12 @@ class Controller:
         offsets = None
 
         if len(filters["ip"]) > 0:
-            logman = apps.logindex.models.LogManager()
+            logman = apps.logindex.models.LogManager(roots[0]["value"])
             offsets = logman.getLogOffsets("ip", filters["ip"])
             filters["date"] = offsets.keys()
             del filters["ip"]
 
-        results, duration = util.fs.appengine_log_grep(log_dir, filters, offsets, 100)
+        results, duration = util.fs.appengine_log_grep(roots[0]["value"], filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
             if not result.get("country"):

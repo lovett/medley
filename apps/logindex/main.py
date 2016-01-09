@@ -5,6 +5,7 @@ import datetime
 import os.path
 import tools.negotiable
 import apps.logindex.models
+import apps.registry.models
 import util.decorator
 import cherrypy
 
@@ -24,13 +25,18 @@ class Controller:
         except:
             raise cherrypy.HTTPError(400, "Unable to parse a date from {}".format(s))
 
-
+    @cherrypy.tools.encode()
     def POST(self, start, end=None, by="ip", match=None):
         start_time = time.time()
         one_day = datetime.timedelta(days=1)
-        logman = apps.logindex.models.LogManager()
+
+        registry = apps.registry.models.Registry()
+        roots = registry.search(key="logindex:root")
+        if not roots:
+            raise cherrypy.HTTPError(500, "No log roots found in registry")
 
         start_date = self.parseLogDate(start)
+        logman = apps.logindex.models.LogManager(roots[0]["value"])
 
         if end:
             end_date = self.parseLogDate(end)
