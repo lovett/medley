@@ -4,7 +4,7 @@ import shutil
 import syslog
 import subprocess
 import time
-
+import apps.registry.models
 import cherrypy
 import tools.negotiable
 import tools.jinja
@@ -81,7 +81,12 @@ class Controller:
         return cherrypy.config.get("database_dir")
 
     def lookupDatabaseUrl(self):
-        return cherrypy.config.get("geoip.download.url")
+        registry = apps.registry.models.Registry()
+        urls = registry.search(key="geodb:download_url")
+        if not urls:
+            raise cherrypy.HTTPError(500, "No geodb download url found in registry")
+
+        return urls[0]["value"]
 
     def getDatabasePath(self, gzipped=False):
         database_dir = self.lookupDatabaseDirectory()

@@ -21,12 +21,13 @@ class Controller:
     @cherrypy.tools.template(template="visitors.html")
     @cherrypy.tools.negotiable()
     def GET(self, q=None):
-        log_dir = cherrypy.request.config.get("log_dir")
-
         registry = apps.registry.models.Registry()
         roots = registry.search(key="logindex:root")
         if not roots:
             raise cherrypy.HTTPError(500, "No log roots found in registry")
+
+        site_domains = [row.value for row in registry.search(key="logindex:site_domains")]
+
 
         print(roots)
 
@@ -108,6 +109,6 @@ class Controller:
             "total_matches": results.count,
             "result_limit": results.limit,
             "duration": duration,
-            "site_domains": cherrypy.request.config.get("site_domains"),
+            "site_domains": site_domains,
             "saved_queries": saved_queries
         }
