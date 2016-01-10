@@ -1,6 +1,7 @@
 import time
 import cherrypy
-import util.net
+import requests
+import apps.registry.models
 import tools.capture
 
 class Controller:
@@ -15,7 +16,16 @@ class Controller:
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
-        notifier = cherrypy.config.get("notifier")
+        registry = apps.registry.models.Registry()
+        config = registry.search(key="notifier:*")
+        notifier = {}
+
+        if not config:
+            raise cherrypy.HTTPError(500, "No configuration found in registry")
+
+        for item in config:
+            k = item["key"].split(":")[1]
+            notifier[k] = item["value"]
 
         details = cherrypy.request.json
 
@@ -36,4 +46,5 @@ class Controller:
         else:
             notification["title"] += " is {}".format(details.get("status", "not specified"))
 
-        util.net.sendNotification(notification, notifier)
+        r = requests.post(notifier["url"], auth=(notifier["username"], notifier["password"]), data=notification)
+        r.raise_for_status()
