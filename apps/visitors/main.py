@@ -27,10 +27,6 @@ class Controller:
             raise cherrypy.HTTPError(500, "No log roots found in registry")
 
         site_domains = [row.value for row in registry.search(key="logindex:site_domains")]
-
-
-        print(roots)
-
         results = None
         active_query = None
 

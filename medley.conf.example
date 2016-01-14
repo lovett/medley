@@ -9,3 +9,6 @@ server.daemonize: False
 server.pid: "/var/run/medley/medley.pid"
 timezone: "America/New_York"
 url_anonymizer: None
+tools.conditional_auth.on: False
+tools.conditional_auth.whitelist: ("127.0.0.1")
+users: {"user1":"password1", "user2":"password2"}
