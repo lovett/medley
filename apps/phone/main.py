@@ -50,11 +50,13 @@ class Controller:
             location = util.phone.findAreaCode(area_code)
             cache.set(cache_key, location)
 
-
         manager = apps.phone.models.AsteriskManager()
-        manager.authenticate()
-        caller_id = manager.getCallerId(number)
-        blacklisted = manager.isBlackListed(number)
+        if manager.authenticate():
+            caller_id = manager.getCallerId(number)
+            blacklisted = manager.isBlackListed(number)
+        else:
+            caller_id = None
+            blacklisted = []
 
         cdr = apps.phone.models.AsteriskCdr()
         history = cdr.callHistory(number, 10)

@@ -4,6 +4,7 @@ import socket
 import datetime
 import sqlite3
 import util.sqlite_converters
+import apps.registry.models
 
 class AsteriskCdr:
     """Query an Asterisk sqlite3 CDR database."""
@@ -107,13 +108,7 @@ class AsteriskManager:
 
     Failure responses are returned as boolean False."""
 
-    config = {}
-
     sock = None
-
-    def __init__(self):
-        for key in ("username", "secret", "host", "port"):
-            self.config[key] = cherrypy.config.get("asterisk.{}".format(key))
 
     def __del__(self):
         if self.sock:
@@ -123,18 +118,26 @@ class AsteriskManager:
         """Open an AMI connection and authenticate. Returns the opened
         socket if authentication succeeds, otherwise False"""
 
+        registry = apps.registry.models.Registry()
+        asterisk_keys = registry.search(key="asterisk:*")
+
+        if not asterisk_keys:
+            return False
+
+        asterisk_config = {item["key"].split(":")[1] : item["value"] for index, item in enumerate(asterisk_keys)}
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
-            self.sock.connect((self.config["host"], self.config["port"]))
+            self.sock.connect((asterisk_config["host"], int(asterisk_config["port"])))
         except ConnectionRefusedError:
             return False
 
         self.sendCommand([
             "Action: login",
             "Events: off",
-            "Username: {}".format(self.config["username"]),
-            "Secret: {}".format(self.config["secret"])
+            "Username: {}".format(asterisk_config["username"]),
+            "Secret: {}".format(asterisk_config["secret"])
         ])
 
         response = self.getResponse("Message")
