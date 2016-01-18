@@ -15,19 +15,17 @@ class Controller:
 
     user_facing = False
 
-    url_template = "https://manage.windowsazure.com/@exampleUserId#Workspaces/WebsiteExtension/Website/{}/deployments"
-
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
         registry = apps.registry.models.Registry()
-        config = registry.search(key="notifier:*")
+        notifier_config = registry.search(key="notifier:*")
         notifier = {}
 
-        if not config:
-            raise cherrypy.HTTPError(500, "No configuration found in registry")
+        if not notifier_config:
+            raise cherrypy.HTTPError(500, "No notification config found in registry")
 
-        for item in config:
+        for item in notifier_config:
             k = item["key"].split(":")[1]
             notifier[k] = item["value"]
 
@@ -38,17 +36,20 @@ class Controller:
 
         notification = {
             "group": "azure",
-            "url": self.url_template.format(details["siteName"]),
             "body": details.get("message", "").split("\n")[0],
             "title": "Deployment to {}".format(details["siteName"])
         }
+
+        azure_portal_url = registry.search(key="azure:portal_url")
+        if azure_portal_url:
+            notification["url"] = azure_portal_url[0]["value"].format(details["siteName"])
 
         if details.get("status") == "success" and details.get("complete") == True:
             notification["title"] += " is complete"
         elif details.get("status") == "failed":
             notification["title"] += " has failed"
         else:
-            notification["title"] += " is {}".format(details.get("status", "not specified"))
+            notification["title"] += " has uncertain status"
 
         r = requests.post(notifier["url"], auth=(notifier["username"], notifier["password"]), data=notification)
         r.raise_for_status()
