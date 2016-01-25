@@ -13,7 +13,10 @@ class Controller:
         manager = apps.phone.models.AsteriskManager()
         manager.authenticate()
 
-        result = manager.setCallerId(cid_number, cid_value)
+        result = manager.setCallerId(cid_number.strip(), cid_value.strip())
 
         if not result:
             raise cherrypy.HTTPError(500, "Failed to save caller id")
+
+        cherrypy.response.status = 204
+        return

@@ -49,7 +49,7 @@
                 <form id="caller-id" class="ui form" method="post" action="/callerid">
                     <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
                     <div class="field">
-                        <input type="text" name="cid_value" value=""/>
+                        <input type="text" name="cid_value" value="{{ caller_id|default('') }}"/>
                     </div>
                     <div class="field">
                         <button class="ui small button">Update</button>
