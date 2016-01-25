@@ -24,9 +24,14 @@ class Controller:
 
         if manager.authenticate():
             result = manager.blacklist(number)
+        else:
+            result = None
 
         if not result:
             raise cherrypy.HTTPError(500, "Failed to modify blacklist")
+
+        cherrypy.response.status = 204
+        return
 
 
     def DELETE(self, number):
@@ -39,3 +44,6 @@ class Controller:
 
         if not result:
             raise cherrypy.HTTPError(500, "Failed to modify blacklist")
+
+        cherrypy.response.status = 204
+        return

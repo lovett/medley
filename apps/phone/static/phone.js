@@ -37,31 +37,38 @@ MEDLEY.phone = (function () {
     function updateBlacklist(e) {
         e.preventDefault();
 
-        var form, action, number;
+        var action, data, form, method, number, url;
 
         form = jQuery(this);
 
-        action = form.find('INPUT[name=action]').val();
         number = form.find('INPUT[name=number]').val();
+        action = form.find('INPUT[name=action]').val();
+
+        if (action === 'add') {
+            method = 'PUT';
+            url = form.attr('action');
+            data = {
+                number: number
+            };
+        } else {
+            method = 'DELETE';
+            url = form.attr('action') + '?number=' + number;
+            data = null;
+        }
 
         jQuery.ajax({
-            type: 'POST',
+            method: method,
             dataType: 'json',
-            url: form.attr('action'),
-            data: {
-                action: action,
-                number: number
-            }
+            url: url,
+            data: data
         }).done(function (data, status, xhr) {
             var forms;
             forms = form.parent().find('FORM');
 
-            if (xhr.status === 204) {
-                jQuery('#blacklist-date').text('today');
-                forms.removeClass('error');
-                forms.find('.error.message').text('');
-                forms.toggleClass('hidden');
-            }
+            jQuery('#blacklist-date').text('today');
+            forms.removeClass('error');
+            forms.find('.error.message').text('');
+            forms.toggleClass('hidden');
 
             if (action === 'add') {
                 form.closest('.segment').addClass('inverted');
@@ -94,7 +101,7 @@ MEDLEY.phone = (function () {
 
             jQuery('FORM.blacklist').on('submit', updateBlacklist);
         }
-    }
+    };
 })();
 
 jQuery(document).ready(MEDLEY.phone.init);

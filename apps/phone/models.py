@@ -227,7 +227,7 @@ class AsteriskManager:
             "Command: database put blacklist {} {}".format(number, today)
         ])
 
-        response = getResponse()
+        response = self.getResponse()
 
         return "Updated database successfully" in response
 
