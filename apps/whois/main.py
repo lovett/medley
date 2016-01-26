@@ -4,11 +4,11 @@ import cherrypy
 import tools.negotiable
 import tools.jinja
 import urllib.parse
-import IPy
 import socket
 import util.cache
 import requests
 import util.ip
+import ipaddress
 
 class Controller:
     """Display whois and geoip data for an IP address or hostname"""
@@ -40,7 +40,7 @@ class Controller:
 
         # Is the address an IP?
         try:
-            IPy.IP(address_clean)
+            ipaddress.ip_address(address_clean)
             ip = address_clean
         except ValueError:
             pass

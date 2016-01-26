@@ -5,7 +5,7 @@ import tools.jinja
 import util.net
 import util.cache
 import apps.registry.models
-import IPy
+import ipaddress
 
 class Controller:
     """Display the the requester's address and the server's external address"""
@@ -17,11 +17,10 @@ class Controller:
 
     def validateIp(self, value):
         try:
-            IPy.IP(value)
+            ipaddress.ip_address(value)
             return True
         except:
             return False
-
 
     def ipFromHeader(self, headers):
         for header in ("X-Real-Ip", "Remote-Addr"):
