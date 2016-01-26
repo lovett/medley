@@ -4,6 +4,7 @@ import tools.negotiable
 import tools.jinja
 import util.net
 import util.cache
+import apps.registry.models
 import IPy
 
 class Controller:
@@ -39,16 +40,21 @@ class Controller:
 
     def PUT(self, token=None):
         cache = util.cache.Cache()
+        registry = apps.registry.models.Registry()
 
-        try:
-            dns_command = cherrypy.config.get("ip.dns.command")[:]
-        except TypeError:
+        dns_command = registry.search(key="ip:dns_command")
+        if not dns_command:
             cherrypy.response.status = 409
             return
 
-        host = cherrypy.config["ip.tokens"].get(token)
-        if not host:
-            raise cherrypy.HTTPError(400, "Invalid token")
+        dns_command = dns_command[0]["value"].split(" ")
+
+        token = registry.search(key="ip:token:{}".format(token))
+        if not token:
+            cherrypy.response.status = 409
+            return
+
+        host = token[0]["value"]
 
         cache_key = "ip:{}".format(host)
         cached_value = cache.get(cache_key)
@@ -58,14 +64,15 @@ class Controller:
         else:
             ip_address = self.ipFromHeader(cherrypy.request.headers)
 
-        if ip_address != cached_value:
+        if ip_address != cached_value[0]:
             cache.set(cache_key, ip_address, 86400)
             dns_command[dns_command.index("$ip")] = ip_address
             dns_command[dns_command.index("$host")] = host
             subprocess.call(dns_command)
             self.announceValueChange(cached_value, ip_address, host)
-
-        cherrypy.response.status = 201
+            cherrypy.response.status = 201
+        else:
+            cherrypy.response.status = 304
 
 
     @cherrypy.tools.template(template="ip.html")
