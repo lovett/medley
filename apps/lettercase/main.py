@@ -9,7 +9,7 @@ class Controller:
 
     user_facing = True
 
-    styles = ("title", "lower", "upper")
+    styles = ("title", "lower", "upper", "capitalize")
 
     @cherrypy.tools.template(template="lettercase.html")
     @cherrypy.tools.negotiable()
@@ -28,6 +28,8 @@ class Controller:
             result = value.lower()
         elif style == "upper":
             result = value.upper()
+        elif style == "capitalize":
+            result = value.capitalize()
         else:
             result = value
 
