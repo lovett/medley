@@ -5,17 +5,15 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
-    <div class="column">
-        <table class="ui definition table">
-            <tbody>
-                {% for key, value in headers %}
-                <tr>
-                    <td>{{ key }}</td>
-                    <td>{{ value }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+<main>
+    <div class="content-wrapper">
+        <table class="key-value">
+            {% for key, value in headers %}
+            <tr>
+                <th>{{ key }}</th>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
         </table>
     </div>
 </main>

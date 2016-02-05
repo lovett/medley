@@ -42,6 +42,40 @@ BODY {
     display: none;
 }
 
+.content-wrapper {
+    width: 75%;
+    margin: auto;
+}
+
+.key-value {
+    border: 1px solid #ccc;
+    font-size: .85em;
+    border-collapse: collapse;
+}
+
+.key-value TR {
+    border-bottom: 1px solid rgba(0, 0, 0, .03);
+}
+
+.key-value TR:last-child {
+    border-bottom: none;
+}
+
+
+.key-value TH {
+    font-weight: bold;
+    padding: .75em;
+    text-align: right;
+    white-space: nowrap;
+    background-color: rgba(0, 0, 0, .03);
+}
+
+.key-value TD {
+    padding: .75em;
+    background-color: #fff;
+}
+
+
 A.focus-candidate .header {
     background-color: green;
 }
