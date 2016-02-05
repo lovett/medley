@@ -7,31 +7,26 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
-    {% for name, description in user_facing_apps %}
-    <div class="eight wide column">
-        <a href="/{{ name }}" class="ui fluid card">
-            <div class="content">
-                <div class="header">{{ name}}</div>
-                <div class="description">{{ description }}</div>
-            </div>
+<main>
+    <div class="module-grid">
+        {% for name, description in user_facing_apps %}
+        <a class="module" href="/{{ name }}">
+            <h2>{{ name }}</h2>
+            <p>{{ description }}</p>
         </a>
+        {% endfor %}
     </div>
-    {% endfor %}
 
-    <div class="ui divider"></div>
 
-    <h1 class="ui header">Service Apps</h1>
-    {% for name, description in service_apps %}
-    <div class="eight wide column">
-        <div class="ui fluid card">
-            <div class="content">
-                <div class="header">{{ name}}</div>
-                <div class="description">{{ description }}</div>
-            </div>
+    <h1 class="module-grid-title">Services</h1>
+    <div class="module-grid">
+        {% for name, description in service_apps %}
+        <div class="module">
+            <h2>{{ name}}</h2>
+            <p>{{ description }}</p>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 
 </main>
 
