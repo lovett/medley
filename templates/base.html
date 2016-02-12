@@ -24,12 +24,31 @@
     </head>
     <body>
 
+        <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <defs>
+                <symbol id="icon-arrow-right" viewBox="0 0 1024 1024">
+                    <title>arrow-right</title>
+                    <path class="path1" d="M992 512l-480-480v288h-512v384h512v288z"></path>
+                </symbol>
+                <symbol id="icon-arrow-left" viewBox="0 0 1024 1024">
+                    <title>arrow-left</title>
+                    <path class="path1" d="M32 512l480 480v-288h512v-384h-512v-288z"></path>
+                </symbol>
+                <symbol id="icon-home" viewBox="0 0 1024 1024">
+                    <title>home</title>
+                    <path class="path1" d="M1024 590.444l-512-397.426-512 397.428v-162.038l512-397.426 512 397.428zM896 576v384h-256v-256h-256v256h-256v-384l384-288z"></path>
+                    </symbol>
+            </defs>
+        </svg>
+
+
         <header id="page-header">
+            <h1>{{ page_title }}</h1>
+
             {% if home_link %}
-            <a class="home" href="/" title="Return to the homepage"><i class="large home icon"></i></a>
+            <a class="home" href="/" title="Return to the homepage"><svg class="icon icon-home"><use xlink:href="#icon-home"></use></svg></a>
             {% endif %}
 
-            <h1>{{ page_title }}</h1>
         </header>
 
         {% block page_body %}{% endblock %}

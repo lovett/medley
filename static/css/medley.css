@@ -38,6 +38,64 @@ BODY {
     margin: 0;
 }
 
+TABLE {
+    min-width: 100%;
+    margin: auto;
+    background-color: white;
+    border: 1px solid #ccc;
+    font-size: .85em;
+    border-collapse: collapse;
+}
+
+TABLE TR {
+    border-bottom: 1px solid rgba(0, 0, 0, .03);
+}
+
+TABLE TR:last-child {
+    border-bottom: none;
+}
+
+TABLE TH {
+    font-weight: bold;
+    padding: .75em;
+    white-space: nowrap;
+    text-align: left;
+    background-color: rgba(0, 0, 0, .03);
+}
+
+TABLE TD {
+    padding: .75em;
+    background-color: #fff;
+}
+
+TABLE.key-value TH {
+    text-align: right;
+}
+
+.pagination {
+    margin: auto;
+    text-align: center;
+    height: 2em;
+}
+
+.pagination .next {
+    padding: 0 1em;
+}
+
+.pagination .previous {
+    padding: 0 1em;
+}
+
+.icon {
+    width: 2em;
+    height: 2em;
+}
+
+.svg-defs {
+    display: none;
+}
+
+
 #shortcuts {
     display: none;
 }
@@ -47,33 +105,6 @@ BODY {
     margin: auto;
 }
 
-.key-value {
-    border: 1px solid #ccc;
-    font-size: .85em;
-    border-collapse: collapse;
-}
-
-.key-value TR {
-    border-bottom: 1px solid rgba(0, 0, 0, .03);
-}
-
-.key-value TR:last-child {
-    border-bottom: none;
-}
-
-
-.key-value TH {
-    font-weight: bold;
-    padding: .75em;
-    text-align: right;
-    white-space: nowrap;
-    background-color: rgba(0, 0, 0, .03);
-}
-
-.key-value TD {
-    padding: .75em;
-    background-color: #fff;
-}
 
 
 A.focus-candidate .header {
@@ -102,9 +133,14 @@ HEADER .ui.header {
 }
 
 #page-header .home {
-    display: inline-block;
+    float: right;
     text-decoration: none;
     padding-right: .5em;
+}
+
+#page-header .icon {
+    fill: #fff;
+    vertical-align: middle;
 }
 
 #page-header H1 {
@@ -128,8 +164,8 @@ HEADER .ui.header {
     margin: 0;
 }
 
-.small {
-    font-size: .75em;
+.smaller {
+    font-size: .85em;
 }
 
 TR.expandable {
