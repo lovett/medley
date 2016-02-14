@@ -1,0 +1,12 @@
+.content-wrapper {
+    max-width: 700px;
+    margin: auto;
+}
+
+.bookmarklet-container {
+    text-align: right;
+}
+
+.bookmarklet-container A {
+    text-decoration: none;
+}

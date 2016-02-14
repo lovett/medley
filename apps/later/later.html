@@ -4,6 +4,10 @@
 
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/later/later.css" />
+{% endblock %}
+
 {% block scripts %}
 <script src="/static/later/later.js"></script>
 {% endblock %}
@@ -11,34 +15,31 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
-    <div class="ui sixteen wide right aligned column">
-        Bookmarklet:
-        <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))">⚡ later</a>
-    </div>
+<main>
+    <div class="content-wrapper">
+        <div class="bookmarklet-container">
+            Bookmarklet:
+            <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))">⚡ later</a>
+        </div>
 
-    <div class="ui sixteen wide column">
-
-        <div class="ui {% if error %}error{% endif %} form">
-
-            <div class="ui error message">{{ error }}</div>
-            <div class="hidden ui green message">Success!</div>
+        <form id="later-form" class="{% if error %}error{% endif %}" method="post" action="/archive">
+            <div class="hidden error message">{{ error }}</div>
+            <div class="hidden success message">Success!</div>
 
             <div class="field">
-                <label for="url">Title:</label>
+                <label for="title">Title:</label>
                 <input type="text" id="title" name="title" value="{{ title|default('', true)|e }}"/>
             </div>
 
             <div class="field">
-                <label for="address">Address:</label>
-                <input type="text" id="address" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
-                <p class="shortcuts">
+                <label for="url">Address:</label>
+                <input type="text" id="url" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
+                <div class="shortcuts">
                     <a class="remove-querystring hidden" href="#">Remove querystring</a>
                     <a class="remove-hash hidden" href="#">Remove hash</a>
                     <a class="revert hidden" href="#">Revert</a>
-                </p>
+                </div>
             </div>
-
 
             <div class="field">
                 <label for="url">Tags:</label>
@@ -48,15 +49,15 @@
             <div class="field">
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
-                <p class="shortcuts">
+                <div class="shortcuts">
                     <a class="trim-sentence-from-start hidden" href="#">Trim sentence from start</a>
                     <a class="trim-sentence-from-end hidden" href="#">Trim sentence from end</a>
                     <a class="trim-all hidden" href="#">Clear</a>
-                </p>
+                </div>
             </div>
 
             <div class="field">
-                <button class="ui submit button">Save</button>
+                <button>Save</button>
             </div>
         </div>
     </div>

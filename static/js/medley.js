@@ -74,8 +74,6 @@ var MEDLEY = (function () {
 
             jQuery(document).on('keydown', shortcuts);
 
-            jQuery('.ui.radio.checkbox').checkbox();
-
             jQuery('TR.expandable').on('expand collapse', function (e) {
                 var prevRow, table, masterToggle;
 

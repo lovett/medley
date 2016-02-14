@@ -1,13 +1,47 @@
 MEDLEY.later = (function () {
     'use strict';
 
+    function submitForm(e) {
+        var form, field, errorMessage;
+        e.preventDefault();
+
+        form = jQuery(this);
+
+        field = jQuery('#url', form);
+
+        if (jQuery.trim(field.val()) === '') {
+            errorMessage = 'Please provide a URL';
+        }
+
+        if (errorMessage) {
+            jQuery('.error.message').removeClass('hidden').text(errorMessage);
+            jQuery('.success.messsage').addClass('hidden');
+            return;
+        }
+
+
+        jQuery.ajax({
+            type: form.attr('method'),
+            url: form.attr('action'),
+            data: $('INPUT, TEXTAREA', form).serialize()
+        }).done(function (data) {
+            jQuery('.error.message').addClass('hidden');
+            jQuery('.success.message').removeClass('hidden');
+            window.location.href = '/archive';
+        }).fail(function (data) {
+            jQuery('.error.message').removeClass('hidden').text(data.statusText);
+            jQuery('.success.message').addClass('hidden');
+            form.addClass('error');
+        });
+    }
+
     function automaticTags() {
-        var address, tagsField, tags, matches;
+        var url, tagsField, tags, matches;
         tagsField = $('#tags');
         tags = tagsField.val();
-        address = $('#address').val();
+        url = $('#url').val();
 
-        matches = /reddit.com\/(r\/(.*?))\//.exec(address);
+        matches = /reddit.com\/(r\/(.*?))\//.exec(url);
 
         if (matches) {
             tags += ' ' + matches[1];
@@ -47,61 +81,26 @@ MEDLEY.later = (function () {
     }
 
     function toggleShortcuts(e) {
-	var shortcuts, target, val;
-	target = jQuery(this);
-	shortcuts = target.closest('.field').find('.shortcuts A');
-	val = jQuery.trim(target.val());
-	if (val === '') {
-	    shortcuts.addClass('hidden');
-	} else {
-	    shortcuts.removeClass('hidden');
-	}
+        var shortcuts, target, val;
+        target = jQuery(this);
+        shortcuts = target.closest('.field').find('.shortcuts A');
+        val = jQuery.trim(target.val());
+        if (val === '') {
+            shortcuts.addClass('hidden');
+        } else {
+            shortcuts.removeClass('hidden');
+        }
     }
 
     return {
         init: function () {
-            var $form, $successMessage, $errorMessage, validationRules, validationSettings;
-            $form = jQuery('.ui.form');
-            $successMessage = jQuery('.green.message', $form);
-            $errorMessage = jQuery('.error.message', $form);
-
-
-            validationRules = {
-                url: {
-                    identifier: 'url',
-                    rules: [
-                        {
-                            type: 'empty',
-                            prompt: 'Please provide a URL'
-                        }
-                    ]
-                }
-            };
-
-            validationSettings = {
-                'onSuccess': function () {
-                    jQuery.ajax({
-                        type: 'POST',
-                        url: '/archive',
-                        data: $('INPUT, TEXTAREA', this).serialize()
-                    }).done(function (data) {
-                        $successMessage.removeClass('hidden');
-                        window.location.href = '/archive';
-                    }).fail(function (data) {
-                        $form.addClass('error');
-                        $successMessage.addClass('hidden');
-                        $errorMessage.text(data.statusText);
-                    });
-                }
-            };
-
-            $form.form(validationRules, validationSettings);
+            jQuery('#later-form').on('submit', submitForm);
 
             jQuery('.shortcuts').on('click', 'A', applyShortcut);
 
-	    jQuery('#address, #comments').on('input', toggleShortcuts);
+            jQuery('#url, #comments').on('input', toggleShortcuts);
 
-            toggleShortcuts.apply('#address');
+            toggleShortcuts.apply('#url');
             toggleShortcuts.apply('#comments');
 
             automaticTags();

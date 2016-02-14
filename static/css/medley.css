@@ -157,6 +157,49 @@ TR.expandable.expanded {
     margin-left: 1em;
 }
 
+.field {
+    padding-bottom: 1em;
+}
+
+.field LABEL {
+    display: block;
+    margin: .25em 0;
+}
+
+.field INPUT, .field TEXTAREA {
+    border: 1px solid #ccc;
+    padding: .5em;
+    width: 100%;
+}
+
+.field TEXTAREA {
+    height: 5em;
+}
+
+.message {
+    margin-bottom: 1em;
+}
+
+.success {
+    background-color: #90EE90;
+    padding: .5em;
+}
+
+
+
+BUTTON {
+    border-radius: .25em;
+    border: 1px solid #333;
+    color: #fff;
+    background-color: green;
+    padding: .5em 2em;
+}
+
+BUTTON:hover {
+    background-color: forestGreen;
+}
+
+
 
 /* Use the same focus state for text inputs and texteareas as for buttons */
 .ui.form TEXTAREA:focus, .ui.form INPUT[type=text]:focus {
