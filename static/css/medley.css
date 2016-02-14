@@ -3,41 +3,6 @@ BODY {
     background-color: #efefef;
 }
 
-.module-grid {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    margin-bottom: 3em;
-}
-
-.module-grid-title {
-    font-size: 1.5em;
-    font-weight: normal;
-    text-align: center;
-}
-
-.module-grid .module {
-    border: 1px solid #ccc;
-    padding: 1em;
-    border-radius: .5em;
-    margin: 1em;
-    width: 40%;
-    text-decoration: none;
-    color: inherit;
-    font-size: .85em;
-    background-color: #fff;
-}
-
-.module-grid H2 {
-    font-size: 1.25em;
-    padding: 0;
-    margin: 0;
-}
-
-.module-grid P {
-    margin: 0;
-}
-
 TABLE {
     min-width: 100%;
     margin: auto;
@@ -95,7 +60,6 @@ TABLE.key-value TH {
     display: none;
 }
 
-
 #shortcuts {
     display: none;
 }
@@ -105,9 +69,7 @@ TABLE.key-value TH {
     margin: auto;
 }
 
-
-
-A.focus-candidate .header {
+.focus-candidate .header {
     background-color: green;
 }
 
