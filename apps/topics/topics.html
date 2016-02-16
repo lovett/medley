@@ -3,31 +3,32 @@
 {% set page_title = "Topics" %}
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/topics/topics.css" />
+{% endblock %}
+
 {% block scripts %}
 <script src="/static/topics/topics.js"></script>
 {% endblock %}
 
 {% block page_body %}
 
-<main class="ui page centered grid">
-    <div class="center aligned one column row">
-        <button class="ui primary button">Walk topics</button>
+<main>
+    <div class="content-wrapper centered">
+        <button>Walk topics</button>
+        <p><a href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}">Rewards Dashboard</a></p>
     </div>
-    <div class="center aligned one column row">
-        <a class="ui button" href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}">Rewards Dashboard</a>
-    </div>
-    <div class="center aligned one column row">
-        <div class="column" id="topics">
-            {% for topic in topics %}
-            <p><a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferer" target="_blank">{{ topic }}</a></p>
-            {% endfor %}
 
-            {% if cache_date %}
-            <p>Using cached value from {{cache_date}}</p>
-            {% else %}
-            <p>The URL was not cached.</p>
-            {% endif %}
-        </div>
+    <div id="topics" class="content-wrapper centered">
+        {% for topic in topics %}
+        <p><a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferer" target="_blank">{{ topic }}</a></p>
+        {% endfor %}
+
+        {% if cache_date %}
+        <p>Using cached value from {{cache_date}}</p>
+        {% else %}
+        <p>The URL was not cached.</p>
+        {% endif %}
     </div>
 </main>
 
