@@ -52,8 +52,18 @@ TABLE.key-value TH {
 }
 
 .icon {
-    width: 2em;
-    height: 2em;
+    width: 1em;
+    height: 1em;
+    fill: #333;
+    vertical-align: middle;
+    padding-right: .5em;
+}
+
+.half-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
 }
 
 .svg-defs {
@@ -71,6 +81,16 @@ TABLE.key-value TH {
 
 .centered {
     text-align: center;
+}
+
+DT {
+    font-weight: bold;
+    margin-left: 0;
+}
+
+DD {
+    margin-left: 0;
+    margin-bottom: 1em;
 }
 
 .focus-candidate .header {
@@ -106,6 +126,8 @@ HEADER .ui.header {
 
 #page-header .icon {
     fill: #fff;
+    width: 2em;
+    height: 2em;
     vertical-align: middle;
 }
 

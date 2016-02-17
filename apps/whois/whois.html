@@ -11,107 +11,103 @@
 {% endif %}
 {% endblock %}
 
+{% block svg_defs %}
+<symbol id="icon-binoculars" viewBox="0 0 1024 1024">
+    <title>binoculars</title>
+    <path class="path1" d="M64 0h384v64h-384zM576 0h384v64h-384zM952 320h-56v-256h-256v256h-256v-256h-256v256h-56c-39.6 0-72 32.4-72 72v560c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-376h128v376c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-560c0-39.6-32.4-72-72-72zM348 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32zM544 512h-64c-17.6 0-32-14.4-32-32s14.4-32 32-32h64c17.6 0 32 14.4 32 32s-14.4 32-32 32zM924 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32z"></path>
+    </symbol>
+{% endblock %}
+
 {% block page_body %}
 
-<main class="ui page grid stackable">
+<main>
 
     {% if error %}
-    <div class="ui sixteen wide column">
-        <div class="ui red inverted segment">
-            <p>{{ error }}</p>
-        </div>
+    <div class="content-wrapper centered">
+        <p>{{ error }}</p>
     </div>
     {% endif %}
 
-    <div class="ui sixteen wide column">
-        <form class="ui form" method="get" action="/whois">
-            <div class="field">
-                <label for="address">IP or host</label>
-                <input type="text" id="address" name="address" value="{{ address }}"/>
-            </div>
-            <div class="field">
-                <button class="ui button">Search</button>
-            </div>
-        </form>
-    </div>
+    <form class="content-wrapper" method="get" action="/whois">
+        <div class="field">
+            <label for="address">IP or host</label>
+            <input type="text" id="address" name="address" value="{{ address }}"/>
+        </div>
+        <div class="field">
+            <button class="ui button">Search</button>
+        </div>
+    </form>
 
     {% if address %}
-    <div class="eight wide column">
-        <h1 class="ui medium header">Details</h1>
-        <div class="ui segment">
-            <div class="ui list">
-                <div class="item">
-                    <div class="content">
-                        {% if "customerRef" in whois.net %}
-                        <div class="header">Owned By</div>
-                        <a href="{{ whois.net.customerRef["$"] }}" target="_blank">{{ whois.net.customerRef["@name"] }}</a>
-                        {% endif %}
+    <div class="content-wrapper">
+        <div class="half-column">
 
-                        {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
-                        <div class="header">City</div> {{ ip_facts.geo.city}}, {{ip_facts.geo.region_code }}
-                        {% elif ip_facts.geo.city and ip_facts.geo.country_name %}
-                        <div class="header">City</div> {{ ip_facts.geo.city }}, {{ ip_facts.geo.country_name }}
-                        {% elif ip_facts.geo.country_name %}
-                        <div class="header">Country</div> {{ ip_facts.geo.country_name }}
-                        {% else %}
-                        <div class="header">Country</div> Unknown
-                        {% endif %}
-                    </div>
-                </div>
+            <div class="module">
+                <h1>Details</h1>
 
-                <div class="item">
-                    <div class="content">
-                        <div class="header">Reverse Host</div>
-                        {{ reverse_host }}
-                    </div>
-                </div>
-                <div class="item">
-                    <div class="content">
-                        <div class="header">IP</div>
-                        {{ ip }}
-                    </div>
-                </div>
+                <dl>
+                    {% if "customerRef" in whois.net %}
+                    <dt>Owned By</dt>
+                    <dd><a href="{{ whois.net.customerRef["$"] }}" target="_blank">{{ whois.net.customerRef["@name"] }}</a></dd>
+                    {% endif %}
+
+                    {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
+                    <dt>City</dt>
+                    <dd>{{ ip_facts.geo.city}}, {{ip_facts.geo.region_code }}</dd>
+                    {% elif ip_facts.geo.city and ip_facts.geo.country_name %}
+                    <dt>City</dt>
+                    <dd>{{ ip_facts.geo.city }}, {{ ip_facts.geo.country_name }}</dd>
+                    {% elif ip_facts.geo.country_name %}
+                    <dt>Country</dt>
+                    <dd>{{ ip_facts.geo.country_name }}</dd>
+                    {% else %}
+                    <dt>Country</dt>
+                    <dd>Unknown</dd>
+                    {% endif %}
+
+                    <dt>Reverse Host</dt>
+                    <dd>{{ reverse_host }}</dd>
+
+                    <dt>
+                        <dt>IP</dt>
+                        <dd>{{ ip }}</dd>
+                    </dt>
+                </dl>
 
                 {% if ip_facts.geo.area_code%}
-                <div class="item">
-                    <div class="content">
-                        <div class="header">Area Code</div>
-                        {{ ip_facts.geo.area_code }}
-                    </div>
-                </div>
+                <dt>Area Code</dt>
+                <dd>{{ ip_facts.geo.area_code }}</dd>
                 {% endif %}
 
                 {% if ip_facts.geo.metro_code %}
-                <div class="item">
-                    <div class="content">
-                        <div class="header">Metro</div>
-                        {{ ip_facts.geo.metro_code }}
-                    </div>
-                </div>
+                <dt>Metro</dt>
+                <dd>{{ ip_facts.geo.metro_code }}</dd>
                 {% endif %}
-            </div>
+
+                <dt>Activity</dt>
+                <dd>
+                    <a href="/visitors/?q=ip+{{ ip }}">
+                        <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
+                        find visits
+                    </a>
+                </dd>
+
+                <dt>Visit</dt>
+                <dd>
+                    <a href="{{ address|anonymize }}" rel="noreferer">http</a>,
+                    <a href="https://{{ address }}" rel="noreferrer">https</a>
+                </dd>
+            </dl>
         </div>
-
-        <h1 class="ui medium header">Activity</h1>
-        <div class="ui segment">
-            <p><a href="/visitors/?q=ip+{{ ip }}" class="content"><i class="sitemap icon"></i> search for website visits</a></p>
-
-            <p><i class="linkify icon"></i> visit over <a href="{{ address|anonymize }}" rel="noreferer">HTTP</a>,
-                <a href="https://{{ address }}" rel="noreferrer">HTTPS</a>
-            </p>
-
-        </div>
-
     </div>
 
-
-    <div class="eight wide column">
-        {% if ip_facts.geo.latitude and ip_facts.geo.longitude %}
-        <h1 class="ui medium header">Location</h1>
-        <div class="ui segment">
+    <div class="half-column">
+        <div class="module">
+            {% if ip_facts.geo.latitude and ip_facts.geo.longitude %}
+            <h1>Location</h1>
             <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ map_region }}"></div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
     {% endif %}
 </main>
