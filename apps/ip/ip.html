@@ -5,19 +5,14 @@
 
 {% block page_body %}
 
-<main class="ui page grid">
+<main>
+    <div class="content-wrapper centered">
         {% if result %}
-        <div class="sixteen wide column">
-            <p>{{ result }}</p>
-        </div>
+        <p>{{ result }}</p>
         {% else %}
-        <div class="center aligned sixteen wide centered column">
-            <div class="ui segment">
-                <p>Your address is <a href="/whois?address={{address}}">{{ address }}</a></p>
-
-                <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
-            </div>
-        </div>
+        <p>Your address is <a href="/whois?address={{address}}">{{ address }}</a></p>
+        <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
         {% endif %}
+    </div>
 </main>
 {% endblock %}
