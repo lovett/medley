@@ -4,61 +4,66 @@
 
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/archive/archive.css" />
+{% endblock %}
+
 {% block scripts %}
 <script src="/static/archive/archive.js"></script>
 {% endblock %}
 
+{% block svg_defs %}
+<symbol id="icon-bin" viewBox="0 0 1024 1024">
+    <title>bin</title>
+    <path class="path1" d="M128 320v640c0 35.2 28.8 64 64 64h576c35.2 0 64-28.8 64-64v-640h-704zM320 896h-64v-448h64v448zM448 896h-64v-448h64v448zM576 896h-64v-448h64v448zM704 896h-64v-448h64v448z"></path>
+    <path class="path2" d="M848 128h-208v-80c0-26.4-21.6-48-48-48h-224c-26.4 0-48 21.6-48 48v80h-208c-26.4 0-48 21.6-48 48v80h832v-80c0-26.4-21.6-48-48-48zM576 128h-192v-63.198h192v63.198z"></path>
+</symbol>
+{% endblock %}
+
 {% block page_body %}
 
-<main class="ui page grid stackable">
+<main>
 
-    <form class="ui form sixteen wide column" method="get" action="/archive">
-        <div class="fields">
-            <div class="fifteen wide field">
-                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
-            </div>
-            <div class="one wide field">
-                <button class="ui button">Search</button>
-            </div>
+    <form class="content-wrapper" method="get" action="/archive">
+        <div class="field">
+            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+        </div>
+        <div class="field">
+            <button>Search</button>
         </div>
     </form>
 
-    <div class="ui feed sixteen wide column">
+    <div class="content-wrapper">
 
         <p {% if entries %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
         {% for key, entries in entries.items() %}
-        <h1 class="ui medium header">{{ entries[0].created|localtime("date-full") }}</h1>
+        <h1 class="date-group">{{ entries[0].created|localtime("date-full") }}</h1>
         {% for entry in entries %}
-        <div class="event">
-            <div class="label">
-                <i class="{{entry.record_type}} icon"></i>
+        <div class="bookmark">
+            <div class="actions">
+                <a href="#" class="delete" data-uid="{{ entry.rowid }}">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </a>
             </div>
-            <div class="content">
-                <div class="date">
-                    {{ entry.created|localtime("time12") }}
-                </div>
-                <div class="summary">
-                    <a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a>
-                </div>
-                <div class="meta">
-                    <a href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
-                </div>
-                {% if not entry.has_fulltext %}
-                <div class="meta">
-                    No fulltext available
-                </div>
-                {% endif %}
 
+            <time>
+                {{ entry.created|localtime("time12") }}
+            </time>
+            <h2><a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a></h2>
+            <a class="domain" href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
 
-                {% if entry.comments %}
-                <div class="extra text}">
-                    {{ entry.comments }}
-                </div>
-
-                {% endif %}
-                <a href="#" class="hidden delete" data-uid="{{ entry.rowid }}">Delete</a>
+            {% if not entry.has_fulltext %}
+            <div class="meta">
+                No fulltext available
             </div>
+            {% endif %}
+
+            {% if entry.comments %}
+            <div class="comments">
+                {{ entry.comments }}
+            </div>
+            {% endif %}
         </div>
         {% endfor %}
 
