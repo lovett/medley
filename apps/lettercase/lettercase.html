@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block page_body %}
-<main class="ui page grid stackable">
-    <form class="ui sixteen wide column form" method="post" action="/lettercase">
+<main>
+    <form class="content-wrapper" method="post" action="/lettercase">
         <div class="field">
             <label for="value">Input:</label>
             <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
@@ -17,32 +17,24 @@
         <div class="field">
             <label for="style">Convert to:</label>
 
-            <div class="inline fields">
+            <div class="field">
                 {% for option in styles %}
-                <div class="field">
-                    <div class="ui radio checkbox">
-                        <input type="radio" name="style" value="{{ option }}" {% if option == style or option == default_style %}checked{% endif %} />
-                        <label>{{ option|title }}</label>
-                    </div>
-                </div>
+                <input type="radio" class="inline" name="style" value="{{ option }}" {% if option == style or option == default_style %}checked{% endif %} />
+                <label class="inline">{{ option|title }}</label>
                 {% endfor %}
             </div>
-
         </div>
 
         <div class="field">
-            <button class="ui button">Convert</button>
+            <button>Convert</button>
         </div>
     </form>
 
 
     {% if result %}
-    <div class="ui sixteen wide column">
-        <div class="ui segment">
-            <a href="#" data-selection-target="#result" class="select-all">Select All</a>
-            <div class="ui divider"></div>
-            <div id="result">{{ result|nl2br() }}</div>
-        </div>
+    <div class="content-wrapper">
+        <p><a href="#" data-selection-target="#result" class="select-all">Select All</a></p>
+        <div id="result">{{ result|nl2br() }}</div>
     </div>
     {% endif %}
 </form>

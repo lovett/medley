@@ -192,7 +192,12 @@ TR.expandable.expanded {
     margin: .25em 0;
 }
 
-.field INPUT, .field TEXTAREA {
+.field .inline {
+    display: inline-block;
+    padding-right: 1em;
+}
+
+.field INPUT[type=text], .field TEXTAREA {
     border: 1px solid #ccc;
     padding: .5em;
     width: 100%;
