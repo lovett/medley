@@ -204,6 +204,12 @@ TR.expandable.expanded {
 
 .message {
     margin-bottom: 1em;
+    padding: 1em;
+}
+
+.error {
+    background-color: #B03C25;
+    color: white;
 }
 
 .success {

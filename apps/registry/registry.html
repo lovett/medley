@@ -4,6 +4,10 @@
 
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/registry/registry.css" />
+{% endblock %}
+
 {% block scripts %}
 <script src="/static/registry/registry.js"></script>
 {% endblock %}
@@ -11,64 +15,55 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
-    <div class="ui sixteen wide column">
-        <form id="search-form" class="ui form">
-            <div class="field">
-                <label for="key">Key:</label>
-                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
-            </div>
-            <div class="field">
-                <button class="ui submit button">Search</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="ui sixteen wide column">
-        <div id="insert-form" class="ui form">
-            <div class="field">
-                <label for="key">Key:</label>
-                <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
-            </div>
-            <div class="field">
-                <label for="comments">Value:</label>
-                <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
-            </div>
-            <div class="field">
-                <button class="ui submit button">Add</button>
-                <div class="ui error message"></div>
-                <div class="hidden ui green message">Success!</div>
-            </div>
+<main>
+    <form id="search-form" class="content-wrapper">
+        <div class="field">
+            <label for="q">Key:</label>
+            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
         </div>
-    </div>
+        <div class="field">
+            <button>Search</button>
+        </div>
+    </form>
 
-    <div class="ui sixteen wide column">
-        <table id="records" class="ui sixteen column table">
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th>Value</th>
-                    <th>Created</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if not records %}
-                <tr>
-                    <td colspan="4">There are no records.</td>
-                </tr>
-                {% endif %}
+    <form id="insert-form" class="content-wrapper">
+        <div class="hidden error message"></div>
+        <div class="hidden success message">Success!</div>
 
-                {% for record in records %}
-                <tr>
-                    <td> {{ record.key }}</td>
-                    <td>{{ record.value }}</td>
-                    <td>{{ record.created|localtime("datetime12") }}</td>
-                    <td class="right aligned"><a href="#" data-uid="{{ record.rowid }}" class="delete" title="Delete record"><i class="remove circle icon"></i></a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="field">
+            <label for="key">Key:</label>
+            <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+        </div>
+        <div class="field">
+            <label for="comments">Value:</label>
+            <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
+        </div>
+        <div class="field">
+            <button>Add</button>
+        </div>
+    </form>
+
+    <div class="content-wrapper">
+        {% if not records %}
+        <p>There are no records.</p>
+        {% endif %}
+
+        <dl id="records">
+            {% for record in records %}
+            <dt>{{ record.key }}</dt>
+
+            <dd>
+                {{ record.value }}
+                <div class="secondary">
+                   <div>Created {{ record.created|localtime("datetime12") }}</div>
+                   <a href="#" data-uid="{{ record.rowid }}" class="delete" title="Delete record">
+                       <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                   </a>
+                </div>
+            </dd>
+
+            {% endfor %}
+        </dl>
     </div>
 
 </main>

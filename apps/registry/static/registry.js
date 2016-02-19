@@ -16,55 +16,50 @@ MEDLEY.registry = (function () {
         });
     }
 
+    function submitRecord (e) {
+        var field, form, errorMessage;
+
+        e.preventDefault();
+
+        form = jQuery(this);
+
+        field = jQuery('#key', form);
+
+        if (jQuery.trim(field.val()) === '') {
+            errorMessage = 'Please provide a value for the Key field';
+        }
+
+        field = jQuery('#value', form);
+
+        if (jQuery.trim(field.val()) === '') {
+            errorMessage = 'Please provide a value for the Value field';
+        }
+
+        if (errorMessage) {
+            jQuery('.error.message').removeClass('hidden').text(errorMessage);
+            jQuery('.success.messsage').addClass('hidden');
+            return;
+        }
+
+
+        jQuery.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: '/registry',
+            data: $('INPUT, TEXTAREA', form).serialize()
+        }).done(function (data) {
+            var href = window.location.pathname;
+            href += '?uid=' + data.uid;
+            window.location.href = href;
+        }).fail(function () {
+            jQuery('.error.message').removeClass('hidden').text('Invalid values');
+            jQuery('.success.message').addClass('hidden');
+        });
+    }
+
     return {
         init: function () {
-            var $form, validationRules, validationSettings;
-            $form = jQuery('#insert-form');
-
-            validationRules = {
-                'key': {
-                    identifier: 'key',
-                    rules: [
-                        {
-                            type: 'empty',
-                            prompt: 'Please provide a key'
-                        }
-                    ]
-                },
-                'value': {
-                    identifier: 'value',
-                    rules: [
-                        {
-                            type: 'empty',
-                            prompt: 'Please provide a value'
-                        }
-                    ]
-                }
-            };
-
-            validationSettings = {
-                'onSuccess': function () {
-                    jQuery.ajax({
-                        type: 'PUT',
-                        dataType: 'json',
-                        url: '/registry',
-                        data: $('INPUT, TEXTAREA', this).serialize()
-                    }).done(function (data) {
-                        var href = window.location.pathname;
-                        href += '?uid=' + data.uid;
-                        window.location.href = href;
-                    }).fail(function () {
-                        var $successMessage = jQuery('.green.message', $form);
-                        var $errorMessage = jQuery('.error.message', $form);
-                        $form.addClass('error');
-                        $successMessage.addClass('hidden');
-                        $errorMessage.text('Invalid values');
-                    });
-                }
-            };
-
-            $form.form(validationRules, validationSettings);
-
+            jQuery('#insert-form').on('submit', submitRecord);
             jQuery('#records').on('click', 'A.delete', deleteRecord);
         }
     };
