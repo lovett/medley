@@ -237,6 +237,12 @@ BUTTON:hover {
 }
 
 
+BUTTON[disabled] {
+    background-color: #ccc;
+    border: #efefef;
+    color: #efefef;
+}
+
 
 /* Use the same focus state for text inputs and texteareas as for buttons */
 .ui.form TEXTAREA:focus, .ui.form INPUT[type=text]:focus {

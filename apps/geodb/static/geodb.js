@@ -2,17 +2,18 @@ MEDLEY.geodb = (function () {
     var triggerUpdate = function (e) {
         e.preventDefault();
 
-        jQuery('#update').addClass('disabled');
-        jQuery('#progress').addClass('active');
+        jQuery('#update').attr('disabled', 1);
+        jQuery('#progress').removeClass('hidden');
+        jQuery('.error.message').addClass('hidden');
 
         jQuery.ajax({
             type: 'POST',
             url: '/geodb'
         }).done(function (data) {
-            window.location.reload();
+            jQuery('#progress').html('Update complete.');
         }).fail(function (xhr, status, error) {
-            jQuery('#update').removeClass('disabled');
-            jQuery('#progress').removeClass('active');
+            jQuery('#update').removeAttr('disabled');
+            jQuery('#progress').addClass('hidden');
             jQuery('.error.message').removeClass('hidden');
         });
     };

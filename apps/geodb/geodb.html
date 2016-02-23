@@ -21,8 +21,8 @@
 {% endblock %}
 
 {% block page_body %}
-<main class="ui page grid">
-    <div class="ui sixteen wide center aligned column">
+<main>
+    <div class="content-wrapper centered">
 
         {% if downloaded %}
         <p>The database was downloaded on {{downloaded|datetime("datetime12")}}</p>
@@ -31,19 +31,16 @@
         {% endif %}
 
         {% if allow_update %}
-        <button id="update" class="ui large focal button">{{ icon }} {{ button_action }}</button>
-        <p><div id="progress" class="ui inline indeterminate text loader">{{ progress_text }}</div></p>
+        <button id="update">{{ icon }} {{ button_action }}</button>
 
-        <div class="hidden ui negative error message">
-            <div class="header">
-                Unable to update
-            </div>
-            <p>An error occurred while trying to update the database.</p>
+        <p id="progress" class="hidden">{{ progress_text }}</p>
+
+        <div class="hidden error message">
+            <p>Unable to update. An error occurred while trying to update the database.</p>
         </div>
 
         {% else %}
-        <button class="ui disabled large focal button">{{ icon }} Update</button>
-        <p><em>Update disabled to prevent unnecessary download.</em></p>
+        <p>Update disabled to prevent unnecessary download.</p>
         {% endif %}
 
     </div>
