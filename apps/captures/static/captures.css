@@ -1,0 +1,27 @@
+.capture {
+    background-color: #fff;
+    margin-bottom: 2em;
+}
+
+.capture HEADER {
+    background-color: #000;
+    color: #fff;
+    padding: .5em 1em;
+}
+
+.capture .half-column {
+    padding: 1em 1em 0 1em;
+}
+
+.capture SECTION {
+    margin-bottom: 2em;
+}
+
+.capture H2 {
+    font-size: 1em;
+    font-weight: normal;
+    font-style: italic;
+    text-transform: uppercase;
+    border-bottom: 1px solid #ccc;
+
+}
