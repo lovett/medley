@@ -3,6 +3,10 @@
 {% set page_title = "Phone" %}
 {% set home_link = True %}
 
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/phone/phone.css" />
+{% endblock %}
+
 {% block scripts %}
 <script src="https://www.google.com/jsapi"></script>
 <script src="/static/js/maps.js"></script>
@@ -13,58 +17,51 @@
 
 {% block page_body %}
 
-<main class="ui page grid stackable">
-
-    <form class="ui form sixteen wide column" method="get" action="/phone">
+<main>
+    <form class="content-wrapper" method="get" action="/phone">
         <div class="field">
             <label for="number">Number</label>
             <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
         </div>
         <div class="field">
-            <button class="ui button">Search</button>
+            <button>Search</button>
         </div>
     </form>
 
     {% if number %}
 
-    <div class="eight wide column">
+    <div class="content-wrapper">
+        <div class="half-column">
 
-        <h1 class="ui medium header">Caller ID</h1>
-        <div class="ui segment">
+            <section>
+                <h1>Caller ID</h1>
+                <p id="callerid-display-value">
+                    {{ caller_id|default('Unknown') }}
+                </p>
 
-            <div class="panel">
-                <div class="ui grid">
-                    <div class="fourteen wide column">
-                        <p id="callerid-display-value">
-                            {{ caller_id|default('Unknown') }}
-                        </p>
-                    </div>
-                    <div class="one wide column">
-                        <a href="#" class="panel-trigger">Edit</a>
-                    </div>
-                </div>
-            </div>
+                <a href="#" class="panel-trigger">Edit</a>
+            </section>
 
-            <div class="hidden panel">
-                <form id="caller-id" class="ui form" method="post" action="/callerid">
+            <section class="hidden">
+                <form id="caller-id" method="post" action="/callerid">
                     <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
                     <div class="field">
                         <input type="text" name="cid_value" value="{{ caller_id|default('') }}"/>
                     </div>
                     <div class="field">
-                        <button class="ui small button">Update</button>
-                        <a href="#" class="panel-trigger form-reset nudge-right">Cancel</a>
+                        <button>Update</button>
+                        <a href="#" class="panel-trigger form-reset">Cancel</a>
                     </div>
-                    <div class="ui error message"></div>
+                    <div class="error message"></div>
                 </form>
             </div>
-        </div>
 
-        <h1 class="ui medium header">Blacklist</h1>
+            <section>
+                <h1>Blacklist</h1>
 
-        <div class="ui {% if blacklisted %}inverted{% endif %} segment">
+                <div class="ui {% if blacklisted %}inverted{% endif %} segment">
 
-            <form class="ui blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                    <form class="ui blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
                 <input type="hidden" name="number" value="{{ number|default('') }}" />
                 <input type="hidden" name="action" value="remove" />
                 <p>Added <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>

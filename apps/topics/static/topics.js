@@ -3,22 +3,26 @@ MEDLEY.topics = (function () {
 
     var childWindow;
 
-    function visitLinks(links) {
-        var link;
+    function visitLinks(links, counter) {
+        var index;
 
-        link = [].shift.call(links);
-
-        if (!childWindow) {
-            childWindow = window.open(link.getAttribute('href'), 'topic');
+        if (counter < links.length) {
+            index = counter;
         } else {
-            childWindow.location.href = link.getAttribute('href');
+            index = counter - links.length;
         }
 
-        link.className += ' strikeout';
+        if (!childWindow) {
+            childWindow = window.open(links[index].getAttribute('href'), 'topic');
+        } else {
+            childWindow.location.href = links[index].getAttribute('href');
+        }
+
+        links[index].className += ' strikeout';
 
         setTimeout(function () {
-            if (links.length > 0) {
-                visitLinks(links);
+            if (counter < 30) {
+                visitLinks(links, counter + 1);
             } else if (childWindow) {
                 childWindow.close();
             }
@@ -27,8 +31,8 @@ MEDLEY.topics = (function () {
 
     return {
         init: function () {
-            jQuery('BUTTON.primary').on('click', function () {
-                visitLinks(jQuery('#topics A'));
+            jQuery('BUTTON').on('click', function () {
+                visitLinks(jQuery('#topics A'), 0);
             });
         }
     };
