@@ -66,6 +66,13 @@ TABLE.key-value TH {
     width: 49%;
 }
 
+.third-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 33%;
+}
+
 .svg-defs {
     display: none;
 }

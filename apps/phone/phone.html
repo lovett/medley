@@ -31,8 +31,7 @@
     {% if number %}
 
     <div class="content-wrapper">
-        <div class="half-column">
-
+        <div class="third-column">
             <section>
                 <h1>Caller ID</h1>
                 <p id="callerid-display-value">
@@ -52,81 +51,81 @@
                         <button>Update</button>
                         <a href="#" class="panel-trigger form-reset">Cancel</a>
                     </div>
-                    <div class="error message"></div>
+                    <div class="hidden error message"></div>
                 </form>
-            </div>
-
+            </section>
             <section>
                 <h1>Blacklist</h1>
 
                 <div class="ui {% if blacklisted %}inverted{% endif %} segment">
 
                     <form class="ui blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                <input type="hidden" name="number" value="{{ number|default('') }}" />
-                <input type="hidden" name="action" value="remove" />
-                <p>Added <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
-                <button class="ui mini button">Remove</button>
-                <div class="ui error message"></div>
-            </form>
+                        <input type="hidden" name="number" value="{{ number|default('') }}" />
+                        <input type="hidden" name="action" value="remove" />
+                        <p>Added <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+                        <button class="ui mini button">Remove</button>
+                        <div class="hidden error message"></div>
+                    </form>
 
-            <form class="ui blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                <input type="hidden" name="number" value="{{ number|default('') }}" />
-                <input type="hidden" name="action" value="add" />
-                <p>Not blacklisted</p>
-                <button class="ui mini button">Add</button>
-                <div class="ui error message"></div>
-            </form>
+                    <form class="ui blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                        <input type="hidden" name="number" value="{{ number|default('') }}" />
+                        <input type="hidden" name="action" value="add" />
+                        <p>Not blacklisted</p>
+                        <button class="ui mini button">Add</button>
+                        <div class="hidden error message"></div>
+                    </form>
+                </div>
+            </section>
         </div>
-
-
-        {% if state_name %}
-        <h1 class="ui medium header">Location: {{ state_name }}</h1>
-        <div class="ui segment">
-            <h2 class="ui tiny header"></h2>
+        <div class="third-column">
+            <h1>Search</h1>
+            <p>
+                <a href="{{ google_url|anonymize }}" target="_blank" rel="noreferrer">google.com</a>,
+                <a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer">bing.com</a>
+            </p>
+        </div>
+        <div class="third-column">
+            {% if state_name %}
+            <h1>Location: {{ state_name }}</h1>
             <p>{{ comment }}</p>
+            {% endif %}
         </div>
-        {% endif %}
-
-        {% if history|length > 0 %}
-        <h1 class="ui medium header">Call History</h1>
-
-        <table class="ui table unstackable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Duration</th>
-                    <th>End</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in history %}
-                <tr>
-                    <td nowrap="nowrap">
-                        {{ entry["date"]|localtime("date") }}
-                        <p class="small">{{ entry["date"]|localtime("time12")}}</p>
-                    </td>
-                    <td>
-                        {{ entry["duration"] }}
-                    </td>
-                    <td nowrap="nowrap">
-                        {{ entry["lastapp"] }}
-                        <p class="small">{{ entry["dst"]}}</p>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-
     </div>
 
-    <div class="eight wide column">
-        <div class="map" data-region="US" data-location="{{state_abbreviation}}"></div>
+    <div class="content-wrapper">
+            {% if history|length > 0 %}
+            <h1>Call History</h1>
 
-        <h1 class="ui medium header">Links</h1>
-        <div class="ui segment">
-            <p class="supplemental"><a href="{{ google_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> google.com</a></p>
-            <p class="supplemental"><a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer"><i class="external link icon"></i> bing.com</a></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>End</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in history %}
+                    <tr>
+                        <td nowrap="nowrap">
+                            {{ entry["date"]|localtime("date") }}
+                            <p class="small">{{ entry["date"]|localtime("time12")}}</p>
+                        </td>
+                        <td>
+                            {{ entry["duration"] }}
+                        </td>
+                        <td nowrap="nowrap">
+                            {{ entry["lastapp"] }}
+                            <p class="small">{{ entry["dst"]}}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        <div class="half-column">
+
         </div>
     </div>
     {% endif %}
