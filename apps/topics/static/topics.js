@@ -3,7 +3,7 @@ MEDLEY.topics = (function () {
 
     var childWindow;
 
-    function visitLinks(links, counter) {
+    function visitLinks(links, counter, limit) {
         var index;
 
         if (counter < links.length) {
@@ -21,8 +21,8 @@ MEDLEY.topics = (function () {
         links[index].className += ' strikeout';
 
         setTimeout(function () {
-            if (counter < 30) {
-                visitLinks(links, counter + 1);
+            if (counter < limit - 1) {
+                visitLinks(links, counter + 1, limit);
             } else if (childWindow) {
                 childWindow.close();
             }
@@ -32,7 +32,8 @@ MEDLEY.topics = (function () {
     return {
         init: function () {
             jQuery('BUTTON').on('click', function () {
-                visitLinks(jQuery('#topics A'), 0);
+                var count = parseInt(jQuery(this).attr('data-count'), 10);
+                visitLinks(jQuery('#topics A'), 0, count);
             });
         }
     };

@@ -16,7 +16,7 @@ class Controller:
 
     @cherrypy.tools.template(template="topics.html")
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, count=0):
         cache = util.cache.Cache()
         key = "topics_html"
         topics = []
@@ -46,7 +46,8 @@ class Controller:
 
         return {
             "cache_date": cache_date,
-            "topics": topics
+            "topics": topics,
+            "count": count,
         }
 
     def fetch(self, url):
