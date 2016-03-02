@@ -73,6 +73,24 @@ TABLE.key-value TH {
     width: 33%;
 }
 
+.quarter-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 25%;
+}
+
+.two-third-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 66%;
+}
+
+.middle-column {
+    padding: 0 1em;
+}
+
 .svg-defs {
     display: none;
 }
@@ -153,7 +171,6 @@ HEADER .ui.header {
 #page-header A:hover {
     text-decoration: underline;
 }
-
 
 #page-header P {
     margin: 0;
@@ -248,6 +265,11 @@ BUTTON[disabled] {
     background-color: #ccc;
     border: #efefef;
     color: #efefef;
+}
+
+BUTTON.small {
+    font-size: .85em;
+    padding: .5em;
 }
 
 

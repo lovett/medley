@@ -1,0 +1,35 @@
+#caller-id INPUT[type=text] {
+    width: 15em;
+    text-align: left;
+}
+
+.cancel {
+    margin-left: 2em;
+}
+
+.blacklisted {
+    background-color: black;
+    color: white;
+    padding: .5em;
+}
+
+.flex-parent {
+    display: flex;
+    justify-content: space-around;
+}
+
+.flex-item {
+    flex: 1.5 0;
+}
+
+.flex-item:last-of-type {
+    flex: 2.5 0;
+}
+
+TD {
+    vertical-align: top;
+}
+
+.debug {
+    margin: 2em auto;
+}

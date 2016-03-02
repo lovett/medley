@@ -8,8 +8,6 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://www.google.com/jsapi"></script>
-<script src="/static/js/maps.js"></script>
 <script src="/static/phone/phone.js"></script>
 {% endblock %}
 
@@ -30,120 +28,107 @@
 
     {% if number %}
 
-    <div class="content-wrapper">
-        <div class="third-column">
+    <div class="content-wrapper flex-parent">
+        <div class="flex-item">
             <section>
                 <h1>Caller ID</h1>
-                <p id="callerid-display-value">
-                    {{ caller_id|default('Unknown') }}
-                </p>
 
-                <a href="#" class="panel-trigger">Edit</a>
-            </section>
+                <div id="caller-id-display">
+                    <p id="callerid-display-value">
+                        {{ caller_id|default('Unknown') }}
+                    </p>
 
-            <section class="hidden">
-                <form id="caller-id" method="post" action="/callerid">
+                    <a href="#" class="edit-callerid">Edit</a>
+                </div>
+
+                <form id="caller-id" class="hidden" method="post" action="/callerid">
                     <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
                     <div class="field">
                         <input type="text" name="cid_value" value="{{ caller_id|default('') }}"/>
                     </div>
                     <div class="field">
-                        <button>Update</button>
-                        <a href="#" class="panel-trigger form-reset">Cancel</a>
+                        <button class="small">Update</button>
+                        <a href="#" class="cancel reset-callerid">Cancel</a>
                     </div>
+
+
                     <div class="hidden error message"></div>
                 </form>
             </section>
-            <section>
-                <h1>Blacklist</h1>
-
-                <div class="ui {% if blacklisted %}inverted{% endif %} segment">
-
-                    <form class="ui blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                        <input type="hidden" name="number" value="{{ number|default('') }}" />
-                        <input type="hidden" name="action" value="remove" />
-                        <p>Added <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
-                        <button class="ui mini button">Remove</button>
-                        <div class="hidden error message"></div>
-                    </form>
-
-                    <form class="ui blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                        <input type="hidden" name="number" value="{{ number|default('') }}" />
-                        <input type="hidden" name="action" value="add" />
-                        <p>Not blacklisted</p>
-                        <button class="ui mini button">Add</button>
-                        <div class="hidden error message"></div>
-                    </form>
-                </div>
-            </section>
         </div>
-        <div class="third-column">
-            <h1>Search</h1>
-            <p>
-                <a href="{{ google_url|anonymize }}" target="_blank" rel="noreferrer">google.com</a>,
-                <a href="{{ bing_url|anonymize }}" target="_blank" rel="noreferrer">bing.com</a>
-            </p>
+        <div class="flex-item">
+            <h1>Status</h1>
+
+            <form class="blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                <input type="hidden" name="number" value="{{ number|default('') }}" />
+                <input type="hidden" name="action" value="remove" />
+                <p class="blacklisted">Blacklisted as of <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+                <button class="small">Remove</button>
+                <div class="hidden error message"></div>
+            </form>
+
+            <form class="blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
+                <input type="hidden" name="number" value="{{ number|default('') }}" />
+                <input type="hidden" name="action" value="add" />
+                <p>Not blacklisted</p>
+                <button class="small">Add</button>
+                <div class="hidden error message"></div>
+            </form>
         </div>
-        <div class="third-column">
+        <div class="flex-item">
             {% if state_name %}
-            <h1>Location: {{ state_name }}</h1>
+            <h1>Location</h1>
+            <p>{{ state_name }}</p>
             <p>{{ comment }}</p>
             {% endif %}
         </div>
     </div>
-
+    {% if history|length > 0 %}
     <div class="content-wrapper">
-            {% if history|length > 0 %}
-            <h1>Call History</h1>
+        <h1>Call History</h1>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Duration</th>
-                        <th>End</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in history %}
-                    <tr>
-                        <td nowrap="nowrap">
-                            {{ entry["date"]|localtime("date") }}
-                            <p class="small">{{ entry["date"]|localtime("time12")}}</p>
-                        </td>
-                        <td>
-                            {{ entry["duration"] }}
-                        </td>
-                        <td nowrap="nowrap">
-                            {{ entry["lastapp"] }}
-                            <p class="small">{{ entry["dst"]}}</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% endif %}
-        </div>
-        <div class="half-column">
-
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Duration</th>
+                    <th>End</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in history %}
+                <tr>
+                    <td nowrap="nowrap">
+                        {{ entry["date"]|localtime("date") }}
+                        <p class="small">{{ entry["date"]|localtime("time12")}}</p>
+                    </td>
+                    <td>
+                        {{ entry["duration"] }}
+                    </td>
+                    <td nowrap="nowrap">
+                        {{ entry["lastapp"] }}
+                        <p class="small">{{ entry["dst"]}}</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% endif %}
 
-    <div class="ui sixteen wide column">
-        {% if number %}
+    {% if number %}
+    <div class="content-wrapper debug">
         <a href="#" class="toggle-trigger"><span>Show</span> SPARQL</a>
         <div class="toggle-target hidden">
             {% for query in sparql %}
             <pre>{{ query|unindent|escape }}</pre>
             {% endfor %}
         </div>
-        {% endif %}
     </div>
+    {% endif %}
 
 
-
-
+    {% endif %}
 </main>
 
 {% endblock %}

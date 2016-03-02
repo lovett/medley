@@ -5,6 +5,22 @@ MEDLEY.phone = (function () {
 
     endpoint = window.location.pathname;
 
+    function showCalleridForm(e) {
+        e.preventDefault();
+        jQuery('#caller-id').removeClass('hidden');
+        jQuery('#caller-id-display').addClass('hidden');
+        jQuery('INPUT[name=cid_value]').val(jQuery('#callerid-display-value').text().trim());
+    }
+
+    function hideCalleridForm(e) {
+        if (e) {
+            e.preventDefault();
+        }
+        jQuery('#caller-id').addClass('hidden');
+        jQuery('#caller-id-display').removeClass('hidden');
+    }
+
+
     function updateCallerId(e) {
         e.preventDefault();
 
@@ -26,7 +42,7 @@ MEDLEY.phone = (function () {
             if (xhr.status === 204) {
                 jQuery('#callerid-display-value').text(cidValue.val());
                 cidValue.val('');
-                form.find('.panel-trigger:first').trigger('click');
+                hideCalleridForm();
             }
         }).fail(function (xhr) {
             form.addClass('error');
@@ -38,8 +54,6 @@ MEDLEY.phone = (function () {
         e.preventDefault();
 
         var action, data, form, method, number, url;
-
-        form = jQuery(this);
 
         number = form.find('INPUT[name=number]').val();
         action = form.find('INPUT[name=action]').val();
@@ -84,22 +98,10 @@ MEDLEY.phone = (function () {
 
     return {
         init: function () {
-            jQuery('#caller-id').form({
-                cid: {
-                    identifier: 'cid_value',
-                    rules: [
-                        {
-                            type   : 'empty',
-                            prompt : 'Please enter a value'
-                        }
-                    ]
-                }
-            }, {
-                inline: true,
-                onSuccess: updateCallerId
-            });
-
+            jQuery('.edit-callerid').on('click', showCalleridForm);
+            jQuery('.reset-callerid').on('click', hideCalleridForm);
             jQuery('FORM.blacklist').on('submit', updateBlacklist);
+            jQuery('#caller-id').on('submit', updateCallerId);
         }
     };
 })();
