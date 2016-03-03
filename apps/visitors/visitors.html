@@ -15,9 +15,10 @@
 
 {% block page_body %}
 
-<main class="ui stackable page grid">
-    <div class="ui sixteen wide column">
-        <form class="ui form" method="get" action="/visitors">
+<main>
+    <div class="content-wrapper">
+        <form method="get" action="/visitors">
+            {% if saved_queries|count > 0 %}
             <div class="field">
                 <label for="saved">Saved Queries</label>
                 <select id="saved">
@@ -27,54 +28,41 @@
                     {% endfor %}
                 </select>
             </div>
+            {% endif %}
 
             <div class="field">
                 <label for="q">Query:</label>
                 <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
                 <div class="shortcuts">
-                    <strong>Shortcuts:</strong>
-                    <a href="#" class="ui mini button item" data-keyword="date" data-value="today"><i class="calendar icon"></i> Today</a>
-                    <a href="#" class="ui mini button item" data-keyword="date" data-value="yesterday"><i class="calendar icon"></i> Yesterday</a>
+                    Shortcuts:
+                    <a href="#" data-keyword="date" data-value="today">Today</a>
+                    <a href="#" data-keyword="date" data-value="yesterday">Yesterday</a>
                 </div>
             </div>
 
-            <div class="fields">
-                <div class="field">
-                    <button id="submit" class="ui button"><i class="send icon"></i> Run query</button>
-                </div>
-                <div class="field">
-                    <button id="save" class="ui button"><i class="bookmark icon"></i> Save query</button>
-                </div>
+            <div class="field">
+                <button id="save">Save query</button>
+                <button id="submit">Run query</button>
             </div>
         </form>
     </div>
 
-    {% if results|length() == 0 %}
-    <div class="sixteen wide column">
-        <div class="ui segment">
-            <p>No results found.</p>
-        </div>
+    {% if results|count == 0 %}
+    <div class="content-wrapper centered">
+        <p>No results found.</p>
     </div>
     {% endif %}
 
 
-    {% if results|length() > 0 %}
-    <div class="sixteen wide column">
+    {% if results|count > 0 %}
+    <div class="content-wrapper">
+        {% if result_limit < total_matches %}
+        <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
+        {% else %}
+        <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
+        {% endif %}
 
-        <div class="ui segment">
-            <div class="ui grid">
-                <div class="ten wide column">
-                    {% if result_limit < total_matches %}
-                    <p>Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}</p>
-                    {% else %}
-                    <p>Showing {{ total_matches|pluralize("match", "matches") }}</p>
-                    {% endif %}
-                </div>
-                <div class="six wide right aligned column">
-                    <a id="matches-master-toggle" class="master-toggle" href="#"><span class="label">expand</a> all</a>
-                </div>
-            </div>
-        </div>
+        <a id="matches-master-toggle" class="master-toggle" href="#"><span class="label">expand</a> all</a>
 
         <div class="sleeve">
             <table id="matches" class="ui table unstackable">
@@ -184,9 +172,7 @@
             </table>
         </div>
 
-        <div class="ui segment">
-            <p>This query ran in {{ duration|round(4) }} seconds</p>
-        </div>
+        <p>This query ran in {{ duration|round(4) }} seconds</p>
 
         {% endif %}
     </div>
