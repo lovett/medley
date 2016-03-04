@@ -14,3 +14,50 @@
 .code-301 TD {
     background-color: #ccc;
 }
+
+TD {
+    vertical-align: top;
+}
+
+TD A {
+    text-decoration: none;
+}
+
+TR TH {
+    background-color: #666;
+    color: #fff;
+}
+
+.calc-delta.active .icon {
+    fill: green;
+}
+
+.flag-icon {
+    padding: .25em;
+}
+
+TR.expandable {
+    display: none;
+}
+
+TR.expandable TD {
+    background-color: #efefef;
+}
+
+
+TR.expandable.expanded {
+    display: table-row;
+}
+
+.table-top {
+    overflow: hidden;
+    padding: 1em 0;
+}
+
+.table-top .left {
+    float: left;
+}
+
+.table-top .right {
+    float: right;
+}
