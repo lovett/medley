@@ -9,6 +9,8 @@ class Controller:
     """Download the current set of AWS IP ranges and store in registry.
     Previously downloaded ranges are removed."""
 
+    name = "AWS Ranges"
+
     exposed = True
 
     user_facing = False

@@ -7,6 +7,8 @@ import apps.registry.models
 class Controller:
     """A general purpose key value store"""
 
+    name = "Registry"
+
     exposed = True
 
     user_facing = True
@@ -27,7 +29,8 @@ class Controller:
 
         return {
             "q": q,
-            "records": records
+            "records": records,
+            "app_name": self.name
         }
 
     @cherrypy.tools.negotiable()

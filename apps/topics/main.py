@@ -10,6 +10,8 @@ import bs4
 class Controller:
     """Scrape news topics from the Bing homepage"""
 
+    name = "Topics"
+
     exposed = True
 
     user_facing = True
@@ -48,6 +50,7 @@ class Controller:
             "cache_date": cache_date,
             "topics": topics,
             "count": count,
+            "app_name": self.name
         }
 
     def fetch(self, url):

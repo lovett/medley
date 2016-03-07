@@ -5,6 +5,8 @@ import tools.jinja
 class Controller:
     """Display request headers"""
 
+    name = "Headers"
+
     exposed = True
 
     user_facing = True
@@ -24,5 +26,6 @@ class Controller:
             return "\n".join(headers)
         else:
             return {
-                "headers": headers
+                "headers": headers,
+                "app_name": self.name
             }

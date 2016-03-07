@@ -14,6 +14,8 @@ from datetime import datetime, timedelta
 class Controller:
     """Search website access logs"""
 
+    name = "Visitors"
+
     exposed = True
 
     user_facing = True
@@ -106,5 +108,6 @@ class Controller:
             "result_limit": results.limit,
             "duration": duration,
             "site_domains": site_domains,
-            "saved_queries": saved_queries
+            "saved_queries": saved_queries,
+            "app_name": self.name
         }

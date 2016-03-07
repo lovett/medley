@@ -9,6 +9,8 @@ import util.net
 class Controller:
     """A collection of bookmarked URLs"""
 
+    name = "Archive"
+
     exposed = True
 
     user_facing = True
@@ -37,6 +39,7 @@ class Controller:
             entries[key].append(record)
 
         return {
+            "app_name": self.name,
             "entries": entries,
             "q": q
         }

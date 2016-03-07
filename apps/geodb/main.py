@@ -13,6 +13,8 @@ import requests
 class Controller:
     """Download the latest GeoLite Legacy City database from maxmind.com"""
 
+    name = "GeoDB"
+
     exposed = True
 
     user_facing = True
@@ -40,7 +42,8 @@ class Controller:
             return {
                 "modified": modified,
                 "allow_update": allow_update,
-                "downloaded": downloaded
+                "downloaded": downloaded,
+                "app_name": self.name
             }
 
 

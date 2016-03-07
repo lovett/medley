@@ -10,6 +10,8 @@ import urllib.parse
 class Controller:
     """Display a form for bookmarking a URL"""
 
+    name = "Later"
+
     exposed = True
 
     user_facing = True
@@ -58,5 +60,6 @@ class Controller:
             "title": title,
             "url": url,
             "tags": tags,
-            "comments": comments
+            "comments": comments,
+            "app_name": self.name
         }

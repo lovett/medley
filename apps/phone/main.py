@@ -8,6 +8,8 @@ import apps.phone.models
 class Controller:
     """Display geographic location and recent call history for a phone number"""
 
+    name = "Phone"
+
     exposed = True
 
     user_facing = True
@@ -22,12 +24,14 @@ class Controller:
             if cherrypy.request.as_json:
                 cherrypy.response.status = 400
                 return {
-                    "message": message
+                    "message": message,
                 }
             elif cherrypy.request.as_text:
                 raise cherrypy.HTTPError(400, message)
             else:
-                return {}
+                return {
+                    "app_name": self.name
+                }
 
         number = util.phone.sanitize(number)
         area_code = number[:3]
@@ -78,5 +82,6 @@ class Controller:
             "bing_url": "https://www.bing.com/search?q=" + number,
             "google_url": "https://www.google.com#q=" + number,
             "comment": location.get("comment"),
-            "sparql": location.get("sparql", [])
+            "sparql": location.get("sparql", []),
+            "app_name": self.name
         }

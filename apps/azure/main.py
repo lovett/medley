@@ -7,6 +7,8 @@ import tools.capture
 class Controller:
     """Relay deployment notifications from Azure"""
 
+    name = "Azure"
+
     _cp_config = {
         'tools.conditional_auth.on': False
     }

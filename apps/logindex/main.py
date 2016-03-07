@@ -12,6 +12,8 @@ import cherrypy
 class Controller:
     """Index log files"""
 
+    name = "Log Index"
+
     exposed = True
 
     user_facing = False

@@ -13,6 +13,8 @@ import ipaddress
 class Controller:
     """Display whois and geoip data for an IP address or hostname"""
 
+    name = "Whois"
+
     exposed = True
 
     user_facing = True
@@ -32,7 +34,9 @@ class Controller:
             raise cherrypy.HTTPError(400, "Address not specified")
 
         if not address:
-            return {}
+            return {
+                "app_name": self.name
+            }
 
         # Sanitization
         address_unquoted = urllib.parse.unquote_plus(address).lower()
@@ -105,7 +109,8 @@ class Controller:
             "whois": whois_result,
             "ip_facts": ip_facts,
             "reverse_host": self.reverseLookup(ip),
-            "map_region": map_region
+            "map_region": map_region,
+            "app_name": self.name
         }
 
 

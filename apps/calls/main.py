@@ -8,6 +8,8 @@ import apps.registry.models
 class Controller:
     """Display call history by date"""
 
+    name = "Calls"
+
     exposed = True
 
     user_facing = True
@@ -33,5 +35,6 @@ class Controller:
             "calls": calls,
             "total": total,
             "newer_offset": newer_offset,
-            "older_offset": older_offset
+            "older_offset": older_offset,
+            "app_name": self.name
         }

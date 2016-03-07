@@ -5,6 +5,8 @@ import apps.phone.models
 class Controller:
     """Manage an Asterisk blacklist database"""
 
+    name = "Blacklist"
+
     exposed = True
 
     user_facing = False

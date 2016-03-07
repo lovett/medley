@@ -4,6 +4,8 @@ import apps.phone.models
 class Controller:
     """Add entries to an Asterisk callerid database"""
 
+    name = "Caller ID"
+
     exposed = True
 
     user_facing = False

@@ -5,6 +5,8 @@ import tools.jinja
 class Controller:
     """Convert a string value to lowercase, uppercase, or titlecase"""
 
+    name = "Lettercase"
+
     exposed = True
 
     user_facing = True
@@ -16,7 +18,8 @@ class Controller:
     def GET(self):
         return {
             "default_style": self.styles[0],
-            "styles": self.styles
+            "styles": self.styles,
+            "app_name": self.name
         }
 
     @cherrypy.tools.template(template="lettercase.html")
@@ -44,5 +47,6 @@ class Controller:
                 "value": value,
                 "result": result,
                 "styles": self.styles,
-                "style": style or "title"
+                "style": style or "title",
+                "app_name": self.name
             }

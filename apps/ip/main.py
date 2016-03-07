@@ -10,6 +10,8 @@ import ipaddress
 class Controller:
     """Display the the requester's address and the server's external address"""
 
+    name = "IP"
+
     exposed = True
 
     user_facing = True
@@ -88,5 +90,6 @@ class Controller:
         else:
             return {
                 "address": ip_address,
-                "external_ip": external_ip
+                "external_ip": external_ip,
+                "app_name": self.name
             }

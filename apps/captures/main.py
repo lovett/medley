@@ -6,6 +6,8 @@ import apps.captures.models
 class Controller:
     """Display captured requests"""
 
+    name = "Captures"
+
     exposed = True
 
     user_facing = True
@@ -22,5 +24,6 @@ class Controller:
 
         return {
             "q": q,
-            "captures": captures
+            "captures": captures,
+            "app_name": self.name
         }
