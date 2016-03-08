@@ -7,7 +7,6 @@ import util.ip
 import urllib.parse
 import apps.registry.models
 import apps.logindex.models
-import pycountry
 import pytz
 from datetime import datetime, timedelta
 
@@ -88,7 +87,9 @@ class Controller:
                 result["ip_facts"]["geo"]["country_code"] = result.get("country")
                 result["ip_facts"]["geo"]["region_code"] = result.get("region")
                 result["ip_facts"]["geo"]["city"] = result.get("city")
-                result["ip_facts"]["geo"]["country_name"] = pycountry.countries.get(alpha2=result["country"]).name
+                registry_key = "country_code:alpha2:{}".format(result["country"])
+                result["ip_facts"]["geo"]["country_name"] = registry.first(registry_key, limit=1)
+
 
             if "," in result.get("latlong", ""):
                 (lat, lng) = result["latlong"].split(",")

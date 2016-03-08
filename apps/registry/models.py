@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS registry (
         #value = re.sub(unacceptable_chars, "", value, flags=re.UNICODE).strip()
 
         if replace:
-            self.removeByKey(key)
+            self.remove(key)
 
         self.cur.execute("INSERT INTO registry (key, value) VALUES (?, ?)", (key, value))
         self.conn.commit()
@@ -60,6 +60,13 @@ CREATE TABLE IF NOT EXISTS registry (
 
         self.cur.execute(sql, (uid,))
         return self.cur.fetchall()
+
+    def first(self, key=None, keys=[], limit=1):
+        result = self.search(key, keys, limit)
+        if len(result) > 0:
+            return result[0]["value"]
+        else:
+            return None
 
     def search(self, key=None, keys=[], limit=100):
         sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry"
