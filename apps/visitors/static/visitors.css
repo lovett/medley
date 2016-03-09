@@ -23,6 +23,11 @@ TD A {
     text-decoration: none;
 }
 
+TD P {
+    margin: 0;
+    line-height: 1.75;
+}
+
 TR TH {
     background-color: #666;
     color: #fff;
@@ -34,6 +39,8 @@ TR TH {
 
 .flag-icon {
     padding: .25em;
+    margin-bottom: .25em;
+    box-shadow: 1px 2px 2px 0 rgba(50, 50, 50, 1);
 }
 
 TR.expandable {

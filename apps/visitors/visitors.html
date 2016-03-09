@@ -108,9 +108,9 @@
                         <td></td>
                         {% else %}
                         <td>
-                            <span><i class="flag-icon flag-icon-{{ result.ip_facts.geo.country_code|lower()}}"></i></span>
+                            <div class="flag-icon flag-icon-{{ result.ip_facts.geo.country_code|lower()}}"></div>
 
-                            <p class="small">
+                            <p>
                                 {% if result.ip_facts.geo.city %}
                                 {{ result.ip_facts.geo.city|default("", true) }}<br/>
                                 {% endif %}
@@ -128,13 +128,13 @@
                         <td colspan="2"></td>
                         {% else %}
                         <td>
-                            <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(25, true) }}</a>
+                            <p><a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(25, true) }}</a></p>
                             {% if result.ip_facts.organization %}
-                            <p class="small">{{ result.ip_facts.organization }}</p>
+                            <p>{{ result.ip_facts.organization }}</p>
                             {% endif %}
 
                             {% for annotation in result.ip_facts.annotations %}
-                            <p class="small">{{ annotation }}</p>
+                            <p>{{ annotation }}</p>
                             {% endfor %}
 
                         </td>
@@ -149,31 +149,35 @@
 			</td>
                         {% endif %}
                         <td nowrap="nowrap">
-                            <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#">
-                                <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
-                            </a>
-                            {% if result.timestamp|localtime('date') != prev_date %}
-                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
-                            at
-                            {% endif %}
-                            {{ result.timestamp|localtime('time12') }}
-
-                            <div class="small">
-                                {% if result.ip_facts.geo.time_zone %}
-                                <div>
-                                    <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
-                                    {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
-                                </div>
+                            <p>
+                                <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#">
+                                    <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
+                                </a>
+                                {% if result.timestamp|localtime('date') != prev_date %}
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}" title="Search for visits on this date to this page">{{ result.timestamp|localtime('date') }}</a>
+                                at
                                 {% endif %}
-                                <div class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}">Δ <span class="value">{{ result.delta }}</span> <span class="label"></span></div>
-                            </div>
+                                {{ result.timestamp|localtime('time12') }}
+                            </p>
+
+                            {% if result.ip_facts.geo.time_zone %}
+                            <p>
+                                <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
+                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
+                            </p>
+                            {% endif %}
+
+                            <p class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}">Δ <span class="value">{{ result.delta }}</span> <span class="label"></span></p>
+                            </p>
 
                         </td>
                         <td nowrap="nowrap">
-                            <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                            <p>
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                            </p>
 
                             {% if result.agent != prev_agent %}
-                            <p class="small">
+                            <p>
                                 {{ result.agent|useragent()|truncate(50) }}
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
                                 <br/>
@@ -183,9 +187,9 @@
                             {% endif %}
                         </td>
                         <td>
-                            <span class="help" title="{{ result.statusCode|status_message()}}">
+                            <p class="help" title="{{ result.statusCode|status_message()}}">
                                 {{ result.statusCode }}
-                            </span>
+                            </p>
                         </td>
                         <td>
                             <a href="#" class="toggle toggle-next-row">

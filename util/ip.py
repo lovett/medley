@@ -3,7 +3,7 @@ import time
 import re
 import sqlite3
 import util.sqlite_converters
-import netaddr
+import ipaddress
 import util.fs
 import hashlib
 import functools
@@ -14,12 +14,11 @@ import apps.geodb.models
 @functools.lru_cache()
 def facts(ip, geo_lookup=True):
     registry = apps.registry.models.Registry()
-    address = netaddr.IPAddress(ip)
     netblocks = registry.search(key="netblock*")
     facts = {}
 
     for netblock in netblocks:
-        if address in netaddr.IPNetwork(netblock["value"]):
+        if ipaddress.ip_address(ip) in ipaddress.ip_network(netblock["value"]):
             facts["organization"] = netblock["key"].split(":")[1]
             break
 

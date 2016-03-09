@@ -79,11 +79,8 @@ class Controller:
         results, duration = util.fs.appengine_log_grep(roots[0]["value"], filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
-            if not result.get("country"):
-                result["ip_facts"] = util.ip.facts(result["ip"])
-            else:
-                result["ip_facts"] = {}
-                result["ip_facts"]["geo"] = {}
+            result["ip_facts"] = util.ip.facts(result["ip"])
+            if result.get("country"):
                 result["ip_facts"]["geo"]["country_code"] = result.get("country")
                 result["ip_facts"]["geo"]["region_code"] = result.get("region")
                 result["ip_facts"]["geo"]["city"] = result.get("city")
