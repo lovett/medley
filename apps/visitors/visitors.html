@@ -1,12 +1,16 @@
 {% extends "base.html" %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/static/visitors/visitors.css"></link>
+<link rel="stylesheet" type="text/css" href="/static/visitors/jquery-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="/static/visitors/jquery-ui.theme.min.css" />
+<link rel="stylesheet" type="text/css" href="/static/visitors/visitors.css" />
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/1.3.0/css/flag-icon.min.css" />
 {% endblock %}
 
 {% block scripts %}
+<script src="/static/visitors/jquery-ui.min.js"></script>
 <script src="/static/visitors/visitors.js"></script>
+
 {% endblock %}
 
 {% block svg_defs %}
@@ -50,13 +54,16 @@
             </div>
             {% endif %}
 
-            <div class="field">
-                <label for="q">Query:</label>
-                <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
-                <div class="shortcuts">
-                    Shortcuts:
-                    <a href="#" data-keyword="date" data-value="today">Today</a>
-                    <a href="#" data-keyword="date" data-value="yesterday">Yesterday</a>
+            <div class="two-third-column">
+                <div class="field">
+                    <label for="q">Query:</label>
+                    <textarea id="q" name="q">{{ q|default('', true) }}</textarea>
+                </div>
+            </div>
+            <div class="third-column">
+                <div class="field">
+                    <label>Date:</label>
+                    <div id="datepicker"></div>
                 </div>
             </div>
 

@@ -1,7 +1,7 @@
 MEDLEY.visitors = (function () {
     'use strict';
 
-    var calculateDelta, queryToMultiline, saveQuery, applyShortcut, resetQueryMenu;
+    var calculateDelta, queryToMultiline, saveQuery, resetQueryMenu;
 
     calculateDelta = function (e) {
         var referenceTimestamp, tbody, trigger;
@@ -121,24 +121,19 @@ MEDLEY.visitors = (function () {
         });
     };
 
-    applyShortcut = function (e) {
-        var keyword, value, query, re;
-        e.preventDefault();
-        keyword = jQuery(this).attr('data-keyword');
-        value = jQuery(this).attr('data-value');
+    function applySelectedDateToQuery(dateText) {
+        var query;
         query = jQuery('#q').val();
 
-        re = new RegExp('^' + keyword + ' .*\n');
-        query = query.trim().replace(re, '');
-        query = keyword + ' ' + value + '\n' + query;
+        query = query.trim().replace(/date.*\d{4}-\d{2}-\d{2}/g, '');
+        query = 'date ' + dateText + '\n' + query;
         jQuery('#q').val(query);
         jQuery('#submit').trigger('click');
-    };
+    }
 
     return {
         init: function () {
             jQuery('#save').on('click', saveQuery);
-            jQuery('.shortcuts').on('click', 'A', applyShortcut);
 
             jQuery('#q').on('keyup', resetQueryMenu);
 
@@ -151,6 +146,11 @@ MEDLEY.visitors = (function () {
             });
 
             jQuery('#matches').on('click', 'A.calc-delta', calculateDelta);
+
+            jQuery('#datepicker').datepicker({
+                'dateFormat': 'yy-mm-dd',
+                'onSelect': applySelectedDateToQuery
+            })
 
         }
     };

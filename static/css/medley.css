@@ -85,7 +85,6 @@ TABLE.key-value TH {
     display: inline-block;
     vertical-align: top;
     width: 66%;
-    background-color: green;
 }
 
 .middle-column {
@@ -208,7 +207,7 @@ CODE {
 .field INPUT[type=text], .field TEXTAREA {
     border: 1px solid #ccc;
     padding: .5em;
-    width: 100%;
+    width: 96%;
 }
 
 .field TEXTAREA {

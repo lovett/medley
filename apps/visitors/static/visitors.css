@@ -37,6 +37,10 @@ TR TH {
     color: #fff;
 }
 
+TEXTAREA[name=q] {
+    height: 10em;
+}
+
 .calc-delta.active .icon {
     fill: green;
 }
