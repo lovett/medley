@@ -42,17 +42,15 @@
 <main>
     <div class="content-wrapper">
         <form method="get" action="/visitors">
-            {% if saved_queries|count > 0 %}
-            <div class="field">
+            <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
                 <label for="saved">Saved Queries</label>
                 <select id="saved">
                     <option value=""></option>
                     {% for query in saved_queries %}
-                    <option value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key }}</option>
+                    <option value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key|replace("visitors:", "") }}</option>
                     {% endfor %}
                 </select>
             </div>
-            {% endif %}
 
             <div class="two-third-column">
                 <div class="field">
@@ -69,7 +67,7 @@
 
             <div class="field">
                 <button id="submit">Run query</button>
-                <button id="save">Save query</button>
+                <a id="save" href="#save">Save query</a>
             </div>
         </form>
     </div>

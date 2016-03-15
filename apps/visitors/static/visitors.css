@@ -76,3 +76,7 @@ TR.expandable.expanded {
 .table-top .right {
     float: right;
 }
+
+BUTTON {
+    margin-right: 1em;
+}

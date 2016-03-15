@@ -93,9 +93,9 @@ MEDLEY.visitors = (function () {
         }
 
         jQuery.ajax({
-            type: 'POST',
+            type: 'PUT',
             dataType: 'json',
-            url: '/annotations',
+            url: '/registry',
             data: {
                 'key': 'visitors:' + name.toLowerCase(),
                 'value': jQuery('#q').val(),
@@ -109,8 +109,8 @@ MEDLEY.visitors = (function () {
             });
 
             newOpt = jQuery('<option></option>');
-            newOpt.attr('value', data.value);
-            newOpt.text(data.key);
+            newOpt.attr('value', jQuery('#q').val());
+            newOpt.text(name.toLowerCase());
 
             opts = opts.add(newOpt);
             opts.sort(function (a, b) {
@@ -118,6 +118,7 @@ MEDLEY.visitors = (function () {
             });
             jQuery('#saved').html(opts);
             newOpt.attr('selected', true);
+            jQuery('#saved-queries').removeClass('hidden');
         });
     };
 
