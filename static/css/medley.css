@@ -229,14 +229,12 @@ CODE {
     padding: .5em;
 }
 
-
-
 BUTTON {
     border-radius: .25em;
-    border: 1px solid #333;
+    border: 0;
     color: #fff;
     background-color: green;
-    padding: .5em 2em;
+    padding: .5em 1em;
 }
 
 BUTTON:hover {

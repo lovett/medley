@@ -18,10 +18,14 @@ class Controller:
 
     @cherrypy.tools.template(template="topics.html")
     @cherrypy.tools.negotiable()
-    def GET(self, count=0):
+    def GET(self, count=15):
         cache = util.cache.Cache()
         key = "topics_html"
         topics = []
+        try:
+            count = int(count)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid count value")
 
         cached_value = cache.get(key)
 
@@ -45,6 +49,15 @@ class Controller:
 
                 if "q" in qs:
                     topics.append(qs["q"][0])
+
+
+        while len(topics) < count:
+            limit = min(len(topics), count - len(topics))
+            topics.extend(topics[0:limit])
+
+        if len(topics) > count:
+            topics = topics[0:count]
+
 
         return {
             "cache_date": cache_date,
