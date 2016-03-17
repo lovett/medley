@@ -75,6 +75,7 @@ MEDLEY.visitors = (function () {
 
     resetQueryMenu = function (e) {
         jQuery('#saved').val('');
+        jQuery('.actions .delete').addClass('hidden');
     };
 
     saveQuery = function (e) {
@@ -108,7 +109,9 @@ MEDLEY.visitors = (function () {
                 return jQuery(this).text() !== data.key;
             });
 
+            console.log(data);
             newOpt = jQuery('<option></option>');
+            newOpt.attr('data-id', data.uid);
             newOpt.attr('value', jQuery('#q').val());
             newOpt.text(name.toLowerCase());
 
@@ -132,6 +135,23 @@ MEDLEY.visitors = (function () {
         jQuery('#submit').trigger('click');
     }
 
+    function deleteSavedQuery(e) {
+        e.preventDefault();
+
+        var selectedOption = jQuery('#saved OPTION:selected');
+
+        console.log(selectedOption);
+
+        jQuery.ajax({
+            type: 'DELETE',
+            url: '/registry/' + selectedOption.attr('data-id')
+        }).done(function (data) {
+            selectedOption.remove();
+            jQuery('#q').val('');
+            resetQueryMenu();
+        });
+    }
+
     return {
         init: function () {
             jQuery('#save').on('click', saveQuery);
@@ -144,7 +164,10 @@ MEDLEY.visitors = (function () {
                 multiline = queryToMultiline(query);
                 jQuery('#q').val(multiline);
                 jQuery('#submit').focus();
+                jQuery('.actions .delete').removeClass('hidden');
             });
+
+            jQuery('.actions .delete').on('click', deleteSavedQuery);
 
             jQuery('#matches').on('click', 'A.calc-delta', calculateDelta);
 

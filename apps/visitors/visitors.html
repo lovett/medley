@@ -47,7 +47,7 @@
                 <select id="saved">
                     <option value=""></option>
                     {% for query in saved_queries %}
-                    <option value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key|replace("visitors:", "") }}</option>
+                    <option data-id="{{ query.rowid }}" value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key|replace("visitors:", "") }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -65,9 +65,16 @@
                 </div>
             </div>
 
-            <div class="field">
+            <div class="field actions">
                 <button id="submit">Run query</button>
                 <a id="save" href="#save">Save query</a>
+
+                <a href="#" class="delete hidden">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                    Delete query
+                </a>
+            </div>
+
             </div>
         </form>
     </div>

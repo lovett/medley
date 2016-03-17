@@ -77,6 +77,6 @@ TR.expandable.expanded {
     float: right;
 }
 
-BUTTON {
-    margin-right: 1em;
+.actions A {
+    margin-left: 3em;
 }
