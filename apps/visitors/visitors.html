@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block page_meta %}
+<meta name="active_date" content="{{ active_date }}" />
+{% endblock %}
+
 {% block stylesheets %}
 <link rel="stylesheet" type="text/css" href="/static/visitors/jquery-ui.min.css" />
 <link rel="stylesheet" type="text/css" href="/static/visitors/jquery-ui.theme.min.css" />
@@ -10,7 +14,6 @@
 {% block scripts %}
 <script src="/static/visitors/jquery-ui.min.js"></script>
 <script src="/static/visitors/visitors.js"></script>
-
 {% endblock %}
 
 {% block svg_defs %}

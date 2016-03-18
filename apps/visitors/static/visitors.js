@@ -129,7 +129,7 @@ MEDLEY.visitors = (function () {
         var query;
         query = jQuery('#q').val();
 
-        query = query.trim().replace(/date.*\d{4}-\d{2}-\d{2}/g, '');
+        query = query.trim().replace(/date.*\d{4}-\d{2}-\d{2}\s+/gm, '');
         query = 'date ' + dateText + '\n' + query;
         jQuery('#q').val(query);
         jQuery('#submit').trigger('click');
@@ -173,8 +173,13 @@ MEDLEY.visitors = (function () {
 
             jQuery('#datepicker').datepicker({
                 'dateFormat': 'yy-mm-dd',
-                'onSelect': applySelectedDateToQuery
-            })
+                'defaultDate': jQuery('META[name=active_date]').attr('content'),
+                'onSelect': applySelectedDateToQuery,
+                'showButtonPanel': true,
+                'changeMonth': true,
+                'changeYear': true,
+                'maxDate': 0
+            });
 
         }
     };

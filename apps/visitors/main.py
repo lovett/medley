@@ -70,12 +70,21 @@ class Controller:
 
         offsets = None
 
+        if len(filters["date"]) > 0:
+            active_date = filters["date"][0]
+        else:
+            active_date = datetime.now().strftime("date %Y-%m-%d")
+
+
         if len(filters["ip"]) > 0:
             logman = apps.logindex.models.LogManager(roots[0]["value"])
             offsets = logman.getLogOffsets("ip", filters["ip"])
             filters["date"] = offsets.keys()
+            active_date = datetime.now().strftime("date %Y-%m-%d")
             del filters["ip"]
 
+
+        print(filters)
         results, duration = util.fs.appengine_log_grep(roots[0]["value"], filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
@@ -101,6 +110,7 @@ class Controller:
         return {
             "q": q,
             "active_query": active_query,
+            "active_date": active_date,
             "results": results.matches,
             "total_matches": results.count,
             "result_limit": results.limit,
