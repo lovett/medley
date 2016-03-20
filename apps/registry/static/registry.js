@@ -60,7 +60,7 @@ MEDLEY.registry = (function () {
     return {
         init: function () {
             jQuery('#insert-form').on('submit', submitRecord);
-            jQuery('#records').on('click', 'A.delete', deleteRecord);
+            jQuery('#entries').on('click', 'A.delete', deleteRecord);
         }
     };
 })();

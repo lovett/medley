@@ -21,15 +21,15 @@ class Controller:
         registry = apps.registry.models.Registry()
 
         if uid:
-            records = registry.find(uid)
+            entries = registry.find(uid)
         elif q:
-            records = registry.search(key=q)
+            entries = registry.search(key=q)
         else:
-            records = registry.recent()
+            entries = []
 
         return {
             "q": q,
-            "records": records,
+            "entries": entries,
             "app_name": self.name
         }
 

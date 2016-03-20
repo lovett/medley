@@ -40,19 +40,19 @@
     </form>
 
     <div class="content-wrapper">
-        {% if not records %}
-        <p>There are no records.</p>
+        {% if (uid or q) and not entries %}
+        <p>No entries found.</p>
         {% endif %}
 
-        <dl id="records">
-            {% for record in records %}
-            <dt>{{ record.key }}</dt>
+        <dl id="entries">
+            {% for entry in entries %}
+            <dt>{{ entry.key }}</dt>
 
             <dd>
-                {{ record.value }}
+                {{ entry.value }}
                 <div class="secondary">
-                   <div>Created {{ record.created|localtime("datetime12") }}</div>
-                   <a href="#" data-uid="{{ record.rowid }}" class="delete" title="Delete record">
+                   <div>Created {{ entry.created|localtime("datetime12") }}</div>
+                   <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry">
                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                    </a>
                 </div>
