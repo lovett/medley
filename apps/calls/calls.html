@@ -14,10 +14,10 @@
                 <tr>
                     <th colspan="4" class="pagination">
                         {% if older_offset > 0 %}
-                        <a href="/calls?offset={{ older_offset }}" class="previous"><svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg></a>
+                        <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous"><svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg></a>
                         {% endif %}
                         {% if newer_offset >= 0 %}
-                        <a href="/calls?offset={{ newer_offset }}" class="next"><svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg></a>
+                        <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next"><svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg></a>
                         {% endif %}
                     </th>
                 </tr>
@@ -40,7 +40,7 @@
                     </td>
                     <td>
                         {{ call["clid"] }}
-                        <div class="smaller"><a href="/phone?number={{ call["src"] }}">{{ call["src"] }}</a></div>
+                        <div class="smaller"><a href="/phone?number={{ call["src"] }}" rel="noreferrer">{{ call["src"] }}</a></div>
                         <div class="smaller">{{ call["abbreviated_channel"] }}</div>
                     </td>
                     <td>

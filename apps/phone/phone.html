@@ -35,7 +35,7 @@
                         {{ caller_id|default('Unknown') }}
                     </p>
 
-                    <a href="#" class="edit-callerid">Edit</a>
+                    <a href="#" class="edit-callerid" rel="noreferrer">Edit</a>
                 </div>
 
                 <form id="caller-id" class="hidden" method="post" action="/callerid">
@@ -45,7 +45,7 @@
                     </div>
                     <div class="field">
                         <button class="small">Update</button>
-                        <a href="#" class="cancel reset-callerid">Cancel</a>
+                        <a href="#" class="cancel reset-callerid" rel="noreferrer">Cancel</a>
                     </div>
 
 
@@ -115,7 +115,7 @@
 
     {% if number %}
     <div class="content-wrapper debug">
-        <a href="#" class="toggle-trigger"><span>Show</span> SPARQL</a>
+        <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> SPARQL</a>
         <div class="toggle-target hidden">
             {% for query in sparql %}
             <pre>{{ query|unindent|escape }}</pre>

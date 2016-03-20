@@ -44,7 +44,7 @@
                 <dl>
                     {% if "customerRef" in whois.net %}
                     <dt>Owned By</dt>
-                    <dd><a href="{{ whois.net.customerRef["$"] }}" target="_blank">{{ whois.net.customerRef["@name"] }}</a></dd>
+                    <dd><a href="{{ whois.net.customerRef["$"] }}" target="_blank" rel="noreferrer">{{ whois.net.customerRef["@name"] }}</a></dd>
                     {% endif %}
 
                     {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
@@ -82,7 +82,7 @@
 
                 <dt>Activity</dt>
                 <dd>
-                    <a href="/visitors/?q=ip+{{ ip }}">
+                    <a href="/visitors/?q=ip+{{ ip }}" rel="noreferrer">
                         <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
                         find visits
                     </a>
@@ -90,7 +90,7 @@
 
                 <dt>Visit</dt>
                 <dd>
-                    <a href="{{ address|anonymize }}" rel="noreferer">http</a>,
+                    <a href="{{ address|anonymize }}" rel="noreferrer">http</a>,
                     <a href="https://{{ address }}" rel="noreferrer">https</a>
                 </dd>
             </dl>

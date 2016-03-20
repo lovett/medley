@@ -70,9 +70,9 @@
 
             <div class="field actions">
                 <button id="submit">Run query</button>
-                <a id="save" href="#save">Save query</a>
+                <a id="save" href="#save" rel="noreferrer">Save query</a>
 
-                <a href="#" class="delete hidden">
+                <a href="#" class="delete hidden" rel="noreferrer">
                     <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                     Delete query
                 </a>
@@ -100,7 +100,7 @@
                 {% endif %}
             </div>
             <div class="right">
-                <a id="matches-master-toggle" class="master-toggle" href="#"><span class="label">expand</a> all</a>
+                <a id="matches-master-toggle" class="master-toggle" href="#" rel="noreferrer"><span class="label">expand</a> all</a>
             </div>
         </div>
 
@@ -143,7 +143,7 @@
                         <td colspan="2"></td>
                         {% else %}
                         <td>
-                            <p><a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address">{{ result.ip|truncate(25, true) }}</a></p>
+                            <p><a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">{{ result.ip|truncate(25, true) }}</a></p>
                             {% if result.ip_facts.organization %}
                             <p>{{ result.ip_facts.organization }}</p>
                             {% endif %}
@@ -154,10 +154,10 @@
 
                         </td>
 			<td>
-			    <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip">
+			    <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
                                 <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
                             </a>
-                            <a href="/registry/ip:{{ result.ip}}" title="Annotate this ip">
+                            <a href="/registry/ip:{{ result.ip}}" title="Annotate this ip" rel="noreferrer">
                                 <svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg>
                             </a>
 
@@ -165,7 +165,7 @@
                         {% endif %}
                         <td nowrap="nowrap">
                             <p>
-                                <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#">
+                                <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#" rel="noreferrer">
                                     <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
                                 </a>
                                 {{ result.timestamp|localtime('date') }}
@@ -186,7 +186,7 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                             </p>
 
                             {% if result.agent != prev_agent %}
@@ -205,7 +205,7 @@
                             </p>
                         </td>
                         <td>
-                            <a href="#" class="toggle toggle-next-row">
+                            <a href="#" class="toggle toggle-next-row" rel="noreferrer">
                                 <span class="label">more</span>
                             </a>
                         </td>

@@ -13,14 +13,14 @@
 <main>
     <div class="content-wrapper centered">
         <button data-count="{{ count }}">Walk topics</button>
-        <p><a href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}">Rewards Dashboard</a></p>
+        <p><a href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}" rel="noreferrer">Rewards Dashboard</a></p>
     </div>
 
     <div id="topics" class="content-wrapper centered">
         {% for topic in topics %}
         <p>
             {{ loop.index }}.
-            <a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferer" target="_blank">{{ topic }}</a>
+            <a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferrer" target="_blank">{{ topic }}</a>
         </p>
         {% endfor %}
     </div>

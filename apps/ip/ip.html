@@ -7,8 +7,8 @@
         {% if result %}
         <p>{{ result }}</p>
         {% else %}
-        <p>Your address is <a href="/whois?address={{address}}">{{ address }}</a></p>
-        <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
+        <p>Your address is <a href="/whois?address={{address}}" rel="noreferrer" >{{ address }}</a></p>
+        <p>The external address is <a href="/whois?address={{ external_ip }}" rel="noreferrer">{{ external_ip }}</a></p>
         {% endif %}
     </div>
 </main>

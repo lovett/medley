@@ -15,7 +15,7 @@
     <div class="content-wrapper">
         <div class="bookmarklet-container">
             Bookmarklet:
-            <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))">⚡ later</a>
+            <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))" rel="noreferrer">⚡ later</a>
         </div>
 
         <form id="later-form" class="{% if error %}error{% endif %}" method="post" action="/archive">
@@ -31,9 +31,9 @@
                 <label for="url">Address:</label>
                 <input type="text" id="url" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
                 <div class="shortcuts">
-                    <a class="remove-querystring hidden" href="#">Remove querystring</a>
-                    <a class="remove-hash hidden" href="#">Remove hash</a>
-                    <a class="revert hidden" href="#">Revert</a>
+                    <a class="remove-querystring hidden" href="#" rel="noreferrer">Remove querystring</a>
+                    <a class="remove-hash hidden" href="#" rel="noreferrer">Remove hash</a>
+                    <a class="revert hidden" href="#" rel="noreferrer">Revert</a>
                 </div>
             </div>
 
@@ -46,9 +46,9 @@
                 <label for="comments">Comments:</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
                 <div class="shortcuts">
-                    <a class="trim-sentence-from-start hidden" href="#">Trim sentence from start</a>
-                    <a class="trim-sentence-from-end hidden" href="#">Trim sentence from end</a>
-                    <a class="trim-all hidden" href="#">Clear</a>
+                    <a class="trim-sentence-from-start hidden" href="#" rel="noreferrer">Trim sentence from start</a>
+                    <a class="trim-sentence-from-end hidden" href="#" rel="noreferrer">Trim sentence from end</a>
+                    <a class="trim-all hidden" href="#" rel="noreferrer">Clear</a>
                 </div>
             </div>
 
