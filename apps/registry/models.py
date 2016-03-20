@@ -81,9 +81,9 @@ CREATE TABLE IF NOT EXISTS registry (
             key = key.replace("*", "%")
 
             if not fuzzy:
-                sql += " WHERE key=?"
-            else:
-                sql += " WHERE KEY LIKE ?"
+                key = "%{}%".format(key)
+
+            sql += " WHERE KEY LIKE ?"
 
             params = (key,)
         sql += " ORDER BY rowid DESC"
