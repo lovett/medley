@@ -12,7 +12,14 @@
 {% block page_body %}
 
 <main>
-    <form id="search-form" class="content-wrapper">
+    <div class="views content-wrapper">
+        <ul>
+            <li><a href="#search-form" class="{{ "active" if view == "search" }}">Search</a></li>
+            <li><a href="#insert-form" class="{{ "active" if view == "add" }}">Add</a></li>
+        </ul>
+    </div>
+
+    <form id="search-form" class="content-wrapper {{ "hidden" if not view == "search" }}">
         <div class="field">
             <label for="q">Key:</label>
             <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
@@ -22,7 +29,7 @@
         </div>
     </form>
 
-    <form id="insert-form" class="content-wrapper">
+    <form id="insert-form" class="content-wrapper {{ "hidden" if not view == "add" }}">
         <div class="hidden error message"></div>
         <div class="hidden success message">Success!</div>
 
@@ -46,17 +53,15 @@
 
         <dl id="entries">
             {% for entry in entries %}
-            <dt>{{ entry.key }}</dt>
+            <dt><span class="counter">{{ loop.index }}.</span> {{ entry.key }}</dt>
 
-            <dd>
-                {{ entry.value }}
-                <div class="secondary">
-                   <div>Created {{ entry.created|localtime("datetime12") }}</div>
+            <dd class="secondary">
+                   Created {{ entry.created|localtime("datetime12") }}
                    <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                    </a>
-                </div>
             </dd>
+            <dd class="value">{{ entry.value }}</dd>
 
             {% endfor %}
         </dl>

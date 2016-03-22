@@ -1,4 +1,30 @@
+DT {
+    background-color: #768EBE;
+    color: #fff;
+    padding: .5em;
+}
+
+.counter {
+    font-weight: normal;
+    font-size: .5em;
+}
+
 .secondary {
     font-size: .85em;
     margin: 0;
+    background-color: #ccc;
+    padding: .5em;
+}
+
+.secondary .icon {
+    margin-top: -.25em;
+    margin-left: 1em;
+}
+
+.value {
+    background-color: #fff;
+    padding: .5em;
+    white-space: pre;
+    font-family: 'Courier New', Courier, monospace;
+    margin-bottom: 2em;
 }

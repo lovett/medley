@@ -253,6 +253,21 @@ BUTTON.small {
     padding: .5em;
 }
 
+.views {
+    text-align: right;
+}
+
+.views LI {
+    display: inline-block;
+    margin-left: 1em;
+}
+
+.views .active {
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+}
+
 
 /* Use the default selection style */
 ::-webkit-selection {

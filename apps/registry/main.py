@@ -17,7 +17,7 @@ class Controller:
 
     @cherrypy.tools.template(template="registry.html")
     @cherrypy.tools.negotiable()
-    def GET(self, q=None, uid=None):
+    def GET(self, q=None, uid=None, view="search"):
         registry = apps.registry.models.Registry()
 
         if uid:
@@ -27,10 +27,14 @@ class Controller:
         else:
             entries = []
 
+        if not view in ["add", "search"]:
+            view = "search"
+
         return {
             "q": q,
             "entries": entries,
-            "app_name": self.name
+            "app_name": self.name,
+            "view": view
         }
 
     @cherrypy.tools.negotiable()
@@ -43,7 +47,7 @@ class Controller:
         if cherrypy.request.headers.get("X-Requested-With", None) == "XMLHttpRequest":
             return {"uid": uid }
         else:
-            raise cherrypy.HTTPRedirect("/registry?uid={}".format(uid))
+            raise cherrypy.HTTPRedirect("/registry?uid={}&view=add".format(uid))
 
     def DELETE(self, uid):
         registry = apps.registry.models.Registry()
