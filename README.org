@@ -1,44 +1,27 @@
 * Setup
-Clone the repository somewhere sensible, then set up a virtualenv.
 
-This is a Python 3 application, so be careful to install and invoke
-virtualenv against Python 3 and not Python 2.
-
-Then activate the virtualenv and install requirements via pip.
-
-For example:
+Medley is a Python 3 application. You'll need Python 3.4 or later as
+well as virtualenv and make. Then:
 
 #+begin_src shell
-virtualenv-3.4 .
+git clone git@github.com:lovett/medley.git
+cd medley
+make venv
 source bin/activate
 pip install -r requirements.txt
-cp sample.conf medley.conf
+pip install -r requirements-dev.txt
+cp medley.conf.example medley.conf
+python medley.py
 #+end_src
 
 * Testing
-From the repository root:
 
+For HTML output, run:
 #+begin_src shell
-PYTHONPATH=. py.test test/test_server.py
+make htmlcov
 #+end_src
 
-* Init Script
-
-The provided init script assumes a Debian environment and expects the
-application to reside under /srv/medley
-
-#+begin_src shell
-sudo cp init /etc/init.d/medley
-sudo update-rc.d medley defaults
-#+end_src
-
-* System user
-
-#+begin_src shell
-sudo adduser medley --system --ingroup proxy --home /srv/medley
-#+end_src
-
-The user is added to the proxy group because so that it can interact with pdnsd.
-
-The adduser command will warn that the specified home directory does
-not belong to the user being created, but ignore that.
+For console output, run:
+#+BEGIN_SRC shell
+make coverage
+#+END_SRC
