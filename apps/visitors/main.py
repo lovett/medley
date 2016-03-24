@@ -83,8 +83,6 @@ class Controller:
             active_date = datetime.now().strftime("date %Y-%m-%d")
             del filters["ip"]
 
-
-        print(filters)
         results, duration = util.fs.appengine_log_grep(roots[0]["value"], filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
