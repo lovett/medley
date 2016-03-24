@@ -3,8 +3,6 @@
   vars:
   roles:
     - common
-    - novuso.openssl
-    - nginx
     - git
     - python3
     - medley

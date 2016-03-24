@@ -1,3 +1,0 @@
----
-openssl_keys_path: "/etc/pki/tls/private"
-openssl_certs_path: "/etc/pki/tls/certs"
