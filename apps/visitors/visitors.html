@@ -148,8 +148,12 @@
                             <p>{{ result.ip_facts.organization }}</p>
                             {% endif %}
 
+                            {% if result.ip_facts.annotations|count == 0 %}
+                            <p class="annotation" data-id=""></p>
+                            {% endif %}
+
                             {% for annotation in result.ip_facts.annotations %}
-                            <p>{{ annotation }}</p>
+                            <p class="annotation" data-id="{{ annotation[1] }}">{{ annotation[0] }}</p>
                             {% endfor %}
 
                         </td>
@@ -157,7 +161,7 @@
 			    <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
                                 <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
                             </a>
-                            <a href="/registry/ip:{{ result.ip}}" title="Annotate this ip" rel="noreferrer">
+                            <a href="#annotate" data-ip="{{ result.ip }}" class="annotate-ip" title="Annotate this ip">
                                 <svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg>
                             </a>
 

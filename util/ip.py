@@ -24,7 +24,7 @@ def facts(ip, geo_lookup=True):
 
     annotations = registry.search(key="ip:{}".format(ip))
     if annotations:
-        facts["annotations"] = [annotation["value"] for annotation in annotations]
+        facts["annotations"] = [(annotation["value"], annotation["rowid"]) for annotation in annotations]
 
     if geo_lookup:
         geodb = apps.geodb.models.GeoDB()

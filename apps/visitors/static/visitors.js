@@ -1,7 +1,7 @@
 MEDLEY.visitors = (function () {
     'use strict';
 
-    var calculateDelta, queryToMultiline, saveQuery, resetQueryMenu;
+    var calculateDelta, queryToMultiline, saveQuery, resetQueryMenu, annotateIP;
 
     calculateDelta = function (e) {
         var referenceTimestamp, tbody, trigger;
@@ -152,11 +152,54 @@ MEDLEY.visitors = (function () {
         });
     }
 
+    function annotateIP(e) {
+        var existingValue, newValue, message, node;
+
+        e.preventDefault();
+
+        message = 'Enter a label for this IP';
+
+        node = jQuery(e.target).closest('TR').find('.annotation').first();
+
+        existingValue = node.text();
+
+        newValue = jQuery.trim(prompt('Enter a label for this IP', existingValue));
+
+        if (newValue === '' && existingValue !== '') {
+            jQuery.ajax({
+                type: 'DELETE',
+                url: '/registry/' + node.attr('data-id')
+            }).done(function (data) {
+                node.text('');
+                node.attr('data-id', '');
+            });
+            return;
+        } else if (newValue === '') {
+            return;
+        }
+
+        jQuery.ajax({
+            type: 'PUT',
+            dataType: 'json',
+            url: '/registry',
+            data: {
+                'key': 'ip:' + jQuery(this).attr('data-ip'),
+                'value': newValue,
+                'replace': true
+            }
+        }).done(function (data) {
+            node.text(newValue);
+            node.attr('data-id', data.uid);
+        });
+    }
+
     return {
         init: function () {
             jQuery('#save').on('click', saveQuery);
 
             jQuery('#q').on('keyup', resetQueryMenu);
+
+            jQuery('.annotate-ip').on('click', annotateIP);
 
             jQuery('#saved').on('change', function (e) {
                 var query, multiline;
