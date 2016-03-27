@@ -3,6 +3,44 @@ BODY {
     background-color: #efefef;
 }
 
+BUTTON {
+    border-radius: .25em;
+    border: 0;
+    color: #fff;
+    background-color: green;
+    padding: .5em 1em;
+}
+
+BUTTON:hover {
+    background-color: forestGreen;
+}
+
+BUTTON[disabled] {
+    background-color: #ccc;
+    border: #efefef;
+    color: #efefef;
+}
+
+BUTTON.small {
+    font-size: .85em;
+    padding: .5em;
+}
+
+CODE {
+    word-break: break-all;
+    white-space: pre-line;
+}
+
+DT {
+    font-weight: bold;
+    margin-left: 0;
+}
+
+DD {
+    margin-left: 0;
+    margin-bottom: 1em;
+}
+
 TABLE {
     min-width: 100%;
     margin: auto;
@@ -35,96 +73,6 @@ TABLE TD {
 
 TABLE.key-value TH {
     text-align: right;
-}
-
-.pagination {
-    margin: auto;
-    text-align: center;
-    height: 2em;
-}
-
-.pagination .next {
-    padding: 0 1em;
-}
-
-.pagination .previous {
-    padding: 0 1em;
-}
-
-.icon {
-    width: 1em;
-    height: 1em;
-    fill: #333;
-    vertical-align: middle;
-    padding-right: .5em;
-}
-
-.half-column {
-    box-sizing: border-box;
-    display: inline-block;
-    vertical-align: top;
-    width: 49%;
-}
-
-.third-column {
-    box-sizing: border-box;
-    display: inline-block;
-    vertical-align: top;
-    width: 33%;
-}
-
-.quarter-column {
-    box-sizing: border-box;
-    display: inline-block;
-    vertical-align: top;
-    width: 25%;
-}
-
-.two-third-column {
-    box-sizing: border-box;
-    display: inline-block;
-    vertical-align: top;
-    width: 66%;
-}
-
-.middle-column {
-    padding: 0 1em;
-}
-
-.svg-defs {
-    display: none;
-}
-
-#shortcuts {
-    display: none;
-}
-
-.content-wrapper {
-    width: 75%;
-    margin: auto;
-}
-
-.centered {
-    text-align: center;
-}
-
-DT {
-    font-weight: bold;
-    margin-left: 0;
-}
-
-DD {
-    margin-left: 0;
-    margin-bottom: 1em;
-}
-
-.focus-candidate .header {
-    background-color: green;
-}
-
-CODE {
-    word-break: break-all;
-    white-space: pre-line;
 }
 
 #page-header {
@@ -168,35 +116,22 @@ CODE {
     margin: 0;
 }
 
-.smaller {
-    font-size: .85em;
-}
-
-.hidden {
+#shortcuts {
     display: none;
 }
 
-.help:hover {
-    cursor: help;
+.centered {
+    text-align: center;
 }
 
-.shortcuts {
-    padding: 1em 0;
-    font-size: .85em;
-    text-align: right;
+.content-wrapper {
+    width: 75%;
+    margin: auto;
 }
 
-.shortcuts A {
-    margin-left: 1em;
-}
-
-.field {
-    padding-bottom: 1em;
-}
-
-.field LABEL {
-    display: block;
-    margin: .25em 0;
+.error {
+    background-color: #B03C25;
+    color: white;
 }
 
 .field .inline {
@@ -210,8 +145,44 @@ CODE {
     width: 96%;
 }
 
+.field LABEL {
+    display: block;
+    margin: .25em 0;
+}
+
 .field TEXTAREA {
     height: 5em;
+}
+
+.field {
+    padding-bottom: 1em;
+}
+
+.focus-candidate .header {
+    background-color: green;
+}
+
+.half-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 49%;
+}
+
+.help:hover {
+    cursor: help;
+}
+
+.hidden {
+    display: none;
+}
+
+.icon {
+    width: 1em;
+    height: 1em;
+    fill: #333;
+    vertical-align: middle;
+    padding-right: .5em;
 }
 
 .message {
@@ -219,9 +190,47 @@ CODE {
     padding: 1em;
 }
 
-.error {
-    background-color: #B03C25;
-    color: white;
+.middle-column {
+    padding: 0 1em;
+}
+
+.pagination .next {
+    padding: 0 1em;
+}
+
+.pagination .previous {
+    padding: 0 1em;
+}
+
+.pagination {
+    margin: auto;
+    text-align: center;
+    height: 2em;
+}
+
+.quarter-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 25%;
+}
+
+.shortcuts A {
+    margin-left: 1em;
+}
+
+.shortcuts {
+    padding: 1em 0;
+    font-size: .85em;
+    text-align: right;
+}
+
+.smaller {
+    font-size: .85em;
+}
+
+.strikeout {
+    text-decoration: line-through;
 }
 
 .success {
@@ -229,37 +238,22 @@ CODE {
     padding: .5em;
 }
 
-BUTTON {
-    border-radius: .25em;
-    border: 0;
-    color: #fff;
-    background-color: green;
-    padding: .5em 1em;
+.svg-defs {
+    display: none;
 }
 
-BUTTON:hover {
-    background-color: forestGreen;
-}
-
-
-BUTTON[disabled] {
-    background-color: #ccc;
-    border: #efefef;
-    color: #efefef;
-}
-
-BUTTON.small {
-    font-size: .85em;
-    padding: .5em;
-}
-
-.views {
-    text-align: right;
-}
-
-.views LI {
+.third-column {
+    box-sizing: border-box;
     display: inline-block;
-    margin-left: 1em;
+    vertical-align: top;
+    width: 33%;
+}
+
+.two-third-column {
+    box-sizing: border-box;
+    display: inline-block;
+    vertical-align: top;
+    width: 66%;
 }
 
 .views .active {
@@ -268,48 +262,11 @@ BUTTON.small {
     color: black;
 }
 
-
-/* Use the default selection style */
-::-webkit-selection {
-    background-color: blanchedalmond;
+.views LI {
+    display: inline-block;
+    margin-left: 1em;
 }
 
-::-moz-selection {
-    background-color: blanchedalmond;
-}
-
-::selection {
-    background-color: blanchedalmond;
-}
-
-.horizontal.linkset A {
-    margin-left: 2em;
-}
-
-.sleeve {
-    max-width: 100%;
-    overflow-x: auto;
-}
-
-@media only screen and (min-width: 40.063em) {
-    .sleeve {
-        min-width: auto;
-        overflow-x: inherit;
-    }
-}
-
-.nudge-right {
-    padding-left: 1em;
-}
-
-.strikeout {
-    text-decoration: line-through;
-}
-
-.flag {
-    color: #ccc;
-}
-
-.calc-delta.active .icon {
-    color: green;
+.views {
+    text-align: right;
 }
