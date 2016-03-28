@@ -7,27 +7,14 @@
         <p>No calls.</p>
         {% endif %}
 
-
         {% if calls|length > 0 %}
         <table>
             <thead>
                 <tr>
-                    <th colspan="4" class="pagination">
-                        {% if older_offset > 0 %}
-                        <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous"><svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg></a>
-                        {% endif %}
-                        {% if newer_offset >= 0 %}
-                        <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next"><svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg></a>
-                        {% endif %}
-                    </th>
-                </tr>
-            </thead>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>From</th>
-                    <th>Destination</th>
-                    <th>Result</th>
+                    <th width="25%">Date</th>
+                    <th width="25%">From</th>
+                    <th width="25%">Destination</th>
+                    <th width="25%">Duration</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,27 +23,41 @@
                     <td nowrap="nowrap">
                         {{ call["date"]|localtime("date") }}
                         <div class="smaller">{{ call["date"]|localtime("time12")}}</div>
-                        <div class="smaller">{{ call["duration"] }}</div>
                     </td>
                     <td>
                         {{ call["clid"] }}
                         <div class="smaller"><a href="/phone?number={{ call["src"] }}" rel="noreferrer">{{ call["src"] }}</a></div>
-                        <div class="smaller">{{ call["abbreviated_channel"] }}</div>
                     </td>
                     <td>
                         {{ call["dst"] }}
                         <div class="smaller">{{ call["abbreviated_dstchannel"]|default('', true) }}</div>
                     </td>
                     <td nowrap="nowrap">
-                        {{ call["lastapp"] }}
-                        <p class="smaller">{{ call["lastdata"]}}</p>
+                        {{ call["duration"] }}
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        <div class="pagination">
+            {% if newer_offset >= 0 %}
+            <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
+                <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                Newer
+            </a>
+            {% endif %}
+            {% if older_offset > 0 %}
+            <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
+                Older
+                <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+            </a>
+            {% endif %}
+        </div>
+
+        {% endif %}
+
     </div>
-    {% endif %}
 </main>
 
 {% endblock %}
