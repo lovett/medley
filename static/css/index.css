@@ -23,6 +23,10 @@
     background-color: #fff;
 }
 
+.module-grid .module:focus {
+    background-color: #ACDDEC;
+}
+
 .module-grid H2 {
     font-size: 1.25em;
     padding: 0;

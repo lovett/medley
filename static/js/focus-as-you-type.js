@@ -1,14 +1,16 @@
 (function ($) {
+    'use strict';
     $.fn.focusAsYouType = function(options) {
-        var buffer = '';
-        var settings = $.extend({
-            bufferLength: 5,
+        var buffer, candidates, elements, settings;
+        buffer = '';
+        settings = $.extend({
+            bufferLength: 2,
             candidateClass: 'focus-candidate'
         }, options);
 
-        var elements = jQuery(this);
+        elements = jQuery(this);
 
-        var candidates = elements.map(function (index, el) {
+        candidates = elements.map(function (index, el) {
             var text = $(el).text().trim();
 
             text = text.split('\n').shift().toLowerCase();
@@ -16,18 +18,15 @@
         }).get();
 
         $(document).on('keypress', function (e) {
+            var matches, score;
             buffer = buffer + String.fromCharCode(e.which);
             buffer = buffer.slice(0, settings.bufferLength);
 
-            var matches = candidates.map(function (candidate) {
-                if (candidate.indexOf(buffer) == 0) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+            matches = candidates.map(function (candidate) {
+                return (candidate.indexOf(buffer) === 0)? 1 : 0;
             });
 
-            var score = matches.reduce(function (accumulator, value) {
+            score = matches.reduce(function (accumulator, value) {
                 return accumulator + value;
             });
 
@@ -40,12 +39,13 @@
                         $(elements[index]).addClass(settings.candidateClass);
                     }
                 });
-            };
+            }
         });
 
         setInterval(function () {
             buffer = '';
-        }, 3000);
+            elements.removeClass(settings.candidateClass).blur();
+        }, 4000);
         return this;
     };
 }(jQuery));
