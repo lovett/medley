@@ -36,3 +36,10 @@
 .module-grid P {
     margin: 0;
 }
+
+@media only screen and (max-width: 600px) {
+    .module-grid .module {
+        width: 100%;
+        margin: .5em;
+    }
+}
