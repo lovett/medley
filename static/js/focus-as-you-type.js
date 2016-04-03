@@ -17,10 +17,20 @@
             return text;
         }).get();
 
+        function reset() {
+            buffer = '';
+            elements.removeClass(settings.candidateClass).blur();
+        }
+
         $(document).on('keypress', function (e) {
             var matches, score;
             buffer = buffer + String.fromCharCode(e.which);
             buffer = buffer.slice(0, settings.bufferLength);
+
+            if (e.which === 27) { // escape key
+                reset();
+                return;
+            }
 
             matches = candidates.map(function (candidate) {
                 return (candidate.indexOf(buffer) === 0)? 1 : 0;
@@ -43,8 +53,7 @@
         });
 
         setInterval(function () {
-            buffer = '';
-            elements.removeClass(settings.candidateClass).blur();
+            reset();
         }, 4000);
         return this;
     };
