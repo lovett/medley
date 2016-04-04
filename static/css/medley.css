@@ -45,7 +45,6 @@ TABLE {
     min-width: 100%;
     margin: auto;
     background-color: white;
-    border: 1px solid #ccc;
     font-size: .85em;
     border-collapse: collapse;
 }
@@ -253,6 +252,12 @@ TABLE.key-value TH {
     display: none;
 }
 
+.table-wrapper {
+    width: 100%;
+    overflow: scroll;
+    border: 1px solid #ccc;
+}
+
 .third-column {
     box-sizing: border-box;
     display: inline-block;
@@ -280,4 +285,11 @@ TABLE.key-value TH {
 
 .views {
     text-align: right;
+}
+
+
+@media only screen and (max-width: 600px) {
+    .content-wrapper {
+        width: 98%;
+    }
 }
