@@ -139,9 +139,10 @@ TABLE.key-value TH {
 }
 
 .field INPUT[type=text], .field TEXTAREA {
+    box-sizing: border-box;
     border: 1px solid #ccc;
     padding: .5em;
-    width: 96%;
+    width: 100%;
 }
 
 .field LABEL {
@@ -287,9 +288,8 @@ TABLE.key-value TH {
     text-align: right;
 }
 
-
 @media only screen and (max-width: 600px) {
     .content-wrapper {
-        width: 98%;
+        width: 95%;
     }
 }
