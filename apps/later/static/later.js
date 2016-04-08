@@ -2,10 +2,11 @@ MEDLEY.later = (function () {
     'use strict';
 
     function submitForm(e) {
-        var form, field, errorMessage;
+        var button, form, field, errorMessage;
         e.preventDefault();
 
         form = jQuery(this);
+        button = form.find('BUTTON').last();
 
         field = jQuery('#url', form);
 
@@ -19,6 +20,7 @@ MEDLEY.later = (function () {
             return;
         }
 
+        button.attr('disabled', 'true').text(button.attr('data-alt'));
 
         jQuery.ajax({
             type: form.attr('method'),
@@ -31,7 +33,7 @@ MEDLEY.later = (function () {
         }).fail(function (data) {
             jQuery('.error.message').removeClass('hidden').text(data.statusText);
             jQuery('.success.message').addClass('hidden');
-            form.addClass('error');
+            button.attr('disabled', false).text(button.attr('data-default'));
         });
     }
 

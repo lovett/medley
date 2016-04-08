@@ -18,8 +18,8 @@
             <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ base }}/later?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))" rel="noreferrer">⚡ later</a>
         </div>
 
-        <form id="later-form" class="{% if error %}error{% endif %}" method="post" action="/archive">
-            <div class="hidden error message">{{ error }}</div>
+        <form id="later-form" method="post" action="/archive">
+            <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
             <div class="hidden success message">Success!</div>
 
             <div class="field">
@@ -53,7 +53,7 @@
             </div>
 
             <div class="field">
-                <button>Save</button>
+                <button data-default="Save" data-alt="Please wait">Save</button>
             </div>
         </div>
     </div>
