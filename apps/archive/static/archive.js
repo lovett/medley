@@ -2,18 +2,23 @@ MEDLEY.archive = (function () {
     'use strict';
 
     function deleteBookmark (e) {
-        var form, trigger;
+        var form, group, trigger;
         e.preventDefault();
         trigger = jQuery(this);
+        group = trigger.closest('.group');
+
         form = trigger.closest('FORM');
         jQuery.ajax({
             type: 'DELETE',
             url: '/archive?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
         }).done(function () {
-            trigger.closest('.event').remove();
-            if (jQuery('MAIN .event').length === 0) {
+            trigger.closest('.bookmark').remove();
+            if (group.find('.bookmark').length === 0) {
+                group.remove();
+            }
+
+            if (jQuery('.bookmark').length === 0) {
                 jQuery('.nothing-message').removeClass('hidden');
-                jQuery('MAIN H1').remove();
             }
         }).fail(function (data) {
             console.log(data.responseText);

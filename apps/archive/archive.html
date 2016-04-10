@@ -29,35 +29,37 @@
         <p {% if entries %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
         {% for key, entries in entries.items() %}
-        <h1 class="date-group">{{ entries[0].created|localtime("date-full") }}</h1>
-        {% for entry in entries %}
-        <div class="bookmark">
-            <div class="actions">
-                <a href="#" class="delete" data-uid="{{ entry.rowid }}" rel="noreferrer">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                </a>
-            </div>
+        <div class="group">
+            <h1 class="date-group">{{ entries[0].created|localtime("date-full") }}</h1>
+            {% for entry in entries %}
+            <div class="bookmark">
+                <div class="actions">
+                    <a href="#" class="delete" data-uid="{{ entry.rowid }}" rel="noreferrer">
+                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                    </a>
+                </div>
 
-            <time>
-                {{ entry.created|localtime("time12") }}
-            </time>
-            <h2><a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a></h2>
-            <a class="domain" href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
+                <time>
+                    {{ entry.created|localtime("time12") }}
+                </time>
 
-            {% if not entry.has_fulltext %}
-            <div class="meta">
-                No fulltext available
-            </div>
-            {% endif %}
+                <h2><a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a></h2>
+                <a class="domain" href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
 
-            {% if entry.comments %}
-            <div class="comments">
-                {{ entry.comments }}
+                {% if not entry.has_fulltext %}
+                <div class="meta">
+                    No fulltext available
+                </div>
+                {% endif %}
+
+                {% if entry.comments %}
+                <div class="comments">
+                    {{ entry.comments }}
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
+            {% endfor %}
         </div>
-        {% endfor %}
-
         {% endfor %}
     </div>
 </main>
