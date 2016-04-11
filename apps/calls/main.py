@@ -21,9 +21,15 @@ class Controller:
         cdr = apps.phone.models.AsteriskCdr()
         registry = apps.registry.models.Registry()
 
-        exclusions = [row["value"] for row in registry.search("calls:exclude")]
+        exclusions = registry.search("calls:exclude")
 
-        (calls, total) = cdr.callLog(offset=offset, exclude=exclusions)
+
+        src_exclusions = [ex["value"] for ex in exclusions if ex["key"].endswith("src")]
+        dst_exclusions = [ex["value"] for ex in exclusions if ex["key"].endswith("dst")]
+
+        print(src_exclusions)
+
+        (calls, total) = cdr.callLog(offset=offset, src_exclude=src_exclusions, dst_exclude=dst_exclusions)
 
         older_offset = len(calls) + offset
         if older_offset > total:
