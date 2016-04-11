@@ -255,7 +255,6 @@ TABLE.key-value TH {
 
 .table-wrapper {
     width: 100%;
-    overflow: scroll;
     border: 1px solid #ccc;
 }
 
@@ -290,6 +289,7 @@ TABLE.key-value TH {
 
 @media only screen and (max-width: 600px) {
     .content-wrapper {
+        overflow: auto;
         width: 95%;
     }
 }
