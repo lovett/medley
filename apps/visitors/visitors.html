@@ -133,7 +133,7 @@
                                 {% if result.ip_facts.geo.country_code == "US" %}
                                 {{ result.ip_facts.geo.region_code|default("", true) }}
                                 {% else %}
-                                {{ result.ip_facts.geo.country_name }}
+                                {{ result.ip_facts.geo.country_name|default("", true) }}
                                 {% endif %}
                             </p>
                         </td>
