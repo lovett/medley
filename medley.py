@@ -23,6 +23,7 @@ import apps.captures.main
 import apps.callerid.main
 import apps.calls.main
 import apps.countries.main
+import apps.speak.main
 
 import tools.negotiable
 import tools.response_time
