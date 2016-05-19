@@ -4,6 +4,7 @@ import apps.registry.models
 import tools.jinja
 import requests
 import hashlib
+import os.path
 
 class Controller:
     """
@@ -46,6 +47,15 @@ class Controller:
 
         if not "client_secret" in config:
             raise cherrypy.HTTPError(500, "No client secret configured")
+
+        if not "cache_dir" in config:
+            raise cherrypy.HTTPERror(500, "No cache dir configured")
+
+        cache_path = os.path.join(config["cache_dir"], statement_hash.hexdigest() + ".wav")
+        if os.path.exists(cache_path):
+            # play cached file; do not make api call
+            print("cache hit!")
+            return
 
         # Get an auth token
         auth = requests.post(self.token_request_url, data = {
