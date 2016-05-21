@@ -17,3 +17,4 @@ db
 ansible/*.hosts
 ansible/host_vars
 venv
+cache

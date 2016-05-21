@@ -2,6 +2,7 @@ import cherrypy
 import os.path
 import os
 import plugins.jinja
+import plugins.audio
 import inspect
 
 import apps.headers.main
@@ -139,6 +140,7 @@ if __name__ == "__main__":
             cherrypy.process.plugins.PIDFile(cherrypy.engine, pid_file).subscribe()
 
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
+    plugins.audio.Plugin(cherrypy.engine).subscribe()
 
     cherrypy.engine.start()
     cherrypy.engine.block()
