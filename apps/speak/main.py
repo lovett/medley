@@ -21,7 +21,7 @@ class Controller:
 
     exposed = True
 
-    user_facing = True
+    user_facing = False
 
     token_request_url = "https://oxford-speech.cloudapp.net/token/issueToken"
     tts_host = "https://speech.platform.bing.com"
@@ -67,13 +67,6 @@ class Controller:
     def ns(self, value):
         (prefix, attribute) = value.split(":")
         return "{{{}}}{}".format(self.xml_namespaces[prefix], attribute)
-
-    @cherrypy.tools.template(template="speak.html")
-    @cherrypy.tools.negotiable()
-    def GET(self):
-        return {
-            "app_name": self.name
-        }
 
     def POST(self, statement, locale="en-GB", gender="Male"):
         if not (locale, gender) in self.voice_fonts:
