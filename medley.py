@@ -46,7 +46,8 @@ class MedleyServer(object):
         for name, controller in cherrypy.tree.apps.items():
             if not name:
                 continue
-            app = (name[1:], controller.root.__doc__)
+            app_summary = controller.root.__doc__.strip().split("\n").pop(0)
+            app = (name[1:], app_summary)
             if getattr(controller.root, "user_facing", False):
                 user_facing_apps.append(app)
             else:
