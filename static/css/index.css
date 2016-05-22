@@ -24,7 +24,12 @@
 }
 
 .module-grid .module:focus {
-    background-color: #ACDDEC;
+    background-color: #56904e;
+    color: white;
+}
+
+.module-grid .focus-candidate {
+    background-color: #e8f7cc;
 }
 
 .module-grid H2 {

@@ -80,39 +80,25 @@ TABLE.key-value TH {
     padding: 1em;
     border-bottom: 2px solid #666;
     margin-bottom: 1em;
-}
-
-#page-header .home {
-    float: right;
-    text-decoration: none;
-    padding-right: .5em;
+    display: flex;
+    justify-content: space-between;
 }
 
 #page-header .icon {
     fill: #fff;
-    width: 2em;
-    height: 2em;
-    vertical-align: middle;
+    width: 2.1em;
+    height: 2.1em;
 }
 
 #page-header H1 {
-    display: inline-block;
-    vertical-align: middle;
+    font-size: 2.25em;
+    line-height: 1;
     margin: 0;
     font-weight: normal;
 }
 
-#page-header A {
-    color: black;
-    text-decoration: none;
-}
-
-#page-header A:hover {
-    text-decoration: underline;
-}
-
-#page-header P {
-    margin: 0;
+#page-header .focus-buffer-display {
+    line-height: 2.25;
 }
 
 #shortcuts {
@@ -156,10 +142,6 @@ TABLE.key-value TH {
 
 .field {
     padding-bottom: 1em;
-}
-
-.focus-candidate .header {
-    background-color: green;
 }
 
 .half-column {
