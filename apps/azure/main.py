@@ -20,21 +20,21 @@ class Controller:
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
-        registry = apps.registry.models.Registry()
-        notifier_config = registry.search(key="notifier:*")
-        notifier = {}
-
-        if not notifier_config:
-            raise cherrypy.HTTPError(500, "No notification config found in registry")
-
-        for item in notifier_config:
-            k = item["key"].split(":")[1]
-            notifier[k] = item["value"]
-
         details = cherrypy.request.json
 
         if not details.get("siteName"):
             raise cherrypy.HTTPError(400, "Site name not specified")
+
+        registry = apps.registry.models.Registry()
+
+        notifier_config = registry.search(key="notifier:*")
+        if not notifier_config:
+            raise cherrypy.HTTPError(500, "No notification config found in registry")
+
+        notifier = {}
+        for item in notifier_config:
+            k = item["key"].split(":")[1]
+            notifier[k] = item["value"]
 
         notification = {
             "group": "azure",
