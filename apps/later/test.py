@@ -71,12 +71,16 @@ class TestLater(cptestcase.BaseCherryPyTestCase):
     def test_urlLookup(self, findMock):
         """An existing bookmark is fetched by url, overwriting querystring values"""
         findMock.return_value = {
-            "title": "existing title"
+            "title": "existing title",
+            "tags": None,
+            "comments": None
         }
         response = self.request("/", url="http://example.com", title="my title")
+        print(response.body)
         self.assertTrue(findMock.called)
         self.assertTrue("existing title" in response.body)
         self.assertFalse("my title" in response.body)
+        self.assertTrue("already been bookmarked" in response.body)
 
 
 if __name__ == "__main__":
