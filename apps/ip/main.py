@@ -50,12 +50,12 @@ class Controller:
 
         dns_command = dns_command[0]["value"].split(" ")
 
-        token = registry.search(key="ip:token:{}".format(token))
-        if not token:
+        token_from_registry = registry.search(key="ip:token:{}".format(token))
+        if not token_from_registry:
             cherrypy.response.status = 409
             return
 
-        host = token[0]["value"]
+        host = token_from_registry[0]["value"]
 
         cache_key = "ip:{}".format(host)
         cached_value = cache.get(cache_key)

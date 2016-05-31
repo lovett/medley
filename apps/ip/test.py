@@ -2,6 +2,7 @@ import cptestcase
 import helpers
 import unittest
 import apps.ip.main
+import apps.registry.models
 import cherrypy
 import mock
 import util.net
@@ -98,74 +99,102 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 400)
         self.assertFalse(externalIpMock.called)
 
+    @mock.patch("apps.registry.models.Registry.search")
     @mock.patch("util.net.sendNotification")
     @mock.patch("util.net.externalIp")
     @mock.patch("util.cache.Cache.set")
     @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
-    def test_externalToken(self, callMock, cacheGetMock, cacheSetMock, externalIpMock, notificationMock):
+    def test_externalToken(self, callMock, cacheGetMock, cacheSetMock, externalIpMock, notificationMock, registrySearchMock):
         """It calls the configured DNS update command via subprocess on PUT with a valid token"""
 
-        cacheGetMock.return_value = None
+        registrySearchMock.side_effect = [
+            [
+                {"key": "ip:dns_command", "value": "test $ip $host"}
+            ],
+            [
+                {"key": "ip:token:external", "value": "test.example.com"}
+            ]
+        ]
+
+        cacheGetMock.return_value = (None, None)
         cacheSetMock.return_value = None
         externalIpMock.return_value = "127.0.0.1"
 
-        expected_command = cherrypy.config["ip.dns.command"][:]
-        expected_command[3] = externalIpMock.return_value
-        expected_command[4] = "external.example.com"
-
-
         response = self.request("/", method="PUT", token="external")
         self.assertEqual(response.code, 201)
-        callMock.assert_called_once_with(expected_command)
+        callMock.assert_called_once_with(["test", "127.0.0.1", "test.example.com"])
         self.assertTrue(externalIpMock.called)
         self.assertTrue(notificationMock.called)
 
 
+    @mock.patch("apps.registry.models.Registry.search")
     @mock.patch("util.cache.Cache.set")
     @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
-    def test_validTokenUpdatesDns(self, callMock, cacheGetMock, cacheSetMock):
+    def test_validTokenUpdatesDns(self, callMock, cacheGetMock, cacheSetMock, registrySearchMock):
         """It calls the configured DNS update command via subprocess on PUT with a valid token"""
 
-        cacheGetMock.return_value = None
+        registrySearchMock.side_effect = [
+            [
+                {"key": "ip:dns_command", "value": "test $ip $host"}
+            ],
+            [
+                {"key": "ip:token:test", "value": "test.example.com"}
+            ]
+        ]
+
+        cacheGetMock.return_value = (None, None)
         cacheSetMock.return_value = None
-
-        expected_command = cherrypy.config["ip.dns.command"][:]
-        expected_command[3] = "127.0.0.1"
-        expected_command[4] = "test.example.com"
-
 
         response = self.request("/", method="PUT", token="test")
         self.assertEqual(response.code, 201)
-        callMock.assert_called_once_with(expected_command)
+        callMock.assert_called_once_with(["test", "127.0.0.1", "test.example.com"])
 
 
+    @mock.patch("apps.registry.models.Registry.search")
     @mock.patch("util.cache.Cache.set")
     @mock.patch("util.cache.Cache.get")
     @mock.patch("apps.ip.main.subprocess.call")
-    def test_tokenCachedValue(self, callMock, cacheGetMock, cacheSetMock):
+    def test_tokenCachedValue(self, callMock, cacheGetMock, cacheSetMock, registrySearchMock):
         """It caches the result of previous calls to avoid unnessary subprocess calls."""
 
-        cacheGetMock.return_value = "1.1.1.1"
+        registrySearchMock.side_effect = [
+            [
+                {"key": "ip:dns_command", "value": "test $ip $host"}
+            ],
+            [
+                {"key": "ip:token:test", "value": "test.example.com"}
+            ]
+        ]
+
+        cacheGetMock.return_value = ["1.1.1.1", None]
 
         response = self.request("/", method="PUT", token="test", headers={"Remote-Addr": "1.1.1.1"})
-        self.assertEqual(response.code, 201)
+        self.assertEqual(response.code, 304)
         self.assertTrue(cacheGetMock.called)
         self.assertFalse(cacheSetMock.called)
         self.assertFalse(callMock.called)
 
     @mock.patch("apps.ip.main.subprocess.call")
-    def test_invalidToken(self, callMock):
+    @mock.patch("apps.registry.models.Registry.search")
+    def test_invalidToken(self, registrySearchMock, callMock):
         """It fails when an invalid token is provided """
+        registrySearchMock.side_effect = [
+            [
+                {"key": "ip:dns_command", "value": "test test"}
+            ],
+            None
+        ]
         response = self.request("/", method="PUT", token="bogus")
-        self.assertEqual(response.code, 400)
+        self.assertEqual(response.code, 409)
         self.assertFalse(callMock.called)
 
     @mock.patch("apps.ip.main.subprocess.call")
-    def test_validTokenNoDns(self, callMock):
+    @mock.patch("apps.registry.models.Registry.search")
+    def test_validTokenNoDns(self, registrySearchMock, callMock):
         """It fails when a dns command has not been configured"""
-        cherrypy.config["ip.dns.command"] = None
+        registrySearchMock.return_value = None
         response = self.request("/", method="PUT", token="test")
         self.assertEqual(response.code, 409)
         self.assertFalse(callMock.called)
