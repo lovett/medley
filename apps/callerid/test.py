@@ -34,7 +34,7 @@ class TestCallerid(cptestcase.BaseCherryPyTestCase):
         setCallerIdMock.return_value = True
 
         response = self.request("/", method="PUT", cid_number="5551234567", cid_value="test")
-        self.assertEqual(response.code, 200)
+        self.assertEqual(response.code, 204)
         self.assertTrue(authenticateMock.called)
         self.assertTrue(setCallerIdMock.called)
 

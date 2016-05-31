@@ -7,6 +7,8 @@ import apps.calls.main
 import mock
 import time
 import apps.phone.models
+import apps.registry.models
+import apps.phone.models
 import tempfile
 import shutil
 import os.path
@@ -31,13 +33,15 @@ class TestCalls(cptestcase.BaseCherryPyTestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
-
-    def test_returnsHtml(self):
+    @mock.patch("apps.phone.models.AsteriskCdr.callLog")
+    @mock.patch("apps.registry.models.Registry.search")
+    def test_returnsHtml(self, registrySearchMock, callLogMock):
         """It returns HTML by default"""
-        response = self.request("/")
-        print(response.body)
-        self.assertEqual(response.code, 200)
 
+        registrySearchMock.return_value = []
+        callLogMock.return_value = ([], 0)
+        response = self.request("/")
+        self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
 
 
