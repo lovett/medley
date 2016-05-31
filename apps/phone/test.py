@@ -91,6 +91,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         blacklistMock.return_value = False
         historyMock.return_value = []
         response = self.request("/", number="1234567890")
+
         self.assertEqual(response.code, 200)
         self.assertTrue("message" in response.body)
         self.assertTrue(cacheGetMock.called)

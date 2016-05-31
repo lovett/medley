@@ -65,15 +65,16 @@ class Controller:
         cdr = apps.phone.models.AsteriskCdr()
         history = cdr.callHistory(number, 10)
 
-        if not caller_id:
-            try:
-                caller_id = history[0][0]["clid"]
-            except (IndexError, KeyError):
-                caller_id = "Unknown"
+        if len(history) > 0:
+            history = history[0]
+            if not caller_id and "clid" in history[0]:
+                caller_id = history[0]["clid"]
+        else:
+            history = []
 
         return {
             "caller_id": caller_id,
-            "history": history[0],
+            "history": history,
             "number": number,
             "blacklisted": blacklisted,
             "number_formatted": util.phone.format(number),
