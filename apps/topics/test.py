@@ -21,13 +21,6 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="awsranges-test")
-        cherrypy.config["database_dir"] = self.temp_dir
-
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
-
     @mock.patch("util.cache.Cache.get")
     def test_returnsHtml(self, cacheGetMock):
         """It returns HTML"""

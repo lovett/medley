@@ -50,8 +50,7 @@ class Controller:
                 if "q" in qs:
                     topics.append(qs["q"][0])
 
-
-        while len(topics) < count:
+        while len(topics) > 0 and len(topics) < count:
             limit = min(len(topics), count - len(topics))
             topics.extend(topics[0:limit])
 
