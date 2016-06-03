@@ -84,8 +84,9 @@ class Controller:
             whois_result = r.json()
             cache.set(cache_key, whois_result)
 
-        ip_facts = util.ip.facts(ip)
 
+
+        ip_facts = util.ip.facts(ip)
 
         # Google charts
         try:

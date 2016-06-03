@@ -47,6 +47,12 @@
                     <dd><a href="{{ whois.net.customerRef["$"] }}" target="_blank" rel="noreferrer">{{ whois.net.customerRef["@name"] }}</a></dd>
                     {% endif %}
 
+                    {% if "orgRef" in whois.net %}
+                    <dt>Organization</dt>
+                    <dd><a href="{{ whois.net.orgRef["$"] }}" target="_blank" rel="noreferrer">{{ whois.net.orgRef["@name"] }}</a>
+                    <dd class="supplemental"><a href="https://whois.arin.net/rest/org/{{ whois.net.orgRef["@handle"] }}/nets" target="_blank" rel="noreferrer">Related networks</a></dd>
+                    {% endif %}
+
                     {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
                     <dt>City</dt>
                     <dd>{{ ip_facts.geo.city}}, {{ip_facts.geo.region_code }}</dd>

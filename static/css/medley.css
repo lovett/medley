@@ -37,8 +37,18 @@ DT {
 }
 
 DD {
-    margin-left: 0;
     margin-bottom: 1em;
+    margin-left: 0;
+}
+
+DD.supplemental {
+    font-size: .85em;
+    padding-left: 1em;
+    margin-top: -1em;
+}
+
+DD.supplemental A {
+    text-decoration: none;
 }
 
 TABLE {
