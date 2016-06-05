@@ -8,6 +8,7 @@ import inspect
 import apps.headers.main
 import apps.lettercase.main
 import apps.ip.main
+import apps.jenkins.main
 import apps.topics.main
 import apps.whois.main
 import apps.geodb.main
