@@ -177,13 +177,6 @@
                                 {{ result.timestamp|localtime('time12') }}
                             </p>
 
-                            {% if result.ip_facts.geo.time_zone %}
-                            <p>
-                                <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
-                                {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
-                            </p>
-                            {% endif %}
-
                             <p class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}">Δ <span class="value">{{ result.delta }}</span> <span class="label"></span></p>
                             </p>
 
@@ -216,6 +209,14 @@
                     </tr>
                     <tr class="expandable">
                         <td colspan="7">
+                            <p class="meta">
+                                <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
+                                {{ result.timestamp|ago() }}
+                                {% if result.ip_facts.geo.time_zone %}
+                                at {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
+                                {% endif %}
+                            </p>
+
                             <p class="wordwrap"><code>{{ result.line }}</code></p>
                         </td>
                     </tr>

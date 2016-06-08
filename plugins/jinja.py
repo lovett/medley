@@ -26,6 +26,7 @@ class Plugin(plugins.SimplePlugin):
         self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
 
         self.env.filters["datetime"] = self.datetime_filter
+        self.env.filters["ago"] = self.ago_filter
         self.env.filters["localtime"] = self.localtime_filter
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["useragent"] = self.useragent_filter
@@ -143,3 +144,36 @@ class Plugin(plugins.SimplePlugin):
 
     def urlencode_filter(self, value):
         return urllib.parse.quote(value)
+
+    def ago_filter(self, value):
+        tz = cherrypy.config.get("timezone")
+        timezone = pytz.timezone(tz)
+
+        today = timezone.localize(datetime.datetime.today())
+
+        if value.tzinfo:
+            value = value.astimezone(timezone)
+        else:
+            value = pytz.timezone(timezone).localize(value)
+
+        year = datetime.timedelta(days=365)
+        month = datetime.timedelta(days=30)
+        week = datetime.timedelta(weeks=1)
+        day = datetime.timedelta(days=1)
+        hour = datetime.timedelta(hours=1)
+        minute = datetime.timedelta(seconds=3600)
+        delta = today - value
+
+        if delta > year:
+            intervals.push("{} years".format(delta // year))
+
+        if delta > month:
+            return "{} months ago".format(delta // month)
+
+        if delta > week:
+            return "{} weeks ago".format(delta // week)
+
+        if delta > day:
+            return "{} days ago".format(delta // day)
+
+        return "today"
