@@ -58,6 +58,15 @@ class TestLettercase(cptestcase.BaseCherryPyTestCase):
                                 value="test")
         self.assertEqual(response.body, "TEST")
 
+    def test_capitalize(self):
+        """Input is capitalized"""
+        response = self.request(path="/",
+                                method="POST",
+                                as_plain=True,
+                                style="capitalize",
+                                value="test Case")
+        self.assertEqual(response.body, "Test case")
+
     def test_title(self):
         """Input is converted to titlecase"""
         response = self.request(path="/",
