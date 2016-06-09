@@ -34,6 +34,17 @@ class TestLater(cptestcase.BaseCherryPyTestCase):
         response = self.request("/")
         self.assertEqual(response.code, 200)
 
+    def test_bookmarkletUrlProtocol(self):
+        """If application is running under HTTPS, the bookmarklet url use HTTPS"""
+        host = "bookmark.hostname.example.com"
+        response = self.request("/", headers={
+            "Host": host,
+            "X-HTTPS": "On"
+        })
+        self.assertEqual(response.code, 200)
+        self.assertTrue("https://{}".format(host) in response.body)
+
+
     def test_populatesTitle(self):
         """The title field is prepopulated if provided via querystring"""
         samples = (
@@ -76,7 +87,6 @@ class TestLater(cptestcase.BaseCherryPyTestCase):
             "comments": None
         }
         response = self.request("/", url="http://example.com", title="my title")
-        print(response.body)
         self.assertTrue(findMock.called)
         self.assertTrue("existing title" in response.body)
         self.assertFalse("my title" in response.body)
