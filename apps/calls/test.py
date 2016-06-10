@@ -44,6 +44,20 @@ class TestCalls(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
 
+    @mock.patch("apps.phone.models.AsteriskCdr.callLog")
+    @mock.patch("apps.registry.models.Registry.search")
+    def test_invalidOffset(self, registrySearchMock, callLogMock):
+        """An invalid offset is return as zero"""
+
+        registrySearchMock.return_value = []
+        callLogMock.return_value = ([
+            {}
+        ], 1)
+        response = self.request("/", offset=2)
+        self.assertEqual(response.code, 200)
+        self.assertTrue("Older" not in response.body)
+
+
 
 if __name__ == "__main__":
     unittest.main()
