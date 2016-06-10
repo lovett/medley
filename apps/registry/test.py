@@ -37,14 +37,10 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertFalse(recentMock.called)
         self.assertFalse(searchMock.called)
 
-    @mock.patch("apps.registry.models.Registry.recent")
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_recentEntries(self, searchMock, recentMock):
-        """Recent entries are returned by default"""
-        response = self.request("/")
+    def test_defaultView(self):
+        """An invalid view returns the search view"""
+        response = self.request("/", view="test")
         self.assertEqual(response.code, 200)
-        self.assertTrue(recentMock.called)
-        self.assertFalse(searchMock.called)
 
     @mock.patch("apps.registry.models.Registry.recent")
     @mock.patch("apps.registry.models.Registry.search")
