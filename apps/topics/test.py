@@ -32,6 +32,37 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue("Using cached value" in response.body)
         self.assertTrue(cacheGetMock.called)
 
+    @mock.patch("util.cache.Cache.get")
+    def test_numericCount(self, cacheGetMock):
+        """It requires a numeric count"""
+        response = self.request("/", count="test")
+        self.assertEqual(response.code, 400)
+
+        cacheGetMock.return_value = ("<html></html>", time.time())
+        response = self.request("/", count="100")
+        self.assertEqual(response.code, 200)
+
+    @mock.patch("util.cache.Cache.get")
+    def test_limitsTopics(self, cacheGetMock):
+        """It requires a numeric count"""
+        response = self.request("/", count="test")
+        self.assertEqual(response.code, 400)
+
+        cacheGetMock.return_value = ("""
+        <html>
+            <ul id="crs_pane">
+                <li><a href="http://example.com/?q=link1">link1</a></li>
+                <li><a href="http://example.com/?q=link2+multiword">link2 multiword</a></li>
+                <li><a href="http://example.com/?q=link3%20multiword">link3 multiword</a></li>
+                <li><a href="http://example.com/?q=%23link4">link4 hashtag</a></li>
+                <li><a href="http://example.com/link5">link5</a></li>
+            </ul>
+        </html>""", time.time())
+        response = self.request("/", count="1")
+        self.assertEqual(response.code, 200)
+        self.assertTrue("link5" not in response.body)
+
+
 
     @responses.activate
     @mock.patch("util.cache.Cache.set")
