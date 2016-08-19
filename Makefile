@@ -27,6 +27,12 @@ update: dummy
 venv: dummy
 	rm -rf venv
 	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
+	pip install --upgrade pip
+	make pip
+
+pip: dummy
+	pip install -r requirements.txt
+	pip install -r requirements-dev.txt
 
 
 # Create the coverage directory
