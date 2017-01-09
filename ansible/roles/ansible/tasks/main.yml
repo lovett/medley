@@ -1,6 +1,6 @@
 ---
 - name: Install python2 packages
-  sudo: yes
+  become: true
   apt:
     name={{ item }}
     state=latest
@@ -9,9 +9,8 @@
     - python-pip
 
 - name: Install ansible
-  sudo: yes
+  become: true
   pip:
-    executable=/usr/bin/pip
     name=ansible
     state=present
     virtualenv={{ project_root }}

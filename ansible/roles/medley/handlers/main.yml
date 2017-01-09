@@ -1,4 +1,4 @@
 ---
 - name: restart medley
-  sudo: yes
+  become: true
   service: name=medley state=restarted

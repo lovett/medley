@@ -1,21 +1,27 @@
 ---
 - name: Install git package
-  sudo: yes
+  become: true
   apt: name=git state=present
 
 - name: Delete backup
-  sudo: yes
+  become: true
   file:
     path={{ project_root }}.bak
     state=absent
 
+- name: Current installation stat
+  stat:
+    path={{ project_root  }}
+  register: install_check
+
 - name: Backup the current installation
-  sudo: yes
+  become: true
+  when: install_check.stat.isdir is defined and install_check.stat.isdir
   shell: cp -r {{ project_root }} {{ project_root }}.bak
     creates={{ project_root }}.bak
 
 - name: Create application directory
-  sudo: yes
+  become: true
   file:
     path={{ project_root }}
     owner={{ project_user }}
@@ -24,8 +30,8 @@
     mode=0775
 
 - name: Checkout head version of master branch
-  sudo: yes
-  sudo_user: "{{ project_user }}"
+  become: true
+  become_user: "{{ project_user }}"
   git:
     repo={{ project_repo }}
     dest={{ project_root }}
@@ -33,7 +39,7 @@
   notify: restart medley
 
 - name: Make checkout group writable
-  sudo: yes
+  become: true
   file:
     path="{{ project_root }}"
     state=directory

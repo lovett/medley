@@ -1,6 +1,6 @@
 ---
 - name: Symlink init script
-  sudo: yes
+  become: true
   file:
     path="/etc/init.d/{{ project_name }}"
     src="{{ project_root }}/init"
@@ -8,6 +8,6 @@
   notify: restart medley
 
 - name: Activate init script
-  sudo: yes
+  become: true
   command: update-rc.d {{ project_name }} defaults
   notify: restart medley

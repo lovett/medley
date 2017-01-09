@@ -1,4 +1,4 @@
 ---
 - name: reload monit
-  sudo: yes
+  become: true
   service: name=monit state=reloaded

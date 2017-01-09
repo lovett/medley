@@ -1,6 +1,6 @@
 ---
 - name: Install python3 system packages
-  sudo: yes
+  become: true
   apt: name={{ item }} state=latest
   with_items:
     - python3
@@ -8,7 +8,7 @@
     - python3-lxml
 
 - name: Install virtualenv for python3
-  sudo: yes
+  become: true
   pip:
     executable=pip3
     name=virtualenv
@@ -16,14 +16,14 @@
 
 - name: Create python3 virtualenv
   shell: "virtualenv --system-site-packages --python=python3 {{ project_root }}/venv"
-  sudo: yes
-  sudo_user: "{{ project_user }}"
+  become: true
+  become_user: "{{ project_user }}"
   args:
     creates: "{{ project_root }}/bin/python"
 
 - name: Install python3 application packages
-  sudo: yes
-  sudo_user: "{{ project_user }}"
+  become: true
+  become_user: "{{ project_user }}"
   pip:
     requirements={{ project_root }}/requirements.txt
     virtualenv={{ project_root }}/venv
