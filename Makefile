@@ -28,10 +28,13 @@ venv: dummy
 	rm -rf venv
 	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
 
-pip: dummy
-	pip install --upgrade pip
+setup: dummy
+	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
+
+serve: dummy
+	python medley.py
 
 
 # Create the coverage directory

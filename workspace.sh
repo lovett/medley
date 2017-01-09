@@ -15,13 +15,14 @@ tmux attach-session -d -t "$PROJECT_NAME" || {
 
     ## 0: Editor
     tmux new-session -d -s "$PROJECT_NAME" bash
-    tmux send-keys -t "$PROJECT_NAME" "e ." C-m
+    tmux send-keys -t "$PROJECT_NAME" "$EDITOR ." C-m
 
     ## 1: Shell
     tmux new-window -a -t "$PROJECT_NAME" bash
+    tmux send-keys -t "$PROJECT_NAME" "source venv/bin/activate" C-m
 
     ## 2: Dev server
-    tmux new-window -a -t "$PROJECT_NAME" -n "devserver" "source venv/bin/activate; python medley.py"
+    tmux new-window -a -t "$PROJECT_NAME" -n "devserver" "source venv/bin/activate; make serve"
 
     tmux select-window -t "$PROJECT_NAME":0
 
