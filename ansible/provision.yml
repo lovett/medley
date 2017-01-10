@@ -6,7 +6,6 @@
     - avahi
     - git
     - python3
-    - ansible
     - medley
     - cron
     - asterisk
