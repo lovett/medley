@@ -6,7 +6,9 @@
 # The "2" is the configuration version. Do not change.
 Vagrant.configure(2) do |config|
 
-  config.vm.box = "chef/debian-7.6"
+  # This box includes guest additions, but debian/jessie64 does not.
+  config.vm.box = "debian/contrib-jessie64"
+
 
   config.vm.hostname = "medley"
 
@@ -14,21 +16,20 @@ Vagrant.configure(2) do |config|
   # through mDNS
   config.vm.network "public_network"
 
-  # There are no shared folders between the guest and host
-  #config.vm.synced_folder "../data", "/vagrant_data"
 
-  # Provider-specific configuration for RAM and hostname
+  config.vm.synced_folder ".", "/vagrant"
+
   config.vm.provider "virtualbox" do |vb|
+    # The machine is headless.
     vb.gui = false
+
     vb.memory = "256"
+
+    # The name displayed in the VirtualBox GUI.
     vb.name = "medley"
   end
 
-  # Customize the name displayed in VirtualBox
-  config.vm.define "medley" do |medley|
-  end
-
-  # Use ansible for provisioning
+  # Provision using ansible. Run ansible from the host.
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "ansible/provision.yml"
     ansible.extra_vars = {
