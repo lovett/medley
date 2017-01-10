@@ -1,14 +1,14 @@
 [global]
-database_dir: "db"
-log_dir: "logs"
-engine.autoreload.on: True
+database_dir: "/var/medley"
+log_dir: "/var/log/medley"
+engine.autoreload.on: False
 log.screen: False
 server.socket_host: "0.0.0.0"
 server.socket_port: 8085
-server.daemonize: False
+server.daemonize: True
 server.pid: "/var/run/medley/medley.pid"
 timezone: "America/New_York"
 url_anonymizer: None
 tools.conditional_auth.on: False
 tools.conditional_auth.whitelist: ("127.0.0.1")
-users: {"user1":"password1", "user2":"password2"}
+users: {"medley":"medley"}

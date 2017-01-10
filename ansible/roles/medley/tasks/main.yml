@@ -1,4 +1,11 @@
 ---
+- name: Place config file in /etc
+  become: true
+  shell: cp medley.conf.example /etc/medley.conf
+  args:
+    chdir: "{{ project_root }}"
+    creates: /etc/medley.conf
+
 - name: Symlink init script
   become: true
   file:
