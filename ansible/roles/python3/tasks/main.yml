@@ -21,7 +21,7 @@
   become: true
   become_user: "{{ project_user }}"
   args:
-    creates: "{{ project_root }}/bin/python"
+    creates: "{{ project_root }}/venv/bin/python"
 
 - name: Install python3 application packages
   become: true
