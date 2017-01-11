@@ -5,13 +5,49 @@ import shutil
 import requests
 import jinja2
 import smtplib
-import lxml.html
-import lxml.etree
 import cherrypy
+from html.parser import HTMLParser
 from email.mime.text import MIMEText
 
 class NetException (Exception):
     pass
+
+class HtmlTitleParser(HTMLParser):
+    in_title_tag = False
+    result = None
+
+    def parse(self, markup):
+        self.feed(markup)
+        return self.result
+
+    def handle_starttag(self, tag, attrs):
+        if not self.result and tag == "title":
+            self.in_title_tag = True
+
+    def handle_endtag(self, tag):
+        if not self.result and tag == "title":
+            self.in_title_tag = False
+
+    def handle_data(self, data):
+        if not self.result and self.in_title_tag:
+            self.result = data.strip()
+
+class HtmlTextParser(HTMLParser):
+    tag = None
+    result = []
+    blacklist = ["script", "style"]
+
+    def parse(self, markup):
+        self.result = []
+        self.feed(markup)
+        return " ".join(self.result)
+
+    def handle_starttag(self, tag, attrs):
+        self.tag = tag
+
+    def handle_data(self, data):
+        if self.tag not in self.blacklist:
+            self.result.append(data.strip())
 
 def externalIp(timeout=5):
     """ Get the current external IP via DNS-O-Matic"""
@@ -62,11 +98,8 @@ def sendNotification(message, config):
 
 def getHtmlTitle(html):
     """Extract the contents of the title tag from an HTML string"""
-    try:
-        tree = lxml.html.fromstring(html.encode("utf-8"))
-        return tree.xpath("//title/text()").pop()
-    except (TypeError, IndexError, lxml.etree.XMLSyntaxError):
-        return None
+    parser = HtmlTitleParser()
+    return parser.parse(html)
 
 def getUrl(url, json=False):
     """Make a GET request for the specified URL and return its HTML as a string"""
@@ -109,12 +142,5 @@ def saveUrl(url, destination):
 
 def htmlToText(html):
     """Reduce an HTML document to the text nodes of the body tag"""
-    try:
-        tree = lxml.html.document_fromstring(html.encode("utf-8"))
-    except lxml.etree.XMLSyntaxError:
-        return ""
-
-    for el in tree.xpath("//body/script"):
-        el.getparent().remove(el)
-
-    return " ".join(tree.xpath("//body//text()"))
+    parser = HtmlTextParser()
+    return parser.parse(html)
