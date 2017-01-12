@@ -12,10 +12,17 @@
 
 <main>
     <div class="content-wrapper centered">
-        <button data-count="{{ count }}">Walk topics</button>
-        <p><a href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}" rel="noreferrer">Rewards Dashboard</a></p>
+        <p>
+            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
+        </p>
+        <p>
+            <a href="{{ 'https://www.bing.com/rewards/dashboard'|anonymize }}" rel="noreferrer">Rewards Dashboard</a>
+        </p>
     </div>
 
+    <div class="content-wrapper centered">
+        <button data-count="{{ count }}">Walk topics</button>
+    </div>
     <div id="topics" class="content-wrapper centered">
         {% for topic in topics %}
         <p>
