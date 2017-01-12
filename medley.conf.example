@@ -1,6 +1,7 @@
 [global]
 database_dir: "/var/medley"
 log_dir: "/var/log/medley"
+cache_dir: "/var/cache/medley"
 engine.autoreload.on: False
 log.screen: False
 server.socket_host: "0.0.0.0"

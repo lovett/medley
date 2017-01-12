@@ -18,18 +18,14 @@
     group="{{ project_user }}"
     append=yes
 
-- name: Create the log directory
+- name: Create application directories
   become: true
   file:
-    path=/var/log/{{ project_name }}
+    path="{{ item }}"
     state=directory
     group={{ project_group }}
     mode=0775
-
-- name: Create the database directory
-  become: true
-  file:
-    path=/var/{{ project_name }}
-    state=directory
-    group={{ project_group }}
-    mode=0775
+  with_items:
+    - /var/{{ project_name }}
+    - /var/log/{{ project_name }}
+    - /var/cache/{{ project_name }}

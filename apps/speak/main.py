@@ -75,9 +75,6 @@ class Controller:
         if not "client_secret" in config:
             raise cherrypy.HTTPError(500, "No client secret configured")
 
-        if not "cache_dir" in config:
-            raise cherrypy.HTTPERror(500, "No cache dir configured")
-
         doc = xml.dom.minidom.Document()
         root = doc.createElement("speak")
         doc.appendChild(root)
@@ -96,14 +93,10 @@ class Controller:
         request_hash.update(ssml_string)
         hash_digest = request_hash.hexdigest()
 
-        cache_dir = os.path.join(
-            config["cache_dir"],
+        cache_path = os.path.join(
+            cherrypy.config.get("cache_dir"),
             hash_digest[0:1],
             hash_digest[0:2],
-        )
-
-        cache_path = os.path.join(
-            cache_dir,
             hash_digest + ".wav"
         )
 
@@ -141,7 +134,7 @@ class Controller:
 
         wav.raise_for_status()
 
-        if not os.path.isdir(cache_dir):
+        if not os.path.isdir(os.path.dirname(cache_path)):
             os.makedirs(cache_dir)
 
         with open(cache_path, "wb") as f:

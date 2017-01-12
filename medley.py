@@ -82,30 +82,21 @@ if __name__ == "__main__":
 
     cherrypy.config.update(config_file)
 
-    # Create the database directory
-    try:
-        os.mkdir(cherrypy.config.get("database_dir"))
-    except PermissionError:
-        raise SystemExit("Unable to create database directory")
-    except FileExistsError:
-        pass
-
-    # Create the log directory. The configuration file only needs to
-    # specify log_dir if using file logging, not log.access_file and
-    # log.error_file.
-    if not cherrypy.config.get("log.screen"):
-        log_dir = cherrypy.config.get("log_dir")
+    # Create required application directories
+    for key in ("database_dir", "cache_dir", "log_dir"):
+        value = cherrypy.config.get(key)
         try:
-            os.mkdir(log_dir)
+            os.mkdir(value)
         except PermissionError:
-            raise SystemExit("Unable to create log directory")
+            raise SystemExit("Unable to create {} directory".format(d))
         except FileExistsError:
             pass
 
-        cherrypy.config.update({
-            "log.access_file": os.path.join(log_dir, "access.log"),
-            "log.error_file": os.path.join(log_dir, "error.log")
-        })
+        if key == "log_dir":
+            cherrypy.config.update({
+                "log.access_file": os.path.join(value, "access.log"),
+                "log.error_file": os.path.join(value, "error.log")
+            })
 
     # Mount the core server
     cherrypy.tree.mount(MedleyServer(), config={
