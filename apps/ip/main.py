@@ -8,7 +8,7 @@ import apps.registry.models
 import ipaddress
 
 class Controller:
-    """Display the the requester's address and the server's external address"""
+    """Show the address of the client and the server"""
 
     name = "IP"
 
