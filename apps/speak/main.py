@@ -7,7 +7,7 @@ import hashlib
 import os
 import os.path
 import simpleaudio
-import lxml.etree
+import xml.dom.minidom
 
 class Controller:
     """
@@ -27,10 +27,6 @@ class Controller:
     tts_host = "https://speech.platform.bing.com"
     synthesize_url = "{}/synthesize".format(tts_host)
     publish_event = "audio-play-wave"
-
-    xml_namespaces = {
-        "xml": "http://www.w3.org/XML/1998/namespace"
-    }
 
     voice_fonts = {
         ("ar-EG", "Female"): ("Hoda", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)"),
@@ -64,10 +60,6 @@ class Controller:
         ("zh-TW", "Male"): ("Zhiwei", "Microsoft Server Speech Text to Speech Voice (zh-TW, Zhiwei, Apollo)"),
     }
 
-    def ns(self, value):
-        (prefix, attribute) = value.split(":")
-        return "{{{}}}{}".format(self.xml_namespaces[prefix], attribute)
-
     def POST(self, statement, locale="en-GB", gender="Male"):
         if not (locale, gender) in self.voice_fonts:
             raise cherrypy.HTTPError(400, "Invalid locale/gender")
@@ -86,15 +78,19 @@ class Controller:
         if not "cache_dir" in config:
             raise cherrypy.HTTPERror(500, "No cache dir configured")
 
-        ssml = lxml.etree.Element("speak", nsmap=self.xml_namespaces)
-        ssml.set("version", "1.0")
-        ssml.set(self.ns("xml:lang"), locale.lower())
-        voice = lxml.etree.SubElement(ssml, "voice")
-        voice.set(self.ns("xml:lang"), locale.lower())
-        voice.set(self.ns("xml:gender"), gender)
-        voice.set("name", self.voice_fonts[(locale, gender)][1])
-        voice.text = statement
-        ssml_string = lxml.etree.tostring(ssml)
+        doc = xml.dom.minidom.Document()
+        root = doc.createElement("speak")
+        doc.appendChild(root)
+        root.setAttribute("version", "1.0")
+        root.setAttribute("xml:lang", locale.lower())
+        voice = doc.createElement("voice")
+        root.appendChild(voice)
+        voice.setAttribute("xml:lang", locale.lower())
+        voice.setAttribute("xml:gender", gender)
+        voice.setAttribute("name", self.voice_fonts[(locale, gender)][1])
+        text = doc.createTextNode(statement)
+        voice.appendChild(text)
+        ssml_string = doc.toxml().encode('utf-8')
 
         request_hash = hashlib.sha1()
         request_hash.update(ssml_string)
