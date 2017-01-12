@@ -4,8 +4,7 @@ import tools.negotiable
 import tools.jinja
 import requests
 import util.cache
-import urllib.parse
-import bs4
+import apps.topics.parser
 
 class Controller:
     """Scrape news topics from the Bing homepage"""
@@ -37,18 +36,11 @@ class Controller:
             cache.set(key, html, 60 * 60 * 18)
             cache_date = None
 
-        soup = bs4.BeautifulSoup(html, "html.parser")
+        p = apps.topics.parser.LinkParser()
+        p.feed(html)
+        p.close()
 
-        container = soup.find(id="crs_pane")
-
-        topics = []
-        if container:
-            for link in container.find_all("a"):
-                url = urllib.parse.urlparse(link["href"])
-                qs = urllib.parse.parse_qs(url.query)
-
-                if "q" in qs:
-                    topics.append(qs["q"][0])
+        topics = p.results
 
         while len(topics) > 0 and len(topics) < count:
             limit = min(len(topics), count - len(topics))
