@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block stylesheets %}
+<link rel="stylesheet" type="text/css" href="/static/grids/grids.css" />
+{% endblock %}
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper">
+        <header class="setup">
+            Available grids:
+            <ul class="inline-list">
+                {% for name in names %}
+                <li><a href="?name={{ name }}">{{ name }}</a></li>
+                {% endfor %}
+            </ul>
+        </header>
+
+        <div class="table-wrapper">
+            {% if rows %}
+            <table class="grid">
+                <thead>
+                    <tr>
+                        {% for header in headers %}
+                        <th>{{ header }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{ cell }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+</main>
+{% endblock %}

@@ -279,9 +279,41 @@ TABLE.key-value TH {
     text-align: right;
 }
 
+.inline-list {
+    display: inline;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.inline-list LI {
+    display: inline;
+}
+
+.inline-list LI:after {
+    content: ', ';
+}
+
+.inline-list LI:last-of-type:after {
+    content: '';
+}
+
 @media only screen and (max-width: 600px) {
     .content-wrapper {
         overflow: auto;
         width: 95%;
+    }
+}
+
+@media print {
+    BODY {
+        background-color: #fff;
+    }
+
+    .content-wrapper {
+        width: 100%;
+    }
+
+    #page-header {
+        display: none;
     }
 }

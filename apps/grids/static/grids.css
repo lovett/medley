@@ -1,0 +1,41 @@
+.setup {
+    background-color: #fff;
+    padding: 1em;
+    margin-bottom: 2em;
+    border: 1px solid #ccc;
+}
+
+.table-wrapper {
+    border: 0;
+}
+
+
+.grid {
+    border: 1px solid black;
+    border-collapse: collapse;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.grid THEAD TH {
+    background-color: #000;
+    color: #fff;
+}
+
+.grid TBODY TD {
+    border: 1px solid #000;
+}
+
+@media print {
+    .setup {
+        display: none;
+    }
+
+    .grid {
+        font-size: 11px;
+    }
+
+    .grid TD, .grid TH {
+        padding: .5em;
+    }
+}
