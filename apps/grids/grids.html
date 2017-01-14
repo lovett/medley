@@ -9,12 +9,25 @@
 <main>
     <div class="content-wrapper">
         <header class="setup">
-            Available grids:
-            <ul class="inline-list">
-                {% for name in names %}
-                <li><a href="?name={{ name }}">{{ name }}</a></li>
-                {% endfor %}
-            </ul>
+            <section>
+                Available grids:
+                <ul class="inline-list">
+                    {% for name in names %}
+                    <li><a href="?name={{ name }}">{{ name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            {% if name and options["layout"] == "month" %}
+            <section>
+                Starting:
+                <ul class="inline-list">
+                    <li><a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">previous month</a></li>
+                    <li><a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">this month</a></li>
+                    <li><a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">next month</a></li>
+                </ul>
+            </section>
+            {% endif %}
         </header>
 
         <div class="table-wrapper">

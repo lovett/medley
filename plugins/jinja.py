@@ -35,6 +35,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["pluralize"] = self.pluralize_filter
         self.env.filters["anonymize"] = self.anonymize_filter
         self.env.filters["urlencode"] = self.urlencode_filter
+        self.env.filters["yearmonth"] = self.yearmonth_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -177,3 +178,6 @@ class Plugin(plugins.SimplePlugin):
             return "{} days ago".format(delta // day)
 
         return "today"
+
+    def yearmonth_filter(self, value):
+        return value.strftime("%Y-%m")

@@ -16,13 +16,19 @@ class Controller:
     user_facing = True
 
     @cherrypy.tools.template(template="grids.html")
-    def GET(self, name=""):
+    def GET(self, name="", start=None):
         registry = apps.registry.models.Registry()
 
         grids = registry.search(key="grids:*")
         names = [grid["key"].split(":")[1] for grid in grids]
         options = defaultdict(lambda: None)
+        today = datetime.date.today()
+        try:
+            start = datetime.datetime.strptime(start, "%Y-%m")
+        except (TypeError, ValueError):
+            start = today.replace(day=1)
 
+        print(start)
         try:
             config = next(
                 grid["value"].split("\n")
@@ -39,11 +45,17 @@ class Controller:
 
         rows = []
         if options["layout"] == "month":
-            today = datetime.date.today()
-            cal = calendar.Calendar(6) # use Sunday as firstweekday
-            for item in cal.itermonthdates(today.year, today.month):
+            headers = ["Date", "Day"] + headers
+            options["last_month"] = start - datetime.timedelta(days=1)
+            options["next_month"] = start + datetime.timedelta(days=32)
+            options["this_month"] = today
+            cal = calendar.Calendar()
+            for item in cal.itermonthdates(start.year, start.month):
+                if item.month != start.month:
+                    continue
                 row = [''] * len(headers)
-                row[0] = item.strftime("%A, %B %d")
+                row[0] = item.strftime("%B %d, %Y")
+                row[1] = item.strftime("%A")
                 rows.append(row)
         else:
             row = [''] * len(headers)
@@ -52,6 +64,8 @@ class Controller:
         return {
             "app_name": self.name,
             "names": names,
+            "name": name,
             "headers": headers,
-            "rows": rows
+            "rows": rows,
+            "options": options
         }

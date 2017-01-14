@@ -5,6 +5,15 @@
     border: 1px solid #ccc;
 }
 
+.setup SECTION {
+    margin-bottom: 1em;
+}
+
+.setup SECTION:last-of-type {
+    margin-bottom: 0;
+}
+
+
 .table-wrapper {
     border: 0;
 }
@@ -36,6 +45,6 @@
     }
 
     .grid TD, .grid TH {
-        padding: .5em;
+        padding: .6em;
     }
 }
