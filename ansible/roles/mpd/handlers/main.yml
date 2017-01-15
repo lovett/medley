@@ -1,0 +1,4 @@
+---
+- name: reload mpd
+  become: true
+  systemd: name=mpd state=restarted

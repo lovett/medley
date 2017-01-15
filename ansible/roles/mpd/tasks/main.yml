@@ -1,0 +1,17 @@
+---
+- name: Install mpd server and client
+  become: true
+  apt: name={{ item }} state=latest
+  with_items:
+    - mpd
+    - mpc
+
+- name: Install mpd configuration file
+  become: true
+  template:
+    src: mpd.conf
+    dest: /etc/mpd.conf
+    owner: mpd
+    group: audio
+    mode: 0640
+  notify: reload mpd
