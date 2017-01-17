@@ -1,3 +1,5 @@
+import datetime
+import email.utils
 import time
 import cherrypy
 import tools.negotiable
@@ -18,6 +20,7 @@ class Controller:
     @cherrypy.tools.template(template="topics.html")
     @cherrypy.tools.negotiable()
     def GET(self, count=15):
+        max_age_hours = 18
         cache = util.cache.Cache()
         key = "topics_html"
         topics = []
@@ -30,11 +33,11 @@ class Controller:
 
         if cached_value:
             html = cached_value[0]
-            cache_date = cached_value[1]
+            cache_date = datetime.datetime.strptime(cached_value[1], "%Y-%m-%d %H:%M:%S")
         else:
             html = self.fetch("http://www.bing.com/hpm")
-            cache.set(key, html, 60 * 60 * 18)
-            cache_date = None
+            cache.set(key, html, 60 * 60 * max_age_hours)
+            cache_date = datetime.datetime.utcnow()
 
         p = apps.topics.parser.LinkParser()
         p.feed(html)
@@ -49,6 +52,13 @@ class Controller:
         if len(topics) > count:
             topics = topics[0:count]
 
+        expiration = cache_date + datetime.timedelta(hours=max_age_hours)
+        expiration = time.mktime(expiration.timetuple())
+        cherrypy.response.headers["Expires"] = email.utils.formatdate(
+            timeval=expiration,
+            localtime=False,
+            usegmt=True
+        )
 
         return {
             "cache_date": cache_date,
