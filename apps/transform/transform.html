@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block scripts %}
-<script src="/static/lettercase/lettercase.js"></script>
+<script src="/static/transform/transform.js"></script>
 {% endblock %}
 
 {% block page_body %}
 <main>
-    <form class="content-wrapper" method="post" action="/lettercase">
+    <form class="content-wrapper" method="post" action="/transform">
         <div class="field">
             <label for="value">Input:</label>
             <textarea id="value" name="value">{{ value|default('', true) }}</textarea>

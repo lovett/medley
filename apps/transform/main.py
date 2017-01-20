@@ -3,9 +3,9 @@ import tools.negotiable
 import tools.jinja
 
 class Controller:
-    """Convert a string value to lowercase, uppercase, or titlecase"""
+    """Convert a string to a different format"""
 
-    name = "Lettercase"
+    name = "Transform"
 
     exposed = True
 
@@ -13,7 +13,7 @@ class Controller:
 
     styles = ("title", "lower", "upper", "capitalize")
 
-    @cherrypy.tools.template(template="lettercase.html")
+    @cherrypy.tools.template(template="transform.html")
     @cherrypy.tools.negotiable()
     def GET(self):
         return {
@@ -22,7 +22,7 @@ class Controller:
             "app_name": self.name
         }
 
-    @cherrypy.tools.template(template="lettercase.html")
+    @cherrypy.tools.template(template="transform.html")
     @cherrypy.tools.negotiable()
     def POST(self, style=None, value=None):
         if style == "title":

@@ -1,4 +1,4 @@
-MEDLEY.lettercase = (function () {
+MEDLEY.transform = (function () {
     'use strict';
 
     function selectAll(e) {
@@ -32,4 +32,4 @@ MEDLEY.lettercase = (function () {
 
 }());
 
-jQuery(document).ready(MEDLEY.lettercase.init);
+jQuery(document).ready(MEDLEY.transform.init);

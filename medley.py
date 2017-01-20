@@ -6,7 +6,7 @@ import plugins.audio
 import inspect
 
 import apps.headers.main
-import apps.lettercase.main
+import apps.transform.main
 import apps.ip.main
 import apps.jenkins.main
 import apps.topics.main

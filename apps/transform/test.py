@@ -1,13 +1,13 @@
 import cptestcase
 import helpers
 import unittest
-import apps.lettercase.main
+import apps.transform.main
 
 
-class TestLettercase(cptestcase.BaseCherryPyTestCase):
+class TestTransform(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def setUpClass(cls):
-        helpers.start_server(apps.lettercase.main.Controller)
+        helpers.start_server(apps.transform.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
