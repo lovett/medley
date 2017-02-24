@@ -4,7 +4,26 @@
 
 <main>
     <div class="content-wrapper">
-        {{ hostname }}
+        <div class="table-wrapper">
+            <table class="key-value">
+                <thead>
+                    <tr>
+                        <td>Source</td>
+                        <td>Destination</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for src, dst in bounce_map.items() %}
+                    <tr>
+                        <td>{{ src }}</td>
+                        <td>{{ dst }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="content-wrapper">
     </div>
 </main>
 {% endblock %}

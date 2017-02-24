@@ -19,18 +19,21 @@ class Controller:
 
         if u:
             parsedUrl = urlparse(u)
+            key = "bounce:{}".format(parsedUrl.hostname)
         else:
             parsedUrl = None
+            key = "bounce:*"
 
         registry = apps.registry.models.Registry()
-        key = "bounce:{}".format(parsedUrl.hostname)
         bounces = registry.search(key=key)
 
-        bounces = [u.replace(parsedUrl.hostname, bounce["value"]) for bounce in bounces]
-
-        print(bounces)
+        bounce_map = {}
+        for bounce in bounces:
+            src = bounce["key"].replace("bounce:", "")
+            dst = bounce["value"]
+            bounce_map[src] = dst
 
         return {
-            "hostname": parsedUrl.hostname,
+            "bounce_map": bounce_map,
             "app_name": self.name
         }
