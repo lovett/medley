@@ -17,15 +17,16 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, u=None):
 
+        registry = apps.registry.models.Registry()
+
         if u:
             parsedUrl = urlparse(u)
-            key = "bounce:{}".format(parsedUrl.hostname)
-        else:
-            parsedUrl = None
-            key = "bounce:*"
+            bounce = registry.first(key="bounce:{}".format(parsedUrl.hostname))
+            if bounce:
+                destination = u.replace(parsedUrl.hostname, bounce)
+                raise cherrypy.HTTPRedirect(destination)
 
-        registry = apps.registry.models.Registry()
-        bounces = registry.search(key=key)
+        bounces = registry.search(key="bounce:*")
 
         bounce_map = {}
         for bounce in bounces:
@@ -33,7 +34,15 @@ class Controller:
             dst = bounce["value"]
             bounce_map[src] = dst
 
+        base = cherrypy.request.headers.get("Host")
+
+        if "X-HTTPS" in cherrypy.request.headers:
+            base = "https://" + base
+        else:
+            base = "http://" + base
+
         return {
+            "base": base,
             "bounce_map": bounce_map,
             "app_name": self.name
         }

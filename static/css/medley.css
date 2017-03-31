@@ -115,8 +115,12 @@ TABLE.key-value TH {
     display: none;
 }
 
-.centered {
-    text-align: center;
+.bookmarklet-container {
+    text-align: right;
+}
+
+.bookmarklet-container A {
+    text-decoration: none;
 }
 
 .content-wrapper {
@@ -296,6 +300,7 @@ TABLE.key-value TH {
 .inline-list LI:last-of-type:after {
     content: '';
 }
+
 
 @media only screen and (max-width: 600px) {
     .content-wrapper {

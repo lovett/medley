@@ -4,24 +4,34 @@
 
 <main>
     <div class="content-wrapper">
+        <div class="bookmarklet-container">
+            <p>Bookmarklet:
+            <a href="javascript:e=encodeURIComponent;void(open('{{ base }}/bounce?u=' + e(location.href), 'bounce'))" rel="noreferrer">bounce</a></p>
+        </div>
+
+        {% if not bounce_map %}
+        <p>No bounces defined.</p>
+        {% endif %}
+        {% if bounce_map %}
         <div class="table-wrapper">
             <table class="key-value">
                 <thead>
                     <tr>
-                        <td>Source</td>
-                        <td>Destination</td>
+                        <td>Source Domain</td>
+                        <td>Bounces To</td>
                     </tr>
                 </thead>
                 <tbody>
                     {% for src, dst in bounce_map.items() %}
                     <tr>
-                        <td>{{ src }}</td>
-                        <td>{{ dst }}</td>
+                        <td><a href="http://{{ src }}" rel="noreferer noopener">{{ src }}</a></td>
+                        <td><a href="http://{{ dst }}" rel="noreferer noopener">{{ dst }}</a></td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% endif %}
     </div>
     <div class="content-wrapper">
     </div>
