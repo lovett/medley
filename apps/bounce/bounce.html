@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<script src="/static/bounce/bounce.js"></script>
+{% endblock %}
+
 {% block page_body %}
 
 <main>
@@ -9,16 +13,44 @@
             <a href="javascript:e=encodeURIComponent;void(open('{{ base }}/bounce?u=' + e(location.href), 'bounce'))" rel="noreferrer">bounce</a></p>
         </div>
 
-        {% if not bounce_map %}
-        <p>No bounces defined.</p>
-        {% endif %}
+
+        <form id="insert-form" method="post" action="/bounce">
+            {% if bounceless_domain %}
+            <p class="error message">No bounces found for {{ bounceless_domain }}</p>
+            {% elif not bounce_map %}
+            <p class="error message">No bounces defined.</p>
+            {% else %}
+            <div class="hidden error message"></div>
+            {% endif %}
+
+            <div class="hidden success message">Success!</div>
+
+            <div class="half-column">
+                <div class="field">
+                    <label for="title">Source</label>
+                    <input type="text" id="source" name="source" value="{{ bounceless_domain|default('', true)|e }}"/>
+                </div>
+            </div>
+            <div class="half-column">
+                <div class="field">
+                    <label for="title">Destination</label>
+                    <input type="text" id="destination" name="destination" value=""/>
+                </div>
+            </div>
+
+            <div class="field">
+                <button data-default="Add" data-alt="Please wait">Add</button>
+            </div>
+        </form>
+
+
         {% if bounce_map %}
         <div class="table-wrapper">
             <table class="key-value">
                 <thead>
                     <tr>
-                        <td>Source Domain</td>
-                        <td>Bounces To</td>
+                        <td>Source</td>
+                        <td>Destination</td>
                     </tr>
                 </thead>
                 <tbody>
