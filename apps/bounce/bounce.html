@@ -10,7 +10,7 @@
     <div class="content-wrapper">
         <div class="bookmarklet-container">
             <p>Bookmarklet:
-            <a href="javascript:e=encodeURIComponent;void(open('{{ base }}/bounce?u=' + e(location.href), 'bounce'))" rel="noreferrer">bounce</a></p>
+            <a href="javascript:e=encodeURIComponent;void(window.location.href='{{ app_url }}/bounce?u=' + e(location.href))" rel="noreferrer">bounce</a></p>
         </div>
 
 
@@ -28,7 +28,7 @@
             <div class="field-group">
                 <div class="field">
                     <label for="title">Source</label>
-                    <input type="text" id="source" name="source" value="{{ bounceless_domain|default('', true)|e }}"/>
+                    <input type="text" id="source" name="source" value="{{ source|default('', true)|e }}"/>
                 </div>
                 <div class="field">
                     <label for="title">Destination</label>

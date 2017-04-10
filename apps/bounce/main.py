@@ -13,42 +13,51 @@ class Controller:
 
     user_facing = True
 
+    def baseUrl(self, url):
+        parsedUrl = urlparse(url)
+        return "{}://{}".format(parsedUrl.scheme, parsedUrl.netloc)
+
+    def toRegistryKey(self, value):
+        return "bounce:{}".format(value)
+
+    def fromRegistryKey(self, value):
+        return value.replace("bounce:", "")
+
+
     @cherrypy.tools.template(template="bounce.html")
     @cherrypy.tools.negotiable()
     def GET(self, u=None):
-        bounceless_domain = False
+        source = False
 
         bounce_map = {}
 
         registry = apps.registry.models.Registry()
 
         if u:
-            parsedUrl = urlparse(u)
-            bounce = registry.first(key="bounce:{}".format(parsedUrl.netloc))
-            if not bounce:
-                bounceless_domain = parsedUrl.netloc
-            else:
-                destination = u.replace(parsedUrl.netloc, bounce)
+            source = self.baseUrl(u)
+            key = self.toRegistryKey(source)
+            bounce = registry.first(key=key)
+            if bounce:
+                destination = u.replace(self.baseUrl(u), bounce)
                 raise cherrypy.HTTPRedirect(destination)
 
         bounces = registry.search(key="bounce:*")
 
-
         for bounce in bounces:
-            src = bounce["key"].replace("bounce:", "")
+            src = self.fromRegistryKey(bounce["key"])
             dst = bounce["value"]
             bounce_map[src] = dst
 
-        base = cherrypy.request.headers.get("Host")
+        app_url = cherrypy.request.headers.get("Host")
 
         if "X-HTTPS" in cherrypy.request.headers:
-            base = "https://" + base
+            app_url = "https://" + app_url
         else:
-            base = "http://" + base
+            app_url = "http://" + app_url
 
         return {
-            "bounceless_domain": bounceless_domain,
-            "base": base,
+            "source": source,
+            "app_url": app_url,
             "bounce_map": bounce_map,
             "app_name": self.name
         }
@@ -57,16 +66,11 @@ class Controller:
     def PUT(self, source, destination):
         registry = apps.registry.models.Registry()
 
-        if source.startswith("http"):
-            parsedSource = urlparse(source)
-            source = parsedSource.netloc
+        source = self.baseUrl(source)
 
-        if destination.startswith("http"):
-            parsedDestination = urlparse(destination)
-            destination = parsedDestination.netloc
-
+        key = self.toRegistryKey(source)
         uid = registry.add(
-            "bounce:{}".format(source),
+            key,
             destination,
             replace=False
         )
