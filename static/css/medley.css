@@ -133,6 +133,21 @@ TABLE.key-value TH {
     color: white;
 }
 
+.field-group {
+    display: flex;
+    justify-content: space-between;
+}
+
+.field-group .field {
+    flex: 1;
+    margin-right: 1em;
+}
+
+.field-group .field:last-of-type {
+    margin-right: 0;
+}
+
+
 .field .inline {
     display: inline-block;
     padding-right: 1em;
