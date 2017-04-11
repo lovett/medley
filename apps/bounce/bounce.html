@@ -17,7 +17,7 @@
         <form id="insert-form" method="post" action="/bounce">
             {% if bounceless_domain %}
             <p class="error message">No bounces found for {{ bounceless_domain }}</p>
-            {% elif not bounce_map %}
+            {% elif not bounces %}
             <p class="error message">No bounces defined.</p>
             {% else %}
             <div class="hidden error message"></div>
@@ -42,20 +42,26 @@
         </form>
 
 
-        {% if bounce_map %}
+        {% if bounces %}
         <div class="table-wrapper">
-            <table class="key-value">
+            <table id="bounces" class="key-value">
                 <thead>
                     <tr>
                         <td>Source</td>
                         <td>Destination</td>
+                        <td align="right">Remove</td>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for src, dst in bounce_map.items() %}
+                    {% for bounce in bounces %}
                     <tr>
-                        <td><a href="http://{{ src }}" rel="noreferer noopener">{{ src }}</a></td>
-                        <td><a href="http://{{ dst }}" rel="noreferer noopener">{{ dst }}</a></td>
+                        <td><a href="http://{{ bounce.key }}" rel="noreferer noopener">{{ bounce.key }}</a></td>
+                        <td><a href="http://{{ bounce.value }}" rel="noreferer noopener">{{ bounce.value }}</a></td>
+                        <td align="right">
+                            <a href="#" data-uid="{{ bounce.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
+                                <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                            </a>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

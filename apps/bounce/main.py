@@ -29,8 +29,6 @@ class Controller:
     def GET(self, u=None):
         source = False
 
-        bounce_map = {}
-
         registry = apps.registry.models.Registry()
 
         if u:
@@ -43,11 +41,6 @@ class Controller:
 
         bounces = registry.search(key="bounce:*")
 
-        for bounce in bounces:
-            src = self.fromRegistryKey(bounce["key"])
-            dst = bounce["value"]
-            bounce_map[src] = dst
-
         app_url = cherrypy.request.headers.get("Host")
 
         if "X-HTTPS" in cherrypy.request.headers:
@@ -55,10 +48,11 @@ class Controller:
         else:
             app_url = "http://" + app_url
 
+
         return {
             "source": source,
             "app_url": app_url,
-            "bounce_map": bounce_map,
+            "bounces": bounces,
             "app_name": self.name
         }
 
@@ -79,3 +73,17 @@ class Controller:
             return {"uid": uid }
         else:
             raise cherrypy.HTTPRedirect("/bounce")
+
+    def DELETE(self, uid):
+        registry = apps.registry.models.Registry()
+        records = registry.find(uid)
+
+        if len(records) == 0:
+            raise cherrypy.HTTPError(404, "Invalid id")
+
+        record = records[0]
+
+        removals = registry.remove(uid=uid)
+
+        if removals != 1:
+            cherrypy.HTTPError(400)
