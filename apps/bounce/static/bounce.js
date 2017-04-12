@@ -21,16 +21,16 @@ MEDLEY.bounce = (function () {
 
         form = jQuery(e.target);
 
-        field = jQuery('#source', form);
+        field = jQuery('#site', form);
 
         if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Source field.';
+            errorMessage = 'Please provide a value for the Site field.';
         }
 
-        field = jQuery('#destination', form);
+        field = jQuery('#group', form);
 
         if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Destination field.';
+            errorMessage = 'Please provide a value for the Group field.';
         }
 
         if (errorMessage) {

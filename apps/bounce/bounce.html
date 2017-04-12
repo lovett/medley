@@ -17,8 +17,6 @@
         <form id="insert-form" method="post" action="/bounce">
             {% if bounceless_domain %}
             <p class="error message">No bounces found for {{ bounceless_domain }}</p>
-            {% elif not bounces %}
-            <p class="error message">No bounces defined.</p>
             {% else %}
             <div class="hidden error message"></div>
             {% endif %}
@@ -26,13 +24,17 @@
             <div class="hidden success message">Success!</div>
 
             <div class="field-group">
+            </div>
+
+            <div class="field-group">
                 <div class="field">
-                    <label for="title">Source</label>
-                    <input type="text" id="source" name="source" value="{{ source|default('', true)|e }}"/>
+                    <label for="title">Site</label>
+                    <input type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
                 </div>
+
                 <div class="field">
-                    <label for="title">Destination</label>
-                    <input type="text" id="destination" name="destination" value=""/>
+                    <label for="title">Group</label>
+                    <input type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
                 </div>
             </div>
 
@@ -47,18 +49,16 @@
             <table id="bounces" class="key-value">
                 <thead>
                     <tr>
-                        <td>Source</td>
                         <td>Destination</td>
-                        <td align="right">Remove</td>
+                        <td align="right"></td>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for bounce in bounces %}
+                    {% for id, url in bounces.items() %}
                     <tr>
-                        <td><a href="http://{{ bounce.key }}" rel="noreferer noopener">{{ bounce.key }}</a></td>
-                        <td><a href="http://{{ bounce.value }}" rel="noreferer noopener">{{ bounce.value }}</a></td>
+                        <td><a href="{{ url }}" rel="noreferer noopener">{{ url }}</a></td>
                         <td align="right">
-                            <a href="#" data-uid="{{ bounce.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
+                            <a href="#" data-uid="{{ id }}" class="delete" title="Delete entry" rel="noreferrer">
                                 <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                             </a>
                         </td>

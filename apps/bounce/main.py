@@ -13,7 +13,7 @@ class Controller:
 
     user_facing = True
 
-    def baseUrl(self, url):
+    def siteUrl(self, url):
         parsedUrl = urlparse(url)
         return "{}://{}".format(parsedUrl.scheme, parsedUrl.netloc)
 
@@ -27,19 +27,22 @@ class Controller:
     @cherrypy.tools.template(template="bounce.html")
     @cherrypy.tools.negotiable()
     def GET(self, u=None):
-        source = False
+        site = False
+        group = False
+        bounces = None
 
         registry = apps.registry.models.Registry()
 
         if u:
-            source = self.baseUrl(u)
-            key = self.toRegistryKey(source)
-            bounce = registry.first(key=key)
-            if bounce:
-                destination = u.replace(self.baseUrl(u), bounce)
-                raise cherrypy.HTTPRedirect(destination)
+            site = self.siteUrl(u)
+            group = registry.firstKey(value=site)
 
-        bounces = registry.search(key="bounce:*")
+        if group:
+            group = self.fromRegistryKey(group)
+            bounces = registry.search(key=group)
+
+        if site and bounces:
+            bounces = {bounce["rowid"]:  u.replace(site, bounce["value"]) for bounce in bounces}
 
         app_url = cherrypy.request.headers.get("Host")
 
@@ -50,22 +53,22 @@ class Controller:
 
 
         return {
-            "source": source,
+            "site": site,
+            "group": group,
             "app_url": app_url,
             "bounces": bounces,
             "app_name": self.name
         }
 
     @cherrypy.tools.negotiable()
-    def PUT(self, source, destination):
+    def PUT(self, site, group):
         registry = apps.registry.models.Registry()
 
-        source = self.baseUrl(source)
+        key = self.toRegistryKey(group)
 
-        key = self.toRegistryKey(source)
         uid = registry.add(
             key,
-            destination,
+            self.siteUrl(site),
             replace=False
         )
 
