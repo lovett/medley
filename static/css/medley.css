@@ -59,6 +59,12 @@ TABLE {
     border-collapse: collapse;
 }
 
+TABLE CAPTION {
+    font-size: 1.25em;
+    font-weight: bold;
+    padding-bottom: .5em;
+}
+
 TABLE TR {
     border-bottom: 1px solid rgba(0, 0, 0, .03);
 }
@@ -113,6 +119,10 @@ TABLE.key-value TH {
 
 #shortcuts {
     display: none;
+}
+
+.align-center {
+    text-align: center;
 }
 
 .bookmarklet-container {
@@ -265,8 +275,23 @@ TABLE.key-value TH {
 }
 
 .table-wrapper {
-    width: 100%;
     border: 1px solid #ccc;
+}
+
+TABLE.bordered {
+    border: 1px solid #ccc;
+}
+
+TABLE.natural-width {
+    min-width: auto;
+}
+
+.natural-width TABLE {
+    min-width: inherit;
+}
+
+.one-line {
+    white-space: nowrap;
 }
 
 .third-column {

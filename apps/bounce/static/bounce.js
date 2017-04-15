@@ -24,13 +24,19 @@ MEDLEY.bounce = (function () {
         field = jQuery('#site', form);
 
         if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Site field.';
+            errorMessage = 'Please provide a value for the Site URL.';
         }
 
         field = jQuery('#group', form);
 
         if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Group field.';
+            errorMessage = 'Please provide a value for the Group.';
+        }
+
+        field = jQuery('#name', form);
+
+        if (jQuery.trim(field.val()) === '') {
+            errorMessage = 'Please provide a value for the Site Name.';
         }
 
         if (errorMessage) {
@@ -47,6 +53,9 @@ MEDLEY.bounce = (function () {
             data: $('INPUT', form).serialize()
         }).done(function (data) {
             var href = window.location.pathname;
+            if (data.hasOwnProperty('group')) {
+                href += '?group=' + data.group
+            }
             window.location.href = href;
         }).fail(function () {
             jQuery('.error.message').removeClass('hidden').text('Invalid values');
