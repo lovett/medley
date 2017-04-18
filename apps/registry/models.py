@@ -62,20 +62,43 @@ CREATE TABLE IF NOT EXISTS registry (
         return self.cur.fetchall()
 
     def first(self, key=None, keys=[], limit=1):
-        result = self.search(key, keys, limit)
+        result = self.search(key, keys, value, limit)
         if len(result) > 0:
             return result[0]["value"]
         else:
             return None
 
-    def search(self, key=None, keys=[], limit=100):
-        sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry"
-        params = None
+    def firstKey(self, value=None):
+        result = self.search(value=value, limit=1)
+        if len(result) > 0:
+            return result[0]["key"]
+        else:
+            return None
+
+    def distinctKeys(self, key, value=None, stripPrefix=True):
+        sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
+
+        key = key.replace("*", "%")
+
+        self.cur.execute(sql, [key])
+        rows = self.cur.fetchall()
+
+        keys = [row["key"] for row in rows]
+
+        if stripPrefix:
+            return [key.split(":", 1).pop() for key in keys]
+
+        return keys
+
+
+    def search(self, key=None, keys=[], value=None, limit=100):
+        sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry WHERE (1) "
+        params = []
 
         if len(keys) > 0:
-            sql += " WHERE key IN ("
+            sql += "AND key IN ("
             sql += ", ".join("?" * len(keys))
-            sql += ")"
+            sql += ") "
         elif key:
             fuzzy = "*" in key
             key = key.replace("*", "%")
@@ -83,9 +106,21 @@ CREATE TABLE IF NOT EXISTS registry (
             if not fuzzy:
                 key = "%{}%".format(key)
 
-            sql += " WHERE KEY LIKE ?"
+            sql += "AND key LIKE ? "
 
-            params = (key,)
+            params.append(key)
+
+        if value:
+            fuzzy = "*" in value
+            value = value.replace("*", "%")
+
+            if fuzzy:
+                sql += "AND VALUE LIKE ?"
+            else:
+                sql += "AND value=?"
+
+            params.append(value)
+
         sql += " ORDER BY rowid DESC"
         sql += " LIMIT {}".format(limit)
 
