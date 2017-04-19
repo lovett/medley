@@ -1,4 +1,4 @@
 ---
 - name: reload mpd
   become: true
-  systemd: name=mpd state=restarted
+  service: name=mpd state=restarted
