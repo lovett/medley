@@ -36,7 +36,7 @@
     repo={{ project_repo }}
     dest={{ project_root }}
     version=HEAD
-  notify: restart medley
+  notify: stop medley
 
 - name: Make checkout group writable
   become: true

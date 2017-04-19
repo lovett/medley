@@ -1,7 +1,7 @@
 ---
-- name: restart medley
+- name: stop medley
   become: true
-  service: name=medley state=restarted
+  command: systemctl stop medley
 
 - name: reload systemd
   become: true

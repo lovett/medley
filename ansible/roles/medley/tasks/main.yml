@@ -8,5 +8,16 @@
 
 - name: Install medley systemd unit file
   become: true
-  template: src=medley.service dest=/etc/systemd/system/
+  template: src={{ item }} dest=/etc/systemd/system/
+  with_items:
+    - medley.socket
+    - medley.service
   notify: reload systemd
+
+- name: Enable medley systemd socket
+  become: true
+  command: systemctl enable medley.socket
+
+- name: Start medley systemd socket
+  become: true
+  command: systemctl start medley.socket
