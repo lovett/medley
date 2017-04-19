@@ -6,15 +6,7 @@
     chdir: "{{ project_root }}"
     creates: /etc/medley.conf
 
-- name: Symlink init script
+- name: Install medley systemd unit file
   become: true
-  file:
-    path="/etc/init.d/{{ project_name }}"
-    src="{{ project_root }}/init"
-    state="link"
-  notify: restart medley
-
-- name: Activate init script
-  become: true
-  command: update-rc.d {{ project_name }} defaults
-  notify: restart medley
+  template: src=medley.service dest=/etc/systemd/system/
+  notify: reload systemd

@@ -2,3 +2,7 @@
 - name: restart medley
   become: true
   service: name=medley state=restarted
+
+- name: reload systemd
+  become: true
+  command: systemctl daemon-reload

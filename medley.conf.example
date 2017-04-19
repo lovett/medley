@@ -7,7 +7,7 @@ log.screen: False
 server.socket_host: "0.0.0.0"
 server.socket_port: 8085
 server.daemonize: True
-server.pid: "/var/run/medley/medley.pid"
+server.pid: "/var/run/medley.pid"
 timezone: "America/New_York"
 url_anonymizer: None
 tools.conditional_auth.on: False
