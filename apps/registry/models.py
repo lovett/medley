@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS registry (
         self.cur.execute(sql, (uid,))
         return self.cur.fetchall()
 
-    def first(self, key=None, keys=[], limit=1):
+    def first(self, key=None, keys=[], value=None, limit=1):
         result = self.search(key, keys, value, limit)
         if len(result) > 0:
             return result[0]["value"]
