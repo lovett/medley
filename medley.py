@@ -126,6 +126,14 @@ if __name__ == "__main__":
         except AttributeError:
             pass
 
+
+    # Customize the error page
+    if not cherrypy.config.get("request.show_tracebacks") is not False:
+        cherrypy.config.update({
+            "error_page.default": os.path.join(app_root, "static/error.html")
+        })
+
+
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):
         cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
