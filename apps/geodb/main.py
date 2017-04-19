@@ -19,6 +19,8 @@ class Controller:
 
     user_facing = True
 
+    default_database_url = "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz"
+
     @cherrypy.tools.template(template="geodb.html")
     @cherrypy.tools.negotiable()
     def GET(self):
@@ -84,12 +86,14 @@ class Controller:
         return cherrypy.config.get("database_dir")
 
     def lookupDatabaseUrl(self):
+        registry_key = "geodb:download_url"
         registry = apps.registry.models.Registry()
-        urls = registry.search(key="geodb:download_url")
-        if not urls:
-            raise cherrypy.HTTPError(500, "No geodb download url found in registry")
+        url = registry.first(key=registry_key)
+        if not url:
+            registry.add(key=registry_key, value=self.default_database_url)
+            url = self.default_database_url
 
-        return urls[0]["value"]
+        return url
 
     def getDatabasePath(self, gzipped=False):
         database_dir = self.lookupDatabaseDirectory()
