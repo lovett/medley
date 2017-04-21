@@ -25,5 +25,3 @@ class Tool(cherrypy.Tool):
 
         if not any(address.startswith(item) for item in whitelist):
             cherrypy.tools.auth_basic.callable(realm="medley", checkpassword=self._checkpassword)
-
-cherrypy.tools.conditional_auth = Tool()

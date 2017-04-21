@@ -164,8 +164,12 @@ def main():
                 pid_file
             ).subscribe()
 
+    # CherryPy Plugins
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
+
+    # CherryPy Tools
+    cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 
     cherrypy.engine.start()
     cherrypy.engine.block()
