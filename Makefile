@@ -27,6 +27,11 @@ update: dummy
 venv: dummy
 	rm -rf venv
 	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
+	echo "[global]" > venv/pip.conf
+	echo "format = columns" >> venv/pip.conf
+
+outdated: dummy
+	pip list --outdated
 
 setup: dummy
 	pip install --upgrade pip setuptools
