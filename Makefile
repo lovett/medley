@@ -30,6 +30,10 @@ venv: dummy
 	echo "[global]" > venv/pip.conf
 	echo "format = columns" >> venv/pip.conf
 
+lint-server: dummy
+	flake8 medley.py
+	pylint --rcfile=.pylintrc medley.py;
+
 outdated: dummy
 	pip list --outdated
 
