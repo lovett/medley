@@ -8,9 +8,12 @@ each time, and makes it easier to leverage existing things when build
 new things.
 """
 
+import datetime
+import email.utils
 import inspect
 import os
 import os.path
+import time
 import cherrypy
 import plugins.jinja
 import plugins.audio
@@ -56,15 +59,28 @@ class MedleyServer(object):
     def index(self):
         """The application homepage lists the available endpoints"""
 
-        for name, controller in cherrypy.tree.apps.items():
-            if not name:
-                continue
-            app_summary = controller.root.__doc__.strip().split("\n").pop(0)
-            user_facing = getattr(controller.root, "user_facing", False)
-            app = (name[1:], app_summary, user_facing)
-            self.apps.append(app)
+        if not self.apps:
+            for name, controller in cherrypy.tree.apps.items():
+                if not name:
+                    continue
 
-        self.apps.sort(key=lambda tup: tup[0])
+                summary = controller.root.__doc__.strip().split("\n").pop(0)
+
+                user_facing = getattr(controller.root, "user_facing", False)
+
+                app = (name[1:], summary, user_facing)
+
+                self.apps.append(app)
+
+                self.apps.sort(key=lambda tup: tup[0])
+
+        expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        expiration = time.mktime(expiration.timetuple())
+        cherrypy.response.headers["Expires"] = email.utils.formatdate(
+            timeval=expiration,
+            localtime=False,
+            usegmt=True
+        )
 
         return {
             "page_title": self.name,
