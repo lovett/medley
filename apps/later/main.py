@@ -1,7 +1,5 @@
 import re
 import cherrypy
-import tools.jinja
-import tools.negotiable
 import requests
 import apps.archive.models
 import util.html

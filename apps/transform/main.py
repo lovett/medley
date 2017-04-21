@@ -1,6 +1,4 @@
 import cherrypy
-import tools.negotiable
-import tools.jinja
 
 class Controller:
     """Convert a string to a different format"""

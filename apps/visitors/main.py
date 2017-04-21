@@ -1,7 +1,5 @@
 import re
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import requests
 import util.ip
 import urllib.parse

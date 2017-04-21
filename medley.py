@@ -10,40 +10,13 @@ new things.
 
 import datetime
 import email.utils
-import inspect
+import importlib
 import os
 import os.path
 import time
 import cherrypy
-import plugins.jinja
-import plugins.audio
-import apps.headers.main
-import apps.transform.main
-import apps.ip.main
-import apps.jenkins.main
-import apps.topics.main
-import apps.whois.main
-import apps.geodb.main
-import apps.registry.main
-import apps.blacklist.main
-import apps.awsranges.main
-import apps.azure.main
-import apps.later.main
-import apps.archive.main
-import apps.phone.main
-import apps.logindex.main
-import apps.visitors.main
-import apps.captures.main
-import apps.callerid.main
-import apps.calls.main
-import apps.countries.main
-import apps.speak.main
-import apps.grids.main
-import apps.bounce.main
-import tools.negotiable
-import tools.response_time
-import tools.jinja
-import tools.conditional_auth
+import plugins
+import tools
 
 
 class MedleyServer(object):
@@ -146,22 +119,24 @@ def main():
     })
 
     # Mount the apps
-    app_config = {
-        "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher()
-        },
-        "/static": {
-            "tools.staticdir.on": True,
-            "tools.staticdir.dir": os.path.realpath("static")
-        }
-    }
+    app_dir = os.path.join(os.path.dirname(__file__), "apps")
 
-    for name, cls in inspect.getmembers(apps, inspect.ismodule):
-        try:
-            path = "/{}".format(name)
-            cherrypy.tree.mount(cls.main.Controller(), path, app_config)
-        except AttributeError:
-            pass
+    for item in os.listdir(app_dir):
+        main_path = os.path.join(app_dir, item, "main.py")
+        if not os.path.isfile(main_path):
+            continue
+
+        module = importlib.import_module("apps.{}.main".format(item))
+
+        cherrypy.tree.mount(module.Controller(), "/{}".format(item), {
+            "/": {
+                "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+            },
+            "/static": {
+                "tools.staticdir.on": True,
+                "tools.staticdir.dir": os.path.realpath("static")
+            }
+        })
 
     # Customize the error page
     if cherrypy.config.get("request.show_tracebacks") is not False:
@@ -180,12 +155,16 @@ def main():
                 pid_file
             ).subscribe()
 
-    # CherryPy Plugins
+    # Plugins
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
 
-    # CherryPy Tools
+    # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
+    cherrypy.tools.response_time = tools.response_time.Tool()
+    cherrypy.tools.negotiable = tools.negotiable.Tool()
+    cherrypy.tools.template = tools.template.Tool()
+    cherrypy.tools.capture = tools.capture.Tool()
 
     cherrypy.engine.start()
     cherrypy.engine.block()

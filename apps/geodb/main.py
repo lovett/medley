@@ -6,8 +6,6 @@ import subprocess
 import time
 import apps.registry.models
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import requests
 
 class Controller:

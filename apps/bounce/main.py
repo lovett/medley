@@ -1,6 +1,4 @@
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import apps.registry.models
 from urllib.parse import urlparse, urlunparse
 

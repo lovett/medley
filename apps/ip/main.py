@@ -1,7 +1,5 @@
 import subprocess
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import util.net
 import util.cache
 import apps.registry.models

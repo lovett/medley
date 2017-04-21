@@ -1,6 +1,4 @@
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import urllib.parse
 import apps.phone.models
 import apps.registry.models

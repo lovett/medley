@@ -1,8 +1,6 @@
 import re
 import subprocess
 import cherrypy
-import tools.negotiable
-import tools.jinja
 import urllib.parse
 import socket
 import util.cache

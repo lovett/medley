@@ -1,5 +1,4 @@
 import cherrypy
-import tools.jinja
 import apps.registry.models
 from collections import defaultdict
 import datetime

@@ -1,7 +1,5 @@
 import cherrypy
-import tools.negotiable
 import apps.registry.models
-import tools.jinja
 import requests
 import hashlib
 import os
