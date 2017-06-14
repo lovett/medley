@@ -8,8 +8,8 @@
 
 - name: Install mpd configuration file
   become: true
-  template:
-    src: mpd.conf
+  copy:
+    src: files/mpd.conf
     dest: /etc/mpd.conf
     owner: mpd
     group: audio

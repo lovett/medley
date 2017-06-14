@@ -4,5 +4,5 @@
 
 - name: Install monit configuration file
   become: true
-  template: src=medley dest=/etc/monit/conf.d/{{ project_name }}
+  copy: src=files/medley dest=/etc/monit/conf.d/{{ project_name }}
   notify: reload monit

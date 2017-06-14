@@ -5,5 +5,5 @@
 
 - name: Copy manager credentials
   become: true
-  template: src=medley.conf dest=/etc/asterisk/manager.d/medley.conf
+  copy: src=files/medley.conf dest=/etc/asterisk/manager.d/medley.conf
   notify: restart asterisk
