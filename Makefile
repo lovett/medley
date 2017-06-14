@@ -1,6 +1,5 @@
 .PHONY: dummy
 
-NOTIFIER := /usr/local/bin/send-notification
 PYTHONPATH := $(CURDIR):test
 COVERAGE_DIR := $(CURDIR)/coverage
 
@@ -10,19 +9,6 @@ APP_DIR := $(CURDIR)/apps
 APP_PATHS := $(wildcard $(APP_DIR)/*)
 APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
 APP_NAMES := $(notdir $(APP_PATHS))
-
-
-define notify
-	$(NOTIFIER) -t "$1" -p 0
-endef
-
-install: dummy
-	ansible-playbook ansible/install.yml
-	$(call notify,Medley install complete)
-
-update: dummy
-	ansible-playbook ansible/update.yml
-	$(call notify,Medley update complete)
 
 venv: dummy
 	rm -rf venv
