@@ -6,6 +6,7 @@ __pycache__
 *.db
 .Python
 medley.conf
+!ansible/***/medley.conf
 *.pyc
 .coverage
 coverage
