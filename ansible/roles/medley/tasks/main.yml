@@ -20,4 +20,4 @@
 
 - name: Start medley systemd socket
   become: true
-  command: systemctl start medley.socket
+  command: systemctl restart medley.service

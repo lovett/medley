@@ -1,8 +1,4 @@
 ---
-- name: stop medley
-  become: true
-  command: systemctl stop medley
-
 - name: reload systemd
   become: true
   command: systemctl daemon-reload
