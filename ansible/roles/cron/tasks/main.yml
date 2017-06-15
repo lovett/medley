@@ -22,7 +22,7 @@
     minute="3"
     hour="8"
     day="10"
-    job="curl -k --fail --silent --show-error -d 'action=update' 'https://localhost/geodb'"
+    job="curl -k --fail --silent --show-error 'https://localhost/geodb/download'"
     user="{{ project_user }}"
 
 - name: Check external ip

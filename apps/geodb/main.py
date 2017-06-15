@@ -19,9 +19,15 @@ class Controller:
 
     default_database_url = "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz"
 
+    actions = [None, "download"]
+
     @cherrypy.tools.template(template="geodb.html")
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, action=None):
+
+        if action not in self.actions:
+            raise cherrypy.NotFound
+
         path = self.getDatabasePath()
 
         if os.path.isfile(path):
@@ -32,6 +38,9 @@ class Controller:
             modified = None
             downloaded = None
             allow_update = True
+
+        if allow_update and action == "download":
+            return self.download()
 
         if cherrypy.request.as_json:
             return {
@@ -47,7 +56,7 @@ class Controller:
             }
 
 
-    def POST(self):
+    def download(self):
         url = self.lookupDatabaseUrl()
         if not url:
             raise cherrypy.HTTPError(410, "The database URL has not been configured")

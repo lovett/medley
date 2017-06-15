@@ -7,8 +7,8 @@ MEDLEY.geodb = (function () {
         jQuery('.error.message').addClass('hidden');
 
         jQuery.ajax({
-            type: 'POST',
-            url: '/geodb'
+            type: 'GET',
+            url: '/geodb/download'
         }).done(function (data) {
             jQuery('#progress').html('Update complete.');
         }).fail(function (xhr, status, error) {
