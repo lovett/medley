@@ -10,6 +10,8 @@
     name="{{ project_user }}"
     createhome=yes
     system=yes
+    append=yes
+    groups="{{ project_user }},audio"
 
 - name: Add ansible ssh user to application user group
   become: true
