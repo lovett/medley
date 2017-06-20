@@ -54,11 +54,9 @@ class Controller:
 
         notification = {
             "group": "jenkins",
-            "url": details["build"]["full_url"]
+            "url": details["build"]["full_url"],
+            "label": "jenkins.{}.{}".format(details["name"], details["build"]["number"])
         }
-
-        if details["build"]["log"]:
-            notification["body"] = details["build"]["log"].split()[0]
 
         if details["build"]["phase"].lower() == "completed":
             # Disregard completed events to avoid double-notification with
@@ -69,15 +67,13 @@ class Controller:
 
         if details["build"]["phase"].lower() == "started":
             notification["title"] = "Starting a build for {}".format(details["name"])
-            notification["body"] = "Build #{}".format(details["build"]["number"])
-
+            notification["body"] = "#{}".format(details["build"]["number"])
 
         if details["build"]["phase"].lower() == "finalized":
             if details["build"]["status"].lower() == "success":
-                notification["title"] = "{} #{} has {}".format(
+                notification["title"] = "{} #{} has finished".format(
                     details["name"],
-                    details["build"]["number"],
-                    details["build"]["phase"].lower()
+                    details["build"]["number"]
                 )
             else:
                 notification["title"] = "{} #{} had trouble".format(
