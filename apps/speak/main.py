@@ -21,7 +21,8 @@ class Controller:
 
     user_facing = False
 
-    token_request_url = "https://oxford-speech.cloudapp.net/token/issueToken"
+    token_request_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
+
     tts_host = "https://speech.platform.bing.com"
     synthesize_url = "{}/synthesize".format(tts_host)
     publish_event = "audio-play-wave"
@@ -63,15 +64,16 @@ class Controller:
             raise cherrypy.HTTPError(400, "Invalid locale/gender")
 
         registry = apps.registry.models.Registry()
+
         config = registry.search(key="speak:*")
+
         if not config:
             raise cherrypy.HTTPError(500, "No configuration found in registry")
-        config = {row["key"].split(":")[1]: row["value"] for row in config}
-        if not "client_id" in config:
-            raise cherrypy.HTTPError(500, "No client id configured")
 
-        if not "client_secret" in config:
-            raise cherrypy.HTTPError(500, "No client secret configured")
+        config = {row["key"].split(":")[1]: row["value"] for row in config}
+
+        if not "azure_key" in config:
+            raise cherrypy.HTTPError(500, "No azure key found")
 
         doc = xml.dom.minidom.Document()
         root = doc.createElement("speak")
@@ -102,20 +104,14 @@ class Controller:
             cherrypy.engine.publish(self.publish_event, cache_path)
             return
 
-        auth = requests.post(
+        auth_response = requests.post(
             self.token_request_url,
-            data = {
-                "grant_type": "client_credentials",
-                "client_id": config["client_id"],
-                "client_secret": config["client_secret"],
-                "scope": self.tts_host
+            headers = {
+                "Ocp-Apim-Subscription-Key": config["azure_key"]
             }
         )
 
-        try:
-            access_token = auth.json()["access_token"]
-        except:
-            raise cherrypy.HTTPError(500, "Request for auth token failed")
+        auth_response.raise_for_status()
 
         wav = requests.post(
             self.synthesize_url,
@@ -123,7 +119,7 @@ class Controller:
             headers= {
                 "Content-type": "application/ssml+xml",
                 "X-Microsoft-OutputFormat": "riff-16khz-16bit-mono-pcm",
-                "Authorization": "Bearer " + access_token,
+                "Authorization": "Bearer " + auth_response.text,
                 "X-Search-AppId": "07D3234E49CE426DAA29772419F436CA",
                 "X-Search-ClientID": "1ECFAE91408841A480F00935DC390960",
                 "User-Agent": "medley"
@@ -132,8 +128,10 @@ class Controller:
 
         wav.raise_for_status()
 
-        if not os.path.isdir(os.path.dirname(cache_path)):
-            os.makedirs(cache_dir)
+        try:
+            os.makedirs(os.path.dirname(cache_path))
+        except FileExistsError:
+            pass
 
         with open(cache_path, "wb") as f:
             f.write(wav.content)
