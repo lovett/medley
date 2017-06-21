@@ -55,7 +55,7 @@ class Controller:
         notification = {
             "group": "jenkins",
             "url": details["build"]["full_url"],
-            "label": "jenkins.{}.{}".format(details["name"], details["build"]["number"])
+            "localId": "jenkins.{}.{}".format(details["name"], details["build"]["number"])
         }
 
         if details["build"]["phase"].lower() == "completed":
