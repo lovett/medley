@@ -55,7 +55,7 @@ class Controller:
         notification = {
             "group": "jenkins",
             "url": details["build"]["full_url"],
-            "localId": "jenkins.{}.{}".format(details["name"], details["build"]["number"])
+            "localId": "jenkins.{}".format(details["name"])
         }
 
         if details["build"]["phase"].lower() == "completed":
@@ -71,12 +71,12 @@ class Controller:
 
         if details["build"]["phase"].lower() == "finalized":
             if details["build"]["status"].lower() == "success":
-                notification["title"] = "{} #{} has finished".format(
+                notification["title"] = "{} build {} has finished".format(
                     details["name"],
                     details["build"]["number"]
                 )
             else:
-                notification["title"] = "{} #{} had trouble".format(
+                notification["title"] = "{} build {} had trouble".format(
                     details["name"],
                     details["build"]["number"]
                 )
