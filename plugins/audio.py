@@ -2,6 +2,7 @@ import cherrypy
 import simpleaudio
 import os.path
 import os
+import socket
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -16,9 +17,21 @@ class Plugin(plugins.SimplePlugin):
         pass
 
     def play_wave(self, path):
-        if not os.access(path, os.R_OK):
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.connect(("localhost", 6600))
+        except ConnectionRefusedError:
             return False
 
-        wave = simpleaudio.WaveObject.from_wave_file(path)
-        player = wave.play()
-        player.wait_done()
+        commands = [
+            "update {}".format(path),
+            "consume 1",
+            "add {}".format(path),
+            "play"
+        ]
+
+        for command in comands:
+            sock.send("{}\n".format(command).encode("UTF-8"))
+
+        sock.close()

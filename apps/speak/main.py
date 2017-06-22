@@ -93,15 +93,20 @@ class Controller:
         request_hash.update(ssml_string)
         hash_digest = request_hash.hexdigest()
 
-        cache_path = os.path.join(
-            cherrypy.config.get("cache_dir"),
+        rel_path = os.path.join(
+            self.name,
             hash_digest[0:1],
             hash_digest[0:2],
             hash_digest + ".wav"
         )
 
+        cache_path = os.path.join(
+            cherrypy.config.get("cache_dir"),
+            rel_path
+        )
+
         if os.path.exists(cache_path):
-            cherrypy.engine.publish(self.publish_event, cache_path)
+            cherrypy.engine.publish(self.publish_event, rel_path)
             return
 
         auth_response = requests.post(
@@ -137,7 +142,7 @@ class Controller:
             f.write(wav.content)
 
         if os.stat(cache_path).st_size > 0:
-            cherrypy.engine.publish(self.publish_event, cache_path)
+            cherrypy.engine.publish(self.publish_event, rel_path)
             cherrypy.response.status = 204
             return
 

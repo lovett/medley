@@ -31,3 +31,4 @@
     - /var/{{ project_name }}
     - /var/log/{{ project_name }}
     - /var/cache/{{ project_name }}
+    - /var/cache/{{ project_name }}/speak

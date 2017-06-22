@@ -5,6 +5,9 @@
   with_items:
     - mpd
     - mpc
+    - alsa-base
+    - alsa-utils
+    - alsamixergui
 
 - name: Install mpd configuration file
   become: true
@@ -15,3 +18,10 @@
     group: audio
     mode: 0640
   notify: reload mpd
+
+- name: Symlink cache into mpd database directory
+  become: true
+  file:
+    src: "/var/cache/{{ project_name }}/speak"
+    dest: /var/lib/mpd/music/speak
+    state: link
