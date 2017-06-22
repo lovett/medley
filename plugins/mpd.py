@@ -17,24 +17,25 @@ class Plugin(plugins.SimplePlugin):
         pass
 
 
+    def send(self, commands=[]):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect(("localhost", 6600))
+
+            for command in commands:
+                sock.send("{}\n".format(command).encode("UTF-8"))
+                sock.recv(1024)
+
+
     def play_cached(self, cache_path):
         cache_dir = cherrypy.config.get("cache_dir")
         file_path = pathlib.PurePath(cache_path).relative_to(cache_dir)
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            sock.connect(("localhost", 6600))
-        except ConnectionRefusedError:
-            return False
-
         commands = [
             "update {}".format(file_path.parts[0]),
             "consume 1",
+            "single 0",
             "add {}".format(file_path),
             "play"
         ]
 
-        for command in commands:
-            sock.send("{}\n".format(command).encode("UTF-8"))
-
-        sock.close()
+        self.send(commands)
