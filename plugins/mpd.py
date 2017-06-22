@@ -19,7 +19,6 @@ class Plugin(plugins.SimplePlugin):
 
     def send(self, commands=[]):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.connect(("localhost", 6600))
 
             reader = sock.makefile(
                 "r",
@@ -33,10 +32,17 @@ class Plugin(plugins.SimplePlugin):
                 newline="\n"
             )
 
+            sock.connect(("localhost", 6600))
+            line = reader.readline()
+
+            if not line.startswith("OK MPD"):
+                return False
+
             for command in commands:
                 writer.write("{}\n".format(command))
                 writer.flush()
-                reader.readline()
+                print("Wrote {}".format(command))
+                print(reader.readline())
 
 
     def play_cached(self, cache_path):
