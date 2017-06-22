@@ -21,9 +21,22 @@ class Plugin(plugins.SimplePlugin):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(("localhost", 6600))
 
+            reader = sock.makefile(
+                "r",
+                encoding="UTF-8",
+                newline="\n"
+            )
+
+            writer = sock.makefile(
+                "w",
+                encoding="UTF-8",
+                newline="\n"
+            )
+
             for command in commands:
-                sock.send("{}\n".format(command).encode("UTF-8"))
-                sock.recv(1024)
+                writer.write("{}\n".format(command))
+                writer.flush()
+                reader.readline()
 
 
     def play_cached(self, cache_path):
