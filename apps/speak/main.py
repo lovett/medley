@@ -4,7 +4,6 @@ import requests
 import hashlib
 import os
 import os.path
-import simpleaudio
 import xml.dom.minidom
 
 class Controller:
@@ -25,7 +24,7 @@ class Controller:
 
     tts_host = "https://speech.platform.bing.com"
     synthesize_url = "{}/synthesize".format(tts_host)
-    publish_event = "audio-play-wave"
+    publish_event = "play-cached"
 
     voice_fonts = {
         ("ar-EG", "Female"): ("Hoda", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)"),
@@ -93,20 +92,16 @@ class Controller:
         request_hash.update(ssml_string)
         hash_digest = request_hash.hexdigest()
 
-        rel_path = os.path.join(
-            self.name,
+        cache_path = os.path.join(
+            cherrypy.config.get("cache_dir"),
+            self.name.lower(),
             hash_digest[0:1],
             hash_digest[0:2],
             hash_digest + ".wav"
         )
 
-        cache_path = os.path.join(
-            cherrypy.config.get("cache_dir"),
-            rel_path
-        )
-
         if os.path.exists(cache_path):
-            cherrypy.engine.publish(self.publish_event, rel_path)
+            cherrypy.engine.publish(self.publish_event, cache_path)
             return
 
         auth_response = requests.post(
@@ -142,7 +137,7 @@ class Controller:
             f.write(wav.content)
 
         if os.stat(cache_path).st_size > 0:
-            cherrypy.engine.publish(self.publish_event, rel_path)
+            cherrypy.engine.publish(self.publish_event, cache_path)
             cherrypy.response.status = 204
             return
 

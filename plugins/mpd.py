@@ -1,8 +1,8 @@
 import cherrypy
-import simpleaudio
 import os.path
 import os
 import socket
+import pathlib
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -11,12 +11,15 @@ class Plugin(plugins.SimplePlugin):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe('audio-play-wave', self.play_wave)
+        self.bus.subscribe('play-cached', self.play_cached)
 
     def stop(self):
         pass
 
-    def play_wave(self, path):
+
+    def play_cached(self, cache_path):
+        cache_dir = cherrypy.config.get("cache_dir")
+        file_path = pathlib.PurePath(cache_path).relative_to(cache_dir)
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
@@ -25,13 +28,13 @@ class Plugin(plugins.SimplePlugin):
             return False
 
         commands = [
-            "update {}".format(path),
+            "update {}".format(file_path.parts[0]),
             "consume 1",
-            "add {}".format(path),
+            "add {}".format(file_path),
             "play"
         ]
 
-        for command in comands:
+        for command in commands:
             sock.send("{}\n".format(command).encode("UTF-8"))
 
         sock.close()

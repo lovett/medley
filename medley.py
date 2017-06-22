@@ -157,7 +157,7 @@ def main():
 
     # Plugins
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    plugins.audio.Plugin(cherrypy.engine).subscribe()
+    plugins.mpd.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
