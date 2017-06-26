@@ -185,4 +185,4 @@ class Plugin(plugins.SimplePlugin):
         return value.strftime("%Y-%m")
 
     def json_filter(self, value):
-        return json.dumps(value)
+        return json.dumps(value, sort_keys=True, indent=2)

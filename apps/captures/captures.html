@@ -10,7 +10,7 @@
 
     <form class="content-wrapper" method="get" action="/captures">
         <div class="field">
-            <label for="number">Search</label>
+            <label for="number">Request URI</label>
             <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
         </div>
         <div class="field">
@@ -31,7 +31,7 @@
 
             <div class="half-column">
                 <section>
-                    <h2>Request headers</h2>
+                    <h2>Request Headers</h2>
                     <code>
                     {{- capture.request_line }}
                     {% for key, value in capture.request.headers.items() -%}
@@ -47,23 +47,19 @@
                 </section>
                 {% endif %}
 
+                {% if capture.request.json %}
+                <section>
+                    <h2>Request Body </h2>
+                    <pre>{{ capture.request.json|json }}</pre>
+                </section>
+                {% endif %}
             </div>
 
             <div class="half-column">
-                {% if capture.request.json %}
                 <section>
-                    <h2>Request body JSON </h2>
-                    <code>{{ capture.request.json|json }}</code>
-                </section>
-                {% endif %}
-
-
-                <section>
-                    <h2>Response status</h2>
+                    <h2>Response</h2>
                     <p>{{ capture.response.status }}</p>
                 </section>
-
-
             </div>
         </div>
         {% endfor %}
