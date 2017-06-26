@@ -1,6 +1,7 @@
 CherryPy==10.2.2
 Jinja2==2.9.6
 httplib2==0.10.3
+msgpack-python==0.4.8
 py==1.4.34
 pygeoip==0.3.2
 pyparsing==2.2.0

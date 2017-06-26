@@ -2,6 +2,7 @@ import re
 import pytz
 import datetime
 import pickle
+import msgpack
 
 def convert_naive_date(s):
     return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
@@ -47,8 +48,12 @@ def convert_duration(s):
 def convert_callerid(s):
     return re.sub(r'"(.*?)".*', r"\1", s.decode("utf-8"))
 
-def convert_pickled(blob):
-    return pickle.loads(blob)
+def convert_binary(blob):
+    try:
+        return msgpack.unpackb(blob, encoding='utf-8')
+    except msgpack.exceptions.ExtraData:
+        return pickle.loads(blob)
+
 
 def convert_channel(s):
     decoded_s = s.decode("utf-8")
