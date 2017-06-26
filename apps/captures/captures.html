@@ -53,7 +53,7 @@
                 {% if capture.request.json %}
                 <section>
                     <h2>Request body JSON </h2>
-                    <code>{{ capture.request.json }}</code>
+                    <code>{{ capture.request.json|json }}</code>
                 </section>
                 {% endif %}
 

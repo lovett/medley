@@ -7,6 +7,7 @@ import os.path
 import urllib
 import datetime
 import os
+import json
 from cherrypy.process import plugins
 
 class Plugin(plugins.SimplePlugin):
@@ -36,6 +37,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["anonymize"] = self.anonymize_filter
         self.env.filters["urlencode"] = self.urlencode_filter
         self.env.filters["yearmonth"] = self.yearmonth_filter
+        self.env.filters["json"] = self.json_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -181,3 +183,6 @@ class Plugin(plugins.SimplePlugin):
 
     def yearmonth_filter(self, value):
         return value.strftime("%Y-%m")
+
+    def json_filter(self, value):
+        return json.dumps(value)
