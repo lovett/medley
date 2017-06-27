@@ -16,6 +16,18 @@ class Plugin(plugins.SimplePlugin):
     def __init__(self, bus):
         app_root = cherrypy.config.get("app_root")
 
+        cache_dir = os.path.join(
+            cherrypy.config.get("cache_dir"),
+            "jinja"
+        )
+
+        try:
+            os.mkdir(cache_dir)
+        except PermissionError:
+            raise SystemExit("Unable to create {} directory".format(cache_dir))
+        except FileExistsError:
+            pass
+
         paths = [os.path.join(app_root, "templates")]
 
         apps = [os.path.join(app_root, "apps", app)
@@ -24,7 +36,15 @@ class Plugin(plugins.SimplePlugin):
 
         paths.extend(apps)
 
-        self.env = jinja2.Environment(loader=jinja2.FileSystemLoader(paths))
+        loader = jinja2.FileSystemLoader(paths)
+
+        cache = jinja2.FileSystemBytecodeCache(cache_dir, '%s.cache')
+
+        self.env = jinja2.Environment(
+            loader = loader,
+            auto_reload = cherrypy.config.get("engine.autoreload.on"),
+            bytecode_cache = cache
+        )
 
         self.env.filters["datetime"] = self.datetime_filter
         self.env.filters["ago"] = self.ago_filter
