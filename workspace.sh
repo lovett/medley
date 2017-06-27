@@ -23,7 +23,7 @@ tmux attach-session -d -t "$PROJECT_NAME" || {
 
     ## 2: Vagrant
     tmux new-window -a -t "$PROJECT_NAME" -n "vagrant" bash
-    tmux send-keys -t "$PROJECT_NAME" "vagrant ssh"
+    tmux send-keys -t "$PROJECT_NAME" "vagrant up"
 
     ## 3: Dev server
     tmux new-window -a -t "$PROJECT_NAME" -n "devserver" "source venv/bin/activate; make serve"
