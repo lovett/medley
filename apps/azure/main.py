@@ -9,10 +9,6 @@ class Controller:
 
     name = "Azure"
 
-    _cp_config = {
-        'tools.conditional_auth.on': False
-    }
-
     exposed = True
 
     user_facing = False
