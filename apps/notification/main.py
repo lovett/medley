@@ -21,8 +21,7 @@ class Controller:
     @cherrypy.tools.capture()
     def POST(self):
         notification = cherrypy.request.json
-        print(notification)
-        if not notification["title"]:
+        if not "title" in notification:
             cherrypy.response.status = 400
 
         manager = apps.speak.models.SpeechManager()
