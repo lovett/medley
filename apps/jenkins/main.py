@@ -67,18 +67,17 @@ class Controller:
 
         if details["build"]["phase"].lower() == "started":
             notification["title"] = "Starting a build for {}".format(details["name"])
-            notification["body"] = "#{}".format(details["build"]["number"])
+            notification["body"] = "Build #{}".format(details["build"]["number"])
 
         if details["build"]["phase"].lower() == "finalized":
             if details["build"]["status"].lower() == "success":
-                notification["title"] = "{} build {} has finished".format(
+                notification["title"] = "Jenkins has finished building {}".format(
                     details["name"],
-                    details["build"]["number"]
                 )
+                notification["body"] = "Build #{}".format(details["build"]["number"])
             else:
-                notification["title"] = "{} build {} had trouble".format(
-                    details["name"],
-                    details["build"]["number"]
+                notification["title"] = "Jenkins had trouble with {} ".format(
+                    details["name"]
                 )
 
                 notification["body"] = "Status: {}".format(
