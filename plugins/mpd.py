@@ -41,8 +41,9 @@ class Plugin(plugins.SimplePlugin):
             for command in commands:
                 writer.write("{}\n".format(command))
                 writer.flush()
-                print("Wrote {}".format(command))
-                print(reader.readline())
+
+                cherrypy.engine.publish("app-log", "mpd", "write", command)
+                cherrypy.engine.publish("app-log", "mpd", "read", reader.readline())
 
 
     def play_cached(self, cache_path):
