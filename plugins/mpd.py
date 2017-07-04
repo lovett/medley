@@ -33,7 +33,7 @@ class Plugin(plugins.SimplePlugin):
             )
 
             sock.connect(("localhost", 6600))
-            line = reader.readline()
+            line = reader.readline().rstrip()
 
             if not line.startswith("OK MPD"):
                 return False
