@@ -96,6 +96,10 @@ class SpeechManager:
         cache_path = self.getCachePath(hash_digest)
 
         if os.path.exists(cache_path):
+            # Updating the access time of the file makes it easier to identify
+            # unused files. Both access and modified times will be set.
+            os.utime(cache_path)
+
             cherrypy.engine.publish(self.publish_event, cache_path)
             return
 
@@ -108,7 +112,9 @@ class SpeechManager:
 
         auth_response.raise_for_status()
 
-        wav = requests.post(
+        cherrypy.engine.publish("app-log", "speechmanager", "ssml", ssml_string)
+
+        req = requests.post(
             self.synthesize_url,
             data = ssml_string,
             headers= {
@@ -121,7 +127,9 @@ class SpeechManager:
             }
         )
 
-        wav.raise_for_status()
+        req.raise_for_status()
+
+        cherrypy.engine.publish("app-log", "speechmanager", "synth-response", req.status_code)
 
         try:
             os.makedirs(os.path.dirname(cache_path))
@@ -129,7 +137,7 @@ class SpeechManager:
             pass
 
         with open(cache_path, "wb") as f:
-            f.write(wav.content)
+            f.write(req.content)
 
         if os.stat(cache_path).st_size > 0:
             cherrypy.engine.publish(self.publish_event, cache_path)

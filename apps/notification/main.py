@@ -33,6 +33,6 @@ class Controller:
             return
 
         manager = apps.speak.models.SpeechManager()
-        manager.say(notification["title"], "en-GB", "Male")
+        manager.say(title, "en-GB", "Male")
 
         return
