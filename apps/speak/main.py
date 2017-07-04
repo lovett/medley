@@ -22,7 +22,12 @@ class Controller:
             raise cherrypy.HTTPError(400, "Invalid locale/gender")
 
 
+        if manager.isMuted():
+            cherrypy.response.status = 202
+            return
+
         manager.say(statement, locale, gender)
 
         cherrypy.response.status = 204
+
         return

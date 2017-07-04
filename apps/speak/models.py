@@ -5,6 +5,8 @@ import hashlib
 import os
 import os.path
 import requests
+import datetime
+import time
 
 class SpeechManager:
     token_request_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
@@ -85,6 +87,32 @@ class SpeechManager:
         text = doc.createTextNode(statement)
         voice.appendChild(text)
         return doc.toxml().encode('utf-8')
+
+    def isMuted(self):
+        today = datetime.date.today()
+        tomorrow = today + datetime.timedelta(1)
+        now = datetime.datetime.now()
+
+        mute = [line.rstrip() for line in self.config.get("mute", "").split("\n")]
+
+        formats = ("%I:%M %p", "%H:%M")
+        for format in formats:
+            try:
+                mute = [datetime.datetime.strptime(line, "%I:%M %p") for line in mute]
+                break
+            except ValueError:
+                pass
+
+        if not isinstance(mute[0], datetime.datetime):
+            return False
+
+        start = datetime.datetime.combine(today, mute[0].time())
+        if mute[1] < mute[0]:
+            end = datetime.datetime.combine(tomorrow, mute[1].time())
+        else:
+            end = datetime.datetime.combine(today, mute[1].time())
+
+        return start <= now <= end
 
     def say(self, statement, locale, gender):
         ssml_string = self.ssml(statement, locale, gender)
