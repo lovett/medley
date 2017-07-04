@@ -18,7 +18,7 @@ class Plugin(plugins.SimplePlugin):
             con.executescript(
                 """CREATE TABLE IF NOT EXISTS logs (
                 created DEFAULT CURRENT_TIMESTAMP,
-                app VARCHAR(255) NOT NULL,
+                source VARCHAR(255) NOT NULL,
                 event VARCHAR(255) NOT NULL,
                 value VARCHAR(255) NOT NULL)"""
             )
@@ -38,9 +38,9 @@ class Plugin(plugins.SimplePlugin):
         con.row_factory = sqlite3.Row
         return con
 
-    def log_event(self, app, event, value):
+    def log_event(self, source, event, value):
         with self.connect() as con:
             con.execute(
-                "INSERT INTO logs (app, event, value) VALUES (?, ?, ?)",
-                (app, event, value)
+                "INSERT INTO logs (source, event, value) VALUES (?, ?, ?)",
+                (source, event, value)
             )
