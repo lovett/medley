@@ -17,7 +17,7 @@ class Plugin(plugins.SimplePlugin):
         app_root = cherrypy.config.get("app_root")
 
         cache_dir = os.path.join(
-            cherrypy.config.get("cache_dir"),
+            cherrypy.config.get("cache_dir", "cache"),
             "jinja"
         )
 

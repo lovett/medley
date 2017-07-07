@@ -1,7 +1,7 @@
-import cptestcase
-import helpers
-import unittest
+from testing import cptestcase
+from testing import helpers
 import apps.headers.main
+import unittest
 
 
 class TestHeaders(cptestcase.BaseCherryPyTestCase):
@@ -50,7 +50,3 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase):
         response = self.request("/", headers={"Special_Header": "Special Value"}, as_json=True)
         header, value = next(pair for pair in response.body if pair[0] == "Special_Header")
         self.assertEqual(value, "Special Value")
-
-
-if __name__ == "__main__":
-    unittest.main()

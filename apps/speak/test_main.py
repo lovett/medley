@@ -1,5 +1,5 @@
-import cptestcase
-import helpers
+from testing import cptestcase
+from testing import helpers
 import unittest
 import apps.speak.main
 

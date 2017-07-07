@@ -1,6 +1,7 @@
 import cherrypy
-import cptestcase
-import helpers
+from testing import cptestcase
+from testing import helpers
+import pytest
 import unittest
 import responses
 import apps.logindex.models
@@ -27,6 +28,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_rejectsInvalidDate(self, logIndexMock, syslogMock):
@@ -47,6 +49,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(logIndexMock.called)
         self.assertTrue(syslogMock.called)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_acceptsValidDate(self, logIndexMock, syslogMock):
@@ -56,6 +59,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(logIndexMock.called)
         self.assertTrue(syslogMock.called)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_rejectsInvalidRange(self, logIndexMock, syslogMock):
@@ -64,6 +68,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 400)
         self.assertFalse(logIndexMock.called)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_acceptsValidRange(self, logIndexMock, syslogMock):
@@ -72,6 +77,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 204)
         self.assertTrue(logIndexMock.called)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_requiresField(self, logIndexMock, syslogMock):
@@ -80,6 +86,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 400)
         self.assertFalse(logIndexMock.called)
 
+    @pytest.mark.skip(reason="pending refactor")
     @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
     def test_indexArguments(self, logIndexMock, syslogMock):

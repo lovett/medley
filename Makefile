@@ -10,6 +10,7 @@ APP_PATHS := $(wildcard $(APP_DIR)/*)
 APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
 APP_NAMES := $(notdir $(APP_PATHS))
 
+
 venv: dummy
 	rm -rf venv
 	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
@@ -71,3 +72,8 @@ coverage: $(addprefix .coverage., $(APP_NAMES))
 	rm -rf htmlcov
 	coverage combine $(COVERAGE_DIR)
 	coverage report
+
+test: $(APP_NAMES)
+
+$(APP_NAMES): dummy
+	python -m pytest $(APP_DIR)/$@

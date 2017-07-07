@@ -4,7 +4,7 @@ from io import BytesIO, StringIO
 import unittest
 import urllib
 import json
-
+import tools
 import cherrypy
 
 cherrypy.config.update({'environment': "test_suite"})

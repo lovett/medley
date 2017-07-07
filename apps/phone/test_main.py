@@ -1,6 +1,6 @@
-import cptestcase
+from testing import cptestcase
 import datetime
-import helpers
+from testing import helpers
 import unittest
 import responses
 import apps.phone.main

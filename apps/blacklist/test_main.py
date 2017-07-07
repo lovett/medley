@@ -1,5 +1,5 @@
-import cptestcase
-import helpers
+from testing import cptestcase
+from testing import helpers
 import unittest
 import responses
 import apps.blacklist.main
@@ -34,7 +34,7 @@ class TestBlacklist(cptestcase.BaseCherryPyTestCase):
         blacklistMock.return_value = True
 
         response = self.request("/", method="PUT", number="5551234567")
-        self.assertEqual(response.code, 200)
+        self.assertEqual(response.code, 204)
         self.assertTrue(authenticateMock.called)
         self.assertTrue(blacklistMock.called)
 
@@ -86,7 +86,7 @@ class TestBlacklist(cptestcase.BaseCherryPyTestCase):
         unblacklistMock.return_value = True
 
         response = self.request("/", method="DELETE", number="5551234567")
-        self.assertEqual(response.code, 200)
+        self.assertEqual(response.code, 204)
         self.assertTrue(authenticateMock.called)
         self.assertTrue(unblacklistMock.called)
 

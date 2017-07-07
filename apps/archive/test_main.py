@@ -1,7 +1,6 @@
+from testing import cptestcase
+from testing import helpers
 import cherrypy
-import cptestcase
-import helpers
-import unittest
 import responses
 import apps.archive.main
 import apps.archive.models
