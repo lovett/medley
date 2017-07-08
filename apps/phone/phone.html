@@ -14,6 +14,7 @@
 
 <main>
     <form class="content-wrapper" method="get" action="/phone">
+        <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
         <div class="field">
             <label for="number">Number</label>
             <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
@@ -32,7 +33,7 @@
 
                 <div id="caller-id-display">
                     <p id="callerid-display-value">
-                        {{ caller_id|default('Unknown') }}
+                        {{ caller_id|default('Unknown caller') }}
                     </p>
 
                     <a href="#" class="edit-callerid" rel="noreferrer">Edit</a>
@@ -78,6 +79,10 @@
             <p>{{ state_name }}</p>
             <p>{{ comment }}</p>
             {% endif %}
+        </div>
+        <div class="flex-item">
+            <p>{{ number|websearch("google") }}</p>
+            <p>{{ number|websearch("bing") }}</p>
         </div>
     </div>
     {% if history|length > 0 %}

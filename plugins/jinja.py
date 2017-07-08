@@ -58,6 +58,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["urlencode"] = self.urlencode_filter
         self.env.filters["yearmonth"] = self.yearmonth_filter
         self.env.filters["json"] = self.json_filter
+        self.env.filters["websearch"] = self.websearch_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -206,3 +207,22 @@ class Plugin(plugins.SimplePlugin):
 
     def json_filter(self, value):
         return json.dumps(value, sort_keys=True, indent=2)
+
+    def websearch_filter(self, value, engine, url_only=False, target="_blank"):
+        if engine is "google":
+            url = "https://www.google.com#q={}"
+
+        if engine is "bing":
+            url= "https://www.bing.com/search?q={}"
+
+        if not url:
+            raise jinja2.TemplateError("Unrecognized search engine")
+
+        url = url.format(value)
+
+        if url_only:
+            return url
+
+        return """<a href="{}" target="{}" rel="noopener noreferer">Search {}</a>""".format(
+            url, target, engine.capitalize()
+        )

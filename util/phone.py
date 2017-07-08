@@ -7,7 +7,7 @@ import util.sqlite_converters
 class PhoneException(Exception):
     pass
 
-def sanitize(number=""):
+def sanitize(number):
     """Strip non-numeric characters from a numeric string"""
     number = re.sub(r"\D", "", number)
     number = re.sub(r"^1(\d{10})", r"\1", number)
@@ -37,13 +37,11 @@ def findAreaCode(area_code, timeout=4):
     sparql = """
     PREFIX dbp: <http://dbpedia.org/property/>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    SELECT ?state_abbrev, ?comment WHERE {{
+    SELECT ?state_abbrev WHERE {{
         ?s dbp:this ?o .
-        ?s dbp:state ?state_abbrev .
-        ?s rdfs:comment ?comment
+        ?s dbp:state ?_state_abbrev
         FILTER (regex(str(?o), "{0}", "i"))
-        FILTER (langMatches(lang(?state_abbrev), "en"))
-        FILTER (langMatches(lang(?comment), "en"))
+        BIND( str(?_state_abbrev) as ?state_abbrev )
     }} LIMIT 1
     """.format(area_code)
 
@@ -58,24 +56,25 @@ def findAreaCode(area_code, timeout=4):
         "url": [],
         "state_abbreviation": None,
         "state_name": "Unknown",
-        "comment": "The location of this number could not be found."
     }
 
     try:
         r = requests.get("http://dbpedia.org/sparql", params=payload, timeout=timeout)
         r.raise_for_status()
         response = r.json()
+
         first_result = response["results"]["bindings"][0]
-        result["sparql"].append(sparql)
-        result["url"].append(r.url)
         result["state_abbreviation"] = first_result["state_abbrev"]["value"]
-        result["comment"] = abbreviateComment(first_result["comment"]["value"])
     except ValueError:
         raise PhoneException("Dbpedia area code query timed out")
     except requests.exceptions.HTTPError:
         raise PhoneException("Dbpedia area code query failed")
     except IndexError:
         return result
+    finally:
+        result["sparql"].append(sparql)
+        result["url"].append(r.url)
+
 
     try:
         state_result = stateName(result["state_abbreviation"], timeout)
@@ -85,6 +84,7 @@ def findAreaCode(area_code, timeout=4):
         return result
     except PhoneException:
         return result
+
 
 def stateName(abbreviation=None, timeout=7):
     """Query dbpedia for the name of a US state from its abbreviation"""

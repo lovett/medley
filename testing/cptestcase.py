@@ -110,7 +110,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         if "json" in h["Accept"]:
             try:
                 result.body = json.loads(result.body)
-            except json.decoder.JSONDecodeError:
+            except ValueError:
                 pass
 
         # Allow the status code of the reponse to be considered

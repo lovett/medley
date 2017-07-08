@@ -25,7 +25,7 @@ class Tool(cherrypy.Tool):
 
         req.as_json = False
         req.as_text = False
-        req.as_html = True
+        req.as_html = False
 
         if negotiated == "application/json":
             req.as_json = True

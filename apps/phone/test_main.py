@@ -13,7 +13,7 @@ import tempfile
 import cherrypy
 import os.path
 
-class TestTopics(cptestcase.BaseCherryPyTestCase):
+class TestPhone(cptestcase.BaseCherryPyTestCase):
     temp_dir = None
 
     @classmethod
@@ -33,25 +33,24 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         shutil.rmtree(self.temp_dir)
 
     @mock.patch("util.cache.Cache.get")
-    def test_returnsHtml(self, cacheGetMock):
-        """It returns HTML"""
+    def test_withoutNumberAsHtml(self, cacheGetMock):
+        """An HTML request that does not specify a nubmer returns a search form"""
         response = self.request("/")
         self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<main" in response.body)
+        self.assertTrue("<form" in response.body)
         self.assertFalse(cacheGetMock.called)
 
     @mock.patch("util.cache.Cache.get")
-    def test_returnsErrorJson(self, cacheGetMock):
+    def test_withoutNumberAsJson(self, cacheGetMock):
         """A json request that does not specify a number returns an error"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 400)
-        self.assertTrue(helpers.response_is_json(response))
-        self.assertTrue("message" in response.body)
+        self.assertIn("message", response.body)
         self.assertFalse(cacheGetMock.called)
 
     @mock.patch("util.cache.Cache.get")
-    def test_returnsErrorText(self, cacheGetMock):
+    def test_withoutNumberAsText(self, cacheGetMock):
         """A text/plain request that does not specify a number returns an error"""
         response = self.request("/", as_plain=True)
         self.assertEqual(response.code, 400)
@@ -59,21 +58,31 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
 
     @mock.patch("util.phone.sanitize")
     @mock.patch("util.cache.Cache.get")
-    def test_rejectsInvalidNumber(self, cacheGetMock, sanitizeMock):
-        """Rejects invalid phone number"""
-        sanitizeMock.return_value = "1"
-        response = self.request("/", number=1)
-        self.assertEqual(response.code, 400)
+    def test_invalidNumberAsHtml(self, cacheGetMock, sanitizeMock):
+        """An HTML request with an invalid number redirects with a message"""
+        sanitizeMock.return_value = ""
+        response = self.request("/", number="invalid-number-html")
+        self.assertEqual(response.code, 303)
+        self.assertIn("message=invalid", response.headers["Location"])
         self.assertFalse(cacheGetMock.called)
 
     @mock.patch("util.phone.sanitize")
     @mock.patch("util.cache.Cache.get")
-    def test_rejectsInvalidNumberJson(self, cacheGetMock, sanitizeMock):
-        """Rejects invalid phone number"""
-        sanitizeMock.return_value = "1"
-        response = self.request("/", number=1, as_json=True)
+    def test_invalidNumberAsJson(self, cacheGetMock, sanitizeMock):
+        """A JSON request with an invalid number returns an error"""
+        sanitizeMock.return_value = ""
+        response = self.request("/", number="invalid-number-json", as_json=True)
         self.assertEqual(response.code, 400)
         self.assertTrue("message" in response.body)
+        self.assertFalse(cacheGetMock.called)
+
+    @mock.patch("util.phone.sanitize")
+    @mock.patch("util.cache.Cache.get")
+    def test_invalidNumberAsText(self, cacheGetMock, sanitizeMock):
+        """A text/plain request with an invalid number returns an error"""
+        sanitizeMock.return_value = ""
+        response = self.request("/", number="invalid-number-text", as_plain=True)
+        self.assertEqual(response.code, 400)
         self.assertFalse(cacheGetMock.called)
 
     @mock.patch("apps.phone.models.AsteriskCdr.callHistory")
@@ -89,7 +98,7 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         authenticateMock.return_value = True
         cidMock.return_value = "test"
         blacklistMock.return_value = False
-        historyMock.return_value = []
+        historyMock.return_value = ([], 0)
         response = self.request("/", number="1234567890")
 
         self.assertEqual(response.code, 200)
@@ -113,15 +122,40 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         authenticateMock.return_value = True
         cidMock.return_value = None
         blacklistMock.return_value = False
-        historyMock.return_value = [[{
+        historyMock.return_value = ([{
             "date": "",
             "duration": 1,
             "lastapp": "test",
-            "dst": 1
-        }]]
+            "dst": 1,
+            "clid": "test"
+        }], 1)
         response = self.request("/", number="1234567890")
         self.assertEqual(response.code, 200)
         self.assertTrue("message" in response.body)
+        self.assertTrue(cacheGetMock.called)
+        self.assertTrue(authenticateMock.called)
+        self.assertTrue(cacheSetMock)
+
+    @mock.patch("util.cache.Cache.set")
+    @mock.patch("util.phone.findAreaCode")
+    @mock.patch("apps.phone.models.AsteriskCdr.callHistory")
+    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
+    @mock.patch("util.phone.sanitize")
+    @mock.patch("util.cache.Cache.get")
+    def test_asteriskManagerAuthFail(self, cacheGetMock, sanitizeMock, authenticateMock, historyMock, areaCodeMock, cacheSetMock):
+        cacheGetMock.return_value = None
+        areaCodeMock.return_value = {"state_abbreviation": "NY"}
+        sanitizeMock.return_value = "1234567890"
+        authenticateMock.return_value = False
+        historyMock.return_value = ([{
+            "date": "",
+            "duration": 1,
+            "lastapp": "test",
+            "dst": 1,
+            "clid": "test"
+        }], 1)
+        response = self.request("/", number="1234567890")
+        self.assertEqual(response.code, 200)
         self.assertTrue(cacheGetMock.called)
         self.assertTrue(authenticateMock.called)
         self.assertTrue(cacheSetMock)
