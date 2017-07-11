@@ -189,7 +189,7 @@ class Plugin(plugins.SimplePlugin):
         delta = today - value
 
         if delta > year:
-            intervals.push("{} years".format(delta // year))
+            return "{} years".format(delta // year)
 
         if delta > month:
             return "{} months ago".format(delta // month)
