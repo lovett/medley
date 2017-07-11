@@ -65,16 +65,17 @@ class Controller:
             cherrypy.response.status = 204
             return
 
+        notification["body"] = "Build #{}".format(details["build"]["number"])
+
         if details["build"]["phase"].lower() == "started":
-            notification["title"] = "Starting a build for {}".format(details["name"])
-            notification["body"] = "Build #{}".format(details["build"]["number"])
+            notification["title"] = "Jenkins is building {}".format(details["name"])
+
 
         if details["build"]["phase"].lower() == "finalized":
             if details["build"]["status"].lower() == "success":
                 notification["title"] = "Jenkins has finished building {}".format(
                     details["name"],
                 )
-                notification["body"] = "Build #{}".format(details["build"]["number"])
             else:
                 notification["title"] = "Jenkins had trouble with {} ".format(
                     details["name"]
