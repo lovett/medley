@@ -10,13 +10,8 @@
   become: true
   copy: src={{ item }} dest=/etc/systemd/system/
   with_items:
-    - files/medley.socket
     - files/medley.service
   notify: reload systemd
-
-- name: Enable medley systemd socket
-  become: true
-  command: systemctl enable medley.socket
 
 - name: Start medley systemd socket
   become: true
