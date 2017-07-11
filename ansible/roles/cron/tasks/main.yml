@@ -33,3 +33,13 @@
     minute="45"
     job="curl -X PUT -d 'token=external' -k --fail --silent 'https://localhost/ip' > /dev/null"
     user="{{ project_user }}"
+
+- name: Prune speak cache
+  become: true
+  cron:
+    cron_file="{{ project_name }}"
+    name="speak_cache"
+    minute="3"
+    hour="2"
+    job="find /var/cache/medley/speak -type f -daystart -mtime 45 -iname '*.wav' -exec rm {} \;"
+    user="{{ project_user }}"
