@@ -164,23 +164,6 @@ class TestUtilNet(unittest.TestCase):
         result = util.net.reverseLookup(None)
         self.assertIsNone(result)
 
-    @requests_mock.Mocker()
-    def test_externalIpSuccess(self, requestsMock):
-        """A successful call to DNS-O-Matic returns an IP address"""
-        address = "1.1.1.1"
-        requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", text=address)
-        response = util.net.externalIp()
-        self.assertEqual(response, address)
-
-    @requests_mock.Mocker()
-    def test_externalIpFail(self, requestsMock):
-        """An unsuccessful call to DNS-O-Matic returns None"""
-        requestsMock.register_uri("GET", "http://myip.dnsomatic.com/", status_code=500)
-
-        with pytest.raises(util.net.NetException) as err:
-            response = util.net.externalIp()
-            self.assertEqual(str(err.value), "DNS-o-Matic query failed")
-
     @mock.patch("util.net.jinja2")
     @mock.patch("util.net.smtplib")
     def test_sendMessageLoadsTemplate(self, smtpMock, jinjaMock):

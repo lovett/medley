@@ -30,8 +30,7 @@
   cron:
     cron_file="{{ project_name }}"
     name="external_ip"
-    minute="45"
-    job="curl -X PUT -d 'token=external' -k --fail --silent 'https://localhost/ip' > /dev/null"
+    state="absent"
     user="{{ project_user }}"
 
 - name: Prune speak cache

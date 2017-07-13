@@ -159,6 +159,7 @@ def main():
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
+    plugins.dnsomatic.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()

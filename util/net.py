@@ -49,18 +49,6 @@ class HtmlTextParser(HTMLParser):
         if self.tag not in self.blacklist:
             self.result.append(data.strip())
 
-def externalIp(timeout=5):
-    """ Get the current external IP via DNS-O-Matic"""
-
-    try:
-        r = requests.get("http://myip.dnsomatic.com", timeout=timeout)
-        r.raise_for_status()
-        return r.text
-    except requests.exceptions.ConnectionError:
-        raise NetException("Unable to connect to DNS-o-Matic")
-    except requests.exceptions.Timeout:
-        raise NetException("Connection to DNS-o-matic timed out")
-
 def sendMessage(message_data, template_data):
     """Render an email template and send via SMTP"""
 
