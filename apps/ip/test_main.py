@@ -34,47 +34,39 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
-
     @mock.patch("util.net.externalIp")
-    def test_returnsHtml(self, externalIpMock):
-        """It returns HTML by default"""
+    def test_getAsHtml(self, externalIpMock):
+        """HTML is returned by default"""
         externalIpMock.return_value = "1.1.1.1"
         response = self.request("/")
         self.assertEqual(response.code, 200)
         self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<main" in response.body)
+        self.assertIn("<main", response.body)
+        self.assertIn("1.1.1.1", response.body)
         self.assertTrue(externalIpMock.called)
 
     @mock.patch("util.net.externalIp")
-    def test_noToken(self, externalIpMock):
-        """It returns the caller's address"""
+    def test_getAsJson(self, externalIpMock):
+        """JSON is returned if the request's accept header specifies application/json"""
         externalIpMock.return_value = "1.1.1.1"
-        response = self.request("/", headers={"Remote-Addr": "1.1.1.1"})
+        response = self.request("/", headers={"Remote-Addr": "2.2.2.2"}, as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertTrue("1.1.1.1" in response.body)
+        self.assertEqual(response.body["external_ip"], "1.1.1.1")
+        self.assertEqual(response.body["client_ip"], "2.2.2.2")
         self.assertTrue(externalIpMock.called)
 
     @mock.patch("util.net.externalIp")
-    def test_noTokenJson(self, externalIpMock):
-        """It returns json"""
-        externalIpMock.return_value = "1.1.1.1"
-        response = self.request("/", headers={"Remote-Addr": "1.1.1.1"}, as_json=True)
+    def test_getAsText(self, externalIpMock):
+        """Text is returned if the requests's accept header specifies text/plain"""
+        externalIpMock.return_value = "1.2.3.4"
+        response = self.request("/", headers={"Remote-Addr": "5.6.7.8"}, as_plain=True)
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["address"], "1.1.1.1")
+        self.assertIn("external_ip=1.2.3.4\nclient_ip=5.6.7.8", response.body)
         self.assertTrue(externalIpMock.called)
 
     @mock.patch("util.net.externalIp")
-    def test_noTokenPlain(self, externalIpMock):
-        """It returns text"""
-        externalIpMock.return_value = "1.1.1.1"
-        response = self.request("/", headers={"Remote-Addr": "1.1.1.1"}, as_plain=True)
-        self.assertEqual(response.code, 200)
-        self.assertEqual(response.body, "1.1.1.1")
-        self.assertTrue(externalIpMock.called)
-
-    @mock.patch("util.net.externalIp")
-    def test_rightHeader(self, externalIpMock):
-        """It uses the X-Real-Ip over the Remote-Addr header """
+    def test_headerPrecedence(self, externalIpMock):
+        """The X-Real-Ip header has precedence over the Remote-Addr header """
         externalIpMock.return_value = "1.1.1.1"
         response = self.request("/", headers={
             "Remote-Addr": "1.1.1.1",
@@ -84,16 +76,16 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
         self.assertTrue(externalIpMock.called)
 
     @mock.patch("util.net.externalIp")
-    def test_noIp(self, externalIpMock):
-        """It fails if the request ip can't be identified"""
+    def test_missingClientAddress(self, externalIpMock):
+        """An error is thrown if the client IP can't be identified"""
         externalIpMock.return_value = "1.1.1.1"
         response = self.request("/", headers={"Remote-Addr": None})
         self.assertEqual(response.code, 400)
         self.assertFalse(externalIpMock.called)
 
     @mock.patch("util.net.externalIp")
-    def test_invalidIp(self, externalIpMock):
-        """It fails if the request ip isn't an ip"""
+    def test_invalidClientAddress(self, externalIpMock):
+        """An error is thrown if the client IP can't be parsed"""
         externalIpMock.return_value = "1.1.1.1"
         response = self.request("/", headers={"Remote-Addr": "garbage"})
         self.assertEqual(response.code, 400)

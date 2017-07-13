@@ -77,17 +77,24 @@ class Controller:
     @cherrypy.tools.template(template="ip.html")
     @cherrypy.tools.negotiable()
     def GET(self):
-        ip_address = self.ipFromHeader(cherrypy.request.headers)
+        client_ip = self.ipFromHeader(cherrypy.request.headers)
 
-        if not self.validateIp(ip_address):
-            raise cherrypy.HTTPError(400, "Unable to determine IP")
+        if not self.validateIp(client_ip):
+            raise cherrypy.HTTPError(400, "Unable to determine client address")
 
         external_ip = util.net.externalIp()
+
         if cherrypy.request.as_text:
-            return ip_address
-        else:
+            return "external_ip={}\nclient_ip={}".format(external_ip, client_ip)
+
+        if cherrypy.request.as_json:
             return {
-                "address": ip_address,
                 "external_ip": external_ip,
-                "app_name": self.name
+                "client_ip": client_ip
             }
+
+        return {
+            "external_ip": external_ip,
+            "client_ip": client_ip,
+            "app_name": self.name
+        }

@@ -2,14 +2,13 @@
 
 {% block page_body %}
 
-<main>
-    <div class="content-wrapper centered">
-        {% if result %}
-        <p>{{ result }}</p>
-        {% else %}
-        <p>The client address is <a href="/whois?address={{address}}" rel="noreferrer" >{{ address }}</a></p>
-        <p>The external address is <a href="/whois?address={{ external_ip }}" rel="noreferrer">{{ external_ip }}</a></p>
-        {% endif %}
-    </div>
+<main class="content-wrapper align-center">
+    {% if result %}
+    <p>{{ result }}</p>
+    {% else %}
+    <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
+    <p>The client address is <a href="/whois?address={{ client_ip }}">{{ client_ip }}</a></p>
+    {% endif %}
 </main>
+
 {% endblock %}
