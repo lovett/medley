@@ -55,6 +55,7 @@ MEDLEY.phone = (function () {
 
         var action, data, form, method, number, url;
 
+        form = jQuery(this);
         number = form.find('INPUT[name=number]').val();
         action = form.find('INPUT[name=action]').val();
 
@@ -91,8 +92,8 @@ MEDLEY.phone = (function () {
             }
 
         }).fail(function (xhr) {
-            form.find('.error.message').html(xhr.statusText);
             form.addClass('error');
+            form.find('.error.message').html(xhr.statusText);
         });
     }
 

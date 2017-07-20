@@ -68,8 +68,12 @@
             <form class="blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
                 <input type="hidden" name="number" value="{{ number|default('') }}" />
                 <input type="hidden" name="action" value="add" />
-                <p>Not blacklisted</p>
-                <button class="small">Add</button>
+                <div class="field">
+                    <p>Not blacklisted</p>
+                </div>
+                <div class="field">
+                    <button class="small">Add</button>
+                </div>
                 <div class="hidden error message"></div>
             </form>
         </div>
