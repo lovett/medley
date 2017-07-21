@@ -48,7 +48,7 @@ def findAreaCode(area_code, timeout=4):
     payload = {
         "query": sparql,
         "format": "json",
-        "timeout": "1000"
+        "timeout": "5000"
     }
 
     result = {
@@ -65,21 +65,17 @@ def findAreaCode(area_code, timeout=4):
 
         first_result = response["results"]["bindings"][0]
         result["state_abbreviation"] = first_result["state_abbrev"]["value"]
+        result["sparql"].append(("State abbreviation for area code", sparql))
     except ValueError:
         raise PhoneException("Dbpedia area code query timed out")
     except requests.exceptions.HTTPError:
         raise PhoneException("Dbpedia area code query failed")
     except IndexError:
         return result
-    finally:
-        result["sparql"].append(sparql)
-        result["url"].append(r.url)
-
 
     try:
         state_result = stateName(result["state_abbreviation"], timeout)
-        result["sparql"].append(state_result["sparql"])
-        result["url"].append(state_result["url"])
+        result["sparql"].append(("State name from abbreviation", state_result["sparql"]))
         result["state_name"] = state_result["name"]
         return result
     except PhoneException:

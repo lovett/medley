@@ -55,28 +55,32 @@ class Controller:
         cache_key = "phone:{}".format(area_code)
         cached_record = cache.get(cache_key)
 
-
         if cached_record:
             location = cached_record[0]
         else:
-            location = util.phone.findAreaCode(area_code)
-            cache.set(cache_key, location)
+            try:
+                location = util.phone.findAreaCode(area_code)
+                cache.set(cache_key, location)
+            except AssertionError:
+                location = {}
+
 
         caller_id = None
         blacklisted = []
 
         manager = apps.phone.models.AsteriskManager()
+
         if manager.authenticate():
             caller_id = manager.getCallerId(number)
             blacklisted = manager.isBlackListed(number)
 
-
         cdr = apps.phone.models.AsteriskCdr()
 
-        call_history, total_calls = cdr.callHistory(number, 10)
+        call_history, total_calls = cdr.callHistory(number, 50)
 
         if call_history and not caller_id:
             caller_id = call_history[0]["clid"]
+
 
         return {
             "caller_id": caller_id,

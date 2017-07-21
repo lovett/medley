@@ -1,15 +1,14 @@
 MEDLEY.phone = (function () {
     'use strict';
 
-    var endpoint;
-
-    endpoint = window.location.pathname;
+    var endpoint = window.location.pathname;
 
     function showCalleridForm(e) {
         e.preventDefault();
+        var value = jQuery('#callerid-display-value').text().trim();
         jQuery('#caller-id').removeClass('hidden');
         jQuery('#caller-id-display').addClass('hidden');
-        jQuery('INPUT[name=cid_value]').val(jQuery('#callerid-display-value').text().trim());
+        jQuery('INPUT[name=cid_value]').val(value).focus().select();
     }
 
     function hideCalleridForm(e) {
@@ -19,7 +18,6 @@ MEDLEY.phone = (function () {
         jQuery('#caller-id').addClass('hidden');
         jQuery('#caller-id-display').removeClass('hidden');
     }
-
 
     function updateCallerId(e) {
         e.preventDefault();
@@ -45,8 +43,7 @@ MEDLEY.phone = (function () {
                 hideCalleridForm();
             }
         }).fail(function (xhr) {
-            form.addClass('error');
-            form.find('.error.message').html(xhr.statusText);
+            form.find('.error.message').text(xhr.statusText).removeClass('hidden');
         });
     }
 
@@ -81,8 +78,7 @@ MEDLEY.phone = (function () {
             forms = form.parent().find('FORM');
 
             jQuery('#blacklist-date').text('today');
-            forms.removeClass('error');
-            forms.find('.error.message').text('');
+            forms.find('.error.message').text('').addClass('hidden');
             forms.toggleClass('hidden');
 
             if (action === 'add') {
@@ -92,8 +88,7 @@ MEDLEY.phone = (function () {
             }
 
         }).fail(function (xhr) {
-            form.addClass('error');
-            form.find('.error.message').html(xhr.statusText);
+            form.find('.error.message').text(xhr.statusText).removeClass('hidden');
         });
     }
 

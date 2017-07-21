@@ -50,6 +50,7 @@ class AsteriskCdr:
 
         query = """
         SELECT calldate as "date [naive_date]", end as "end_date [naive_date]",
+        CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
         duration as "duration [duration]", clid as "clid [clid]",
         channel as "abbreviated_channel [channel]",
         dstchannel as "abbreviated_dstchannel [channel]", *
@@ -75,7 +76,6 @@ class AsteriskCdr:
 
         params += [limit, offset]
 
-
         self.cur.execute(query, params)
 
         try:
@@ -90,8 +90,18 @@ class AsteriskCdr:
             return ([], 0)
 
         params = []
-        query = """SELECT calldate as "date [naive_date]", duration as "duration [duration]", clid as "clid [clid]", * FROM cdr WHERE src=? ORDER BY calldate DESC"""
+        query = """
+        SELECT calldate as "date [naive_date]",
+        CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
+        duration as "duration [duration]",
+        clid as "clid [clid]",
+        *
+        FROM cdr
+        WHERE src=? OR dst LIKE ?
+        ORDER BY calldate DESC
+        """
         params.append(caller)
+        params.append("%" + caller)
 
         if limit > 0:
             query += " LIMIT ?"

@@ -59,6 +59,8 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["yearmonth"] = self.yearmonth_filter
         self.env.filters["json"] = self.json_filter
         self.env.filters["websearch"] = self.websearch_filter
+        self.env.filters["phonenumber"] = self.phonenumber_filter
+        self.env.filters["snorql"] = self.snorql_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -223,6 +225,31 @@ class Plugin(plugins.SimplePlugin):
         if url_only:
             return url
 
-        return """<a href="{}" target="{}" rel="noopener noreferer">Search {}</a>""".format(
+        return """<a href="{}" target="{}" rel="noopener noreferer">{}</a>""".format(
             url, target, engine.capitalize()
         )
+
+    def phonenumber_filter(self, value):
+        """Format a US phone number as a human-readable string"""
+
+        formats = {
+             7: lambda x: "{}-{}".format(x[:3], x[3:]),
+            10: lambda x: "({}) {}-{}".format(x[:3], x[3:6], x[6:]),
+            11: lambda x: "({}) {}-{}".format(x[1:4], x[4:7], x[7:]),
+        }
+
+        formatter = formats.get(len(value))
+
+        if formatter:
+            return formatter(value)
+
+        return value
+
+    def snorql_filter(self, value):
+        """Build a URL to dbpedia.org/snorql with the specified query"""
+
+        query = self.unindent_filter(value).strip()
+
+        encoded_query = self.urlencode_filter(query)
+
+        return "http://dbpedia.org/snorql?query={}".format(encoded_query)

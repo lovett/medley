@@ -17,7 +17,7 @@
         <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
         <div class="field">
             <label for="number">Number</label>
-            <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
+            <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value=""/>
         </div>
         <div class="field">
             <button>Search</button>
@@ -26,94 +26,117 @@
 
     {% if number %}
 
+    <h1 class="align-center">{{ number|phonenumber }}</h1>
+
     <div class="content-wrapper flex-parent">
         <div class="flex-item">
             <section>
-                <h1>Caller ID</h1>
+                <h2>Caller ID</h2>
 
                 <div id="caller-id-display">
                     <p id="callerid-display-value">
-                        {{ caller_id|default('Unknown caller') }}
+                        {{ caller_id or "Unknown caller" }}
                     </p>
 
-                    <a href="#" class="edit-callerid" rel="noreferrer">Edit</a>
+                    <p><a href="#" class="edit-callerid" rel="noreferrer">Edit</a></p>
                 </div>
 
                 <form id="caller-id" class="hidden" method="post" action="/callerid">
                     <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
+
+                    <div class="hidden error message"></div>
+
                     <div class="field">
                         <input type="text" name="cid_value" value="{{ caller_id|default('') }}"/>
                     </div>
+
                     <div class="field">
                         <button class="small">Update</button>
-                        <a href="#" class="cancel reset-callerid" rel="noreferrer">Cancel</a>
+                        <a href="#" class="cancel reset-callerid">Cancel</a>
                     </div>
-
-
-                    <div class="hidden error message"></div>
                 </form>
             </section>
         </div>
+
         <div class="flex-item">
-            <h1>Status</h1>
+            <h2>Status</h2>
 
             <form class="blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
                 <input type="hidden" name="number" value="{{ number|default('') }}" />
                 <input type="hidden" name="action" value="remove" />
-                <p class="blacklisted">Blacklisted as of <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+
+                <div class="hidden error message">asdf</div>
+
+                <p class="blacklisted">Blacklisted on <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+
                 <button class="small">Remove</button>
-                <div class="hidden error message"></div>
             </form>
 
             <form class="blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
                 <input type="hidden" name="number" value="{{ number|default('') }}" />
                 <input type="hidden" name="action" value="add" />
-                <div class="field">
-                    <p>Not blacklisted</p>
-                </div>
-                <div class="field">
-                    <button class="small">Add</button>
-                </div>
+
                 <div class="hidden error message"></div>
+
+                <p>Not blacklisted</p>
+
+                <button class="small">Add</button>
             </form>
         </div>
         <div class="flex-item">
+            <h2>Location</h2>
             {% if state_name %}
-            <h1>Location</h1>
             <p>{{ state_name }}</p>
+            {% else %}
+            <p>Unknown</p>
+            {% endif %}
+
+            {% if comment %}
             <p>{{ comment }}</p>
             {% endif %}
         </div>
         <div class="flex-item">
-            <p>{{ number|websearch("google") }}</p>
-            <p>{{ number|websearch("bing") }}</p>
+            <h2>Search</h2>
+            <p>{{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
         </div>
     </div>
     {% if history|length > 0 %}
     <div class="content-wrapper">
-        <h1>Call History</h1>
+        <h2>History</h2>
 
         <table>
             <thead>
                 <tr>
                     <th>Date</th>
+                    <th>Direction</th>
                     <th>Duration</th>
-                    <th>End</th>
+                    <th>Last App</th>
                 </tr>
             </thead>
             <tbody>
                 {% for entry in history %}
+                {{ entry }}
                 <tr>
                     <td nowrap="nowrap">
-                        {{ entry["date"]|localtime("date") }}
-                        <p class="small">{{ entry["date"]|localtime("time12")}}</p>
+                        {{ entry["date"]|localtime("date") }} at
+                        {{ entry["date"]|localtime("time12")}}
+                    </td>
+                    <td>
+                        {% if entry["direction"] == "incoming" %}
+                        ⬅️
+                        {{ entry["direction"] }} call from
+                        <a href="?number={{ entry["src"] }}">{{ entry["src"]|phonenumber }}</a>
+                        {% else %}
+                        ➡️
+                        {{ entry["direction"] }} call to
+                        <a href="?number={{ entry["dst"] }}">{{ entry["dst"]|phonenumber }}</a>
+                        {% endif %}
                     </td>
                     <td>
                         {{ entry["duration"] }}
                     </td>
                     <td nowrap="nowrap">
                         {{ entry["lastapp"] }}
-                        <p class="small">{{ entry["dst"]}}</p>
                     </td>
                 </tr>
                 {% endfor %}
@@ -124,10 +147,11 @@
 
     {% if number %}
     <div class="content-wrapper debug">
-        <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> SPARQL</a>
+        <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> SPARQL queries</a>
         <div class="toggle-target hidden">
             {% for query in sparql %}
-            <pre>{{ query|unindent|escape }}</pre>
+            <p><a href="{{ query[1]|snorql }}" rel="noreferrer" target="_blank">{{ query[0] }}</a></p>
+            <pre>{{ query[1]|unindent|escape }}</pre>
             {% endfor %}
         </div>
     </div>
