@@ -1,39 +1,42 @@
 MEDLEY.topics = (function () {
     'use strict';
 
-    var childWindow;
+    var childWindow, links, worker;
 
-    function visitLinks(links, counter, limit) {
-        var index;
+    function visitLink(index) {
+        var link = links[index];
 
-        if (counter < links.length) {
-            index = counter;
-        } else {
-            index = counter - links.length;
+        if (link.classList.contains('strikeout')) {
+            return;
         }
 
-        if (!childWindow) {
-            childWindow = window.open(links[index].getAttribute('href'), 'topic');
-        } else {
+        if (!childWindow.closed) {
             childWindow.location.href = links[index].getAttribute('href');
+            link.classList.add('strikeout');
         }
-
-        links[index].className += ' strikeout';
-
-        setTimeout(function () {
-            if (counter < limit - 1) {
-                visitLinks(links, counter + 1, limit);
-            } else if (childWindow) {
-                childWindow.close();
-            }
-        }, Math.floor(Math.random() * 3000) + 3000);
     }
 
     return {
         init: function () {
+            links = jQuery('#topics A');
+
+            worker = new Worker('/static/topics/topics-worker.js');
+
+            worker.addEventListener('message', function (e) {
+                var fields = e.data.split(':');
+                if (fields[0] === 'visit') {
+                    visitLink(parseInt(fields[1], 10));
+                }
+
+                if (fields[0] === 'finish') {
+                    childWindow.close();
+                }
+            });
+
             jQuery('BUTTON').on('click', function () {
-                var count = parseInt(jQuery(this).attr('data-count'), 10);
-                visitLinks(jQuery('#topics A'), 0, count);
+                var message = 'start:0:' + parseInt(jQuery(this).attr('data-count'), 10);
+                childWindow = window.open('about:blank');
+                worker.postMessage(message);
             });
         }
     };
