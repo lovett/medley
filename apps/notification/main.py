@@ -20,9 +20,19 @@ class Controller:
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
+        """Decide whether a notification is speakable.
+
+        Retractions are not, so respond with a 204. Likewise for
+        reminders, which get the same treatment because they recur too
+        frequently to be meaningful."""
+
         notification = cherrypy.request.json
 
         if "retracted" in notification:
+            cherrypy.response.status = 204
+            return
+
+        if notification.get("group") == "reminder":
             cherrypy.response.status = 204
             return
 
