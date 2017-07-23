@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS registry (
         return keys
 
 
-    def search(self, key=None, keys=[], value=None, limit=100):
+    def search(self, key=None, keys=[], value=None, limit=100, exact=False):
         sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry WHERE (1) "
         params = []
 
@@ -101,12 +101,16 @@ CREATE TABLE IF NOT EXISTS registry (
             sql += ") "
         elif key:
             fuzzy = "*" in key
-            key = key.replace("*", "%")
 
-            if not fuzzy:
+            if fuzzy:
+                key = key.replace("*", "%")
+            elif not exact:
                 key = "%{}%".format(key)
 
-            sql += "AND key LIKE ? "
+            if exact:
+                sql += "AND key = ?"
+            else:
+                sql += "AND key LIKE ? "
 
             params.append(key)
 

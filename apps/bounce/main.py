@@ -66,10 +66,12 @@ class Controller:
             site = self.siteUrl(u)
             search_value = "{}*".format(site)
             group = registry.firstKey(value=search_value)
+            if group:
+                group = self.fromRegistryKey(group)
 
         if group:
-            group = self.fromRegistryKey(group)
-            bounces = registry.search(key=group)
+            search_key = self.toRegistryKey(group)
+            bounces = registry.search(search_key, exact=True)
 
         if site and not group:
             group = self.guessGroup(site)
