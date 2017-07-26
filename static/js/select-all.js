@@ -1,4 +1,4 @@
-MEDLEY.transform = (function () {
+MEDLEY.selectAll = (function () {
     'use strict';
 
     function selectAll(e) {
@@ -22,14 +22,12 @@ MEDLEY.transform = (function () {
 
     return {
         init: function () {
-            jQuery('.select-all').on('click', selectAll);
+            const links = jQuery('.select-all').on('click', selectAll);
 
-            if (jQuery('#result').html() !== '') {
-                jQuery('#result').prevAll('.select-all').trigger('click');
-            }
+            links.first('data-sellection-immediate=1').trigger('click');
         }
     };
 
 }());
 
-jQuery(document).ready(MEDLEY.transform.init);
+jQuery(document).ready(MEDLEY.selectAll.init);
