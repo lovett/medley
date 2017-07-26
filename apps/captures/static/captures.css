@@ -25,3 +25,8 @@
     border-bottom: 1px solid #ccc;
 
 }
+
+.options {
+    text-align: right;
+    font-size: .85em;
+}

@@ -24,7 +24,7 @@ MEDLEY.selectAll = (function () {
         init: function () {
             const links = jQuery('.select-all').on('click', selectAll);
 
-            links.first('data-sellection-immediate=1').trigger('click');
+            links.filter('[data-selection-immediate="1"]').first().trigger('click');
         }
     };
 

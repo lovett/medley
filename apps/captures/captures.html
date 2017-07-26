@@ -1,7 +1,15 @@
 {% extends "base.html" %}
 
+{% macro selectAll(target) -%}
+<a href="#" data-selection-target="#{{ target }}" class="select-all">Select All</a>
+{%- endmacro %}
+
 {% block stylesheets %}
 <link rel="stylesheet" type="text/css" href="/static/captures/captures.css" />
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/select-all.js"></script>
 {% endblock %}
 
 {% block page_body %}
@@ -32,7 +40,11 @@
             <div class="half-column">
                 <section>
                     <h2>Request Headers</h2>
-                    <code>
+                    <p class="options">
+                        {{ selectAll("reqhead-" ~ loop.index) }}
+                    </p>
+
+                    <code id="reqhead-{{ loop.index }}">
                     {{- capture.request_line }}
                     {% for key, value in capture.request.headers.items() -%}
                     {{ key }}: {{ value }}
@@ -43,14 +55,21 @@
                 {% if capture.request.params %}
                 <section>
                     <h2>Request body</h2>
-                    <code>{{ capture.request.params }}</code>
+                    <p class="options">
+                        {{ selectAll("reqbodyparam-" ~ loop.index) }}
+                    </p>
+                    <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
                 </section>
                 {% endif %}
 
                 {% if capture.request.json %}
                 <section>
                     <h2>Request Body </h2>
-                    <pre>{{ capture.request.json|json }}</pre>
+                    <p class="options">
+                        {{ selectAll("reqbodyjson-" ~ loop.index) }}
+                    </p>
+
+                    <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
                 </section>
                 {% endif %}
             </div>
