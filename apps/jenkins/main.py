@@ -47,6 +47,18 @@ class Controller:
                 "No notification config found in registry"
             )
 
+        skip_notification = False
+        skippable_projects = [project["value"] for project in registry.search(key="jenkins:skip")]
+        if details["name"] in skippable_projects:
+            if details["build"]["phase"].lower() == "started":
+                skip_notification = True
+            elif details["build"]["status"].lower() == "success":
+                skip_notification = True
+
+        if skip_notification:
+            cherrypy.response.status = 202
+            return
+
         notifier = {}
         for item in notifier_config:
             k = item["key"].split(":")[1]
