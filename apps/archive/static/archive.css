@@ -1,36 +1,47 @@
+.content-wrapper {
+    max-width: 800px;
+    margin: auto;
+}
+
 .bookmark {
     background-color: #fff;
     padding: .75em;
-    margin-bottom: 1em;
+    margin-bottom: 1.5em;
+    line-height: 1.5;
+}
+
+.bookmark A {
+    text-decoration: none;
 }
 
 .bookmark TIME {
+    display: inline;
+}
+
+.bookmark .meta {
     color: #666;
     font-size: .85em;
 }
 
-
 .bookmark H2 {
     margin: 0;
     padding: 0;
-    font-size: 1.25em;
+    font-size: 1.2em;
 }
 
-
-.bookmark .comments {
-    margin: 1em 0;
+.bookmark P {
+    margin: 0;
+    padding: 0;
 }
 
 .bookmark .actions {
     float: right;
 }
 
-
 .date-group {
-    margin-top: 2em;
-    font-size: 1.5em;
+    padding-bottom: 1em;
 }
 
-.date-group:nth-of-type(1) {
-    margin-top: 1em;
+.date-group H1 {
+    font-size: 1.25em;
 }

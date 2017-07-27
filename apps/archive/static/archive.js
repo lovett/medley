@@ -28,7 +28,6 @@ MEDLEY.archive = (function () {
     return {
         init: function () {
             jQuery('MAIN').on('click', 'A.delete', deleteBookmark);
-            jQuery('MAIN A.delete.hidden').removeClass('hidden');
         }
     };
 })();

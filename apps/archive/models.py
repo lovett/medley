@@ -91,7 +91,8 @@ CREATE INDEX IF NOT EXISTS url_domain ON urls (domain);
     def search(self, search):
         sql = """SELECT u.rowid, u.url, u.domain, m.title,
             u.created as 'created [created]', m.tags, m.comments
-            FROM urls u, meta m WHERE u.rowid=m.url_id AND meta MATCH ?"""
+            FROM urls u, meta m WHERE u.rowid=m.url_id AND meta MATCH ?
+            ORDER BY u.created DESC"""
         self.cur.execute(sql, (search,))
 
         return self.cur.fetchall()

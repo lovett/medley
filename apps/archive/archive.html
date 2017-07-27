@@ -14,13 +14,18 @@
 {% block page_body %}
 
 <main>
-
     <form class="content-wrapper" method="get" action="/archive">
         <div class="field">
+            <label for="q">Search terms</label>
             <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
         </div>
-        <div class="field">
-            <button>Search</button>
+        <div class="field-group">
+            <div class="field">
+                <button>Search</button>
+            </div>
+            <div class="field align-right">
+                <a href="/archive">Reset</a>
+            </div>
         </div>
     </form>
 
@@ -29,33 +34,30 @@
         <p {% if entries %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
         {% for key, entries in entries.items() %}
-        <div class="group">
-            <h1 class="date-group">{{ entries[0].created|localtime("date-full") }}</h1>
+        <div class="date-group">
+            <h1>{{ entries[0].created|localtime("date-full") }}</h1>
             {% for entry in entries %}
             <div class="bookmark">
                 <div class="actions">
-                    <a href="#" class="delete" data-uid="{{ entry.rowid }}" rel="noreferrer">
+                    <a href="#" class="delete" data-uid="{{ entry.rowid }}" rel="noreferrer" title="Delete this bookmark">
                         <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                     </a>
                 </div>
 
-                <time>
-                    {{ entry.created|localtime("time12") }}
-                </time>
+                <p class="meta">
+                    <time>
+                        {{ entry.created|localtime("time12") }}
+                    </time>
+
+                    from <span class="domain">{{ entry.domain }}</span>
+                </p>
 
                 <h2><a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a></h2>
-                <a class="domain" href="{{ entry.domain|anonymize }}" rel="noreferrer" target="_blank">{{ entry.domain }}</a>
-
-                {% if not entry.has_fulltext %}
-                <div class="meta">
-                    No fulltext available
-                </div>
-                {% endif %}
 
                 {% if entry.comments %}
-                <div class="comments">
+                <p class="comments">
                     {{ entry.comments }}
-                </div>
+                </p>
                 {% endif %}
             </div>
             {% endfor %}

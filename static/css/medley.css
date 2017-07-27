@@ -125,6 +125,10 @@ TABLE.key-value TH {
     text-align: center;
 }
 
+.align-right {
+    text-align: right;
+}
+
 .bookmarklet-container {
     text-align: right;
 }
