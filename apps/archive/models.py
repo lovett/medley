@@ -123,7 +123,7 @@ CREATE INDEX IF NOT EXISTS url_domain ON urls (domain);
         """Remove site identifiers and noise from the title of an HTML document"""
         title = title or ""
         reduced_title = title
-        for char in "|·—:-":
+        for char in "»|·—:-":
             separator = " {} ".format(char)
             if separator in title:
                 segments = title.split(separator)
