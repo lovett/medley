@@ -24,7 +24,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is converted to lowercase and returned as HTML"""
         response = self.request(path="/",
                                 method="POST",
-                                style="lower",
+                                transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_html(response))
         self.assertTrue("""<div id="result">test</div>""" in response.body)
@@ -34,7 +34,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         response = self.request(path="/",
                                 method="POST",
                                 as_json=True,
-                                style="lower",
+                                transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_json(response))
         self.assertEqual(response.body["result"], "test")
@@ -44,7 +44,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
-                                style="lower",
+                                transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_text(response))
         self.assertEqual(response.body, "test")
@@ -54,16 +54,34 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
-                                style="upper",
+                                transform="upper",
                                 value="test")
         self.assertEqual(response.body, "TEST")
+
+    def test_urlencode(self):
+        """Input is url-encoded"""
+        response = self.request(path="/",
+                                method="POST",
+                                as_plain=True,
+                                transform="urlencode",
+                                value="this is a test")
+        self.assertEqual(response.body, "this+is+a+test")
+
+    def test_urldecode(self):
+        """Input is url-encoded"""
+        response = self.request(path="/",
+                                method="POST",
+                                as_plain=True,
+                                transform="urldecode",
+                                value="this+is+a+test")
+        self.assertEqual(response.body, "this is a test")
 
     def test_capitalize(self):
         """Input is capitalized"""
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
-                                style="capitalize",
+                                transform="capitalize",
                                 value="test Case")
         self.assertEqual(response.body, "Test case")
 
@@ -72,25 +90,25 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         response = self.request(path="/",
                                 method="POST",
                                 as_plain=True,
-                                style="title",
+                                transform="title",
                                 value="this iS a TEst 1999")
         self.assertEqual(response.body, "This Is A Test 1999")
 
-    def test_invalidStyle(self):
-        """Unrecognized values for the style parameter leave the value unmodified"""
+    def test_invalidTransform(self):
+        """Unrecognized values for the transform parameter return leave the value unmodified"""
         val = "test"
         response = self.request(
             path="/",
             method="POST",
             as_plain=True,
-            style="example",
+            transform="example",
             value=val
         )
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, val)
 
     def test_paramsOptional(self):
-        """Style and value parameters are optional"""
+        """Transform and value parameters are optional"""
         response = self.request(path="/",
                                method="POST",
                                as_plain=True)

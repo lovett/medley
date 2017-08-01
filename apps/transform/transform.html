@@ -12,12 +12,12 @@
             <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
         </div>
         <div class="field">
-            <label for="style">Convert to:</label>
+            <label for="transform">Convert to:</label>
 
             <div class="field">
-                {% for option in styles %}
-                <input type="radio" class="inline" name="style" value="{{ option }}" {% if option == style or option == default_style %}checked{% endif %} />
-                <label class="inline">{{ option|title }}</label>
+                {% for transform in transforms %}
+                <input id="transform-{{ transform }}" type="radio" class="inline" name="transform" value="{{ transform }}" {% if transform == current_transform %}checked{% endif %} />
+                <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
                 {% endfor %}
             </div>
         </div>
@@ -31,7 +31,7 @@
     {% if result %}
     <div class="content-wrapper">
         <p><a href="#" data-selection-target="#result" class="select-all" data-selection-immediate="1" rel="noreferrer">Select All</a></p>
-        <div id="result">{{ result|nl2br() }}</div>
+        <div id="result">{{ result|escape()|nl2br() }}</div>
     </div>
     {% endif %}
 </form>
