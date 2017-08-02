@@ -1,10 +1,11 @@
 from testing import cptestcase
 from testing import helpers
+from testing import assertions
 import apps.headers.main
 import unittest
 
 
-class TestHeaders(cptestcase.BaseCherryPyTestCase):
+class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.headers.main.Controller)
@@ -14,39 +15,29 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase):
         helpers.stop_server()
 
     def test_returnsHtml(self):
-        """It returns HTML by default"""
+        """GET returns text/html by default"""
         response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<table" in response.body)
+        self.assertHtml(response, "<table")
 
     def test_returnsJson(self):
-        """It returns JSON if requested"""
+        """GET returns application/json if requested"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_json(response))
-        header, value = next(pair for pair in response.body if pair[0] == "Accept")
-        self.assertTrue(helpers.response_is_json(response))
+        self.assertJson(response)
 
     def test_returnsText(self):
-        """It returns plain text if requested"""
-        response = self.request("/", as_plain=True)
+        """GET returns text/plain if requested"""
+        response = self.request("/", as_text=True)
         self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_text(response))
-        self.assertTrue("Accept" in response.body)
+        self.assertText(response)
 
-    def test_noVars(self):
-        """It takes no querystring arguments"""
-        response = self.request("/?this=that")
-        self.assertEqual(response.code, 404)
-
-    def test_noParams(self):
-        """It takes no route parameters"""
-        response = self.request("/test")
+    def test_noquery(self):
+        """GET takes no querystring arguments"""
+        response = self.request("/?test_noquery=abc123")
         self.assertEqual(response.code, 404)
 
     def test_customHeader(self):
-        """It recognizes custom headers"""
+        """GET recognizes custom headers"""
         response = self.request("/", headers={"Special_Header": "Special Value"}, as_json=True)
         header, value = next(pair for pair in response.body if pair[0] == "Special_Header")
         self.assertEqual(value, "Special Value")

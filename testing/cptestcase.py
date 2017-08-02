@@ -21,7 +21,7 @@ __all__ = ['BaseCherryPyTestCase']
 class BaseCherryPyTestCase(unittest.TestCase):
     def request(self, path='/', method='GET', app_path='',
                 scheme='http', proto='HTTP/1.1', data=None,
-                headers={}, as_json=False, as_plain=False,
+                headers={}, as_json=False, as_text=False,
                 json_body={}, **kwargs):
         """ CherryPy does not have a facility for serverless unit testing.
         This recipe demonstrates a way of simulating an incoming
@@ -40,11 +40,13 @@ class BaseCherryPyTestCase(unittest.TestCase):
 
         if as_json:
             h["Accept"] = "application/json"
-        elif as_plain:
+        elif as_text:
             h["Accept"] = "text/plain"
 
         if json_body:
             h["content-type"] = "application/json"
+
+
 
         # Allow default headers to be removed
         h.update(headers)
@@ -92,7 +94,6 @@ class BaseCherryPyTestCase(unittest.TestCase):
             if fd:
                 fd.close()
                 fd = None
-
 
         # A generic object is easier to work and customize than the
         # CherryPy response
