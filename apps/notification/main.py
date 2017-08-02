@@ -43,6 +43,11 @@ class Controller:
             return
 
         manager = apps.speak.models.SpeechManager()
+
+        if manager.isMuted():
+            cherrypy.response.status = 202
+            return
+
         manager.say(title, "en-GB", "Male")
 
         return
