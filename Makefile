@@ -10,6 +10,10 @@ APP_PATHS := $(wildcard $(APP_DIR)/*)
 APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
 APP_NAMES := $(notdir $(APP_PATHS))
 
+REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
+REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
+REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
+PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
 venv: dummy
 	rm -rf venv
@@ -21,8 +25,17 @@ lint-server: dummy
 	flake8 medley.py
 	pylint --rcfile=.pylintrc medley.py;
 
-outdated: dummy
-	pip list --outdated
+
+# Filter the list of outdated packages to direct dependencies
+#
+# By default, pip returns a list of all outdated packages. It can be
+# annoying to reconcile this list to the contents of requirements.txt
+# to separate direct dependencies (things this application uses) from
+# indirect dependencies (other things used by direct dependencies).
+#
+# This setup also handles multiple requirements files.
+outdated: .pip-outdated $(REQUIREMENTS_FILES)
+	rm $(PIP_OUTDATED_TEMP)
 
 setup: dummy
 	pip install --upgrade pip setuptools
@@ -40,6 +53,26 @@ serve: dummy
 $(COVERAGE_DIR):
 	mkdir $(COVERAGE_DIR)
 
+# Filter the list of outdated packages based on the contents of a requirements file
+#
+# This is normally called from the outdated target. It greps the temp file produced
+# by the .pip-outdated target to avoid slowdown across multiple calls.
+#
+# The package names are extracted to a temporary file to facilitate grepping. There is
+# some sed fiddling with this file to improve the readability of the grep.
+#
+# Don't invoke directly.
+#
+$(REQUIREMENTS_FILES): dummy
+	@echo ""
+	@echo "Outdated packages from $@:"
+	@cut -d'=' -f 1 $@ > $(REQUIREMENTS_TEMP)
+	@echo "Package" >> $(REQUIREMENTS_TEMP)
+	@echo "-------" >> $(REQUIREMENTS_TEMP)
+	@sed -i '' -e 's/^/^/' $(REQUIREMENTS_TEMP)
+	@grep -f $(REQUIREMENTS_TEMP) $(PIP_OUTDATED_TEMP)
+	@echo ""
+	@rm $(REQUIREMENTS_TEMP)
 
 # Create a coverage file for each app
 #
@@ -59,6 +92,14 @@ $(COVERAGE_DIR):
 .coverage.%:
 	@if [ -f $(COVERAGE_DIR)/$*.cov ]; then \
 	cp $(COVERAGE_DIR)/$*.cov $(COVERAGE_DIR)/.coverage.$*; fi
+
+
+# Save pip's list of outdated packages to a temp file.
+#
+# Don't invoke directly.
+#
+.pip-outdated: dummy
+	pip list --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report
