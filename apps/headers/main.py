@@ -3,6 +3,8 @@ import cherrypy
 class Controller:
     """Display request headers"""
 
+    URL = "/headers"
+
     name = "Headers"
 
     exposed = True
