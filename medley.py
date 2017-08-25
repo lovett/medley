@@ -8,58 +8,12 @@ each time, and makes it easier to leverage existing things when build
 new things.
 """
 
-import datetime
-import email.utils
 import importlib
 import os
 import os.path
-import time
 import cherrypy
 import plugins
 import tools
-
-
-class MedleyServer(object):
-    """The core application onto which individual apps are mounted."""
-
-    name = "Medley"
-
-    apps = []
-
-    @cherrypy.expose
-    @cherrypy.tools.negotiable()
-    @cherrypy.tools.template(template="index.html")
-    def index(self):
-        """The application homepage lists the available endpoints"""
-
-        if not self.apps:
-            for name, controller in cherrypy.tree.apps.items():
-                if not name:
-                    continue
-
-                summary = controller.root.__doc__.strip().split("\n").pop(0)
-
-                user_facing = getattr(controller.root, "user_facing", False)
-
-                app = (name[1:], summary, user_facing)
-
-                self.apps.append(app)
-
-                self.apps.sort(key=lambda tup: tup[0])
-
-        expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-        expiration = time.mktime(expiration.timetuple())
-        cherrypy.response.headers["Expires"] = email.utils.formatdate(
-            timeval=expiration,
-            localtime=False,
-            usegmt=True
-        )
-
-        return {
-            "page_title": self.name,
-            "apps": self.apps,
-        }
-
 
 def main():
     """Configure and start the medley server
@@ -110,14 +64,6 @@ def main():
                 "log.error_file": os.path.join(value, "error.log")
             })
 
-    # Mount the core server
-    cherrypy.tree.mount(MedleyServer(), config={
-        "/static": {
-            "tools.staticdir.on": True,
-            "tools.staticdir.dir": os.path.realpath("static")
-        }
-    })
-
     # Mount the apps
     app_dir = os.path.join(os.path.dirname(__file__), "apps")
 
@@ -128,7 +74,12 @@ def main():
 
         module = importlib.import_module("apps.{}.main".format(item))
 
-        cherrypy.tree.mount(module.Controller(), "/{}".format(item), {
+        try:
+            url_path = module.Controller.URL
+        except:
+            continue
+
+        cherrypy.tree.mount(module.Controller(), url_path, {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher()
             },
@@ -160,6 +111,9 @@ def main():
     plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
     plugins.dnsomatic.Plugin(cherrypy.engine).subscribe()
+    plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
+    plugins.registry.Plugin(cherrypy.engine).subscribe()
+    plugins.cache.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
