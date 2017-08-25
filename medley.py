@@ -31,7 +31,7 @@ def main():
 
     app_root = os.path.dirname(os.path.abspath(__file__))
 
-    # Jinja templating won't work unlss tools.encode is off
+    # Jinja templating won't work unless tools.encode is off
     cherrypy.config.update({
         "app_root": app_root,
         "tools.encode.on": False
@@ -65,34 +65,41 @@ def main():
             })
 
     # Mount the apps
-    app_dir = os.path.join(os.path.dirname(__file__), "apps")
+    app_dir = os.path.realpath("apps")
 
-    for item in os.listdir(app_dir):
-        main_path = os.path.join(app_dir, item, "main.py")
+    for app in os.listdir(app_dir):
+        main_path = os.path.join(app_dir, app, "main.py")
+
         if not os.path.isfile(main_path):
             continue
 
-        module = importlib.import_module("apps.{}.main".format(item))
+        app_module = importlib.import_module("apps.{}.main".format(app))
 
         try:
-            url_path = module.Controller.URL
+            url_path = app_module.Controller.URL
         except:
             continue
 
-        cherrypy.tree.mount(module.Controller(), url_path, {
+        app_config = {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher()
             },
-            "/static": {
+        }
+
+        # An app can optionally have a dedicated directory for static assets
+        static_path = os.path.join(app_dir, app, "static")
+        if os.path.isdir(static_path):
+            app_config["/static"] = {
                 "tools.staticdir.on": True,
-                "tools.staticdir.dir": os.path.realpath("static")
+                "tools.staticdir.dir": os.path.realpath(static_path)
             }
-        })
+
+        cherrypy.tree.mount(app_module.Controller(), url_path, app_config)
 
     # Customize the error page
     if cherrypy.config.get("request.show_tracebacks") is not False:
         cherrypy.config.update({
-            "error_page.default": os.path.join(app_root, "static/error.html")
+            "error_page.default": os.path.join(app_root, "error.html")
         })
 
     # Attempt to drop privileges if daemonized
