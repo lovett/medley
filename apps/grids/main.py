@@ -8,13 +8,15 @@ import calendar
 class Controller:
     """Printable pages for data entry"""
 
+    URL = "/grids"
+
     name = "Grids"
 
     exposed = True
 
     user_facing = True
 
-    @cherrypy.tools.template(template="grids.html")
+    @cherrypy.tools.negotiable()
     def GET(self, name="", start=None):
         registry = apps.registry.models.Registry()
 
@@ -27,7 +29,6 @@ class Controller:
         except (TypeError, ValueError):
             start = today.replace(day=1)
 
-        print(start)
         try:
             config = next(
                 grid["value"].split("\n")
@@ -61,10 +62,13 @@ class Controller:
             rows = [row for x in range(1, 30)]
 
         return {
-            "app_name": self.name,
-            "names": names,
-            "name": name,
-            "headers": headers,
-            "rows": rows,
-            "options": options
+            "html": ("grids.html", {
+                "headers": headers,
+                "app_name": self.name,
+                "names": names,
+                "name": name,
+                "headers": headers,
+                "rows": rows,
+                "options": options
+            })
         }
