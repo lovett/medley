@@ -35,7 +35,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         h = {
             "Host": "127.0.0.1",
             "Remote-Addr": "127.0.0.1",
-            "Accept": "*/*"
+            "Accept": "text/html"
         }
 
         if as_json:
