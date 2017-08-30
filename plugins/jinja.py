@@ -31,9 +31,10 @@ class Plugin(plugins.SimplePlugin):
         paths = [os.path.join(app_root, "templates")]
 
         apps = [os.path.join(app_root, "apps", app)
-                for app in os.listdir(os.path.join(app_root, "apps"))
-                if not app.startswith("__")]
+                for app in os.listdir(os.path.join(app_root, "apps"))]
 
+        apps = filter(os.path.isdir, apps)
+        apps = filter(lambda x: not x.endswith("__"), apps)
         paths.extend(apps)
 
         loader = jinja2.FileSystemLoader(paths)
