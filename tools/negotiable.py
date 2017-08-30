@@ -67,10 +67,14 @@ class Tool(cherrypy.Tool):
             cherrypy.response.body = None
             return
 
-        # The trailing newline keeps the response from colling with
-        # the shell prompt when using curl.
-        cherrypy.response.body = "{}\n".format(final_body).encode(self.charset)
-        return
+        # Requests made on the command line using curl tend to collide with the shell prompt.
+        # Add some trailing newlines to prevent this.
+        body_format = "{}"
+
+        if "curl" in cherrypy.request.headers.get("User-Agent", ""):
+            body_format += "\n\n"
+
+        cherrypy.response.body = body_format.format(final_body).encode(self.charset)
 
     def _renderJson(self, body):
         part = body.get("json")
