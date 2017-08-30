@@ -21,7 +21,7 @@ class Tool(cherrypy.Tool):
 
     charset = "utf-8"
 
-    wanted_type = None
+    response_format = None
 
     def __init__(self):
         cherrypy.Tool.__init__(
@@ -30,6 +30,7 @@ class Tool(cherrypy.Tool):
             self._negotiate,
             priority=10
         )
+
 
     def _setup(self):
         cherrypy.Tool._setup(self)
@@ -40,28 +41,14 @@ class Tool(cherrypy.Tool):
             priority=5
         )
 
-    def _negotiate(self, media=[], default_media="text/html"):
-        """Decide on a response format
 
-        This happens from an early hook point for the sake of error
-        handling. If the client wants a format that isn't available,
-        there is an impasse and further processing isn't possible.
+    def _negotiate(self):
+        """Decide on a response format"""
 
-        The media parameter can narrow the default set of acceptable
-        formats. It should specify the list of mime types the
-        controller is willing to provide."""
+        candidates = list(self.renderers.keys())
 
-        candidates = media or list(self.renderers.keys())
+        self.response_format = cherrypy.tools.accept.callable(candidates)
 
-        # The first candidate acts as the default content type
-        candidates.remove(default_media)
-        candidates.insert(0, default_media)
-
-        if isinstance(candidates, str):
-            candidates = [candidates]
-
-        self.wanted_type = cherrypy.tools.accept.callable(candidates)
-        print("Wanted type is {}".format(self.wanted_type))
 
     def _finalize(self):
         """Select the response body that matches the previously negotiated format"""
@@ -69,22 +56,30 @@ class Tool(cherrypy.Tool):
         if not isinstance(cherrypy.response.body, dict):
             return
 
-        renderer = self.renderers.get(self.wanted_type)
+        renderer = self.renderers.get(self.response_format)
 
         final_body, content_type = getattr(self, renderer)(cherrypy.response.body)
 
         cherrypy.response.headers["Content-Type"] = content_type
 
+        if not final_body:
+            cherrypy.response.status = 406
+            cherrypy.response.body = None
+            return
+
         # The trailing newline keeps the response from colling with
         # the shell prompt when using curl.
         cherrypy.response.body = "{}\n".format(final_body).encode(self.charset)
+        return
 
     def _renderJson(self, body):
         part = body.get("json")
+
         return (
-            json.JSONEncoder().encode(part),
+            json.JSONEncoder().encode(part) if part else None,
             "application/json"
         )
+
 
     def _renderText(self, body):
         part = body.get("text")
@@ -92,16 +87,20 @@ class Tool(cherrypy.Tool):
             part = [part]
 
         return (
-            "\n".join([str(line) for line in part]),
+            "\n".join([str(line) for line in part]) if part else None,
             "text/plain;charset={}".format(self.charset)
         )
 
+
     def _renderHtml(self, body):
-        template_file, values = body.get("html")
-        template = cherrypy.engine.publish("lookup-template", template_file).pop()
+        template_file, values = body.get("html", (None, None))
+
+        template = None
+        if template_file:
+            template = cherrypy.engine.publish("lookup-template", template_file).pop()
 
         return (
-            template.render(**values),
+            template.render(**values) if template else None,
             "text/html;charset={}".format(self.charset)
         )
 
