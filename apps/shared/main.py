@@ -5,6 +5,8 @@ class Controller:
 
     URL = "/shared"
 
+    name = "Shared"
+
     exposed = True
 
     user_facing = False
