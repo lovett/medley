@@ -1,6 +1,7 @@
 import cherrypy
 import datetime
 import email.utils
+import functools
 import time
 
 class Controller:
@@ -8,31 +9,31 @@ class Controller:
 
     URL = "/"
 
-    name = "Medley"
+    name = "Homepage"
 
     exposed = True
 
     user_facing = True
 
-    apps = []
+    @functools.lru_cache(maxsize=1)
+    def list_apps(self):
+        apps = []
+        for name, controller in cherrypy.tree.apps.items():
+            if (controller.root == self):
+                continue
+
+            summary = controller.root.__doc__.strip().split("\n").pop(0)
+
+            user_facing = getattr(controller.root, "user_facing", False)
+
+            apps.append((name[1:], summary, user_facing))
+
+            apps.sort(key=lambda tup: tup[0])
+
+        return apps
 
     @cherrypy.tools.negotiable()
     def GET(self):
-        if not self.apps:
-            for name, controller in cherrypy.tree.apps.items():
-                if not name:
-                    continue
-
-                summary = controller.root.__doc__.strip().split("\n").pop(0)
-
-                user_facing = getattr(controller.root, "user_facing", False)
-
-                app = (name[1:], summary, user_facing)
-
-                self.apps.append(app)
-
-                self.apps.sort(key=lambda tup: tup[0])
-
         expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
         expiration = time.mktime(expiration.timetuple())
         cherrypy.response.headers["Expires"] = email.utils.formatdate(
@@ -44,6 +45,6 @@ class Controller:
         return {
             "html": ("homepage.html", {
                 "app_name": self.name,
-                "apps": self.apps,
+                "apps": self.list_apps(),
             })
         }
