@@ -43,7 +43,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is coverted to lowercase and returned as plain text"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_text(response))
@@ -53,7 +53,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is converted to uppercase"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="upper",
                                 value="test")
         self.assertEqual(response.body, "TEST")
@@ -62,7 +62,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is url-encoded"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="urlencode",
                                 value="this is a test")
         self.assertEqual(response.body, "this+is+a+test")
@@ -71,7 +71,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is url-encoded"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="urldecode",
                                 value="this+is+a+test")
         self.assertEqual(response.body, "this is a test")
@@ -80,7 +80,7 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is capitalized"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="capitalize",
                                 value="test Case")
         self.assertEqual(response.body, "Test case")
@@ -89,10 +89,20 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         """Input is converted to titlecase"""
         response = self.request(path="/",
                                 method="POST",
-                                as_plain=True,
+                                as_text=True,
                                 transform="title",
                                 value="this iS a TEst 1999")
         self.assertEqual(response.body, "This Is A Test 1999")
+
+    def test_invalid_transform(self):
+        """Input is converted to titlecase"""
+        response = self.request(path="/",
+                                method="POST",
+                                as_text=True,
+                                transform="invalid",
+                                value="abcde")
+        self.assertEqual(response.body, "abcde")
+
 
     def test_invalidTransform(self):
         """Unrecognized values for the transform parameter return leave the value unmodified"""
@@ -100,19 +110,19 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
         response = self.request(
             path="/",
             method="POST",
-            as_plain=True,
+            as_text=True,
             transform="example",
             value=val
         )
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, val)
 
-    def test_paramsOptional(self):
-        """Transform and value parameters are optional"""
+    def test_paramsRequired(self):
+        """Transform and value parameters are required"""
         response = self.request(path="/",
                                method="POST",
-                               as_plain=True)
-        self.assertEqual(response.code, 200)
+                               as_text=True)
+        self.assertEqual(response.code, 404)
 
 
 

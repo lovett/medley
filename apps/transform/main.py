@@ -4,6 +4,8 @@ import urllib
 class Controller:
     """Convert a string to a different format"""
 
+    URL = "/transform"
+
     name = "Transform"
 
     exposed = True
@@ -12,10 +14,7 @@ class Controller:
 
     transforms = {}
 
-    view_vars = {}
-
-    def __init__(self, additional_transforms={}):
-
+    def __init__(self):
         self.transforms = {
             "capitalize": lambda x: x.capitalize(),
             "lower": lambda x: x.lower(),
@@ -25,33 +24,36 @@ class Controller:
             "urlencode": lambda x: urllib.parse.quote_plus(x),
         }
 
-        self.transforms.update(additional_transforms)
+    def list_of_transforms(self):
+        """Shape the list of transforms into a list of keys"""
+        return sorted(list(self.transforms.keys()))
 
-        self.view_vars.update({
-            "app_name": self.name,
-            "transforms":  sorted(list(self.transforms.keys()))
-        })
-
-
-    @cherrypy.tools.template(template="transform.html")
     @cherrypy.tools.negotiable()
     def GET(self):
-        return self.view_vars
 
-    @cherrypy.tools.template(template="transform.html")
+        return {
+            "json": {"transforms": self.list_of_transforms()},
+            "text": "\n".join(self.list_of_transforms()),
+            "html": ("transform.html", {
+                "app_name": self.name,
+                "transforms": self.list_of_transforms()
+            })
+        }
+
     @cherrypy.tools.negotiable()
-    def POST(self, transform=None, value=None):
+    def POST(self, transform, value):
 
         transformer = self.transforms.get(transform, lambda x: x)
 
         result = transformer(value)
 
-        if cherrypy.request.as_text:
-            return result
-
-        if cherrypy.request.as_json:
-            return {"result": result}
-
-        self.view_vars["value"] = value
-        self.view_vars["result"] = result
-        return self.view_vars
+        return {
+            "json": {"result": result},
+            "text": result,
+            "html": ("transform.html", {
+                "app_name": self.name,
+                "result": result,
+                "transforms": self.list_of_transforms(),
+                "value": value,
+            })
+        }
