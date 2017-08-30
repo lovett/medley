@@ -3,6 +3,7 @@ import plugins.jinja
 import random
 import os.path
 import tempfile
+import apps.shared.main
 
 def getFixture(path):
     with open("test/fixtures/" + path) as handle:
@@ -27,6 +28,13 @@ def start_server(app):
     }
 
     cherrypy.tree.mount(app(), "/", app_config)
+
+    # Always load the shared app
+    cherrypy.tree.mount(
+        apps.shared.main.Controller,
+        apps.shared.main.Controller.URL,
+        {}
+    )
 
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     cherrypy.engine.start()
