@@ -18,21 +18,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def start(self):
         self.bus.subscribe("registry:remove", self.remove)
         self.bus.subscribe("registry:add", self.add)
-        self.bus.subscribe("registry:add_many", self.addMany)
 
     def stop(self):
         pass
 
-    def add(self, key, value, replace=False):
-        self.addMany(key, [value], replace)
-
-    def addMany(self, key, values=[], replace=False):
+    def add(self, key, values=[], replace=False):
         if replace:
             self.remove(key)
 
-        placeholder_values = [(key, value) for value in values]
-
-        self._insertMany("INSERT INTO registry (key, value) VALUES (?, ?)", placeholder_values)
+        self._insert(
+            "INSERT INTO registry (key, value) VALUES (?, ?)",
+             [(key, value) for value in values]
+        )
 
     def remove(self, key):
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))

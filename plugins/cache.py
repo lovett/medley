@@ -43,7 +43,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def set(self, key, value, lifespan_seconds=3600):
         expires = time.time() + int(lifespan_seconds)
         packed_value = msgpack.packb(value, use_bin_type=True)
-        self._insert("INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)", (key, packed_value, expires))
+        self._insert(
+            "INSERT OR REPLACE INTO cache (key, value, expires) VALUES (?, ?, ?)",
+            [(key, packed_value, expires)]
+        )
         return True
 
     def clear(self, key):

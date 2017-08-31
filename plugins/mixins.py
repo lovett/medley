@@ -28,10 +28,7 @@ class Sqlite:
         con.commit()
         con.close()
 
-    def _insert(self, query, value):
-        return self._insertMany(query, [value])
-
-    def _insertMany(self, query, values):
+    def _insert(self, query, values):
         con = self._open()
         with con:
             con.executemany(query, values)
