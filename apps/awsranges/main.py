@@ -1,13 +1,12 @@
 import cherrypy
-import requests
-
-import util.cache
-import apps.registry.models
-import syslog
 
 class Controller:
     """Download the current set of AWS IP ranges and store in registry.
-    Previously downloaded ranges are removed."""
+    Previously downloaded ranges are removed.
+
+    See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html"""
+
+    URL = "/awsranges"
 
     name = "AWS Ranges"
 
@@ -15,47 +14,36 @@ class Controller:
 
     user_facing = False
 
+    CACHE_KEY = "awsranges-json"
+
+    REGISTRY_KEY = "netblock:aws"
+
     @cherrypy.tools.encode()
     def GET(self):
-        """See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html"""
+        ranges = cherrypy.engine.publish("cache:get", self.CACHE_KEY).pop()
 
-        cache = util.cache.Cache()
+        if not ranges:
+            ranges = cherrypy.engine.publish(
+                "urlfetch:get",
+                url="https://ip-ranges.amazonaws.com/ip-ranges.json",
+                as_json=True,
+            ).pop()
 
-        ranges = None
-        cache_key = "aws_ranges"
-        cached_value = cache.get(cache_key)
+            if ranges:
+                cherrypy.engine.publish("cache:set", self.CACHE_KEY, ranges)
 
-        if cached_value:
-            ranges = cached_value[0]
-        else:
-            ranges = self.fetch("https://ip-ranges.amazonaws.com/ip-ranges.json")
-            cache.set(cache_key, ranges)
+        if not ranges:
+            cherrypy.response.status = 503
+            return
 
-        if not ranges or not "prefixes" in ranges:
-            raise cherrypy.HTTPError(400, "JSON response contains no prefixes")
+        values = [prefix.get("ip_prefix") for prefix in ranges["prefixes"]]
 
-        registry_key = "netblock:aws"
-
-        registry = apps.registry.models.Registry()
-
-        registry.remove(registry_key)
-
-        for prefix in ranges["prefixes"]:
-            registry.add(registry_key, prefix["ip_prefix"])
-
-        syslog.syslog(syslog.LOG_NOTICE, "AWS netblock range download complete")
-        cherrypy.response.status = 204
-        return
-
-    def fetch(self, url):
-        r = requests.get(
-            url,
-            timeout=5,
-            allow_redirects=False,
-            headers = {
-                "User-Agent": "python"
-            }
+        cherrypy.engine.publish(
+            "registry:add",
+            self.REGISTRY_KEY,
+            values,
+            replace=True
         )
 
-        r.raise_for_status()
-        return r.json()
+        cherrypy.response.status = 204
+        return
