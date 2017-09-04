@@ -17,9 +17,10 @@ PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
 venv: dummy
 	rm -rf venv
-	virtualenv -p python3 --no-site-packages --prompt="♪ ♪ ♪" venv
+	python3 -m venv --system-site-packages venv
 	echo "[global]" > venv/pip.conf
 	echo "format = columns" >> venv/pip.conf
+	@echo "Virtual env created. Now do: source venv/bin/activate"
 
 lint-server: dummy
 	flake8 medley.py
