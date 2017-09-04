@@ -1,16 +1,16 @@
 [global]
-database_dir: "/var/medley"
-log_dir: "/var/log/medley"
-cache_dir: "/var/cache/medley"
-engine.autoreload.on: False
-log.screen: False
+database_dir: "db"
+log_dir: "logs"
+cache_dir: "cache"
+engine.autoreload.on: True
+log.screen: True
 server.socket_host: "0.0.0.0"
 server.socket_port: 8085
-server.daemonize: True
-server.pid: "/var/run/medley.pid"
+server.daemonize: False
+server.pid: None
 timezone: "America/New_York"
 url_anonymizer: None
 tools.conditional_auth.on: False
 tools.conditional_auth.whitelist: ("127.0.0.1")
 users: {"medley":"medley"}
-request.show_tracebacks: False
+request.show_tracebacks: True
