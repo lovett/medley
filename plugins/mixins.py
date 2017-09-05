@@ -37,7 +37,6 @@ class Sqlite:
         con.close()
         return rowid
 
-
     def _delete(self, query, values):
         con = self._open()
         with con:
@@ -45,12 +44,14 @@ class Sqlite:
         con.close()
         return rows
 
-    def _selectOne(self, query, values):
+    def _select(self, query, values):
         con = self._open()
         con.row_factory = sqlite3.Row
         with con:
             cur = con.cursor()
             cur.execute(query, values)
-            row = cur.fetchone()
+            return cur.fetchall() or []
 
-        return row or {}
+    def _selectOne(self, query, values):
+        result = self._selectOne(self, query, values)
+        return result.pop() or {}
