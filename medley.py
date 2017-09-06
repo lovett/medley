@@ -117,7 +117,6 @@ def main():
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
-    plugins.dnsomatic.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
