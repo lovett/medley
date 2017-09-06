@@ -1,25 +1,14 @@
 from testing import cptestcase
 from testing import helpers
-import pytest
 import unittest
-import responses
-import apps.registry.models
 import apps.jenkins.main
 import mock
-import requests_mock
 
 class TestJenkins(cptestcase.BaseCherryPyTestCase):
-
-    notifier_config = [
-        {"key": "notifier:url", "value": "http://example.com"},
-        {"key": "notifier:username", "value": "testuser"},
-        {"key": "notifier:password", "value": "testpass"}
-    ]
 
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.jenkins.main.Controller)
-
 
     @classmethod
     def tearDownClass(cls):
@@ -27,13 +16,20 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase):
 
     @classmethod
     def setUp(self):
-        self.test_payload = {
+
+        self.config_fixture = {
+            "notifier:url": "http://example.com",
+            "notifier:username": "testuser",
+            "notifier:password": "testpass",
+        }
+
+        self.plugin_fixture = {
             "name": "testjob",
             "url": "job/testjob/",
             "build": {
                 "full_url": "http://example.com/job/testjob/1/",
                 "number": 1,
-                "phase": "COMPLETED",
+                "phase": "FINALIZED",
                 "status": "SUCCESS",
                 "url": "job/testjob/1/",
                 "scm": {
@@ -44,60 +40,142 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase):
             }
         }
 
+        self.pipeline_fixture = {
+            "format": "pipeline",
+            "name": "testjob-pipeline",
+            "build_number": 1,
+            "phase": "completed",
+            "status": "success",
+            "url": "http://example.com/job/testjob-pipeline/1/"
+        }
 
-    def test_requiresJson(self):
-        """The request body must post a JSON payload"""
+    def get_fixture(self, format, phase, status):
+        if format == "plugin":
+            fixture = self.plugin_fixture
+            fixture["build"]["phase"] = phase.upper()
+            fixture["build"]["status"] = status.upper()
+        if format == "pipeline":
+            fixture = self.pipeline_fixture
+            fixture["phase"] = phase
+            fixture["status"] = status
+
+        return fixture
+
+    def default_side_effect_callback(self, *args, **kwargs):
+        if args[0] == "registry:search":
+            if args[1] == "notifier:*":
+                return [self.config_fixture]
+            if args[1] == "jenkins:skip":
+                return [["skippable"]]
+
+    def test_rejectsHtml(self):
+        """The request body must contain JSON"""
 
         response = self.request("/", method="POST")
         self.assertEqual(response.code, 415)
 
-        response = self.request("/", method="POST", json_body={
-            "hello": "world"
-        })
-        self.assertNotEqual(response.code, 415)
+    @mock.patch("cherrypy.engine.publish")
+    def test_acceptsPluginFinalizedSuccess(self, publishMock):
+        """JSON bodies from the Jenkins Notification plugin are accepted"""
 
-    @pytest.mark.skip(reason="pending refactor")
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_notifyCompletedSuccess(self, requestsMock, registrySearchMock):
-        """A success payload triggers a success notification"""
+        payload_fixture = self.get_fixture("plugin", "finalized", "success")
 
-        registrySearchMock.return_value = self.notifier_config
+        publishMock.side_effect = self.default_side_effect_callback
 
-        requestsMock.register_uri("POST", "http://example.com")
+        response = self.request(
+            "/",
+            method="POST",
+            json_body=payload_fixture,
+        )
 
-        payload = self.test_payload
+        self.assertEqual(response.code, 204)
 
-        response = self.request("/", method="POST", json_body=self.test_payload)
+    @mock.patch("cherrypy.engine.publish")
+    def test_acceptsPipelineFormat(self, publishMock):
+        """JSON bodies from the Jenkins Notification plugin are accepted"""
 
-        notification = requestsMock.request_history[0]
+        payload_fixture = self.get_fixture("pipeline", "finalized", "success")
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertTrue("Jenkins+build+testjob+has+completed" in notification.text)
-        self.assertTrue("SUCCESS" in notification.text)
+        publishMock.side_effect = self.default_side_effect_callback
 
-    @pytest.mark.skip(reason="pending refactor")
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_notifyCompletedFail(self, requestsMock, registrySearchMock):
-        """A failure payload triggers a success notification"""
+        response = self.request(
+            "/",
+            method="POST",
+            json_body=payload_fixture,
+        )
 
-        registrySearchMock.return_value = self.notifier_config
+        self.assertEqual(response.code, 204)
 
-        requestsMock.register_uri("POST", "http://example.com")
 
-        payload = self.test_payload
-        payload["build"]["status"] = "FAILED"
+    @mock.patch("cherrypy.engine.publish")
+    def test_acceptsPluginCompletedSuccess(self, publishMock):
+        """JSON bodies from the Jenkins Notification plugin are accepted"""
 
-        response = self.request("/", method="POST", json_body=payload)
+        payload_fixture = self.get_fixture("plugin", "completed", "success")
 
-        notification = requestsMock.request_history[0]
+        publishMock.side_effect = self.default_side_effect_callback
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertTrue("FAILED" in notification.text)
+        response = self.request(
+            "/",
+            method="POST",
+            json_body=payload_fixture,
+        )
 
+        self.assertEqual(response.code, 202)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_requiresNotifierConfig(self, publishMock):
+        """The registry needs to hold the notifier URL and auth"""
+
+        payload_fixture = self.get_fixture("plugin", "completed", "success")
+
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:search":
+                if args[1] == "notifier:*":
+                    return [[]]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", method="POST", json_body=payload_fixture)
+        self.assertEqual(response.code, 501)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skippableByPhase(self, publishMock):
+        """Skip logic consiers project name and phase"""
+        payload_fixture = self.get_fixture("plugin", "started", "success")
+        payload_fixture["name"] = "skippable"
+
+        publishMock.side_effect = self.default_side_effect_callback
+
+        response = self.request("/", method="POST", json_body=payload_fixture)
+
+        self.assertEqual(response.code, 202)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skippableByStatus(self, publishMock):
+        """Skip logic consiers project name and status"""
+
+        payload_fixture = self.get_fixture("plugin", "completed", "success")
+        payload_fixture["name"] = "skippable"
+
+        publishMock.side_effect = self.default_side_effect_callback
+
+        response = self.request("/", method="POST", json_body=payload_fixture)
+
+        self.assertEqual(response.code, 202)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skippableButNotOnFail(self, publishMock):
+        """Failure status supercedes skip logic"""
+
+        payload_fixture = self.get_fixture("plugin", "started", "failure")
+        payload_fixture["name"] = "skippable"
+
+        publishMock.side_effect = self.default_side_effect_callback
+
+        response = self.request("/", method="POST", json_body=payload_fixture)
+
+        self.assertEqual(response.code, 204)
 
 
 if __name__ == "__main__":

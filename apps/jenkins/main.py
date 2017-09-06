@@ -1,8 +1,4 @@
-import time
 import cherrypy
-import requests
-import apps.registry.models
-import tools.capture
 
 class Controller:
     """Relay deployment notifications from Jenkins
@@ -10,97 +6,139 @@ class Controller:
     This works with the Jenkins Notification Plugin:
     https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin
 
-    Each Jenkins job should specify this app's URL as a notification
-    endpoint. All event types will be accepted, but the completed event
-    will be silently dropped in favor of the finalized event to avoid
-    double notification.
+    It can also accept custom formats.
 
-    The difference between the finalized and completed events is
-    described at the URL above: "...[W]hen job is finalized all
+    Each Jenkins job should specify this app's URL as a notification
+    endpoint. The app will determine whether to relay the notification
+    or drop it.
+
+    For notifications from the Jenkins Notification plugin, all event
+    types will be accepted but the completed event will be silently
+    dropped. The finalized event is favored instead. Otherwise there would be
+    double notifications.
+
+    From the plugin documentation: "...[W]hen job is finalized all
     post-build activities, such as archiving artifacts, were executed
     as well. This is not the case with job being merely "completed"
     which usually involves only creation of job's artifacts without
     post-processing them."
     """
 
-    name = "Jenkins"
+    URL = "/jenkins"
 
-    _cp_config = {
-        'tools.conditional_auth.on': False
-    }
+    name = "Jenkins"
 
     exposed = True
 
     user_facing = False
 
+    _cp_config = {
+        'tools.conditional_auth.on': False
+   }
+
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
-        details = cherrypy.request.json
+        payload = self.normalizePayload(cherrypy.request.json)
 
-        registry = apps.registry.models.Registry()
+        notifier_config = cherrypy.engine.publish(
+            "registry:search",
+            "notifier:*",
+            as_dict=True
+        ).pop()
 
-        notifier_config = registry.search(key="notifier:*")
         if not notifier_config:
             raise cherrypy.HTTPError(
-                500,
+                501,
                 "No notification config found in registry"
             )
 
-        skip_notification = False
-        skippable_projects = [project["value"] for project in registry.search(key="jenkins:skip")]
-        if details["name"] in skippable_projects:
-            if details["build"]["phase"].lower() == "started":
-                skip_notification = True
-            elif details["build"]["status"].lower() == "success":
-                skip_notification = True
-
-        if skip_notification:
+        if self.can_skip(payload):
             cherrypy.response.status = 202
             return
 
-        notifier = {}
-        for item in notifier_config:
-            k = item["key"].split(":")[1]
-            notifier[k] = item["value"]
-
-        notification = {
-            "group": "jenkins",
-            "url": details["build"]["full_url"],
-            "localId": "jenkins.{}".format(details["name"])
-        }
-
-        if details["build"]["phase"].lower() == "completed":
-            # Disregard completed events to avoid double-notification with
-            # finalized event (Jenkins is expected to send all supported
-            # event types).
-            cherrypy.response.status = 204
-            return
-
-        notification["body"] = "Build #{}".format(details["build"]["number"])
-
-        if details["build"]["phase"].lower() == "started":
-            notification["title"] = "Jenkins is building {}".format(details["name"])
-
-
-        if details["build"]["phase"].lower() == "finalized":
-            if details["build"]["status"].lower() == "success":
-                notification["title"] = "Jenkins has finished building {}".format(
-                    details["name"],
-                )
-            else:
-                notification["title"] = "Jenkins had trouble with {} ".format(
-                    details["name"]
-                )
-
-                notification["body"] = "Status: {}".format(
-                    details["build"]["status"]
-                )
-
-        r = requests.post(
-            notifier["url"],
-            auth=(notifier["username"], notifier["password"]),
-            data=notification
+        auth = (
+            notifier_config["notifier:username"],
+            notifier_config["notifier:password"],
         )
 
-        r.raise_for_status()
+        cherrypy.engine.publish(
+            "urlfetch:post",
+            notifier_config["notifier:url"],
+            self.build_notification(payload),
+            auth
+        )
+
+        cherrypy.response.status = 204
+
+    def can_skip(self, payload):
+        """Should the payload produce a notification?"""
+
+        if payload["status"].lower() == "failure":
+            return False
+
+        if payload["phase"].lower() == "completed":
+            return True
+
+        skips = cherrypy.engine.publish(
+            "registry:search",
+            "jenkins:skip",
+            as_value_list=True
+        ).pop()
+
+        return payload.get("name") in skips
+
+    def build_notification(self, payload):
+        phase = payload["phase"].lower()
+        status = payload["status"].lower()
+        name = payload.get("name")
+
+        if phase == "started":
+            title = "Jenkins is building {}".format(name)
+
+        if phase == "finalized":
+            title = "Jenkins has finished building {}".format(name)
+
+        if status == "failure":
+            title = "Jenkins had trouble with {} ".format(name)
+
+        return {
+            "group": "jenkins",
+            "url": payload.get("url"),
+            "localId": "jenkins.{}".format(payload["name"]),
+            "title": title,
+            "body": "Build #{}".format(payload["build_number"]),
+        }
+
+    def normalizePayload(self, payload):
+        """Reshape an incoming payload to a standardized structure"""
+
+        result = {}
+
+        formats = {
+            # Jenkins notifier plugin (non-pipeline)
+            "plugin": lambda x: "name" in x and "build" in x,
+
+            # Custom (Jenkins pipeline)
+            "pipeline": lambda x: x.get("format") == "pipeline"
+        }
+
+        matches = (name for name, callback in formats.items() if callback(payload))
+
+        format = list(matches)[0]
+
+        if format == "plugin":
+            result["name"] = payload.get("name")
+            result["build_number"] = payload["build"].get("number")
+            result["phase"] = payload["build"].get("phase")
+            result["status"] = payload["build"].get("status")
+            result["url"] = payload["build"].get("full_url")
+
+        if format == "pipeline":
+            result["name"] = payload.get("name")
+            result["build_number"] = payload.get("build_number")
+            result["phase"] = payload.get("phase")
+            result["status"] = payload.get("status")
+            result["url"] = payload.get("url")
+
+        return result
