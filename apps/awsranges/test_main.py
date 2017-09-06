@@ -7,8 +7,6 @@ import cherrypy
 
 class TestAwsranges(cptestcase.BaseCherryPyTestCase):
 
-    temp_dir = None
-
     fixture = {
         "prefixes": [
             {

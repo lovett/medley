@@ -33,8 +33,7 @@ class Controller:
                 cherrypy.engine.publish("cache:set", self.CACHE_KEY, ranges)
 
         if not ranges:
-            cherrypy.response.status = 503
-            return
+            raise cherrypy.HTTPError(503)
 
         values = [prefix.get("ip_prefix") for prefix in ranges["prefixes"]]
 
