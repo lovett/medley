@@ -124,22 +124,6 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase):
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_requiresNotifierConfig(self, publishMock):
-        """The registry needs to hold the notifier URL and auth"""
-
-        payload_fixture = self.get_fixture("plugin", "completed", "success")
-
-        def side_effect(*args, **kwargs):
-            if args[0] == "registry:search":
-                if args[1] == "notifier:*":
-                    return [[]]
-
-        publishMock.side_effect = side_effect
-
-        response = self.request("/", method="POST", json_body=payload_fixture)
-        self.assertEqual(response.code, 501)
-
-    @mock.patch("cherrypy.engine.publish")
     def test_skippableByPhase(self, publishMock):
         """Skip logic consiers project name and phase"""
         payload_fixture = self.get_fixture("plugin", "started", "success")
@@ -166,7 +150,7 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase):
 
     @mock.patch("cherrypy.engine.publish")
     def test_skippableButNotOnFail(self, publishMock):
-        """Failure status supercedes skip logic"""
+        """Failure status supersedes skip logic"""
 
         payload_fixture = self.get_fixture("plugin", "started", "failure")
         payload_fixture["name"] = "skippable"

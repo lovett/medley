@@ -41,32 +41,13 @@ class Controller:
     def POST(self):
         payload = self.normalizePayload(cherrypy.request.json)
 
-        notifier_config = cherrypy.engine.publish(
-            "registry:search",
-            "notifier:*",
-            as_dict=True
-        ).pop()
-
-        if not notifier_config:
-            raise cherrypy.HTTPError(
-                501,
-                "No notification config found in registry"
-            )
-
         if self.can_skip(payload):
             cherrypy.response.status = 202
             return
 
-        auth = (
-            notifier_config["notifier:username"],
-            notifier_config["notifier:password"],
-        )
-
         cherrypy.engine.publish(
-            "urlfetch:post",
-            notifier_config["notifier:url"],
+            "notifier:send",
             self.build_notification(payload),
-            auth
         )
 
         cherrypy.response.status = 204

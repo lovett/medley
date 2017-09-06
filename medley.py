@@ -114,12 +114,13 @@ def main():
             ).subscribe()
 
     # Plugins
-    plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    plugins.mpd.Plugin(cherrypy.engine).subscribe()
-    plugins.logger.Plugin(cherrypy.engine).subscribe()
-    plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
-    plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
+    plugins.jinja.Plugin(cherrypy.engine).subscribe()
+    plugins.logger.Plugin(cherrypy.engine).subscribe()
+    plugins.mpd.Plugin(cherrypy.engine).subscribe()
+    plugins.notifier.Plugin(cherrypy.engine).subscribe()
+    plugins.registry.Plugin(cherrypy.engine).subscribe()
+    plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
