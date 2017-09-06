@@ -1,12 +1,9 @@
-import subprocess
 import cherrypy
-import util.net
-import util.cache
-import apps.registry.models
-import ipaddress
 
 class Controller:
     """Determine the current IP address"""
+
+    URL = "/ip"
 
     name = "IP"
 
@@ -14,40 +11,35 @@ class Controller:
 
     user_facing = True
 
-    @cherrypy.tools.template(template="ip.html")
+    CACHE_KEY = "ip:external"
+
     @cherrypy.tools.negotiable()
     def GET(self):
-        client_ip = self.ipFromHeader(cherrypy.request.headers)
+        client_ip = cherrypy.request.headers.get("Remote-Addr")
 
-        try:
-            ipaddress.ip_address(client_ip)
-        except:
-            raise cherrypy.HTTPError(400, "Unable to determine client address")
+        if "X-Real-Ip" in cherrypy.request.headers:
+            client_ip = cherrypy.request.headers["X-Real-Ip"]
 
-        external_ip = self.determineIp()
+        external_ip = cherrypy.engine.publish("cache:get", self.CACHE_KEY).pop()
 
-        if cherrypy.request.as_text:
-            return "external_ip={}\nclient_ip={}".format(external_ip, client_ip)
+        if not external_ip:
+            external_ip = cherrypy.engine.publish(
+                "urlfetch:get",
+                "http://myip.dnsomatic.com",
+            ).pop()
 
-        if cherrypy.request.as_json:
-            return {
-                "external_ip": external_ip,
-                "client_ip": client_ip
-            }
+            if external_ip:
+                cherrypy.engine.publish("cache:set", self.CACHE_KEY, external_ip)
 
         return {
-            "external_ip": external_ip,
-            "client_ip": client_ip,
-            "app_name": self.name
+            "json": {
+                "client_ip": client_ip,
+                "external_ip": external_ip,
+            },
+            "text": "client_ip={}\nexternal_ip={}".format(client_ip, external_ip),
+            "html": ("ip.html", {
+                "app_name": self.name,
+                "client_ip": client_ip,
+                "external_ip": external_ip,
+            })
         }
-
-    def determineIp(self):
-        """Invoke the dnsomatic plugin to get the application host's external IP"""
-        lookup_response = cherrypy.engine.publish("dnsomatic:query")
-        return lookup_response[0]
-
-    def ipFromHeader(self, headers):
-        for header in ("X-Real-Ip", "Remote-Addr"):
-            if header in headers:
-                return cherrypy.request.headers[header]
-        return None

@@ -2,14 +2,8 @@ from testing import cptestcase
 from testing import helpers
 import unittest
 import apps.ip.main
-import apps.registry.models
 import cherrypy
 import mock
-import util.net
-import util.cache
-import shutil
-import tempfile
-import cherrypy
 
 class TestIp(cptestcase.BaseCherryPyTestCase):
 
@@ -21,68 +15,133 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        cherrypy.config["ip.dns.command"] = ["pdnsd-ctl", "add", "a", "$ip", "$host"]
-        cherrypy.config["ip.tokens"] = {
-            "external": "external.example.com",
-            "test": "test.example.com"
-        }
+    def extract_template_vars(self, mock, key):
+        return mock.call_args[0][0][key]
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_getAsHtml(self, mock):
-        """HTML is returned by default"""
-        mock.return_value = ["1.1.1.1"]
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_returnsHtml(self, publishMock, renderMock):
+        """GET returns text/html by default"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return ["1.1.1.1"]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertIn("<main", response.body)
-        self.assertIn("1.1.1.1", response.body)
-        self.assertTrue(mock.called)
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_getAsJson(self, mock):
-        """JSON is returned if the request's accept header specifies application/json"""
-        mock.return_value = "1.1.1.1"
-        response = self.request("/", headers={"Remote-Addr": "2.2.2.2"}, as_json=True)
-        self.assertEqual(response.code, 200)
-        self.assertEqual(response.body["external_ip"], "1.1.1.1")
-        self.assertEqual(response.body["client_ip"], "2.2.2.2")
-        self.assertTrue(mock.called)
+        template_vars = self.extract_template_vars(renderMock, "html")
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_getAsText(self, mock):
-        """Text is returned if the requests's accept header specifies text/plain"""
-        mock.return_value = "1.2.3.4"
-        response = self.request("/", headers={"Remote-Addr": "5.6.7.8"}, as_plain=True)
-        self.assertEqual(response.code, 200)
-        self.assertIn("external_ip=1.2.3.4\nclient_ip=5.6.7.8", response.body)
-        self.assertTrue(mock.called)
+        self.assertEqual(
+            template_vars[1]["external_ip"],
+            "1.1.1.1"
+        )
+        self.assertEqual(
+            template_vars[1]["client_ip"],
+            "127.0.0.1"
+        )
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_headerPrecedence(self, mock):
-        """The X-Real-Ip header has precedence over the Remote-Addr header """
-        mock.return_value = "6.6.6.6"
-        response = self.request("/", headers={
-            "Remote-Addr": "1.1.1.1",
-            "X-REAL-IP": "2.2.2.2"
-        })
-        self.assertIn("2.2.2.2", response.body)
-        self.assertIn("6.6.6.6", response.body)
-        self.assertTrue(mock.called)
+    @mock.patch("cherrypy.tools.negotiable._renderJson")
+    @mock.patch("cherrypy.engine.publish")
+    def test_returnsJson(self, publishMock, renderMock):
+        """GET returns application/json if requested"""
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_missingClientAddress(self, mock):
-        """An error is thrown if the client IP can't be identified"""
-        response = self.request("/", headers={"Remote-Addr": None})
-        self.assertEqual(response.code, 400)
-        self.assertFalse(mock.called)
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return ["1.1.1.1"]
 
-    @mock.patch("apps.ip.main.Controller.determineIp")
-    def test_invalidClientAddress(self, mock):
-        """An error is thrown if the client IP can't be parsed"""
-        response = self.request("/", headers={"Remote-Addr": "garbage"})
-        self.assertEqual(response.code, 400)
-        self.assertFalse(mock.called)
+        publishMock.side_effect = side_effect
+
+
+        response = self.request("/", as_json=True)
+
+        template_vars = self.extract_template_vars(renderMock, "json")
+        print(template_vars)
+
+        self.assertEqual(
+            template_vars["external_ip"],
+            "1.1.1.1"
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderText")
+    @mock.patch("cherrypy.engine.publish")
+    def test_returnsText(self, publishMock, renderMock):
+        """GET returns text/plain if requested"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return ["1.1.1.1"]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", as_text=True)
+
+        template_vars = self.extract_template_vars(renderMock, "text")
+
+        self.assertTrue("external_ip=1.1.1.1" in template_vars)
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_honorsXRealIp(self, publishMock, renderMock):
+        """The X-Real-IP header takes precedence over Remote-Addr"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return ["1.1.1.1"]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
+
+        template_vars = self.extract_template_vars(renderMock, "html")
+
+        self.assertEqual(
+            template_vars[1]["client_ip"],
+            "2.2.2.2"
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_cacheSaveOnSuccess(self, publishMock, renderMock):
+        """The external IP lookup is cached if successfully retrieved"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return [None]
+            if (args[0] == "urlfetch:get"):
+                return ["3.3.3.3"]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
+
+        publishMock.assert_any_call(
+            "cache:set",
+            apps.ip.main.Controller.CACHE_KEY,
+            "3.3.3.3"
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_noCacheSaveOnFail(self, publishMock, renderMock):
+        """The external IP lookup is not cached if retrieval fails"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "cache:get"):
+                return [None]
+            if (args[0] == "urlfetch:get"):
+                return [None]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
+
+        self.assertEqual(
+            publishMock.call_args_list[-1][0][0],
+            "urlfetch:get"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
