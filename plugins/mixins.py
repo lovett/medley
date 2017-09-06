@@ -53,5 +53,8 @@ class Sqlite:
             return cur.fetchall() or []
 
     def _selectOne(self, query, values):
-        result = self._selectOne(self, query, values)
-        return result.pop() or {}
+        result = self._select(query, values)
+        try:
+            return result.pop()
+        except IndexError:
+            return {}
