@@ -1,18 +1,10 @@
 from testing import cptestcase
 from testing import helpers
-import pytest
 import unittest
-import responses
 import apps.topics.main
 import mock
-import util.cache
-import time
-import shutil
-import tempfile
-import cherrypy
 
 class TestTopics(cptestcase.BaseCherryPyTestCase):
-    temp_dir = None
 
     @classmethod
     def setUpClass(cls):
@@ -22,110 +14,104 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("util.cache.Cache.get")
-    def test_returnsHtml(self, cacheGetMock):
-        """It returns HTML"""
-        cacheGetMock.return_value = ("<html></html>", time.time())
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<main" in response.body)
-        self.assertTrue("Using cached value" in response.body)
-        self.assertTrue(cacheGetMock.called)
+    @classmethod
+    def setUp(self):
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("util.cache.Cache.get")
-    def test_numericCount(self, cacheGetMock):
-        """It requires a numeric count"""
-        response = self.request("/", count="test")
-        self.assertEqual(response.code, 400)
-
-        cacheGetMock.return_value = ("<html></html>", time.time())
-        response = self.request("/", count="100")
-        self.assertEqual(response.code, 200)
-
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("util.cache.Cache.get")
-    def test_limitsTopics(self, cacheGetMock):
-        """It requires a numeric count"""
-        response = self.request("/", count="test")
-        self.assertEqual(response.code, 400)
-
-        cacheGetMock.return_value = ("""
-        <html>
-            <ul id="crs_pane">
-                <li><a href="http://example.com/?q=link1">link1</a></li>
-                <li><a href="http://example.com/?q=link2+multiword">link2 multiword</a></li>
-                <li><a href="http://example.com/?q=link3%20multiword">link3 multiword</a></li>
-                <li><a href="http://example.com/?q=%23link4">link4 hashtag</a></li>
-                <li><a href="http://example.com/link5">link5</a></li>
-            </ul>
-        </html>""", time.time())
-        response = self.request("/", count="1")
-        self.assertEqual(response.code, 200)
-        self.assertTrue("link5" not in response.body)
-
-
-
-    @pytest.mark.skip(reason="pending refactor")
-    @responses.activate
-    @mock.patch("util.cache.Cache.set")
-    @mock.patch("util.cache.Cache.get")
-    def test_requestsUrl(self, cacheGetMock, cacheSetMock):
-        """It requests a URL if the cache is empty"""
-        cacheGetMock.return_value = None
-        cacheSetMock.return_value = None
-
-        response_html = "<html></html>"
-        responses.add(responses.GET, "http://www.bing.com/hpm", body=response_html)
-
-        response = self.request("/")
-        self.assertEqual(len(responses.calls), 1)
-        self.assertTrue(cacheSetMock.called)
-        self.assertTrue("The URL was not cached" in response.body)
-
-    @pytest.mark.skip(reason="pending refactor")
-    @responses.activate
-    @mock.patch("util.cache.Cache.set")
-    @mock.patch("util.cache.Cache.get")
-    def test_extractsLinks(self, cacheGetMock, cacheSetMock):
-        """It extracts links from the requested URL and handles escaping"""
-        cacheGetMock.return_value = None
-        cacheSetMock.return_value = None
-
-        response_html = """
+        self.html_fixture = """
         <html>
         <ul id="crs_pane">
-            <li><a href="http://example.com/?q=link1">link1</a></li>
-            <li><a href="http://example.com/?q=link2+multiword">link2 multiword</a></li>
-            <li><a href="http://example.com/?q=link3%20multiword">link3 multiword</a></li>
-            <li><a href="http://example.com/?q=%23link4">link4 hashtag</a></li>
-            <li><a href="http://example.com/link5">link5</a></li>
+            <li><a id="crs_itemLink1" href="http://example.com/?q=link1">link1</a></li>
+            <li><a id="crs_itemLink2" href="http://example.com/?q=link2">link2</a></li>
+            <li><a id="crs_itemLink3" href="http://example.com/?q=link2">link3</a></li>
+            <li><a id="crs_itemLink4" href="http://example.com/?q=link2">link4</a></li>
         </ul>
         </html>"""
-        responses.add(responses.GET, "http://www.bing.com/hpm", body=response_html)
 
-        response = self.request("/")
-        self.assertEqual(len(responses.calls), 1)
+    def extract_template_vars(self, mock):
+        return mock.call_args[0][0]["html"][1]
 
-        # single word query
-        self.assertTrue("?q=link1" in response.body)
-        self.assertTrue(">link1</a>" in response.body)
+    def default_side_effect_callback(self, *args, **kwargs):
+        if args[0] == "cache:get":
+            return [self.html_fixture]
 
-        # multiword escaped query
-        self.assertTrue("?q=link2%20multiword" in response.body)
-        self.assertTrue(">link2 multiword</a>" in response.body)
-        self.assertTrue("?q=link3%20multiword" in response.body)
-        self.assertTrue(">link3 multiword</a>" in response.body)
+    def urlfetch_side_effect_callback(self, *args, **kwargs):
+        if args[0] == "urlfetch:get":
+            return [self.html_fixture]
 
-        # hashtag query
-        self.assertTrue("?q=%23link4" in response.body)
-        self.assertTrue(">#link4</a>" in response.body)
 
-        # non-query link
-        self.assertFalse("?q=link5" in response.body)
+    def test_sanitizesCount(self):
+        """Non-numeric values for count parameter are rejected"""
+        response = self.request("/", count="test")
+        self.assertEqual(response.code, 400)
 
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_repeatListUntilCount(self, publishMock, renderMock):
+        """The number of links is padded to the count parameter"""
+        publishMock.side_effect = self.default_side_effect_callback
+
+        target_count = 13
+
+        response = self.request("/", count=target_count)
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["topics"]), target_count)
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_trimListToCount(self, publishMock, renderMock):
+        """The number of links returned is reduced to match the count parameter"""
+        publishMock.side_effect = self.default_side_effect_callback
+
+        target_count = 2
+
+        response = self.request("/", count=target_count)
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["topics"]), target_count)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_cacheMissTriggersUrlfetch(self, publishMock):
+        """A urlfetch occurs when a cached value is not present"""
+        publishMock.side_effect = self.urlfetch_side_effect_callback
+
+        response = self.request("/", count=8)
+
+        publish_calls = [args[0][0] for args in publishMock.call_args_list]
+
+        self.assertTrue("urlfetch:get" in publish_calls)
+        self.assertTrue("cache:set" in publish_calls)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_fetchFailure(self, publishMock):
+        """A urlfetch occurs when a cached value is not present"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "urlfetch:get"):
+                return [None]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", as_json=True)
+
+        self.assertEqual(response.code, 503)
+
+
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_expiresHeader(self, publishMock):
+        """The response sends an expires header
+
+        By testing against the JSON repsonse, there aren't any complications
+        with the publish mock and the HTML template lookup.
+        """
+
+        publishMock.side_effect = self.default_side_effect_callback
+
+        response = self.request("/", count=8, as_json=True)
+        self.assertTrue("GMT" in response.headers.get("Expires"))
 
 if __name__ == "__main__":
     unittest.main()

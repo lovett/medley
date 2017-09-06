@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/static/topics/topics.css" />
+<link rel="stylesheet" type="text/css" href="/topics/static/topics.css" />
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/topics/topics.js"></script>
+<script src="/topics/static/topics.js"></script>
 {% endblock %}
 
 {% block page_body %}
@@ -30,14 +30,6 @@
             <a href="https://www.bing.com/search/?q={{ topic|urlencode }}" rel="noreferrer" target="_blank">{{ topic }}</a>
         </p>
         {% endfor %}
-    </div>
-
-    <div class="content-wrapper centered">
-        {% if cache_date %}
-        <p>Using cached value from {{cache_date}}</p>
-        {% else %}
-        <p>The URL was not cached.</p>
-        {% endif %}
     </div>
 </main>
 

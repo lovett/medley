@@ -20,7 +20,7 @@ MEDLEY.topics = (function () {
         init: function () {
             links = jQuery('#topics A');
 
-            worker = new Worker('/static/topics/topics-worker.js');
+            worker = new Worker('/topics/static/topics-worker.js');
 
             worker.addEventListener('message', function (e) {
                 var fields = e.data.split(':');

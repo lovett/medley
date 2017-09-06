@@ -1,13 +1,13 @@
 import datetime
-import email.utils
 import time
+import email.utils
 import cherrypy
-import requests
-import util.cache
 import apps.topics.parser
 
 class Controller:
     """Scrape news topics from the Bing homepage"""
+
+    URL = "/topics"
 
     name = "Topics"
 
@@ -15,27 +15,39 @@ class Controller:
 
     user_facing = True
 
-    @cherrypy.tools.template(template="topics.html")
+    CACHE_KEY = "topics:html"
+
     @cherrypy.tools.negotiable()
     def GET(self, count=15):
-        max_age_hours = 18
-        cache = util.cache.Cache()
-        key = "topics_html"
         topics = []
+
         try:
             count = int(count)
         except ValueError:
             raise cherrypy.HTTPError(400, "Invalid count value")
 
-        cached_value = cache.get(key)
+        # The local server time as a timezone-aware datetime
+        now_local = datetime.datetime.now(datetime.timezone.utc).astimezone()
 
-        if cached_value:
-            html = cached_value[0]
-            cache_date = datetime.datetime.strptime(cached_value[1], "%Y-%m-%d %H:%M:%S")
-        else:
-            html = self.fetch("http://www.bing.com/hpm")
-            cache.set(key, html, 60 * 60 * max_age_hours)
-            cache_date = datetime.datetime.utcnow()
+        start_of_today = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        start_of_tomorrow = start_of_today + datetime.timedelta(days=1, seconds=1)
+
+        start_of_tomorrow_utc = start_of_tomorrow.astimezone(tz=datetime.timezone.utc)
+
+        cache_lifespan = (start_of_tomorrow - now_local).total_seconds()
+
+        answer = cherrypy.engine.publish("cache:get", self.CACHE_KEY)
+        html = answer.pop() if answer else None
+
+        if not html:
+            answer = cherrypy.engine.publish("urlfetch:get", "http://www.bing.com/hpm")
+            html = answer.pop() if answer else None
+
+            if not html:
+                raise cherrypy.HTTPError(503)
+
+            cherrypy.engine.publish("cache:set", self.CACHE_KEY, html, cache_lifespan)
 
         p = apps.topics.parser.LinkParser()
         p.feed(html)
@@ -50,30 +62,16 @@ class Controller:
         if len(topics) > count:
             topics = topics[0:count]
 
-        expiration = cache_date + datetime.timedelta(hours=max_age_hours)
-        expiration = time.mktime(expiration.timetuple())
-        cherrypy.response.headers["Expires"] = email.utils.formatdate(
-            timeval=expiration,
-            localtime=False,
+        cherrypy.response.headers["Expires"] = email.utils.format_datetime(
+            start_of_tomorrow_utc,
             usegmt=True
         )
 
         return {
-            "cache_date": cache_date,
-            "topics": topics,
-            "count": count,
-            "app_name": self.name
+            "html": ("topics.html", {
+                "topics": topics,
+                "count": count,
+                "app_name": self.name
+            }),
+            "json": topics,
         }
-
-    def fetch(self, url):
-        r = requests.get(
-            url,
-            timeout=5,
-            allow_redirects=False,
-            headers = {
-                "User-Agent": "python"
-            }
-        )
-
-        r.raise_for_status()
-        return r.text
