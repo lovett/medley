@@ -11,7 +11,7 @@
 {% block page_body %}
 
 <main>
-    <div class="content-wrapper centered">
+    <div class="content-wrapper align-center">
         <p>
             <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
         </p>
@@ -20,10 +20,10 @@
         </p>
     </div>
 
-    <div class="content-wrapper centered">
+    <div class="content-wrapper align-center">
         <button data-count="{{ count }}">Walk topics</button>
     </div>
-    <div id="topics" class="content-wrapper centered">
+    <div id="topics" class="content-wrapper align-center">
         {% for topic in topics %}
         <p>
             {{ loop.index }}.
