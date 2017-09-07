@@ -1,54 +1,46 @@
 import cherrypy
-import requests
-
-import util.cache
-import apps.registry.models
-import syslog
 
 class Controller:
     """Import a list of country code abbreviations into the registry"""
 
     name = "Country Codes"
 
+    URL = "/countries"
+
     exposed = True
 
     user_facing = False
 
-    @cherrypy.tools.encode()
+    cache_key = "countries"
+
+    registry_key = "country_code:alpha2:{}"
+
+    download_url = "http://data.okfn.org/data/core/country-codes/r/country-codes.json"
+
     def GET(self):
-        cache = util.cache.Cache()
-
         codes = None
-        cache_key = "country_codes"
-        cached_value = cache.get(cache_key)
 
-        if cached_value:
-            codes = cached_value[0]
-        else:
-            codes = self.fetch("http://data.okfn.org/data/core/country-codes/r/country-codes.json")
-            cache.set(cache_key, codes)
+        answer = cherrypy.engine.publish("cache:get", self.cache_key)
+        country_codes = answer.pop() if answer else []
 
-        if not codes:
-            raise cherrypy.HTTPError(400, "JSON response contains no country codes")
+        if not country_codes:
+            answer = cherrypy.engine.publish(
+                "urlfetch:get",
+                self.download_url,
+                as_json=True
+            )
+            country_codes = answer.pop() if answer else []
 
-        registry = apps.registry.models.Registry()
+            if country_codes:
+                cherrypy.engine.publish("cache:set", self.cache_key, country_codes)
 
-        for code in codes:
-            key = "country_code:alpha2:{}".format(code["ISO3166-1-Alpha-2"])
-            registry.add(key, code["name"], True)
+        if not country_codes:
+            raise cherrypy.HTTPError(501, "JSON response contains no country codes")
+
+
+        for code in country_codes:
+            key = self.registry_key.format(code["ISO3166-1-Alpha-2"])
+            cherrypy.engine.publish("registry:add", key, code["name"], True)
 
         cherrypy.response.status = 204
         return
-
-    def fetch(self, url):
-        r = requests.get(
-            url,
-            timeout=5,
-            allow_redirects=False,
-            headers = {
-                "User-Agent": "python"
-            }
-        )
-
-        r.raise_for_status()
-        return r.json()
