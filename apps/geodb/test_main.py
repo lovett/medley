@@ -1,17 +1,17 @@
 from testing import cptestcase
-import cherrypy
 from testing import helpers
-import pytest
-import unittest
 import apps.geodb.main
+import cherrypy
+import datetime
 import mock
-import tempfile
 import os
 import os.path
-import shutil
 import responses
 import shutil
 import subprocess
+import tempfile
+import time
+import unittest
 
 class TestGeodb(cptestcase.BaseCherryPyTestCase):
 
@@ -34,106 +34,121 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
         self.temp_file = temp_file[1]
         self.empty_temp_dir = tempfile.mkdtemp(prefix="geodb-test")
         self.download_url = "http://example.com/" + os.path.basename(self.temp_file) + ".gz"
-        cherrypy.config["geoip.download.url"] = self.download_url
         cherrypy.config["database_dir"] = self.temp_dir
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
         shutil.rmtree(self.empty_temp_dir)
 
-    def test_noDatabase(self):
-        """A GET request returns HTML if the database does not exist"""
-        cherrypy.config["database_dir"] = self.empty_temp_dir
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<main" in response.body)
 
-    @pytest.mark.skip(reason="pending refactor")
-    def test_existingDatabase(self):
-        """A GET request reads the mtime of a previously downloaded file"""
-        response = self.request("/", as_json=True)
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_json(response))
-        self.assertEqual(response.body["modified"], os.path.getmtime(self.temp_file))
+    def test_downloadableIfNoExistingFile(self):
+        """The database should be downloadable if there is no existing file"""
 
+        controller = apps.geodb.main.Controller()
+        controller.download_path = os.path.join(self.empty_temp_dir, "nonexistant-file")
+        self.assertTrue(controller.canDownload())
 
-    @pytest.mark.skip(reason="pending refactor")
-    def test_noUrl(self):
-        """A 410 is returned if geoip.download.url has not been configured"""
-        cherrypy.config["geoip.download.url"] = None
-        response = self.request("/", method="POST")
-        self.assertEqual(response.code, 410)
+    def test_downloadableIfOldFile(self):
+        """The database should be downloadable if the existing file is older than 1 day"""
 
-    @pytest.mark.skip(reason="pending refactor")
-    def test_noDatabaseDirectory(self):
-        """A 410 is returned if database_dir is not configured"""
-        cherrypy.config["database_dir"] = None
-        response = self.request("/", method="POST")
-        self.assertEqual(response.code, 410)
+        st = os.stat(self.temp_file)
+        os.utime(
+            self.temp_file,
+            (st.st_atime, st.st_mtime - 86400)
+        )
 
-    @pytest.mark.skip(reason="pending refactor")
+        controller = apps.geodb.main.Controller()
+        controller.download_path = self.temp_file
+
+        self.assertTrue(controller.canDownload())
+
+    def test_notDownloadableIfRecent(self):
+        """The database should not be downloadable if the existing file is less than 1 day old"""
+
+        controller = apps.geodb.main.Controller()
+        controller.download_path = self.temp_file
+        self.assertFalse(controller.canDownload())
+
     @responses.activate
-    @mock.patch("syslog.syslog")
     @mock.patch("subprocess.check_call")
     @mock.patch("shutil.copyfileobj")
-    def test_downloadSuccess(self, copyMock, callMock, syslogMock):
+    def test_downloadSuccess(self, copyMock, callMock):
         """A 204 is returned if the database is successfully downloaded  """
 
-        cherrypy.config["database_dir"] = self.empty_temp_dir
+        controller = apps.geodb.main.Controller()
+        controller.download_url = self.download_url
+        controller.download_path = self.temp_file + ".gz"
 
         responses.add(responses.GET, self.download_url)
 
-        response = self.request("/", method="POST")
+        result = controller.download()
 
-        self.assertEqual(response.code, 204)
         self.assertTrue(copyMock.called)
         self.assertTrue(callMock.called)
-        self.assertTrue(syslogMock.called)
+        self.assertIsInstance(result, float)
 
-    @pytest.mark.skip(reason="pending refactor")
     @responses.activate
-    @mock.patch("syslog.syslog")
     @mock.patch("subprocess.check_call")
     @mock.patch("shutil.copyfileobj")
-    def test_downloadNotGzipped(self, copyMock, callMock, syslogMock):
-        """Gunzipping only occurs on gzipped files"""
+    def test_downloadFail(self, copyMock, callMock):
+        """A 204 is returned if the database is successfully downloaded  """
 
-        cherrypy.config["database_dir"] = self.empty_temp_dir
+        controller = apps.geodb.main.Controller()
+        controller.download_url = self.download_url
+        controller.download_path = self.temp_file + ".gz"
 
-        download_url = self.download_url.rstrip(".gz")
-        cherrypy.config["geoip.download.url"] = download_url
-
-        responses.add(responses.GET, download_url)
-
-        response = self.request("/", method="POST")
-
-        self.assertEqual(response.code, 204)
-        self.assertTrue(copyMock.called)
-        self.assertFalse(callMock.called)
-        self.assertTrue(syslogMock.called)
-
-    @pytest.mark.skip(reason="pending refactor")
-    @responses.activate
-    @mock.patch("os.unlink")
-    @mock.patch("syslog.syslog")
-    @mock.patch("subprocess.check_call")
-    @mock.patch("shutil.copyfileobj")
-    def test_gunzipFailure(self, copyMock, callMock, syslogMock, unlinkMock):
-        """Gunzip failure returns 500"""
-
-        callMock.side_effect = subprocess.CalledProcessError(3, '')
-        cherrypy.config["database_dir"] = self.empty_temp_dir
+        callMock.side_effect = subprocess.CalledProcessError(-1, "placeholder")
 
         responses.add(responses.GET, self.download_url)
 
-        response = self.request("/", method="POST")
+        result = controller.download()
 
-        self.assertEqual(response.code, 500)
+        self.assertTrue(copyMock.called)
         self.assertTrue(callMock.called)
-        self.assertTrue(syslogMock.called)
-        self.assertTrue(unlinkMock.called)
+        self.assertFalse(result)
 
+    @mock.patch("apps.geodb.main.Controller.canDownload")
+    @mock.patch("apps.geodb.main.Controller.download")
+    def test_requestSuccess(self, downloadMock, canDownloadMock):
+
+        canDownloadMock.return_value = True
+
+        now = time.time()
+
+        downloadMock.return_value = now
+
+        now_dt = datetime.datetime.fromtimestamp(now)
+
+        response = self.request("/", as_json=True)
+
+        print(response.body)
+        self.assertEqual(response.code, 200)
+
+    @mock.patch("apps.geodb.main.Controller.canDownload")
+    @mock.patch("apps.geodb.main.Controller.download")
+    def test_requestSuccessWithoutDownload(self, downloadMock, canDownloadMock):
+
+        canDownloadMock.return_value = False
+
+        now = time.time()
+
+        downloadMock.return_value = now
+
+        now_dt = datetime.datetime.fromtimestamp(now)
+
+        response = self.request("/", as_json=True)
+
+        self.assertEqual(response.code, 200)
+
+    @mock.patch("apps.geodb.main.Controller.canDownload")
+    @mock.patch("apps.geodb.main.Controller.download")
+    def test_requestFail(self, downloadMock, canDownloadMock):
+
+        canDownloadMock.return_value = True
+        downloadMock.return_value = None
+        response = self.request("/", as_json=True)
+
+        self.assertEqual(response.code, 501)
 
 if __name__ == "__main__":
     unittest.main()

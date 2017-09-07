@@ -1,47 +1,9 @@
 {% extends "base.html" %}
 
-{% set icon = '<i class="icon cloud download"></i>' %}
-
-{% if downloaded %}
-{% set button_action = "Update database" %}
-{% set progress_text = "Update in progress..." %}
-{% else %}
-{% set button_action = "Get database" %}
-{% set progress_text = "Download in progress..." %}
-{% endif %}
-
-{% block scripts %}
-
-{% if allow_update %}
-<script src="/static/geodb/geodb.js"></script>
-{% endif %}
-
-{% endblock %}
-
 {% block page_body %}
 <main>
-    <div class="content-wrapper centered">
-
-        {% if downloaded %}
+    <div class="content-wrapper align-center">
         <p>The database was downloaded on {{downloaded|datetime("datetime12")}}</p>
-        {% else %}
-        <p>There is no database.</p>
-        {% endif %}
-
-        {% if allow_update %}
-        <button id="update">{{ icon }} {{ button_action }}</button>
-
-        <p id="progress" class="hidden">{{ progress_text }}</p>
-
-        <div class="hidden error message">
-            <p>Unable to update. An error occurred while trying to update the database.</p>
-        </div>
-
-        {% else %}
-        <p>Update disabled to prevent unnecessary download.</p>
-        {% endif %}
-
     </div>
 </main>
-
 {% endblock %}
