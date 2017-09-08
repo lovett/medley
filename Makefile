@@ -113,8 +113,17 @@ $(REQUIREMENTS_FILES): dummy
 #
 coverage: $(addprefix .coverage., $(APP_NAMES))
 	coverage combine $(COVERAGE_DIR)
-	coverage html
 	coverage report
+
+# Build a coverage report and view the HTML report in a browser
+#
+# Example: make htmlcov
+#
+# Uses the macOS-specific open utility to launch the default browser.
+htmlcov: coverage
+	coverage html
+	open htmlcov/index.html
+
 
 
 # Test all apps
