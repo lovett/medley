@@ -118,19 +118,3 @@ CREATE INDEX IF NOT EXISTS url_domain ON urls (domain);
             return r.text
         else:
             return None
-
-    def reduceHtmlTitle(self, title):
-        """Remove site identifiers and noise from the title of an HTML document"""
-        title = title or ""
-        reduced_title = title
-        for char in "»|·—:-":
-            separator = " {} ".format(char)
-            if separator in title:
-                segments = title.split(separator)
-                reduced_title = max(segments, key=len)
-                break
-
-        if reduced_title == title:
-            return title
-        else:
-            return self.reduceHtmlTitle(reduced_title)

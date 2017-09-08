@@ -1,12 +1,11 @@
-import re
 import cherrypy
-import requests
-import apps.archive.models
+import re
 import util.html
-import urllib.parse
 
 class Controller:
     """Display a form for bookmarking a URL"""
+
+    URL = "/later"
 
     name = "Later"
 
@@ -14,16 +13,15 @@ class Controller:
 
     user_facing = True
 
-    @cherrypy.tools.template(template="later.html")
     @cherrypy.tools.negotiable()
     def GET(self, url=None, title=None, tags=None, comments=None):
         error = None
         bookmark = None
-        archive = apps.archive.models.Archive()
 
         if title:
             title = util.html.parse_text(title)
-            title = archive.reduceHtmlTitle(title)
+            answer = cherrypy.engine.publish("markup:reduce_title", title)
+            title = answer.pop() if answer else title
 
         if tags:
             tags = util.html.parse_text(tags)
@@ -37,7 +35,8 @@ class Controller:
             comments += "."
 
         if url:
-            bookmark = archive.find(url=url)
+            answer = cherrypy.engine.publish("archive:find", url=url)
+            bookmark = answer.pop() if answer else None
 
         if bookmark:
             error = "This URL has already been bookmarked"
@@ -53,11 +52,13 @@ class Controller:
             base = "http://" + base
 
         return {
-            "base": base,
-            "error": error,
-            "title": title,
-            "url": url,
-            "tags": tags,
-            "comments": comments,
-            "app_name": self.name
+            "html": ("later.html", {
+                "base": base,
+                "error": error,
+                "title": title,
+                "url": url,
+                "tags": tags,
+                "comments": comments,
+                "app_name": self.name
+            })
         }

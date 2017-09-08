@@ -114,9 +114,11 @@ def main():
             ).subscribe()
 
     # Plugins
+    plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
+    plugins.markup.Plugin(cherrypy.engine).subscribe()
     plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
