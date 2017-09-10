@@ -5,7 +5,7 @@ import util.html
 class Controller:
     """Display a form for bookmarking a URL"""
 
-    URL = "/later"
+    url = "/later"
 
     name = "Later"
 

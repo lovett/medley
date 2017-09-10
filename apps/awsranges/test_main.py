@@ -1,11 +1,12 @@
 from testing import cptestcase
 from testing import helpers
+from testing import assertions
 import unittest
 import apps.awsranges.main
 import mock
 import cherrypy
 
-class TestAwsranges(cptestcase.BaseCherryPyTestCase):
+class TestAwsranges(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     fixture = {
         "prefixes": [
@@ -22,6 +23,10 @@ class TestAwsranges(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
     def test_uncached(self, publishMock):

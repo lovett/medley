@@ -4,15 +4,13 @@ import math
 class Controller:
     """The current forecast"""
 
-    URL = "/weather"
+    url = "/weather"
 
     name = "Weather"
 
     exposed = True
 
     user_facing = True
-
-
 
     @cherrypy.tools.negotiable()
     def GET(self):

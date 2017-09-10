@@ -1,3 +1,4 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import apps.later.main
@@ -5,7 +6,7 @@ import cherrypy
 import mock
 import unittest
 
-class TestLater(cptestcase.BaseCherryPyTestCase):
+class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -14,6 +15,10 @@ class TestLater(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     def test_returnsHtml(self):
         """A GET request returns a form for adding a bookmark"""

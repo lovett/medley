@@ -4,7 +4,7 @@ import urllib
 class Controller:
     """Convert a string to a different format"""
 
-    URL = "/transform"
+    url = "/transform"
 
     name = "Transform"
 

@@ -24,7 +24,7 @@ class Controller:
     post-processing them."
     """
 
-    URL = "/jenkins"
+    url = "/jenkins"
 
     name = "Jenkins"
 

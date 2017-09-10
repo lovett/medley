@@ -7,7 +7,7 @@ import apps.topics.parser
 class Controller:
     """Scrape news topics from the Bing homepage"""
 
-    URL = "/topics"
+    url = "/topics"
 
     name = "Topics"
 
@@ -15,7 +15,7 @@ class Controller:
 
     user_facing = True
 
-    CACHE_KEY = "topics:html"
+    cache_key = "topics:html"
 
     @cherrypy.tools.negotiable()
     def GET(self, count=15):
@@ -37,7 +37,7 @@ class Controller:
 
         cache_lifespan = (start_of_tomorrow - now_local).total_seconds()
 
-        answer = cherrypy.engine.publish("cache:get", self.CACHE_KEY)
+        answer = cherrypy.engine.publish("cache:get", self.cache_key)
         html = answer.pop() if answer else None
 
         if not html:
@@ -47,7 +47,7 @@ class Controller:
             if not html:
                 raise cherrypy.HTTPError(503)
 
-            cherrypy.engine.publish("cache:set", self.CACHE_KEY, html, cache_lifespan)
+            cherrypy.engine.publish("cache:set", self.cache_key, html, cache_lifespan)
 
         p = apps.topics.parser.LinkParser()
         p.feed(html)

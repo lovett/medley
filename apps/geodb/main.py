@@ -9,7 +9,7 @@ import requests
 class Controller:
     """Download the latest GeoLite Legacy City database from maxmind.com"""
 
-    URL = "/geodb"
+    url = "/geodb"
 
     name = "GeoDB"
 

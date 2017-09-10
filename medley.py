@@ -76,7 +76,7 @@ def main():
         app_module = importlib.import_module("apps.{}.main".format(app))
 
         try:
-            url_path = app_module.Controller.URL
+            url_path = app_module.Controller.url
         except:
             continue
 

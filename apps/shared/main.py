@@ -3,7 +3,7 @@ import cherrypy
 class Controller:
     """Serve static assets used by multiple apps"""
 
-    URL = "/shared"
+    url = "/shared"
 
     name = "Shared"
 

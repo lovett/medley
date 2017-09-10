@@ -14,6 +14,10 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
     def tearDownClass(cls):
         helpers.stop_server()
 
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
+
     def test_returnsHtml(self):
         """GET returns text/html by default"""
         response = self.request("/")

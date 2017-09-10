@@ -1,5 +1,6 @@
 from testing import cptestcase
 from testing import helpers
+from testing import assertions
 import apps.geodb.main
 import cherrypy
 import datetime
@@ -13,7 +14,7 @@ import tempfile
 import time
 import unittest
 
-class TestGeodb(cptestcase.BaseCherryPyTestCase):
+class TestGeodb(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     temp_dir = None
     temp_file = None
@@ -40,6 +41,9 @@ class TestGeodb(cptestcase.BaseCherryPyTestCase):
         shutil.rmtree(self.temp_dir)
         shutil.rmtree(self.empty_temp_dir)
 
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     def test_downloadableIfNoExistingFile(self):
         """The database should be downloadable if there is no existing file"""

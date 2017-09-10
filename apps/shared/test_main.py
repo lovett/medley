@@ -14,6 +14,10 @@ class TestShared(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions)
     def tearDownClass(cls):
         helpers.stop_server()
 
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
+
     def test_redirect(self):
         """GET redirects to the homepage"""
         response = self.request("/")

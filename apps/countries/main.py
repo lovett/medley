@@ -5,7 +5,7 @@ class Controller:
 
     name = "Country Codes"
 
-    URL = "/countries"
+    url = "/countries"
 
     exposed = True
 

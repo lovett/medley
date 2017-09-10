@@ -1,10 +1,11 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
 import apps.jenkins.main
 import mock
 
-class TestJenkins(cptestcase.BaseCherryPyTestCase):
+class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -67,6 +68,10 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase):
                 return [self.config_fixture]
             if args[1] == "jenkins:skip":
                 return [["skippable"]]
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("POST",))
 
     def test_rejectsHtml(self):
         """The request body must contain JSON"""

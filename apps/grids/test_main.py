@@ -33,6 +33,10 @@ class TestGrids(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     def extract_template_vars(self, mock):
         return mock.call_args[0][0]["html"][1]
 
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
+
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
     def test_monthLayout(self, publishMock, renderMock):

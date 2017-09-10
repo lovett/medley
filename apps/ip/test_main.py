@@ -1,3 +1,4 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
@@ -5,7 +6,7 @@ import apps.ip.main
 import cherrypy
 import mock
 
-class TestIp(cptestcase.BaseCherryPyTestCase):
+class TestIp(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -17,6 +18,10 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
 
     def extract_template_vars(self, mock, key):
         return mock.call_args[0][0][key]
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
@@ -118,7 +123,7 @@ class TestIp(cptestcase.BaseCherryPyTestCase):
 
         publishMock.assert_any_call(
             "cache:set",
-            apps.ip.main.Controller.CACHE_KEY,
+            apps.ip.main.Controller.cache_key,
             "3.3.3.3"
         )
 

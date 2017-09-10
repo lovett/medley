@@ -3,7 +3,7 @@ import cherrypy
 class Controller:
     """Display request headers"""
 
-    URL = "/headers"
+    url = "/headers"
 
     name = "Headers"
 

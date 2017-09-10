@@ -20,3 +20,16 @@ class ResponseAssertions:
     def assertText(self, response, value=None):
         self.assertType(response, "text/plain;charset=utf-8")
         self.assertValueInBody(response, value)
+
+    def assertAllowedMethods(self, response, expected_verbs=()):
+        """The Allows header shouldn't contain any unexpected verbs
+
+        Support for the HEAD method is provided by the framework.
+        """
+
+        if "GET" in expected_verbs:
+            expected_verbs = expected_verbs + ("HEAD",)
+
+        allowed_verbs = [method.strip() for method in response.headers.get("Allow", "").split(",")]
+
+        self.assertEqual(set(expected_verbs), set(allowed_verbs))

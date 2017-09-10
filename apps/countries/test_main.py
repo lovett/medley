@@ -1,11 +1,12 @@
 from testing import cptestcase
 from testing import helpers
+from testing import assertions
 import unittest
 import mock
 import apps.countries.main
 
 
-class TestCountries(cptestcase.BaseCherryPyTestCase):
+class TestCountries(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.countries.main.Controller)
@@ -13,7 +14,6 @@ class TestCountries(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
-
 
     def setUp(self):
         self.fixture = [{
@@ -46,7 +46,6 @@ class TestCountries(cptestcase.BaseCherryPyTestCase):
 	    "official_name_fr": "États-Unis d'Amérique"
 	}]
 
-
     def default_side_effect_callback(self, *args, **kwargs):
         if args[0] == "cache:get":
             return [self.fixture]
@@ -62,6 +61,10 @@ class TestCountries(cptestcase.BaseCherryPyTestCase):
             return [None]
         if args[0] == "urlfetch:get":
             return [None]
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
     def testRegistrySave(self, publishMock):

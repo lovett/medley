@@ -3,7 +3,7 @@ import cherrypy
 class Controller:
     """Determine the current IP address"""
 
-    URL = "/ip"
+    url = "/ip"
 
     name = "IP"
 
@@ -11,7 +11,7 @@ class Controller:
 
     user_facing = True
 
-    CACHE_KEY = "ip:external"
+    cache_key = "ip:external"
 
     @cherrypy.tools.negotiable()
     def GET(self):
@@ -20,7 +20,7 @@ class Controller:
         if "X-Real-Ip" in cherrypy.request.headers:
             client_ip = cherrypy.request.headers["X-Real-Ip"]
 
-        external_ip = cherrypy.engine.publish("cache:get", self.CACHE_KEY).pop()
+        external_ip = cherrypy.engine.publish("cache:get", self.cache_key).pop()
 
         if not external_ip:
             external_ip = cherrypy.engine.publish(
@@ -29,7 +29,7 @@ class Controller:
             ).pop()
 
             if external_ip:
-                cherrypy.engine.publish("cache:set", self.CACHE_KEY, external_ip)
+                cherrypy.engine.publish("cache:set", self.cache_key, external_ip)
 
         return {
             "json": {

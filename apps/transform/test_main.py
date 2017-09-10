@@ -1,10 +1,11 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
 import apps.transform.main
 
 
-class TestTransform(cptestcase.BaseCherryPyTestCase):
+class TestTransform(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.transform.main.Controller)
@@ -12,6 +13,10 @@ class TestTransform(cptestcase.BaseCherryPyTestCase):
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET", "POST"))
 
     def test_returnsHtml(self):
         """HTML is returned by default"""

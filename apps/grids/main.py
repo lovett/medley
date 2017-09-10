@@ -6,7 +6,7 @@ from calendar import Calendar
 class Controller:
     """Printable pages for data entry"""
 
-    URL = "/grids"
+    url = "/grids"
 
     name = "Grids"
 

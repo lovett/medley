@@ -1,10 +1,11 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
 import apps.topics.main
 import mock
 
-class TestTopics(cptestcase.BaseCherryPyTestCase):
+class TestTopics(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -38,6 +39,9 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
         if args[0] == "urlfetch:get":
             return [self.html_fixture]
 
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
     def test_sanitizesCount(self):
         """Non-numeric values for count parameter are rejected"""
