@@ -62,6 +62,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["websearch"] = self.websearch_filter
         self.env.filters["phonenumber"] = self.phonenumber_filter
         self.env.filters["snorql"] = self.snorql_filter
+        self.env.filters["percentage"] = self.percentage_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -104,6 +105,12 @@ class Plugin(plugins.SimplePlugin):
     def datetime_filter(self, value, format="locale"):
         """Format a datetime as a date string based on the specified format"""
 
+        if not value:
+            return ""
+
+        if isinstance(value, int):
+            value = datetime.datetime.fromtimestamp(value)
+
         if format == "locale":
             directives = "%c"
         elif format == "date":
@@ -112,6 +119,8 @@ class Plugin(plugins.SimplePlugin):
             directives = "%A %b %d, %Y"
         elif format == "time12":
             directives = "%I:%M:%S %p"
+        elif format == "time12_short":
+            directives = "%I:%M %p"
         elif format == "datetime12":
             directives = "%A %b %d, %Y %I:%M %p"
         else:
@@ -254,3 +263,9 @@ class Plugin(plugins.SimplePlugin):
         encoded_query = self.urlencode_filter(query)
 
         return "http://dbpedia.org/snorql?query={}".format(encoded_query)
+
+    def percentage_filter(self, value):
+        if value < 1:
+            return str(round(value * 100)) + "%"
+
+        return str(value) + "%"

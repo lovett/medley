@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper">
+
+        {% for label, forecast in forecasts.items() %}
+
+        <h1>
+            {{ label }}
+            {% if forecast.time %}
+            at {{ forecast.time|datetime('time12_short') }}
+            {% endif %}
+        </h1>
+
+
+        <h2>Currently</h2>
+        <p>{{ forecast.current_temperature }}° F as of {{ forecast.current_time|datetime('time12_short') }}.</p>
+
+        <p>{{ forecast.current_summary }}</p>
+
+
+        <h2>Today</h2>
+
+        <p>{{ forecast.summary }}</p>
+
+        <table class="key-value">
+            <tr>
+                <th>Temperature</th>
+                <td>{{ forecast.current_temperature }}° F</td>
+            </tr>
+
+            {% if forecast.high %}
+            <tr>
+                <th>High</th>
+                <td>{{ forecast.high }}° F at {{ forecast.high_at|datetime('time12_short') }}</td>
+            </tr>
+            {% endif %}
+            {% if forecast.low %}
+            <tr>
+                <th>Low</th>
+                <td>{{ forecast.low }}° F at {{ forecast.low_at|datetime('time12_short') }}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Precipitation</th>
+                <td>
+                    {{ forecast.liklihood_of_precipitation|percentage }} chance
+
+                    {% if forecast.precipitation_type %}
+                    of {{ forecast.precipitation_type }}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Humidity</th>
+                <td>{{ forecast.humidity|percentage }}</td>
+            </tr>
+
+            {% if forecast.sunrise %}
+            <tr>
+                <th>Sunrise</th>
+                <td>{{ forecast.sunrise|datetime('time12_short') }}</td>
+            </tr>
+            {% endif %}
+
+            {% if forecast.sunset %}
+            <tr>
+                <th>Sunset</th>
+                <td>{{ forecast.sunset|datetime('time12_short') }}</td>
+            </tr>
+            {% endif %}
+        </table>
+
+        <h2>Hourly</h2>
+
+        {% if forecast.hourly %}
+        <table>
+            {% for record in forecast.hourly %}
+            <tr>
+                <th>{{ record.time|datetime('time12_short') }}</th>
+                <td>{{ record.summary }}</td>
+                <td>
+                    <p>{{ record.temperature }}° F</p>
+                    {% if record.temperature != record.apparentTemperature %}
+                    <p>will feel like {{ record.apparentTemperature }}</p>
+                    {% endif %}
+                    {% if record.humidity %}
+                    <p>{{ record.humidity|percentage }} humidity</p>
+                    {% endif %}
+                    {% if record.windSpeed %}
+                    <p>Wind {{ record.windSpeed }} mph</p>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+
+
+        {% if "alerts" in forecast %}
+
+        {{ forecast.alerts }}
+
+        {% endif %}
+
+        {% endfor %}
+
+
+    </div>
+</main>
+{% endblock %}
