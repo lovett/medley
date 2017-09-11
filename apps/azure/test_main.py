@@ -1,30 +1,23 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
-import responses
-import apps.registry.models
 import apps.azure.main
 import mock
-import requests_mock
 
-class TestAzure(cptestcase.BaseCherryPyTestCase):
-
-    notifier_config = [
-        {"key": "notifier:url", "value": "http://example.com"},
-        {"key": "notifier:username", "value": "testuser"},
-        {"key": "notifier:password", "value": "testpass"}
-    ]
-
-    site_name = "azuretest"
+class TestAzure(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.azure.main.Controller)
 
-
     @classmethod
     def tearDownClass(cls):
         helpers.stop_server()
+
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("POST",))
 
     def test_requiresSiteName(self):
         """The request body must specify a site name"""
@@ -33,127 +26,94 @@ class TestAzure(cptestcase.BaseCherryPyTestCase):
         })
         self.assertEqual(response.code, 400)
 
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_needsNotifierConfig(self, registrySearchMock):
-        """An error is raised the registry does not have notifier credentials"""
-        registrySearchMock.side_effect = [
-            [], []
-        ]
-        response = self.request("/", method="POST", json_body={
-            "status": "success",
-            "siteName": self.site_name
-        })
-        self.assertEqual(response.code, 500)
-
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_sendsSuccessNotification(self, requestsMock, registrySearchMock):
+    @mock.patch("cherrypy.engine.publish")
+    def test_sendsSuccessNotification(self, publishMock):
         """A success status triggers a success notification"""
 
-        registrySearchMock.side_effect = [
-            self.notifier_config,
-            []
-        ]
+        def side_effect(*args, **kwargs):
+            if (args[0] == "registry:first_value"):
+                return ["http://example.com/{}"]
 
-        requestsMock.register_uri("POST", "http://example.com")
+        publishMock.side_effect = side_effect
 
         response = self.request("/", method="POST", json_body={
-            "siteName": self.site_name,
+            "siteName": "azuretest",
             "status": "success",
             "complete": True
         })
 
-        notification = requestsMock.request_history[0]
+        notification = publishMock.call_args[0][1]
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertFalse("has+uncertain+status" in notification.text)
-        self.assertFalse("has+failed" in notification.text)
-        self.assertTrue("is+complete" in notification.text)
-        self.assertTrue(self.site_name in notification.text)
+        self.assertEqual(response.code, 204)
+        self.assertEqual("Deployment to azuretest is complete", notification["title"])
+        self.assertEqual("http://example.com/azuretest", notification["url"])
 
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_sendsFailureNotification(self, requestsMock, registrySearchMock):
+    @mock.patch("cherrypy.engine.publish")
+    def test_sendsFailureNotification(self, publishMock):
         """A failed status triggers a failure notification"""
 
-        registrySearchMock.side_effect = [
-            self.notifier_config,
-            []
-        ]
+        def side_effect(*args, **kwargs):
+            if (args[0] == "registry:first_value"):
+                return ["http://example.com/{}"]
 
-        requestsMock.register_uri("POST", "http://example.com")
+        publishMock.side_effect = side_effect
 
         response = self.request("/", method="POST", json_body={
-            "siteName": self.site_name,
+            "siteName": "azuretest",
             "status": "failed",
             "complete": True
         })
 
-        notification = requestsMock.request_history[0]
+        notification = publishMock.call_args[0][1]
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertFalse("has+uncertain+status" in notification.text)
-        self.assertTrue("has+failed" in notification.text)
-        self.assertFalse("is+complete" in notification.text)
-        self.assertTrue(self.site_name in notification.text)
+        self.assertEqual(response.code, 204)
+        self.assertEqual("Deployment to azuretest has failed", notification["title"])
+        self.assertEqual("http://example.com/azuretest", notification["url"])
 
+    @mock.patch("cherrypy.engine.publish")
+    def test_sendsUnknownStatusNotification(self, publishMock):
+        """A status that is neither failed nor success triggers sends an
+        unknown status notification
+        """
 
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_sendsUnknownNotification(self, requestsMock, registrySearchMock):
-        """An unknown status value triggers a notification"""
+        def side_effect(*args, **kwargs):
+            if (args[0] == "registry:first_value"):
+                return ["http://example.com/{}"]
 
-        registrySearchMock.side_effect = [
-            self.notifier_config, []
-        ]
-
-        requestsMock.register_uri("POST", "http://example.com")
+        publishMock.side_effect = side_effect
 
         response = self.request("/", method="POST", json_body={
-            "siteName": self.site_name,
+            "siteName": "azuretest",
             "status": "unexpected value",
             "complete": True
         })
 
-        notification = requestsMock.request_history[0]
+        notification = publishMock.call_args[0][1]
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertTrue("has+uncertain+status" in notification.text)
-        self.assertFalse("has+failed" in notification.text)
-        self.assertFalse("is+complete" in notification.text)
-        self.assertTrue(self.site_name in notification.text)
+        self.assertEqual(response.code, 204)
+        self.assertEqual("Deployment to azuretest has uncertain status", notification["title"])
+        self.assertEqual("http://example.com/azuretest", notification["url"])
 
+    @mock.patch("cherrypy.engine.publish")
+    def test_skipsUrlIfPortalNotConfigured(self, publishMock):
+        """A failed status triggers a failure notification"""
 
-    @requests_mock.Mocker()
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_siteNamePopulatedInAzurePortalUrl(self, requestsMock, registrySearchMock):
-        """The site name is populated within the Azure portal url"""
+        def side_effect(*args, **kwargs):
+            if (args[0] == "registry:first_value"):
+                return [None]
 
-        registrySearchMock.side_effect = [
-            self.notifier_config,
-            [{"key": "azure:portal_url", "value": "http://test.example.com/{}/portal"}]
-        ]
-
-        requestsMock.register_uri("POST", "http://example.com")
+        publishMock.side_effect = side_effect
 
         response = self.request("/", method="POST", json_body={
-            "siteName": self.site_name,
+            "siteName": "azuretest",
             "status": "success",
             "complete": True
         })
 
-        notification = requestsMock.request_history[0]
+        notification = publishMock.call_args[0][1]
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue(requestsMock.called)
-        self.assertTrue("url=" in notification.text)
-        self.assertTrue(self.site_name in notification.text)
-
-
-
+        self.assertEqual(response.code, 204)
+        self.assertNotIn("url", notification)
 
 
 if __name__ == "__main__":

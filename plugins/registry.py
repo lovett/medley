@@ -18,6 +18,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def start(self):
         self.bus.subscribe("registry:remove", self.remove)
         self.bus.subscribe("registry:first_key", self.firstKey)
+        self.bus.subscribe("registry:first_value", self.firstValue)
         self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
@@ -90,10 +91,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def firstKey(self, value=None):
         result = self.search(value=value, limit=1)
 
-        if len(result) > 0:
-            return result[0]["key"]
-        else:
+        if not result:
             return None
+
+        return result[0]["key"]
+
+    def firstValue(self, key):
+        result = self.search(key=key, limit=1)
+
+        if not result:
+            return None
+
+        return result[0]["value"]
 
     def distinctKeys(self, key, value=None, stripPrefix=True):
         sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
