@@ -51,11 +51,8 @@ MEDLEY.bounce = (function () {
             dataType: 'json',
             url: '/bounce',
             data: $('INPUT', form).serialize()
-        }).done(function (data) {
-            var href = window.location.pathname;
-            if (data.hasOwnProperty('group')) {
-                href += '?group=' + data.group
-            }
+        }).done(function (data, status, request) {
+            var href = window.location.pathname + '?group=' + jQuery('#group').val();
             window.location.href = href;
         }).fail(function () {
             jQuery('.error.message').removeClass('hidden').text('Invalid values');

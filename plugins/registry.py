@@ -17,6 +17,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def start(self):
         self.bus.subscribe("registry:remove", self.remove)
+        self.bus.subscribe("registry:first_key", self.firstKey)
+        self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
 
@@ -27,7 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if replace:
             self.remove(key)
 
-        self._insert(
+        return self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
              [(key, value) for value in values]
         )
@@ -84,3 +86,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
         cherrypy.engine.publish("app-log", "registry", "clear_key:{}".format(key), deletions)
         return deletions
+
+    def firstKey(self, value=None):
+        result = self.search(value=value, limit=1)
+
+        if len(result) > 0:
+            return result[0]["key"]
+        else:
+            return None
+
+    def distinctKeys(self, key, value=None, stripPrefix=True):
+        sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
+
+        key = key.replace("*", "%")
+
+        rows = self._select(sql, [key])
+
+        keys = [row["key"] for row in rows]
+
+        if stripPrefix:
+            return [key.split(":", 1).pop() for key in keys]
+
+        return keys

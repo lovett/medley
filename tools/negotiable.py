@@ -45,8 +45,12 @@ class Tool(cherrypy.Tool):
     def _negotiate(self):
         """Decide on a response format"""
 
-        candidates = list(self.renderers.keys())
+        # If any format is acceptable, send text/html
+        if cherrypy.request.headers.get("Accept") == "*/*":
+            self.response_format = "text/html"
+            return
 
+        candidates = list(self.renderers.keys())
         self.response_format = cherrypy.tools.accept.callable(candidates)
 
 
