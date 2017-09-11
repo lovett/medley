@@ -68,6 +68,11 @@ def main():
     app_dir = os.path.realpath("apps")
 
     for app in os.listdir(app_dir):
+
+        # The template app is a scaffolding for creating new apps
+        if app == "template":
+            continue
+
         main_path = os.path.join(app_dir, app, "main.py")
 
         if not os.path.isfile(main_path):
