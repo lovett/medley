@@ -1,11 +1,9 @@
 import cherrypy
-import apps.speak.models
-import tools.capture
 
 class Controller:
-    """
-    Relay messages from notifier to the speak app
-    """
+    """Relay messages from notifier to the speech plugin"""
+
+    url = "/notification"
 
     name = "Notification"
 
@@ -17,14 +15,13 @@ class Controller:
 
     user_facing = False
 
-    @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
+    @cherrypy.tools.json_in()
     def POST(self):
         """Decide whether a notification is speakable.
 
-        Retractions are not, so respond with a 204. Likewise for
-        reminders, which get the same treatment because they recur too
-        frequently to be meaningful."""
+        Disregard retractions, because they are not actionable here.
+        """
 
         notification = cherrypy.request.json
 
@@ -42,12 +39,12 @@ class Controller:
             cherrypy.response.status = 400
             return
 
-        manager = apps.speak.models.SpeechManager()
+        is_muted = cherrypy.engine.publish("speak:is_muted").pop()
 
-        if manager.isMuted():
-            cherrypy.response.status = 202
-            return
+        if is_muted:
+            response_status = 202
+        else:
+            cherrypy.engine.publish("speak", title)
+            response_status = 204
 
-        manager.say(title, "en-GB", "Male")
-
-        return
+        cherrypy.response.status = response_status
