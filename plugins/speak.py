@@ -1,21 +1,26 @@
-import apps.registry.models
+from cherrypy.process import plugins
 import cherrypy
-import xml.dom.minidom
+import datetime
 import hashlib
 import os
 import os.path
 import requests
-import datetime
 import time
+import xml.dom.minidom
 
-class SpeechManager:
+class Plugin(plugins.SimplePlugin):
+    """
+    Perform text-to-speech synthesis via Microsoft Cognitive Services
+
+    https://www.microsoft.com/cognitive-services/en-us/documentation
+
+    https://github.com/Microsoft/ProjectOxford-ClientSDK/blob/master/Speech/TextToSpeech/Samples-Http/Python/TTSSample.py
+    """
+
     token_request_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
 
-    tts_host = "https://speech.platform.bing.com"
+    synthesize_url = "https://speech.platform.bing.com/synthesize"
 
-    synthesize_url = "{}/synthesize".format(tts_host)
-
-    publish_event = "play-cached"
     voice_fonts = {
         ("ar-EG", "Female"): ("Hoda", "Microsoft Server Speech Text to Speech Voice (ar-EG, Hoda)"),
         ("de-DE", "Female"): ("Hedda", "Microsoft Server Speech Text to Speech Voice (de-DE, Hedda)"),
@@ -48,21 +53,26 @@ class SpeechManager:
         ("zh-TW", "Male"): ("Zhiwei", "Microsoft Server Speech Text to Speech Voice (zh-TW, Zhiwei, Apollo)"),
     }
 
-    conn = None
-    cur = None
-    config = None
+    def __init__(self, bus):
+        plugins.SimplePlugin.__init__(self, bus)
 
-    def __init__(self):
-        registry = apps.registry.models.Registry()
 
-        config = registry.search(key="speak:*")
-        if not config:
-            raise cherrypy.HTTPError(500, "No configuration found in registry")
+    def start(self):
+        self.bus.subscribe("speak:can_speak", self.canSpeak)
+        self.bus.subscribe("speak", self.speak)
 
-        self.config = {row["key"].split(":")[1]: row["value"] for row in config}
 
-        if not "azure_key" in self.config:
-            raise cherrypy.HTTPError(500, "No azure key found")
+    def stop(self):
+        pass
+
+
+    def getConfig(self):
+        answer = cherrypy.engine.publish("registry:search", "speak:*").pop()
+
+        config = {row["key"].split(":")[1]: row["value"] for row in answer}
+
+        return config
+
 
     def getCachePath(self, hash_digest):
         return os.path.join(
@@ -72,6 +82,7 @@ class SpeechManager:
             hash_digest[0:2],
             hash_digest + ".wav"
         )
+
 
     def ssml(self, statement, locale, gender):
         doc = xml.dom.minidom.Document()
@@ -88,33 +99,45 @@ class SpeechManager:
         voice.appendChild(text)
         return doc.toxml().encode('utf-8')
 
-    def isMuted(self):
+    def canSpeak(self):
+        config = self.getConfig()
         today = datetime.date.today()
         tomorrow = today + datetime.timedelta(1)
         now = datetime.datetime.now()
 
-        mute = [line.rstrip() for line in self.config.get("mute", "").split("\n")]
+        schedule = [line.rstrip() for line in config.get("mute", "").split("\n")]
 
-        formats = ("%I:%M %p", "%H:%M")
-        for format in formats:
+        time_range = [None, None]
+        for format in ("%I:%M %p", "%H:%M"):
             try:
-                mute = [datetime.datetime.strptime(line, "%I:%M %p") for line in mute]
+                time_range = [datetime.datetime.strptime(line, "%I:%M %p") for line in schedule]
                 break
             except ValueError:
                 pass
 
-        if not isinstance(mute[0], datetime.datetime):
+        if not isinstance(time_range[0], datetime.datetime):
+            return True
+
+        start = datetime.datetime.combine(today, time_range[0].time())
+        if time_range[1] < time_range[0]:
+            end = datetime.datetime.combine(tomorrow, time_range[1].time())
+        else:
+            end = datetime.datetime.combine(today, time_Range[1].time())
+
+        in_schedule = start <= now <= end
+        return not in_schedule
+
+    def speak(self, statement, locale="en-GB", gender="Male"):
+
+        if not (locale, gender) in self.voice_fonts:
+            locale = "en-GB"
+            gender = "Male"
+
+        config = self.getConfig()
+
+        if not "azure_key" in config:
             return False
 
-        start = datetime.datetime.combine(today, mute[0].time())
-        if mute[1] < mute[0]:
-            end = datetime.datetime.combine(tomorrow, mute[1].time())
-        else:
-            end = datetime.datetime.combine(today, mute[1].time())
-
-        return start <= now <= end
-
-    def say(self, statement, locale, gender):
         ssml_string = self.ssml(statement, locale, gender)
 
         request_hash = hashlib.sha1()
@@ -125,16 +148,16 @@ class SpeechManager:
 
         if os.path.exists(cache_path):
             # Updating the access time of the file makes it easier to identify
-            # unused files. Both access and modified times will be set.
+            # unused files. Both access and modified times will be updated.
             os.utime(cache_path)
 
-            cherrypy.engine.publish(self.publish_event, cache_path)
+            self.playCachedFile(cache_path)
             return
 
         auth_response = requests.post(
             self.token_request_url,
             headers = {
-                "Ocp-Apim-Subscription-Key": self.config["azure_key"]
+                "Ocp-Apim-Subscription-Key": config["azure_key"]
             }
         )
 
@@ -168,6 +191,9 @@ class SpeechManager:
             f.write(req.content)
 
         if os.stat(cache_path).st_size > 0:
-            cherrypy.engine.publish(self.publish_event, cache_path)
+            self.playCachedFile(cache_path)
         else:
             raise cherrypy.HTTPError(500, "Cache not updated")
+
+    def playCachedFile(self, path):
+        cherrypy.engine.publish("play-cached", path)

@@ -127,6 +127,7 @@ def main():
     plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
+    plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
     # Tools

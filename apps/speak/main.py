@@ -1,13 +1,8 @@
 import cherrypy
-import apps.speak.models
 
 class Controller:
-    """
-    Perform text-to-speech synthesis via Microsoft Cognitive Services
 
-    https://www.microsoft.com/cognitive-services/en-us/documentation
-    https://github.com/Microsoft/ProjectOxford-ClientSDK/blob/master/Speech/TextToSpeech/Samples-Http/Python/TTSSample.py
-    """
+    url = "/speak"
 
     name = "Speak"
 
@@ -16,18 +11,13 @@ class Controller:
     user_facing = False
 
     def POST(self, statement, locale="en-GB", gender="Male"):
-        manager = apps.speak.models.SpeechManager()
 
-        if not (locale, gender) in manager.voice_fonts:
-            raise cherrypy.HTTPError(400, "Invalid locale/gender")
+        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
 
+        if not can_speak:
+            response_status = 202
+        else:
+            cherrypy.engine.publish("speak", statement, locale, gender)
+            response_status = 204
 
-        if manager.isMuted():
-            cherrypy.response.status = 202
-            return
-
-        manager.say(statement, locale, gender)
-
-        cherrypy.response.status = 204
-
-        return
+        cherrypy.response.status = response_status
