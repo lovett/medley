@@ -1,7 +1,6 @@
 import cherrypy
 import datetime
 import email.utils
-import functools
 import time
 
 class Controller:
@@ -15,22 +14,23 @@ class Controller:
 
     user_facing = True
 
-    @functools.lru_cache(maxsize=1)
-    def list_apps(self):
-        apps = []
-        for name, controller in cherrypy.tree.apps.items():
+    def catalog_apps(self, apps={}):
+        catalog = []
+        for mount_path, controller in apps.items():
             if (controller.root == self):
                 continue
 
-            summary = controller.root.__doc__.strip().split("\n").pop(0)
+            doc = controller.root.__doc__ or ""
+
+            summary = doc.strip().split("\n").pop(0)
 
             user_facing = getattr(controller.root, "user_facing", False)
 
-            apps.append((name[1:], summary, user_facing))
+            catalog.append((mount_path.lstrip("/"), summary, user_facing))
 
-            apps.sort(key=lambda tup: tup[0])
+        catalog.sort(key=lambda tup: tup[0])
 
-        return apps
+        return catalog
 
     @cherrypy.tools.negotiable()
     def GET(self):
@@ -45,6 +45,6 @@ class Controller:
         return {
             "html": ("homepage.html", {
                 "app_name": self.name,
-                "apps": self.list_apps(),
+                "apps": self.catalog_apps(cherrypy.tree.apps),
             })
         }
