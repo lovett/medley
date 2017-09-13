@@ -79,8 +79,8 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         }
 
         def side_effect(*args, **kwargs):
-            if args[0] == "speak:is_muted":
-                return [True]
+            if args[0] == "speak:can_speak":
+                return [False]
 
         publishMock.side_effect = side_effect
 
@@ -102,8 +102,8 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         }
 
         def side_effect(*args, **kwargs):
-            if args[0] == "speak:is_muted":
-                return [False]
+            if args[0] == "speak:can_speak":
+                return [True]
 
         publishMock.side_effect = side_effect
 

@@ -39,9 +39,9 @@ class Controller:
             cherrypy.response.status = 400
             return
 
-        is_muted = cherrypy.engine.publish("speak:is_muted").pop()
+        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
 
-        if is_muted:
+        if not can_speak:
             response_status = 202
         else:
             cherrypy.engine.publish("speak", title)
