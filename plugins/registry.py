@@ -17,6 +17,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def start(self):
         self.bus.subscribe("registry:remove", self.remove)
+        self.bus.subscribe("registry:remove_id", self.remove)
         self.bus.subscribe("registry:first_key", self.firstKey)
         self.bus.subscribe("registry:first_value", self.firstValue)
         self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
@@ -85,7 +86,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def remove(self, key):
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
-        cherrypy.engine.publish("app-log", "registry", "clear_key:{}".format(key), deletions)
+        cherrypy.engine.publish("app-log", "registry", "remove_key:{}".format(key), deletions)
+        return deletions
+
+    def removeId(self, rowid):
+        deletions = self._delete("DELETE FROM registry WHERE rowid=?", (rowid,))
+        cherrypy.engine.publish("app-log", "registry", "remove_id:{}".format(key), deletions)
         return deletions
 
     def firstKey(self, value=None):
