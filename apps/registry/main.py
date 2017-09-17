@@ -1,7 +1,7 @@
 import cherrypy
 
 class Controller:
-    """A general purpose key value store"""
+    """A general-purpose key value store"""
 
     url = "/registry"
 
@@ -14,9 +14,9 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, q=None, uid=None, view="search"):
         if uid:
-            entries = cherrypy.engine.publish("registry:find", uid).pop()
+            entries = cherrypy.engine.publish("registry:find", uid)
         elif q:
-            entries = cherrypy.engine.publish("registry:search", key=q).pop()
+            entries = cherrypy.engine.publish("registry:search", key=q)
         else:
             entries = []
 

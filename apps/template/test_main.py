@@ -8,8 +8,7 @@ import mock
 import unittest
 
 class TestTemplate(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
-    """Unit tests for the template app controller
-    """
+    """Unit tests for the template app"""
 
     @classmethod
     def setUpClass(cls):

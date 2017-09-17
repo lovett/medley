@@ -1,16 +1,15 @@
-import cherrypy
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
-import unittest
-import responses
 import apps.registry.main
-import apps.registry.models
+import cherrypy
+import datetime
 import mock
-import util.cache
-import tempfile
-import shutil
+import unittest
 
-class TestTopics(cptestcase.BaseCherryPyTestCase):
+class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+    """Unit tests for the registry app"""
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.registry.main.Controller)
@@ -19,142 +18,105 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="registry-test")
-        cherrypy.config["database_dir"] = self.temp_dir
+    def extract_template_vars(self, mock):
+        return mock.call_args[0][0]["html"][1]
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
 
-    @mock.patch("apps.registry.models.Registry.find")
-    @mock.patch("apps.registry.models.Registry.recent")
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_findEntries(self, searchMock, recentMock, findMock):
-        """Recent entries are returned by default"""
-        response = self.request("/", uid=1)
-        self.assertEqual(response.code, 200)
-        self.assertTrue(findMock.called)
-        self.assertFalse(recentMock.called)
-        self.assertFalse(searchMock.called)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_getByUid(self, publishMock, renderMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:find":
+                return [{"key": "abc123"}]
 
-    def test_defaultView(self):
-        """An invalid view returns the search view"""
-        response = self.request("/", view="test")
-        self.assertEqual(response.code, 200)
+        publishMock.side_effect = side_effect
 
-    @mock.patch("apps.registry.models.Registry.recent")
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_searchEntries(self, searchMock, recentMock):
-        """Registry records can be searched"""
+        response = self.request("/", uid="test")
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(template_vars["entries"][0]["key"], "abc123")
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_getBySearch(self, publishMock, renderMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:search":
+                return [{"key": "abc456"}]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/", q="test")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(searchMock.called)
-        self.assertFalse(recentMock.called)
 
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.add")
-    def test_addEntry(self, addMock, cacheClearMock):
-        """Records are added via a PUT which returns with a redirect"""
-        cacheClearMock.return_value = True
-        response = self.request("/", method="PUT", key="test", value="test1")
-        self.assertEqual(response.code, 303)
-        self.assertTrue(addMock.called_with("test", "test1"))
-        self.assertFalse(cacheClearMock.called)
+        template_vars = self.extract_template_vars(renderMock)
 
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.add")
-    def test_addEntryXHR(self, addMock, cacheClearMock):
-        """Records added via XHR return the newly created id"""
-        addMock.return_value = 1
-        cacheClearMock.return_value = True
+        self.assertEqual(template_vars["entries"][0]["key"], "abc456")
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_defaultView(self, publishMock, renderMock):
+        """An invalid view returns the search view"""
+
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:search":
+                return [{"key": "abc789"}]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", q="test", view="invalid")
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(template_vars["view"], "search")
+
+
+    @mock.patch("cherrypy.engine.publish")
+    def testDelete(self, publishMock):
+        response = self.request("/", method="DELETE", uid="testid")
+
+        publishMock.assert_any_call("registry:remove_id", "testid")
+        self.assertEqual(response.code, 204)
+
+
+    @mock.patch("cherrypy.engine.publish")
+    def testPutNoRedirect(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:add":
+                return ["fakeuid"]
+
+        publishMock.side_effect = side_effect
+
         response = self.request(
-            "/", method="PUT", key="test", value="test1",
+            "/",
+            method="PUT",
+            key="put_key",
+            value="put_value",
             as_json=True,
             headers={"X-Requested-With": "XMLHttpRequest"}
         )
-        self.assertEqual(response.code, 200)
-        self.assertTrue(addMock.called_with("test", "test1"))
-        self.assertEqual(response.body["uid"], 1)
-        self.assertFalse(cacheClearMock.called)
 
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.add")
-    def test_addIpEntry(self, addMock, cacheClearMock):
-        """Adding an record whose key is prefixed with ip: clears the ip facts cache"""
-        addMock.return_value = 1
-        cacheClearMock.return_value = True
-        response = self.request(
-            "/", method="PUT", key="ip:test", value="test1"
-        )
-        self.assertTrue(cacheClearMock.called)
+        self.assertEqual(response.body["uid"], "fakeuid")
 
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.remove")
-    @mock.patch("apps.registry.models.Registry.find")
-    def test_deleteEntryValidId(self, findMock, removeMock, cacheClearMock):
-        """An entry can be deleted if its uid is provided"""
-        findMock.return_value = ["test"]
-        removeMock.return_value = 1
-        cacheClearMock.return_value = True
+    @mock.patch("cherrypy.engine.publish")
+    def testPutRedirectToAddView(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:add":
+                return ["fakeuid"]
+
+        publishMock.side_effect = side_effect
 
         response = self.request(
-            "/", method="DELETE", uid=1
+            "/",
+            method="PUT",
+            key="put_key",
+            value="put_value"
         )
-        self.assertTrue(response.code, 200)
-        self.assertTrue(findMock.called)
-        self.assertTrue(removeMock.called)
-        self.assertFalse(cacheClearMock.called)
 
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.remove")
-    @mock.patch("apps.registry.models.Registry.find")
-    def test_deleteEntryIpKey(self, findMock, removeMock, cacheClearMock):
-        """An entry can be deleted if its uid is provided"""
-        findMock.return_value = [{"key": "ip:test"}]
-        removeMock.return_value = 1
-        cacheClearMock.return_value = True
-
-        response = self.request(
-            "/", method="DELETE", uid=1
-        )
-        self.assertTrue(response.code, 200)
-        self.assertTrue(findMock.called)
-        self.assertTrue(removeMock.called)
-        self.assertTrue(cacheClearMock.called)
-
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.remove")
-    @mock.patch("apps.registry.models.Registry.find")
-    def test_deleteEntryInvalidId(self, findMock, removeMock, cacheClearMock):
-        """Deletion fails if an invalid uid is provided"""
-        findMock.return_value = []
-        removeMock.return_value = 1
-        cacheClearMock.return_value = True
-
-        response = self.request(
-            "/", method="DELETE", uid=1
-        )
-        self.assertTrue(response.code, 404)
-        self.assertTrue(findMock.called)
-        self.assertFalse(removeMock.called)
-        self.assertFalse(cacheClearMock.called)
-
-    @mock.patch("util.ip.facts.cache_clear")
-    @mock.patch("apps.registry.models.Registry.remove")
-    @mock.patch("apps.registry.models.Registry.find")
-    def test_deletoinFailure(self, findMock, removeMock, cacheClearMock):
-        """An error is thrown if deletion of a valid uid fails"""
-        findMock.return_value = ["test"]
-        removeMock.return_value = 0
-        cacheClearMock.return_value = True
-
-        response = self.request(
-            "/", method="DELETE", uid=1
-        )
-        self.assertTrue(response.code, 400)
-        self.assertTrue(findMock.called)
-        self.assertTrue(removeMock.called)
-        self.assertFalse(cacheClearMock.called)
+        self.assertEqual(response.code, 303)
+        self.assertTrue("view=add" in response.body)
 
 
 if __name__ == "__main__":
