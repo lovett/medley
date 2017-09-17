@@ -56,10 +56,10 @@
             <dt><span class="counter">{{ loop.index }}.</span> {{ entry.key }}</dt>
 
             <dd class="secondary">
-                   Created {{ entry.created|localtime("datetime12") }}
-                   <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
-                       <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                   </a>
+                Created {{ entry.created|localtime("datetime12") }}
+                <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </a>
             </dd>
             <dd class="value">{{ entry.value }}</dd>
 
