@@ -1,8 +1,9 @@
 import cherrypy
-import apps.phone.models
 
 class Controller:
     """Add entries to an Asterisk callerid database"""
+
+    url = "/callerid"
 
     name = "Caller ID"
 
@@ -12,13 +13,11 @@ class Controller:
 
     def PUT(self, cid_number, cid_value):
         """Set the caller id for a number"""
-        manager = apps.phone.models.AsteriskManager()
-        manager.authenticate()
 
-        result = manager.setCallerId(cid_number.strip(), cid_value.strip())
+        number = cid_number.strip()
+        value = cid_value.strip()
 
-        if not result:
-            raise cherrypy.HTTPError(500, "Failed to save caller id")
+        cherrypy.engine.publish("phone:set_callerid", number, value)
 
         cherrypy.response.status = 204
         return
