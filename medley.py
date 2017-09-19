@@ -120,7 +120,9 @@ def main():
 
     # Plugins
     plugins.archive.Plugin(cherrypy.engine).subscribe()
+    plugins.asterisk.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
+    plugins.cdr.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()

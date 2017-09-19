@@ -13,6 +13,11 @@ class Sqlite:
     def _registerConverters(self):
         sqlite3.register_converter("created", util.sqlite_converters.convert_date)
         sqlite3.register_converter("binary", util.sqlite_converters.convert_binary)
+        sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
+        sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
+        sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
+        sqlite3.register_converter("channel", util.sqlite_converters.convert_channel)
+
         print("registered converters")
 
     def _open(self):

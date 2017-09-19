@@ -1,124 +1,11 @@
-import os.path
 import cherrypy
+import os.path
+import os
 import socket
-import datetime
-import sqlite3
-import util.sqlite_converters
-import apps.registry.models
+import pathlib
+from . import mixins
 
-class AsteriskCdr:
-    """Query an Asterisk sqlite3 CDR database."""
-
-    conn = None
-    cur = None
-
-    def __init__(self):
-        db_dir = cherrypy.config.get("database_dir")
-        path = os.path.join(db_dir, "asterisk_cdr.sqlite")
-        sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
-        sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
-        sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
-        sqlite3.register_converter("channel", util.sqlite_converters.convert_channel)
-
-        self.conn = sqlite3.connect(path, detect_types=sqlite3.PARSE_COLNAMES)
-        self.conn.row_factory = sqlite3.Row
-        self.cur = self.conn.cursor()
-
-    def __del__(self):
-        if self.conn:
-            self.conn.close()
-
-    def callCount(self, src=None):
-        query = """SELECT count(*) as count FROM cdr"""
-
-        if src is None:
-            self.cur.execute(query)
-            return self.cur.fetchone()[0]
-
-        query += " WHERE src=?"
-        try:
-            self.cur.execute(query, (src,))
-            return self.cur.fetchone()[0]
-        except:
-            return 0
-
-    def callLog(self, src_exclude=[], dst_exclude=[], offset=0, limit=50):
-        count = self.callCount()
-
-        if count == 0:
-            return ([], 0)
-
-        query = """
-        SELECT calldate as "date [naive_date]", end as "end_date [naive_date]",
-        CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
-        duration as "duration [duration]", clid as "clid [clid]",
-        channel as "abbreviated_channel [channel]",
-        dstchannel as "abbreviated_dstchannel [channel]", *
-        FROM cdr
-        WHERE 1=1"""
-
-        if src_exclude:
-            query += " AND src NOT IN ({}) ".format(",".join("?" * len(src_exclude)))
-
-        if dst_exclude:
-            query += " AND dst NOT IN ({}) ".format(",".join("?" * len(dst_exclude)))
-
-        query += """
-        ORDER BY calldate DESC
-        LIMIT ? OFFSET ?"""
-
-        params = []
-        if src_exclude:
-            params += src_exclude
-
-        if dst_exclude:
-            params += dst_exclude
-
-        params += [limit, offset]
-
-        self.cur.execute(query, params)
-
-        try:
-            return (self.cur.fetchall(), count)
-        except:
-            return ([], count)
-
-    def callHistory(self, caller, limit=0, offset=0):
-        count = self.callCount(caller)
-
-        if count == 0:
-            return ([], 0)
-
-        params = []
-        query = """
-        SELECT calldate as "date [naive_date]",
-        CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
-        duration as "duration [duration]",
-        clid as "clid [clid]",
-        *
-        FROM cdr
-        WHERE src=? OR dst LIKE ?
-        ORDER BY calldate DESC
-        """
-        params.append(caller)
-        params.append("%" + caller)
-
-        if limit > 0:
-            query += " LIMIT ?"
-            params.append(limit)
-
-        if limit > 0 and offset > 0:
-            query += " OFFSET ?"
-            params.append(offset)
-
-        self.cur.execute(query, params)
-        result = (self.cur.fetchall(), count)
-
-        return result
-
-
-
-class AsteriskManager:
+class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """Interact with Asterisk via its manager interface (AMI)
 
     Communication occurs over a TCP socket which is returned to the caller
@@ -130,9 +17,19 @@ class AsteriskManager:
 
     sock = None
 
-    def __del__(self):
-        if self.sock:
-            self.sock.close()
+    def __init__(self, bus):
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+
+    def start(self):
+        self.bus.subscribe("asterisk:set_caller_id", self.setCallerId)
+        self.bus.subscribe("asterisk:get_caller_id", self.getCallerId)
+        self.bus.subscribe("asterisk:blacklist", self.blacklist)
+        self.bus.subscribe("asterisk:unblacklist", self.unblacklist)
+        self.bus.subscribe("asterisk:is_blacklisted", self.isBlackListed)
+
+    def stop(self):
+        pass
+
 
     def authenticate(self):
         """Open an AMI connection and authenticate. Returns the opened
@@ -168,6 +65,7 @@ class AsteriskManager:
 
         return True
 
+
     def sendCommand(self, params):
         """Build a string of commands from the provided list and send to Asterisk.
         Takes care of newlines and encoding"""
@@ -197,14 +95,17 @@ class AsteriskManager:
         else:
             return response
 
+
     def getLastLine(self, response):
         """Returns the last data line from a response. Ignores blank lines and
         the end command line."""
         return response.strip().split("\n")[-2]
 
+
     def getValue(self, line):
         """Return the value part of a key-value line whose key is Value"""
         return line.strip().replace("Value: ", "")
+
 
     def getCallerId(self, number):
         """Look up the callerid value of the provided number"""
@@ -237,6 +138,7 @@ class AsteriskManager:
 
         return "Updated database successfully" in response
 
+
     def blacklist(self, number):
         """Add a number to the Asterisk blacklist"""
 
@@ -263,6 +165,7 @@ class AsteriskManager:
         response = self.getResponse()
 
         return "Database entry removed" in response
+
 
     def isBlackListed(self, number):
         """Look up the blacklist status of the provided number in the Asterisk

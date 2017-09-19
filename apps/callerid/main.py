@@ -17,7 +17,7 @@ class Controller:
         number = cid_number.strip()
         value = cid_value.strip()
 
-        cherrypy.engine.publish("phone:set_callerid", number, value)
+        cherrypy.engine.publish("asterisk:set_caller_id", number, value)
 
         cherrypy.response.status = 204
         return
