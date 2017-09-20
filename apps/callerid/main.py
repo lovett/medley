@@ -11,6 +11,7 @@ class Controller:
 
     user_facing = False
 
+    @cherrypy.tools.json_out()
     def PUT(self, cid_number, cid_value):
         """Set the caller id for a number"""
 
@@ -19,5 +20,7 @@ class Controller:
 
         cherrypy.engine.publish("asterisk:set_caller_id", number, value)
 
-        cherrypy.response.status = 204
-        return
+        return {
+            "cid_number": number,
+            "cid_value": value
+        }

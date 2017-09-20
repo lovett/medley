@@ -1,16 +1,14 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
-import unittest
-import responses
 import apps.callerid.main
+import cherrypy
+import datetime
 import mock
-import apps.phone.models
-import time
-import socket
+import unittest
 
-class TestCallerid(cptestcase.BaseCherryPyTestCase):
-
-    sock = None
+class TestTemplate(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+    """Unit tests for the callerid app"""
 
     @classmethod
     def setUpClass(cls):
@@ -20,35 +18,29 @@ class TestCallerid(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("PUT",))
 
-    def tearDown(self):
-        self.sock.close()
+    @mock.patch("cherrypy.engine.publish")
+    def test_put(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "asterisk:set_caller_id":
+                return [None]
 
-    @mock.patch("apps.phone.models.AsteriskManager.setCallerId")
-    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
-    def test_addValue(self, authenticateMock, setCallerIdMock):
-        """A callerid value can be set"""
-        authenticateMock.return_value = self.sock
-        setCallerIdMock.return_value = True
+        publishMock.side_effect = side_effect
 
-        response = self.request("/", method="PUT", cid_number="5551234567", cid_value="test")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(authenticateMock.called)
-        self.assertTrue(setCallerIdMock.called)
+        response = self.request(
+            "/",
+            method="PUT",
+            cid_number=" 5556667777 ",
+            cid_value="John Doe\n",
+            as_json=True,
+        )
 
-    @mock.patch("apps.phone.models.AsteriskManager.setCallerId")
-    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
-    def test_addValueFailure(self, authenticateMock, setCallerIdMock):
-        """A callerid value can be set"""
-        authenticateMock.return_value = self.sock
-        setCallerIdMock.return_value = False
-
-        response = self.request("/", method="PUT", cid_number="5551234567", cid_value="test")
-        self.assertEqual(response.code, 500)
-        self.assertTrue(authenticateMock.called)
-        self.assertTrue(setCallerIdMock.called)
+        self.assertEqual(response.code, 200)
+        self.assertEqual(response.body["cid_number"], "5556667777")
+        self.assertEqual(response.body["cid_value"], "John Doe")
 
 
 if __name__ == "__main__":
