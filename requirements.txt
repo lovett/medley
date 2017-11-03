@@ -1,10 +1,10 @@
-CherryPy==11.0.0
+CherryPy==11.1.0
 Jinja2==2.9.6
 httplib2==0.10.3
 msgpack-python==0.4.8
 pygeoip==0.3.2
 pyparsing==2.2.0
-pytz==2017.2
+pytz==2017.3
 requests==2.18.4
 ua-parser==0.7.3
 urllib3==1.22
