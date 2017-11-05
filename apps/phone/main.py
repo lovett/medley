@@ -1,10 +1,10 @@
 import cherrypy
-import util.cache
 import urllib.parse
-import apps.phone.models
 
 class Controller:
     """Display geographic location and recent call history for a phone number"""
+
+    url = "/phone"
 
     name = "Phone"
 
@@ -32,65 +32,79 @@ class Controller:
 
         raise cherrypy.HTTPRedirect(redirect_url)
 
-    @cherrypy.tools.template(template="phone.html")
     @cherrypy.tools.negotiable()
     def GET(self, number=None, message=None):
-        if number:
-            sanitized_number = util.phone.sanitize(number)
+        sanitized_number = cherrypy.engine.publish(
+        "phone:sanitize",
+            number=number
+        ).pop()
+
+        error = ""
 
         if number and not sanitized_number:
-            return self.error(400, "invalid")
+            error = self.messages.get("invalid")
 
-        if not number and cherrypy.request.as_html:
-            return {
-                "app_name": self.name,
-            }
+        area_code = sanitized_number[:3]
 
-        if not number:
-            return self.error(400, "missing")
+        cached_record = cherrypy.engine.publish(
+            "cache:get",
+            "phone:{}".format(area_code)
+        )
 
-        area_code = number[:3]
-
-        cache = util.cache.Cache()
-        cache_key = "phone:{}".format(area_code)
-        cached_record = cache.get(cache_key)
-
-        if cached_record:
-            location = cached_record[0]
-        else:
-            try:
-                location = util.phone.findAreaCode(area_code)
-                cache.set(cache_key, location)
-            except AssertionError:
-                location = {}
+        location = {}
+        # if cached_record:
+        #     location = cached_record[0]
+        # else:
+        #     location = {}
+            # try:
+            #     location = util.phone.findAreaCode(area_code)
+            #     cache.set(cache_key, location)
+            # except AssertionError:
+            #     location = {}
 
 
         caller_id = None
+        # caller_id = cherrypy.engine.publish(
+        #     "asterisk:get_caller_id",
+        #     number=number
+        # ).pop()
+
         blacklisted = []
+        # blacklisted = cherrypy.engine.publish(
+        #     "asterisk:is_blacklisted",
+        #     number=number
+        # ).pop()
 
-        manager = apps.phone.models.AsteriskManager()
+        call_history = []
+        total_calls = 0
+        # call_history, total_calls = cherrypy.engine.publish(
+        #     "cdr:call_history",
+        #     number=number,
+        #     limit=50
+        # ).pop()
 
-        if manager.authenticate():
-            caller_id = manager.getCallerId(number)
-            blacklisted = manager.isBlackListed(number)
+        # if call_history and not caller_id:
+        #     caller_id = call_history[0]["clid"]
 
-        cdr = apps.phone.models.AsteriskCdr()
-
-        call_history, total_calls = cdr.callHistory(number, 50)
-
-        if call_history and not caller_id:
-            caller_id = call_history[0]["clid"]
-
+        formatted_number = ""
+        # formatted_number = cherrypy.engine.publish(
+        #     "phone:format",
+        #     number=number
+        # ).pop()
 
         return {
-            "caller_id": caller_id,
-            "history": call_history,
-            "number": number,
-            "blacklisted": blacklisted,
-            "number_formatted": util.phone.format(number),
-            "state_abbreviation": location.get("state_abbreviation"),
-            "state_name": location.get("state_name"),
-            "comment": location.get("comment"),
-            "sparql": location.get("sparql", []),
-            "app_name": self.name
-        }
+            "html": ("phone.html", {
+                "caller_id": caller_id,
+                "error": error,
+                "history": call_history,
+                "number": number,
+                "blacklisted": blacklisted,
+                "number_formatted": formatted_number,
+                "state_abbreviation": location.get("state_abbreviation"),
+                "state_name": location.get("state_name"),
+                "comment": location.get("comment"),
+                "sparql": location.get("sparql", []),
+                "app_name": self.name
+            })
+
+}
