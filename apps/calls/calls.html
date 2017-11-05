@@ -27,11 +27,14 @@
                         </td>
                         <td>
                             {{ call["clid"] }}
-                            <div class="smaller"><a href="/phone?number={{ call["src"] }}" rel="noreferrer">{{ call["src"] }}</a></div>
+                            <div class="smaller">{{ call["src"]|phonenumber(as_link=True) }}</div>
                         </td>
                         <td>
-                            {{ call["dst"] }}
-                            <div class="smaller">{{ call["abbreviated_dstchannel"]|default('', true) }}</div>
+                            {% if call["dst"]|length < 3 or "NOANSWER" in call["dst"] %}
+                            {{ call["dst"]|phonenumber }}
+                            {% else %}
+                            {{ call["dst"]|phonenumber(as_link=True) }}
+                            {% endif %}
                         </td>
                         <td nowrap="nowrap">
                             {{ call["duration"] }}

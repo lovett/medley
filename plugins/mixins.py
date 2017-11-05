@@ -57,7 +57,7 @@ class Sqlite:
             cur.execute(query, values)
             return cur.fetchall() or []
 
-    def _selectOne(self, query, values):
+    def _selectOne(self, query, values=()):
         result = self._select(query, values)
         try:
             return result.pop()

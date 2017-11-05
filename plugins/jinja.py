@@ -9,6 +9,7 @@ import datetime
 import os
 import json
 from cherrypy.process import plugins
+from string import Template
 
 class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
@@ -239,7 +240,7 @@ class Plugin(plugins.SimplePlugin):
             url, target, engine.capitalize()
         )
 
-    def phonenumber_filter(self, value):
+    def phonenumber_filter(self, value, as_link=False):
         """Format a US phone number as a human-readable string"""
 
         formats = {
@@ -251,9 +252,17 @@ class Plugin(plugins.SimplePlugin):
         formatter = formats.get(len(value))
 
         if formatter:
-            return formatter(value)
+            formattedValue = formatter(value)
+        elif "stdexten-" in value:
+            formattedValue = value.replace("stdexten-", "")
+        else:
+            formattedValue = value
 
-        return value
+        if as_link and formattedValue != value:
+            template = Template("""<a href="/phone?number=$plainNumber" rel="noreferrer">$formattedNumber</a>""")
+            return template.substitute(plainNumber=value, formattedNumber=formattedValue)
+
+        return formattedValue
 
     def snorql_filter(self, value):
         """Build a URL to dbpedia.org/snorql with the specified query"""

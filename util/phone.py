@@ -7,17 +7,6 @@ import util.sqlite_converters
 class PhoneException(Exception):
     pass
 
-def format(number=""):
-    """Format a 10 or 7-digit numeric string as an American telephone number.
-    Strings of other lengths are returned unmodified."""
-
-    if len(number) == 10:
-        return re.sub(r"(\d{3})(\d{3})(\d{4})", r"(\1) \2-\3", number)
-    if len(number) == 7:
-        return re.sub(r"(\d\d\d)(\d\d\d\d)", r"\1-\2", number)
-    else:
-        return number
-
 def findAreaCode(area_code, timeout=4):
     """Query dbpedia for the geographic location of a North American
     telephone area code. Returns a dictionary with keys for state
