@@ -9,52 +9,52 @@
 
         {% if calls|length > 0 %}
         <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th width="25%">Date</th>
-                    <th width="25%">From</th>
-                    <th width="25%">Destination</th>
-                    <th width="25%">Duration</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for call in calls %}
-                <tr>
-                    <td nowrap="nowrap">
-                        {{ call["date"]|localtime("date") }}
-                        <div class="smaller">{{ call["date"]|localtime("time12")}}</div>
-                    </td>
-                    <td>
-                        {{ call["clid"] }}
-                        <div class="smaller"><a href="/phone?number={{ call["src"] }}" rel="noreferrer">{{ call["src"] }}</a></div>
-                    </td>
-                    <td>
-                        {{ call["dst"] }}
-                        <div class="smaller">{{ call["abbreviated_dstchannel"]|default('', true) }}</div>
-                    </td>
-                    <td nowrap="nowrap">
-                        {{ call["duration"] }}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <table>
+                <thead>
+                    <tr>
+                        <th width="25%">Date</th>
+                        <th width="25%">From</th>
+                        <th width="25%">Destination</th>
+                        <th width="25%">Duration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for call in calls %}
+                    <tr>
+                        <td nowrap="nowrap">
+                            {{ call["date"]|localtime("date") }}
+                            <div class="smaller">{{ call["date"]|localtime("time12")}}</div>
+                        </td>
+                        <td>
+                            {{ call["clid"] }}
+                            <div class="smaller"><a href="/phone?number={{ call["src"] }}" rel="noreferrer">{{ call["src"] }}</a></div>
+                        </td>
+                        <td>
+                            {{ call["dst"] }}
+                            <div class="smaller">{{ call["abbreviated_dstchannel"]|default('', true) }}</div>
+                        </td>
+                        <td nowrap="nowrap">
+                            {{ call["duration"] }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-        <div class="pagination">
-            {% if newer_offset >= 0 %}
-            <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
-                <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                Newer
-            </a>
-            {% endif %}
-            {% if older_offset > 0 %}
-            <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
-                Older
-                <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-            </a>
-            {% endif %}
-        </div>
+            <div class="pagination">
+                {% if newer_offset >= 0 %}
+                <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
+                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                    Newer
+                </a>
+                {% endif %}
+                {% if older_offset > 0 %}
+                <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
+                    Older
+                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                </a>
+                {% endif %}
+            </div>
         </div>
 
         {% endif %}
