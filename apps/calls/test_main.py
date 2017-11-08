@@ -1,21 +1,11 @@
-import cherrypy
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import unittest
-import responses
 import apps.calls.main
 import mock
-import time
-import apps.phone.models
-import apps.registry.models
-import apps.phone.models
-import tempfile
-import shutil
-import os.path
 
-class TestCalls(cptestcase.BaseCherryPyTestCase):
-
-    sock = None
+class TestCalls(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -25,37 +15,69 @@ class TestCalls(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="calls-test")
-        cherrypy.config["database_dir"] = self.temp_dir
-        cherrypy.config["asterisk.cdr_db"] = os.path.join(self.temp_dir, "cdr.db")
+    def extract_template_vars(self, mock):
+        return mock.call_args[0][0]["html"][1]
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("apps.phone.models.AsteriskCdr.callLog")
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_returnsHtml(self, registrySearchMock, callLogMock):
-        """It returns HTML by default"""
+    @mock.patch("cherrypy.engine.publish")
+    def test_exclusion(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:search":
+                return [[
+                    {"key": "src", "value": "test"},
+                    {"key": "dst", "value": "test2"}
+                ]]
 
-        registrySearchMock.return_value = []
-        callLogMock.return_value = ([], 0)
+            if args[0] == "cdr:call_count":
+                return [1]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
 
-    @mock.patch("apps.phone.models.AsteriskCdr.callLog")
-    @mock.patch("apps.registry.models.Registry.search")
-    def test_invalidOffset(self, registrySearchMock, callLogMock):
-        """An invalid offset is return as zero"""
+        publishMock.assert_any_call(
+            "cdr:call_count",
+            dst_exclude=["test2"],
+            src_exclude=["test"]
+        )
 
-        registrySearchMock.return_value = []
-        callLogMock.return_value = ([
-            {}
-        ], 1)
-        response = self.request("/", offset=2)
-        self.assertEqual(response.code, 200)
-        self.assertTrue("Older" not in response.body)
+        print(publishMock.mock_calls)
+        publishMock.assert_any_call(
+            "cdr:call_log",
+            dst_exclude=["test2"],
+            src_exclude=["test"],
+            offset=0
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_pagination(self, publishMock, renderMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:search":
+                return [[]]
+
+            if args[0] == "cdr:call_count":
+                return [1]
+
+            if args[0] == "cdr:call_log":
+                return [[]]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/")
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(template_vars["older_offset"], 0)
+        self.assertEqual(template_vars["newer_offset"], 0)
+
+        response = self.request("/", offset=10)
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(template_vars["older_offset"], 0)
+        self.assertEqual(template_vars["newer_offset"], 10)
 
 
 
