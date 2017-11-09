@@ -6,14 +6,7 @@ import pathlib
 from . import mixins
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
-    """Interact with Asterisk via its manager interface (AMI)
-
-    Communication occurs over a TCP socket which is returned to the caller
-    from the authentication function and is expected to be passed back
-    when calling other functions. The caller is also responsible for
-    closing the socket.
-
-    Failure responses are returned as boolean False."""
+    """Interact with Asterisk via its manager interface (AMI)"""
 
     sock = None
 
@@ -30,39 +23,45 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def stop(self):
         pass
 
-
     def authenticate(self):
-        """Open an AMI connection and authenticate. Returns the opened
-        socket if authentication succeeds, otherwise False"""
+        if self.sock:
+            return True
 
-        registry = apps.registry.models.Registry()
-        asterisk_keys = registry.search(key="asterisk:*")
+        config = cherrypy.engine.publish(
+            "registry:search",
+            key="asterisk:*",
+            as_dict=True
+        ).pop()
 
-        if not asterisk_keys:
+        if not config:
             return False
 
-        asterisk_config = {item["key"].split(":")[1] : item["value"] for index, item in enumerate(asterisk_keys)}
-
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        try:
-            self.sock.connect((asterisk_config["host"], int(asterisk_config["port"])))
-        except ConnectionRefusedError:
-            return False
+        self.sock = socket.create_connection((
+            config["asterisk:host"],
+            int(config["asterisk:port"])
+        ))
 
         self.sendCommand([
             "Action: login",
             "Events: off",
-            "Username: {}".format(asterisk_config["username"]),
-            "Secret: {}".format(asterisk_config["secret"])
+            "Username: {}".format(config["asterisk:username"]),
+            "Secret: {}".format(config["asterisk:secret"])
         ])
 
         response = self.getResponse("Message")
 
         if not response or "Message: Authentication accepted" not in response:
-            self.sock.close()
+            self.disconnect()
             return False
 
+        return True
+
+    def disconnect(self):
+        if not self.sock:
+            return False
+
+        self.sock.close()
+        self.sock = None
         return True
 
 
@@ -71,6 +70,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         Takes care of newlines and encoding"""
 
         command = "\r\n".join(params) + "\r\n\r\n"
+
         self.sock.send(command.encode("UTF-8"))
 
 
@@ -110,6 +110,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def getCallerId(self, number):
         """Look up the callerid value of the provided number"""
 
+        self.authenticate()
+
         self.sendCommand([
             "Action: Command",
             "Command: database get cidname {}".format(number)
@@ -122,12 +124,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if "Database entry not found" in last_line:
             return False
-        else:
-            return self.getValue(last_line)
+
+        self.disconnect()
+
+        return self.getValue(last_line)
 
 
     def setCallerId(self, number, value):
         """Add or update the callerid string for a number"""
+
+        self.authenticate()
 
         self.sendCommand([
             "Action: Command",
@@ -136,6 +142,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         response = self.getResponse()
 
+        self.disconnect()
+
         return "Updated database successfully" in response
 
 
@@ -143,6 +151,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Add a number to the Asterisk blacklist"""
 
         today = datetime.datetime.today().strftime("%Y%m%d")
+
+        self.authenticate()
 
         self.sendCommand([
             "Action: Command",
@@ -157,12 +167,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def unblacklist(self, number):
         """Remove a number from the Asterisk blacklist"""
 
+        self.authenticate()
+
         self.sendCommand([
             "Action: Command",
             "Command: database del blacklist {}".format(number)
         ])
 
         response = self.getResponse()
+
+        self.disconnect()
 
         return "Database entry removed" in response
 
@@ -171,6 +185,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Look up the blacklist status of the provided number in the Asterisk
         database. Returns a datetime if found indicating when the
         number was blacklisted. Returns false if not found."""
+
+        self.authenticate()
 
         self.sendCommand([
             "Action: Command",
@@ -181,6 +197,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if not last_line or "Database entry not found" in last_line:
             return False
+
+        self.disconnect()
 
         value = self.getValue(last_line)
         return datetime.datetime.strptime(value, "%Y%m%d")

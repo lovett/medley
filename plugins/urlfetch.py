@@ -14,7 +14,7 @@ class Plugin(plugins.SimplePlugin):
     def stop(self):
         pass
 
-    def get(self, url, auth=(), headers={}, timeout=5, as_json=False):
+    def get(self, url, auth=(), headers={}, params={}, timeout=5, as_json=False):
         """Send a GET request"""
 
         request_headers = {
@@ -28,7 +28,8 @@ class Plugin(plugins.SimplePlugin):
                 url,
                 auth=auth,
                 timeout=timeout,
-                headers=request_headers
+                headers=request_headers,
+                params=params
             )
 
             req.raise_for_status()

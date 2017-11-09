@@ -17,93 +17,70 @@ class Controller:
         "missing": "A number was not provided"
     }
 
-    def error(self, code, message_key=None):
-        message = self.messages.get(message_key, "")
-
-        if cherrypy.request.as_json:
-            cherrypy.response.status = code
-            return {"message": message}
-
-        if cherrypy.request.as_text:
-            cherrypy.response.status = code
-            return message
-
-        redirect_url = "/phone?message={}".format(message_key)
-
-        raise cherrypy.HTTPRedirect(redirect_url)
-
     @cherrypy.tools.negotiable()
-    def GET(self, number=None, message=None):
+    def GET(self, number=None, ):
         sanitized_number = cherrypy.engine.publish(
-        "phone:sanitize",
+            "phone:sanitize",
             number=number
         ).pop()
 
         error = ""
 
         if number and not sanitized_number:
-            error = self.messages.get("invalid")
+            return {
+                "html": ("phone.html", {
+                    "error": self.messages.get("invalid")
+                })
+            }
 
         area_code = sanitized_number[:3]
 
-        cached_record = cherrypy.engine.publish(
+        location = cherrypy.engine.publish(
             "cache:get",
             "phone:{}".format(area_code)
-        )
+        ).pop()
 
-        location = {}
-        # if cached_record:
-        #     location = cached_record[0]
-        # else:
-        #     location = {}
-            # try:
-            #     location = util.phone.findAreaCode(area_code)
-            #     cache.set(cache_key, location)
-            # except AssertionError:
-            #     location = {}
+        if not location:
+            state_lookup = cherrypy.engine.publish(
+                "geography:state_by_area_code",
+                area_code
+            ).pop()
 
+            state_name_lookup = cherrypy.engine.publish(
+                "geography:unabbreviate_state",
+                state_lookup[1]
+            ).pop()
 
-        caller_id = None
-        # caller_id = cherrypy.engine.publish(
-        #     "asterisk:get_caller_id",
-        #     number=number
-        # ).pop()
+        caller_id = cherrypy.engine.publish(
+            "asterisk:get_caller_id",
+            number=sanitized_number
+        ).pop()
 
-        blacklisted = []
-        # blacklisted = cherrypy.engine.publish(
-        #     "asterisk:is_blacklisted",
-        #     number=number
-        # ).pop()
+        blacklisted = cherrypy.engine.publish(
+            "asterisk:is_blacklisted",
+            number=sanitized_number
+        ).pop()
 
-        call_history = []
-        total_calls = 0
-        # call_history, total_calls = cherrypy.engine.publish(
-        #     "cdr:call_history",
-        #     number=number,
-        #     limit=50
-        # ).pop()
+        call_history = cherrypy.engine.publish(
+            "cdr:call_history",
+            sanitized_number,
+            limit=50
+        ).pop()
 
-        # if call_history and not caller_id:
-        #     caller_id = call_history[0]["clid"]
-
-        formatted_number = ""
-        # formatted_number = cherrypy.engine.publish(
-        #     "phone:format",
-        #     number=number
-        # ).pop()
+        if call_history and not caller_id:
+            caller_id = call_history[0][0]["clid"]
 
         return {
             "html": ("phone.html", {
                 "caller_id": caller_id,
                 "error": error,
-                "history": call_history,
-                "number": number,
+                "history": call_history[0],
+                "number": sanitized_number,
                 "blacklisted": blacklisted,
-                "number_formatted": formatted_number,
-                "state_abbreviation": location.get("state_abbreviation"),
-                "state_name": location.get("state_name"),
-                "comment": location.get("comment"),
-                "sparql": location.get("sparql", []),
+                "state_abbreviation": state_lookup[1],
+                "comment": state_lookup[2],
+                "state_name": state_name_lookup[1],
+                "sparql": [lookup[0] for lookup in (state_lookup, state_name_lookup)],
                 "app_name": self.name
             })
 

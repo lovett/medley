@@ -32,7 +32,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if src:
             srcTarget = "AND src=?"
-            values.push(src)
+            values.append(src)
 
         if src_exclude:
             srcFilter = "AND src NOT IN ({})".format(",".join("?" * len(src_exclude)))
@@ -63,8 +63,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LIMIT ? OFFSET ?""")
 
         reversed_values = [offset, limit]
-        dstExclude = ""
-        srcExclude = ""
+        dstFilter = ""
+        srcFilter = ""
 
         if dst_exclude:
             dstFilter = "AND dst NOT IN ({})".format(",".join("?" * len(dst_exclude)))
@@ -78,8 +78,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select(query_str, list(reversed(reversed_values)))
 
-    def callHistory(self, caller, limit=0, offset=0):
-        count = self.callCount(caller)
+    def callHistory(self, number, limit=0, offset=0):
+        count = self.callCount(number)
 
         if count == 0:
             return ([], 0)
@@ -97,8 +97,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY calldate DESC
         """
 
-        params.append(caller)
-        params.append("%" + caller)
+        params.append(number)
+        params.append("%" + number)
 
         if limit > 0:
             query += " LIMIT ?"
