@@ -22,15 +22,17 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
         return mock.call_args[0][0]["html"][1]
 
     def test_allow(self):
+        """The app supports GET, PUT, and DELETE operations"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_getByUid(self, publishMock, renderMock):
+    def test_getByUidSuccess(self, publishMock, renderMock):
+        """Searching for a valid uid returns a list of the one record"""
         def side_effect(*args, **kwargs):
-            if args[0] == "registry:find":
-                return [{"key": "abc123"}]
+            if args[0] == "registry:find_id":
+                return [{"rowid": "test", "key": "mykey"}]
 
         publishMock.side_effect = side_effect
 
@@ -38,14 +40,30 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
 
         template_vars = self.extract_template_vars(renderMock)
 
-        self.assertEqual(template_vars["entries"][0]["key"], "abc123")
+        self.assertEqual(template_vars["entries"][0]["rowid"], "test")
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_getByUidFail(self, publishMock, renderMock):
+        """Searching for an invalid uid returns an empty list of entries"""
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:find_id":
+                return [{}]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", uid="invalidid")
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["entries"]), 0)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
     def test_getBySearch(self, publishMock, renderMock):
         def side_effect(*args, **kwargs):
             if args[0] == "registry:search":
-                return [{"key": "abc456"}]
+                return [[{"key": "abc456"}]]
 
         publishMock.side_effect = side_effect
 
@@ -53,6 +71,7 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
 
         template_vars = self.extract_template_vars(renderMock)
 
+        print(template_vars)
         self.assertEqual(template_vars["entries"][0]["key"], "abc456")
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
@@ -62,7 +81,7 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
 
         def side_effect(*args, **kwargs):
             if args[0] == "registry:search":
-                return [{"key": "abc789"}]
+                return [[{"key": "abc789"}]]
 
         publishMock.side_effect = side_effect
 

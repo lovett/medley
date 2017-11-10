@@ -13,12 +13,16 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, q=None, uid=None, view="search"):
+        entries = []
+
         if uid:
-            entries = cherrypy.engine.publish("registry:find", uid)
+            entry = cherrypy.engine.publish("registry:find_id", uid).pop()
+            if entry:
+                entries.append(entry)
         elif q:
-            entries = cherrypy.engine.publish("registry:search", key=q)
-        else:
-            entries = []
+            entries.extend(cherrypy.engine.publish("registry:search", key=q).pop())
+
+        print([e["value"] for e in entries])
 
         if not view in ["add", "search"]:
             view = "search"
@@ -26,6 +30,7 @@ class Controller:
         return {
             "html": ("registry.html", {
                 "q": q,
+                "uid": uid,
                 "entries": entries,
                 "app_name": self.name,
                 "view": view,

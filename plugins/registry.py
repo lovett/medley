@@ -18,6 +18,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def start(self):
         self.bus.subscribe("registry:remove", self.remove)
         self.bus.subscribe("registry:remove_id", self.remove)
+        self.bus.subscribe("registry:find_id", self.find)
         self.bus.subscribe("registry:first_key", self.firstKey)
         self.bus.subscribe("registry:first_value", self.firstValue)
         self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
@@ -26,6 +27,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def stop(self):
         pass
+
+    def find(self, uid):
+        return self._selectOne(
+            "SELECT rowid, key, value, created as 'created [created]' FROM registry WHERE rowid=?",
+            (uid,)
+        )
 
     def add(self, key, values=[], replace=False):
         if replace:
