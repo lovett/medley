@@ -76,7 +76,7 @@ class TestCountries(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertio
 
         self.assertEqual(response.code, 204)
 
-        publishMock.assert_called_with("registry:add", "country_code:alpha2:US", "US", True)
+        publishMock.assert_called_with("registry:add", "country_code:alpha2:US", ["US"], True)
 
 
     @mock.patch("cherrypy.engine.publish")
@@ -90,7 +90,7 @@ class TestCountries(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertio
         self.assertEqual(response.code, 204)
 
         publishMock.assert_any_call("cache:set", "countries", self.fixture)
-        publishMock.assert_any_call("registry:add", "country_code:alpha2:US", "US", True)
+        publishMock.assert_any_call("registry:add", "country_code:alpha2:US", ["US"], True)
 
     @mock.patch("cherrypy.engine.publish")
     def testUrlFetchFailure(self, publishMock):
