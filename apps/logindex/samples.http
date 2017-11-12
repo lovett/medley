@@ -1,0 +1,7 @@
+# -*- restclient -*-
+
+POST http://127.0.0.1:8085/logindex
+Content-Type: application/x-www-form-urlencoded
+
+start=2016-01-01&end=2016-01-02
+#

@@ -5,12 +5,13 @@ import datetime
 import os.path
 import tools.negotiable
 import apps.logindex.models
-import apps.registry.models
 import util.decorator
 import cherrypy
 
 class Controller:
     """Index log files"""
+
+    url = "/logindex"
 
     name = "Log Index"
 
@@ -27,25 +28,23 @@ class Controller:
         except:
             raise cherrypy.HTTPError(400, "Unable to parse a date from {}".format(s))
 
-    @cherrypy.tools.encode()
     def POST(self, start, end=None, by="ip", match=None):
         start_time = time.time()
         one_day = datetime.timedelta(days=1)
 
-        registry = apps.registry.models.Registry()
-        roots = registry.search(key="logindex:root")
-        if not roots:
-            raise cherrypy.HTTPError(500, "No log roots found in registry")
+        root = cherrypy.engine.publish("registry:first_value", "logindex:root").pop()
+
+        if not root:
+            raise cherrypy.HTTPError(500, "No log root found in registry")
 
         start_date = self.parseLogDate(start)
-        logman = apps.logindex.models.LogManager(roots[0]["value"])
+        logman = apps.logindex.models.LogManager(root)
 
+        end_date = start_date
         if end:
             end_date = self.parseLogDate(end)
             if start_date > end_date:
                 raise cherrypy.HTTPError(400, "Invalid date range")
-        else:
-            end_date = start_date
 
         if not by:
             raise cherrypy.HTTPError(400, "Field name to index by not specified")
