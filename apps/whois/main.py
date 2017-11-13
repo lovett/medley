@@ -1,15 +1,13 @@
 import re
-import subprocess
 import cherrypy
 import urllib.parse
 import socket
-import util.cache
-import requests
-import util.ip
 import ipaddress
 
 class Controller:
-    """Display whois and geoip data for an IP address or hostname"""
+    """Whois and geoip data for an IP address or hostname"""
+
+    url = "/whois"
 
     name = "Whois"
 
@@ -17,116 +15,69 @@ class Controller:
 
     user_facing = True
 
-    @cherrypy.tools.template(template="whois.html")
     @cherrypy.tools.negotiable()
     def GET(self, address=None):
-        ip = None
-        cache = util.cache.Cache()
-
-        if not address and cherrypy.request.as_json:
-            cherrypy.response.status = 400
-            return {
-                "message": "Address not specified"
-            }
-        if not address and cherrypy.request.as_text:
-            raise cherrypy.HTTPError(400, "Address not specified")
-
         if not address:
             return {
+                "html": ("whois.html", {
                 "app_name": self.name
+                })
             }
 
-        # Sanitization
-        address_unquoted = urllib.parse.unquote_plus(address).lower()
-        address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
-
-        # Is the address an IP?
         try:
-            ipaddress.ip_address(address_clean)
-            ip = address_clean
-        except ValueError:
-            pass
-
-        # Is the address a hostname?
-        if ip is None:
-            address_parsed = urllib.parse.urlparse(address_clean)
-            if address_parsed.hostname:
-                address_clean = address_parsed.hostname
-            ip = self.resolveHost(address_clean)
-
-        if ip is None and cherrypy.request.as_text:
-            raise cherrypy.HTTPError(400, "Invalid address")
-
-        if ip is None:
-            cherrypy.response.status = 400
-            return {
-                "message": "Invalid address"
-            }
-
-        cache_key = "whois:{}".format(address_clean)
-        cached_value = cache.get(cache_key)
-
-        if cached_value:
-            whois_result = cached_value[0]
-        else:
-            r = requests.get(
-                "http://whois.arin.net/rest/ip/{}".format(ip),
-                timeout = 5,
-                allow_redirects = False,
-                headers = {
-                    "User-Agent": "python",
-                    "Accept": "application/json"
-                }
-            )
-            r.raise_for_status()
-            whois_result = r.json()
-            cache.set(cache_key, whois_result)
-
-
-
-        ip_facts = util.ip.facts(ip)
-
-        # Google charts
-        try:
-            map_region = ip_facts["geo"]["country_code"]
-            if map_region == "US" and ip_facts["geo"].get("region_code", None):
-                map_region += "-" + ip_facts["geo"]["region_code"]
+            address_unquoted = urllib.parse.unquote_plus(address).lower()
         except:
-            map_region = None
+            address_unquoted = None
 
-        if cherrypy.request.as_text:
-            if "city" in ip_facts["geo"] and "country_name" in ip_facts["geo"]:
-                return "{}, {}".format(ip_facts["geo"]["city"], ip_facts["geo"]["country_name"])
-            elif "country_name" in ip_facts["geo"]:
-                return ip_facts["geo"]["country_name"]
-            else:
-                return "Unknown"
+        # The address could be an IP or a hostname
+        try:
+            address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
+            ip = str(ipaddress.ip_address(address_clean))
+        except ValueError:
+            address_parsed = urllib.parse.urlparse(address_unquoted)
+            if "hostname" in address_parsed:
+                address_clean = address_parsed.hostname
+            elif "path" in address_parsed:
+                address_clean = address_parsed.path
+
+            if not address_clean:
+                raise ValueError
+
+            result = socket.gethostbyname_ex(address_clean)
+            ip = result[2][0]
+        except:
+            raise cherrypy.HTTPRedirect(self.url)
+
+        whois_cache_key = "whois:{}".format(ip)
+
+        whois = cherrypy.engine.publish("cache:get", whois_cache_key).pop()
+
+        if not whois:
+            whois = cherrypy.engine.publish(
+                "urlfetch:get",
+                "http://whois.arin.net/rest/ip/{}".format(ip),
+                as_json=True
+            ).pop()
+
+            if whois:
+                cherrypy.engine.publish("cache:set", whois_cache_key, whois)
+
+
+        facts_cache_key = "ipfacts:{}".format(ip)
+        facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
+
+        if not facts:
+            facts = cherrypy.engine.publish("ip:facts", ip).pop()
+
+            if facts:
+                cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
         return {
-            "address": address_clean,
-            "ip": ip,
-            "whois": whois_result,
-            "ip_facts": ip_facts,
-            "reverse_host": self.reverseLookup(ip),
-            "map_region": map_region,
-            "app_name": self.name
+            "html": ("whois.html", {
+                "address": address_clean,
+                "ip": ip,
+                "whois": whois,
+                "ip_facts": facts,
+                "app_name": self.name
+            })
         }
-
-
-    def resolveHost(self, host=None):
-        """Resolve a hostname to its IP address"""
-
-        try:
-            result = socket.gethostbyname_ex(host)
-            return result[2][0]
-        except:
-            pass
-
-    def reverseLookup(self, ip=None):
-        """Find the hostname associated with the given IP"""
-
-        try:
-            result = socket.gethostbyaddr(ip)
-            return result[0]
-        except:
-            pass

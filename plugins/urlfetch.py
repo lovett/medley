@@ -21,6 +21,9 @@ class Plugin(plugins.SimplePlugin):
             "User-Agent": "python",
         }
 
+        if as_json:
+            request_headers["Accept"] = "application/json"
+
         request_headers.update(headers)
 
         try:

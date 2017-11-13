@@ -3,7 +3,7 @@
 {% block scripts %}
 {% if ip %}
 <script src="https://www.google.com/jsapi"></script>
-<script src="/static/js/maps.js"></script>
+<script src="/shared/static/js/maps.js"></script>
 {% endif %}
 {% endblock %}
 
@@ -44,13 +44,12 @@
                 <dl>
                     {% if "customerRef" in whois.net %}
                     <dt>Owned By</dt>
-                    <dd><a href="{{ whois.net.customerRef["$"] }}" target="_blank" rel="noreferrer">{{ whois.net.customerRef["@name"] }}</a></dd>
+                    <dd>{{ whois.net.customerRef["@name"] }}</dd>
                     {% endif %}
 
                     {% if "orgRef" in whois.net %}
                     <dt>Organization</dt>
-                    <dd><a href="{{ whois.net.orgRef["$"] }}" target="_blank" rel="noreferrer">{{ whois.net.orgRef["@name"] }}</a>
-                    <dd class="supplemental"><a href="https://whois.arin.net/rest/org/{{ whois.net.orgRef["@handle"] }}/nets" target="_blank" rel="noreferrer">Related networks</a></dd>
+                    <dd>{{ whois.net.orgRef["@name"] }}</dd>
                     {% endif %}
 
                     {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
@@ -67,8 +66,10 @@
                     <dd>Unknown</dd>
                     {% endif %}
 
+                    {% if ip_facts.reverse_host %}
                     <dt>Reverse Host</dt>
-                    <dd>{{ reverse_host }}</dd>
+                    <dd>{{ ip_facts.reverse_host }}</dd>
+                    {% endif %}
 
                     <dt>
                         <dt>IP</dt>
@@ -93,12 +94,6 @@
                         find visits
                     </a>
                 </dd>
-
-                <dt>Visit</dt>
-                <dd>
-                    <a href="{{ address|anonymize }}" rel="noreferrer">http</a>,
-                    <a href="https://{{ address }}" rel="noreferrer">https</a>
-                </dd>
             </dl>
         </div>
     </div>
@@ -107,7 +102,7 @@
         <div class="module">
             {% if ip_facts.geo.latitude and ip_facts.geo.longitude %}
             <h1>Location</h1>
-            <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ map_region }}"></div>
+            <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ ip_facts.map_region }}"></div>
             {% endif %}
         </div>
     </div>
