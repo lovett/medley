@@ -1,12 +1,11 @@
 import cherrypy
-import apps.archive.models
-import tools
 import pytz
 from collections import OrderedDict
-import util.net
 
 class Controller:
     """A collection of bookmarked URLs"""
+
+    url = "/archive"
 
     name = "Archive"
 
@@ -14,19 +13,15 @@ class Controller:
 
     user_facing = True
 
-    dbconn = None
-
-    @cherrypy.tools.template(template="archive.html")
     @cherrypy.tools.negotiable()
     def GET(self, date=None, q=None, action=None, bookmark_id=None):
         entries = OrderedDict()
         timezone = pytz.timezone(cherrypy.config.get("timezone"))
-        archive = apps.archive.models.Archive()
 
         if not q:
-            records = archive.recent(limit=50)
+            records = cherrypy.engine.publish("archive:recent", limit=50).pop()
         else:
-            records = archive.search(q)
+            records = cherrypy.engine.publish("archive:search", q).pop()
 
         for record in records:
             key = record["created"].astimezone(timezone)
@@ -38,39 +33,58 @@ class Controller:
             entries[key].append(record)
 
         return {
-            "app_name": self.name,
-            "entries": entries,
-            "q": q
+            "html": ("archive.html", {
+                "app_name": self.name,
+                "entries": entries,
+                "q": q
+            })
         }
 
     def POST(self, url, title=None, tags=None, comments=None):
-        archive = apps.archive.models.Archive()
         record = archive.find(url=url)
 
         if record:
             page = None
         else:
-            page = archive.fetch(url)
+            page = cherrypy.engine.publish(
+                "urlfetch:get",
+                url
+            )
 
         if page and not title:
-            title = util.net.getHtmlTitle(page)
-            title = archive.reduceHtmlTitle(title)
+            title = cherrypy.engine.publish(
+                "markup:html_title",
+                page,
+                with_reduce=true
+            ).pop()
 
-        url_id = archive.add(url, title, comments, tags)
+        url_id = cherrypy.engine.publish(
+            "archive:add",
+            url,
+            title,
+            comments,
+            tags
+        ).pop()
 
         if page:
-            text = util.net.htmlToText(page)
-            archive.addFullText(url_id, text)
+            text = cherrypy.engine.publish(
+                "markup:html_to_text", page
+            ).pop()
+
+            cherrypy.engine.publish(
+                "add_fulltext",
+                url_id,
+                text
+            )
 
         cherrypy.response.status = 204
 
-
-
     def DELETE(self, uid):
-        archive = apps.archive.models.Archive()
-        record_count = archive.count(uid=uid)
+        deletion_count = cherrypy.engine.publish(
+            "archive:remove", uid
+        ).pop()
 
-        if record_count != 1:
+        if deletion_count != 1:
             raise cherrypy.HTTPError(404, "Invalid id")
 
-        removals = archive.remove(uid=uid)
+        cherrypy.response.status = 204

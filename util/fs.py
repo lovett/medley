@@ -4,7 +4,6 @@ import time
 import re
 import fnmatch
 import os.path
-import util.net
 import util.parse
 import util.decorator
 import hashlib

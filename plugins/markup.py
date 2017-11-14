@@ -1,4 +1,5 @@
 import cherrypy
+from html.parser import HTMLParser
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
 
@@ -7,6 +8,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self):
         self.bus.subscribe("markup:reduce_title", self.reduceTitle)
+        self.bus.subscribe("markup:html_title", self.getTitle)
+        self.bus.subscribe("markup:html_to_text", self.htmlToText)
 
     def stop(self):
         pass
@@ -26,3 +29,56 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return title
         else:
             return self.reduceTitle(reduced_title)
+
+    def getTitle(self, html, with_reduce=True):
+        """Extract the contents of the title tag from an HTML string"""
+        parser = HtmlTitleParser()
+        title = parser.parse(html)
+        if with_reduce:
+            title = self.reduceTitle(title)
+        return title
+
+    def htmlToText(self, html):
+        """Reduce an HTML document to the text nodes of the body tag"""
+        parser = HtmlTextParser()
+        return parser.parse(html)
+
+
+
+class HtmlTitleParser(HTMLParser):
+    in_title_tag = False
+    result = None
+
+    def parse(self, markup):
+        self.feed(markup)
+        return self.result
+
+    def handle_starttag(self, tag, attrs):
+        if not self.result and tag == "title":
+            self.in_title_tag = True
+
+    def handle_endtag(self, tag):
+        if not self.result and tag == "title":
+            self.in_title_tag = False
+
+    def handle_data(self, data):
+        if not self.result and self.in_title_tag:
+            self.result = data.strip()
+
+
+class HtmlTextParser(HTMLParser):
+    tag = None
+    result = []
+    blacklist = ["script", "style"]
+
+    def parse(self, markup):
+        self.result = []
+        self.feed(markup)
+        return " ".join(self.result)
+
+    def handle_starttag(self, tag, attrs):
+        self.tag = tag
+
+    def handle_data(self, data):
+        if self.tag not in self.blacklist:
+            self.result.append(data.strip())
