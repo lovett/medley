@@ -1,5 +1,6 @@
 import cherrypy
 import pytz
+from urllib.parse import urlparse
 from collections import OrderedDict
 
 class Controller:
@@ -41,41 +42,18 @@ class Controller:
         }
 
     def POST(self, url, title=None, tags=None, comments=None):
-        record = archive.find(url=url)
+        parsed_url = urlparse(url.lower())
 
-        if record:
-            page = None
-        else:
-            page = cherrypy.engine.publish(
-                "urlfetch:get",
-                url
-            )
+        if not parsed_url.netloc:
+            raise cherrypy.HTTPErorr(400, "Invalid URL")
 
-        if page and not title:
-            title = cherrypy.engine.publish(
-                "markup:html_title",
-                page,
-                with_reduce=true
-            ).pop()
-
-        url_id = cherrypy.engine.publish(
+        cherrypy.engine.publish(
             "archive:add",
-            url,
+            parsed_url,
             title,
             comments,
             tags
-        ).pop()
-
-        if page:
-            text = cherrypy.engine.publish(
-                "markup:html_to_text", page
-            ).pop()
-
-            cherrypy.engine.publish(
-                "add_fulltext",
-                url_id,
-                text
-            )
+        )
 
         cherrypy.response.status = 204
 
