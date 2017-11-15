@@ -1,4 +1,5 @@
 import cherrypy
+from urllib.parse import urlparse
 from . import mixins
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -46,35 +47,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if uid:
             sql += " AND u.rowid=?"
-            placeholders = (uid, )
+            params = (uid, )
 
         if url:
             sql += " AND u.url=?"
-            placeholders = (url.lower(),)
+            params = (url.lower(),)
 
         return self._selectOne(sql, params)
 
-    def add(self, url, title, comments=None, tags=None):
-        parsed_url = urlparse(url)
+    def add(self, parsed_url, title=None, comments=None, tags=None):
+        self._multi((
+            ("INSERT OR IGNORE INTO urls (url, domain) VALUES (?, ?)", (parsed_url.geturl(), parsed_url.netloc)),
+            ("UPDATE meta SET title=?, comments=?, tags=? WHERE url_id=(SELECT rowid FROM urls WHERE url=?)", (title, comments, tags, parsed_url.geturl())),
+            ("INSERT INTO meta (url_id, title, comments, tags) SELECT last_insert_rowid(), ?, ?, ? WHERE (SELECT Changes() = 0)", (title, comments, tags)),
+        ))
 
-        url_id = self._insert(
-            "INSERT OR REPLACE INTO urls (url, domain) VALUES (?, ?)",
-            (url, parsed_url.netloc)
-        )
-
-        self._insert(
-            """INSERT OR REPLACE INTO meta (url_id, title, comments, tags)
-            VALUES (?, ?, ?, ?)""",
-            (url_id, title, comments, tags)
-        )
-        return url_id
+        return True
 
     def addFullText(self, url_id, fulltext):
-        rowid = self._insert(
+        return self._insert(
             "UPDATE meta SET fulltext=? WHERE url_id=?",
-            (fulltext, url_id)
+            [(fulltext, url_id)]
         )
-        return rowid
 
     def remove(self, uid):
         rowcount = self._delete("DELETE FROM urls WHERE rowid=?", (int(uid),))
