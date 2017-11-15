@@ -33,6 +33,14 @@ class Sqlite:
         con.commit()
         con.close()
 
+
+    def _multi(self, queries):
+        con = self._open()
+        with con:
+            for query, params in queries:
+                con.execute(query, params)
+            con.commit()
+
     def _insert(self, query, values):
         con = self._open()
         with con:
@@ -40,7 +48,9 @@ class Sqlite:
             cur = con.cursor()
             rowid = cur.lastrowid
         con.close()
-        return rowid
+
+        # cannot return lastrowid because it is not populated during executemany
+        return True
 
     def _delete(self, query, values):
         con = self._open()
@@ -59,6 +69,7 @@ class Sqlite:
 
     def _selectOne(self, query, values=()):
         result = self._select(query, values)
+
         try:
             return result.pop()
         except IndexError:
