@@ -17,7 +17,6 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, date=None, q=None, action=None, bookmark_id=None):
         entries = OrderedDict()
-        timezone = pytz.timezone(cherrypy.config.get("timezone"))
 
         if not q:
             records = cherrypy.engine.publish("archive:recent", limit=50).pop()
@@ -25,8 +24,7 @@ class Controller:
             records = cherrypy.engine.publish("archive:search", q).pop()
 
         for record in records:
-            key = record["created"].astimezone(timezone)
-            key = key.strftime("%Y-%m-%d")
+            key = record["created"].strftime("%Y-%m-%d")
 
             if not key in entries:
                 entries[key] = []
@@ -45,7 +43,7 @@ class Controller:
         parsed_url = urlparse(url.lower())
 
         if not parsed_url.netloc:
-            raise cherrypy.HTTPErorr(400, "Invalid URL")
+            raise cherrypy.HTTPError(400, "Invalid URL")
 
         cherrypy.engine.publish(
             "archive:add",
