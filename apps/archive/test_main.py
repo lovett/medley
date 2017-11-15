@@ -1,18 +1,13 @@
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
 import cherrypy
-import responses
+import unittest
 import apps.archive.main
-import apps.archive.models
 import mock
-import time
-import tempfile
-import shutil
-import util.sqlite_converters
+from util.sqlite_converters import *
 
-class TestArchive(cptestcase.BaseCherryPyTestCase):
-
-    temp_dir = None
+class TestArchive(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @classmethod
     def setUpClass(cls):
@@ -24,113 +19,96 @@ class TestArchive(cptestcase.BaseCherryPyTestCase):
         helpers.stop_server()
 
     def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="archive-test")
-        cherrypy.config["database_dir"] = self.temp_dir
+        self.controller = apps.archive.main.Controller()
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET", "POST", "DELETE"))
 
-    @mock.patch("apps.archive.models.Archive.search")
-    @mock.patch("apps.archive.models.Archive.recent")
-    def test_noRecentBookmarks(self, recentMock, searchMock):
+    def extract_template_vars(self, mock):
+        return mock.call_args[0][0]["html"][1]
+
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_recent(self, publishMock, renderMock):
         """If the database is empty, a no-records message is returned"""
-        recentMock.return_value = []
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(recentMock.called)
-        self.assertTrue("Nothing found" in response.body)
-        self.assertFalse(searchMock.called)
 
-    @mock.patch("apps.archive.models.Archive.search")
-    @mock.patch("apps.archive.models.Archive.recent")
-    def test_recentBookmarks(self, recentMock, searchMock):
-        """Recently bookmarked URLs are grouped by date"""
-        template = {
-            "url": "http://example.com",
-            "domain": "example.com"
-        }
+        def side_effect(*args, **kwargs):
+            if (args[0] == "archive:recent"):
+                return [[]]
 
-        # Four bookmarks created on three days, to demonstrate grouping
-        recentMock.return_value = [
-            dict({"created": util.sqlite_converters.convert_date(b"2015-01-03 01:00:00")}, **template),
-            dict({"created": util.sqlite_converters.convert_date(b"2015-01-03 01:01:00")}, **template),
-            dict({"created": util.sqlite_converters.convert_date(b"2015-01-02 01:00:00")}, **template),
-            dict({"created": util.sqlite_converters.convert_date(b"2015-01-01 01:00:00")}, **template),
-        ]
-
+        publishMock.side_effect = side_effect
 
         response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(recentMock.called)
-        self.assertTrue("Jan 02, 2015</h1>" in response.body)
-        self.assertTrue("Jan 01, 2015</h1>" in response.body)
-        self.assertTrue("Dec 31, 2014</h1>" in response.body)
-        self.assertFalse(searchMock.called)
 
-    @mock.patch("apps.archive.models.Archive.search")
-    @mock.patch("apps.archive.models.Archive.recent")
-    def test_searchBookmarks(self, recentMock, searchMock):
-        """Searching for bookmarks bypasses recent bookmarks"""
-        searchMock.return_value = []
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["entries"]), 0)
+        self.assertIsNone(template_vars["q"])
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_search(self, publishMock, renderMock):
+        """Search results are grouped by date"""
+
+        def side_effect(*args, **kwargs):
+            date_format = "%Y-%m-%d %H:%M:%S"
+
+            if (args[0] == "archive:search"):
+                return [[
+                    {"created": datetime.datetime.strptime("1999-01-02 11:12:13", date_format)},
+                    {"created": datetime.datetime.strptime("1999-01-02 12:13:14", date_format)},
+                    {"created": datetime.datetime.strptime("1999-01-03 11:12:13", date_format)},
+                ]]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/", q="test")
-        self.assertEqual(response.code, 200)
-        self.assertFalse(recentMock.called)
-        self.assertTrue(searchMock.called)
 
-    @mock.patch("apps.archive.models.Archive.reduceHtmlTitle")
-    @mock.patch("util.net.getHtmlTitle")
-    @mock.patch("apps.archive.models.Archive.addFullText")
-    @mock.patch("apps.archive.models.Archive.add")
-    @mock.patch("apps.archive.models.Archive.fetch")
-    @mock.patch("apps.archive.models.Archive.find")
-    def test_addBookmarkSuccess(self, findMock, fetchMock, addMock, addFullTextMock, getHtmlTitleMock, reduceHtmlTitleMock):
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["entries"]), 2)
+
+    def test_addSuccess(self):
         """A bookmark can be added to the database"""
-        findMock.return_value = None
-        fetchMock.return_value = "<html>test</html>"
-        addMock.return_value = 1
-        addFullTextMock.return_value = True
-        getHtmlTitleMock.return_value = "test"
-        reduceHtmlTitleMock.return_value = "test"
 
         response = self.request("/", url="http://example.com", method="POST")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(addMock.called)
-        self.assertTrue(findMock.called)
-        self.assertTrue(getHtmlTitleMock.called)
-        self.assertTrue(reduceHtmlTitleMock.called)
-
-    @mock.patch("apps.archive.models.Archive.addFullText")
-    @mock.patch("apps.archive.models.Archive.add")
-    @mock.patch("apps.archive.models.Archive.fetch")
-    @mock.patch("apps.archive.models.Archive.find")
-    def test_updateBookmarkSuccess(self, findMock, fetchMock, addMock, addFullTextMock):
-        """A previously added bookmark can be updated"""
-        findMock.return_value = True
-        addMock.return_value = 1
-        addFullTextMock.return_value = True
-
-        response = self.request("/", title="new title", url="http://example.com", method="POST")
 
         self.assertEqual(response.code, 204)
-        self.assertFalse(fetchMock.called)
-        self.assertTrue(addMock.called)
-        self.assertTrue(findMock.called)
 
+    def test_addFail(self):
+        """Bookmark URLs must be well-formed"""
 
+        response = self.request("/", url="not-a-url", method="POST")
 
-    @mock.patch("apps.archive.models.Archive.remove")
-    def test_deleteRequiresId(self, removeMock):
-        """Deletion is refused if the bookmark id is not found"""
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_deleteFail(self, publishMock):
+        """Deletion 404s if the bookmark id is not found"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "archive:remove"):
+                return [0]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/", uid=123456789, method="DELETE")
         self.assertEqual(response.code, 404)
-        self.assertFalse(removeMock.called)
 
-    def test_deleteBookmark(self):
-        """An existing bookmark can be deleted"""
-        archive = apps.archive.models.Archive()
-        url_id = archive.add("http://example.com", "Test")
-        response = self.request("/", uid=url_id, method="DELETE")
-        self.assertEqual(response.code, 200)
+    @mock.patch("cherrypy.engine.publish")
+    def test_deleteSuccess(self, publishMock):
+        """Successful deletion sends no response"""
+
+        def side_effect(*args, **kwargs):
+            if (args[0] == "archive:remove"):
+                return [1]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", uid=123, method="DELETE")
+        self.assertEqual(response.code, 204)
 
 if __name__ == "__main__":
     unittest.main()
