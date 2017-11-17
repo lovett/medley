@@ -1,5 +1,4 @@
 import cherrypy
-import apps.captures.models
 
 class Tool(cherrypy.Tool):
     """Save the headers and body of an incoming request for later review"""
@@ -8,7 +7,6 @@ class Tool(cherrypy.Tool):
         cherrypy.Tool.__init__(self, 'on_end_request',
                                self._capture)
     def _capture(self):
-        manager = apps.captures.models.CaptureManager()
-        manager.add(cherrypy.request, cherrypy.response)
+        cherrypy.engine.publish("capture:add", cherrypy.response)
 
 cherrypy.tools.capture = Tool()

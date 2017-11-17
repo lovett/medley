@@ -122,6 +122,7 @@ def main():
     plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.asterisk.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
+    plugins.capture.Plugin(cherrypy.engine).subscribe()
     plugins.cdr.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.geography.Plugin(cherrypy.engine).subscribe()
