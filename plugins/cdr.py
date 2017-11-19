@@ -56,7 +56,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         SELECT calldate as "date [naive_date]", end as "end_date [naive_date]",
         CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
         duration as "duration [duration]", clid as "clid [clid]",
-        dstchannel as "abbreviated_dstchannel [channel]", src, dst
+        src, dst
         FROM cdr
         WHERE 1=1 $srcFilter $dstFilter
         ORDER BY calldate DESC

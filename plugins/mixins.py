@@ -16,7 +16,7 @@ class Sqlite:
         sqlite3.register_converter("naive_date", util.sqlite_converters.convert_naive_date)
         sqlite3.register_converter("duration", util.sqlite_converters.convert_duration)
         sqlite3.register_converter("clid", util.sqlite_converters.convert_callerid)
-        sqlite3.register_converter("channel", util.sqlite_converters.convert_channel)
+        #sqlite3.register_converter("channel", util.sqlite_converters.convert_channel)
 
         print("registered converters")
 
