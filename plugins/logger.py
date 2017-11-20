@@ -1,5 +1,4 @@
 import sqlite3
-import util.sqlite_converters
 import cherrypy
 import os
 from cherrypy.process import plugins
@@ -8,10 +7,6 @@ class Plugin(plugins.SimplePlugin):
 
     def __init__(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
-        sqlite3.register_converter(
-            "created",
-            util.sqlite_converters.convert_date
-        )
 
     def start(self):
         with self.connect() as con:

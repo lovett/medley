@@ -10,8 +10,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("cache.sqlite")
 
-        self._registerConverters()
-
         self._create("""CREATE TABLE IF NOT EXISTS cache (
             key UNIQUE NOT NULL,
             value, expires,

@@ -1,7 +1,6 @@
 import os.path
 import sqlite3
 import cherrypy
-import util.sqlite_converters
 
 class Registry:
 

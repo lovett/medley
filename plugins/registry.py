@@ -8,8 +8,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("registry.sqlite")
 
-        self._registerConverters()
-
         self._create("""CREATE TABLE IF NOT EXISTS registry (
             key VARCHAR(255) NOT NULL,
             value VARCHAR(255),

@@ -10,8 +10,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("asterisk_cdr.sqlite")
 
-        self._registerConverters()
-
     def start(self):
         self.bus.subscribe("cdr:call_count", self.callCount)
         self.bus.subscribe("cdr:call_log", self.callLog)
