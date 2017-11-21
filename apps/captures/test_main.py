@@ -1,15 +1,15 @@
-import cherrypy
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
-import unittest
-import responses
 import apps.captures.main
-import apps.captures.models
+import cherrypy
+import datetime
 import mock
-import tempfile
-import shutil
+import unittest
 
-class TestTopics(cptestcase.BaseCherryPyTestCase):
+class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+    """Unit tests for the captures app controller"""
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.captures.main.Controller)
@@ -18,39 +18,47 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="archive-test")
-        cherrypy.config["database_dir"] = self.temp_dir
+    def extract_template_vars(self, mock):
+        return mock.call_args[0][0]["html"][1]
+
+    def test_allow(self):
+        """The app supports GET requests only"""
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("GET",))
 
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_recent(self, publishMock, renderMock):
+        """The default view is a list of recent captures"""
+        def side_effect(*args, **kwargs):
+            if args[0] == "capture:recent":
+                return [[{}, {}, {}]]
 
-    def test_returnsHtml(self):
-        """It returns HTML"""
+        publishMock.side_effect = side_effect
+
         response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
 
-    @mock.patch("apps.captures.models.CaptureManager.recent")
-    @mock.patch("apps.captures.models.CaptureManager.search")
-    def test_performsSearch(self, searchMock, recentMock):
-        """Recent captures are returned by default"""
-        searchMock.return_value = []
-        recentMock.return_value = []
-        response = self.request("/")
-        self.assertTrue(recentMock.called)
-        self.assertFalse(searchMock.called)
+        template_vars = self.extract_template_vars(renderMock)
 
-    @mock.patch("apps.captures.models.CaptureManager.recent")
-    @mock.patch("apps.captures.models.CaptureManager.search")
-    def test_performsSearch(self, searchMock, recentMock):
-        """Recent captures are returned by default"""
-        searchMock.return_value = []
-        recentMock.return_value = []
+        self.assertEqual(len(template_vars["captures"]), 3)
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_recent(self, publishMock, renderMock):
+        """Captures can be searched by URI"""
+        def side_effect(*args, **kwargs):
+            if args[0] == "capture:search":
+                return [[{}]]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/", q="test")
-        self.assertFalse(recentMock.called)
-        self.assertTrue(searchMock.called)
+
+        template_vars = self.extract_template_vars(renderMock)
+
+        self.assertEqual(len(template_vars["captures"]), 1)
+
 
 
 if __name__ == "__main__":
