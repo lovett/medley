@@ -1,6 +1,5 @@
 import cherrypy
 import re
-import util.html
 
 class Controller:
     """Display a form for bookmarking a URL"""
@@ -19,15 +18,15 @@ class Controller:
         bookmark = None
 
         if title:
-            title = util.html.parse_text(title)
+            title = cherrypy.engine.publish("markup:plaintext", title).pop()
             answer = cherrypy.engine.publish("markup:reduce_title", title)
             title = answer.pop() if answer else title
 
         if tags:
-            tags = util.html.parse_text(tags)
+            tags = cherrypy.engine.publish("markup:plaintext", tags).pop()
 
         if comments:
-            comments = util.html.parse_text(comments)
+            comments = cherrypy.engine.publish("markup:plaintext", comments).pop()
             comments = re.sub("\s+", " ", comments).strip()
             comments = re.sub(",(\w)", ", \\1", comments)
 

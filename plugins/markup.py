@@ -1,5 +1,6 @@
 import cherrypy
 from html.parser import HTMLParser
+from html.entities import name2codepoint
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
 
@@ -9,7 +10,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self):
         self.bus.subscribe("markup:reduce_title", self.reduceTitle)
         self.bus.subscribe("markup:html_title", self.getTitle)
-        self.bus.subscribe("markup:html_to_text", self.htmlToText)
+        self.bus.subscribe("markup:plaintext", self.plainText)
 
     def stop(self):
         pass
@@ -43,6 +44,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         parser = HtmlTextParser()
         return parser.parse(html)
 
+    def plainText(self, text):
+        """Remove markup and entities from a string"""
+        parser = TextParser()
+        parser.feed(text)
+        parser.close()
+        return parser.result
 
 
 class HtmlTitleParser(HTMLParser):
@@ -82,3 +89,22 @@ class HtmlTextParser(HTMLParser):
     def handle_data(self, data):
         if self.tag not in self.blacklist:
             self.result.append(data.strip())
+
+class TextParser(HTMLParser):
+    result = ""
+
+    def capture(self, s):
+        self.result += s
+
+    def handle_data(self, s):
+        self.capture(s)
+
+    def handle_entityref(self, name):
+        self.capture(chr(name2codepoint[name]))
+
+    def handle_charref(self, name):
+        if name.startswith('x'):
+            c = chr(int(name[1:], 16))
+        else:
+            c = chr(int(name))
+        self.capture(c)
