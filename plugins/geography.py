@@ -8,6 +8,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self):
         self.bus.subscribe("geography:unabbreviate_state", self.unabbreviateUsState)
         self.bus.subscribe("geography:state_by_area_code", self.stateByAreaCode)
+        self.bus.subscribe("geography:country_by_abbreviation", self.countryByAbbreviation)
 
     def stop(self):
         pass
@@ -91,3 +92,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
         except:
             return (None, None)
+
+    def countryByAbbreviation(self, abbreviation):
+        key = "country_code:alpha2:{}".format(abbreviation)
+        return cherrypy.engine.publish("registry:first_value", key).pop()

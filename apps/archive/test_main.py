@@ -5,7 +5,6 @@ import cherrypy
 import unittest
 import apps.archive.main
 import mock
-from util.sqlite_converters import *
 
 class TestArchive(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
@@ -67,6 +66,7 @@ class TestArchive(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         response = self.request("/", q="test")
 
         template_vars = self.extract_template_vars(renderMock)
+
 
         self.assertEqual(len(template_vars["entries"]), 2)
 

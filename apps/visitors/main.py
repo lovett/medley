@@ -1,15 +1,13 @@
 import re
 import cherrypy
-import requests
-import util.ip
-import urllib.parse
-import apps.registry.models
+import util.fs
 import apps.logindex.models
-import pytz
 from datetime import datetime, timedelta
 
 class Controller:
     """Search website access logs"""
+
+    url = "/visitors"
 
     name = "Visitors"
 
@@ -17,15 +15,19 @@ class Controller:
 
     user_facing = True
 
-    @cherrypy.tools.template(template="visitors.html")
     @cherrypy.tools.negotiable()
     def GET(self, q=None):
-        registry = apps.registry.models.Registry()
-        roots = registry.search(key="logindex:root")
-        if not roots:
-            raise cherrypy.HTTPError(500, "No log roots found in registry")
+        log_root = cherrypy.engine.publish("registry:first_value", "logindex:root").pop()
 
-        site_domains = [row.value for row in registry.search(key="logindex:site_domains")]
+        if not log_root:
+            raise cherrypy.HTTPError(500, "No log root found in registry")
+
+        site_domains = cherrypy.engine.publish(
+            "registry:search",
+            "logindex:site_domains",
+            as_value_list=True
+        ).pop()
+
         results = None
         active_query = None
 
@@ -37,7 +39,7 @@ class Controller:
             "date":  []
         }
 
-        saved_queries = registry.search(key="visitors*")
+        saved_queries = cherrypy.engine.publish("registry:search", "visitors*").pop()
 
         if q:
             for query in saved_queries:
@@ -75,22 +77,25 @@ class Controller:
 
 
         if len(filters["ip"]) > 0:
-            logman = apps.logindex.models.LogManager(roots[0]["value"])
+            logman = apps.logindex.models.LogManager(log_root)
             offsets = logman.getLogOffsets("ip", filters["ip"])
             filters["date"] = offsets.keys()
             active_date = datetime.now().strftime("date %Y-%m-%d")
             del filters["ip"]
 
-        results, duration = util.fs.appengine_log_grep(roots[0]["value"], filters, offsets, 100)
+        results, duration = util.fs.appengine_log_grep(log_root, filters, offsets, 100)
 
         for index, result in enumerate(results.matches):
-            result["ip_facts"] = util.ip.facts(result["ip"])
+            result["ip_facts"] = cherrypy.engine.publish("ip:facts", result["ip"]).pop()
+
             if result.get("country"):
                 result["ip_facts"]["geo"]["country_code"] = result.get("country")
                 result["ip_facts"]["geo"]["region_code"] = result.get("region")
                 result["ip_facts"]["geo"]["city"] = result.get("city")
-                registry_key = "country_code:alpha2:{}".format(result["country"])
-                result["ip_facts"]["geo"]["country_name"] = registry.first(registry_key, limit=1)
+                result["ip_facts"]["geo"]["country_name"] = cherrypy.engine.publish(
+                    "geography:country_by_abbreviation",
+                    result["country"]
+                ).pop()
 
 
             if "," in result.get("latlong", ""):
@@ -104,14 +109,16 @@ class Controller:
                 result["delta"] = None
 
         return {
-            "q": q,
-            "active_query": active_query,
-            "active_date": active_date,
-            "results": results.matches,
-            "total_matches": results.count,
-            "result_limit": results.limit,
-            "duration": duration,
-            "site_domains": site_domains,
-            "saved_queries": saved_queries,
-            "app_name": self.name
+            "html": ("visitors.html", {
+                "q": q,
+                "active_query": active_query,
+                "active_date": active_date,
+                "results": results.matches,
+                "total_matches": results.count,
+                "result_limit": results.limit,
+                "duration": duration,
+                "site_domains": site_domains,
+                "saved_queries": saved_queries,
+                "app_name": self.name
+            })
         }
