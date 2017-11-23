@@ -1,18 +1,14 @@
-import cherrypy
+from testing import assertions
 from testing import cptestcase
 from testing import helpers
-import pytest
-import unittest
-import responses
 import apps.logindex.models
 import apps.logindex.main
+import cherrypy
 import mock
-import util.cache
-import tempfile
-import shutil
-import syslog
+import unittest
 
-class TestTopics(cptestcase.BaseCherryPyTestCase):
+class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.logindex.main.Controller)
@@ -21,79 +17,55 @@ class TestTopics(cptestcase.BaseCherryPyTestCase):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def setUp(self):
-        self.temp_dir = tempfile.mkdtemp(prefix="logindex-test")
-        cherrypy.config["database_dir"] = self.temp_dir
+    def test_allow(self):
+        response = self.request("/", method="HEAD")
+        self.assertAllowedMethods(response, ("POST",))
 
-    def tearDown(self):
-        shutil.rmtree(self.temp_dir)
-
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_rejectsInvalidDate(self, logIndexMock, syslogMock):
-        """Start and end times must be provided in a recognized format"""
-        response = self.request("/", method="POST", start="123")
+    def test_invalidStart(self):
+        response = self.request(
+            "/",
+            method="POST",
+            start="invalid"
+        )
         self.assertEqual(response.code, 400)
-        response = self.request("/", method="POST", start="2015-01-01", end="123")
+
+    def test_invalidEnd(self):
+        response = self.request(
+            "/",
+            method="POST",
+            start="2000-01-01.log",
+            end="1999-12-31.log"
+        )
         self.assertEqual(response.code, 400)
-        self.assertFalse(logIndexMock.called)
-        self.assertFalse(syslogMock.called)
 
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_acceptsValidDate(self, logIndexMock, syslogMock):
-        """Start and end times must be provided in a recognized format"""
-        response = self.request("/", method="POST", start="2015-01-01.log")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(logIndexMock.called)
-        self.assertTrue(syslogMock.called)
+    @mock.patch("cherrypy.engine.publish")
+    def test_noRoot(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:first_value" and args[1] == "logindex:root":
+                return [None]
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_acceptsValidDate(self, logIndexMock, syslogMock):
-        """Start and end times must be provided in a recognized format"""
-        response = self.request("/", method="POST", start="2015-01-01", end="2015-01-02")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(logIndexMock.called)
-        self.assertTrue(syslogMock.called)
+        publishMock.side_effect = side_effect
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_rejectsInvalidRange(self, logIndexMock, syslogMock):
-        """Start and end times must be provided in a recognized format"""
-        response = self.request("/", method="POST", start="2015-01-01", end="2014-01-02")
-        self.assertEqual(response.code, 400)
-        self.assertFalse(logIndexMock.called)
+        response = self.request("/", method="POST", start="2000-01-01.log")
+        self.assertEqual(response.code, 500)
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
     @mock.patch("apps.logindex.models.LogManager.index")
-    def test_acceptsValidRange(self, logIndexMock, syslogMock):
-        """Start and end times must be provided in a recognized format"""
-        response = self.request("/", method="POST", start="2015-01-01", end="2015-02-02")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(logIndexMock.called)
+    @mock.patch("cherrypy.engine.publish")
+    def test_validStart(self, publishMock, logIndexMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "registry:first_value" and args[1] == "logindex:root":
+                return ["/tmp"]
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_requiresField(self, logIndexMock, syslogMock):
-        """The field to index by is required"""
-        response = self.request("/", method="POST", start="2015-01-01", by="")
-        self.assertEqual(response.code, 400)
-        self.assertFalse(logIndexMock.called)
+        publishMock.side_effect = side_effect
 
-    @pytest.mark.skip(reason="pending refactor")
-    @mock.patch("syslog.syslog")
-    @mock.patch("apps.logindex.models.LogManager.index")
-    def test_indexArguments(self, logIndexMock, syslogMock):
-        """The field to index by and the match value to filter against are passed to LogManager"""
-        response = self.request("/", method="POST", start="2015-01-01", by="test", match="test2")
-        self.assertEqual(response.code, 204)
-        self.assertTrue(logIndexMock.called_with("2015-01-01", "test", "test2"))
+        response = self.request(
+            "/",
+            method="POST",
+            start="2017-01-01.log",
+            end="2017-01-03.log"
+        )
+        self.assertTrue(logIndexMock.called_thrice)
+
 
 if __name__ == "__main__":
     unittest.main()
