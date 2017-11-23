@@ -1,5 +1,4 @@
 import sys
-import syslog
 import time
 import datetime
 import os.path
@@ -18,8 +17,6 @@ class Controller:
     exposed = True
 
     user_facing = False
-
-    syslog_ident = "medley:logindex"
 
     def parseLogDate(self, s):
         s = s.replace(".log", "")
@@ -49,18 +46,10 @@ class Controller:
         if not by:
             raise cherrypy.HTTPError(400, "Field name to index by not specified")
 
-        syslog.openlog(self.syslog_ident)
-
         index_date = start_date
         while index_date <= end_date:
             line_count = logman.index(index_date, by, match)
 
-            syslog.syslog(
-                "Indexed {} lines from {} by {}".format(
-                line_count, index_date.strftime("%Y-%m-%d"), by)
-            )
-
             index_date += one_day
 
-        syslog.closelog()
         cherrypy.response.status = 204
