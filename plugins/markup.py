@@ -44,13 +44,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         parser = HtmlTextParser()
         return parser.parse(html)
 
-    def plainText(self, text):
+    def plainText(self, html):
         """Remove markup and entities from a string"""
         parser = TextParser()
-        parser.feed(text)
-        parser.close()
-        return parser.result
-
+        return parser.parse(html)
 
 class HtmlTitleParser(HTMLParser):
     in_title_tag = False
@@ -91,10 +88,14 @@ class HtmlTextParser(HTMLParser):
             self.result.append(data.strip())
 
 class TextParser(HTMLParser):
-    result = ""
+
+    def parse(self, text):
+        self.result = []
+        self.feed(text)
+        return " ".join(self.result)
 
     def capture(self, s):
-        self.result += s
+        self.result.append(s.strip())
 
     def handle_data(self, s):
         self.capture(s)

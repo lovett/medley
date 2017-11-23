@@ -49,30 +49,40 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
             response = self.request("/", title=sample[0])
             self.assertTrue(sample[1] in response.body)
 
-    def test_populatesTags(self):
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_populatesTags(self, publishMock, renderMock):
         """The tags field is prepopulated if provided via querystring"""
 
-        samples = (
-            ("<b>tag1</b>, tag2", "tag1, tag2")
-        )
+        def side_effect(*args, **kwargs):
+            if args[0].startswith("markup:"):
+                return ["abc123"]
 
-        for sample in samples:
-            response = self.request("/", tags=sample[0])
-            self.assertTrue(sample[1] in response.body)
+        publishMock.side_effect = side_effect
 
-    def test_populatesComments(self):
-        """The comments field is prepopulated if provided via querystring"""
+        response = self.request("/", tags="hello")
+        template_vars = renderMock.call_args[0][0]["html"][1]
 
-        samples = (
-            ("<b>comment</b>", "comment."),
-            ("Sentence 1. Sentence 2.", "Sentence 1. Sentence 2"),
-            ("Word 1            word 2", "Word 1 word 2"),
-            ("trailing whitespace        ", "trailing whitespace.")
-        )
+        self.assertEqual(template_vars["tags"], "abc123")
 
-        for sample in samples:
-            response = self.request("/", comments=sample[0])
-            self.assertTrue(sample[1] in response.body)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_populatesComments(self, publishMock, renderMock):
+        """The comments field is prepopulated if provided via querystring
+
+        A period is also added to make the populated value a sentence.
+        """
+        def side_effect(*args, **kwargs):
+            if args[0].startswith("markup:"):
+                return ["abc456"]
+
+        publishMock.side_effect = side_effect
+
+        response = self.request("/", comments="hello")
+        template_vars = renderMock.call_args[0][0]["html"][1]
+
+        self.assertEqual(template_vars["comments"], "abc456.")
+
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
@@ -80,7 +90,9 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         """An existing bookmark is fetched by url, overwriting querystring values"""
 
         def side_effect(*args, **kwargs):
-            if (args[0] == "archive:find"):
+            if args[0].startswith("markup:"):
+                return [args[1]]
+            if args[0] == "archive:find":
                 return [{
                     "title": "existing title",
                     "tags": None,
@@ -89,7 +101,7 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
         publishMock.side_effect = side_effect
 
-        self.request("/", url="http://example.com", title="my title")
+        response = self.request("/", url="http://example.com", title="my title")
 
         template_vars = renderMock.call_args[0][0]["html"][1]
 

@@ -19,8 +19,7 @@ class Controller:
 
         if title:
             title = cherrypy.engine.publish("markup:plaintext", title).pop()
-            answer = cherrypy.engine.publish("markup:reduce_title", title)
-            title = answer.pop() if answer else title
+            title = cherrypy.engine.publish("markup:reduce_title", title).pop()
 
         if tags:
             tags = cherrypy.engine.publish("markup:plaintext", tags).pop()
