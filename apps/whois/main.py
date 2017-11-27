@@ -24,29 +24,26 @@ class Controller:
                 })
             }
 
-        try:
-            address_unquoted = urllib.parse.unquote_plus(address).lower()
-        except:
-            address_unquoted = None
+        address_unquoted = urllib.parse.unquote_plus(address).lower()
 
         # The address could be an IP or a hostname
         try:
             address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
             ip = str(ipaddress.ip_address(address_clean))
         except ValueError:
+            ip = None
+
+
+        if not ip:
             address_parsed = urllib.parse.urlparse(address_unquoted)
-            if "hostname" in address_parsed:
-                address_clean = address_parsed.hostname
-            elif "path" in address_parsed:
-                address_clean = address_parsed.path
+            address_clean = address_parsed.hostname or address_parsed.path
 
-            if not address_clean:
-                raise ValueError
-
-            result = socket.gethostbyname_ex(address_clean)
-            ip = result[2][0]
-        except:
-            raise cherrypy.HTTPRedirect(self.url)
+        if address_clean and not ip:
+            try:
+                result = socket.gethostbyname_ex(address_clean)
+                ip = result[2][0]
+            except:
+                raise cherrypy.HTTPRedirect(self.url)
 
         whois_cache_key = "whois:{}".format(ip)
 
