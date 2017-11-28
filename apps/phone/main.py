@@ -18,7 +18,7 @@ class Controller:
     }
 
     @cherrypy.tools.negotiable()
-    def GET(self, number=None, ):
+    def GET(self, number=None):
         sanitized_number = cherrypy.engine.publish(
             "phone:sanitize",
             number=number
@@ -30,7 +30,11 @@ class Controller:
             return {
                 "html": ("phone.html", {
                     "error": self.messages.get("invalid")
-                })
+                }),
+                "json": {
+                    "error": self.messages.get("invalid")
+                },
+                "text": self.messages.get("invalid")
             }
 
         area_code = sanitized_number[:3]
