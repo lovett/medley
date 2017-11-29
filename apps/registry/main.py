@@ -22,8 +22,6 @@ class Controller:
         elif q:
             entries.extend(cherrypy.engine.publish("registry:search", key=q).pop())
 
-        print([e["value"] for e in entries])
-
         if not view in ["add", "search"]:
             view = "search"
 
