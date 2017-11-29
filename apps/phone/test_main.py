@@ -27,29 +27,19 @@ class TestPhone(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("util.cache.Cache.get")
-    def xtest_withoutNumberAsHtml(self, cacheGetMock):
-        """An HTML request that does not specify a nubmer returns a search form"""
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<form" in response.body)
-        self.assertFalse(cacheGetMock.called)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_noNumber(self, publishMock, renderMock):
+        """An HTML request with no number displays the search form"""
 
-    @mock.patch("util.cache.Cache.get")
-    def xtest_withoutNumberAsJson(self, cacheGetMock):
-        """A json request that does not specify a number returns an error"""
-        response = self.request("/", as_json=True)
-        self.assertEqual(response.code, 400)
-        self.assertIn("message", response.body)
-        self.assertFalse(cacheGetMock.called)
+        def side_effect(*args, **kwargs):
+            if args[0] == "phone:sanitize":
+                return [None]
 
-    @mock.patch("util.cache.Cache.get")
-    def xtest_withoutNumberAsText(self, cacheGetMock):
-        """A text/plain request that does not specify a number returns an error"""
-        response = self.request("/", as_plain=True)
-        self.assertEqual(response.code, 400)
-        self.assertFalse(cacheGetMock.called)
+        publishMock.side_effect = side_effect
+        self.request("/")
+        template_vars = self.extract_template_vars(renderMock)
+        self.assertFalse("error" in template_vars)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
@@ -91,80 +81,53 @@ class TestPhone(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         self.assertTrue(helpers.response_is_text(response))
         self.assertEqual(response.body, apps.phone.main.Controller.messages["invalid"])
 
-    @mock.patch("apps.phone.models.AsteriskCdr.callHistory")
-    @mock.patch("apps.phone.models.AsteriskManager.isBlackListed")
-    @mock.patch("apps.phone.models.AsteriskManager.getCallerId")
-    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
-    @mock.patch("util.phone.sanitize")
-    @mock.patch("util.cache.Cache.get")
-    def xtest_cacheHit(self, cacheGetMock, sanitizeMock, authenticateMock, cidMock, blacklistMock, historyMock):
-        """Cached values from a previous lookup are successfully retrieved"""
-        cacheGetMock.return_value = ({"state_abbreviation": "NY"},)
-        sanitizeMock.return_value = "1234567890"
-        authenticateMock.return_value = True
-        cidMock.return_value = "test"
-        blacklistMock.return_value = False
-        historyMock.return_value = ([], 0)
-        response = self.request("/", number="1234567890")
 
-        self.assertEqual(response.code, 200)
-        self.assertTrue("message" in response.body)
-        self.assertTrue(cacheGetMock.called)
-        self.assertTrue(authenticateMock.called)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_validNumber(self, publishMock, renderMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "cache:get":
+                return [None]
+            if args[0] == "geography:state_by_area_code":
+                return [(None, "XY", None)]
+            if args[0] == "geography:unabbreviate_state":
+                return [(None, "Unabbreviated State")]
+            if args[0] == "phone:sanitize":
+                return ["1234567890"]
+            if args[0] == "asterisk:is_blacklisted":
+                return [False]
+            if args[0] == "asterisk:get_caller_id":
+                return [None]
+            if args[0] == "cdr:call_history":
+                return [[]]
 
-    @mock.patch("util.cache.Cache.set")
-    @mock.patch("util.phone.findAreaCode")
-    @mock.patch("apps.phone.models.AsteriskCdr.callHistory")
-    @mock.patch("apps.phone.models.AsteriskManager.isBlackListed")
-    @mock.patch("apps.phone.models.AsteriskManager.getCallerId")
-    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
-    @mock.patch("util.phone.sanitize")
-    @mock.patch("util.cache.Cache.get")
-    def xtest_cacheMiss(self, cacheGetMock, sanitizeMock, authenticateMock, cidMock, blacklistMock, historyMock, areaCodeMock, cacheSetMock):
-        """A cache miss triggers an area code lookup"""
-        cacheGetMock.return_value = None
-        areaCodeMock.return_value = {"state_abbreviation": "NY"}
-        sanitizeMock.return_value = "1234567890"
-        authenticateMock.return_value = True
-        cidMock.return_value = None
-        blacklistMock.return_value = False
-        historyMock.return_value = ([{
-            "date": "",
-            "duration": 1,
-            "lastapp": "test",
-            "dst": 1,
-            "clid": "test"
-        }], 1)
+        publishMock.side_effect = side_effect
         response = self.request("/", number="1234567890")
-        self.assertEqual(response.code, 200)
-        self.assertTrue("message" in response.body)
-        self.assertTrue(cacheGetMock.called)
-        self.assertTrue(authenticateMock.called)
-        self.assertTrue(cacheSetMock)
+        template_vars = self.extract_template_vars(renderMock)
+        self.assertEqual(template_vars["state_abbreviation"], "XY")
 
-    @mock.patch("util.cache.Cache.set")
-    @mock.patch("util.phone.findAreaCode")
-    @mock.patch("apps.phone.models.AsteriskCdr.callHistory")
-    @mock.patch("apps.phone.models.AsteriskManager.authenticate")
-    @mock.patch("util.phone.sanitize")
-    @mock.patch("util.cache.Cache.get")
-    def xtest_asteriskManagerAuthFail(self, cacheGetMock, sanitizeMock, authenticateMock, historyMock, areaCodeMock, cacheSetMock):
-        cacheGetMock.return_value = None
-        areaCodeMock.return_value = {"state_abbreviation": "NY"}
-        sanitizeMock.return_value = "1234567890"
-        authenticateMock.return_value = False
-        historyMock.return_value = ([{
-            "date": "",
-            "duration": 1,
-            "lastapp": "test",
-            "dst": 1,
-            "clid": "test"
-        }], 1)
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_validNumberCached(self, publishMock, renderMock):
+        def side_effect(*args, **kwargs):
+            if args[0] == "cache:get":
+                return [{
+                    "state_lookup": ("query placeholder", "XY", None),
+                    "state_name_lookup": ("query placeholder", "Unabbreviated State")
+                }]
+            if args[0] == "phone:sanitize":
+                return ["1234567890"]
+            if args[0] == "asterisk:is_blacklisted":
+                return [False]
+            if args[0] == "asterisk:get_caller_id":
+                return [None]
+            if args[0] == "cdr:call_history":
+                return [[[{"clid": "test"}]]]
+
+        publishMock.side_effect = side_effect
         response = self.request("/", number="1234567890")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(cacheGetMock.called)
-        self.assertTrue(authenticateMock.called)
-        self.assertTrue(cacheSetMock)
+        template_vars = self.extract_template_vars(renderMock)
+        self.assertEqual(template_vars["state_abbreviation"], "XY")
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 abstract
             )
         except:
-            return (None, None)
+            return (None, None, None)
 
     def unabbreviateUsState(self, abbreviation):
         """Query dbpedia for the full name of a U.S. state by its 2-letter

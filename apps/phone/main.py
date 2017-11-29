@@ -26,7 +26,13 @@ class Controller:
 
         error = ""
 
-        if number and not sanitized_number:
+        if not number:
+            return {
+                "html": ("phone.html", {
+                }),
+            }
+
+        if not sanitized_number:
             return {
                 "html": ("phone.html", {
                     "error": self.messages.get("invalid")
@@ -44,7 +50,10 @@ class Controller:
             "phone:{}".format(area_code)
         ).pop()
 
-        if not location:
+        if location:
+            state_lookup = location["state_lookup"]
+            state_name_lookup = location["state_name_lookup"]
+        else:
             state_lookup = cherrypy.engine.publish(
                 "geography:state_by_area_code",
                 area_code
@@ -54,6 +63,15 @@ class Controller:
                 "geography:unabbreviate_state",
                 state_lookup[1]
             ).pop()
+
+            cherrypy.engine.publish(
+                "cache:set",
+                "phone:{}".format(area_code),
+                {
+                    "state_lookup": state_lookup,
+                    "state_name_lookup": state_name_lookup
+                }
+            )
 
         caller_id = cherrypy.engine.publish(
             "asterisk:get_caller_id",
@@ -78,7 +96,7 @@ class Controller:
             "html": ("phone.html", {
                 "caller_id": caller_id,
                 "error": error,
-                "history": call_history[0],
+                "history": call_history,
                 "number": sanitized_number,
                 "blacklisted": blacklisted,
                 "state_abbreviation": state_lookup[1],
