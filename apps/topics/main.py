@@ -18,7 +18,7 @@ class Controller:
     cache_key = "topics:html"
 
     @cherrypy.tools.negotiable()
-    def GET(self, count=15):
+    def GET(self, count=20):
         topics = []
 
         try:
