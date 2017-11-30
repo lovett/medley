@@ -15,10 +15,6 @@ class TestPhone(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    @classmethod
-    def tearDownClass(cls):
-        helpers.stop_server()
-
     def extract_template_vars(self, mock, media="html"):
         return mock.call_args[0][0][media][1]
 
