@@ -45,3 +45,7 @@
 .date-group H1 {
     font-size: 1.25em;
 }
+
+.wayback {
+    display: inline-block;
+}

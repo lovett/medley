@@ -14,9 +14,26 @@ class Controller:
 
     user_facing = True
 
+    def checkWaybackAvailability(self, url):
+        response = cherrypy.engine.publish(
+            "urlfetch:get",
+            "http://archive.org/wayback/available",
+            params={"url": url},
+            as_json=True
+        ).pop()
+
+        snapshots = response.get("archived_snapshots", {})
+        closest_snapshot = snapshots.get("closest", {})
+        return closest_snapshot
+
     @cherrypy.tools.negotiable()
-    def GET(self, date=None, q=None, action=None, bookmark_id=None):
+    def GET(self, date=None, q=None, action=None, bookmark_id=None, wayback=None):
         entries = OrderedDict()
+
+        if wayback:
+            return {
+                "json": self.checkWaybackAvailability(wayback)
+            }
 
         if not q:
             records = cherrypy.engine.publish("archive:recent", limit=50).pop()

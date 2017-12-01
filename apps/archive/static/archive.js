@@ -25,9 +25,26 @@ MEDLEY.archive = (function () {
         });
     }
 
+    function waybackAvailability (e) {
+        var url;
+        e.preventDefault();
+        url = jQuery(this).data('url');
+
+        jQuery
+            .getJSON('?wayback=' + url)
+            .done((data) => {
+                if (!data.url) {
+                    alert('Not available');
+                    return;
+                }
+                window.location.href = data.url;
+            })
+    }
+
     return {
         init: function () {
             jQuery('MAIN').on('click', 'A.delete', deleteBookmark);
+            jQuery('MAIN').on('click', 'A.wayback', waybackAvailability);
         }
     };
 })();
