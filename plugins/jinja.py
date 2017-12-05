@@ -102,7 +102,11 @@ class Plugin(plugins.SimplePlugin):
             tz = pytz.timezone(timezone)
 
         if not tz:
-            configured_timezone = cherrypy.engine.publish("registry:first_value", "config:timezone").pop()
+            configured_timezone = cherrypy.engine.publish(
+                "registry:first_value",
+                "config:timezone",
+                memorize=True
+            ).pop()
             if configured_timezone:
                 tz = pytz.timezone(configured_timezone)
 
@@ -182,15 +186,19 @@ class Plugin(plugins.SimplePlugin):
         return "{} {}".format(count, value)
 
     def anonymize_filter(self, url):
-        anonymizer = cherrypy.config.get("url_anonymizer")
+        anonymizer = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:url_anonymizer",
+            memorize=True
+        ).pop()
 
         if not url.startswith("http"):
             url = "http://" + url
 
         if not anonymizer:
             return url
-        else:
-            return "{}{}".format(anonymizer, url)
+
+        return "{}{}".format(anonymizer, url)
 
     def urlencode_filter(self, value):
         return urllib.parse.quote(value)

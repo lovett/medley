@@ -136,6 +136,7 @@ def main():
     plugins.phone.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
+    plugins.memorize.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
     # Tools

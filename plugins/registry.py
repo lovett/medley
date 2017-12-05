@@ -3,6 +3,7 @@ from . import mixins
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
+
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -33,6 +34,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     def add(self, key, values=[], replace=False):
+        cherrypy.engine.publish("memorize:clear", key)
         if replace:
             self.remove(key)
 
@@ -90,6 +92,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return result
 
     def remove(self, key):
+        cherrypy.engine.publish("memorize:clear", key)
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
         cherrypy.engine.publish("app-log", "registry", "remove_key:{}".format(key), deletions)
         return deletions
@@ -107,13 +110,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result[0]["key"]
 
-    def firstValue(self, key):
+    def firstValue(self, key, memorize=False):
+        if memorize:
+            memorize_hit, memorize_value = cherrypy.engine.publish("memorize:get", key).pop()
+            if memorize_hit:
+                return memorize_value
+
         result = self.search(key=key, limit=1)
 
-        if not result:
-            return None
+        try:
+            value = result[0]["value"]
+        except IndexError:
+            value = None
 
-        return result[0]["value"]
+        if memorize:
+            cherrypy.engine.publish("memorize:set", key, value)
+        return  value
 
     def distinctKeys(self, key, value=None, stripPrefix=True):
         sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
