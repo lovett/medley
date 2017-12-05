@@ -11,7 +11,7 @@ MEDLEY.registry = (function () {
 
         jQuery.ajax({
             type: 'DELETE',
-            url: '/registry?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
+            url: '/registry?uid=' + (parseInt(trigger.data('uid'), 10) || 0)
         }).done(function (data) {
             window.location.reload();
         });
@@ -42,7 +42,6 @@ MEDLEY.registry = (function () {
             return;
         }
 
-
         jQuery.ajax({
             type: 'PUT',
             dataType: 'json',
@@ -50,10 +49,10 @@ MEDLEY.registry = (function () {
             data: $('INPUT, TEXTAREA', form).serialize()
         }).done(function (data) {
             var href = window.location.pathname;
-            href += '?uid=' + data.uid;
+            href += '?q=' + jQuery('#key').val();
             href += '&view=add';
             window.location.href = href;
-        }).fail(function () {
+        }).fail(function (data) {
             jQuery('.error.message').removeClass('hidden').text('Invalid values');
             jQuery('.success.message').addClass('hidden');
         });

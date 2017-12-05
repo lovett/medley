@@ -104,7 +104,7 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
     def testPutNoRedirect(self, publishMock):
         def side_effect(*args, **kwargs):
             if args[0] == "registry:add":
-                return ["fakeuid"]
+                return [True]
 
         publishMock.side_effect = side_effect
 
@@ -117,7 +117,7 @@ class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
             headers={"X-Requested-With": "XMLHttpRequest"}
         )
 
-        self.assertEqual(response.body["uid"], "fakeuid")
+        self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
     def testPutRedirectToAddView(self, publishMock):

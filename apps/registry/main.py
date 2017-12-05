@@ -35,16 +35,14 @@ class Controller:
             })
         }
 
-    @cherrypy.tools.negotiable()
     def PUT(self, key, value, replace=False):
-        uid = cherrypy.engine.publish("registry:add", key, value, replace).pop()
+        result = cherrypy.engine.publish("registry:add", key, [value], replace).pop()
 
-        if cherrypy.request.headers.get("X-Requested-With", None) is not "XMLHttpRequest":
-            raise cherrypy.HTTPRedirect("/registry?uid={}&view=add".format(uid))
+        print(cherrypy.request.headers)
+        if cherrypy.request.headers.get("X-Requested-With") != "XMLHttpRequest":
+            raise cherrypy.HTTPRedirect("/registry?q={}&view=add".format(key))
 
-        return {
-            "json": { "uid": uid }
-        }
+        cherrypy.response.status = 204
 
     def DELETE(self, uid):
         cherrypy.engine.publish("registry:remove_id", uid)
