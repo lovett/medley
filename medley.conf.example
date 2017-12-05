@@ -8,7 +8,6 @@ server.socket_host: "0.0.0.0"
 server.socket_port: 8085
 server.daemonize: False
 server.pid: None
-timezone: "America/New_York"
 url_anonymizer: None
 tools.conditional_auth.on: False
 tools.conditional_auth.whitelist: ("127.0.0.1")

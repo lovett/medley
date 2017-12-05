@@ -1,4 +1,4 @@
-# taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973a/web/templating/jinja2_templating
+# taken from https://bitbucket.org/Lawouach/cherrypy-recipes/src/d140e6da973a/web/templating/jinja2_templatin
 import cherrypy
 import jinja2
 import http.client
@@ -8,6 +8,8 @@ import urllib
 import datetime
 import os
 import json
+import time
+from tzlocal import get_localzone
 from cherrypy.process import plugins
 from string import Template
 
@@ -37,6 +39,7 @@ class Plugin(plugins.SimplePlugin):
         apps = filter(os.path.isdir, apps)
         apps = filter(lambda x: not x.endswith("__"), apps)
         paths.extend(apps)
+
 
         loader = jinja2.FileSystemLoader(paths)
 
@@ -90,16 +93,26 @@ class Plugin(plugins.SimplePlugin):
     def localtime_filter(self, value, format="locale", timezone=None):
         """Same as datetime_filter, but converts to the application's timezone"""
 
+        tz = None
+
         if not value:
             return ''
 
-        if not timezone:
-            timezone = cherrypy.config.get("timezone")
+        if timezone:
+            tz = pytz.timezone(timezone)
+
+        if not tz:
+            configured_timezone = cherrypy.engine.publish("registry:first_value", "config:timezone").pop()
+            if configured_timezone:
+                tz = pytz.timezone(configured_timezone)
+
+        if not tz:
+            tz = get_localzone()
 
         if value.tzinfo:
-            local_value = value.astimezone(pytz.timezone(timezone))
+            local_value = value.astimezone(tz)
         else:
-            local_value = pytz.timezone(timezone).localize(value)
+            local_value = tz.localize(value)
 
         return self.datetime_filter(local_value, format)
 

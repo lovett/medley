@@ -12,7 +12,6 @@ class TestArchive(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
     @classmethod
     def setUpClass(cls):
         helpers.start_server(apps.archive.main.Controller)
-        cherrypy.config["timezone"] = "America/New_York"
 
     @classmethod
     def tearDownClass(cls):
