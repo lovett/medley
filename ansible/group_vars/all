@@ -2,9 +2,9 @@
 project_name: medley
 project_user: "{{ project_name }}"
 project_hostname: "{{ project_name }}.local"
-project_group: medley
-project_repo: https://github.com/lovett/medley.git
+project_group: "{{ project_name }}"
 project_root: /srv/{{ project_name }}
+project_backup: "/srv/{{ project_name }}.bak"
 openssl_self_signed:
   - name: "{{ project_name }}"
     domains: ["{{ project_hostname }}"]

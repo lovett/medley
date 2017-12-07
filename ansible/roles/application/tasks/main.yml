@@ -1,0 +1,87 @@
+---
+- name: Delete previous backup
+  become: true
+  file:
+    path={{ project_backup }}
+    state=absent
+
+- name: Stat current installation
+  stat:
+    path={{ project_root  }}
+  register: install_check
+
+- name: Backup current installation
+  become: true
+  when: install_check.stat.exists
+  command: mv {{ project_root }} {{ project_backup }}
+
+- name: Create application root
+  become: true
+  file:
+    path={{ project_root }}
+    state=directory
+
+- name: Rsync application files to new application root
+  become: true
+  synchronize:
+    src: "../../../../"
+    dest: "{{ project_root }}"
+    delete: true
+    recursive: true
+    rsync_opts:
+      - "--cvs-exclude"
+
+- name: Salvage virtualenv from previous installation
+  become: true
+  command: cp -r {{ project_backup }}/venv {{ project_root }}/venv
+  when: install_check.stat.isdir is defined and install_check.stat.isdir
+
+- name: Stat venv
+  stat:
+    path={{ project_root }}/venv
+  register: venv_check
+
+- name: Create python3 virtualenv
+  shell: "python3 -m venv {{ project_root }}/venv"
+  become: true
+  when: venv_check.stat.isdir is not defined
+
+# Saved for the future reference
+# - name: Create python3 virtualenv
+#   become: true
+#   make:
+#     chdir: "{{ project_temp_root}}"
+#     target: venv
+
+- name: Set permissions on new application root
+  become: true
+  file:
+    path: "{{ project_root}}"
+    recurse: yes
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
+
+
+- name: Install python3 application packages
+  become: true
+  become_user: "{{ project_user }}"
+  pip:
+    requirements={{ project_root }}/requirements.txt
+    virtualenv={{ project_root }}/venv
+
+- name: Place config file in /etc
+  become: true
+  command: cp medley.conf.example /etc/medley.conf
+  args:
+    chdir: "{{ project_root }}"
+
+- name: Install medley systemd unit file
+  become: true
+  copy: src={{ item }} dest=/etc/systemd/system/
+  with_items:
+    - files/medley.service
+  notify: reload systemd
+
+- name: Start medley systemd service
+  become: true
+  command: systemctl restart medley.service

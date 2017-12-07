@@ -3,6 +3,12 @@
   become: true
   apt: update_cache=yes cache_valid_time=86400
 
+- name: Create application group
+  become: true
+  group:
+    state=present
+    name="{{ project_group }}"
+
 - name: Create application user
   become: true
   user:
@@ -13,7 +19,7 @@
     append=yes
     groups="{{ project_user }},audio"
 
-- name: Add ansible ssh user to application user group
+- name: Put ansible user in application group
   become: true
   user:
     name="{{ ansible_ssh_user }}"
@@ -25,10 +31,10 @@
   file:
     path="{{ item }}"
     state=directory
-    group={{ project_group }}
+    owner="{{ project_user }}"
+    group="{{ project_group }}"
     mode=0775
   with_items:
-    - /var/{{ project_name }}
     - /var/log/{{ project_name }}
     - /var/cache/{{ project_name }}
     - /var/cache/{{ project_name }}/speak
@@ -38,3 +44,15 @@
   file:
     path="/var/cache/{{ project_name }}/jinja"
     state="absent"
+
+- name: Install python3 system packages
+  become: true
+  apt: name={{ item }} state=latest
+  with_items:
+    - python3
+    - python3-pip
+    - python3-dev
+    - python3-venv
+    - libasound2-dev
+    - make
+    - rsync

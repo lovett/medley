@@ -156,3 +156,11 @@ test: $(APP_NAMES)
 $(APP_NAMES): $(COVERAGE_DIR)
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
+
+
+vagrant-install: dummy
+	vagrant box update
+	vagrant up
+
+vagrant-provision: dummy
+	vagrant provision
