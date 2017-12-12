@@ -13,9 +13,9 @@ def start_server(app):
     """Create a cherrypy server for testing with an app mounted at root
     using method dispatch"""
 
-    app_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     cherrypy.config.update({
-        "app_root": app_root,
+        "server_root": server_root,
         "database_dir": tempfile.gettempdir(),
         "tools.encode.on": False
     })

@@ -17,7 +17,7 @@ class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
 
     def __init__(self, bus):
-        app_root = cherrypy.config.get("app_root")
+        server_root = cherrypy.config.get("server_root")
 
         cache_dir = os.path.join(
             cherrypy.config.get("cache_dir", "cache"),
@@ -31,10 +31,10 @@ class Plugin(plugins.SimplePlugin):
         except FileExistsError:
             pass
 
-        paths = [os.path.join(app_root, "templates")]
+        paths = [os.path.join(server_root, "templates")]
 
-        apps = [os.path.join(app_root, "apps", app)
-                for app in os.listdir(os.path.join(app_root, "apps"))]
+        apps = [os.path.join(server_root, "apps", app)
+                for app in os.listdir(os.path.join(server_root, "apps"))]
 
         apps = filter(os.path.isdir, apps)
         apps = filter(lambda x: not x.endswith("__"), apps)

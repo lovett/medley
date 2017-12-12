@@ -1,11 +1,12 @@
-"""Medley, a collection of web-based utilities.
+"""Medley, a collection of web-based utilities
 
-Medley is a hub for miniature applications that each do one thing
-reasonably well and might otherwise be one-off or throwaway scripts.
+Medley is an application server for lightweight, single-purpose
+applications that are too small or trivial to bother making
+standalone.
 
-Putting them under a common roof means not having to start from zero
-each time, and makes it easier to leverage existing things when build
-new things.
+Having them under one roof provides makes it possible to share
+frequently-needed services instead of starting from zero. It also
+helps each application stay relatively small.
 """
 
 import importlib
@@ -16,74 +17,77 @@ import plugins
 import tools
 
 def main():
-    """Configure and start the medley server
+    """Configure and start the application server
 
-    The server consists of the core application which displays a
-    homepage of the available applications, as well as the set of
-    those applications which are mounted as sub- or mini-applications.
-
-    The core application is as minimal as possible so that
-    applications can be modular and relatively independent of one
-    another. However, certain applications provide models services to
-    other applications. The independence of each application varies.
-
+    The application server is the backbone that individual
+    applications are attached to. It does almost nothing by itself
+    except load applications and plugins.
     """
 
-    app_root = os.path.dirname(os.path.abspath(__file__))
+    server_root = os.path.dirname(os.path.abspath(__file__))
+    app_root = os.path.join(server_root, "apps")
 
     # Jinja templating won't work unless tools.encode is off
     cherrypy.config.update({
-        "app_root": app_root,
+        "server_root": server_root,
         "tools.encode.on": False
     })
 
-    # Load configuration from /etc/medley.conf if it exists, otherwise load
-    # from the application root
-    config_file = "/etc/medley.conf"
-    if not os.path.isfile(config_file):
-        config_file = os.path.join(app_root, "medley.conf")
+    # Configuration
+    #
+    # Application configuration is loaded from /etc/medley.conf or
+    # medley.conf in the application root, whichever is found first.
+    config_candidates = (
+        "/etc/medley.conf",
+        os.path.join(server_root, "medley.conf")
+    )
 
-    if not os.path.isfile(config_file):
+    try:
+        config = next(
+            (candidate for candidate in config_candidates
+             if os.path.isfile(candidate)),
+        )
+    except StopIteration:
         raise SystemExit("No configuration file")
 
-    cherrypy.config.update(config_file)
+    cherrypy.config.update(config)
 
-    # Create required application directories
+    # Derived configuration
+    #
+    # Some configuration values are set automatically.
+    log_dir = cherrypy.config.get("log_dir")
+    cherrypy.config.update({
+        "log.access_file": os.path.join(log_dir, "access.log"),
+        "log.error_file": os.path.join(log_dir, "error.log")
+    })
+
+    # Directory creation
+    #
+    # Filesystem paths declared by the config are expected to exist.
     for key in ("database_dir", "cache_dir", "log_dir"):
         value = cherrypy.config.get(key)
+
+        if os.path.isdir(value):
+            continue
+
         try:
             os.mkdir(value)
         except PermissionError:
-            raise SystemExit("Unable to create {} directory".format(key))
-        except FileExistsError:
-            pass
-
-        if key == "log_dir":
-            cherrypy.config.update({
-                "log.access_file": os.path.join(value, "access.log"),
-                "log.error_file": os.path.join(value, "error.log")
-            })
+            raise SystemExit("Unable to create the {} directory at {}".format(key, value))
 
     # Mount the apps
-    app_dir = os.path.realpath("apps")
+    for app in os.listdir(app_root):
 
-    for app in os.listdir(app_dir):
-
-        # The template app is a scaffolding for creating new apps
+        # The template app is scaffolding and not meant to be mounted
         if app == "template":
             continue
 
-        main_path = os.path.join(app_dir, app, "main.py")
+        main_path = os.path.join(app_root, app, "main.py")
 
         if not os.path.isfile(main_path):
             continue
 
         app_module = importlib.import_module("apps.{}.main".format(app))
-
-        try:
-            url_path = app_module.Controller.url
-        except:
-            continue
 
         app_config = {
             "/": {
@@ -92,19 +96,23 @@ def main():
         }
 
         # An app can optionally have a dedicated directory for static assets
-        static_path = os.path.join(app_dir, app, "static")
+        static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
             app_config["/static"] = {
                 "tools.staticdir.on": True,
                 "tools.staticdir.dir": os.path.realpath(static_path)
             }
 
-        cherrypy.tree.mount(app_module.Controller(), url_path, app_config)
+        cherrypy.tree.mount(
+            app_module.Controller(),
+            app_module.Controller.url,
+            app_config
+        )
 
     # Customize the error page
     if cherrypy.config.get("request.show_tracebacks") is not False:
         cherrypy.config.update({
-            "error_page.default": os.path.join(app_root, "error.html")
+            "error_page.default": os.path.join(server_root, "error.html")
         })
 
     # Attempt to drop privileges if daemonized
