@@ -87,51 +87,5 @@ class TestAwsranges(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertio
         response = self.request("/")
         self.assertEqual(response.code, 503)
 
-
-
-#     @responses.activate
-#     @mock.patch("syslog.syslog")
-#     @mock.patch("apps.registry.models.Registry")
-#     @mock.patch("util.cache.Cache.set")
-#     @mock.patch("util.cache.Cache.get")
-#     def xtest_readsFromCache(self, cacheGetMock, cacheSetMock, registryMock, syslogMock):
-#         """No request is made if a cached value is available"""
-#         cacheGetMock.return_value = ({"prefixes": [{"ip_prefix": "test"}]}, time.time())
-#         registry = registryMock.return_value
-
-#         responses.add(responses.GET, "https://ip-ranges.amazonaws.com/ip-ranges.json", body='{}', content_type='application/json')
-
-#         response = self.request("/")
-#         print(response.body)
-#         self.assertEqual(response.code, 204)
-#         self.assertTrue(cacheGetMock.called)
-#         self.assertFalse(cacheSetMock.called)
-#         self.assertEqual(len(responses.calls), 0)
-#         self.assertTrue(registry.add.called)
-#         self.assertTrue(registry.remove.called)
-#         self.assertTrue(syslogMock.called)
-
-#     @responses.activate
-#     @mock.patch("syslog.syslog")
-#     @mock.patch("apps.registry.models.Registry")
-#     @mock.patch("util.cache.Cache.set")
-#     @mock.patch("util.cache.Cache.get")
-#     def xtest_readsFromCache(self, cacheGetMock, cacheSetMock, registryMock, syslogMock):
-#         """No request is made if a cached value is available"""
-#         cacheGetMock.return_value = ({"foo": "bar"}, time.time())
-#         registry = registryMock.return_value
-
-#         responses.add(responses.GET, "https://ip-ranges.amazonaws.com/ip-ranges.json", body='{}', content_type='application/json')
-
-#         response = self.request("/")
-#         self.assertEqual(response.code, 400)
-#         self.assertTrue(cacheGetMock.called)
-#         self.assertFalse(cacheSetMock.called)
-#         self.assertEqual(len(responses.calls), 0)
-#         self.assertFalse(registry.add.called)
-#         self.assertFalse(registry.remove.called)
-#         self.assertFalse(syslogMock.called)
-
-
 if __name__ == "__main__":
     unittest.main()
