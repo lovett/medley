@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Determine the current IP address"""
 
-    url = "/ip"
-
     name = "IP"
 
     exposed = True

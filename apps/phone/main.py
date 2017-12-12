@@ -4,8 +4,6 @@ import urllib.parse
 class Controller:
     """Display geographic location and recent call history for a phone number"""
 
-    url = "/phone"
-
     name = "Phone"
 
     exposed = True

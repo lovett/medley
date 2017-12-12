@@ -32,7 +32,7 @@ def start_server(app):
     # Always load the shared app
     cherrypy.tree.mount(
         apps.shared.main.Controller,
-        apps.shared.main.Controller.url,
+        "/shared",
         {}
     )
 

@@ -6,8 +6,6 @@ from collections import OrderedDict
 class Controller:
     """A collection of bookmarked URLs"""
 
-    url = "/archive"
-
     name = "Archive"
 
     exposed = True

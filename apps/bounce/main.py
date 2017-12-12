@@ -4,8 +4,6 @@ from urllib.parse import urlparse, urlunparse
 class Controller:
     """Redirect to an equivalent page on a different domain."""
 
-    url = "/bounce"
-
     name = "Bounce"
 
     exposed = True

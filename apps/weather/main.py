@@ -4,8 +4,6 @@ import math
 class Controller:
     """The current forecast"""
 
-    url = "/weather"
-
     name = "Weather"
 
     exposed = True

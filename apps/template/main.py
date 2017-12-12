@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """One-line summary of the app goes here"""
 
-    url = "/template"
-
     name = "Template"
 
     exposed = True

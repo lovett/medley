@@ -4,8 +4,6 @@ import tools.capture
 class Controller:
     """Relay deployment notifications from Azure"""
 
-    url = "/azure"
-
     name = "Azure"
 
     exposed = True

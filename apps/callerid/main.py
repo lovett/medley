@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Add entries to an Asterisk callerid database"""
 
-    url = "/callerid"
-
     name = "Caller ID"
 
     exposed = True

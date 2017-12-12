@@ -9,8 +9,6 @@ import requests
 class Controller:
     """Download the latest GeoLite Legacy City database from maxmind.com"""
 
-    url = "/geodb"
-
     name = "GeoDB"
 
     exposed = True

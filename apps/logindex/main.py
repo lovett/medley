@@ -10,8 +10,6 @@ import cherrypy
 class Controller:
     """Index log files"""
 
-    url = "/logindex"
-
     name = "Log Index"
 
     exposed = True

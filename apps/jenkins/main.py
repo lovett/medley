@@ -24,8 +24,6 @@ class Controller:
     post-processing them."
     """
 
-    url = "/jenkins"
-
     name = "Jenkins"
 
     exposed = True

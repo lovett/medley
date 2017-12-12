@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Add and remove entries from the Asterisk blacklist database"""
 
-    url = "/url"
-
     name = "Blacklist"
 
     exposed = True

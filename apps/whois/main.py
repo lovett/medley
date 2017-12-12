@@ -7,8 +7,6 @@ import ipaddress
 class Controller:
     """Whois and geoip data for an IP address or hostname"""
 
-    url = "/whois"
-
     name = "Whois"
 
     exposed = True

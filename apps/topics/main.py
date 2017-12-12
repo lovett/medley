@@ -7,8 +7,6 @@ import apps.topics.parser
 class Controller:
     """Scrape news topics from the Bing homepage"""
 
-    url = "/topics"
-
     name = "Topics"
 
     exposed = True

@@ -6,8 +6,6 @@ import time
 class Controller:
     """Present a catalog of the available apps"""
 
-    url = "/"
-
     name = "Homepage"
 
     exposed = True

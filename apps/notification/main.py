@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Relay messages from notifier to the speech plugin"""
 
-    url = "/notification"
-
     name = "Notification"
 
     _cp_config = {

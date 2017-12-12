@@ -6,8 +6,6 @@ class Controller:
 
     See http://docs.aws.amazon.com/general/latest/gr/aws-ip-ranges.html"""
 
-    url = "/awsranges"
-
     name = "AWS Ranges"
 
     exposed = True

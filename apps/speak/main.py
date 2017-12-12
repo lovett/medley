@@ -2,8 +2,6 @@ import cherrypy
 
 class Controller:
 
-    url = "/speak"
-
     name = "Speak"
 
     exposed = True

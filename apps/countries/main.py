@@ -5,8 +5,6 @@ class Controller:
 
     name = "Country Codes"
 
-    url = "/countries"
-
     exposed = True
 
     user_facing = False

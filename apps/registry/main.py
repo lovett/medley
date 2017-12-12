@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """A general-purpose key value store"""
 
-    url = "/registry"
-
     name = "Registry"
 
     exposed = True

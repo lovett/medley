@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Display call history by date"""
 
-    url = "/calls"
-
     name = "Calls"
 
     exposed = True

@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 class Controller:
     """Search website access logs"""
 
-    url = "/visitors"
-
     name = "Visitors"
 
     exposed = True

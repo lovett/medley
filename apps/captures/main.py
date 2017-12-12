@@ -3,8 +3,6 @@ import cherrypy
 class Controller:
     """Display captured requests"""
 
-    url = "/captures"
-
     name = "Captures"
 
     exposed = True

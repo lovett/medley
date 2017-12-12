@@ -95,6 +95,10 @@ def main():
             },
         }
 
+        app_path = "/{}".format(app)
+        if app == "homepage":
+            app_path = "/"
+
         # An app can optionally have a dedicated directory for static assets
         static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
@@ -105,7 +109,7 @@ def main():
 
         cherrypy.tree.mount(
             app_module.Controller(),
-            app_module.Controller.url,
+            app_path,
             app_config
         )
 

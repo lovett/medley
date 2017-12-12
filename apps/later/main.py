@@ -4,8 +4,6 @@ import re
 class Controller:
     """Display a form for bookmarking a URL"""
 
-    url = "/later"
-
     name = "Later"
 
     exposed = True
