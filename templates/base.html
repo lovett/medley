@@ -55,7 +55,7 @@
 
             <span class="focus-buffer-display"></span>
 
-            {% if app_name %}
+            {% if app_name|lower != "homepage" %}
             <a class="home" href="/" title="Return to the homepage"><svg class="icon icon-home"><use xlink:href="#icon-home"></use></svg></a>
             {% endif %}
 
