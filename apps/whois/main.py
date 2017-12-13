@@ -15,6 +15,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, address=None):
+
         if not address:
             return {
                 "html": ("whois.html", {
@@ -41,7 +42,8 @@ class Controller:
                 result = socket.gethostbyname_ex(address_clean)
                 ip = result[2][0]
             except:
-                raise cherrypy.HTTPRedirect(self.url)
+                redirect_url = cherrypy.engine.publish("url:for_controller", self).pop()
+                raise cherrypy.HTTPRedirect(redirect_url)
 
         whois_cache_key = "whois:{}".format(ip)
 

@@ -150,6 +150,7 @@ def main():
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.memorize.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
+    plugins.url.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()

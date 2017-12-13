@@ -28,7 +28,13 @@ class TestWhois(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
         self.assertEqual(response.code, 200)
 
-    def test_invalidAddressAsHostname(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_invalidAddressAsHostname(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if (args[0] == "url:for_controller"):
+                return ["/"]
+
+        publishMock.side_effect = side_effect
         response = self.request("/", address="invalid")
         self.assertEqual(response.code, 303)
 
@@ -50,7 +56,14 @@ class TestWhois(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         template_vars = self.extract_template_vars(renderMock)
         self.assertEqual(template_vars["ip"], "127.0.0.1")
 
-    def test_invalidAddressAsIp(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_invalidAddressAsIp(self, publishMock):
+        def side_effect(*args, **kwargs):
+            if (args[0] == "url:for_controller"):
+                return ["/"]
+
+        publishMock.side_effect = side_effect
+
         response = self.request("/", address="333.333.333.333")
         self.assertEqual(response.code, 303)
 
