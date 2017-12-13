@@ -1,7 +1,13 @@
+* Medley
+
+A collection of lightweight, single-purpose web applications that are too
+small or trivial to bother making standalone.
+
+Medley is written in Python 3 and uses the CherryPy framework.
+
 * Setup
 
-Medley is a Python 3 application. You'll need Python 3.4 or later as
-well as virtualenv and make. Then:
+You'll need at least Python 3.4. Then:
 
 #+begin_src shell
 git clone git@github.com:lovett/medley.git
@@ -15,12 +21,10 @@ make serve
 
 * Testing
 
-For HTML output, run:
-#+begin_src shell
-make htmlcov
-#+end_src
+~make test~ will run through all tests for all apps.
 
-For console output, run:
-#+BEGIN_SRC shell
-make coverage
-#+END_SRC
+~make [appname]~ will run through the tests for a specific app.
+
+~make htmlcov~ will generate a coverage report in HTML
+
+~make coverage~ will print a coverage report to the console.
