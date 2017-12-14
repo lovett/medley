@@ -22,7 +22,7 @@
 - name: Put ansible user in application group
   become: true
   user:
-    name="{{ ansible_ssh_user }}"
+    name="{{ ansible_user }}"
     group="{{ project_user }}"
     append=yes
 
