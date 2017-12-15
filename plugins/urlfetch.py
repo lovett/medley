@@ -55,7 +55,7 @@ class Plugin(plugins.SimplePlugin):
         request_headers.update(headers)
 
         if (as_json):
-            data=json.dumps(payload)
+            data=json.dumps(data)
             request_headers["Content-Type"] = "application/json"
 
         try:
