@@ -204,8 +204,16 @@ class Plugin(plugins.SimplePlugin):
         return urllib.parse.quote(value)
 
     def ago_filter(self, value):
-        tz = cherrypy.config.get("timezone")
-        timezone = pytz.timezone(tz)
+        tz = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:timezone",
+            memorize=True
+        ).pop()
+
+        if tz:
+            timezone = pytz.timezone(tz)
+        else:
+            timezone = get_localzone()
 
         today = timezone.localize(datetime.datetime.today())
 
