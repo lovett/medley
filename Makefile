@@ -70,8 +70,7 @@ $(REQUIREMENTS_FILES): dummy
 	@cut -d'=' -f 1 $@ > $(REQUIREMENTS_TEMP)
 	@echo "Package" >> $(REQUIREMENTS_TEMP)
 	@echo "-------" >> $(REQUIREMENTS_TEMP)
-	@sed -i '' -e 's/^/^/' $(REQUIREMENTS_TEMP)
-	@grep -f $(REQUIREMENTS_TEMP) $(PIP_OUTDATED_TEMP)
+	@-grep -f $(REQUIREMENTS_TEMP) $(PIP_OUTDATED_TEMP)
 	@echo ""
 	@rm $(REQUIREMENTS_TEMP)
 
@@ -100,7 +99,7 @@ $(REQUIREMENTS_FILES): dummy
 # Don't invoke directly.
 #
 .pip-outdated: dummy
-	pip list --outdated > $(PIP_OUTDATED_TEMP)
+	pip list --format=columns --not-required --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report
