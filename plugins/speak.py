@@ -122,7 +122,7 @@ class Plugin(plugins.SimplePlugin):
         if time_range[1] < time_range[0]:
             end = datetime.datetime.combine(tomorrow, time_range[1].time())
         else:
-            end = datetime.datetime.combine(today, time_Range[1].time())
+            end = datetime.datetime.combine(today, time_range[1].time())
 
         in_schedule = start <= now <= end
         return not in_schedule
