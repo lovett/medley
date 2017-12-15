@@ -103,8 +103,12 @@ def main():
         static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
             app_config["/static"] = {
+                "tools.gzip.on": True,
+                "tools.gzip.mime_types": ["text/*", "application/*"],
                 "tools.staticdir.on": True,
-                "tools.staticdir.dir": os.path.realpath(static_path)
+                "tools.staticdir.dir": os.path.realpath(static_path),
+                "tools.expires.on": True,
+                "tools.expires.secs": 86400 * 7
             }
 
         cherrypy.tree.mount(
