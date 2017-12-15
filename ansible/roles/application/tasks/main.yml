@@ -69,11 +69,17 @@
     requirements={{ project_root }}/requirements.txt
     virtualenv={{ project_root }}/venv
 
+- name: Stat global config
+  stat:
+    path="/etc/medley.conf"
+  register: global_config_check
+
 - name: Place config file in /etc
   become: true
   command: cp medley.conf.example /etc/medley.conf
   args:
     chdir: "{{ project_root }}"
+  when: global_config_check.stat.exists == False
 
 - name: Install medley systemd unit file
   become: true
