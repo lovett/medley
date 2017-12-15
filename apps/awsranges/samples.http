@@ -1,0 +1,5 @@
+# -*- restclient -*-
+
+GET http://localhost:8085/awsranges
+Content-Type: application/x-www-form-urlencoded
+#
