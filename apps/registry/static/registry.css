@@ -27,6 +27,7 @@ DT {
     white-space: pre;
     font-family: 'Courier New', Courier, monospace;
     margin-bottom: 2em;
+    overflow-wrap: break-word;
 }
 
 .delete {
