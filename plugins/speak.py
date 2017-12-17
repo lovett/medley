@@ -12,9 +12,7 @@ class Plugin(plugins.SimplePlugin):
     """
     Perform text-to-speech synthesis via Microsoft Cognitive Services
 
-    https://www.microsoft.com/cognitive-services/en-us/documentation
-
-    https://github.com/Microsoft/ProjectOxford-ClientSDK/blob/master/Speech/TextToSpeech/Samples-Http/Python/TTSSample.py
+    https://docs.microsoft.com/en-us/azure/cognitive-services/speech/api-reference-rest/bingvoiceoutput
     """
 
     token_request_url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken"
@@ -196,4 +194,7 @@ class Plugin(plugins.SimplePlugin):
             raise cherrypy.HTTPError(500, "Cache not updated")
 
     def playCachedFile(self, path):
-        cherrypy.engine.publish("play-cached", path)
+        cherrypy.engine.publish(
+            "scheduler:add", 1,
+            "audio:wav:play", path
+        )
