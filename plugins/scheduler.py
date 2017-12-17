@@ -23,10 +23,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def execute(self, name, *args, **kwargs):
         cherrypy.engine.publish(name, *args, **kwargs)
 
-    def add(self, minutes, *args, **kwargs):
-        return self.scheduler.enter(minutes * 60, 1, self.execute, args, kwargs)
+    def add(self, delay_seconds, *args, **kwargs):
+        """Schedule an event for future execution
+
+        args should be a plugin command and arguments it expects. When
+        the job is ready to execute, it will be as if
+        cherrpy.engine.publish had been called directly"""
+
+        return self.scheduler.enter(delay_seconds, 1, self.execute, args, kwargs)
 
     def remove(self, event):
+        """Cancel a previously-scheduled event
+
+        Event should be an object, either the one returned when the
+        event was added or the equivalent from the list of upcoming
+        events.
+        """
+
         try:
             self.scheduler.cancel(event)
             return True

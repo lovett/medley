@@ -47,7 +47,7 @@ class Controller:
 
         cherrypy.engine.publish(
             "scheduler:add",
-            minutes,
+            minutes * 60,
             "notifier:send",
             notification
         )
