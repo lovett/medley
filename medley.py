@@ -137,6 +137,7 @@ def main():
     # Plugins
     plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.asterisk.Plugin(cherrypy.engine).subscribe()
+    plugins.audio.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.capture.Plugin(cherrypy.engine).subscribe()
     plugins.cdr.Plugin(cherrypy.engine).subscribe()
@@ -147,7 +148,6 @@ def main():
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.logger.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()
-    plugins.mpd.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.phone.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()

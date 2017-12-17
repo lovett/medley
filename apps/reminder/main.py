@@ -23,7 +23,7 @@ class Controller:
 
         template_dict = {t["rowid"]: parse_qs(t["value"]) for t in templates}
 
-        upcoming = cherrypy.engine.publish("scheduler:upcoming").pop()
+        upcoming = cherrypy.engine.publish("scheduler:upcoming", "notifier:send").pop()
 
         return {
             "html": ("reminder.html", {
@@ -75,7 +75,7 @@ class Controller:
 
         uid = float(uid)
 
-        scheduled_events = cherrypy.engine.publish("scheduler:upcoming").pop()
+        scheduled_events = cherrypy.engine.publish("scheduler:upcoming", "notifier:send").pop()
 
         wanted_events = [event for event in scheduled_events if event.time == uid]
 

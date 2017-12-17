@@ -46,10 +46,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except ValueError:
             return False
 
-    def upcoming(self):
+    def upcoming(self, event_filter=None):
         """List upcoming events in the order they will be run.
 
         Events are returned as named tuples with the fields:
         time, priority, action, argument, kwargs
         """
-        return self.scheduler.queue or []
+
+        events = self.scheduler.queue or []
+
+        if event_filter:
+            events = [event for event in events if event.argument[0] == event_filter]
+
+        return events
