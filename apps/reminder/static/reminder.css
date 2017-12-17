@@ -1,0 +1,64 @@
+.content-wrapper {
+    margin: auto;
+    padding: 1em;
+    max-width: 500px;
+}
+
+.content-wrapper H1 {
+    font-size: 1.4em;
+    font-weight: normal;
+
+}
+
+.content-wrapper > .half-column {
+    padding: 0 1em;
+}
+
+.upcoming-reminder {
+    padding-bottom: 1em;
+}
+
+.upcoming-reminder.done {
+    text-decoration: line-through;
+    color: #666;
+}
+
+.upcoming-reminder.done .delete-reminder {
+    display: none;
+}
+
+.upcoming-reminder .delete-reminder {
+    float: left;
+    text-decoration: none;
+    line-height: 2;
+}
+
+.upcoming-reminder p {
+    margin: 0;
+    padding: .25em 0 0 0;
+}
+
+.upcoming-reminder time {
+    font-weight: bold;
+}
+
+#minutes {
+    width: 3em;
+    margin: 0 .5em;
+}
+
+#reminder-form select {
+    margin-bottom: .5em;
+}
+
+#template-options {
+    padding-left: 1em;
+}
+
+#page-header {
+    margin-bottom: 0;
+}
+
+.band {
+    background-color: lightskyblue;
+}

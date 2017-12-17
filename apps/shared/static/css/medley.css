@@ -4,6 +4,7 @@ BODY {
 }
 
 BUTTON {
+    font-family: 'Lato', sans-serif;
     border-radius: .25em;
     border: 0;
     color: #fff;
@@ -13,6 +14,7 @@ BUTTON {
 
 BUTTON:hover {
     background-color: forestGreen;
+    cursor: pointer;
 }
 
 BUTTON[disabled] {
@@ -167,11 +169,19 @@ TABLE.key-value TH {
     padding-right: 1em;
 }
 
+.field INPUT.inline {
+    padding-right: 2em;
+}
+
 .field INPUT[type=text], .field TEXTAREA {
     box-sizing: border-box;
     border: 1px solid #ccc;
     padding: .5em;
     width: 100%;
+}
+
+.field INPUT[type=text].inline {
+    width: auto;
 }
 
 .field LABEL {

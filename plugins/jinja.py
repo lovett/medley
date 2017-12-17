@@ -113,6 +113,9 @@ class Plugin(plugins.SimplePlugin):
         if not tz:
             tz = get_localzone()
 
+        if isinstance(value, (int, float)):
+            value = datetime.datetime.fromtimestamp(value)
+
         if value.tzinfo:
             local_value = value.astimezone(tz)
         else:
@@ -126,7 +129,7 @@ class Plugin(plugins.SimplePlugin):
         if not value:
             return ""
 
-        if isinstance(value, int):
+        if isinstance(value, (int, float)):
             value = datetime.datetime.fromtimestamp(value)
 
         if format == "locale":
