@@ -40,7 +40,7 @@ class Controller:
             minutes = int(minutes)
 
         notification = {
-            "group": "reminder",
+            "group": "medley",
             "body": comments,
             "title": message
         }
