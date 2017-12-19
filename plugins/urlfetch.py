@@ -37,6 +37,9 @@ class Plugin(plugins.SimplePlugin):
 
             req.raise_for_status()
 
+            if req.status_code == 204:
+                return True
+
             if as_json:
                 return req.json()
 
@@ -69,7 +72,13 @@ class Plugin(plugins.SimplePlugin):
 
             req.raise_for_status()
 
-            return req.json() if as_json else req.text
+            if req.status_code == 204:
+                return True
+
+            if as_json:
+                return req.json()
+
+            return req.text
 
         except requests.exceptions.RequestException:
             return None
