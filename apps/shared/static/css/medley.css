@@ -115,10 +115,6 @@ TABLE.key-value TH {
     font-weight: normal;
 }
 
-#page-header .focus-buffer-display {
-    line-height: 2.25;
-}
-
 #shortcuts {
     display: none;
 }
@@ -353,6 +349,28 @@ TABLE.natural-width {
 
 .inline-list LI:last-of-type:after {
     content: '';
+}
+
+.copy-to-clipboard {
+    text-decoration: none;
+    display: inline-block;
+    padding-right: .5em;
+}
+
+.icon-copy {
+    transition: all 500ms;
+}
+
+.icon-copy.light {
+    fill: white;
+}
+
+.icon-copy:hover {
+    fill: green;
+}
+
+.icon-copy.copied {
+    transform: scale(1.5) rotate(20deg);
 }
 
 

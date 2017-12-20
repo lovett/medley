@@ -1,0 +1,5 @@
+{% macro copyToClipboard(value, light=False) %}
+<a class="copy-to-clipboard" data-copytarget="{{ value }}" href="#">
+    <svg class="icon icon-copy {% if light %}light{% endif %}"><use xlink:href="#icon-copy"></use></svg>
+</a>
+{% endmacro %}

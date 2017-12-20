@@ -24,11 +24,19 @@ DT {
 .value {
     background-color: #fff;
     padding: .5em;
-    white-space: pre;
     font-family: 'Courier New', Courier, monospace;
     margin-bottom: 2em;
-    overflow-wrap: break-word;
+    display: flex;
 }
+
+.value span {
+    white-space: pre;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    flex-grow: 1;
+}
+
+
 
 .delete {
     float: right;

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros %}
 
 {% block stylesheets %}
 <link rel="stylesheet" type="text/css" href="/registry/static/registry.css" />
@@ -6,6 +7,7 @@
 
 {% block scripts %}
 <script src="/registry/static/registry.js"></script>
+<script src="/shared/static/js/copy-to-clipboard.js"></script>
 {% endblock %}
 
 
@@ -54,7 +56,10 @@
         {% if entries %}
         <dl id="entries">
             {% for entry in entries %}
-            <dt><span class="counter">{{ loop.index }}.</span> {{ entry.key }}</dt>
+            <dt>
+                {{ macros.copyToClipboard(entry.key, True) }}
+                <span class="counter">{{ loop.index }}.</span> {{ entry.key }}
+            </dt>
 
             <dd class="secondary">
                 Created {{ entry.created|localtime("datetime12") }}
@@ -62,7 +67,9 @@
                     <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                 </a>
             </dd>
-            <dd class="value">{{ entry.value }}</dd>
+            <dd>
+                <div class="value">{{ macros.copyToClipboard(entry.value) }}<span>{{ entry.value }}</span></div>
+            </dd>
 
             {% endfor %}
         </dl>

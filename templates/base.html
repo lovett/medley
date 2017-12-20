@@ -28,6 +28,10 @@
 
         <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <defs>
+                <symbol id="icon-copy" viewBox="0 0 32 32">
+                    <title>copy</title>
+                    <path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"></path>
+                </symbol>
                 <symbol id="icon-arrow-right" viewBox="0 0 1024 1024">
                     <title>arrow-right</title>
                     <path class="path1" d="M992 512l-480-480v288h-512v384h512v288z"></path>
@@ -53,7 +57,7 @@
         <header id="page-header">
             <h1>{{ app_name or "Medley" }}</h1>
 
-            <span class="focus-buffer-display"></span>
+            <span class="message-holder focus-buffer-display"></span>
 
             {% if app_name|lower != "homepage" %}
             <a class="home" href="/" title="Return to the homepage"><svg class="icon icon-home"><use xlink:href="#icon-home"></use></svg></a>
