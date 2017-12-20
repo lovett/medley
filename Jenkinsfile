@@ -21,7 +21,7 @@ pipeline {
 
             steps {
                 sshagent(["f4f6a0a8-c2ae-4f7e-9bf1-869831034fad"]) {
-                    sh "ansible-playbook -l medley ansible/provision.yml"
+                    sh "ansible-playbook -l medley ansible/install.yml"
                 }
             }
         }

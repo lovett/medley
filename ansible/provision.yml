@@ -1,9 +1,0 @@
----
-- hosts: all
-  vars:
-  roles:
-    - system
-    - application
-    - avahi
-    # - cron
-    # - asterisk

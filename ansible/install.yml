@@ -2,11 +2,8 @@
 - hosts: all
   vars:
   roles:
-    - common
-    - git
-    - python3
-    - medley
-    - cron
-    - monit
-    - asterisk
-    - mpd
+    - system
+    - application
+    - avahi
+    # - cron
+    # - asterisk

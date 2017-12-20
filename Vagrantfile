@@ -9,13 +9,11 @@ Vagrant.configure(2) do |config|
   # This box includes guest additions, but debian/jessie64 does not.
   config.vm.box = "debian/contrib-jessie64"
 
-
   config.vm.hostname = "medley"
 
   # Create a public (bridged) network so that the VM is reachable
   # through mDNS
   config.vm.network "public_network"
-
 
   config.vm.synced_folder ".", "/vagrant"
 
@@ -31,7 +29,7 @@ Vagrant.configure(2) do |config|
 
   # Provision using ansible. Run ansible from the host.
   config.vm.provision "ansible" do |ansible|
-    ansible.playbook = "ansible/provision.yml"
+    ansible.playbook = "ansible/install.yml"
     ansible.extra_vars = {
       ansible_user: "vagrant"
     }
