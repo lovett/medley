@@ -52,7 +52,8 @@ class Controller:
             notification
         )
 
-        remember = int(remember)
+        if remember:
+            remember = int(remember)
 
         if remember == 1:
             registry_value = urlencode({

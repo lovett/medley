@@ -56,7 +56,10 @@
                 <select id="template" name="template">
                     <option value=""></option>
                     {% for id, template in templates.items() %}
-                    <option value="1" data-uid="{{ id }}" data-message="{{ template.message[0] }}" data-minutes="{{ template.minutes[0] }}" data-comments="{{ template.comments[0] }}">{{ template.message[0] }}</option>
+                    {% set comment = template.get('comments', [])|join %}
+                    {% set message = template.get('message', [])|join %}
+                    {% set minutes = template.get('minutes', '') %}
+                    <option value="1" data-uid="{{ id }}" data-message="{{ message }}" data-minutes="{{ minutes }}" data-comments="{{ comment }}">{{ message }}</option>
                     {% endfor %}
                 </select>
 
