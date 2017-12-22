@@ -1,4 +1,4 @@
-CherryPy==13.0.0
+CherryPy==13.1.0
 Jinja2==2.10
 httplib2==0.10.3
 msgpack-python==0.4.8
