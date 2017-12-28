@@ -151,6 +151,9 @@ class Plugin(plugins.SimplePlugin):
 
     def unindent_filter(self, string):
         """Remove leading whitespace from a multiline string without losing indentation"""
+        if not string:
+            return ""
+
         lines = string.split("\n")
         indents = [len(line) - len(line.lstrip(" ")) for line in lines]
         indents.remove(0)

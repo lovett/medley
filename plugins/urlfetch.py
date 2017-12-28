@@ -21,7 +21,7 @@ class Plugin(plugins.SimplePlugin):
             "User-Agent": "python",
         }
 
-        if as_json:
+        if as_json and "Accdept" not in request_headers:
             request_headers["Accept"] = "application/json"
 
         request_headers.update(headers)

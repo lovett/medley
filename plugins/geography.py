@@ -35,6 +35,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         response = cherrypy.engine.publish(
             "urlfetch:get",
             "http://dbpedia.org/sparql",
+            headers={
+                "Accept": "application/sparql-results+json"
+            },
             params={
                 "query": sparql,
                 "format": "json",
@@ -77,6 +80,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         response = cherrypy.engine.publish(
             "urlfetch:get",
             "http://dbpedia.org/sparql",
+            headers={
+                "Accept": "application/sparql-results+json"
+            },
             params={
                 "query": sparql,
                 "format": "json",
