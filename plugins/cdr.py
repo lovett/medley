@@ -106,6 +106,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query += " OFFSET ?"
             params.append(offset)
 
-        result = self._select(query, params)
-
-        return (result, count)
+        return self._select(query, params)
