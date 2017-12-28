@@ -14,8 +14,14 @@ class Plugin(plugins.SimplePlugin):
         pass
 
     def urlForController(self, cls):
+        host = cherrypy.request.headers.get("Host", "")
+
+        proto = "http"
+        if cherrypy.request.headers.get("X-Https", "") == "On":
+            proto = "https"
+
         return next(
-            (key for key in cherrypy.tree.apps.keys()
+            ("{}://{}{}".format(proto, host, key) for key in cherrypy.tree.apps.keys()
              if isinstance(cherrypy.tree.apps[key].root, type(cls))),
             None
         )

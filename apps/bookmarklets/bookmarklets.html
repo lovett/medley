@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
+{% macro bookmarklet_url(url, label) -%}
+{% if not url.startswith("http") %}
+{% set url = app_url + "/static/js/" + url %}
+{% endif %}
+<a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">▶️ {{ label }}</a>
+{%- endmacro %}
+
 {% block stylesheets %}
+<link rel="stylesheet" href="{{ app_url }}/static/css/bookmarklets.css" />
 {% endblock %}
 
 {% block scripts %}
@@ -11,6 +19,23 @@
 
 <main>
     <div class="content-wrapper">
+        <dl>
+            <dt>{{ bookmarklet_url("validate.js", "validate") }}</dt>
+            <dd>Submit the current page to the W3C HTML validator</dd>
+
+            <dt>{{ bookmarklet_url("restate.js", "restate") }}</dt>
+            <dd>Site-specific browser automation</dd>
+
+            <dt>{{ bookmarklet_url("restyle.js", "restyle") }}</dt>
+            <dd>Reload stylesheets without doing a full page refresh.</dd>
+
+            <dt>{{ bookmarklet_url(ubounce, "ubounce") }}</dt>
+            <dd>Redirect links through an anonymizer</dd>
+
+            <dt>{{ bookmarklet_url("hnhiring.js", "hnhiring") }}</dt>
+            <dd>Filter posts on the monthly Who Is Hiring post on Hacker News</dd>
+
+        </dl>
     </div>
 </main>
 {% endblock %}
