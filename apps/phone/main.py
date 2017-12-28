@@ -76,6 +76,7 @@ class Controller:
             number=sanitized_number
         ).pop()
 
+
         blacklisted = cherrypy.engine.publish(
             "asterisk:is_blacklisted",
             number=sanitized_number
@@ -87,8 +88,11 @@ class Controller:
             limit=50
         ).pop()
 
-        if call_history and not caller_id:
-            caller_id = call_history[0][0]["clid"]
+        if not caller_id:
+            try:
+                caller_id = call_history[0][0]["clid"]
+            except:
+                caller_id = None
 
         return {
             "html": ("phone.html", {

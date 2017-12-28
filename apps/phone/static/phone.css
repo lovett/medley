@@ -3,6 +3,10 @@
     text-align: left;
 }
 
+.content-wrapper {
+    padding-bottom: 2em;
+}
+
 .cancel {
     margin-left: 2em;
 }
@@ -20,6 +24,7 @@
 }
 
 .flex-item {
+    max-width: 50%;
     min-width: 17em;
     background-color: #fff;
     border: 1px solid #ccc;

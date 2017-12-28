@@ -29,7 +29,10 @@
     <div class="content-wrapper flex-parent">
         <div class="flex-item">
             <section>
-                <h2>Caller ID</h2>
+                <h2>
+                    Caller ID
+
+                </h2>
 
                 <div id="caller-id-display">
                     <p id="callerid-display-value">
@@ -85,19 +88,17 @@
             <h2>Search</h2>
             <p>{{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
         </div>
-        <div class="flex-item">
-            <h2>Location</h2>
-            {% if state_name %}
-            <p>{{ state_name }}</p>
-            {% else %}
-            <p>Unknown</p>
-            {% endif %}
-
-            {% if comment %}
-            <p>{{ comment }}</p>
-            {% endif %}
-        </div>
     </div>
+
+    {% if state_name %}
+    <div class="content-wrapper">
+        <h2>Location</h2>
+        {% if comment %}
+        <p>{{ comment }}</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
     {% if history|length > 0 %}
     <div class="content-wrapper">
         <h2>History</h2>
@@ -119,15 +120,7 @@
                         {{ entry["date"]|localtime("time12")}}
                     </td>
                     <td>
-                        {% if entry["direction"] == "incoming" %}
-                        ⬅️
-                        {{ entry["direction"] }} call from
-                        <a href="?number={{ entry["src"] }}">{{ entry["src"]|phonenumber }}</a>
-                        {% else %}
-                        ➡️
-                        {{ entry["direction"] }} call to
-                        <a href="?number={{ entry["dst"] }}">{{ entry["dst"]|phonenumber }}</a>
-                        {% endif %}
+                        {{ entry["direction"] }}
                     </td>
                     <td>
                         {{ entry["duration"] }}
