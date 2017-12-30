@@ -1,7 +1,15 @@
 .content-wrapper {
     margin: auto;
-    padding: 1em;
+    padding: 1em 0;
     max-width: 500px;
+}
+
+.field {
+    padding-bottom: 2em;
+}
+
+INPUT[type=checkbox] {
+    padding-right: 1em;
 }
 
 .content-wrapper H1 {
@@ -61,4 +69,33 @@
 
 .band {
     background-color: lightskyblue;
+}
+
+.template-container {
+    margin-bottom: 2em;
+    padding-bottom: 2em;
+    border-bottom: 1px solid #ccc;
+}
+
+.template-container .template {
+    background-color: #666;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: .25em;
+    padding: 1em;
+    display: inline-block;
+    text-decoration: none;
+}
+
+.template-container .template:hover,
+.template-container .template:active {
+    color: #666;
+    background-color: #fff;
+}
+
+.template-container .delete-template {
+    display: inline-block;
+    text-align: right;
+    background-color: pinkp;
+    box-sizing: border-box;
 }

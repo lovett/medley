@@ -44,54 +44,44 @@
     </div>
     {% endif %}
 
-
     <div class="content-wrapper">
 
         <form id="reminder-form" method="post" action="{{ url }}">
             <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
 
             {% if templates %}
-            <div class="field">
-                <label for="template">Templates:</label>
-                <select id="template" name="template">
-                    <option value=""></option>
-                    {% for id, template in templates.items() %}
-                    <option value="" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">{{ template.message }}</option>
-                    {% endfor %}
-                </select>
-
-                <span id="template-options" class="hidden smaller">
-                    <a id="delete-template" href="#">
-                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                    </a>
-                </span>
+            {% for id, template in templates.items() %}
+            <div class="template-container">
+                <a href="#" class="delete-template" data-uid="{{ id }}">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </a>
+                <a class="template" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
+                    {{ template.message }} - {{ template.minutes|pluralize('minute', 'minutes') }}
+                </a>
+                    </span>
             </div>
+            {% endfor %}
             {% endif %}
 
             <div class="field">
-                <label for="message">Message:</label>
+                <label for="message">Message</label>
                 <input type="text" id="message" name="message" value="{{ message|default('', true)|e }}"/>
             </div>
 
             <div class="field">
-                <p>Send:</p>
-                <div class="half-column">
-                    <div class="field">
-                        in
-                        <input type="text" class="inline" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
-                        minutes
-                    </div>
-                </div>
+                Send in
+                <input type="text" class="inline" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
+                minutes
             </div>
 
             <div class="field">
-                <label for="comments">Comments:</label>
+                <label for="comments">Comments</label>
                 <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
             </div>
 
             <div class="field">
-                <input class="inline" type="checkbox" id="remember" name="remember" value="1" />
-                <label for="remember" class="inline">Save this as a template for future use</later>
+                <input type="checkbox" id="remember" name="remember" value="1" />
+                <label for="remember" class="inline">Make this a template</later>
             </div>
 
             <div class="field">

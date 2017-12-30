@@ -6,8 +6,7 @@ MEDLEY.reminders = (function () {
     function deleteTemplate(e) {
         var option, uid;
         e.preventDefault();
-        option = jQuery('#template option:selected');
-        uid = parseInt(option.data('uid'), 10) || 0;
+        uid = parseInt(jQuery(this).data('uid'), 10) || 0;
 
         jQuery.ajax({
             type: 'DELETE',
@@ -103,19 +102,20 @@ MEDLEY.reminders = (function () {
 
     return {
         init: function () {
-            jQuery('#template').on('change', function () {
-                var option = jQuery('option:selected', this);
+            jQuery('.template').on('click', function () {
+                var template = jQuery(this);
                 jQuery('INPUT, TEXTAREA').each(function () {
                     var id = this.getAttribute('id');
-                    var val = option.data(id);
+                    var val = template.data(id);
                     if (val) {
                         jQuery(this).val(val);
                     }
                 });
-                jQuery('#template-options').removeClass('hidden');
+
+                jQuery('#reminder-form').submit();
             });
 
-            jQuery('#delete-template').on('click', deleteTemplate);
+            jQuery('.delete-template').on('click', deleteTemplate);
             jQuery('.delete-reminder').on('click', deleteReminder);
 
             times = jQuery('time').map(function() {
