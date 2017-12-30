@@ -15,29 +15,39 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self):
 
-        templates = cherrypy.engine.publish(
+        registry_rows = cherrypy.engine.publish(
             "registry:search",
             self.registry_key,
             exact=True,
         ).pop()
 
-        template_dict = {t["rowid"]: parse_qs(t["value"]) for t in templates}
+        templates = {
+            row["rowid"]: {k: v[-1] for k, v in parse_qs(row["value"]).items()}
+            for row in registry_rows
+        }
 
         upcoming = cherrypy.engine.publish("scheduler:upcoming", "notifier:send").pop()
 
         return {
             "html": ("reminder.html", {
                 "app_name": self.name,
-                "templates": template_dict,
+                "templates": templates,
                 "upcoming": upcoming,
                 "url": cherrypy.engine.publish("url:for_controller", self).pop()
             }),
         }
 
-    def POST(self, message, minutes=None, comments=None, remember=0, template=0):
+    def POST(self, message, minutes=None, comments=None, remember=None, template=None):
 
-        if minutes:
+        try:
             minutes = int(minutes)
+        except:
+            minutes = 0
+
+        try:
+            remember = int(remember)
+        except:
+            remember = 0
 
         notification = {
             "group": "medley",
@@ -52,16 +62,12 @@ class Controller:
             notification
         )
 
-        if remember:
-            remember = int(remember)
-
         if remember == 1:
             registry_value = urlencode({
                 "message": message,
                 "minutes": minutes,
                 "comments": comments,
             })
-            print(registry_value)
 
             cherrypy.engine.publish(
                 "registry:add",
@@ -70,6 +76,8 @@ class Controller:
             )
 
         redirect_url = cherrypy.engine.publish("url:for_controller", self).pop()
+
+        print(redirect_url)
         raise cherrypy.HTTPRedirect(redirect_url)
 
     def DELETE(self, uid):

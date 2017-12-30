@@ -107,7 +107,10 @@ MEDLEY.reminders = (function () {
                 var option = jQuery('option:selected', this);
                 jQuery('INPUT, TEXTAREA').each(function () {
                     var id = this.getAttribute('id');
-                    jQuery(this).val(option.data(id));
+                    var val = option.data(id);
+                    if (val) {
+                        jQuery(this).val(val);
+                    }
                 });
                 jQuery('#template-options').removeClass('hidden');
             });
