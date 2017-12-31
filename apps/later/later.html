@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/later/static/later.css" />
+{{ macros.cacheBustedStylesheet('later', 'later.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/later/static/later.js"></script>
+{{ macros.cacheBustedScript('later', 'later.js') }}
 {% endblock %}
 
 

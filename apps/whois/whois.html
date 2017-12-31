@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block scripts %}
 {% if ip %}
 <script src="https://www.google.com/jsapi"></script>
-<script src="/shared/static/js/maps.js"></script>
+{{ macros.cacheBustedScript('shared', 'js/maps.js') }}
 {% endif %}
 {% endblock %}
 

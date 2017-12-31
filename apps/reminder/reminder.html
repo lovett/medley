@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block page_meta %}
 <meta name="lang.time.hour" content="hour,hours" />
@@ -8,11 +9,11 @@
 {% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/reminder/static/reminder.css" />
+{{ macros.cacheBustedStylesheet('reminder', 'reminder.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/reminder/static/reminder.js"></script>
+{{ macros.cacheBustedScript('reminder', 'reminder.js') }}
 {% endblock %}
 
 

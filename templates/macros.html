@@ -5,9 +5,9 @@
 {% endmacro %}
 
 {% macro cacheBustedStylesheet(app, file_name) %}
-<link rel="stylesheet" type="text/css" href="{{ '/{}/static/css/{}'.format(app, file_name)|cache_bust }}" />
+<link rel="stylesheet" type="text/css" href="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}" />
 {% endmacro %}
 
 {% macro cacheBustedScript(app, file_name) %}
-<script src="{{ '/{}/static/js/{}'.format(app, file_name)|cache_bust }}"></script>
+<script src="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}"></script>
 {% endmacro %}

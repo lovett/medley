@@ -1,19 +1,20 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block page_meta %}
 <meta name="active_date" content="{{ active_date }}" />
 {% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/visitors/static/jquery-ui.min.css" />
-<link rel="stylesheet" type="text/css" href="/visitors/static/jquery-ui.theme.min.css" />
-<link rel="stylesheet" type="text/css" href="/visitors/static/visitors.css" />
+{{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.min.css') }}
+{{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.theme.min.css') }}
+{{ macros.cacheBustedStylesheet('visitors', 'visitors.css') }}
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/1.3.0/css/flag-icon.min.css" />
 {% endblock %}
 
 {% block scripts %}
-<script src="/visitors/static/jquery-ui.min.js"></script>
-<script src="/visitors/static/visitors.js"></script>
+{{ macros.cacheBustedScript('visitors', 'jquery-ui.min.js') }}
+{{ macros.cacheBustedScript('visitors', 'visitors.js') }}
 {% endblock %}
 
 {% block svg_defs %}

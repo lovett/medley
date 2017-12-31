@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% macro bookmarklet_url(url, label) -%}
 {% if not url.startswith("http") %}
@@ -8,7 +9,7 @@
 {%- endmacro %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ app_url }}/static/css/bookmarklets.css" />
+{{ macros.cacheBustedStylesheet('bookmarklets', 'css/bookmarklets.css') }}
 {% endblock %}
 
 {% block scripts %}

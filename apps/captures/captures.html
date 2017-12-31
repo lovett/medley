@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% macro selectAll(target) -%}
 <a href="#" data-selection-target="#{{ target }}" class="select-all">Select All</a>
 {%- endmacro %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/captures/static/captures.css" />
+{{ macros.cacheBustedStylesheet('captures', 'captures.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/shared/static/js/select-all.js"></script>
+{{ macros.cacheBustedScript('shared', 'js/select-all.js') }}
 {% endblock %}
 
 {% block page_body %}

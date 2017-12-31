@@ -1,7 +1,8 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block scripts %}
-<script src="/shared/static/js/select-all.js"></script>
+{{ macros.cacheBustedScript('shared', 'js/select-all.js') }}
 {% endblock %}
 
 {% block page_body %}

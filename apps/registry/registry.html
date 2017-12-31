@@ -2,12 +2,12 @@
 {% import "macros.html" as macros %}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/registry/static/registry.css" />
+{{ macros.cacheBustedStylesheet('registry', 'registry.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/registry/static/registry.js"></script>
-<script src="/shared/static/js/copy-to-clipboard.js"></script>
+{{ macros.cacheBustedScript('registry', 'registry.js') }}
+{{ macros.cacheBustedScript('shared', 'js/copy-to-clipboard.js') }}
 {% endblock %}
 
 

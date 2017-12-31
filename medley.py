@@ -96,6 +96,7 @@ def main():
             },
         }
 
+        # The homepage app is unique. Its app name is not its url.
         app_path = "/{}".format(app)
         if app == "homepage":
             app_path = "/"
@@ -103,7 +104,13 @@ def main():
         # An app can optionally have a dedicated directory for static assets
         static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
-            app_config["/static"] = {
+
+            # The homepage app is unique. Its static path is not under its app path.
+            static_url = "/static"
+            if app_path == "/":
+                static_url = "/homepage/static"
+
+            app_config[static_url] = {
                 "tools.gzip.on": True,
                 "tools.gzip.mime_types": ["text/*", "application/*"],
                 "tools.staticdir.on": True,

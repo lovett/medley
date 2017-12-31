@@ -1,12 +1,13 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/static/homepage.css" />
+{{ macros.cacheBustedStylesheet('homepage', 'homepage.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/shared/static/js/focus-as-you-type.js"></script>
-<script src="/static/homepage.js"></script>
+{{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
+{{ macros.cacheBustedScript('homepage', 'homepage.js') }}
 {% endblock %}
 
 {% block page_body %}

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% import "macros.html" as macros -%}
 
 {% block stylesheets %}
-<link rel="stylesheet" type="text/css" href="/phone/static/phone.css" />
+{{ macros.cacheBustedStylesheet('phone', 'phone.css') }}
 {% endblock %}
 
 {% block scripts %}
-<script src="/phone/static/phone.js"></script>
+{{ macros.cacheBustedScript('phone', 'phone.js') }}
 {% endblock %}
 
 {% block page_body %}
