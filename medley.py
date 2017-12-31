@@ -58,7 +58,8 @@ def main():
     log_dir = cherrypy.config.get("log_dir")
     cherrypy.config.update({
         "log.access_file": os.path.join(log_dir, "access.log"),
-        "log.error_file": os.path.join(log_dir, "error.log")
+        "log.error_file": os.path.join(log_dir, "error.log"),
+        "app_root": app_root
     })
 
     # Directory creation
@@ -141,6 +142,7 @@ def main():
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.capture.Plugin(cherrypy.engine).subscribe()
     plugins.cdr.Plugin(cherrypy.engine).subscribe()
+    plugins.checksum.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.geography.Plugin(cherrypy.engine).subscribe()

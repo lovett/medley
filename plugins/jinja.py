@@ -67,6 +67,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["phonenumber"] = self.phonenumber_filter
         self.env.filters["snorql"] = self.snorql_filter
         self.env.filters["percentage"] = self.percentage_filter
+        self.env.filters["cache_bust"] = self.cache_bust_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -313,3 +314,9 @@ class Plugin(plugins.SimplePlugin):
             return str(round(value * 100)) + "%"
 
         return str(value) + "%"
+
+    @jinja2.contextfilter
+    def cache_bust_filter(self, context, url):
+        abs_path = cherrypy.config.get("app_root") + url
+        checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
+        return "{}?{}".format(url, checksum)
