@@ -50,17 +50,18 @@
             <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
 
             {% if templates %}
-            {% for id, template in templates.items() %}
             <div class="template-container">
-                <a href="#" class="delete-template" data-uid="{{ id }}">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                </a>
-                <a class="template" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
-                    {{ template.message }} - {{ template.minutes|pluralize('minute', 'minutes') }}
-                </a>
-                    </span>
+                <p>
+                    {% for id, template in templates.items() %}
+                    <a href="#" class="delete-template" data-uid="{{ id }}">
+                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                    </a>
+                    <a class="template" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
+                        {{ template.message }} - {{ template.minutes|pluralize('minute', 'minutes') }}
+                    </a>
+                </p>
+                {% endfor %}
             </div>
-            {% endfor %}
             {% endif %}
 
             <div class="field">
