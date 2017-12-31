@@ -131,9 +131,22 @@ TABLE.key-value TH {
     text-align: right;
 }
 
-.bookmarklet-container A {
+.bookmarklet-container a {
+    display: inline-block;
+    background-color: #666;
+    border: 1px solid #666;
+    color: #fff;
+    padding: .5em 2em;
+    border-radius: .25em;
     text-decoration: none;
 }
+
+.bookmarklet-container a:hover,
+.bookmarklet-container a:active {
+    background-color: #fff;
+    color: #666;
+}
+
 
 .content-wrapper {
     width: 75%;

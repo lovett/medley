@@ -11,3 +11,5 @@
 {% macro cacheBustedScript(app, file_name) %}
 <script src="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}"></script>
 {% endmacro %}
+
+{% set bookmarkletIcon = "🔖" %}

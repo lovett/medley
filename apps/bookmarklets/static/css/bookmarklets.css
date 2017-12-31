@@ -6,7 +6,6 @@
 
 dd {
     margin-bottom: 2em;
-    margin-left: 1.5em;
 }
 
 dt {
@@ -15,4 +14,13 @@ dt {
 
 dt a {
     text-decoration: none;
+}
+
+.bookmarklet-container {
+    text-align: left;
+}
+
+.bookmarklet-container a {
+    min-width: 8em;
+    text-align: center;
 }

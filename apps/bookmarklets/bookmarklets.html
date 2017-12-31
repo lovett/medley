@@ -5,7 +5,9 @@
 {% if not url.startswith("http") %}
 {% set url = app_url + "/static/js/" + url %}
 {% endif %}
-<a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">▶️ {{ label }}</a>
+<div class="bookmarklet-container">
+    <a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">{{ macros.bookmarkletIcon }}️ {{ label }}</a>
+</div>
 {%- endmacro %}
 
 {% block stylesheets %}
