@@ -102,7 +102,7 @@ MEDLEY.reminders = (function () {
 
     return {
         init: function () {
-            jQuery('.template').on('click', function () {
+            jQuery('.summary').on('click', function () {
                 var template = jQuery(this);
                 jQuery('INPUT, TEXTAREA').each(function () {
                     var id = this.getAttribute('id');

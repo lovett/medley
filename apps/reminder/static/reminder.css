@@ -23,7 +23,19 @@ INPUT[type=checkbox] {
 }
 
 .upcoming-reminder {
-    padding-bottom: 1em;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: flex-start;
+    margin-bottom: 2em;
+}
+
+.upcoming-reminder:last-of-type {
+    margin-bottom: 1em;
+}
+
+
+.upcoming-reminder .summary {
+    flex-grow: 1;
 }
 
 .upcoming-reminder.done {
@@ -36,10 +48,20 @@ INPUT[type=checkbox] {
 }
 
 .upcoming-reminder .delete-reminder {
-    float: left;
     text-decoration: none;
     line-height: 2;
 }
+
+.icon-bin {
+    padding: .5em;
+    margin-right: .5em;
+    border-radius: .25em;
+}
+.icon-bin:hover, .icon-bin:active {
+    fill: #fff;
+    background-color: red;
+}
+
 
 .upcoming-reminder p {
     margin: 0;
@@ -78,24 +100,25 @@ INPUT[type=checkbox] {
 }
 
 .template-container .template {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-bottom: .5em;
+}
+
+.template-container .summary {
+    flex-grow: 1;
     background-color: #666;
     color: #fff;
     border: 1px solid #666;
     border-radius: .25em;
     padding: 1em;
-    display: inline-block;
     text-decoration: none;
+    display: inline-block
 }
 
-.template-container .template:hover,
-.template-container .template:active {
+.template-container .summary:hover,
+.template-container .summary:active {
     color: #666;
     background-color: #fff;
-}
-
-.template-container .delete-template {
-    display: inline-block;
-    text-align: right;
-    background-color: pinkp;
-    box-sizing: border-box;
 }

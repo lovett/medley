@@ -31,12 +31,13 @@
                 <a class="delete-reminder" data-uid="{{ event.time }}" href="#">
                     <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                 </a>
-                <time datetime="{{ event.time * 1000 }}">
-                    {{ event.time|localtime(format="time12_short") }}
-                </time>
-                {{ event.argument[1].title }}
-                <p class="remaining smaller">calculating time remaining...</p>
-
+                <div class="summary">
+                    <time datetime="{{ event.time * 1000 }}">
+                        {{ event.time|localtime(format="time12_short") }}
+                    </time>
+                    {{ event.argument[1].title }}
+                    <p class="remaining smaller">calculating time remaining...</p>
+                </div>
             </div>
 
             {% endfor %}
@@ -52,15 +53,17 @@
 
             {% if templates %}
             <div class="template-container">
-                <p>
-                    {% for id, template in templates.items() %}
+                {% for id, template in templates.items() %}
+                <div class="template">
                     <a href="#" class="delete-template" data-uid="{{ id }}">
                         <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                     </a>
-                    <a class="template" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
-                        {{ template.message }} - {{ template.minutes|pluralize('minute', 'minutes') }}
+                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
+                        {{ template.message }}
+                        <br/>
+                        <span class="smaller">{{ template.minutes|pluralize('minute', 'minutes') }}</span>
                     </a>
-                </p>
+                </div>
                 {% endfor %}
             </div>
             {% endif %}
