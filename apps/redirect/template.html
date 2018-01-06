@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros -%}
+
+{% block stylesheets %}
+{{ macros.cacheBustedStylesheet('template', 'template.css') }}
+{% endblock %}
+
+{% block scripts %}
+{{ macros.cacheBustedScript('template', 'template.js') }}
+{% endblock %}
+
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper">
+        <p>HTML goes here.</p>
+    </div>
+</main>
+{% endblock %}

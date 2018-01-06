@@ -68,6 +68,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["snorql"] = self.snorql_filter
         self.env.filters["percentage"] = self.percentage_filter
         self.env.filters["cache_bust"] = self.cache_bust_filter
+        self.env.filters["escapejs"] = self.escapejs_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -320,3 +321,20 @@ class Plugin(plugins.SimplePlugin):
         abs_path = cherrypy.config.get("app_root") + url
         checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
         return "{}?{}".format(url, checksum)
+
+    @jinja2.contextfilter
+    def escapejs_filter(self, context, val):
+        return str(val).translate({
+            ord('\\'): '\\u005C',
+            ord('\''): '\\u0027',
+            ord('"'): '\\u0022',
+            ord('>'): '\\u003E',
+            ord('<'): '\\u003C',
+            ord('&'): '\\u0026',
+            ord('='): '\\u003D',
+            ord('-'): '\\u002D',
+            ord(';'): '\\u003B',
+            ord('`'): '\\u0060',
+            ord('\u2028'): '\\u2028',
+            ord('\u2029'): '\\u2029'
+        })

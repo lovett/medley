@@ -1,0 +1,8 @@
+# No url
+GET http://127.0.0.1:8085/redirect
+
+# Unencoded URL
+GET http://127.0.0.1:8085/redirect?http://example.com
+
+# Encoded URL
+GET http://127.0.0.1:8085/redirect?http%3A%2F%2Fexample.com

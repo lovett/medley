@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros -%}
+
+{% block page_meta %}
+{# Referer policy, see http://caniuse.com/#feat=referrer-policy #}
+<meta name="referrer" content="same-origin" />
+{% endblock %}
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper align-center">
+        {% if not dest %}
+
+        <p>No destination specified. Cannot redirect.</p>
+
+        {% endif %}
+
+        {% if dest %}
+        <p>Redirecting to {{ dest }}...</p>
+
+        <script>
+            setTimeout(function () {
+                window.location.replace('{{ dest|escapejs }}' + window.location.hash);
+            }, 500);
+        </script>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
