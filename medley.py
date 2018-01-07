@@ -10,6 +10,8 @@ helps each application stay relatively small.
 """
 
 import importlib
+import logging
+import logging.config
 import os
 import os.path
 import cherrypy
@@ -55,10 +57,7 @@ def main():
     # Derived configuration
     #
     # Some configuration values are set automatically.
-    log_dir = cherrypy.config.get("log_dir")
     cherrypy.config.update({
-        "log.access_file": os.path.join(log_dir, "access.log"),
-        "log.error_file": os.path.join(log_dir, "error.log"),
         "app_root": app_root
     })
 
@@ -172,6 +171,33 @@ def main():
     cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.template = tools.template.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
+
+    # Logging
+    log_dir = cherrypy.config.get("log_dir")
+    access_log_path = os.path.join(log_dir, "access.log")
+    error_log_path = os.path.join(log_dir, "error.log")
+
+    error_log_handler = logging.handlers.TimedRotatingFileHandler(
+        error_log_path,
+        when="D",
+        interval=1,
+        backupCount=14,
+        encoding="utf8"
+    )
+    error_log_handler.setLevel(logging.INFO)
+    error_log_handler.setFormatter(cherrypy._cplogging.logfmt)
+    cherrypy.log.error_log.addHandler(error_log_handler)
+
+    access_log_handler = logging.handlers.TimedRotatingFileHandler(
+        access_log_path,
+        when="D",
+        interval=1,
+        backupCount=14,
+        encoding="utf8"
+    )
+    access_log_handler.setLevel(logging.INFO)
+    access_log_handler.setFormatter(cherrypy._cplogging.logfmt)
+    cherrypy.log.access_log.addHandler(access_log_handler)
 
     cherrypy.engine.start()
     cherrypy.engine.block()
