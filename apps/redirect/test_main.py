@@ -32,7 +32,7 @@ class TestTemplate(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
         template_vars = self.extract_template_vars(renderMock)
 
         self.assertEqual(template_vars["app_name"], apps.redirect.main.Controller.name)
-        self.assertEqual(template_vars["dest"], "")
+        self.assertEqual(template_vars["dest"], None)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     def test_encodedDestination(self, renderMock):

@@ -11,17 +11,14 @@ class Controller:
     user_facing = True
 
     @cherrypy.tools.negotiable()
-    def GET(self, **kwargs):
-        dest = cherrypy.request.query_string
-        if "u" in kwargs:
-            dest = kwargs["u"]
+    def GET(self, u=None):
 
-        if "%3A" in dest:
-            dest = urllib.parse.unquote_plus(dest)
+        if u is not None:
+            u = urllib.parse.unquote_plus(u)
 
         return {
             "html": ("redirect.html", {
                 "app_name": self.name,
-                "dest": dest
+                "dest": u
             })
         }

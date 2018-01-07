@@ -12,7 +12,7 @@
     <div class="content-wrapper align-center">
         {% if not dest %}
 
-        <p>No destination specified. Cannot redirect.</p>
+        <p>Cannot redirect because a destination was not specified.</p>
 
         {% endif %}
 
@@ -22,7 +22,7 @@
         <script>
             setTimeout(function () {
                 window.location.replace('{{ dest|escapejs }}' + window.location.hash);
-            }, 500);
+            });
         </script>
         {% endif %}
     </div>
