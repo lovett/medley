@@ -9,7 +9,7 @@ server.socket_port: 8085
 server.daemonize: True
 server.pid: "/var/run/medley.pid"
 tools.conditional_auth.on: False
-tools.conditional_auth.whitelist: ("127.0.0.1")
+tools.conditional_auth.whitelist: "192.168.0"
 users: {"medley":"medley"}
 request.show_tracebacks: True
 memorize_checksums: True
