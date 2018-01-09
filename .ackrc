@@ -1,0 +1,11 @@
+--ignore-dir=venv
+--ignore-dir=cache
+--ignore-dir=coverage
+--ignore-dir=logs
+--ignore-dir=db
+--ignore-dir=__pycache__
+--ignore-file=ext:pyc
+--type-add=app:match:/apps/
+--type-add=plugin:match:/plugins/
+--type-add=tool:match:/tools/
+--type-add=ansible:match:/ansible/
