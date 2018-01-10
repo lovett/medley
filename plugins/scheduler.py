@@ -28,7 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         args should be a plugin command and arguments it expects. When
         the job is ready to execute, it will be as if
-        cherrpy.engine.publish had been called directly"""
+        cherrypy.engine.publish had been called directly"""
 
         return self.scheduler.enter(delay_seconds, 1, self.execute, args, kwargs)
 
