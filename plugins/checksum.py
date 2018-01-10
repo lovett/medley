@@ -9,15 +9,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe("checksum:file", self.calculate)
+        self.bus.subscribe("checksum:file", self.byPath)
+        self.bus.subscribe("checksum:string", self.byString)
 
     def stop(self):
         pass
 
-    def calculate(self, path):
+    def byString(self, val):
+        result = zlib.adler32(bytes(val, "utf-8"), 0)
+        result_hash = '%x' % (result & 0xFFFFFFFF)
+        return result_hash
+
+    def byPath(self, path):
         memorized_hash = cherrypy.engine.publish("memorize:get", path).pop()
         if memorized_hash[0] == True:
-            print("Cache hit!")
             return memorized_hash[1]
 
         result = 0
@@ -27,7 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         result_hash = '%x' % (result & 0xFFFFFFFF)
 
         if cherrypy.config.get("memorize_checksums") == True:
-            print("Cache write!")
             cherrypy.engine.publish(
                 "memorize:set",
                 path, result_hash
