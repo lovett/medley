@@ -17,6 +17,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         sqlite3.register_converter("naive_date", self.naiveDate)
         sqlite3.register_converter("duration", self.duration)
         sqlite3.register_converter("clid", self.callerid)
+        sqlite3.register_converter("int", self.int)
 
     def stop(self):
         pass
@@ -71,3 +72,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return msgpack.unpackb(blob, encoding='utf-8')
         except msgpack.exceptions.ExtraData:
             return pickle.loads(blob)
+
+    def int(self, val):
+        return int(val)

@@ -4,10 +4,8 @@ import time
 import re
 import fnmatch
 import os.path
-import util.parse
 import util.decorator
 import hashlib
-import apps.logindex.models
 from collections import namedtuple
 
 GrepResult = namedtuple("GrepResult", "matches count limit")
@@ -59,7 +57,7 @@ def appengine_log_grep(logdir, filters, offsets=None, limit=50):
         if include and len(matches) + len(matches_in_file) > limit:
             return 1
 
-        fields = util.parse.appengine(line)
+        fields = {}
         matches_in_file.append(fields)
         return 0
 

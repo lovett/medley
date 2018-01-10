@@ -1,7 +1,6 @@
 import re
 import cherrypy
 import util.fs
-import apps.logindex.models
 from datetime import datetime, timedelta
 
 class Controller:

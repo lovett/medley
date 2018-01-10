@@ -41,6 +41,13 @@ class Sqlite:
         # cannot return lastrowid because it is not populated during executemany
         return True
 
+    def _update(self, query, values):
+        con = self._open()
+        with con:
+            con.executemany(query, values)
+        con.close()
+        return True
+
     def _delete(self, query, values):
         con = self._open()
         with con:
