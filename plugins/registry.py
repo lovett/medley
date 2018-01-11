@@ -29,7 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def find(self, uid):
         return self._selectOne(
-            "SELECT rowid, key, value, created as 'created [created]' FROM registry WHERE rowid=?",
+            "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE rowid=?",
             (uid,)
         )
 
@@ -46,7 +46,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False):
         params = []
 
-        sql = "SELECT rowid, key, value, created as 'created [created]' FROM registry WHERE (1) "
+        sql = "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE (1) "
 
         if len(keys) > 0:
             sql += "AND key IN ("

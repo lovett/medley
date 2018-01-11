@@ -45,7 +45,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search(self, search, limit=20):
         sql = """SELECT id, request_line, request as 'request [binary]',
-        response as 'response [binary]', created as 'created [created]'
+        response as 'response [binary]', created as 'created [datetime]'
         FROM captures
         WHERE request_line LIKE ?
         ORDER BY created DESC
@@ -57,7 +57,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def recent(self, limit=50):
         sql = """SELECT id, request_line, request as 'request [binary]',
-        response as 'response [binary]', created as 'created [created]'
+        response as 'response [binary]', created as 'created [datetime]'
         FROM captures
         ORDER BY created DESC
         LIMIT ?"""

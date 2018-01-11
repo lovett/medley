@@ -29,7 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.prune(key)
 
-        row = self._selectOne("SELECT value as 'value [binary]', created as 'created [created]' FROM cache WHERE key=?", (key,))
+        row = self._selectOne("SELECT value as 'value [binary]', created as 'created [datetime]' FROM cache WHERE key=?", (key,))
 
         if "value" in row.keys():
             cherrypy.engine.publish("app-log", "cache", "hit", key)

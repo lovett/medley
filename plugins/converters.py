@@ -6,25 +6,36 @@ import pytz
 import pytz
 import re
 import sqlite3
+from ua_parser import user_agent_parser
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        sqlite3.register_converter("created", self.date)
+        sqlite3.register_converter("datetime", self.datetime)
+        sqlite3.register_converter("useragent", self.useragent)
         sqlite3.register_converter("binary", self.binary)
         sqlite3.register_converter("naive_date", self.naiveDate)
         sqlite3.register_converter("duration", self.duration)
         sqlite3.register_converter("clid", self.callerid)
-        sqlite3.register_converter("int", self.int)
 
     def stop(self):
         pass
 
-    def date(self, s):
-        d = datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
-        return pytz.utc.localize(d)
+    def datetime(self, s):
+        s = s.decode("utf-8")
+        try:
+            d = datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S")
+            return pytz.utc.localize(d)
+        except ValueError:
+            last_colon_index = s.rindex(":")
+            date = s[:last_colon_index] + s[last_colon_index + 1:]
+            return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S%z")
+
+    def useragent(self, s):
+        s = s.decode("utf-8")
+        return user_agent_parser.Parse(s)
 
     def naiveDate(self, s):
         return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
@@ -72,6 +83,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return msgpack.unpackb(blob, encoding='utf-8')
         except msgpack.exceptions.ExtraData:
             return pickle.loads(blob)
-
-    def int(self, val):
-        return int(val)

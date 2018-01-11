@@ -40,7 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate a record by a unique identifier"""
 
         sql = """SELECT u.rowid, u.url, u.domain, m.title,
-            u.created as 'created [created]', m.tags, m.comments
+            u.created as 'created [datetime]', m.tags, m.comments
             FROM urls u, meta m WHERE u.rowid=m.url_id"""
 
         if uid:
@@ -80,12 +80,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search(self, search):
         sql = """SELECT u.rowid, u.url, u.domain, m.title,
-            u.created as 'created [created]', m.tags, m.comments
+            u.created as 'created [datetime]', m.tags, m.comments
             FROM urls u, meta m WHERE u.rowid=m.url_id AND meta MATCH ?
             ORDER BY u.created DESC"""
         return self._select(sql, (search,))
 
     def recent(self, limit=100):
         sql = """SELECT u.rowid, u.url, u.domain, m.title, case when m.fulltext is
-        null then 0 else 1 end as has_fulltext, u.created as 'created [created]', m.tags, m.comments, 'bookmark' as record_type FROM urls u, meta m WHERE u.rowid=m.url_id ORDER BY u.created DESC LIMIT ?"""
+        null then 0 else 1 end as has_fulltext, u.created as 'created [datetime]', m.tags, m.comments, 'bookmark' as record_type FROM urls u, meta m WHERE u.rowid=m.url_id ORDER BY u.created DESC LIMIT ?"""
         return self._select(sql, (limit,))
