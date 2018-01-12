@@ -85,3 +85,8 @@ TR.expandable.expanded {
 .actions A {
     margin-left: 3em;
 }
+
+.delete {
+    margin-left: 1em;
+    vertical-align: top;
+}

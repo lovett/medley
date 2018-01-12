@@ -75,7 +75,7 @@ MEDLEY.visitors = (function () {
 
     resetQueryMenu = function (e) {
         jQuery('#saved').val('');
-        jQuery('.actions .delete').addClass('hidden');
+        jQuery('.delete').addClass('hidden');
     };
 
     saveQuery = function (e) {
@@ -102,26 +102,8 @@ MEDLEY.visitors = (function () {
                 'value': jQuery('#q').val(),
                 'replace': true
             }
-        }).done(function (data) {
-            var newOpt, opts;
-            opts = jQuery('#saved OPTION').detach();
-            opts = opts.filter(function () {
-                return jQuery(this).text() !== data.key;
-            });
-
-            console.log(data);
-            newOpt = jQuery('<option></option>');
-            newOpt.attr('data-id', data.uid);
-            newOpt.attr('value', jQuery('#q').val());
-            newOpt.text(name.toLowerCase());
-
-            opts = opts.add(newOpt);
-            opts.sort(function (a, b) {
-                return $(a).text() > $(b).text()? 1:-1;
-            });
-            jQuery('#saved').html(opts);
-            newOpt.attr('selected', true);
-            jQuery('#saved-queries').removeClass('hidden');
+        }).done(function () {
+            jQuery('#submit').trigger('click');
         });
     };
 
@@ -146,9 +128,8 @@ MEDLEY.visitors = (function () {
             type: 'DELETE',
             url: '/registry/' + selectedOption.attr('data-id')
         }).done(function (data) {
-            selectedOption.remove();
             jQuery('#q').val('');
-            resetQueryMenu();
+            jQuery('#submit').trigger('click');
         });
     }
 
@@ -206,13 +187,19 @@ MEDLEY.visitors = (function () {
                 query = jQuery(this).val();
                 multiline = queryToMultiline(query);
                 jQuery('#q').val(multiline);
-                jQuery('#submit').focus();
-                jQuery('.actions .delete').removeClass('hidden');
+                jQuery('#submit').trigger('click');
+
+                jQuery('.delete').removeClass('hidden');
             });
 
-            jQuery('.actions .delete').on('click', deleteSavedQuery);
+            jQuery('.delete').on('click', deleteSavedQuery);
 
             jQuery('#matches').on('click', 'A.calc-delta', calculateDelta);
+
+            if (jQuery('#saved').val() !== '' && jQuery('#saved option:selected').text() !== 'default') {
+                jQuery('.delete').removeClass('hidden');
+            }
+
 
             jQuery('#datepicker').datepicker({
                 'dateFormat': 'yy-mm-dd',

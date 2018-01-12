@@ -45,15 +45,20 @@
 
 <main>
     <div class="content-wrapper">
-        <form method="get" action="/visitors">
+        <form method="get" action="{{ app_url }}">
             <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
                 <label for="saved">Saved Queries</label>
                 <select id="saved">
                     <option value=""></option>
                     {% for query in saved_queries %}
-                    <option data-id="{{ query.rowid }}" value="{{ query.value }}" {% if query.key == active_query %}selected="selected"{% endif %}>{{ query.key|replace("visitors:", "") }}</option>
+                    <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
                     {% endfor %}
                 </select>
+
+                <a href="#" class="delete hidden">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </a>
+
             </div>
 
             <div class="two-third-column">
@@ -71,15 +76,10 @@
 
             <div class="field actions">
                 <button id="submit">Run query</button>
-                <a id="save" href="#save" rel="noreferrer">Save query</a>
-
-                <a href="#" class="delete hidden" rel="noreferrer">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                    Delete query
-                </a>
+                <a id="save" href="#save">Save query</a>
             </div>
 
-            </div>
+    </div>
         </form>
     </div>
 
@@ -93,13 +93,6 @@
     {% if results|count > 0 %}
     <div class="content-wrapper">
         <div class="table-top">
-            <div class="left">
-                {% if result_limit < total_matches %}
-                Showing {{ result_limit }} of {{ total_matches|pluralize("match", "matches") }}
-                {% else %}
-                Showing {{ total_matches|pluralize("match", "matches") }}
-                {% endif %}
-            </div>
             <div class="right">
                 <a id="matches-master-toggle" class="master-toggle" href="#" rel="noreferrer"><span class="label">expand</a> all</a>
             </div>
@@ -118,23 +111,31 @@
                     </tr>
                 </thead>
                 <tbody>
+
+
                     {% for result in results %}
+
+                    {% if loop.first %}
+                    {% set prev_ip = None %}
+                    {% set prev_agent = None %}
+                    {% set prev_date = None %}
+                    {% endif %}
                     <tr class="result code-{{ result.statusCode }}">
                         {% if result.ip == prev_ip %}
                         <td></td>
                         {% else %}
                         <td>
-                            <div class="flag-icon flag-icon-{{ result.ip_facts.geo.country_code|lower()}}"></div>
+                            <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
 
                             <p>
-                                {% if result.ip_facts.geo.city %}
-                                {{ result.ip_facts.geo.city|default("", true) }}<br/>
+                                {% if result.city %}
+                                {{ result.city|default("", true) }}<br/>
                                 {% endif %}
 
-                                {% if result.ip_facts.geo.country_code == "US" %}
-                                {{ result.ip_facts.geo.region_code|default("", true) }}
+                                {% if result.country == "US" %}
+                                {{ result.region|default("", true) }}
                                 {% else %}
-                                {{ result.ip_facts.geo.country_name|default("", true) }}
+                                {{ result.country|default("", true) }}
                                 {% endif %}
                             </p>
                         </td>
@@ -145,28 +146,28 @@
                         {% else %}
                         <td>
                             <p><a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">{{ result.ip|truncate(25, true) }}</a></p>
-                            {% if result.ip_facts.organization %}
-                            <p>{{ result.ip_facts.organization }}</p>
+                            {% if result.organization %}
+                            <p>{{ result.organization }}</p>
                             {% endif %}
 
-                            {% if result.ip_facts.annotations|count == 0 %}
+                            {% if result.annotations|count == 0 %}
                             <p class="annotation" data-id=""></p>
                             {% endif %}
 
-                            {% for annotation in result.ip_facts.annotations %}
+                            {% for annotation in result.annotations %}
                             <p class="annotation" data-id="{{ annotation[1] }}">{{ annotation[0] }}</p>
                             {% endfor %}
 
                         </td>
-			<td>
-			    <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
+                        <td>
+                            <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
                                 <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
                             </a>
                             <a href="#annotate" data-ip="{{ result.ip }}" class="annotate-ip" title="Annotate this ip">
                                 <svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg>
                             </a>
 
-			</td>
+                        </td>
                         {% endif %}
                         <td nowrap="nowrap">
                             <p>
@@ -178,7 +179,9 @@
                                 {{ result.timestamp|localtime('time12') }}
                             </p>
 
-                            <p class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ result.delta}}">Δ <span class="value">{{ result.delta }}</span> <span class="label"></span></p>
+                            <p class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ deltas[loop.index]}}">
+                                Δ <span class="value">{{ deltas[loop.index] }}</span>
+                                <span class="label"></span>
                             </p>
 
                         </td>
@@ -213,25 +216,23 @@
                             <p class="meta">
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.timestamp|ago() }}
-                                {% if result.ip_facts.geo.time_zone %}
-                                at {{ result.timestamp|localtime('time12', result.ip_facts.geo.time_zone) }} local time
+                                {% if result.time_zone %}
+                                at {{ result.timestamp|localtime('time12', result.time_zone) }} local time
                                 {% endif %}
                             </p>
 
-                            <p class="wordwrap"><code>{{ result.line }}</code></p>
+                            <p class="wordwrap"><code>{{ result.logline }}</code></p>
                         </td>
                     </tr>
 
                     {% set prev_ip = result.ip %}
                     {% set prev_agent = result.agent %}
                     {% set prev_date = result.timestamp|localtime('date') %}
+                    {% set prev_timestamp_unix = result.timestamp_unix %}
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-
-        <p>This query ran in {{ duration|round(4) }} seconds</p>
-
         {% endif %}
     </div>
 </main>
