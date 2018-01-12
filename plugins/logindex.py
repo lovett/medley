@@ -22,22 +22,53 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
 
-        self.table_fields = "year, month, day, hour, timestamp, timestamp_unix, checksum, source_file, source_offset, ip, host, uri, query, statusCode, method, agent, country, city, cookie, referrer_domain, logline"
+
         self._create("""
         CREATE TABLE IF NOT EXISTS logs (
-            {},
+            year integer,
+            month integer,
+            day integer,
+            hour integer,
+            timestamp,
+            timestamp_unix integer,
+            checksum,
+            source_file,
+            source_offset integer,
+            ip,
+            ip_reverse_host,
+            organization,
+            host,
+            uri,
+            query,
+            statusCode integer,
+            method,
+            agent,
+            classification,
+            country,
+            region,
+            city,
+            postal_code,
+            latitude real,
+            longitude real,
+            cookie,
+            referrer_domain,
+            logline,
             UNIQUE(checksum)
         );
+        CREATE INDEX IF NOT EXISTS index_year ON logs(year);
+        CREATE INDEX IF NOT EXISTS index_month ON logs(month);
+        CREATE INDEX IF NOT EXISTS index_day ON logs(day);
         CREATE INDEX IF NOT EXISTS index_ip ON logs(ip);
         CREATE INDEX IF NOT EXISTS index_host ON logs(host);
         CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
         CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
         CREATE INDEX IF NOT EXISTS index_method ON logs(method);
         CREATE INDEX IF NOT EXISTS index_agent ON logs(agent);
+        CREATE INDEX IF NOT EXISTS index_classification ON logs(classification);
         CREATE INDEX IF NOT EXISTS index_country ON logs(country);
         CREATE INDEX IF NOT EXISTS index_city ON logs(city);
         CREATE INDEX IF NOT EXISTS index_cookie ON logs(cookie);
-        """.format(self.table_fields))
+        """)
 
     def start(self):
         self.bus.subscribe('logindex:files', self.fileList)
@@ -45,6 +76,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:schedule_parse', self.scheduleParse)
+        self.bus.subscribe('logindex:query', self.query)
         self.scheduleParse()
 
     def stop(self):
@@ -187,8 +219,9 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         update_sql = """
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
-        timestamp_unix=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?,
-        agent=?, country=?, city=?, cookie=?, referrer_domain=?
+        timestamp_unix=?, ip=?, ip_reverse_host=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
+        agent=?, classification=?, country=?, region=?, city=?, latitude=?, longitude=?, postal_code=?, cookie=?,
+        referrer_domain=?
         WHERE rowid=?"""
 
         records = self._select(select_sql, ())
@@ -196,6 +229,18 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         for record in records:
             fields = cherrypy.engine.publish("parse:appengine", record["logline"]).pop()
+
+            ip_facts = cherrypy.engine.publish("ip:facts", fields["ip"]).pop()
+            geo = ip_facts.get("geo")
+
+            fields["country"] = fields["country"] or geo.get("country_code")
+            fields["region"] = fields["region"] or geo.get("region_code")
+            fields["city"] = fields["city"] or geo.get("city")
+            fields["latitude"] = fields["latitude"] or geo.get("latitude")
+            fields["longitude"] = fields["latitude"] or geo.get("longitude")
+            fields["postal_code"] = geo.get("postal_code")
+            fields["ip_reverse_host"] = ip_facts.get("reverse_host")
+            fields["organization"] = ip_facts.get("organization")
 
             values = (
                 fields.get("year"),
@@ -205,14 +250,21 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("timestamp"),
                 fields.get("timestamp_unix"),
                 fields.get("ip"),
+                fields.get("ip_reverse_host"),
+                fields.get("organization"),
                 fields.get("host"),
                 fields.get("uri"),
                 fields.get("query"),
                 fields.get("statusCode"),
                 fields.get("method"),
                 fields.get("agent"),
+                fields.get("classification"),
                 fields.get("country"),
+                fields.get("region"),
                 fields.get("city"),
+                fields.get("latitude"),
+                fields.get("longitude"),
+                fields.get("postal_code"),
                 fields.get("cookie"),
                 fields.get("referrer_domain"),
                 record["rowid"]
@@ -235,3 +287,13 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             self._insert(sql, records)
 
         return len(records)
+
+    def query(self, q):
+        sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]", timestamp_unix,
+        ip, ip_reverse_host, organization, host, uri, query, statusCode, method, agent as "agent [useragent]",
+        country, region, city, postal_code, latitude, longitude, cookie, referrer_domain, logline
+        FROM logs WHERE """
+
+        sql += cherrypy.engine.publish("parse:log_query", q).pop()
+
+        return self._select(sql, ())
