@@ -289,11 +289,15 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         return len(records)
 
     def query(self, q):
-        sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]", timestamp_unix,
-        ip, ip_reverse_host, organization, host, uri, query, statusCode, method, agent as "agent [useragent]",
-        country, region, city, postal_code, latitude, longitude, cookie, referrer_domain, logline
-        FROM logs WHERE """
 
-        sql += cherrypy.engine.publish("parse:log_query", q).pop()
+        parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
+
+        sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
+        timestamp_unix, ip, ip_reverse_host, organization, host, uri, query, statusCode,
+        method, agent as "agent [useragent]", country, region, city, postal_code, latitude,
+        longitude, cookie, referrer_domain, logline
+        FROM logs
+        WHERE {}
+        ORDER BY timestamp_unix DESC""".format(parsed_query)
 
         return self._select(sql, ())
