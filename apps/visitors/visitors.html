@@ -135,7 +135,7 @@
                                 {% if result.country == "US" %}
                                 {{ result.region|default("", true) }}
                                 {% else %}
-                                {{ result.country|default("", true) }}
+                                {{ country_names[result.country] }}
                                 {% endif %}
                             </p>
                         </td>

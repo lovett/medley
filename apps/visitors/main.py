@@ -58,11 +58,20 @@ class Controller:
                 delta = 0
             deltas.append(delta)
 
+
+        countries = {record["country"] for record in log_records}
+
+        country_names = {
+            country: cherrypy.engine.publish("geography:country_by_abbreviation", country).pop()
+            for country in countries
+        }
+
         return {
             "html": ("visitors.html", {
                 "q": q,
                 "active_date": active_date,
                 "results": log_records,
+                "country_names": country_names,
                 "deltas": deltas,
                 "site_domains": site_domains,
                 "saved_queries": saved_queries,
