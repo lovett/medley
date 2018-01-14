@@ -68,11 +68,8 @@ class Plugin(plugins.SimplePlugin):
                 # relative date
                 (Literal("date") + oneOf("today yesterday")).setParseAction(self.logQueryRelativeDate),
 
-                # date in yyyy-mm-dd format
-                (Literal("date") + self.date10).setParseAction(self.logQueryAbsoluteDate),
-
-                # date in yyyy-mm format
-                (Literal("date") + self.date7).setParseAction(self.logQueryYearMonth),
+                # absolute date in yyyy-mm-dd or yyyy-mm format
+                (Literal("date") + OneOrMore(self.date10 | self.date7)).setParseAction(self.logQueryAbsoluteDate),
 
                 # numeric fields
                 (oneOf("year month day hour statusCode") +
@@ -131,19 +128,25 @@ class Plugin(plugins.SimplePlugin):
 
 
     def logQueryAbsoluteDate(self, s, l, t):
-        full_date = t[1]
-        year = int(full_date[0])
-        month = int(full_date[1])
-        day = int(full_date[2])
+        field = t[0]
 
-        return "year={} AND month={} AND day={}".format(year, month, day)
+        dates = t[1:]
 
-    def logQueryYearMonth(self, s, l, t):
-        full_date = t[1]
-        year = int(full_date[0])
-        month = int(full_date[1])
+        sql = []
+        for date in dates:
+            year = int(date[0])
+            month = int(date[1])
 
-        return "year={} AND month={}".format(year, month)
+            if len(date) == 2:
+                sql.append("(year={} AND month={})".format(year, month))
+
+            if len(date) == 3:
+                day = int(date[2])
+                sql.append("(year={} AND month={} AND day={})".format(year, month, day))
+
+        joined_sql = " OR ".join(sql)
+        return "({})".format(joined_sql)
+
 
     def logQueryNumeric(self, s, l, t):
         field = t[0]
