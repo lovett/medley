@@ -111,7 +111,7 @@ MEDLEY.visitors = (function () {
         var query;
         query = jQuery('#q').val();
 
-        query = query.trim().replace(/date.*\d{4}-\d{2}-\d{2}\s+/gm, '');
+        query = query.trim().replace(/^\s*date.*\s*/g, '');
         query = 'date ' + dateText + '\n' + query;
         jQuery('#q').val(query);
         jQuery('#submit').trigger('click');
