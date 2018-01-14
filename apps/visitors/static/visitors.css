@@ -90,3 +90,7 @@ TR.expandable.expanded {
     margin-left: 1em;
     vertical-align: top;
 }
+
+#matches {
+    margin-bottom: 5em;
+}

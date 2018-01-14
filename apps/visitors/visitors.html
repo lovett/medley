@@ -103,7 +103,7 @@
                 <thead>
                     <tr>
                         <th>Location</th>
-                        <th colspan="2">IP</th>
+                        <th>IP</th>
                         <th>Date</th>
                         <th>Request</th>
                         <th>Code</th>
@@ -115,15 +115,11 @@
 
                     {% for result in results %}
 
-                    {% if loop.first %}
-                    {% set prev_ip = None %}
-                    {% set prev_agent = None %}
-                    {% set prev_date = None %}
-                    {% endif %}
+                    {% set new_ip = loop.changed(result.ip) %}
+                    {% set new_agent = (loop.previtem and loop.previtem.agent != result.agent) %}
+
                     <tr class="result code-{{ result.statusCode }}">
-                        {% if result.ip == prev_ip %}
-                        <td></td>
-                        {% else %}
+                        {% if new_ip %}
                         <td>
                             <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
 
@@ -139,36 +135,35 @@
                                 {% endif %}
                             </p>
                         </td>
-                        {% endif %}
-
-                        {% if result.ip == prev_ip %}
-                        <td colspan="2"></td>
-                        {% else %}
                         <td>
-                            <p><a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">{{ result.ip|truncate(25, true) }}</a></p>
+                            <p>
+                                <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
+                                    {{ result.ip|truncate(25, true) }}
+                                </a>
+                            </p>
+
                             {% if result.organization %}
                             <p>{{ result.organization }}</p>
+
                             {% endif %}
 
                             {% for annotation in annotations.get(result.ip, ()) %}
                             <p class="annotation" data-id="">{{ annotation }}</p>
                             {% endfor %}
 
-                            {% for annotation in result.annotations %}
-                            <p class="annotation" data-id="{{ annotation[1] }}">{{ annotation[0] }}</p>
-                            {% endfor %}
-
-                        </td>
-                        <td>
                             <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
                                 <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
                             </a>
+
                             <a href="#annotate" data-ip="{{ result.ip }}" class="annotate-ip" title="Annotate this ip">
                                 <svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg>
                             </a>
 
                         </td>
+                        {% else %}
+                        <td colspan="2"></td>
                         {% endif %}
+
                         <td nowrap="nowrap">
                             <p>
                                 <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#" rel="noreferrer">
@@ -190,9 +185,10 @@
                                 <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                             </p>
 
-                            {% if result.agent != prev_agent %}
+
+                            {% if new_agent %}
                             <p>
-                                {{ result.agent|useragent()|truncate(50) }}
+                                {{ result.agent|useragent() }}
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
                                 <br/>
                                 Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
@@ -212,7 +208,7 @@
                         </td>
                     </tr>
                     <tr class="expandable">
-                        <td colspan="7">
+                        <td colspan="6">
                             <p class="meta">
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.timestamp|ago() }}
@@ -224,11 +220,6 @@
                             <p class="wordwrap"><code>{{ result.logline }}</code></p>
                         </td>
                     </tr>
-
-                    {% set prev_ip = result.ip %}
-                    {% set prev_agent = result.agent %}
-                    {% set prev_date = result.timestamp|localtime('date') %}
-                    {% set prev_timestamp_unix = result.timestamp_unix %}
                     {% endfor %}
                 </tbody>
             </table>
