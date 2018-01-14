@@ -1,5 +1,6 @@
 import cherrypy
 from . import mixins
+from collections import defaultdict
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
@@ -43,7 +44,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
              [(key, value) for value in values]
         )
 
-    def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False):
+    def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False, as_multivalue_dict=False, key_slice=None):
         params = []
 
         sql = "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE (1) "
@@ -52,6 +53,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             sql += "AND key IN ("
             sql += ", ".join("?" * len(keys))
             sql += ") "
+            params = keys
         elif key:
             fuzzy = "*" in key
 
@@ -85,6 +87,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if as_dict:
             result = {row["key"]: row["value"] for row in result}
+
+        if as_multivalue_dict:
+            d = defaultdict(list)
+
+            for row in result:
+                k = row["key"]
+                if key_slice:
+                    sliced_key = k.split(":")[key_slice:]
+                    k = ":".join(sliced_key)
+                d[k].append(row["value"])
+            result = d
 
         if as_value_list:
             result = [row["value"] for row in result]

@@ -66,6 +66,16 @@ class Controller:
             for country in countries
         }
 
+        ips = {record["ip"] for record in log_records}
+        annotation_keys = tuple("ip:{}".format(ip) for ip in ips)
+
+        annotations = cherrypy.engine.publish(
+            "registry:search",
+            keys=annotation_keys,
+            as_multivalue_dict=True,
+            key_slice=1
+        ).pop()
+
         return {
             "html": ("visitors.html", {
                 "q": q,
@@ -76,6 +86,7 @@ class Controller:
                 "site_domains": site_domains,
                 "saved_queries": saved_queries,
                 "app_name": self.name,
+                "annotations": annotations,
                 "app_url": cherrypy.engine.publish("url:for_controller", self).pop()
             })
         }

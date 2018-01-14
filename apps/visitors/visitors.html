@@ -150,9 +150,9 @@
                             <p>{{ result.organization }}</p>
                             {% endif %}
 
-                            {% if result.annotations|count == 0 %}
-                            <p class="annotation" data-id=""></p>
-                            {% endif %}
+                            {% for annotation in annotations.get(result.ip, ()) %}
+                            <p class="annotation" data-id="">{{ annotation }}</p>
+                            {% endfor %}
 
                             {% for annotation in result.annotations %}
                             <p class="annotation" data-id="{{ annotation[1] }}">{{ annotation[0] }}</p>
