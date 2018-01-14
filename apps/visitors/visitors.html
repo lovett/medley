@@ -147,9 +147,11 @@
 
                             {% endif %}
 
-                            {% for annotation in annotations.get(result.ip, ()) %}
-                            <p class="annotation" data-id="">{{ annotation }}</p>
-                            {% endfor %}
+                            <div class="annotations">
+                                {% for annotation in annotations.get(result.ip, ()) %}
+                                <p>{{ annotation }}</p>
+                                {% endfor %}
+                            </div>
 
                             <a href="/whois/{{ result.ip }}" target="_blank" title="View whois details for this ip" rel="noreferrer">
                                 <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>

@@ -140,22 +140,18 @@ MEDLEY.visitors = (function () {
 
         message = 'Enter a label for this IP';
 
-        node = jQuery(e.target).closest('TR').find('.annotation').first();
+        node = jQuery(e.target).closest('TD').find('.annotations P').first();
 
-        existingValue = node.text();
+        if (node.length === 0) {
+            node = jQuery('<p></p>');
+            jQuery(e.target).closest('TD').find('.annotations').append(node);
+        }
+
+        existingValue = jQuery.trim(node.text());
 
         newValue = jQuery.trim(prompt('Enter a label for this IP', existingValue));
 
-        if (newValue === '' && existingValue !== '') {
-            jQuery.ajax({
-                type: 'DELETE',
-                url: '/registry/' + node.attr('data-id')
-            }).done(function (data) {
-                node.text('');
-                node.attr('data-id', '');
-            });
-            return;
-        } else if (newValue === '') {
+        if (newValue === '' || newValue === existingValue) {
             return;
         }
 
@@ -170,7 +166,6 @@ MEDLEY.visitors = (function () {
             }
         }).done(function (data) {
             node.text(newValue);
-            node.attr('data-id', data.uid);
         });
     }
 
