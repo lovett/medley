@@ -55,13 +55,65 @@ class Sqlite:
         con.close()
         return rows
 
-    def _select(self, query, values):
+    def _select(self, query, values, cacheable=False):
         con = self._open()
         con.row_factory = sqlite3.Row
+
+        if cacheable:
+            cache_table = self._cacheTable(query)
+            all_tables = self._tableNames()
+            if cache_table in all_tables:
+                query = "SELECT * FROM {}".format(cache_table)
+                values = ()
+
         with con:
             cur = con.cursor()
             cur.execute(query, values)
             return cur.fetchall() or []
+
+    def _cacheTable(self, query):
+        """The name of the table that will cache results for the specified query"""
+        checksum = cherrypy.engine.publish("checksum:string", query).pop()
+        return "cache_{}".format(checksum)
+
+
+    def _tableNames(self):
+        result = self._select(
+            "SELECT name FROM sqlite_master WHERE type=?",
+            ("table",)
+        )
+        return [row["name"] for row in result]
+
+
+    def _dropCacheTables(self):
+        """Remove all existing cache tables"""
+        delete_queries = [
+            ("DROP TABLE {}".format(table), ())
+            for table in self._tableNames()
+            if table.startswith("cache_")
+        ]
+
+        self._multi(delete_queries)
+
+    def _selectToCache(self, query, values):
+        """Send the results of a query to a cache table
+
+        This is the sqlite way of doing "select into"
+        """
+        cache_table = self._cacheTable(query)
+
+        con = self._open()
+        with con:
+            cur = con.cursor()
+
+            # This delete is redundant with _dropCacheTables(), but it allows
+            # a single cache to be cleaned up, instead of all of them.
+            cur.execute("DROP TABLE IF EXISTS {}".format(cache_table))
+
+            cur.execute(
+                "CREATE TABLE {} AS {}".format(cache_table, query),
+                values
+            )
 
     def _selectOne(self, query, values=()):
         result = self._select(query, values)

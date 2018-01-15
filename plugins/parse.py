@@ -267,5 +267,4 @@ class Plugin(plugins.SimplePlugin):
         result = self.logquery_grammar.parseString(val).asList()
 
         sql = " AND ".join(result)
-        print(sql)
         return sql

@@ -77,6 +77,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:schedule_parse', self.scheduleParse)
         self.bus.subscribe('logindex:query', self.query)
+        self.bus.subscribe('logindex:precache', self.preCache)
         self.scheduleParse()
 
     def stop(self):
@@ -160,13 +161,17 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         row = self._selectOne(sql)
 
         if row["total"] == 0:
-            return
-
-        cherrypy.engine.publish(
-            "scheduler:add",
-            5,
-            "logindex:parse"
-        )
+            cherrypy.engine.publish(
+                "scheduler:add",
+                10,
+                "logindex:precache"
+            )
+        else:
+            cherrypy.engine.publish(
+                "scheduler:add",
+                10,
+                "logindex:parse"
+            )
 
     def enqueue(self, dt, batch_size=100):
         """Add log lines to the database for later parsing"""
@@ -288,8 +293,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         return len(records)
 
-    def query(self, q):
-
+    def query(self, q, for_precache=False):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
@@ -300,4 +304,19 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)
 
-        return self._select(sql, ())
+        if for_precache:
+            return self._selectToCache(sql, ())
+        else:
+            return self._select(sql, (), cacheable=True)
+
+    def preCache(self):
+        saved_queries = cherrypy.engine.publish(
+            "registry:search",
+            "visitors*",
+            key_slice=1
+        ).pop()
+
+        self._dropCacheTables()
+
+        for query in saved_queries:
+            self.query(query["value"], for_precache=True)
