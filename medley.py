@@ -142,6 +142,8 @@ def main():
             ).subscribe()
 
     # Plugins
+    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
+
     plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.asterisk.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
@@ -165,7 +167,6 @@ def main():
     plugins.memorize.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
     plugins.url.Plugin(cherrypy.engine).subscribe()
-    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
