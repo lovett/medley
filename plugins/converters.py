@@ -6,7 +6,6 @@ import pytz
 import pytz
 import re
 import sqlite3
-from ua_parser import user_agent_parser
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     def __init__(self, bus):
@@ -14,7 +13,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self):
         sqlite3.register_converter("datetime", self.datetime)
-        sqlite3.register_converter("useragent", self.useragent)
         sqlite3.register_converter("binary", self.binary)
         sqlite3.register_converter("naive_date", self.naiveDate)
         sqlite3.register_converter("duration", self.duration)
@@ -32,10 +30,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             last_colon_index = s.rindex(":")
             date = s[:last_colon_index] + s[last_colon_index + 1:]
             return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S%z")
-
-    def useragent(self, s):
-        s = s.decode("utf-8")
-        return user_agent_parser.Parse(s)
 
     def naiveDate(self, s):
         return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")

@@ -80,9 +80,9 @@ class Plugin(plugins.SimplePlugin):
                 (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-"))).setParseAction(self.logQueryWildcard),
 
                 # string fields
-                (oneOf("city country region postal_code classification method cookie uri") +
+                (oneOf("city country region postal_code classification method cookie uri agent_domain agent_type agent_family agent_platform") +
                  self.optionalNot +
-                 OneOrMore(Word(alphanums))).setParseAction(self.logQueryExactString),
+                 OneOrMore(Word(alphanums + "."))).setParseAction(self.logQueryExactString),
 
                 # ip
                 (Literal("ip") + self.optionalNot + OneOrMore(self.ipv4 | self.ipv6)).setParseAction(self.logQueryExactString)

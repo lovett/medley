@@ -122,7 +122,6 @@
                     {% for result in results %}
 
                     {% set new_ip = loop.changed(result.ip) %}
-                    {% set new_agent = (loop.previtem and loop.previtem.agent != result.agent) %}
 
                     <tr class="result code-{{ result.statusCode }}">
                         {% if new_ip %}
@@ -198,13 +197,22 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                    {{ result.method }} {{ result.uri|truncate(30, True) }}
+                                </a>
                             </p>
 
 
-                            {% if new_agent %}
+                            {% if new_ip %}
                             <p>
-                                {{ result.agent|useragent() }}
+                                {% if result.agent_family and result.agent_domain %}
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Aagent_domain+{{ result.agent_domain }}">
+                                    {{ result.agent_family }}
+                                </a>
+                                {% else %}
+                                {{ result.agent_family }} {{ result.agent_platform }}
+                                {% endif %}
+
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
                                 <br/>
                                 Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>

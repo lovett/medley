@@ -5,7 +5,9 @@ from collections import defaultdict
 import fnmatch
 import os.path
 import zlib
+import re
 from . import mixins
+from ua_parser import user_agent_parser
 
 class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
@@ -42,7 +44,10 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             query,
             statusCode integer,
             method,
-            agent,
+            agent_domain,
+            agent_type,
+            agent_family,
+            agent_platform,
             classification,
             country,
             region,
@@ -63,7 +68,10 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
         CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
         CREATE INDEX IF NOT EXISTS index_method ON logs(method);
-        CREATE INDEX IF NOT EXISTS index_agent ON logs(agent);
+        CREATE INDEX IF NOT EXISTS index_agent_domain ON logs(agent_domain);
+        CREATE INDEX IF NOT EXISTS index_agent_type ON logs(agent_type);
+        CREATE INDEX IF NOT EXISTS index_agent_family ON logs(agent_family);
+        CREATE INDEX IF NOT EXISTS index_agent_platform ON logs(agent_platform);
         CREATE INDEX IF NOT EXISTS index_classification ON logs(classification);
         CREATE INDEX IF NOT EXISTS index_country ON logs(country);
         CREATE INDEX IF NOT EXISTS index_city ON logs(city);
@@ -225,9 +233,11 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         update_sql = """
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
         timestamp_unix=?, ip=?, ip_reverse_host=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
-        agent=?, classification=?, country=?, region=?, city=?, latitude=?, longitude=?, postal_code=?, cookie=?,
-        referrer_domain=?
+        agent_domain=?, agent_type=?, agent_family=?, agent_platform=?, classification=?, country=?, region=?, city=?,
+        latitude=?, longitude=?, postal_code=?, cookie=?, referrer_domain=?
         WHERE rowid=?"""
+
+        print("parsing...")
 
         records = self._select(select_sql, ())
         batch = []
@@ -247,6 +257,27 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             fields["ip_reverse_host"] = ip_facts.get("reverse_host")
             fields["organization"] = ip_facts.get("organization")
 
+            agent_url_matches = re.search("https?://(.*?)[/; ]", fields.get("agent", ""))
+
+            if agent_url_matches:
+                fields["agent_domain"] = agent_url_matches.group(1).lower()
+            else:
+                fields["agent_domain"] = None
+
+            parsed_agent = user_agent_parser.Parse(fields.get("agent", ""))
+            fields["agent_type"] = parsed_agent.get("device", {}).get("family", None)
+            fields["agent_family"] = parsed_agent.get("user_agent", {}).get("family", None)
+            fields["agent_platform"] = parsed_agent.get("os", {}).get("family", None)
+
+            if fields["agent_type"] == "Other":
+                fields["agent_type"] = None
+
+            if fields["agent_family"] == "Other":
+                fields["agent_family"] = None
+
+            if fields["agent_platform"] == "Other":
+                fields["agent_platform"] = None
+
             values = (
                 fields.get("year"),
                 fields.get("month"),
@@ -262,7 +293,10 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("query"),
                 fields.get("statusCode"),
                 fields.get("method"),
-                fields.get("agent"),
+                fields.get("agent_domain"),
+                fields.get("agent_type"),
+                fields.get("agent_family"),
+                fields.get("agent_platform"),
                 fields.get("classification"),
                 fields.get("country"),
                 fields.get("region"),
@@ -298,8 +332,8 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
         timestamp_unix, ip, ip_reverse_host, organization, host, uri, query, statusCode,
-        method, agent as "agent [useragent]", country, region, city, postal_code, latitude,
-        longitude, cookie, referrer_domain, logline
+        method, agent_domain, agent_type, agent_family, agent_platform, country, region,
+        city, postal_code, latitude, longitude, cookie, referrer_domain, logline
         FROM logs
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)

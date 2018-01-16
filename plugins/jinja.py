@@ -55,7 +55,6 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["ago"] = self.ago_filter
         self.env.filters["localtime"] = self.localtime_filter
         self.env.filters["unindent"] = self.unindent_filter
-        self.env.filters["useragent"] = self.useragent_filter
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
         self.env.filters["pluralize"] = self.pluralize_filter
@@ -161,25 +160,6 @@ class Plugin(plugins.SimplePlugin):
         indents.remove(0)
         unindented = [line.replace(" ", "", min(indents)) for line in lines]
         return "\n".join(unindented)
-
-    def useragent_filter(self, agent):
-        """Format the object returned by ua-parser into a string"""
-        out = ""
-
-        if not agent:
-            return ""
-
-        if agent["device"]["family"] == "Spider":
-            return agent["user_agent"]["family"]
-
-        family = agent["user_agent"]["family"]
-        version = agent["user_agent"]["major"]
-        os = agent["os"]["family"]
-
-        if family and version and os:
-            return "{} {}, {}".format(family, version, os)
-
-        return agent["string"]
 
     def status_message_filter(self, code):
         """Returns the standard status code message for the given integer"""
