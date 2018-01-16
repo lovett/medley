@@ -1,16 +1,12 @@
 {% extends "base.html" %}
 {% import "macros.html" as macros -%}
 
-{% macro selectAll(target) -%}
-<a href="#" data-selection-target="#{{ target }}" class="select-all">Select All</a>
-{%- endmacro %}
-
 {% block stylesheets %}
 {{ macros.cacheBustedStylesheet('captures', 'captures.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('shared', 'js/select-all.js') }}
+{{ macros.cacheBustedScript('shared', 'js/copy-to-clipboard.js') }}
 {% endblock %}
 
 {% block page_body %}
@@ -40,35 +36,36 @@
 
             <div class="half-column">
                 <section>
+                    <div class="options">
+                        {{ macros.copyToClipboardBySelector("#reqhead-" ~ loop.index) }}
+                    </div>
                     <h2>Request Headers</h2>
-                    <p class="options">
-                        {{ selectAll("reqhead-" ~ loop.index) }}
-                    </p>
 
                     <code id="reqhead-{{ loop.index }}">
+{#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
                     {{- capture.request_line }}
-                    {% for key, value in capture.request.headers.items() -%}
-                    {{ key }}: {{ value }}
-                    {% endfor -%}
+{%  for key, value in capture.request.headers.items() -%}
+{{ key }}: {{ value }}
+{% endfor -%}
                     </code>
                 </section>
 
                 {% if capture.request.params %}
                 <section>
+                    <div class="options">
+                        {{ macros.copyToClipboardBySelector("#reqbodyparam-" ~ loop.index) }}
+                    </div>
                     <h2>Request body</h2>
-                    <p class="options">
-                        {{ selectAll("reqbodyparam-" ~ loop.index) }}
-                    </p>
                     <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
                 </section>
                 {% endif %}
 
                 {% if capture.request.json %}
                 <section>
+                    <div class="options">
+                        {{ macros.copyToClipboardBySelector("#reqbodyjson-" ~ loop.index) }}
+                    </div>
                     <h2>Request Body </h2>
-                    <p class="options">
-                        {{ selectAll("reqbodyjson-" ~ loop.index) }}
-                    </p>
 
                     <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
                 </section>

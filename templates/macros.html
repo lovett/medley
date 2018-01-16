@@ -1,5 +1,11 @@
-{% macro copyToClipboard(value, light=False) %}
-<a class="copy-to-clipboard" data-copytarget="{{ value }}" href="#">
+{% macro copyToClipboard(value=None, light=False) %}
+<a class="copy-to-clipboard" data-copytarget="{{ value }}" data-copyselector="{{ selector }}" href="#">
+    <svg class="icon icon-copy {% if light %}light{% endif %}"><use xlink:href="#icon-copy"></use></svg>
+</a>
+{% endmacro %}
+
+{% macro copyToClipboardBySelector(value=None, light=False) %}
+<a class="copy-to-clipboard" data-copyselector="{{ value }}" href="#">
     <svg class="icon icon-copy {% if light %}light{% endif %}"><use xlink:href="#icon-copy"></use></svg>
 </a>
 {% endmacro %}
