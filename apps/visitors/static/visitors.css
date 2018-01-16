@@ -94,3 +94,12 @@ TR.expandable.expanded {
 #matches {
     margin-bottom: 5em;
 }
+
+.next-actions a {
+    margin-right: 1em;
+}
+
+.next-actions svg {
+    padding: .5em .5em .5em 0;
+    fill: #666;
+}
