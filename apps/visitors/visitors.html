@@ -198,7 +198,7 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }},include+{{result.method}}+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
+                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">{{ result.method }} {{ result.uri|truncate(30, True) }}</a>
                             </p>
 
 
