@@ -3,6 +3,8 @@ import ipaddress
 import os.path
 import pygeoip
 import socket
+from collections import defaultdict
+import re
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
 
@@ -16,7 +18,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         pass
 
     def facts(self, ip):
-        facts = {}
+        facts = defaultdict()
 
         address = ipaddress.ip_address(ip)
 
@@ -61,15 +63,58 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             region_code = geodb_record.get("region_code")
             if map_region == "US" and region_code:
                 map_region += "-" + region_code
+            facts["map_region"] = map_region
         except:
-            map_region = None
+            pass
 
-        facts["map_region"] = map_region
+        # Reverse host and domain
+        #
+        # These are treated as separate values because the reverse host
+        # may embed the IP (reversed or otherwise). The non-IP parts are
+        # the more interesting ones.
 
-        try:
-            facts["reverse_host"] = socket.gethostbyaddr(ip)[0]
-        except:
-            facts["reverse_host"] = None
+        reverse_host = socket.getfqdn(ip)
+
+        if reverse_host != ip:
+            # Reverse by IPv4 quads (12.34.56.78 becomes 78.56.34.21)
+            quads = ip.split(".")
+            reversed_ip = ".".join(quads[::-1])
+            zero_filled_quads = tuple(map(lambda x: x.zfill(3), quads))
+
+            ip_representations = {
+                ip,
+                ip.replace(".", ""),
+                ip.replace(".", "-"),
+                ip.replace(":", ""),
+                ip.replace(":", "-"),
+                reversed_ip,
+                reversed_ip.replace(".", ""),
+                reversed_ip.replace(".", "-"),
+                ".".join(zero_filled_quads),
+                "".join(zero_filled_quads),
+            }
+
+            filtered_reverse_host = reverse_host
+            replacement_placeholder = "~PLACEHOLDER~"
+            for rep in ip_representations:
+                filtered_reverse_host = filtered_reverse_host.replace(
+                    rep, replacement_placeholder
+                )
+
+            if "netvigator.com" in reverse_host or "versatel" in reverse_host:
+                print("Ip is {}".format(ip))
+                print(ip_representations)
+                print(filtered_reverse_host)
+
+            filtered_segments = filter(
+                lambda x: replacement_placeholder not in x,
+                filtered_reverse_host.split(".")
+            )
+
+            reverse_domain = ".".join(filtered_segments)
+
+            facts["reverse_host"] = reverse_host
+            facts["reverse_domain"] = reverse_domain
 
 
         return facts

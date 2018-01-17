@@ -38,6 +38,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             source_offset integer,
             ip,
             ip_reverse_host,
+            ip_reverse_domain,
             organization,
             host,
             uri,
@@ -64,6 +65,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_month ON logs(month);
         CREATE INDEX IF NOT EXISTS index_day ON logs(day);
         CREATE INDEX IF NOT EXISTS index_ip ON logs(ip);
+        CREATE INDEX IF NOT EXISTS index_ip_reverse_domain ON logs(ip_reverse_domain);
         CREATE INDEX IF NOT EXISTS index_host ON logs(host);
         CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
         CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
@@ -169,12 +171,14 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         row = self._selectOne(sql)
 
         if row["total"] == 0:
+            print("Scheduling a precache")
             cherrypy.engine.publish(
                 "scheduler:add",
                 10,
                 "logindex:precache"
             )
         else:
+            print("Scheduling a parse")
             cherrypy.engine.publish(
                 "scheduler:add",
                 10,
@@ -232,7 +236,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         update_sql = """
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
-        timestamp_unix=?, ip=?, ip_reverse_host=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
+        timestamp_unix=?, ip=?, ip_reverse_host=?, ip_reverse_domain=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
         agent_domain=?, agent_type=?, agent_family=?, agent_platform=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer_domain=?
         WHERE rowid=?"""
@@ -242,11 +246,21 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         records = self._select(select_sql, ())
         batch = []
 
+        ip_facts_cache = {}
+        agent_cache = {}
+
         for record in records:
             fields = cherrypy.engine.publish("parse:appengine", record["logline"]).pop()
 
-            ip_facts = cherrypy.engine.publish("ip:facts", fields["ip"]).pop()
-            geo = ip_facts.get("geo")
+            ip = fields["ip"]
+
+            if ip in ip_facts_cache:
+                ip_facts = ip_facts_cache[ip]
+            else:
+                ip_facts = cherrypy.engine.publish("ip:facts", ip).pop()
+                ip_facts_cache[ip] = ip_facts
+
+            geo = ip_facts.get("geo", {})
 
             fields["country"] = fields["country"] or geo.get("country_code")
             fields["region"] = fields["region"] or geo.get("region_code")
@@ -255,28 +269,42 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             fields["longitude"] = fields["latitude"] or geo.get("longitude")
             fields["postal_code"] = geo.get("postal_code")
             fields["ip_reverse_host"] = ip_facts.get("reverse_host")
+            fields["ip_reverse_domain"] = ip_facts.get("reverse_domain")
             fields["organization"] = ip_facts.get("organization")
 
-            agent_url_matches = re.search("https?://(.*?)[/; ]", fields.get("agent", ""))
-
-            if agent_url_matches:
-                fields["agent_domain"] = agent_url_matches.group(1).lower()
+            if ip in agent_cache:
+                fields["agent_domain"] = agent_cache[ip]["agent_domain"]
+                fields["agent_type"] = agent_cache[ip]["agent_type"]
+                fields["agent_family"] = agent_cache[ip]["agent_family"]
+                fields["agent_platform"] = agent_cache[ip]["agent_platform"]
             else:
-                fields["agent_domain"] = None
+                agent_url_matches = re.search("https?://(.*?)[/; ]", fields.get("agent", ""))
 
-            parsed_agent = user_agent_parser.Parse(fields.get("agent", ""))
-            fields["agent_type"] = parsed_agent.get("device", {}).get("family", None)
-            fields["agent_family"] = parsed_agent.get("user_agent", {}).get("family", None)
-            fields["agent_platform"] = parsed_agent.get("os", {}).get("family", None)
+                if agent_url_matches:
+                    fields["agent_domain"] = agent_url_matches.group(1).lower()
+                else:
+                    fields["agent_domain"] = None
 
-            if fields["agent_type"] == "Other":
-                fields["agent_type"] = None
+                parsed_agent = user_agent_parser.Parse(fields.get("agent", ""))
+                fields["agent_type"] = parsed_agent.get("device", {}).get("family", None)
+                fields["agent_family"] = parsed_agent.get("user_agent", {}).get("family", None)
+                fields["agent_platform"] = parsed_agent.get("os", {}).get("family", None)
 
-            if fields["agent_family"] == "Other":
-                fields["agent_family"] = None
+                if fields["agent_type"] == "Other":
+                    fields["agent_type"] = None
 
-            if fields["agent_platform"] == "Other":
-                fields["agent_platform"] = None
+                if fields["agent_family"] == "Other":
+                    fields["agent_family"] = None
+
+                if fields["agent_platform"] == "Other":
+                    fields["agent_platform"] = None
+
+                agent_cache[ip] = {
+                    "agent_domain": fields["agent_domain"],
+                    "agent_type": fields["agent_type"],
+                    "agent_family": fields["agent_family"],
+                    "agent_platform": fields["agent_platform"]
+                }
 
             values = (
                 fields.get("year"),
@@ -287,6 +315,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("timestamp_unix"),
                 fields.get("ip"),
                 fields.get("ip_reverse_host"),
+                fields.get("ip_reverse_domain"),
                 fields.get("organization"),
                 fields.get("host"),
                 fields.get("uri"),
@@ -331,7 +360,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
-        timestamp_unix, ip, ip_reverse_host, organization, host, uri, query, statusCode,
+        timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri, query, statusCode,
         method, agent_domain, agent_type, agent_family, agent_platform, country, region,
         city, postal_code, latitude, longitude, cookie, referrer_domain, logline
         FROM logs
