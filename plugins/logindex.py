@@ -167,7 +167,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         return os.path.splitext(basename)[0]
 
     def scheduleParse(self):
-        sql = """SELECT count(*) as "total [int]" FROM logs WHERE ip IS NULL"""
+        sql = """SELECT count(*) as total FROM logs WHERE ip IS NULL"""
         row = self._selectOne(sql)
 
         if row["total"] == 0:
