@@ -1,27 +1,18 @@
 import cherrypy
 import os
-from cherrypy.process import plugins
 from collections import defaultdict
 import fnmatch
 import os.path
 import zlib
 import re
 from . import mixins
+from . import decorators
 from ua_parser import user_agent_parser
 
-class Plugin(plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def __init__(self, bus):
-        """The tables of this database map byte indexes within log files to
-        one or more keys, making it possible to select a subset of log
-        lines across one or more log files by seeking to specific
-        indexes.
-
-        The table itself acts as an index, but there is also a
-        database-level index on the key field.
-        """
-
-        plugins.SimplePlugin.__init__(self, bus)
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
 
 
@@ -170,21 +161,22 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         sql = """SELECT count(*) as total FROM logs WHERE ip IS NULL"""
         row = self._selectOne(sql)
 
+        cherrypy.engine.publish("applog:add", self, "unparsed_rows", row["total"])
+
         if row["total"] == 0:
-            print("Scheduling a precache")
             cherrypy.engine.publish(
                 "scheduler:add",
                 10,
                 "logindex:precache"
             )
         else:
-            print("Scheduling a parse")
             cherrypy.engine.publish(
                 "scheduler:add",
                 10,
                 "logindex:parse"
             )
 
+    @decorators.log_runtime_in_applog
     def enqueue(self, dt, batch_size=100):
         """Add log lines to the database for later parsing"""
         batch = []
@@ -230,6 +222,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         return line_count
 
+    @decorators.log_runtime_in_applog
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
         select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
@@ -240,8 +233,6 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         agent_domain=?, agent_type=?, agent_family=?, agent_platform=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer_domain=?
         WHERE rowid=?"""
-
-        print("parsing...")
 
         records = self._select(select_sql, ())
         batch = []
@@ -349,7 +340,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         self.scheduleParse()
 
-
+    @decorators.log_runtime_in_applog
     def insertLine(self, dt, records):
         sql = "INSERT OR IGNORE INTO logs (source_file, source_offset, checksum, logline) VALUES (?, ?, ?, ?)"
         if records:
@@ -357,6 +348,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
         return len(records)
 
+    @decorators.log_runtime_in_applog
     def query(self, q, for_precache=False):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
@@ -373,6 +365,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         else:
             return self._select(sql, (), cacheable=True)
 
+    @decorators.log_runtime_in_applog
     def preCache(self):
         saved_queries = cherrypy.engine.publish(
             "registry:search",

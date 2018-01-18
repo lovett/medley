@@ -142,9 +142,9 @@ def main():
             ).subscribe()
 
     # Plugins
+    plugins.applog.Plugin(cherrypy.engine).subscribe()
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
 
-    plugins.applog.Plugin(cherrypy.engine).subscribe()
     plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.asterisk.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()

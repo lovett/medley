@@ -14,6 +14,9 @@ for item in os.listdir(module_dir):
     if item.startswith("mixins"):
         continue
 
+    if item.startswith("decorators"):
+        continue
+
     if item.startswith("test_"):
         continue
 

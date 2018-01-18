@@ -1,4 +1,5 @@
 import cherrypy
+import inspect
 from . import mixins
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -8,21 +9,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("applog.sqlite")
 
-        self._create("""CREATE TABLE IF NOT EXISTS applog (
-                created DEFAULT CURRENT_TIMESTAMP,
-                source VARCHAR(255) NOT NULL,
-                key VARCHAR(255) NOT NULL,
-                value VARCHAR(255) NOT NULL)""")
+        self._create("""
+        CREATE TABLE IF NOT EXISTS applog (
+            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'NOW')),
+            source VARCHAR(255) NOT NULL,
+            key VARCHAR(255) NOT NULL,
+            value VARCHAR(255) NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS index_source ON applog(source);
+        """)
 
     def start(self):
-        self.bus.subscribe('applog', self.add)
-
+        self.bus.subscribe("applog:add", self.add)
 
     def stop(self):
         pass
 
-    def add(self, source, key, value):
+    def add(self, caller, key, value):
+        try:
+            source = caller.__module__
+        except AttributeError:
+            source = caller
+
         return self._insert(
-            "INSERT INTO logs (source, key, value) VALUES (?, ?, ?)",
-            (source, key, value)
+            "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
+            [(source, key, value)]
         )
