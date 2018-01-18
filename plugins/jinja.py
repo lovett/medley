@@ -68,6 +68,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["percentage"] = self.percentage_filter
         self.env.filters["cache_bust"] = self.cache_bust_filter
         self.env.filters["escapejs"] = self.escapejs_filter
+        self.env.filters["hostname_truncate"] = self.hostname_truncate_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -318,3 +319,9 @@ class Plugin(plugins.SimplePlugin):
             ord('\u2028'): '\\u2028',
             ord('\u2029'): '\\u2029'
         })
+
+
+    def hostname_truncate_filter(self, val, length=4):
+        segments = val.split(".")[::-1]
+        slice = segments[:length]
+        return ".".join(slice[::-1])

@@ -143,9 +143,15 @@
                         <td>
                             <p>
                                 <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
-                                    {{ result.ip|truncate(25, true) }}
+                                    {{ result.ip }}
                                 </a>
                             </p>
+
+                            {% if result.ip_reverse_domain %}
+                            <a href="/visitors?q=ip_reverse_domain+{{ result.ip_reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
+                                {{ result.ip_reverse_domain|hostname_truncate(4) }}
+                            </a>
+                            {% endif %}
 
                             {% if result.organization %}
                             <p>{{ result.organization }}</p>
@@ -210,7 +216,8 @@
                                     {{ result.agent_family }}
                                 </a>
                                 {% else %}
-                                {{ result.agent_family }} {{ result.agent_platform }}
+                                {{ result.agent_family|default('', true) }}
+                                {{ result.agent_platform|default('', true) }}
                                 {% endif %}
 
                                 {% if result.referrer and result.referrer_domain not in site_domains  %}
