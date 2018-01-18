@@ -46,7 +46,7 @@ class Controller:
         if not q:
             q = "date today"
 
-        log_records = cherrypy.engine.publish("logindex:query", q).pop()
+        log_records = cherrypy.engine.publish("logindex:query", q).pop() or []
 
         deltas = []
         for index, row in enumerate(log_records):

@@ -272,13 +272,14 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             fields["ip_reverse_domain"] = ip_facts.get("reverse_domain")
             fields["organization"] = ip_facts.get("organization")
 
-            if ip in agent_cache:
-                fields["agent_domain"] = agent_cache[ip]["agent_domain"]
-                fields["agent_type"] = agent_cache[ip]["agent_type"]
-                fields["agent_family"] = agent_cache[ip]["agent_family"]
-                fields["agent_platform"] = agent_cache[ip]["agent_platform"]
+            agent = fields.get("agent", "")
+            if agent in agent_cache:
+                fields["agent_domain"] = agent_cache[agent]["agent_domain"]
+                fields["agent_type"] = agent_cache[agent]["agent_type"]
+                fields["agent_family"] = agent_cache[agent]["agent_family"]
+                fields["agent_platform"] = agent_cache[agent]["agent_platform"]
             else:
-                agent_url_matches = re.search("https?://(.*?)[/; ]", fields.get("agent", ""))
+                agent_url_matches = re.search("https?://(.*?)[/; ]", agent)
 
                 if agent_url_matches:
                     fields["agent_domain"] = agent_url_matches.group(1).lower()
@@ -299,7 +300,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 if fields["agent_platform"] == "Other":
                     fields["agent_platform"] = None
 
-                agent_cache[ip] = {
+                agent_cache[agent] = {
                     "agent_domain": fields["agent_domain"],
                     "agent_type": fields["agent_type"],
                     "agent_family": fields["agent_family"],
