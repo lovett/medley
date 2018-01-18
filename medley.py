@@ -144,6 +144,7 @@ def main():
     # Plugins
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
 
+    plugins.applog.Plugin(cherrypy.engine).subscribe()
     plugins.archive.Plugin(cherrypy.engine).subscribe()
     plugins.asterisk.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
@@ -156,7 +157,6 @@ def main():
     plugins.geography.Plugin(cherrypy.engine).subscribe()
     plugins.ip.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    plugins.logger.Plugin(cherrypy.engine).subscribe()
     plugins.logindex.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()

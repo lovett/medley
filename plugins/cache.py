@@ -32,10 +32,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         row = self._selectOne("SELECT value as 'value [binary]', created as 'created [datetime]' FROM cache WHERE key=?", (key,))
 
         if "value" in row.keys():
-            cherrypy.engine.publish("app-log", "cache", "hit", key)
+            cherrypy.engine.publish("applog:add", "cache", "hit", key)
             return row["value"]
 
-        cherrypy.engine.publish("app-log", "cache", "miss", key)
+        cherrypy.engine.publish("applog:add", "cache", "miss", key)
         return False
 
     def set(self, key, value, lifespan_seconds=3600):
@@ -49,10 +49,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def clear(self, key):
         deletions = self._delete("DELETE FROM cache WHERE key=?", (key,))
-        cherrypy.engine.publish("app-log", "cache", "clear:{}".format(key), deletions)
+        cherrypy.engine.publish("applog:add", "cache", "clear:{}".format(key), deletions)
         return deletions
 
     def prune(self, key):
         """Delete expired cache entries by key"""
         deletions = self._delete("DELETE FROM cache WHERE key=? AND expires < ?", (key, time.time()))
-        cherrypy.engine.publish("app-log", "cache", "prune:{}".format(key), deletions)
+        cherrypy.engine.publish("applog:add", "cache", "prune:{}".format(key), deletions)

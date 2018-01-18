@@ -161,7 +161,7 @@ class Plugin(plugins.SimplePlugin):
 
         auth_response.raise_for_status()
 
-        cherrypy.engine.publish("app-log", "speechmanager", "ssml", ssml_string)
+        cherrypy.engine.publish("applog:add", "speechmanager", "ssml", ssml_string)
 
         req = requests.post(
             self.synthesize_url,
@@ -178,7 +178,7 @@ class Plugin(plugins.SimplePlugin):
 
         req.raise_for_status()
 
-        cherrypy.engine.publish("app-log", "speechmanager", "synth-response", req.status_code)
+        cherrypy.engine.publish("applog:add", "speechmanager", "synth-response", req.status_code)
 
         try:
             os.makedirs(os.path.dirname(cache_path))
