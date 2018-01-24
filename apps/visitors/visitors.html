@@ -112,6 +112,7 @@
                         <th>IP</th>
                         <th>Date</th>
                         <th>Request</th>
+                        <th>Referrer</th>
                         <th>Code</th>
                         <th></th>
                     </tr>
@@ -219,12 +220,23 @@
                                 {{ result.agent_family|default('', true) }}
                                 {{ result.agent_platform|default('', true) }}
                                 {% endif %}
-
-                                {% if result.referrer and result.referrer_domain not in site_domains  %}
-                                <br/>
-                                Referrer: <a href="{{ result.referrer }}" target="_blank" rel="noreferrer">{{ result.referrer_domain }}</a>
-                                {% endif %}
                             </p>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not result.referrer %}
+                            <p>none</p>
+                            {% endif %}
+
+                            {% if result.referrer_domain in site_domains %}
+                            <p>internal</p>
+                            {% endif %}
+
+                            {% if result.referrer and result.referrer_domain not in site_domains %}
+                            <p>{{ result.referrer_domain }}</p>
+                            <a href="{{ result.referrer|anonymize() }}" target="_blank" rel="noreferrer">
+                                visit
+                            </a>
                             {% endif %}
                         </td>
                         <td>
@@ -239,7 +251,7 @@
                         </td>
                     </tr>
                     <tr class="expandable">
-                        <td colspan="6">
+                        <td colspan="7">
                             <p class="meta">
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.timestamp|ago() }}

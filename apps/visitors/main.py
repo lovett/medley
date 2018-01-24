@@ -14,7 +14,7 @@ class Controller:
     def GET(self, q=None):
         site_domains = cherrypy.engine.publish(
             "registry:search",
-            "logindex:site_domains",
+            "logindex:site_domain",
             as_value_list=True
         ).pop()
 

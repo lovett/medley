@@ -48,6 +48,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             latitude real,
             longitude real,
             cookie,
+            referrer,
             referrer_domain,
             logline,
             UNIQUE(checksum)
@@ -231,7 +232,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
         timestamp_unix=?, ip=?, ip_reverse_host=?, ip_reverse_domain=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
         agent_domain=?, agent_type=?, agent_family=?, agent_platform=?, classification=?, country=?, region=?, city=?,
-        latitude=?, longitude=?, postal_code=?, cookie=?, referrer_domain=?
+        latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
         records = self._select(select_sql, ())
@@ -326,6 +327,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("longitude"),
                 fields.get("postal_code"),
                 fields.get("cookie"),
+                fields.get("referrer"),
                 fields.get("referrer_domain"),
                 record["rowid"]
             )
@@ -342,9 +344,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime_in_applog
     def insertLine(self, dt, records):
-        sql = "INSERT OR IGNORE INTO logs (source_file, source_offset, checksum, logline) VALUES (?, ?, ?, ?)"
-        if records:
-            self._insert(sql, records)
+        if not records:
+            return 0
+
+        sql = """INSERT OR IGNORE INTO logs
+        (source_file, source_offset, checksum, logline)
+        VALUES (?, ?, ?, ?)"""
+
+        self._insert(sql, records)
 
         return len(records)
 
@@ -353,9 +360,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
-        timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri, query, statusCode,
-        method, agent_domain, agent_type, agent_family, agent_platform, country, region,
-        city, postal_code, latitude, longitude, cookie, referrer_domain, logline
+        timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri,
+        query, statusCode, method, agent_domain, agent_type, agent_family, agent_platform,
+        country, region, city, postal_code, latitude, longitude, cookie, referrer, referrer_domain,
+        logline
         FROM logs
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)
