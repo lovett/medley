@@ -6,6 +6,7 @@ import pytz
 import os.path
 import urllib
 import datetime
+import dateutil.relativedelta
 import os
 import json
 import time
@@ -170,9 +171,12 @@ class Plugin(plugins.SimplePlugin):
         """Replace newlines with <br/> tags"""
         return s.replace("\n", "<br/>")
 
-    def pluralize_filter(self, count, singular, plural):
+    def pluralize_filter(self, count, singular, plural=None, suffix=''):
+        if not plural:
+            plural = singular + "s"
+
         value = singular if count == 1 else plural
-        return "{} {}".format(count, value)
+        return "{} {} {}".format(count, value, suffix)
 
     def anonymize_filter(self, url):
         anonymizer = cherrypy.engine.publish(
@@ -211,25 +215,22 @@ class Plugin(plugins.SimplePlugin):
         else:
             value = pytz.timezone(timezone).localize(value)
 
-        year = datetime.timedelta(days=365)
-        month = datetime.timedelta(days=30)
-        week = datetime.timedelta(weeks=1)
-        day = datetime.timedelta(days=1)
-        hour = datetime.timedelta(hours=1)
-        minute = datetime.timedelta(seconds=3600)
-        delta = today - value
 
-        if delta > year:
-            return "{} years".format(delta // year)
+        delta = dateutil.relativedelta.relativedelta(today, value)
 
-        if delta > month:
-            return "{} months ago".format(delta // month)
+        units = ['years', 'months', 'days', 'hours', 'minutes']
 
-        if delta > week:
-            return "{} weeks ago".format(delta // week)
+        relative_units = [
+            self.pluralize_filter(getattr(delta, unit), unit[:-1])
+            for unit in units
+            if getattr(delta, unit) > 0
+        ]
 
-        if delta > day:
-            return "{} days ago".format(delta // day)
+        if relative_units:
+            return "{} {}".format(
+                ", ".join(relative_units[:2]),
+                "ago"
+            )
 
         return "today"
 
