@@ -77,7 +77,7 @@ class Plugin(plugins.SimplePlugin):
                  OneOrMore(self.integer)).setParseAction(self.logQueryNumeric),
 
                 # url
-                (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-"))).setParseAction(self.logQueryWildcard),
+                (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-."))).setParseAction(self.logQueryWildcard),
 
                 # string fields
                 (oneOf("city country region postal_code classification method cookie uri agent_domain classification ip_reverse_domain referrer_domain") +
