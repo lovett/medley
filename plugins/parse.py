@@ -234,9 +234,7 @@ class Plugin(plugins.SimplePlugin):
             fields["referrer_domain"] = None
 
         for key, value in fields["extras"].items():
-            if key == "country" and value == "ZZ":
-                value = None
-            elif key == "city" and value == "?":
+            if value in ("ZZ", "?"):
                 value = None
             elif key == "country":
                 value = value.upper()
