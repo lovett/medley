@@ -1,13 +1,11 @@
 import cherrypy
 import os
-from collections import defaultdict
 import fnmatch
 import os.path
 import zlib
 import re
 from . import mixins
 from . import decorators
-from ua_parser import user_agent_parser
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
@@ -36,10 +34,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query,
             statusCode integer,
             method,
+            agent,
             agent_domain,
-            agent_type,
-            agent_family,
-            agent_platform,
             classification,
             country,
             region,
@@ -63,9 +59,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
         CREATE INDEX IF NOT EXISTS index_method ON logs(method);
         CREATE INDEX IF NOT EXISTS index_agent_domain ON logs(agent_domain);
-        CREATE INDEX IF NOT EXISTS index_agent_type ON logs(agent_type);
-        CREATE INDEX IF NOT EXISTS index_agent_family ON logs(agent_family);
-        CREATE INDEX IF NOT EXISTS index_agent_platform ON logs(agent_platform);
         CREATE INDEX IF NOT EXISTS index_classification ON logs(classification);
         CREATE INDEX IF NOT EXISTS index_country ON logs(country);
         CREATE INDEX IF NOT EXISTS index_city ON logs(city);
@@ -164,6 +157,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("applog:add", self, "unparsed_rows", row["total"])
 
+        cherrypy.log("logindex found {} unparsed rows".format(row["total"]))
+
         if row["total"] == 0:
             cherrypy.engine.publish(
                 "scheduler:add",
@@ -230,8 +225,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         update_sql = """
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
-        timestamp_unix=?, ip=?, ip_reverse_host=?, ip_reverse_domain=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?,
-        agent_domain=?, agent_type=?, agent_family=?, agent_platform=?, classification=?, country=?, region=?, city=?,
+        timestamp_unix=?, ip=?, ip_reverse_host=?, ip_reverse_domain=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
@@ -267,36 +261,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             agent = fields.get("agent", "")
             if agent in agent_cache:
                 fields["agent_domain"] = agent_cache[agent]["agent_domain"]
-                fields["agent_type"] = agent_cache[agent]["agent_type"]
-                fields["agent_family"] = agent_cache[agent]["agent_family"]
-                fields["agent_platform"] = agent_cache[agent]["agent_platform"]
             else:
-                agent_url_matches = re.search("https?://(.*?)[/; ]", agent)
+                agent_url_matches = re.search("https?://(www\.)?(.*?)[/; ]", agent)
 
                 if agent_url_matches:
-                    fields["agent_domain"] = agent_url_matches.group(1).lower()
-                else:
-                    fields["agent_domain"] = None
-
-                parsed_agent = user_agent_parser.Parse(fields.get("agent", ""))
-                fields["agent_type"] = parsed_agent.get("device", {}).get("family", None)
-                fields["agent_family"] = parsed_agent.get("user_agent", {}).get("family", None)
-                fields["agent_platform"] = parsed_agent.get("os", {}).get("family", None)
-
-                if fields["agent_type"] == "Other":
-                    fields["agent_type"] = None
-
-                if fields["agent_family"] == "Other":
-                    fields["agent_family"] = None
-
-                if fields["agent_platform"] == "Other":
-                    fields["agent_platform"] = None
+                    fields["agent_domain"] = agent_url_matches.group(2).lower()
 
                 agent_cache[agent] = {
-                    "agent_domain": fields["agent_domain"],
-                    "agent_type": fields["agent_type"],
-                    "agent_family": fields["agent_family"],
-                    "agent_platform": fields["agent_platform"]
+                    "agent_domain": fields.get("agent_domain"),
                 }
 
             values = (
@@ -315,10 +287,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("query"),
                 fields.get("statusCode"),
                 fields.get("method"),
+                fields.get("agent"),
                 fields.get("agent_domain"),
-                fields.get("agent_type"),
-                fields.get("agent_family"),
-                fields.get("agent_platform"),
                 fields.get("classification"),
                 fields.get("country"),
                 fields.get("region"),
@@ -361,9 +331,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
         timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri,
-        query, statusCode, method, agent_domain, agent_type, agent_family, agent_platform,
-        country, region, city, postal_code, latitude, longitude, cookie, referrer, referrer_domain,
-        logline
+        query, statusCode, method, agent_domain, classification, country, region, city,
+        postal_code, latitude, longitude, cookie, referrer, referrer_domain, logline
         FROM logs
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)

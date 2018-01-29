@@ -112,7 +112,6 @@
                         <th>IP</th>
                         <th>Date</th>
                         <th>Request</th>
-                        <th>Referrer</th>
                         <th>Code</th>
                         <th></th>
                     </tr>
@@ -150,7 +149,7 @@
 
                             {% if result.ip_reverse_domain %}
                             <a href="/visitors?q=ip_reverse_domain+{{ result.ip_reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
-                                {{ result.ip_reverse_domain|hostname_truncate(4) }}
+                                {{ result.ip_reverse_domain|hostname_truncate(3) }}
                             </a>
                             {% endif %}
 
@@ -186,6 +185,8 @@
                         <td colspan="2"></td>
                         {% endif %}
 
+
+
                         <td nowrap="nowrap">
                             <p>
                                 <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#" rel="noreferrer">
@@ -209,34 +210,10 @@
                                 </a>
                             </p>
 
-
-                            {% if new_ip %}
-                            <p>
-                                {% if result.agent_family and result.agent_domain %}
-                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Aagent_domain+{{ result.agent_domain }}">
-                                    {{ result.agent_family }}
-                                </a>
-                                {% else %}
-                                {{ result.agent_family|default('', true) }}
-                                {{ result.agent_platform|default('', true) }}
-                                {% endif %}
-                            </p>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if not result.referrer %}
-                            <p>none</p>
-                            {% endif %}
-
-                            {% if result.referrer_domain in site_domains %}
-                            <p>internal</p>
-                            {% endif %}
-
                             {% if result.referrer and result.referrer_domain not in site_domains %}
-                            <p>{{ result.referrer_domain }}</p>
-                            <a href="{{ result.referrer|anonymize() }}" target="_blank" rel="noreferrer">
-                                visit
-                            </a>
+                            <p>
+                                Referrer: <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                            </p>
                             {% endif %}
                         </td>
                         <td>
@@ -251,7 +228,7 @@
                         </td>
                     </tr>
                     <tr class="expandable">
-                        <td colspan="7">
+                        <td colspan="6">
                             <p class="meta">
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.timestamp|ago() }}
