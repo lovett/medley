@@ -101,11 +101,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     rep, replacement_placeholder
                 )
 
-            if "netvigator.com" in reverse_host or "versatel" in reverse_host:
-                print("Ip is {}".format(ip))
-                print(ip_representations)
-                print(filtered_reverse_host)
-
             filtered_segments = filter(
                 lambda x: replacement_placeholder not in x,
                 filtered_reverse_host.split(".")
