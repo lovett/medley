@@ -80,7 +80,7 @@ class Plugin(plugins.SimplePlugin):
                 (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-"))).setParseAction(self.logQueryWildcard),
 
                 # string fields
-                (oneOf("city country region postal_code classification method cookie uri agent_domain agent_type agent_family agent_platform ip_reverse_domain") +
+                (oneOf("city country region postal_code classification method cookie uri agent_domain classification ip_reverse_domain referrer_domain") +
                  self.optionalNot +
                  OneOrMore(Word(alphanums + ".-"))).setParseAction(self.logQueryExactString),
 
