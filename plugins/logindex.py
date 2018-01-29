@@ -331,8 +331,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
         timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri,
-        query, statusCode, method, agent_domain, classification, country, region, city,
-        postal_code, latitude, longitude, cookie, referrer, referrer_domain, logline
+        query as "query [querystring]", statusCode, method, agent_domain, classification,
+        country, region, city, postal_code, latitude, longitude, cookie, referrer,
+        referrer_domain, logline
         FROM logs
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)

@@ -92,6 +92,7 @@ TR.expandable.expanded {
 }
 
 #matches {
+    width: 100%;
     margin-bottom: 5em;
 }
 
@@ -102,4 +103,26 @@ TR.expandable.expanded {
 .next-actions svg {
     padding: .5em .5em .5em 0;
     fill: #666;
+}
+
+UL.querystring {
+    background-color: rgba(0, 0, 0, .05);
+    border-left: .3em solid rgba(0, 0, 0, .1);
+    margin: 0;
+    padding: .3em;
+    list-style-type: none;
+    line-height: 1.5;
+}
+
+UL.inline LI {
+    display: inline;
+    padding-right: 1em;
+}
+
+UL.inline LI:last-of-type {
+    padding-right: 0;
+}
+
+.smaller {
+    font-size: .85em;
 }

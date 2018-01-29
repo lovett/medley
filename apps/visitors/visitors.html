@@ -18,6 +18,13 @@
 {% endblock %}
 
 {% block svg_defs %}
+<symbol id="icon-database" viewBox="0 0 32 32">
+    <title>database</title>
+    <path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+    <path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+    <path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+
 <symbol id="icon-flag" viewBox="0 0 1024 1024">
     <title>flag</title>
     <path class="path1" d="M614 256h240v426h-300l-16-84h-240v298h-84v-726h384z"></path>
@@ -108,17 +115,15 @@
             <table id="matches">
                 <thead>
                     <tr>
-                        <th>Location</th>
-                        <th>IP</th>
-                        <th>Date</th>
-                        <th>Request</th>
-                        <th>Code</th>
-                        <th></th>
+                        <th width="5%">Location</th>
+                        <th width="20%">Address</th>
+                        <th width="35%">Date</th>
+                        <th widtt="35%">Request</th>
+                        <th width="5%">Code</th>
+                        <th width="5%"></th>
                     </tr>
                 </thead>
                 <tbody>
-
-
                     {% for result in results %}
 
                     {% set new_ip = loop.changed(result.ip) %}
@@ -133,22 +138,24 @@
                                 {{ result.city|default("", true) }}<br/>
                                 {% endif %}
 
-                                {% if result.country == "US" %}
-                                {{ result.region|default("", true) }}
-                                {% else %}
-                                {{ country_names[result.country] }}
-                                {% endif %}
+                                <span class="smaller">
+                                    {% if result.country == "US" %}
+                                    {{ result.region|default("", true) }}
+                                    {% else %}
+                                    {{ country_names[result.country] }}
+                                    {% endif %}
+                                </span>
                             </p>
                         </td>
                         <td>
-                            <p>
+                            <p class="always-wrap">
                                 <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
                                     {{ result.ip }}
                                 </a>
                             </p>
 
                             {% if result.ip_reverse_domain %}
-                            <a href="/visitors?q=ip_reverse_domain+{{ result.ip_reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
+                            <a href="/visitors?q=ip_reverse_domain+{{ result.ip_reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
                                 {{ result.ip_reverse_domain|hostname_truncate(3) }}
                             </a>
                             {% endif %}
@@ -197,7 +204,7 @@
                                 {{ result.timestamp|localtime('time12') }}
                             </p>
 
-                            <p class="delta {% if loop.last %}hidden{% endif %}" data-default="{{ deltas[loop.index]}}">
+                            <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
                                 Δ <span class="value">{{ deltas[loop.index0] }}</span>
                                 <span class="label"></span>
                             </p>
@@ -209,6 +216,14 @@
                                     {{ result.method }} {{ result.uri|truncate(30, True) }}
                                 </a>
                             </p>
+
+                            {% if result.query %}
+                            <ul class="querystring smaller">
+                                {% for item in result.query|dictsort %}
+                                <li>{{ item.0 }}: {{ item.1|join(',') }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
 
                             {% if result.referrer and result.referrer_domain not in site_domains %}
                             <p>
@@ -237,7 +252,11 @@
                                 {% endif %}
                             </p>
 
-                            <p class="wordwrap"><code>{{ result.logline }}</code></p>
+                            <p class="meta">
+                                <svg class="icon"><use xlink:href="#icon-database"></use></svg>
+                                {{ result.host }}</p>
+
+                            <p><code>{{ result.logline }}</code></p>
                         </td>
                     </tr>
                     {% endfor %}

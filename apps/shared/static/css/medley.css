@@ -28,6 +28,10 @@ BUTTON.small {
     padding: .5em;
 }
 
+.always-wrap {
+    word-break: break-all;
+}
+
 CODE {
     word-break: break-all;
     white-space: pre-line;
