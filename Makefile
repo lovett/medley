@@ -169,11 +169,8 @@ vagrant-provision: dummy
 # Empty the logindex database and re-index
 #
 # For use when changes to the logindex or visitors apps require a
-# database do-over. Does not handle schema changes because server
-# would need to be restarted.
+# database do-over.
 #
-logindex-trial: dummy
-	sqlite3 db/logindex.sqlite 'delete from logs'
-	curl -d "start=2017-12-01" "http://localhost:8085/logindex"
-	sleep 1
-	sqlite3 db/logindex.sqlite 'select count(*) from logs where ip is null'
+logindex-reset: dummy
+	rm db/logindex.sqlite
+	touch medley.py
