@@ -13,6 +13,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self):
         self.bus.subscribe("ip:facts", self.facts)
+        self.bus.subscribe("ip:reverse", self.reverse)
 
     def stop(self):
         pass
@@ -67,11 +68,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except:
             pass
 
+        return facts
+
+
+    def reverse(self, ip):
         # Reverse host and domain
         #
         # These are treated as separate values because the reverse host
         # may embed the IP (reversed or otherwise). The non-IP parts are
         # the more interesting ones.
+
+        facts = defaultdict()
 
         reverse_host = socket.getfqdn(ip)
 
@@ -110,6 +117,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             facts["reverse_host"] = reverse_host
             facts["reverse_domain"] = reverse_domain
-
 
         return facts

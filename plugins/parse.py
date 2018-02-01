@@ -80,7 +80,7 @@ class Plugin(plugins.SimplePlugin):
                 (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-."))).setParseAction(self.logQueryWildcard),
 
                 # string fields
-                (oneOf("city country region postal_code classification method cookie uri agent_domain classification ip_reverse_domain referrer_domain") +
+                (oneOf("city country region postal_code classification method cookie uri agent_domain classification reverse_domain referrer_domain") +
                  self.optionalNot +
                  OneOrMore(Word(alphanums + ".-"))).setParseAction(self.logQueryExactString),
 
@@ -189,6 +189,12 @@ class Plugin(plugins.SimplePlugin):
     def logQueryExactString(self, s, l, t):
         field = t[0]
 
+        # The IP field needs to be qualified because it is used
+        # as the basis of a join. It is the only field that needs
+        # this special handling.
+        if field == "ip":
+            field = "logs.ip"
+
         if t[1] == "not":
             values = t[2:]
             sql = ["{} <> '{}'".format(field, value) for value in values]
@@ -226,7 +232,6 @@ class Plugin(plugins.SimplePlugin):
         fields["postal_code"] = None
         fields["latitude"] = None
         fields["longitude"] = None
-        fields["ip_reverse_host"] = None
 
         if "referrer" in fields:
             fields["referrer_domain"] = urlparse(fields["referrer"]).netloc or None

@@ -26,9 +26,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             source_file,
             source_offset integer,
             ip,
-            ip_reverse_host,
-            ip_reverse_domain,
-            organization,
             host,
             uri,
             query,
@@ -49,11 +46,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             logline,
             UNIQUE(checksum)
         );
+
         CREATE INDEX IF NOT EXISTS index_year ON logs(year);
         CREATE INDEX IF NOT EXISTS index_month ON logs(month);
         CREATE INDEX IF NOT EXISTS index_day ON logs(day);
         CREATE INDEX IF NOT EXISTS index_ip ON logs(ip);
-        CREATE INDEX IF NOT EXISTS index_ip_reverse_domain ON logs(ip_reverse_domain);
         CREATE INDEX IF NOT EXISTS index_host ON logs(host);
         CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
         CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
@@ -63,15 +60,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_country ON logs(country);
         CREATE INDEX IF NOT EXISTS index_city ON logs(city);
         CREATE INDEX IF NOT EXISTS index_cookie ON logs(cookie);
+
+        CREATE TABLE IF NOT EXISTS reverse_ip (
+            ip,
+            reverse_host,
+            reverse_domain,
+            organization,
+            updated DEFAULT NULL,
+            UNIQUE(ip)
+        );
+
+        CREATE TRIGGER reverse_ip_after_update AFTER UPDATE ON reverse_ip
+        BEGIN
+        UPDATE reverse_ip SET updated=CURRENT_TIMESTAMP WHERE ip=new.ip;
+        END;
+
+        CREATE INDEX IF NOT EXISTS index_reverse_domain ON reverse_ip(reverse_domain);
+
         """)
 
     def start(self):
         self.bus.subscribe('logindex:parse', self.parse)
+        self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:schedule_parse', self.scheduleParse)
+        self.bus.subscribe('logindex:schedule_reversal', self.scheduleReversal)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:precache', self.preCache)
         self.scheduleParse()
+        self.scheduleReversal()
 
     def stop(self):
         pass
@@ -113,6 +130,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return 0
 
+    def fileForDate(self, dt):
+        """The filesystem path of the log file for the given date"""
+
+        root = self.getRoot()
+
+        log_file = "{}/{}/{}".format(
+            root,
+            dt.strftime("%Y-%m"),
+            dt.strftime("%Y-%m-%d.log")
+        )
+
+        if not os.path.isfile(log_file):
+            return False
+        return log_file
+
     def filePathToSource(self, path):
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
@@ -128,14 +160,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if row["total"] == 0:
             cherrypy.engine.publish(
                 "scheduler:add",
-                10,
+                1,
+                "logindex:precache"
+            )
+        else:
+            cherrypy.engine.publish(
+                "scheduler:add",
+                1,
+                "logindex:parse"
+            )
+
+    def scheduleReversal(self):
+        sql = """SELECT count(*) as total FROM reverse_ip WHERE updated IS NULL"""
+        row = self._selectOne(sql)
+
+        cherrypy.engine.publish("applog:add", self, "unreversed_ips", row["total"])
+
+        cherrypy.log("logindex found {} unreversed ips".format(row["total"]))
+
+        if row["total"] == 0:
+            cherrypy.engine.publish(
+                "scheduler:add",
+                1,
                 "logindex:precache"
             )
         else:
             cherrypy.engine.publish(
                 "scheduler:add",
                 10,
-                "logindex:parse"
+                "logindex:reversal"
             )
 
     @decorators.log_runtime_in_applog
@@ -185,18 +238,48 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return line_count
 
     @decorators.log_runtime_in_applog
+    def reversal(self, batch_size=10):
+        records = self._select(
+            "SELECT rowid, ip FROM reverse_ip WHERE updated IS NULL LIMIT {}".format(batch_size),
+            ()
+        )
+
+        if len(records) == 0:
+            return
+
+        batch = []
+
+        for record in records:
+            facts = cherrypy.engine.publish("ip:reverse", record["ip"]).pop()
+
+            batch.append((
+                facts.get("reverse_host"),
+                facts.get("reverse_domain"),
+                record["rowid"],
+            ))
+
+        self._update(
+            "UPDATE reverse_ip SET reverse_host=?, reverse_domain=? WHERE rowid=?",
+            batch
+        )
+
+        self.scheduleReversal()
+
+
+    @decorators.log_runtime_in_applog
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
         select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
 
         update_sql = """
         UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
-        timestamp_unix=?, ip=?, ip_reverse_host=?, ip_reverse_domain=?, organization=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
+        timestamp_unix=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
         records = self._select(select_sql, ())
         batch = []
+        ips = set()
 
         ip_facts_cache = {}
         agent_cache = {}
@@ -205,6 +288,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             fields = cherrypy.engine.publish("parse:appengine", record["logline"]).pop()
 
             ip = fields["ip"]
+
+            ips.add(ip)
 
             if ip in ip_facts_cache:
                 ip_facts = ip_facts_cache[ip]
@@ -220,9 +305,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             fields["latitude"] = fields["latitude"] or geo.get("latitude")
             fields["longitude"] = fields["latitude"] or geo.get("longitude")
             fields["postal_code"] = geo.get("postal_code")
-            fields["ip_reverse_host"] = ip_facts.get("reverse_host")
-            fields["ip_reverse_domain"] = ip_facts.get("reverse_domain")
-            fields["organization"] = ip_facts.get("organization")
 
             agent = fields.get("agent", "")
             if agent in agent_cache:
@@ -245,9 +327,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("timestamp"),
                 fields.get("timestamp_unix"),
                 fields.get("ip"),
-                fields.get("ip_reverse_host"),
-                fields.get("ip_reverse_domain"),
-                fields.get("organization"),
                 fields.get("host"),
                 fields.get("uri"),
                 fields.get("query"),
@@ -276,6 +355,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if batch:
             self._update(update_sql, batch)
 
+        self._insert(
+            """INSERT OR IGNORE INTO reverse_ip (ip) VALUES (?)""",
+            {(ip,) for ip in ips}
+        )
+
+        self.scheduleReversal()
         self.scheduleParse()
 
     @decorators.log_runtime_in_applog
@@ -296,13 +381,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
         sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
-        timestamp_unix, ip, ip_reverse_host, ip_reverse_domain, organization, host, uri,
-        query as "query [querystring]", statusCode, method, agent_domain, classification,
-        country, region, city, postal_code, latitude, longitude, cookie, referrer,
-        referrer_domain, logline
+        timestamp_unix, logs.ip, host, uri, query as "query [querystring]",
+        statusCode, method, agent_domain, classification, country,
+        region, city, postal_code, latitude, longitude, cookie,
+        referrer, referrer_domain, logline, reverse_ip.reverse_domain
         FROM logs
+        LEFT JOIN reverse_ip ON logs.ip=reverse_ip.ip
         WHERE {}
         ORDER BY timestamp_unix DESC""".format(parsed_query)
+
 
         if for_precache:
             return self._selectToCache(sql, ())

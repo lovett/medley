@@ -115,10 +115,10 @@
             <table id="matches">
                 <thead>
                     <tr>
-                        <th width="5%">Location</th>
+                        <th width="10%">Location</th>
                         <th width="20%">Address</th>
-                        <th width="35%">Date</th>
-                        <th widtt="35%">Request</th>
+                        <th width="30%">Date</th>
+                        <th widtt="30%">Request</th>
                         <th width="5%">Code</th>
                         <th width="5%"></th>
                     </tr>
@@ -154,9 +154,9 @@
                                 </a>
                             </p>
 
-                            {% if result.ip_reverse_domain %}
-                            <a href="/visitors?q=ip_reverse_domain+{{ result.ip_reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
-                                {{ result.ip_reverse_domain|hostname_truncate(3) }}
+                            {% if result.reverse_domain %}
+                            <a href="/visitors?q=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
+                                {{ result.reverse_domain|hostname_truncate(3) }}
                             </a>
                             {% endif %}
 
