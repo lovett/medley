@@ -66,8 +66,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """)
 
     def start(self):
-        self.bus.subscribe('logindex:files', self.fileList)
-        self.bus.subscribe('logindex:file_for_date', self.fileForDate)
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:schedule_parse', self.scheduleParse)
@@ -115,38 +113,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return 0
 
-    def fileList(self, full_paths=False, ext="log"):
-        """Returns a list of files matching an extension"""
-
-        root = self.getRoot()
-
-        files = [
-            os.path.join(dirpath, f)
-            for dirpath, dirnames, files in os.walk(root)
-            for f in fnmatch.filter(files, "*.{}".format(ext))
-        ]
-
-        if full_paths:
-            return files
-        else:
-            return [os.path.basename(f) for f in files]
-
-    def fileForDate(self, dt):
-        """The filesystem path of the log file for the given date"""
-
-        root = self.getRoot()
-
-        log_file = "{}/{}/{}".format(
-            root,
-            dt.strftime("%Y-%m"),
-            dt.strftime("%Y-%m-%d.log")
-        )
-
-        if not os.path.isfile(log_file):
-            return False
-
-        return log_file
-
     def filePathToSource(self, path):
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
@@ -186,8 +152,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         with open(log_file, "r") as f:
 
-            # When indexing a previously index log, max_offset is the
-            # position of the last line that was added to the
+            # When indexing a previously indexed log file, max_offset
+            # is the position of the last line that was added to the
             # database. Since it has already been seen, it can be
             # skipped. The next line is the first new line.
             if max_offset > 0:
