@@ -5,11 +5,10 @@ import http.client
 import pytz
 import os.path
 import urllib
-import datetime
-import dateutil.relativedelta
 import os
 import json
 import time
+import pendulum
 from tzlocal import get_localzone
 from cherrypy.process import plugins
 from string import Template
@@ -93,47 +92,33 @@ class Plugin(plugins.SimplePlugin):
         return self.env.get_template(name)
 
 
-    def localtime_filter(self, value, format="locale", timezone=None):
-        """Same as datetime_filter, but converts to the application's timezone"""
-
-        tz = None
+    def localtime_filter(self, value, format="locale"):
+        """Switch a datetime to the local timezone, then format it"""
 
         if not value:
-            return ''
+            return ""
 
-        if timezone:
-            tz = pytz.timezone(timezone)
-
-        if not tz:
-            configured_timezone = cherrypy.engine.publish(
-                "registry:first_value",
-                "config:timezone",
-                memorize=True
-            ).pop()
-            if configured_timezone:
-                tz = pytz.timezone(configured_timezone)
-
-        if not tz:
-            tz = get_localzone()
+        tz = self.local_timezone()
 
         if isinstance(value, (int, float)):
-            value = datetime.datetime.fromtimestamp(value)
-
-        if value.tzinfo:
-            local_value = value.astimezone(tz)
+            value = pendulum.from_timestamp(value)
         else:
-            local_value = tz.localize(value)
+            value = pendulum.instance(value)
+
+        local_value = value.in_timezone(tz)
 
         return self.datetime_filter(local_value, format)
 
     def datetime_filter(self, value, format="locale"):
-        """Format a datetime as a date string based on the specified format"""
+        """Format a datetime as a string based on a format keyword"""
 
         if not value:
             return ""
 
         if isinstance(value, (int, float)):
-            value = datetime.datetime.fromtimestamp(value)
+            value = pendulum.from_timestamp(value)
+        else:
+            value = pendulum.instance(value)
 
         if format == "locale":
             directives = "%c"
@@ -150,7 +135,7 @@ class Plugin(plugins.SimplePlugin):
         else:
             directives = format
 
-        return value.strftime(directives).lstrip("0")
+        return value.format(directives).lstrip("0")
 
     def unindent_filter(self, string):
         """Remove leading whitespace from a multiline string without losing indentation"""
@@ -196,43 +181,25 @@ class Plugin(plugins.SimplePlugin):
     def urlencode_filter(self, value):
         return urllib.parse.quote(value)
 
-    def ago_filter(self, value):
+    def local_timezone(self):
         tz = cherrypy.engine.publish(
             "registry:first_value",
             "config:timezone",
             memorize=True
         ).pop()
 
-        if tz:
-            timezone = pytz.timezone(tz)
-        else:
-            timezone = get_localzone()
+        if not tz:
+            tz = get_localzone()
 
-        today = timezone.localize(datetime.datetime.today())
-
-        if value.tzinfo:
-            value = value.astimezone(timezone)
-        else:
-            value = pytz.timezone(timezone).localize(value)
+        return tz
 
 
-        delta = dateutil.relativedelta.relativedelta(today, value)
+    def ago_filter(self, unix_timestamp):
+        dt = pendulum.from_timestamp(unix_timestamp)
 
-        units = ['years', 'months', 'days', 'hours', 'minutes']
+        tz = self.local_timezone()
 
-        relative_units = [
-            self.pluralize_filter(getattr(delta, unit), unit[:-1])
-            for unit in units
-            if getattr(delta, unit) > 0
-        ]
-
-        if relative_units:
-            return "{} {}".format(
-                ", ".join(relative_units[:2]),
-                "ago"
-            )
-
-        return "today"
+        return dt.in_timezone(tz).diff_for_humans()
 
     def yearmonth_filter(self, value):
         return value.strftime("%Y-%m")

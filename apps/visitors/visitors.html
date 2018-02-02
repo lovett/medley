@@ -192,16 +192,14 @@
                         <td colspan="2"></td>
                         {% endif %}
 
-
-
                         <td nowrap="nowrap">
                             <p>
-                                <a class="calc-delta" data-timestamp-unix="{{ result.timestamp_unix }}" href="#" rel="noreferrer">
+                                <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
                                     <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
                                 </a>
-                                {{ result.timestamp|localtime('date') }}
+                                {{ result.unix_timestamp|localtime('date') }}
                                 at
-                                {{ result.timestamp|localtime('time12') }}
+                                {{ result.unix_timestamp|localtime('time12') }}
                             </p>
 
                             <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
@@ -212,7 +210,7 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                <a href="/visitors?q=date+{{ result.unix_timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                     {{ result.method }} {{ result.uri|truncate(30, True) }}
                                 </a>
                             </p>
@@ -227,7 +225,7 @@
 
                             {% if result.referrer and result.referrer_domain not in site_domains %}
                             <p>
-                                Referrer: <a href="/visitors?q=date+{{ result.timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                Referrer: <a href="/visitors?q=date+{{ result.unix_timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                             </p>
                             {% endif %}
                         </td>
@@ -246,9 +244,9 @@
                         <td colspan="6">
                             <p class="meta">
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
-                                {{ result.timestamp|ago() }}
+                                {{ result.unix_timestamp|ago() }}
                                 {% if result.time_zone %}
-                                at {{ result.timestamp|localtime('time12', result.time_zone) }} local time
+                                at {{ result.unix_timestamp|localtime('time12', result.time_zone) }} local time
                                 {% endif %}
                             </p>
 

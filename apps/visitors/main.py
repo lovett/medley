@@ -1,4 +1,5 @@
 import cherrypy
+import pendulum
 from datetime import datetime, timedelta
 
 class Controller:
@@ -51,9 +52,12 @@ class Controller:
         deltas = []
         for index, row in enumerate(log_records):
             if index == 0:
-                active_date = row["timestamp"]
+                active_date = row["unix_timestamp"]
             try:
-                delta = row["timestamp"] - log_records[index + 1]["timestamp"]
+                delta = pendulum.from_timestamp(row["unix_timestamp"]).diff_for_humans(
+                    pendulum.from_timestamp(log_records[index + 1]["unix_timestamp"]),
+                    True
+                )
             except (KeyError, IndexError):
                 delta = 0
             deltas.append(delta)

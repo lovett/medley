@@ -6,6 +6,7 @@ from pyparsing import *
 import string
 import os.path
 from urllib.parse import urlparse
+import pendulum
 from datetime import datetime, timedelta
 
 # Parse action helper methods receive 3 arguments:
@@ -220,12 +221,17 @@ class Plugin(plugins.SimplePlugin):
     def parseAppengine(self, val):
         """Convert a combined format log line with Appengine extra fields into a dict"""
         fields = self.appengine_grammar.parseString(val.strip()).asDict()
-        fields["timestamp"] = datetime.strptime(fields["timestamp"], "%d/%b/%Y:%H:%M:%S %z")
-        fields["timestamp_unix"] = (fields["timestamp"] - datetime(1970,1,1, tzinfo=fields["timestamp"].tzinfo)) / timedelta(seconds=1)
-        fields["year"] = fields["timestamp"].strftime("%Y")
-        fields["month"] = fields["timestamp"].strftime("%m")
-        fields["day"] = fields["timestamp"].strftime("%d")
-        fields["hour"] = fields["timestamp"].strftime("%-H")
+
+        timestamp = pendulum.from_format(
+            fields["timestamp"],
+            "%d/%b/%Y:%H:%M:%S %z"
+        ).in_timezone("UTC")
+
+        fields["unix_timestamp"] = timestamp.timestamp()
+        fields["year"] = timestamp.year
+        fields["month"] = timestamp.month
+        fields["day"] = timestamp.day
+        fields["hour"] = timestamp.hour
         fields["country"] = None
         fields["city"] = None
         fields["region"] = None

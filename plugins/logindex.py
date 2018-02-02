@@ -20,8 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             month integer,
             day integer,
             hour integer,
-            timestamp,
-            timestamp_unix integer,
+            unix_timestamp integer,
             checksum,
             source_file,
             source_offset integer,
@@ -272,8 +271,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
 
         update_sql = """
-        UPDATE logs SET year=?, month=?, day=?, hour=?, timestamp=?,
-        timestamp_unix=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
+        UPDATE logs SET year=?, month=?, day=?, hour=?, unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
@@ -324,8 +322,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("month"),
                 fields.get("day"),
                 fields.get("hour"),
-                fields.get("timestamp"),
-                fields.get("timestamp_unix"),
+                fields.get("unix_timestamp"),
                 fields.get("ip"),
                 fields.get("host"),
                 fields.get("uri"),
@@ -380,15 +377,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def query(self, q, for_precache=False):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
-        sql = """SELECT year, month, day, hour, timestamp as "timestamp [datetime]",
-        timestamp_unix, logs.ip, host, uri, query as "query [querystring]",
+        sql = """SELECT year, month, day, hour, unix_timestamp, logs.ip,
+        host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
         region, city, postal_code, latitude, longitude, cookie,
         referrer, referrer_domain, logline, reverse_ip.reverse_domain
         FROM logs
         LEFT JOIN reverse_ip ON logs.ip=reverse_ip.ip
         WHERE {}
-        ORDER BY timestamp_unix DESC""".format(parsed_query)
+        ORDER BY unix_timestamp DESC""".format(parsed_query)
 
 
         if for_precache:
