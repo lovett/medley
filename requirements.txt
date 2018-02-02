@@ -2,11 +2,10 @@ CherryPy==13.1.0
 Jinja2==2.10
 httplib2==0.10.3
 msgpack-python==0.5.1
+pendulum==1.4.0
 pygeoip==0.3.2
 pyparsing==2.2.0
-python-dateutil==2.6.1
 pytz==2017.3
 requests==2.18.4
 simpleaudio==1.0.2
-tzlocal==1.5.1
 urllib3==1.22
