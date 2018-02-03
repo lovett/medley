@@ -1,7 +1,7 @@
 CherryPy==13.1.0
 Jinja2==2.10
 httplib2==0.10.3
-msgpack-python==0.5.1
+msgpack-python==0.5.2
 pendulum==1.4.0
 pygeoip==0.3.2
 pyparsing==2.2.0
