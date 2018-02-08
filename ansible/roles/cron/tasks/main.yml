@@ -13,6 +13,7 @@
     weekday="0"
     job="curl -k --fail --silent --show-error 'https://localhost/awsranges' > /dev/null"
     user="{{ project_user }}"
+    state="absent"
 
 - name: Update geodb database
   become: true
