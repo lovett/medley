@@ -35,6 +35,6 @@ class Controller:
             cherrypy.engine.publish("logindex:enqueue",index_date)
             index_date += datetime.timedelta(days=1)
 
-        cherrypy.engine.publish("logindex:schedule_parse")
+        cherrypy.engine.publish("logindex:parse")
 
         cherrypy.response.status = 204

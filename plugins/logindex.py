@@ -82,12 +82,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
-        self.bus.subscribe('logindex:schedule_parse', self.scheduleParse)
-        self.bus.subscribe('logindex:schedule_reversal', self.scheduleReversal)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:precache', self.preCache)
-        self.scheduleParse()
-        self.scheduleReversal()
+        self.parse()
 
     def stop(self):
         pass
@@ -148,48 +145,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
 
-    def scheduleParse(self):
-        sql = """SELECT count(*) as total FROM logs WHERE ip IS NULL"""
-        row = self._selectOne(sql)
-
-        cherrypy.engine.publish("applog:add", self, "unparsed_rows", row["total"])
-
-        cherrypy.log("logindex found {} unparsed rows".format(row["total"]))
-
-        if row["total"] == 0:
-            cherrypy.engine.publish(
-                "scheduler:add",
-                1,
-                "logindex:precache"
-            )
-        else:
-            cherrypy.engine.publish(
-                "scheduler:add",
-                1,
-                "logindex:parse"
-            )
-
-    def scheduleReversal(self):
-        sql = """SELECT count(*) as total FROM reverse_ip WHERE updated IS NULL"""
-        row = self._selectOne(sql)
-
-        cherrypy.engine.publish("applog:add", self, "unreversed_ips", row["total"])
-
-        cherrypy.log("logindex found {} unreversed ips".format(row["total"]))
-
-        if row["total"] == 0:
-            cherrypy.engine.publish(
-                "scheduler:add",
-                1,
-                "logindex:precache"
-            )
-        else:
-            cherrypy.engine.publish(
-                "scheduler:add",
-                10,
-                "logindex:reversal"
-            )
-
     @decorators.log_runtime_in_applog
     def enqueue(self, dt, batch_size=100):
         """Add log lines to the database for later parsing"""
@@ -243,7 +198,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ()
         )
 
+        cherrypy.log("LOGNDX Found {} unreversed ips".format(len(records)))
+
         if len(records) == 0:
+            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
             return
 
         batch = []
@@ -262,7 +220,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             batch
         )
 
-        self.scheduleReversal()
+        cherrypy.engine.publish("scheduler:add", 5, "logindex:reversal")
 
 
     @decorators.log_runtime_in_applog
@@ -276,6 +234,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         WHERE rowid=?"""
 
         records = self._select(select_sql, ())
+
+        cherrypy.log("LOGNDX Found {} unparsed rows".format(len(records)))
+
+        if len(records) == 0:
+            cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
+            return
+
         batch = []
         ips = set()
 
@@ -357,8 +322,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             {(ip,) for ip in ips}
         )
 
-        self.scheduleReversal()
-        self.scheduleParse()
+        cherrypy.engine.publish("scheduler:add", 1, "logindex:parse")
 
     @decorators.log_runtime_in_applog
     def insertLine(self, dt, records):
@@ -405,3 +369,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         for query in saved_queries:
             self.query(query["value"], for_precache=True)
+
+        cherrypy.log("LOGNDX Pre-cached {} queries".format(len(saved_queries)))
