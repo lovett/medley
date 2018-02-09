@@ -31,7 +31,7 @@ class Plugin(plugins.SimplePlugin):
 
         self.date7 = Group(
              Word(nums, exact=4) + Suppress("-") +
-             Word(nums, exact=2) + Suppress("-")
+             Word(nums, exact=2)
         )
 
         self.tzoffset = Word("+-", nums)
@@ -121,11 +121,14 @@ class Plugin(plugins.SimplePlugin):
 
     def logQueryRelativeDate(self, s, l, t):
         if t[1] == "today":
-            d = datetime.now()
+            reference_date = pendulum.today()
         elif t[1] == "yesterday":
-            d = datetime.now() - timedelta(days=1)
+            reference_date = pendulum.yesterday()
 
-        return "year={} AND month={} AND day={}".format(d.year, d.month, d.day)
+        return "unix_timestamp BETWEEN {} AND {}".format(
+            reference_date.start_of('day').in_timezone('utc').timestamp(),
+            reference_date.end_of('day').in_timezone('utc').timestamp()
+        )
 
 
     def logQueryAbsoluteDate(self, s, l, t):
@@ -133,17 +136,32 @@ class Plugin(plugins.SimplePlugin):
 
         dates = t[1:]
 
+        tz = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:timezone",
+            memorize=True
+        ).pop()
+
+        if not tz:
+            tz = pendulum.now().get_timezone()
+
         sql = []
         for date in dates:
-            year = int(date[0])
-            month = int(date[1])
-
+            ints = tuple(map(int, date))
             if len(date) == 2:
-                sql.append("(year={} AND month={})".format(year, month))
+                year, month = ints
+                start_date = pendulum.create(year, month, 1, tz=tz).start_of('day')
+                end_date = start_date.copy().end_of('month')
 
             if len(date) == 3:
-                day = int(date[2])
-                sql.append("(year={} AND month={} AND day={})".format(year, month, day))
+                year, month, day = ints
+                start_date = pendulum.create(year, month, day, tz=tz).start_of('day')
+                end_date = start_date.copy().end_of('day')
+
+            sql.append("unix_timestamp BETWEEN {} AND {}".format(
+                start_date.in_timezone('utc').timestamp(),
+                end_date.in_timezone('utc').timestamp()
+            ))
 
         joined_sql = " OR ".join(sql)
         return "({})".format(joined_sql)
