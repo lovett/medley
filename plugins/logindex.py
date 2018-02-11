@@ -16,10 +16,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._create("""
         CREATE TABLE IF NOT EXISTS logs (
-            year integer,
-            month integer,
-            day integer,
-            hour integer,
             unix_timestamp integer,
             checksum,
             source_file,
@@ -46,9 +42,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             UNIQUE(checksum)
         );
 
-        CREATE INDEX IF NOT EXISTS index_year ON logs(year);
-        CREATE INDEX IF NOT EXISTS index_month ON logs(month);
-        CREATE INDEX IF NOT EXISTS index_day ON logs(day);
         CREATE INDEX IF NOT EXISTS index_ip ON logs(ip);
         CREATE INDEX IF NOT EXISTS index_host ON logs(host);
         CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
@@ -229,7 +222,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
 
         update_sql = """
-        UPDATE logs SET year=?, month=?, day=?, hour=?, unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
+        UPDATE logs SET unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
@@ -283,10 +276,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 }
 
             values = (
-                fields.get("year"),
-                fields.get("month"),
-                fields.get("day"),
-                fields.get("hour"),
                 fields.get("unix_timestamp"),
                 fields.get("ip"),
                 fields.get("host"),
@@ -341,7 +330,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def query(self, q, for_precache=False):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
-        sql = """SELECT year, month, day, hour, unix_timestamp, logs.ip,
+        sql = """SELECT unix_timestamp, logs.ip,
         host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
         region, city, postal_code, latitude, longitude, cookie,

@@ -73,7 +73,7 @@ class Plugin(plugins.SimplePlugin):
                 (Literal("date") + OneOrMore(self.date10 | self.date7)).setParseAction(self.logQueryAbsoluteDate),
 
                 # numeric fields
-                (oneOf("year month day hour statusCode") +
+                (oneOf("statusCode") +
                  self.optionalNot +
                  OneOrMore(self.integer)).setParseAction(self.logQueryNumeric),
 
@@ -246,10 +246,6 @@ class Plugin(plugins.SimplePlugin):
         ).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
-        fields["year"] = timestamp.year
-        fields["month"] = timestamp.month
-        fields["day"] = timestamp.day
-        fields["hour"] = timestamp.hour
         fields["country"] = None
         fields["city"] = None
         fields["region"] = None
