@@ -2,7 +2,7 @@
 {% import "macros.html" as macros -%}
 
 {% block page_meta %}
-<meta name="active_date" content="{{ active_date }}" />
+<meta name="active_date" content="{{ active_date|localtime('date') }}" />
 {% endblock %}
 
 {% block stylesheets %}

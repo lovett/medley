@@ -1,6 +1,6 @@
 import cherrypy
 import pendulum
-from datetime import datetime, timedelta
+import re
 
 class Controller:
     """Search website access logs"""
@@ -21,7 +21,6 @@ class Controller:
 
         results = None
         active_query = None
-        active_date = datetime.now()
 
         query_records = cherrypy.engine.publish(
             "registry:search",
@@ -50,9 +49,10 @@ class Controller:
         log_records = cherrypy.engine.publish("logindex:query", q).pop() or []
 
         deltas = []
+        active_date = None
         for index, row in enumerate(log_records):
             if index == 0:
-                active_date = row["unix_timestamp"]
+                active_date = pendulum.from_timestamp(row["unix_timestamp"])
             try:
                 delta = pendulum.from_timestamp(row["unix_timestamp"]).diff_for_humans(
                     pendulum.from_timestamp(log_records[index + 1]["unix_timestamp"]),
@@ -61,6 +61,22 @@ class Controller:
             except (KeyError, IndexError):
                 delta = 0
             deltas.append(delta)
+
+        if not active_date:
+            tz = cherrypy.engine.publish(
+                "registry:first_value",
+                "config:timezone",
+                memorize=True
+            ).pop()
+
+            try:
+                active_date = pendulum.from_format(
+                    re.match("date\s+(\d{4}-\d{2}-\d{2})", q).group(1),
+                    '%Y-%m-%d',
+                    tz
+                )
+            except:
+                active_date = pendulum.now()
 
 
         countries = {record["country"] for record in log_records}
@@ -79,6 +95,7 @@ class Controller:
             as_multivalue_dict=True,
             key_slice=1
         ).pop()
+
 
         return {
             "html": ("visitors.html", {
