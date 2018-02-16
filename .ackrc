@@ -6,3 +6,4 @@
 --ignore-dir=db
 --ignore-dir=__pycache__
 --ignore-file=ext:pyc
+--ignore-file=is:.coverage
