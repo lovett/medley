@@ -186,16 +186,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime_in_applog
     def reversal(self, batch_size=10):
+        unreversed_ips = self._selectFirst("SELECT count(*) from reverse_ip WHERE updated IS NULL")
+
+        cherrypy.log("Logindex found {} unreversed ips".format(unreversed_ips))
+
+        if (unreversed_ips == 0):
+            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
+            return
+
         records = self._select(
             "SELECT rowid, ip FROM reverse_ip WHERE updated IS NULL LIMIT {}".format(batch_size),
             ()
         )
-
-        cherrypy.log("LOGNDX Found {} unreversed ips".format(len(records)))
-
-        if len(records) == 0:
-            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
-            return
 
         batch = []
 
@@ -219,6 +221,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     @decorators.log_runtime_in_applog
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
+
+        count_sql = "SELECT count(*) FROM logs WHERE ip IS NULL"
+
         select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
 
         update_sql = """
@@ -226,13 +231,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
-        records = self._select(select_sql, ())
+        unparsed_count = self._selectFirst(count_sql)
 
-        cherrypy.log("LOGNDX Found {} unparsed rows".format(len(records)))
+        cherrypy.log("Logindex found {} unparsed rows".format(unparsed_count))
 
-        if len(records) == 0:
+        if unparsed_count == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
+
+        records = self._select(select_sql, ())
 
         batch = []
         ips = set()
@@ -359,4 +366,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for query in saved_queries:
             self.query(query["value"], for_precache=True)
 
-        cherrypy.log("LOGNDX Pre-cached {} queries".format(len(saved_queries)))
+        cherrypy.log("Logindex pre-cached {} queries".format(len(saved_queries)))

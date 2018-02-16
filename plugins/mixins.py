@@ -122,3 +122,12 @@ class Sqlite:
             return result.pop()
         except IndexError:
             return {}
+
+    def _selectFirst(self, query, values=()):
+        result = self._select(query, values)
+
+        try:
+            row = result.pop()
+            return row[0]
+        except IndexError:
+            return None
