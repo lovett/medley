@@ -32,7 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             country collate nocase,
             region collate nocase,
             city collate nocase,
-            postal_code collate nocase,
             latitude real,
             longitude real,
             cookie collate nocase,
@@ -228,7 +227,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         update_sql = """
         UPDATE logs SET unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
-        latitude=?, longitude=?, postal_code=?, cookie=?, referrer=?, referrer_domain=?
+        latitude=?, longitude=?, cookie=?, referrer=?, referrer_domain=?
         WHERE rowid=?"""
 
         unparsed_count = self._selectFirst(count_sql)
@@ -267,7 +266,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             fields["city"] = fields["city"] or geo.get("city")
             fields["latitude"] = fields["latitude"] or geo.get("latitude")
             fields["longitude"] = fields["latitude"] or geo.get("longitude")
-            fields["postal_code"] = geo.get("postal_code")
 
             agent = fields.get("agent", "")
             if agent in agent_cache:
@@ -298,7 +296,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("city"),
                 fields.get("latitude"),
                 fields.get("longitude"),
-                fields.get("postal_code"),
                 fields.get("cookie"),
                 fields.get("referrer"),
                 fields.get("referrer_domain"),
@@ -340,7 +337,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = """SELECT unix_timestamp, logs.ip,
         host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
-        region, city, postal_code, latitude, longitude, cookie,
+        region, city, latitude, longitude, cookie,
         referrer, referrer_domain, logline, reverse_ip.reverse_domain
         FROM logs
         LEFT JOIN reverse_ip ON logs.ip=reverse_ip.ip
