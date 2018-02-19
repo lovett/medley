@@ -218,7 +218,7 @@
                             {% if result.query %}
                             <ul class="querystring smaller">
                                 {% for item in result.query|dictsort %}
-                                <li>{{ item.0 }}: {{ item.1|join(',') }}</li>
+                                <li>{{ item.0|truncate(50, True) }}: {{ item.1|join(',')|truncate(50, True) }}</li>
                                 {% endfor %}
                             </ul>
                             {% endif %}
