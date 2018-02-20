@@ -1,7 +1,8 @@
-# -*- restclient -*-
+:today := (format-time-string "%Y-%m-%d")
+:yesterday := (format-time-string "%Y-%m-%d" (time-subtract (current-time) (days-to-time 1)))
 
 POST http://127.0.0.1:8085/logindex
 Content-Type: application/x-www-form-urlencoded
 
-start=2018-01-01
+start=:yesterday&end=:today
 #
