@@ -124,7 +124,6 @@ htmlcov: coverage
 	open htmlcov/index.html
 
 
-
 # Test all apps
 #
 # Example: make test
@@ -132,8 +131,7 @@ htmlcov: coverage
 # A shortcut for calling "make appname" for every app individually, and
 # the sort of thing you'd want to invoke during CI.
 #
-# This will stop at the first failing app, rather than go through
-# everything every time.
+# This will stop at the first failing app.
 #
 test: $(APP_NAMES)
 
@@ -146,13 +144,15 @@ test: $(APP_NAMES)
 # coverage file to the coverage directory.
 #
 # The coverage file uses a non-standard name (ex: appname.cov) so
-# that report generation is re-reunnable.
+# that report generation is re-runnable.
 #
 # If the coverage file had a standard name (ex: .coverage.appname)
 # it would get deleted during combination and you'd have to regenerate
 # everything else just to reflect changes in one app.
 #
 $(APP_NAMES): $(COVERAGE_DIR)
+	flake8 $(APP_DIR)/$@
+	pylint --rcfile=.pylintrc $(APP_DIR)/$@/*.py
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
 
@@ -160,6 +160,7 @@ $(APP_NAMES): $(COVERAGE_DIR)
 vagrant-install: dummy
 	vagrant box update
 	vagrant up
+
 
 vagrant-provision: dummy
 	vagrant provision

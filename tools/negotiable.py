@@ -62,9 +62,7 @@ class Tool(cherrypy.Tool):
 
         renderer = self.renderers.get(self.response_format)
 
-        final_body, content_type = getattr(self, renderer)(cherrypy.response.body)
-
-        cherrypy.response.headers["Content-Type"] = content_type
+        final_body = getattr(self, renderer)(cherrypy.response.body)
 
         if not final_body:
             cherrypy.response.status = 406
@@ -83,33 +81,32 @@ class Tool(cherrypy.Tool):
     def _renderJson(self, body):
         part = body.get("json")
 
-        return (
-            json.JSONEncoder().encode(part) if part else None,
-            "application/json"
-        )
+        cherrypy.response.headers["Content-Type"] = "applciation/json"
+
+        return json.JSONEncoder().encode(part) if part else None
 
 
     def _renderText(self, body):
         part = body.get("text")
+
         if isinstance(part, str):
             part = [part]
 
-        return (
-            "\n".join([str(line) for line in part]) if part else None,
-            "text/plain;charset={}".format(self.charset)
-        )
+        cherrypy.response.headers["Content-Type"] = "text/plain;charset={}".format(self.charset)
+
+        return "\n".join([str(line) for line in part]) if part else None
 
 
     def _renderHtml(self, body):
         template_file, values = body.get("html", (None, None))
 
         template = None
+
         if template_file:
             template = cherrypy.engine.publish("lookup-template", template_file).pop()
 
-        return (
-            template.render(**values) if template else None,
-            "text/html;charset={}".format(self.charset)
-        )
+        cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(self.charset)
+
+        return template.render(**values) if template else None
 
 cherrypy.tools.negotiable = Tool()

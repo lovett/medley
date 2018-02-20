@@ -1,112 +1,134 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import cherrypy
-import datetime
-import unittest
-import apps.whois.main
-import mock
+"""
+Test suite for the whois app
+"""
 
-class TestWhois(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.whois.main
+
+
+class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the whois application controller
+    """
+
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.whois.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
-
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
     def test_default(self):
+        """Make a request with no arguments"""
         response = self.request("/")
 
         self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invalidAddressAsHostname(self, publishMock):
-        def side_effect(*args, **kwargs):
-            if (args[0] == "url:for_controller"):
-                return ["/"]
+    def test_invalid_address_hostname(self, publish_mock):
+        """Request lookup of an invalid hostname"""
 
-        publishMock.side_effect = side_effect
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "url:for_controller":
+                return ["/"]
+            return True
+
+        publish_mock.side_effect = side_effect
         response = self.request("/", address="invalid")
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_validAddressAsHostname(self, publishMock, renderMock):
-        def side_effect(*args, **kwargs):
-            if (args[0] == "cache:get"):
-                return [None]
-            if (args[0] == "ip:facts"):
-                return [None]
-            if (args[0] == "urlfetch:get"):
-                return [None]
+    def test_valid_address_as_hostname(self, publish_mock, render_mock):
+        """Request lookup of a valid hostname"""
 
-        publishMock.side_effect = side_effect
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] in ("cache:get", "ip:facts", "urlfetch:get"):
+                return [None]
+            return mock.DEFAULT
 
-        response = self.request("/", address="localhost")
+        publish_mock.side_effect = side_effect
 
-        template_vars = self.extract_template_vars(renderMock)
-        self.assertEqual(template_vars["ip"], "127.0.0.1")
+        self.request("/", address="localhost")
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "ip_address"),
+            "127.0.0.1"
+        )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invalidAddressAsIp(self, publishMock):
-        def side_effect(*args, **kwargs):
-            if (args[0] == "url:for_controller"):
-                return ["/"]
+    def test_invalid_address_as_ip(self, publish_mock):
+        """Request lookup of an invalid IP address"""
 
-        publishMock.side_effect = side_effect
+        def side_effect(*args, **_):
+            """Overrides to be returned by the mock"""
+            if args[0] == "url:for_controller":
+                return ["/"]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request("/", address="333.333.333.333")
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_addressAsIpWithCache(self, publishMock, renderMock):
+    def test_address_as_ip(self, publish_mock, render_mock):
+        """Request lookup of a cached IP address"""
 
         cache_fake = {"foo": "bar"}
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "cache:get"):
+        def side_effect(*args, **_):
+            """Overrides to be returned by the mock"""
+            if args[0] == "cache:get":
                 return [cache_fake]
-            if (args[0] == "urlfetch:get"):
+            if args[0] == "urlfetch:get":
                 return [None]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", address="127.0.0.1")
+        self.request("/", address="127.0.0.1")
 
-        template_vars = self.extract_template_vars(renderMock)
-        print(template_vars)
-
-        self.assertEqual(template_vars["whois"], cache_fake)
-        self.assertEqual(template_vars["ip_facts"], cache_fake)
+        self.assertEqual(helpers.html_var(render_mock, "whois"), cache_fake)
+        self.assertEqual(helpers.html_var(render_mock, "ip_facts"), cache_fake)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_addressAsIpWithoutCache(self, publishMock, renderMock):
+    def test_address_as_ip_nocache(self, publish_mock, render_mock):
+        """Request lookup of an uncached IP address"""
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "cache:get"):
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "cache:get":
                 return [None]
-            if (args[0] == "ip:facts"):
+            if args[0] == "ip:facts":
                 return ["test"]
-            if (args[0] == "urlfetch:get"):
+            if args[0] == "urlfetch:get":
                 return [{"foo": "bar"}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", address="127.0.0.1")
+        self.request("/", address="127.0.0.1")
 
-        template_vars = self.extract_template_vars(renderMock)
-        self.assertEqual(template_vars["ip_facts"], "test")
+        self.assertEqual(helpers.html_var(render_mock, "ip_facts"), "test")
+
 
 if __name__ == "__main__":
     unittest.main()

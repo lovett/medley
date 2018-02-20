@@ -18,6 +18,7 @@ import cherrypy
 import plugins
 import tools
 
+
 def main():
     """Configure and start the application server
 
@@ -73,7 +74,9 @@ def main():
         try:
             os.mkdir(value)
         except PermissionError:
-            raise SystemExit("Unable to create the {} directory at {}".format(key, value))
+            raise SystemExit(
+                "Unable to create {} directory at {}".format(key, value)
+            )
 
     # Mount the apps
     for app in os.listdir(app_root):
@@ -104,7 +107,8 @@ def main():
         static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
 
-            # The homepage app is unique. Its static path is not under its app path.
+            # The homepage app is unique. Its static path is not under
+            # its app path.
             static_url = "/static"
             if app_path == "/":
                 static_url = "/homepage/static"

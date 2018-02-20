@@ -268,7 +268,11 @@ class Plugin(plugins.SimplePlugin):
     @jinja2.contextfilter
     def cache_bust_filter(self, context, url):
         abs_path = cherrypy.config.get("app_root") + url
-        checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
+
+        try:
+            checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
+        except IndexError:
+            checksum = ""
         return "{}?{}".format(url, checksum)
 
     @jinja2.contextfilter

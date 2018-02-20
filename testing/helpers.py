@@ -4,6 +4,7 @@ import random
 import os.path
 import tempfile
 import apps.shared.main
+from tools import negotiable
 
 def getFixture(path):
     with open("test/fixtures/" + path) as handle:
@@ -14,7 +15,10 @@ def start_server(app):
     using method dispatch"""
 
     server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    app_root = os.path.join(server_root, "apps")
+
     cherrypy.config.update({
+        "app_root": app_root,
         "server_root": server_root,
         "database_dir": tempfile.gettempdir(),
         "tools.encode.on": False
@@ -37,6 +41,7 @@ def start_server(app):
     )
 
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
+    cherrypy.tools.negotiable = negotiable.Tool()
     cherrypy.engine.start()
 
 def stop_server():
@@ -61,3 +66,6 @@ def header_is(headers, name, value):
         return headers[name] == value
     except KeyError:
         return false
+
+def html_var(called_mock, key):
+    return called_mock.call_args[0][0]["html"][1].get(key)
