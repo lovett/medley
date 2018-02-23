@@ -46,10 +46,10 @@
             <tr>
                 <th>Precipitation</th>
                 <td>
-                    {{ forecast.liklihood_of_precipitation|percentage }} chance
+                    {{ forecast.precip_prob|percentage }} chance
 
-                    {% if forecast.precipitation_type %}
-                    of {{ forecast.precipitation_type }}
+                    {% if forecast.precip_type %}
+                    of {{ forecast.precip_type }}
                     {% endif %}
                 </td>
             </tr>

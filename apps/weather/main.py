@@ -1,8 +1,16 @@
-import cherrypy
+"""
+Display current and upcoming weather conditions
+"""
+
 import math
+import cherrypy
+
 
 class Controller:
-    """The current forecast"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Weather"
 
@@ -12,6 +20,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self):
+        """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(
             "registry:search",
@@ -19,7 +28,12 @@ class Controller:
         ).pop()
 
         try:
-            api_key = next(item["value"] for item in config if item["key"] == "weather:darksky_key")
+            api_key = next(
+                item["value"]
+                for item in config
+                if item["key"] == "weather:darksky_key"
+            )
+
         except StopIteration:
             raise cherrypy.HTTPError(500, "No api key")
 
@@ -38,13 +52,15 @@ class Controller:
             ).pop()
 
             if answer:
-                forecasts[label] = self.shapeForecast(answer)
+                forecasts[label] = self.shape_forecast(answer)
                 continue
 
             latitude, longitude = latlong.split(",")
-            endpoint = "https://api.darksky.net/forecast/{}/{},{}?lang=en&units=us&exclude=minutely".format(
+            endpoint = "https://api.darksky.net/forecast/{}/{},{}".format(
                 api_key, latitude, longitude
             )
+
+            endpoint += "?lang=en&units=us&exclude=minutely"
 
             answer = cherrypy.engine.publish(
                 "urlfetch:get",
@@ -53,7 +69,7 @@ class Controller:
             ).pop()
 
             if answer:
-                forecasts[label] = self.shapeForecast(answer)
+                forecasts[label] = self.shape_forecast(answer)
 
                 cherrypy.engine.publish(
                     "cache:set",
@@ -68,7 +84,8 @@ class Controller:
             })
         }
 
-    def shapeForecast(self, forecast):
+    @staticmethod
+    def shape_forecast(forecast):
         """Reduce an API response object to wanted values"""
 
         result = {}
@@ -77,21 +94,22 @@ class Controller:
         days = daily_block.get("data", [{}, {}])
 
         today = days[0]
-        tomorrow = days[1]
 
-        current_block = forecast.get("currently", {})
-        hourly_block = forecast.get("hourly", {})
+        currently = forecast.get("currently", {})
+        hourly = forecast.get("hourly", {})
 
-        result["current_summary"] = current_block.get("summary")
-        result["current_temperature"] = math.ceil(current_block.get("temperature"))
-        result["current_time"] = current_block.get("time")
-        result["current_humidity"] = current_block.get("humidity", 0)
+        result["current_summary"] = currently.get("summary")
+        result["current_temperature"] = math.ceil(
+            currently.get("temperature")
+        )
+        result["current_time"] = currently.get("time")
+        result["current_humidity"] = currently.get("humidity", 0)
 
         result["summary"] = today.get("summary")
         result["temperature"] = math.ceil(today.get("temperature", 0))
         result["sunrise"] = today.get("sunriseTime")
         result["sunset"] = today.get("sunsetTime")
-        result["humidity"] = current_block.get("humidity", 0)
+        result["humidity"] = currently.get("humidity", 0)
 
         result["high"] = math.ceil(today.get("temperatureHigh"))
         result["high_at"] = today.get("temperatureHighTime")
@@ -99,10 +117,10 @@ class Controller:
         result["low"] = math.ceil(today.get("temperatureLow"))
         result["low_at"] = today.get("temperatureLowTime")
 
-        result["liklihood_of_precipitation"] = current_block.get("precipProbability", 0) * 100
-        result["precipitation_type"] = current_block.get("precipType")
+        result["precip_prob"] = currently.get("precipProbability", 0) * 100
+        result["precip_type"] = currently.get("precipType")
 
-        if "data" in hourly_block:
-            result["hourly"] = [item for item in hourly_block["data"]][0:24]
+        if "data" in hourly:
+            result["hourly"] = [item for item in hourly["data"]][0:24]
 
         return result
