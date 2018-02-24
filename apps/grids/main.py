@@ -1,10 +1,17 @@
-import cherrypy
+"""
+Printable pages for data entry
+"""
+
 from collections import defaultdict
-import datetime
-from calendar import Calendar
+import pendulum
+import cherrypy
+
 
 class Controller:
-    """Printable pages for data entry"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Grids"
 
@@ -14,12 +21,13 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, name="", start=None):
+        """Display the list of available grids, or the current grid"""
+
         grids = cherrypy.engine.publish(
             "registry:search",
             "grids:*",
             as_dict=True
         ).pop()
-
 
         options = defaultdict(lambda: None)
 
@@ -38,23 +46,24 @@ class Controller:
 
         rows = []
         if options["layout"] == "month":
-            today = datetime.date.today()
+            today = pendulum.today()
 
             try:
-                start = datetime.datetime.strptime(start, "%Y-%m")
+                start = pendulum.from_format(start, "%Y-%m")
             except (TypeError, ValueError):
-                start = today.replace(day=1)
+                start = today.start_of("month")
 
             headers = ["Date", "Day"] + headers
-            options["last_month"] = start - datetime.timedelta(days=1)
-            options["next_month"] = start + datetime.timedelta(days=32)
+            options["last_month"] = start.subtract(months=1)
+            options["next_month"] = start.add(months=1)
             options["this_month"] = today
-            for item in Calendar().itermonthdates(start.year, start.month):
-                if item.month != start.month:
-                    continue
+
+            period = pendulum.period(start, start.add(months=1))
+
+            for day in period.range("days"):
                 row = [''] * len(headers)
-                row[0] = item.strftime("%B %d, %Y")
-                row[1] = item.strftime("%A")
+                row[0] = day.format("%B %d, %Y")
+                row[1] = day.format("%A")
                 rows.append(row)
         elif headers:
             row = [''] * len(headers)

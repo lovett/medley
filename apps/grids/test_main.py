@@ -1,26 +1,20 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.grids.main
-import cherrypy
-import datetime
-import mock
+"""
+Test suite for the grids app
+"""
+
 import unittest
+import mock
+import pendulum
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.grids.main
 
-class TestGrids(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
-    """Unit tests for the Grids app controller
 
-    Testing involves the use of two mocks. The first mock patches
-    cherrypy.engine.publish in order to inject a fixture for the grid
-    template.
-
-    The controller is not the only thing calling this method. If the
-    mock makes it as far as the template plugin, the request will fail
-    due to lack of an appropriate return value (side effect).
-
-    The second mock against cherrpy.tools.negotiable avoids this. It
-    provides a window into the dict returned by the controller before
-    the templating plugin gets involved."""
+class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the grids application controller
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -30,93 +24,98 @@ class TestGrids(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
-
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_monthLayout(self, publishMock, renderMock):
+    def test_month_layout(self, publish_mock, render_mock):
         """The first two columns of a template with layout=month are Date and
         Day, even though these are not otherwise specified in the template"""
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:search"):
-                return [{"grids:test1": "Column 1, Column 2, Column 3\nlayout=month"}]
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                value = "Column 1, Column 2, Column 3\nlayout=month"
+                return [{"grids:test1": value}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", name="test1")
-
-        template_vars = self.extract_template_vars(renderMock)
+        self.request("/", name="test1")
 
         self.assertCountEqual(
-            template_vars["headers"],
+            helpers.html_var(render_mock, "headers"),
             ['Date', 'Day', 'Column 1', 'Column 2', 'Column 3']
         )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_monthLayoutInvalidStart(self, publishMock, renderMock):
+    def test_month_layout_invalid_start(self, publish_mock, render_mock):
         """An invalid start date for a monthly layout is handled gracefully"""
 
-        first_of_current_month = datetime.date.today().replace(day=1)
+        first_of_current_month = pendulum.today().start_of('month')
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:search"):
-                return [{"grids:test1": "Column 4, Column 5, Column 6\nlayout=month"}]
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                value = "Column 4, Column 5, Column 6\nlayout=month"
+                return [{"grids:test1": value}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", name="test1", start="1234-56")
-
-        template_vars = self.extract_template_vars(renderMock)
+        self.request("/", name="test1", start="1234-56")
 
         self.assertEqual(
-            template_vars["rows"][0][0],
+            helpers.html_var(render_mock, "rows")[0][0],
             first_of_current_month.strftime("%B %d, %Y")
         )
 
-
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_plainLayout(self, publishMock, renderMock):
+    def test_plain_layout(self, publish_mock, render_mock):
         """No additional columns are added to a plain-layout template"""
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:search"):
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
                 return [{"grids:test1": "Column A, Column B"}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", name="test1")
+        self.request("/", name="test1")
 
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertCountEqual(template_vars["headers"], ['Column A', 'Column B'])
+        self.assertCountEqual(
+            helpers.html_var(render_mock, "headers"),
+            ['Column A', 'Column B']
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_defaultView(self, publishMock, renderMock):
+    def test_default_view(self, publish_mock, render_mock):
         """The default view of the app is a list of available templates"""
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:search"):
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
                 return [{"grids:test1": "Column A"}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/")
+        self.request("/")
 
-        template_vars = self.extract_template_vars(renderMock)
+        self.assertFalse(helpers.html_var(render_mock, "rows"))
+        self.assertFalse(helpers.html_var(render_mock, "headers"))
+        self.assertEqual(
+            helpers.html_var(render_mock, "names"),
+            ["test1"]
+        )
 
-        print(template_vars)
-
-        self.assertFalse(template_vars["rows"])
-        self.assertFalse(template_vars["headers"])
-        self.assertEqual(template_vars["names"], ["test1"])
 
 if __name__ == "__main__":
     unittest.main()
