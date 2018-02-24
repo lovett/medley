@@ -1,22 +1,32 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import unittest
-import apps.jenkins.main
-import mock
+"""
+Test suite for the jenkins app
+"""
 
-class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.jenkins.main
+
+
+class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the jenkins application controller
+    """
 
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.jenkins.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
-    @classmethod
     def setUp(self):
+        """Fixtures available to all tests"""
 
         self.config_fixture = {
             "notifier:url": "http://example.com",
@@ -50,42 +60,53 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
             "url": "http://example.com/job/testjob-pipeline/1/"
         }
 
-    def get_fixture(self, format, phase, status):
-        if format == "plugin":
+    def get_fixture(self, kind, phase, status):
+        """
+        Select of the available fixtures based on its structure and
+        values
+        """
+
+        if kind == "plugin":
             fixture = self.plugin_fixture
             fixture["build"]["phase"] = phase.upper()
             fixture["build"]["status"] = status.upper()
-        if format == "pipeline":
+        if kind == "pipeline":
             fixture = self.pipeline_fixture
             fixture["phase"] = phase
             fixture["status"] = status
 
         return fixture
 
-    def default_side_effect_callback(self, *args, **kwargs):
+    def default_side_effect_callback(self, *args, **_):
+        """
+        The standard mock side effect function used by all tests
+        """
+
         if args[0] == "registry:search":
             if args[1] == "notifier:*":
                 return [self.config_fixture]
             if args[1] == "jenkins:skip":
                 return [["skippable"]]
+        return mock.DEFAULT
 
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("POST",))
 
-    def test_rejectsHtml(self):
+    def test_rejects_html(self):
         """The request body must contain JSON"""
 
         response = self.request("/", method="POST")
         self.assertEqual(response.code, 415)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_acceptsPluginFinalizedSuccess(self, publishMock):
+    def test_plugin_finalized_success(self, publish_mock):
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("plugin", "finalized", "success")
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request(
             "/",
@@ -96,12 +117,12 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_acceptsPipelineFormat(self, publishMock):
+    def test_accepts_pipeline_format(self, publish_mock):
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("pipeline", "finalized", "success")
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request(
             "/",
@@ -111,14 +132,13 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
 
         self.assertEqual(response.code, 204)
 
-
     @mock.patch("cherrypy.engine.publish")
-    def test_acceptsPluginCompletedSuccess(self, publishMock):
+    def test_plugin_completed_success(self, publish_mock):
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("plugin", "completed", "success")
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request(
             "/",
@@ -129,38 +149,38 @@ class TestJenkins(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippableByPhase(self, publishMock):
+    def test_skippable_by_phase(self, publish_mock):
         """Skip logic consiers project name and phase"""
         payload_fixture = self.get_fixture("plugin", "started", "success")
         payload_fixture["name"] = "skippable"
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/", method="POST", json_body=payload_fixture)
 
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippableByStatus(self, publishMock):
+    def test_skippable_by_status(self, publish_mock):
         """Skip logic consiers project name and status"""
 
         payload_fixture = self.get_fixture("plugin", "completed", "success")
         payload_fixture["name"] = "skippable"
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/", method="POST", json_body=payload_fixture)
 
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippableButNotOnFail(self, publishMock):
+    def test_skippable_but_not_on_fail(self, publish_mock):
         """Failure status supersedes skip logic"""
 
         payload_fixture = self.get_fixture("plugin", "started", "failure")
         payload_fixture["name"] = "skippable"
 
-        publishMock.side_effect = self.default_side_effect_callback
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/", method="POST", json_body=payload_fixture)
 
