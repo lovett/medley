@@ -1,7 +1,13 @@
+"""Serve static assets used by multiple apps"""
+
 import cherrypy
 
+
 class Controller:
-    """Serve static assets used by multiple apps"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Shared"
 
@@ -9,5 +15,7 @@ class Controller:
 
     user_facing = False
 
-    def GET(self):
+    @staticmethod
+    def GET():
+        """Redirect requests for non-static assets"""
         raise cherrypy.HTTPRedirect("/")
