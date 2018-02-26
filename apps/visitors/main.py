@@ -65,7 +65,7 @@ class Controller:
 
         return {
             "html": ("visitors.html", {
-                "q": query,
+                "query": query,
                 "active_date": active_date,
                 "results": log_records,
                 "country_names": country_names,

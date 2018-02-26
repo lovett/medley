@@ -99,7 +99,7 @@ MEDLEY.visitors = (function () {
             url: '/registry',
             data: {
                 'key': 'visitors:' + name.toLowerCase(),
-                'value': jQuery('#q').val(),
+                'value': jQuery('#query').val(),
                 'replace': true
             }
         }).done(function () {
@@ -109,11 +109,11 @@ MEDLEY.visitors = (function () {
 
     function applySelectedDateToQuery(dateText) {
         var query;
-        query = jQuery('#q').val();
+        query = jQuery('#query').val();
 
         query = query.trim().replace(/^\s*date.*\s*/g, '');
         query = 'date ' + dateText + '\n' + query;
-        jQuery('#q').val(query);
+        jQuery('#query').val(query);
         jQuery('#submit').trigger('click');
     }
 
@@ -128,7 +128,7 @@ MEDLEY.visitors = (function () {
             type: 'DELETE',
             url: '/registry/' + selectedOption.attr('data-id')
         }).done(function (data) {
-            jQuery('#q').val('');
+            jQuery('#query').val('');
             jQuery('#submit').trigger('click');
         });
     }
@@ -173,7 +173,7 @@ MEDLEY.visitors = (function () {
         init: function () {
             jQuery('#save').on('click', saveQuery);
 
-            jQuery('#q').on('keyup', resetQueryMenu);
+            jQuery('#query').on('keyup', resetQueryMenu);
 
             jQuery('.annotate-ip').on('click', annotateIP);
 
@@ -181,7 +181,7 @@ MEDLEY.visitors = (function () {
                 var query, multiline;
                 query = jQuery(this).val();
                 multiline = queryToMultiline(query);
-                jQuery('#q').val(multiline);
+                jQuery('#query').val(multiline);
                 jQuery('#submit').trigger('click');
 
                 jQuery('.delete').removeClass('hidden');
