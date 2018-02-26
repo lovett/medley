@@ -81,7 +81,7 @@ class Tool(cherrypy.Tool):
     def _renderJson(self, body):
         part = body.get("json")
 
-        cherrypy.response.headers["Content-Type"] = "applciation/json"
+        cherrypy.response.headers["Content-Type"] = "application/json"
 
         return json.JSONEncoder().encode(part) if part else None
 

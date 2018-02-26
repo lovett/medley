@@ -1,8 +1,14 @@
-import cherrypy
+"""Convert a string to a different format"""
+
 import urllib
+import cherrypy
+
 
 class Controller:
-    """Convert a string to a different format"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Transform"
 
@@ -18,8 +24,8 @@ class Controller:
             "lower": lambda x: x.lower(),
             "title": lambda x: x.title(),
             "upper": lambda x: x.upper(),
-            "urldecode": lambda x: urllib.parse.unquote_plus(x),
-            "urlencode": lambda x: urllib.parse.quote_plus(x),
+            "urldecode": urllib.parse.unquote_plus,
+            "urlencode": urllib.parse.quote_plus,
         }
 
     def list_of_transforms(self):
@@ -28,6 +34,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self):
+        """The default view presents the available transformation methods"""
 
         return {
             "json": {"transforms": self.list_of_transforms()},
@@ -40,6 +47,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def POST(self, transform, value):
+        """Perform a transformation and display the result"""
 
         transformer = self.transforms.get(transform, lambda x: x)
 
