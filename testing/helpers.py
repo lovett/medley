@@ -69,3 +69,6 @@ def header_is(headers, name, value):
 
 def html_var(called_mock, key):
     return called_mock.call_args[0][0]["html"][1].get(key)
+
+def text_var(called_mock):
+    return called_mock.call_args[0][0]["text"]
