@@ -140,7 +140,7 @@ class Controller:
         """
 
         if log_records:
-            return log_records[1]
+            return log_records[0]["unix_timestamp"]
 
         timezone = cherrypy.engine.publish(
             "registry:first_value",
