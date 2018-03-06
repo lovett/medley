@@ -149,13 +149,13 @@
                         </td>
                         <td>
                             <p class="always-wrap">
-                                <a href="/visitors?q=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
+                                <a href="/visitors?query=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
                                     {{ result.ip }}
                                 </a>
                             </p>
 
                             {% if result.reverse_domain %}
-                            <a href="/visitors?q=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
+                            <a href="/visitors?query=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
                                 {{ result.reverse_domain|hostname_truncate(3) }}
                             </a>
                             {% endif %}
@@ -173,7 +173,7 @@
 
                             <div class="next-actions">
                                 {% if result.cookie %}
-                                <a href="/visitors?q=cookie+{{ result.cookie }}" title="Search for visits with this cookie" rel="noreferrer">
+                                <a href="/visitors?query=cookie+{{ result.cookie }}" title="Search for visits with this cookie" rel="noreferrer">
                                     <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                 </a>
                                 {% endif %}
@@ -210,7 +210,7 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?q=date+{{ result.unix_timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                <a href="/visitors?query=date+{{ result.unix_timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                     {{ result.method }} {{ result.uri|truncate(30, True) }}
                                 </a>
                             </p>
@@ -225,7 +225,7 @@
 
                             {% if result.referrer and result.referrer_domain not in site_domains %}
                             <p>
-                                Referrer: <a href="/visitors?q=date+{{ result.unix_timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                Referrer: <a href="/visitors?query=date+{{ result.unix_timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                             </p>
                             {% endif %}
                         </td>
