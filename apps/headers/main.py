@@ -1,7 +1,15 @@
+"""
+Display request headers
+"""
+
 import cherrypy
 
+
 class Controller:
-    """Display request headers"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Headers"
 
@@ -11,6 +19,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self):
+        """Display the headers of the current request"""
         headers = sorted(
             cherrypy.request.headers.items(),
             key=lambda pair: pair[0]
