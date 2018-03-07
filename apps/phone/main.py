@@ -1,8 +1,15 @@
+"""
+Display geographic location and recent call history for a phone number
+"""
+
 import cherrypy
-import urllib.parse
+
 
 class Controller:
-    """Display geographic location and recent call history for a phone number"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Phone"
 
@@ -17,6 +24,10 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, number=None):
+        """
+        Display information about the specified number, or a search form to
+        look up a number
+        """
         sanitized_number = cherrypy.engine.publish(
             "phone:sanitize",
             number=number
@@ -76,7 +87,6 @@ class Controller:
             number=sanitized_number
         ).pop()
 
-
         blacklisted = cherrypy.engine.publish(
             "asterisk:is_blacklisted",
             number=sanitized_number
@@ -90,8 +100,14 @@ class Controller:
         if not caller_id:
             try:
                 caller_id = call_history[0][0]["clid"]
-            except:
+            except IndexError:
                 caller_id = None
+
+        sparql = [
+            lookup[0]
+            for lookup in
+            (state_lookup, state_name_lookup)
+        ]
 
         return {
             "html": ("phone.html", {
@@ -103,8 +119,7 @@ class Controller:
                 "state_abbreviation": state_lookup[1],
                 "comment": state_lookup[2],
                 "state_name": state_name_lookup[1],
-                "sparql": [lookup[0] for lookup in (state_lookup, state_name_lookup)],
+                "sparql": sparql,
                 "app_name": self.name
             })
-
-}
+        }
