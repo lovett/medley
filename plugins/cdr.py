@@ -76,34 +76,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select(query_str, list(reversed(reversed_values)))
 
-    def callHistory(self, number, limit=0, offset=0):
-        count = self.callCount(number)
-
-        if count == 0:
-            return ([], 0)
-
-        params = []
-
+    def callHistory(self, number, limit=50):
         query = """
         SELECT calldate as "date [naive_date]",
         CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
-        duration as "duration [duration]",
-        clid as "clid [clid]",
-        *
+        duration as "duration [duration]", clid as "clid [clid]"
         FROM cdr
         WHERE src=? OR dst LIKE ?
         ORDER BY calldate DESC
+        LIMIT ?
         """
 
-        params.append(number)
-        params.append("%" + number)
-
-        if limit > 0:
-            query += " LIMIT ?"
-            params.append(limit)
-
-        if limit > 0 and offset > 0:
-            query += " OFFSET ?"
-            params.append(offset)
+        params = (number, "%" + number, limit)
 
         return self._select(query, params)

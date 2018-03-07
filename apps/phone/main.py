@@ -84,8 +84,7 @@ class Controller:
 
         call_history = cherrypy.engine.publish(
             "cdr:call_history",
-            sanitized_number,
-            limit=50
+            sanitized_number
         ).pop()
 
         if not caller_id:

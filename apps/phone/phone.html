@@ -108,27 +108,18 @@
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Direction</th>
+                    <th>Time</th>
                     <th>Duration</th>
-                    <th>Last App</th>
+                    <th>Direction</th>
                 </tr>
             </thead>
             <tbody>
                 {% for entry in history %}
                 <tr>
-                    <td nowrap="nowrap">
-                        {{ entry["date"]|localtime("date") }} at
-                        {{ entry["date"]|localtime("time12")}}
-                    </td>
-                    <td>
-                        {{ entry["direction"] }}
-                    </td>
-                    <td>
-                        {{ entry["duration"] }}
-                    </td>
-                    <td nowrap="nowrap">
-                        {{ entry["lastapp"] }}
-                    </td>
+                    <td nowrap="nowrap">{{ entry["date"]|localtime("date") }}</td>
+                    <td>{{ entry["date"]|localtime("time12")}}</td>
+                    <td>{{ entry["duration"] }}</td>
+                    <td>{{ entry["direction"] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
