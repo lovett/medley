@@ -2,8 +2,8 @@
 Trigger indexing of log files for display by the visitors app
 """
 
-import datetime
 import os.path
+import pendulum
 import cherrypy
 
 
@@ -21,15 +21,18 @@ class Controller:
 
     @staticmethod
     def parse_log_date(val):
-        """
-        Convert a datestamp in YYYY-mm-dd format to a datetime
+        """Convert a date string in either date or filename format
+        to a datetime.
 
-        If parsing fails, raise a 400 error.
-        """
+        Date format is YYYY-mm-dd. Filename format is the same, but with
+        any extension at the end, most likely ".log"
+
+        If parsing fails, raise a 400 error."""
 
         filename = os.path.splitext(val)[0]
+
         try:
-            return datetime.datetime.strptime(filename, "%Y-%m-%d")
+            return pendulum.strptime(filename, "%Y-%m-%d")
         except ValueError:
             raise cherrypy.HTTPError(
                 400,
@@ -52,7 +55,7 @@ class Controller:
         index_date = start_date
         while index_date <= end_date:
             cherrypy.engine.publish("logindex:enqueue", index_date)
-            index_date += datetime.timedelta(days=1)
+            index_date = index_date.add(days=1)
 
         cherrypy.engine.publish("logindex:parse")
 

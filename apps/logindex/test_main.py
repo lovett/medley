@@ -3,7 +3,7 @@ Test suite for the logindex app
 """
 
 import unittest
-import datetime
+import pendulum
 import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -67,17 +67,17 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             calls[-4],
-            mock.call('logindex:enqueue', datetime.datetime(2017, 1, 1, 0, 0))
+            mock.call('logindex:enqueue', pendulum.create(2017, 1, 1, 0, 0))
         )
 
         self.assertEqual(
             calls[-3],
-            mock.call('logindex:enqueue', datetime.datetime(2017, 1, 2, 0, 0))
+            mock.call('logindex:enqueue', pendulum.create(2017, 1, 2, 0, 0))
         )
 
         self.assertEqual(
             calls[-2],
-            mock.call('logindex:enqueue', datetime.datetime(2017, 1, 3, 0, 0))
+            mock.call('logindex:enqueue', pendulum.create(2017, 1, 3, 0, 0))
         )
 
         self.assertEqual(
@@ -101,7 +101,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             calls[-2],
-            mock.call('logindex:enqueue', datetime.datetime(2017, 1, 1, 0, 0))
+            mock.call('logindex:enqueue', pendulum.create(2017, 1, 1, 0, 0))
         )
 
         self.assertEqual(
