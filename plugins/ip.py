@@ -55,7 +55,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             geodb_path = geodb_path[0:-3]
 
         geodb = pygeoip.GeoIP(geodb_path)
-        geodb_record = geodb.record_by_addr(ip)
+        geodb_record = geodb.record_by_addr(ip) or {}
         facts["geo"] = geodb_record
 
         # Google charts
@@ -67,6 +67,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             facts["map_region"] = map_region
         except:
             pass
+
 
         return facts
 
