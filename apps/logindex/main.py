@@ -52,11 +52,6 @@ class Controller:
             if start_date > end_date:
                 raise cherrypy.HTTPError(400, "Invalid date range")
 
-        index_date = start_date
-        while index_date <= end_date:
-            cherrypy.engine.publish("logindex:enqueue", index_date)
-            index_date = index_date.add(days=1)
-
-        cherrypy.engine.publish("logindex:parse")
+        cherrypy.engine.publish("logindex:enqueue", start_date, end_date)
 
         cherrypy.response.status = 204

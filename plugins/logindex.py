@@ -1,18 +1,19 @@
 import cherrypy
 import os
-import fnmatch
 import os.path
-import zlib
+from collections import deque
 import re
+import pendulum
 from . import mixins
 from . import decorators
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
-
+        self.queue = deque()
 
         self._create("""
         CREATE TABLE IF NOT EXISTS logs (
@@ -41,16 +42,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             UNIQUE(checksum)
         );
 
-        CREATE INDEX IF NOT EXISTS index_ip ON logs(ip);
-        CREATE INDEX IF NOT EXISTS index_host ON logs(host);
-        CREATE INDEX IF NOT EXISTS index_uri ON logs(uri);
-        CREATE INDEX IF NOT EXISTS index_statusCode ON logs(statusCode);
-        CREATE INDEX IF NOT EXISTS index_method ON logs(method);
-        CREATE INDEX IF NOT EXISTS index_agent_domain ON logs(agent_domain);
-        CREATE INDEX IF NOT EXISTS index_classification ON logs(classification);
-        CREATE INDEX IF NOT EXISTS index_country ON logs(country);
-        CREATE INDEX IF NOT EXISTS index_city ON logs(city);
-        CREATE INDEX IF NOT EXISTS index_cookie ON logs(cookie);
+        CREATE INDEX IF NOT EXISTS index_ip
+            ON logs(ip);
+        CREATE INDEX IF NOT EXISTS index_host
+            ON logs(host);
+        CREATE INDEX IF NOT EXISTS index_uri
+            ON logs(uri);
+        CREATE INDEX IF NOT EXISTS index_statusCode
+            ON logs(statusCode);
+        CREATE INDEX IF NOT EXISTS index_method
+            ON logs(method);
+        CREATE INDEX IF NOT EXISTS index_agent_domain
+            ON logs(agent_domain);
+        CREATE INDEX IF NOT EXISTS index_classification
+            ON logs(classification);
+        CREATE INDEX IF NOT EXISTS index_country
+            ON logs(country);
+        CREATE INDEX IF NOT EXISTS index_city
+            ON logs(city);
+        CREATE INDEX IF NOT EXISTS index_cookie
+            ON logs(cookie);
 
         CREATE TABLE IF NOT EXISTS reverse_ip (
             ip,
@@ -66,17 +77,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         UPDATE reverse_ip SET updated=CURRENT_TIMESTAMP WHERE ip=new.ip;
         END;
 
-        CREATE INDEX IF NOT EXISTS index_reverse_domain ON reverse_ip(reverse_domain);
-
+        CREATE INDEX IF NOT EXISTS index_reverse_domain
+            ON reverse_ip(reverse_domain);
         """)
 
     def start(self):
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
+        self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:precache', self.preCache)
-        self.parse()
 
     def stop(self):
         pass
@@ -138,18 +149,45 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return os.path.splitext(basename)[0]
 
     @decorators.log_runtime_in_applog
-    def enqueue(self, dt, batch_size=100):
+    def enqueue(self, start_date, end_date):
         """Add log lines to the database for later parsing"""
+
+        period = pendulum.period(start_date, end_date)
+
+        if self.queue.count(period) > 0:
+            cherrypy.log("Ignoring a request to queue an already-queued range")
+            return False
+
+        self.queue.append(period)
+        cherrypy.engine.publish("scheduler:add", 5, "logindex:process_queue")
+        cherrypy.log("Queueing complete, processing scheduled")
+        return True
+
+    def process_queue(self):
+        try:
+            period = self.queue[0]
+            cherrypy.log("Queue is non-empty")
+        except IndexError:
+            cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
+            cherrypy.log("Queue is empty, parsing scheduled")
+            return
+
+        for dt in period.range('days'):
+            log_file = self.fileForDate(dt)
+            if log_file:
+                self.ingest_file(dt, log_file)
+
+        self.queue.popleft()
+        self.process_queue()
+
+    def ingest_file(self, dt, file_path, batch_size=100):
+
         batch = []
         line_count = 0
 
-        log_file = self.fileForDate(dt)
-        if not log_file:
-            return False
+        max_offset = self.lastKnownOffset(file_path)
 
-        max_offset = self.lastKnownOffset(log_file)
-
-        with open(log_file, "r") as f:
+        with open(file_path, "r") as f:
 
             # When indexing a previously indexed log file, max_offset
             # is the position of the last line that was added to the
@@ -167,7 +205,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                     break
 
                 values = (
-                    self.filePathToSource(log_file),
+                    self.filePathToSource(file_path),
                     offset,
                     cherrypy.engine.publish("checksum:string", line).pop(),
                     line
@@ -181,11 +219,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if batch:
             line_count += self.insertLine(dt, batch)
 
-        return line_count
+        cherrypy.log("Ingested {}".format(file_path))
 
     @decorators.log_runtime_in_applog
     def reversal(self, batch_size=10):
-        unreversed_ips = self._selectFirst("SELECT count(*) from reverse_ip WHERE updated IS NULL")
+        unreversed_ips = self._selectFirst(
+            """SELECT count(*)
+            FROM reverse_ip
+            WHERE updated IS NULL"""
+        )
 
         cherrypy.log("Logindex found {} unreversed ips".format(unreversed_ips))
 
@@ -194,7 +236,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return
 
         records = self._select(
-            "SELECT rowid, ip FROM reverse_ip WHERE updated IS NULL LIMIT {}".format(batch_size),
+            """SELECT rowid, ip
+            FROM reverse_ip
+            WHERE updated IS NULL
+            LIMIT {}""".format(batch_size),
             ()
         )
 
@@ -210,12 +255,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ))
 
         self._update(
-            "UPDATE reverse_ip SET reverse_host=?, reverse_domain=? WHERE rowid=?",
+            """UPDATE reverse_ip
+            SET reverse_host=?, reverse_domain=?
+            WHERE rowid=?""",
             batch
         )
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:reversal")
-
 
     @decorators.log_runtime_in_applog
     def parse(self, batch_size=100):
@@ -223,11 +269,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         count_sql = "SELECT count(*) FROM logs WHERE ip IS NULL"
 
-        select_sql = "SELECT rowid, logline FROM logs WHERE ip IS NULL LIMIT {}".format(batch_size)
+        select_sql = """
+        SELECT rowid, logline
+        FROM logs
+        WHERE ip IS NULL
+        LIMIT {}""".format(batch_size)
 
         update_sql = """
-        UPDATE logs SET unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?, method=?, agent=?, agent_domain=?, classification=?, country=?, region=?, city=?,
-        latitude=?, longitude=?, cookie=?, referrer=?, referrer_domain=?
+        UPDATE logs
+        SET unix_timestamp=?, ip=?, host=?, uri=?, query=?, statusCode=?,
+        method=?, agent=?, agent_domain=?, classification=?, country=?,
+        region=?, city=?, latitude=?, longitude=?, cookie=?, referrer=?,
+        referrer_domain=?
         WHERE rowid=?"""
 
         unparsed_count = self._selectFirst(count_sql)
@@ -238,7 +291,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
 
-        records = self._select(select_sql, ())
+        records = self._select(select_sql)
 
         batch = []
         ips = set()
@@ -247,7 +300,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         agent_cache = {}
 
         for record in records:
-            fields = cherrypy.engine.publish("parse:appengine", record["logline"]).pop()
+            fields = cherrypy.engine.publish(
+                "parse:appengine",
+                record["logline"]
+            ).pop()
 
             ip = fields["ip"]
 
@@ -261,17 +317,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             geo = ip_facts.get("geo", {})
 
-            fields["country"] = fields["country"] or geo.get("country_code")
-            fields["region"] = fields["region"] or geo.get("region_code")
-            fields["city"] = fields["city"] or geo.get("city")
-            fields["latitude"] = fields["latitude"] or geo.get("latitude")
-            fields["longitude"] = fields["latitude"] or geo.get("longitude")
+            fields["country"] = fields.get("country", geo.get("country_code"))
+            fields["region"] = fields.get("region", geo.get("region_code"))
+            fields["city"] = fields.get("city", geo.get("city"))
+            fields["latitude"] = fields.get("latitude", geo.get("latitude"))
+            fields["longitude"] = fields.get("latitude", geo.get("longitude"))
 
             agent = fields.get("agent", "")
             if agent in agent_cache:
                 fields["agent_domain"] = agent_cache[agent]["agent_domain"]
             else:
-                agent_url_matches = re.search("https?://(www\.)?(.*?)[/; ]", agent)
+                agent_url_matches = re.search(
+                    "https?://(www\.)?(.*?)[/; ]",
+                    agent
+                )
 
                 if agent_url_matches:
                     fields["agent_domain"] = agent_url_matches.group(2).lower()
@@ -344,7 +403,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         WHERE {}
         ORDER BY unix_timestamp DESC""".format(parsed_query)
 
-
         if for_precache:
             return self._selectToCache(sql, ())
         else:
@@ -363,4 +421,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for query in saved_queries:
             self.query(query["value"], for_precache=True)
 
-        cherrypy.log("Logindex pre-cached {} queries".format(len(saved_queries)))
+        cherrypy.log(
+            "Logindex pre-cached {} queries".format(len(saved_queries))
+        )
