@@ -52,7 +52,7 @@ class Plugin(plugins.SimplePlugin):
         # This is heavily based on  http://pyparsing.wikispaces.com/file/view/httpServerLogParser.py/30166005/httpServerLogParser.py
         self.appengine_grammar = (self.ipv4 | self.ipv6).setResultsName("ip") + \
         Suppress("-") + \
-        ("-" | Word( alphanums + "@._")).setResultsName("auth").setParseAction(self.dashToNone) + \
+        ("-" | dblQuotedString | Word( alphanums + "@._")).setResultsName("auth").setParseAction(self.dashToNone) + \
         self.timestamp.setResultsName("timestamp").setParseAction(self.firstInGroup) + \
         dblQuotedString.setResultsName("cmd").setParseAction(self.requestFields) + \
         ("-" | self.integer).setResultsName("statusCode").setParseAction(self.dashToNone) + \
@@ -100,15 +100,23 @@ class Plugin(plugins.SimplePlugin):
         pass
 
     def requestFields(self, s, l, t):
-        """Subdivide the cmd field to isolate method, uri, query, and version"""
-        method, uri, version = t[0].strip('"').split()
+        """Subdivide the cmd field to isolate method, uri, query, and version
 
-        t["method"] = method
+        Extra care needs to be taken because the uri could contain
+        unexpected garbage. Just splitting on whitespace is too
+        brittle, even though it's the straightforward approach that
+        works for the normal case."""
+
+        fields = t[0].strip('"').split()
+
+        uri = ' '.join(fields[1:-1])
+
+        t["method"] = fields[0]
         t["uri"] = uri
         t["query"] = None
-        t["version"] = version
+        t["version"] = fields[-1]
         if "?" in uri:
-            t["uri"], t["query"] = uri.split('?', 1)
+            t["uri"], t["query"] = t["uri"].split('?', 1)
 
 
     def firstInGroup(self, s, l, t):
@@ -237,7 +245,7 @@ class Plugin(plugins.SimplePlugin):
         return d
 
     def parseAppengine(self, val):
-        """Convert a combined format log line with Appengine extra fields into a dict"""
+        """Parse a log line in combined-plus-Appengine-extras format"""
         fields = self.appengine_grammar.parseString(val.strip()).asDict()
 
         timestamp = pendulum.from_format(
