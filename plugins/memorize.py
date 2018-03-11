@@ -15,9 +15,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def stop(self):
         pass
 
-    def get(self, key):
+    def get(self, key, default=None):
         cache_hit = key in self.cache
-        cache_value = self.cache.get(key, None)
+        cache_value = self.cache.get(key, default)
         return (cache_hit, cache_value)
 
     def set(self, key, value):
