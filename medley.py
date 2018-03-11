@@ -207,6 +207,8 @@ def main():
     cherrypy.log.access_log.addHandler(access_log_handler)
 
     cherrypy.engine.start()
+    cherrypy.engine.publish("logindex:parse")
+
     cherrypy.engine.block()
 
 
