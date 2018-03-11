@@ -245,7 +245,14 @@ class Plugin(plugins.SimplePlugin):
         return d
 
     def parseAppengine(self, val):
-        """Parse a log line in combined-plus-Appengine-extras format"""
+        """Parse a log line in combined-plus-Appengine-extras format
+
+        App Engine extras consist of additional key=value pairs after
+        the ones for the combined format. This is where
+        App Engine-sourced geoip values are found. It also contains
+        less interesting things like the instance ID that served the
+        request."""
+
         fields = self.appengine_grammar.parseString(val.strip()).asDict()
 
         timestamp = pendulum.from_format(
@@ -254,30 +261,33 @@ class Plugin(plugins.SimplePlugin):
         ).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
-        fields["country"] = None
-        fields["city"] = None
-        fields["region"] = None
-        fields["latitude"] = None
-        fields["longitude"] = None
 
         if "referrer" in fields:
-            fields["referrer_domain"] = urlparse(fields["referrer"]).netloc or None
-        else:
-            fields["referrer_domain"] = None
+            parse_result = urlparse(fields["referrer"])
+
+            # Ignore netloc if it is an empty string.
+            if parse_result.netloc:
+                fields["referrer_domain"] = parse_result.netloc
 
         for key, value in fields["extras"].items():
             if value in ("ZZ", "?"):
-                value = None
-            elif key == "country":
-                value = value.upper()
-            elif key == "city":
-                value = value.title()
-            elif key == "region" and len(value) == 2:
-                value = value.upper()
-            elif key == "latlong" and "," in value:
-                fields["latitude"], fields["longitude"] = value.split(",")
+                continue
 
-            fields[key] = value
+            if key == "country":
+                fields[key] = value.upper()
+                continue
+
+            if key == "city":
+                fields[key] = value.title()
+                continue
+
+            if key == "region" and len(value) == 2:
+                fields[key] = value.upper()
+                continue
+
+            if key == "latlong" and "," in value:
+                fields["latitude"], fields["longitude"] = value.split(",")
+                continue
 
         del fields["extras"]
         return fields
