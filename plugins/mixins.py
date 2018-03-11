@@ -55,7 +55,7 @@ class Sqlite:
         con.close()
         return rows
 
-    def _select(self, query, values, cacheable=False):
+    def _select(self, query, values=(), cacheable=False):
         con = self._open()
         con.row_factory = sqlite3.Row
 
