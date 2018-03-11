@@ -23,16 +23,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         address = ipaddress.ip_address(ip)
 
-        netblocks = cherrypy.engine.publish(
-            "registry:search",
-            "netblock:*"
-        ).pop()
-
-        for netblock in netblocks:
-            if address in ipaddress.ip_network(netblock["value"]):
-                facts["organization"] = netblock["key"].split(":")[1]
-                break
-
         annotations = cherrypy.engine.publish(
             "registry:search",
             "ip:{}".format(ip)
@@ -59,15 +49,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         facts["geo"] = geodb_record
 
         # Google charts
-        try:
-            map_region = geodb_record.get("country_code")
-            region_code = geodb_record.get("region_code")
-            if map_region == "US" and region_code:
-                map_region += "-" + region_code
-            facts["map_region"] = map_region
-        except:
-            pass
-
+        map_region = geodb_record.get("country_code", "")
+        region_code = geodb_record.get("region_code", "")
+        if map_region == "US" and region_code:
+            facts["map_region"] = "{}-{}".format(
+                map_region,
+                region_code
+            )
 
         return facts
 
