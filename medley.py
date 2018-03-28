@@ -159,6 +159,7 @@ def main():
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.geography.Plugin(cherrypy.engine).subscribe()
+    plugins.hasher.Plugin(cherrypy.engine).subscribe()
     plugins.ip.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.logindex.Plugin(cherrypy.engine).subscribe()

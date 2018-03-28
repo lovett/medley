@@ -18,7 +18,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self._create("""
         CREATE TABLE IF NOT EXISTS logs (
             unix_timestamp integer,
-            checksum,
+            hash,
             source_file,
             source_offset integer,
             ip collate nocase,
@@ -39,7 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             referrer collate nocase,
             referrer_domain collate nocase,
             logline,
-            UNIQUE(checksum)
+            UNIQUE(hash)
         );
 
         CREATE INDEX IF NOT EXISTS index_ip
@@ -207,7 +207,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 values = (
                     self.filePathToSource(file_path),
                     offset,
-                    cherrypy.engine.publish("checksum:string", line).pop(),
+                    cherrypy.engine.publish("hasher:md5", line).pop(),
                     line
                 )
 
@@ -382,7 +382,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return 0
 
         sql = """INSERT OR IGNORE INTO logs
-        (source_file, source_offset, checksum, logline)
+        (source_file, source_offset, hash, logline)
         VALUES (?, ?, ?, ?)"""
 
         self._insert(sql, records)
