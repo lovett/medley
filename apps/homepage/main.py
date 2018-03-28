@@ -1,9 +1,7 @@
 """Display all the available apps"""
 
-import datetime
-import email.utils
-import time
 import cherrypy
+import pendulum
 
 
 class Controller:
@@ -41,12 +39,10 @@ class Controller:
     def GET(self):
         """Display the list of applications"""
 
-        expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
-        expiration = time.mktime(expiration.timetuple())
-        cherrypy.response.headers["Expires"] = email.utils.formatdate(
-            timeval=expiration,
-            localtime=False,
-            usegmt=True
+        expiration = pendulum.now('UTC').add(days=1)
+        cherrypy.response.headers["Expires"] = expiration.format(
+            'ddd, dd MMM YYYY HH:mm:ss zz',
+            formatter='alternative'
         )
 
         return {
