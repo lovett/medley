@@ -1,8 +1,14 @@
-import cherrypy
+"""Display a form for bookmarking a URL"""
+
 import re
+import cherrypy
+
 
 class Controller:
-    """Display a form for bookmarking a URL"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Later"
 
@@ -12,26 +18,42 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, url=None, title=None, tags=None, comments=None):
+        """Display a form for for bookmarking a URL"""
         error = None
         bookmark = None
 
         if title:
-            title = cherrypy.engine.publish("markup:plaintext", title).pop()
-            title = cherrypy.engine.publish("markup:reduce_title", title).pop()
+            title = cherrypy.engine.publish(
+                "markup:plaintext",
+                title
+            ).pop()
+
+            title = cherrypy.engine.publish(
+                "markup:reduce_title",
+                title
+            ).pop()
 
         if tags:
-            tags = cherrypy.engine.publish("markup:plaintext", tags).pop()
+            tags = cherrypy.engine.publish(
+                "markup:plaintext", tags
+            ).pop()
 
         if comments:
-            comments = cherrypy.engine.publish("markup:plaintext", comments).pop()
-            comments = re.sub("\s+", " ", comments).strip()
-            comments = re.sub(",(\w)", ", \\1", comments)
+            comments = cherrypy.engine.publish(
+                "markup:plaintext",
+                comments
+            ).pop()
+            comments = re.sub(r"\s+", " ", comments).strip()
+            comments = re.sub(r",(\w)", ", \\1", comments)
 
         if comments and not comments.endswith("."):
             comments += "."
 
         if url:
-            answer = cherrypy.engine.publish("archive:find", url=url)
+            answer = cherrypy.engine.publish(
+                "archive:find",
+                url=url
+            )
             bookmark = answer.pop() if answer else None
 
         if bookmark:

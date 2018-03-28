@@ -1,12 +1,19 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.later.main
-import cherrypy
-import mock
-import unittest
+"""
+Test suite for the later app
+"""
 
-class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.later.main
+
+
+class TestLater(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the later application controller
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -17,15 +24,16 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         helpers.stop_server()
 
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    def test_returnsHtml(self):
+    def test_returns_html(self):
         """A GET request returns a form for adding a bookmark"""
         response = self.request("/")
         self.assertEqual(response.code, 200)
 
-    def test_bookmarkletUrlProtocol(self):
+    def test_bookmarklet_url_protocol(self):
         """If running under HTTPS, the bookmarklet url uses HTTPS"""
 
         host = "bookmark.hostname.example.com"
@@ -37,8 +45,7 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
         self.assertEqual(response.code, 200)
         self.assertTrue("https://{}".format(host) in response.body)
 
-
-    def test_populatesTitle(self):
+    def test_populates_title(self):
         """The title field is prepopulated if provided via querystring"""
 
         samples = (
@@ -51,45 +58,54 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_populatesTags(self, publishMock, renderMock):
+    def test_populates_tags(self, publish_mock, render_mock):
         """The tags field is prepopulated if provided via querystring"""
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["abc123"]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", tags="hello")
-        template_vars = renderMock.call_args[0][0]["html"][1]
+        self.request("/", tags="hello")
 
-        self.assertEqual(template_vars["tags"], "abc123")
+        self.assertEqual(
+            helpers.html_var(render_mock, "tags"),
+            "abc123"
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_populatesComments(self, publishMock, renderMock):
+    def test_populates_comments(self, publish_mock, render_mock):
         """The comments field is prepopulated if provided via querystring
 
         A period is also added to make the populated value a sentence.
         """
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["abc456"]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", comments="hello")
-        template_vars = renderMock.call_args[0][0]["html"][1]
+        self.request("/", comments="hello")
 
-        self.assertEqual(template_vars["comments"], "abc456.")
-
+        self.assertEqual(
+            helpers.html_var(render_mock, "comments"),
+            "abc456."
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_urlLookup(self, publishMock, renderMock):
-        """An existing bookmark is fetched by url, overwriting querystring values"""
+    def test_url_lookup(self, publish_mock, render_mock):
+        """An existing bookmark is fetched by url, overwriting querystring
+        values"""
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
             if args[0] == "archive:find":
@@ -98,15 +114,21 @@ class TestLater(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
                     "tags": None,
                     "comments": None
                 }]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", url="http://example.com", title="my title")
+        self.request("/", url="http://example.com", title="my title")
 
-        template_vars = renderMock.call_args[0][0]["html"][1]
+        self.assertEqual(
+            helpers.html_var(render_mock, "title"),
+            "existing title"
+        )
 
-        self.assertEqual("existing title", template_vars["title"])
-        self.assertTrue("already been bookmarked" in template_vars["error"])
+        self.assertTrue(
+            "already been bookmarked" in
+            helpers.html_var(render_mock, "error")
+        )
 
 
 if __name__ == "__main__":
