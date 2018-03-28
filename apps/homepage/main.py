@@ -1,10 +1,16 @@
-import cherrypy
+"""Display all the available apps"""
+
 import datetime
 import email.utils
 import time
+import cherrypy
+
 
 class Controller:
-    """Present a catalog of the available apps"""
+    """
+    The primary controller for the application, structured for
+    method-based dispatch
+    """
 
     name = "Homepage"
 
@@ -12,10 +18,11 @@ class Controller:
 
     user_facing = True
 
-    def catalog_apps(self, apps={}):
+    def catalog_apps(self, apps):
+        """Extract app details from controller docstrings"""
         catalog = []
         for mount_path, controller in apps.items():
-            if (controller.root == self):
+            if controller.root == self:
                 continue
 
             doc = controller.root.__doc__ or ""
@@ -32,6 +39,8 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self):
+        """Display the list of applications"""
+
         expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
         expiration = time.mktime(expiration.timetuple())
         cherrypy.response.headers["Expires"] = email.utils.formatdate(
