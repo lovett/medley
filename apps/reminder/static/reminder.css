@@ -38,15 +38,6 @@ INPUT[type=checkbox] {
     flex-grow: 1;
 }
 
-.upcoming-reminder.done {
-    text-decoration: line-through;
-    color: #666;
-}
-
-.upcoming-reminder.done .delete-reminder {
-    display: none;
-}
-
 .upcoming-reminder .delete-reminder {
     text-decoration: none;
     line-height: 2;

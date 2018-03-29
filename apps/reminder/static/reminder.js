@@ -1,7 +1,7 @@
 MEDLEY.reminders = (function () {
     'use strict';
 
-    var times, timeLabels = {};
+    var timer, timeLabels = {};
 
     function deleteTemplate(e) {
         var option, uid;
@@ -87,13 +87,23 @@ MEDLEY.reminders = (function () {
 
     function countdown() {
         var now = Date.now();
+        var times = jQuery('#scheduled-reminders time').map(function() {
+            return jQuery(this);
+        });
+
+        if (times.length === 0) {
+            jQuery('#scheduled-reminders').remove();
+            clearInterval(timer);
+            return;
+        }
+
         times.each(function (index, time) {
             var expiration, ms;
             ms = parseFloat(time.attr('datetime'));
             expiration = remaining(ms);
 
             if (expiration === '') {
-                time.parent().addClass('done');
+                time.closest('.upcoming-reminder').remove();
             }
 
             time.nextAll('.remaining').html(expiration);
@@ -118,10 +128,6 @@ MEDLEY.reminders = (function () {
             jQuery('.delete-template').on('click', deleteTemplate);
             jQuery('.delete-reminder').on('click', deleteReminder);
 
-            times = jQuery('time').map(function() {
-                return jQuery(this);
-            });
-
             jQuery('meta[name^="lang.time"]').each(function (index, el) {
                 var key, node, value;
                 node = jQuery(el);
@@ -129,7 +135,7 @@ MEDLEY.reminders = (function () {
                 value = node.attr('content').split(',');
                 timeLabels[key] = value;
             });
-            setInterval(countdown, 1000);
+            timer = setInterval(countdown, 1000);
         }
     }
 }());
