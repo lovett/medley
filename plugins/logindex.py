@@ -222,36 +222,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.log("Ingested {}".format(file_path))
 
     @decorators.log_runtime_in_applog
-    def reversal(self, batch_size=10):
-        unreversed_ips = self._selectFirst(
-            """SELECT count(*)
-            FROM reverse_ip
-            WHERE updated IS NULL"""
-        )
-
-        cherrypy.log("Logindex found {} unreversed ips".format(unreversed_ips))
-
-        if (unreversed_ips == 0):
-            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
-            return
-
+    def reversal(self, batch_size=50):
         records = self._select(
-            """SELECT rowid, ip
+            """SELECT 0 as id, count(*) as value
             FROM reverse_ip
             WHERE updated IS NULL
-            LIMIT {}""".format(batch_size),
-            ()
+            UNION
+            SELECT rowid as id, ip as value
+            FROM (
+                SELECT rowid, ip
+                FROM reverse_ip
+                WHERE updated IS NULL
+                ORDER BY rowid DESC
+                LIMIT {}
+            )""".format(batch_size)
         )
 
         batch = []
 
-        for record in records:
-            facts = cherrypy.engine.publish("ip:reverse", record["ip"]).pop()
+        unreversed_ips = records[0]["value"]
+
+        cherrypy.log("Logindex found {} unreversed ips".format(unreversed_ips))
+
+        if unreversed_ips == 0:
+            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
+            return
+
+        for record in records[1:]:
+            facts = cherrypy.engine.publish(
+                "ip:reverse",
+                record["value"]
+            ).pop()
 
             batch.append((
                 facts.get("reverse_host"),
                 facts.get("reverse_domain"),
-                record["rowid"],
+                record["id"],
             ))
 
         self._update(
