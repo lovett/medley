@@ -253,7 +253,16 @@ class Plugin(plugins.SimplePlugin):
         less interesting things like the instance ID that served the
         request."""
 
-        fields = self.appengine_grammar.parseString(val.strip()).asDict()
+        # Sanity check to make sure double-quoted fields are balanced.
+        val = val.strip()
+        if val.count('"') % 2 > 0:
+            val = '{}"'.format(val)
+
+        try:
+            fields = self.appengine_grammar.parseString(val).asDict()
+        except ParseException:
+            cherrypy.log("could not parse an appengine logline", traceback=True)
+            cherrypy.log(val)
 
         timestamp = pendulum.from_format(
             fields["timestamp"],
@@ -304,6 +313,7 @@ class Plugin(plugins.SimplePlugin):
         """
 
         val = val.replace("\r", "").strip().replace("\n", "|")
+
         result = self.logquery_grammar.parseString(val).asList()
 
         sql = " AND ".join(result)
