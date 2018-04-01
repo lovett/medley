@@ -133,9 +133,12 @@ class Plugin(plugins.SimplePlugin):
         elif t[1] == "yesterday":
             reference_date = pendulum.yesterday()
 
-        return "unix_timestamp BETWEEN {} AND {}".format(
-            reference_date.start_of('day').in_timezone('utc').timestamp(),
-            reference_date.end_of('day').in_timezone('utc').timestamp()
+        utc_reference_date = reference_date.in_timezone('utc')
+
+        return "year={} and month={} and day={}".format(
+            utc_reference_date.year,
+            utc_reference_date.month,
+            utc_reference_date.day
         )
 
 
@@ -159,17 +162,24 @@ class Plugin(plugins.SimplePlugin):
             if len(date) == 2:
                 year, month = ints
                 start_date = pendulum.create(year, month, 1, tz=tz).start_of('day')
-                end_date = start_date.copy().end_of('month')
+                utc_start_date = start_date.in_timezone('utc')
+
+                sql.append("year={} and month={}".format(
+                    utc_start_date.year,
+                    utc_start_date.month
+                ))
 
             if len(date) == 3:
                 year, month, day = ints
                 start_date = pendulum.create(year, month, day, tz=tz).start_of('day')
-                end_date = start_date.copy().end_of('day')
+                utc_start_date = start_date.in_timezone('utc')
 
-            sql.append("unix_timestamp BETWEEN {} AND {}".format(
-                start_date.in_timezone('utc').timestamp(),
-                end_date.in_timezone('utc').timestamp()
-            ))
+                sql.append("year={} and month={} and day={}".format(
+                    utc_start_date.year,
+                    utc_start_date.month,
+                    utc_start_date.day,
+                ))
+
 
         joined_sql = " OR ".join(sql)
         return "({})".format(joined_sql)
@@ -270,6 +280,9 @@ class Plugin(plugins.SimplePlugin):
         ).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
+        fields["year"] = timestamp.year
+        fields["month"] = timestamp.month
+        fields["day"] = timestamp.day
 
         if "referrer" in fields:
             parse_result = urlparse(fields["referrer"])
