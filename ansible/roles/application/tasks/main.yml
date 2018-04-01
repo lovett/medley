@@ -61,6 +61,17 @@
     owner: "{{ project_user }}"
     group: "{{ project_group }}"
 
+- name: Upgrade pip and setuptools
+  become: true
+  become_user: "{{ project_user }}"
+  pip:
+    name: "{{ item }}"
+    extra_args: --upgrade
+    virtualenv: "{{ project_root }}/venv"
+  with_items:
+    - pip
+    - setuptools
+
 
 - name: Install python3 application packages
   become: true
