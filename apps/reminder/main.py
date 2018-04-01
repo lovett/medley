@@ -1,7 +1,7 @@
 """Schedule a notification for future delivery."""
 
-import cherrypy
 from urllib.parse import urlencode, parse_qs
+import cherrypy
 
 
 class Controller:
@@ -15,8 +15,15 @@ class Controller:
 
     registry_key = "reminder:template"
 
+    list_command = "scheduler:upcoming"
+
+    add_command = "scheduler:add"
+
+    remove_command = "scheduler:remove"
+
     @cherrypy.tools.negotiable()
     def GET(self):
+        """Display scheduled reminders, and a form to create new ones."""
 
         registry_rows = cherrypy.engine.publish(
             "registry:search",
@@ -29,27 +36,36 @@ class Controller:
             for row in registry_rows
         }
 
-        upcoming = cherrypy.engine.publish("scheduler:upcoming", "notifier:send").pop()
+        upcoming = cherrypy.engine.publish(
+            self.list_command,
+            "notifier:send"
+        ).pop()
+
+        url = cherrypy.engine.publish(
+            "url:for_controller",
+            self
+        ).pop()
 
         return {
             "html": ("reminder.html", {
                 "app_name": self.name,
                 "templates": templates,
                 "upcoming": upcoming,
-                "url": cherrypy.engine.publish("url:for_controller", self).pop()
+                "url": url,
             }),
         }
 
-    def POST(self, message, minutes=None, comments=None, remember=None, template=None):
+    def POST(self, message, minutes=None, comments=None, remember=None):
+        """Queue a new reminder for delivery."""
 
         try:
             minutes = int(minutes)
-        except:
+        except (ValueError, TypeError):
             minutes = 0
 
         try:
             remember = int(remember)
-        except:
+        except (ValueError, TypeError):
             remember = 0
 
         notification = {
@@ -59,7 +75,7 @@ class Controller:
         }
 
         cherrypy.engine.publish(
-            "scheduler:add",
+            self.add_command,
             minutes * 60,
             "notifier:send",
             notification
@@ -78,26 +94,38 @@ class Controller:
                 [registry_value]
             )
 
-        redirect_url = cherrypy.engine.publish("url:for_controller", self).pop()
+        url = cherrypy.engine.publish(
+            "url:for_controller",
+            self
+        ).pop()
 
-        print(redirect_url)
-        raise cherrypy.HTTPRedirect(redirect_url)
+        raise cherrypy.HTTPRedirect(url)
 
     def DELETE(self, uid):
+        """Remove a previously-scheduled reminder."""
 
         uid = float(uid)
 
-        scheduled_events = cherrypy.engine.publish("scheduler:upcoming", "notifier:send").pop()
+        scheduled_events = cherrypy.engine.publish(
+            self.list_command,
+            "notifier:send"
+        ).pop()
 
-        wanted_events = [event for event in scheduled_events if event.time == uid]
+        wanted_events = [
+            event for event in scheduled_events
+            if event.time == uid
+        ]
 
         if not wanted_events:
             cherrypy.response.status = 400
             return
 
-        result = cherrypy.engine.publish("scheduler:remove", wanted_events[0]).pop()
+        result = cherrypy.engine.publish(
+            self.remove_command,
+            wanted_events[0]
+        ).pop()
 
-        if result == False:
+        if result is False:
             cherrypy.response.status = 500
             return
 

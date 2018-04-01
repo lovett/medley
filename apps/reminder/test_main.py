@@ -1,14 +1,18 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.reminder.main
-import cherrypy
-import datetime
-import mock
-import unittest
+"""
+Test suite for the reminder app.
+"""
 
-class TestReminder(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
-    """Unit tests for the reminder app"""
+import unittest
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.reminder.main
+
+
+class TestReminder(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the reminder application controller.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -18,12 +22,11 @@ class TestReminder(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertion
     def tearDownClass(cls):
         helpers.stop_server()
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
-
     def test_allow(self):
+        """Verify the controller's supported HTTP methods."""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "POST", "DELETE"))
+
 
 if __name__ == "__main__":
     unittest.main()
