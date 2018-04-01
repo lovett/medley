@@ -233,7 +233,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 SELECT rowid, ip
                 FROM reverse_ip
                 WHERE updated IS NULL
-                ORDER BY rowid DESC
                 LIMIT {}
             )""".format(batch_size)
         )
