@@ -1,7 +1,8 @@
+"""One-line summary of the app goes here"""
 import cherrypy
 
 class Controller:
-    """One-line summary of the app goes here"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Template"
 

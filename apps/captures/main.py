@@ -1,7 +1,10 @@
+"""Display previously-captured requests."""
+
 import cherrypy
 
+
 class Controller:
-    """Display captured requests"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Captures"
 

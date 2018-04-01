@@ -1,7 +1,9 @@
+"""Display a collection of bookmarklets."""
+
 import cherrypy
 
 class Controller:
-    """A collection of bookmarklets"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Bookmarklets"
 

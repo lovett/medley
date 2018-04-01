@@ -1,14 +1,12 @@
-"""Display all the available apps"""
+"""Present all the available applications."""
 
+import sys
 import cherrypy
 import pendulum
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Homepage"
 
@@ -17,13 +15,18 @@ class Controller:
     user_facing = True
 
     def catalog_apps(self, apps):
-        """Extract app details from controller docstrings"""
+        """Extract app summaries from module docstrings."""
         catalog = []
         for mount_path, controller in apps.items():
             if controller.root == self:
                 continue
 
-            doc = controller.root.__doc__ or ""
+            try:
+                doc = sys.modules.get(
+                    controller.root.__module__
+                ).__doc__
+            except AttributeError:
+                doc = ""
 
             summary = doc.strip().split("\n").pop(0)
 

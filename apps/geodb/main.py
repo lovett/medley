@@ -1,3 +1,5 @@
+"""Download the latest GeoLite Legacy City database from maxmind.com."""
+
 import datetime
 import os.path
 import shutil
@@ -7,7 +9,7 @@ import cherrypy
 import requests
 
 class Controller:
-    """Download the latest GeoLite Legacy City database from maxmind.com"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "GeoDB"
 

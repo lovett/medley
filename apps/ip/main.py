@@ -1,15 +1,10 @@
-"""
-Determine the current IP address
-"""
+"""Determine the internal and exteranl IP address."""
 
 import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "IP"
 

@@ -1,7 +1,9 @@
+"""Add and remove entries from the Asterisk blacklist database."""
+
 import cherrypy
 
 class Controller:
-    """Add and remove entries from the Asterisk blacklist database"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Blacklist"
 

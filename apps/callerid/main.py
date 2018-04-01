@@ -1,7 +1,9 @@
+"""Add entries to an Asterisk callerid database."""
+
 import cherrypy
 
 class Controller:
-    """Add entries to an Asterisk callerid database"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Caller ID"
 

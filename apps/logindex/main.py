@@ -1,6 +1,4 @@
-"""
-Trigger indexing of log files for display by the visitors app
-"""
+"""Trigger indexing of log files."""
 
 import os.path
 import pendulum
@@ -8,10 +6,7 @@ import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Log Index"
 

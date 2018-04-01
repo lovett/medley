@@ -1,11 +1,14 @@
+"""Scrape news topics from the Bing homepage"""
+
 import datetime
 import time
 import email.utils
 import cherrypy
 import apps.topics.parser
 
+
 class Controller:
-    """Scrape news topics from the Bing homepage"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Topics"
 

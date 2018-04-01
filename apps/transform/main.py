@@ -1,14 +1,11 @@
-"""Convert a string to a different format"""
+"""Convert a string to a different format."""
 
 import urllib
 import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Transform"
 

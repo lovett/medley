@@ -1,6 +1,4 @@
-"""
-Look up whois and geoip details for an IP address or hostname
-"""
+"""Look up whois and geoip details for an IP address or hostname."""
 
 import ipaddress
 import re
@@ -10,10 +8,7 @@ import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Whois"
 
@@ -23,7 +18,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, address=None):
-        """Display the search form and search results"""
+        """Display a search form and lookup results."""
 
         if not address:
             return {

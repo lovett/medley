@@ -1,8 +1,11 @@
+"""URL redirection for referrer privacy."""
+
 import cherrypy
 import urllib.parse
 
+
 class Controller:
-    """URL redirection without referrer"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Redirect"
 

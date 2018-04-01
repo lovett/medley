@@ -1,7 +1,10 @@
+"""A general-purpose key value store."""
+
 import cherrypy
 
+
 class Controller:
-    """A general-purpose key value store"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Registry"
 

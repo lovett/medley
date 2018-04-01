@@ -1,8 +1,11 @@
+"""Redirect to an equivalent page on a different domain."""
+
 import cherrypy
 from urllib.parse import urlparse, urlunparse
 
+
 class Controller:
-    """Redirect to an equivalent page on a different domain."""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Bounce"
 

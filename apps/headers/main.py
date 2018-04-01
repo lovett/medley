@@ -1,15 +1,10 @@
-"""
-Display request headers
-"""
+"""Display request headers."""
 
 import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Headers"
 

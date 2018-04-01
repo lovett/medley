@@ -10,6 +10,7 @@ class Sqlite:
         )
 
     def _open(self):
+        cherrypy.log("opening {}".format(self.db_path))
         con = sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_COLNAMES)
         return con
 

@@ -1,7 +1,10 @@
+"""Display call history by date."""
+
 import cherrypy
 
+
 class Controller:
-    """Display call history by date"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Calls"
 

@@ -1,7 +1,10 @@
+"""Notifier webhook for text-to-speech."""
+
 import cherrypy
 
+
 class Controller:
-    """Relay messages from notifier to the speech plugin"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Notification"
 

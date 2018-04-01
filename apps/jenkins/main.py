@@ -1,5 +1,4 @@
-"""
-Relay deployment notifications from Jenkins
+"""Relay deployment notifications from Jenkins.
 
 This works with the Jenkins Notification Plugin:
 https://wiki.jenkins-ci.org/display/JENKINS/Notification+Plugin
@@ -26,10 +25,7 @@ import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Jenkins"
 

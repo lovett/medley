@@ -1,8 +1,11 @@
+"""Schedule a notification for future delivery."""
+
 import cherrypy
 from urllib.parse import urlencode, parse_qs
 
+
 class Controller:
-    """Send a notification in the future"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Reminder"
 

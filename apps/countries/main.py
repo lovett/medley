@@ -1,15 +1,10 @@
-"""
-Import a list of country code abbreviations into the registry
-"""
+"""Import a list of country code abbreviations into the registry."""
 
 import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Country Codes"
 

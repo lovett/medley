@@ -60,7 +60,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(result, [])
 
     def test_app_without_docstring(self):
-        """An app controller with no docstring is handled gracefully"""
+        """An app controller with no module docstring is handled gracefully"""
 
         target = apps.homepage.main.Controller()
 

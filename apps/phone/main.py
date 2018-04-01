@@ -1,15 +1,10 @@
-"""
-Display geographic location and recent call history for a phone number
-"""
+"""Geographic location and call history for a phone number."""
 
 import cherrypy
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
-    method-based dispatch
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Phone"
 

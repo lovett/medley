@@ -1,8 +1,11 @@
+"""Relay deployment notifications from Azure to notifier."""
+
 import cherrypy
 import tools.capture
 
+
 class Controller:
-    """Relay deployment notifications from Azure"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Azure"
 

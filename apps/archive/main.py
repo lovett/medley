@@ -1,10 +1,12 @@
+"""Manage a collection of bookmarked URLs."""
+
 import cherrypy
 import pytz
 from urllib.parse import urlparse
 from collections import OrderedDict
 
 class Controller:
-    """A collection of bookmarked URLs"""
+    """Dispatch application requests based on HTTP verb."""
 
     name = "Archive"
 
