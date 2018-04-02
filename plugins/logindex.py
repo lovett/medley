@@ -81,7 +81,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             UNIQUE(ip)
         );
 
-        CREATE TRIGGER reverse_ip_after_update AFTER UPDATE ON reverse_ip
+        CREATE TRIGGER IF NOT EXISTS reverse_ip_after_update
+        AFTER UPDATE ON reverse_ip
         BEGIN
         UPDATE reverse_ip SET updated=CURRENT_TIMESTAMP WHERE ip=new.ip;
         END;
