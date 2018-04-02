@@ -82,6 +82,7 @@ class Controller:
         phase = payload["phase"].lower()
         status = payload["status"].lower()
         name = payload.get("name")
+        group = "sysup"
 
         if phase == "started":
             title = "Jenkins is building {}".format(name)
@@ -91,9 +92,11 @@ class Controller:
 
         if status == "failure":
             title = "Jenkins had trouble with {} ".format(name)
+            group = "sysdown"
 
         return {
-            "group": "jenkins",
+            "group": group,
+            "badge": "jenkins.svg",
             "url": payload.get("url"),
             "localId": "jenkins.{}".format(payload["name"]),
             "title": title,
