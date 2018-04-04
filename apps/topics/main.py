@@ -1,9 +1,7 @@
 """Scrape news topics from the Bing homepage"""
 
-import datetime
-import time
-import email.utils
 import cherrypy
+import pendulum
 import apps.topics.parser
 
 
@@ -20,6 +18,8 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, count=20):
+        """Display a list of links."""
+
         topics = []
 
         try:
@@ -27,45 +27,49 @@ class Controller:
         except ValueError:
             raise cherrypy.HTTPError(400, "Invalid count value")
 
-        # The local server time as a timezone-aware datetime
-        now_local = datetime.datetime.now(datetime.timezone.utc).astimezone()
+        now = pendulum.now()
 
-        start_of_today = now_local.replace(hour=0, minute=0, second=0, microsecond=0)
+        cache_lifespan = (now.end_of('day') - now).in_seconds()
 
-        start_of_tomorrow = start_of_today + datetime.timedelta(days=1, seconds=1)
-
-        start_of_tomorrow_utc = start_of_tomorrow.astimezone(tz=datetime.timezone.utc)
-
-        cache_lifespan = (start_of_tomorrow - now_local).total_seconds()
-
-        answer = cherrypy.engine.publish("cache:get", self.cache_key)
-        html = answer.pop() if answer else None
+        html = cherrypy.engine.publish(
+            "cache:get",
+            self.cache_key
+        ).pop()
 
         if not html:
-            answer = cherrypy.engine.publish("urlfetch:get", "http://www.bing.com/hpm")
-            html = answer.pop() if answer else None
+            html = cherrypy.engine.publish(
+                "urlfetch:get",
+                "http://www.bing.com/hpm"
+            ).pop()
 
             if not html:
                 raise cherrypy.HTTPError(503)
 
-            cherrypy.engine.publish("cache:set", self.cache_key, html, cache_lifespan)
+            cherrypy.engine.publish(
+                "cache:set",
+                self.cache_key,
+                html,
+                cache_lifespan
+            )
 
-        p = apps.topics.parser.LinkParser()
-        p.feed(html)
-        p.close()
+        parser = apps.topics.parser.LinkParser()
+        parser.feed(html)
+        parser.close()
 
-        topics = p.results
+        topics = parser.results
 
-        while len(topics) > 0 and len(topics) < count:
+        while topics and len(topics) < count:
             limit = min(len(topics), count - len(topics))
             topics.extend(topics[0:limit])
 
         if len(topics) > count:
             topics = topics[0:count]
 
-        cherrypy.response.headers["Expires"] = email.utils.format_datetime(
-            start_of_tomorrow_utc,
-            usegmt=True
+        expiration = now.end_of('day').in_timezone('GMT')
+
+        cherrypy.response.headers["Expires"] = expiration.format(
+            'ddd, dd MMM YYYY HH:mm:ss zz',
+            formatter='alternative'
         )
 
         return {
