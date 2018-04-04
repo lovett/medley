@@ -42,7 +42,7 @@ class Controller:
     def GET(self):
         """Display the list of applications"""
 
-        expiration = pendulum.now('UTC').add(days=1)
+        expiration = pendulum.now('GMT').add(days=1)
         cherrypy.response.headers["Expires"] = expiration.format(
             'ddd, dd MMM YYYY HH:mm:ss zz',
             formatter='alternative'

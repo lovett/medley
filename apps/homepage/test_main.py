@@ -70,6 +70,17 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(len(result), 1)
 
+    def test_expires_header(self):
+        """The response sends an expires header
+
+        By testing against the JSON repsonse, there aren't any complications
+        with the publish mock and the HTML template lookup.
+        """
+
+        response = self.request("/")
+        print(response.headers.get("Expires"))
+        self.assertTrue("GMT" in response.headers.get("Expires"))
+
 
 if __name__ == "__main__":
     unittest.main()
