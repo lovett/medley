@@ -4,6 +4,7 @@ Test suite for the homepage app
 
 import unittest
 from types import SimpleNamespace
+import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -23,26 +24,45 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     def tearDownClass(cls):
         helpers.stop_server()
 
+    @staticmethod
+    def default_side_effect_callback(*args, **_):
+        """
+        The standard mock side effect function used by all tests
+        """
+        if args[0] == "formatting:http_timestamp":
+            return ["Thu, 01 Dec 1994 16:00:00 GMT"]
+
+        return mock.DEFAULT
+
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    def test_returns_html(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_returns_html(self, publish_mock):
         """GET returns text/html by default"""
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/")
-        self.assertHtml(response, "class=\"module")
+        self.assertEqual(response.code, 200)
+        self.assertHtml(response)
 
-    def test_refuses_json(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_refuses_json(self, publish_mock):
         """This endpoint does not support JSON responses"""
+
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 406)
         self.assertEqual(response.body, '')
 
-    def test_refuses_text(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_refuses_text(self, publish_mock):
         """This endpoint does not support text responses"""
+
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/", as_text=True)
         self.assertEqual(response.code, 406)
@@ -70,16 +90,15 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(len(result), 1)
 
-    def test_expires_header(self):
-        """The response sends an expires header
+    @mock.patch("cherrypy.engine.publish")
+    def test_expires_header(self, publish_mock):
+        """The response sends an expires header."""
 
-        By testing against the JSON repsonse, there aren't any complications
-        with the publish mock and the HTML template lookup.
-        """
+        publish_mock.side_effect = self.default_side_effect_callback
 
         response = self.request("/")
-        print(response.headers.get("Expires"))
-        self.assertTrue("GMT" in response.headers.get("Expires"))
+
+        self.assertExpiresHeader(response)
 
 
 if __name__ == "__main__":

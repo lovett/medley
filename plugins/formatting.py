@@ -1,19 +1,24 @@
-import cherrypy
 import re
 from cherrypy.process import plugins
+
 
 class Plugin(plugins.SimplePlugin):
     def __init__(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        print("subscribing!")
         self.bus.subscribe("formatting:dbpedia_abstract", self.dbpediaAbstract)
+        self.bus.subscribe("formatting:http_timestamp", self.http_timestamp)
 
     def stop(self):
         pass
 
     def dbpediaAbstract(self, text):
-        """Extract the first two meaningful sentences from a dbpedia abstract"""
+        """Extract the first two meaningful sentences from a dbpedia
+        abstract.
+
+        """
 
         # Separate collided sentences:
         #
@@ -38,3 +43,16 @@ class Plugin(plugins.SimplePlugin):
             abbreviated_text += "."
 
         return abbreviated_text
+
+    def http_timestamp(self, instance):
+        """Custom Pendulum formatter for an HTTP-date timestamp, as defined in
+        Section 7.1.1.1 of [RFC7231].
+
+        Example output: Thu, 01 Dec 1994 16:00:00 GMT
+
+        """
+
+        return instance.format(
+            'ddd, DD MMM YYYY HH:mm:ss zz',
+            formatter='alternative'
+        )

@@ -43,10 +43,13 @@ class Controller:
         """Display the list of applications"""
 
         expiration = pendulum.now('GMT').add(days=1)
-        cherrypy.response.headers["Expires"] = expiration.format(
-            'ddd, dd MMM YYYY HH:mm:ss zz',
-            formatter='alternative'
-        )
+
+        timestamp = cherrypy.engine.publish(
+            "formatting:http_timestamp",
+            expiration
+        ).pop()
+
+        cherrypy.response.headers["Expires"] = timestamp
 
         return {
             "html": ("homepage.html", {
