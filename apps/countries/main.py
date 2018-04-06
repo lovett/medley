@@ -32,6 +32,7 @@ class Controller:
                 self.source_url,
                 as_json=True
             )
+
             country_codes = answer.pop() if answer else []
 
             if country_codes:
@@ -48,8 +49,12 @@ class Controller:
             )
 
         for code in country_codes:
-            key = self.registry_key.format(code["ISO3166-1-Alpha-2"])
-            cherrypy.engine.publish("registry:add", key, [code["name"]], True)
+            name = code.get("name")
+            alpha2 = code.get("ISO3166-1-Alpha-2")
+
+            if name and alpha2:
+                key = self.registry_key.format(alpha2)
+                cherrypy.engine.publish("registry:add", key, (name,), True)
 
         cherrypy.response.status = 204
         return

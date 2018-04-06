@@ -78,9 +78,35 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_called_with(
             "registry:add",
             "country_code:alpha2:US",
-            ["US"],
+            ("US",),
             True
         )
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skip_record_without_name(self, publish_mock):
+        """A record without a name field is skipped."""
+
+        def side_effect(*args, **_):
+            """Side effects local function."""
+
+            if args[0] == "cache:get":
+                return [[{
+                    "Capital": "Fake",
+                    "Continent": "X",
+                }]]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/")
+
+        self.assertEqual(response.code, 204)
+
+        # There is no assert_not_called_with() method,
+        # so make sure the last one wasn't registry:add
+        last_call = publish_mock.call_args[0][0]
+
+        self.assertEqual(last_call, "cache:get")
 
     @mock.patch("cherrypy.engine.publish")
     def test_url_fetched_if_not_cached(self, publish_mock):
@@ -100,11 +126,16 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(response.code, 204)
 
-        publish_mock.assert_any_call("cache:set", "countries", self.fixture)
+        publish_mock.assert_any_call(
+            "cache:set",
+            "countries",
+            self.fixture
+        )
+
         publish_mock.assert_any_call(
             "registry:add",
             "country_code:alpha2:US",
-            ["US"],
+            ("US",),
             True
         )
 
