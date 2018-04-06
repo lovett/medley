@@ -115,10 +115,10 @@
             <table id="matches">
                 <thead>
                     <tr>
-                        <th width="10%">Location</th>
-                        <th width="20%">Address</th>
-                        <th width="30%">Date</th>
-                        <th widtt="30%">Request</th>
+                        <th width="20%">Location</th>
+                        <th width="20%">Network</th>
+                        <th width="25%">Date</th>
+                        <th widtt="25%">Request</th>
                         <th width="5%">Code</th>
                         <th width="5%"></th>
                     </tr>
@@ -146,23 +146,20 @@
                                     {% endif %}
                                 </span>
                             </p>
-                        </td>
-                        <td>
-                            <p class="always-wrap">
-                                <a href="/visitors?query=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
-                                    {{ result.ip }}
-                                </a>
-                            </p>
 
+                        </td>
+
+                        <td>
                             {% if result.reverse_domain %}
-                            <a href="/visitors?query=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer" class="smaller">
+                            <a href="/visitors?query=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
                                 {{ result.reverse_domain|hostname_truncate(3) }}
                             </a>
+                            {% else %}
+                            unknown
                             {% endif %}
 
                             {% if result.organization %}
                             <p>{{ result.organization }}</p>
-
                             {% endif %}
 
                             <div class="annotations">
@@ -186,7 +183,6 @@
                                     <svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg>
                                 </a>
                             </div>
-
                         </td>
                         {% else %}
                         <td colspan="2"></td>
@@ -235,14 +231,17 @@
                             </p>
                         </td>
                         <td>
-                            <a href="#" class="toggle toggle-next-row" rel="noreferrer">
-                                <span class="label">more</span>
-                            </a>
+                            <p>
+                                <a href="#" class="toggle toggle-next-row" rel="noreferrer">
+                                    <span class="label">more</span>
+                                </a>
+                            </p>
                         </td>
                     </tr>
                     <tr class="expandable">
                         <td colspan="6">
                             <p class="meta">
+
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.unix_timestamp|ago() }}
                                 {% if result.time_zone %}
@@ -254,7 +253,7 @@
                                 <svg class="icon"><use xlink:href="#icon-database"></use></svg>
                                 {{ result.host }}</p>
 
-                            <p><code>{{ result.logline }}</code></p>
+                            <p><code>{{ result|logline_with_links() }}</code></p>
                         </td>
                     </tr>
                     {% endfor %}
