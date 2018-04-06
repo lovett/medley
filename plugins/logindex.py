@@ -16,6 +16,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.queue = deque()
 
         self._create("""
+        PRAGMA journal_mode=WAL;
+
         CREATE TABLE IF NOT EXISTS logs (
             unix_timestamp integer,
             year integer,
