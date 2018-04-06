@@ -23,17 +23,17 @@ class Controller:
     def GET(self):
         """Request the country code list and populate the registry"""
 
-        answer = cherrypy.engine.publish("cache:get", self.cache_key)
-        country_codes = answer.pop() if answer else []
+        country_codes = cherrypy.engine.publish(
+            "cache:get",
+            self.cache_key
+        ).pop()
 
         if not country_codes:
-            answer = cherrypy.engine.publish(
+            country_codes = cherrypy.engine.publish(
                 "urlfetch:get",
                 self.source_url,
                 as_json=True
-            )
-
-            country_codes = answer.pop() if answer else []
+            ).pop()
 
             if country_codes:
                 cherrypy.engine.publish(
@@ -49,7 +49,7 @@ class Controller:
             )
 
         for code in country_codes:
-            name = code.get("name")
+            name = code.get("official_name_en")
             alpha2 = code.get("ISO3166-1-Alpha-2")
 
             if name and alpha2:

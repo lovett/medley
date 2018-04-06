@@ -78,7 +78,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_called_with(
             "registry:add",
             "country_code:alpha2:US",
-            ("US",),
+            ("United States of America",),
             True
         )
 
@@ -135,7 +135,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_any_call(
             "registry:add",
             "country_code:alpha2:US",
-            ("US",),
+            ("United States of America",),
             True
         )
 
