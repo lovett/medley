@@ -2,7 +2,7 @@
 
 import sys
 import cherrypy
-import pendulum
+from plugins import decorators
 
 
 class Controller:
@@ -43,18 +43,23 @@ class Controller:
     def GET(self):
         """Display the list of applications"""
 
-        expiration = pendulum.now('GMT').add(days=1)
+        template = "homepage.html"
 
-        timestamp = cherrypy.engine.publish(
-            "formatting:http_timestamp",
-            expiration
+        etag_match = cherrypy.engine.publish(
+            "memorize:check_etag",
+            template
         ).pop()
 
-        cherrypy.response.headers["Expires"] = timestamp
+        if etag_match:
+            cherrypy.response.status = 304
+            return None
+
+        apps = self.catalog_apps(cherrypy.tree.apps)
 
         return {
-            "html": ("homepage.html", {
+            "with_etag": True,
+            "html": (template, {
                 "app_name": self.name,
-                "apps": self.catalog_apps(cherrypy.tree.apps),
+                "apps": apps
             })
         }

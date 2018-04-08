@@ -29,8 +29,8 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """
         The standard mock side effect function used by all tests
         """
-        if args[0] == "formatting:http_timestamp":
-            return ["Thu, 01 Dec 1994 16:00:00 GMT"]
+        if args[0] == "memorize:check_etag":
+            return [False]
 
         return mock.DEFAULT
 
@@ -89,16 +89,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         result = target.catalog_apps({"/fake_app": fake_controller})
 
         self.assertEqual(len(result), 1)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_expires_header(self, publish_mock):
-        """The response sends an expires header."""
-
-        publish_mock.side_effect = self.default_side_effect_callback
-
-        response = self.request("/")
-
-        self.assertExpiresHeader(response)
 
 
 if __name__ == "__main__":

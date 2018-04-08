@@ -4,6 +4,11 @@ GET http://127.0.0.1:8085/
 Content-Type: application/x-www-form-urlencoded
 #
 
+GET http://127.0.0.1:8085/
+Content-Type: application/x-www-form-urlencoded
+If-None-Match: this-is-bogus
+#
+
 HEAD http://127.0.0.1:8085/
 Content-Type: application/x-www-form-urlencoded
 #

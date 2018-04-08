@@ -31,7 +31,6 @@ class Tool(cherrypy.Tool):
             priority=10
         )
 
-
     def _setup(self):
         cherrypy.Tool._setup(self)
 
@@ -40,7 +39,6 @@ class Tool(cherrypy.Tool):
             self._finalize,
             priority=5
         )
-
 
     def _negotiate(self):
         """Decide on a response format"""
@@ -85,7 +83,6 @@ class Tool(cherrypy.Tool):
 
         return json.JSONEncoder().encode(part) if part else None
 
-
     def _renderText(self, body):
         part = body.get("text")
 
@@ -96,17 +93,38 @@ class Tool(cherrypy.Tool):
 
         return "\n".join([str(line) for line in part]) if part else None
 
-
     def _renderHtml(self, body):
         template_file, values = body.get("html", (None, None))
 
-        template = None
+        if not template_file:
+            return None
 
-        if template_file:
-            template = cherrypy.engine.publish("lookup-template", template_file).pop()
+        template = cherrypy.engine.publish("lookup-template", template_file).pop()
+
+        if not template:
+            return None
 
         cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(self.charset)
 
-        return template.render(**values) if template else None
+        html = template.render(**values)
+
+        if body.get("with_etag"):
+            hash = cherrypy.engine.publish("hasher:md5", html).pop()
+
+            cherrypy.engine.publish(
+                "memorize:etag",
+                template_file,
+                hash
+            )
+
+            cherrypy.response.headers["ETag"] = hash
+
+        max_age = body.get("max_age")
+        if max_age:
+            cache_control = "private, max-age={}".format(max_age)
+            cherrypy.response.headers["Cache-Control"] = cache_control
+
+        return html
+
 
 cherrypy.tools.negotiable = Tool()

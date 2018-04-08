@@ -11,6 +11,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("memorize:get", self.get)
         self.bus.subscribe("memorize:set", self.set)
         self.bus.subscribe("memorize:clear", self.clear)
+        self.bus.subscribe("memorize:etag", self.etag)
+        self.bus.subscribe("memorize:check_etag", self.check_etag)
 
     def stop(self):
         pass
@@ -25,3 +27,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def clear(self, key):
         self.cache.pop(key, None)
+
+    def etag(self, template, value):
+        """Store an etag hash for a template.
+
+        This is just like calling set(), except it includes an
+        identifier which serves as a quasi namespace.
+
+        """
+
+        key = "etag:{}".format(template)
+        self.set(key, value)
+
+    def check_etag(self, template):
+        """Decide whether an etag hash is valid.
+
+        The hash being checked is taken out of the request headers
+        here, rather than on the caller's side, for convenience.
+
+        """
+
+        wanted_value = cherrypy.request.headers.get("If-None-Match")
+
+        if not wanted_value:
+            return False
+
+        key = "etag:{}".format(template)
+        cache_hit, cache_value = self.get(key)
+
+        return cache_value == wanted_value
