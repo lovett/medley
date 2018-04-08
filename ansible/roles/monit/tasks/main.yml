@@ -1,8 +1,0 @@
-- name: Install monit
-  become: true
-  apt: name=monit state=latest
-
-- name: Install monit configuration file
-  become: true
-  copy: src=files/medley dest=/etc/monit/conf.d/{{ project_name }}
-  notify: reload monit

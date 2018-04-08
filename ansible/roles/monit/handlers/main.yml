@@ -1,4 +1,0 @@
----
-- name: reload monit
-  become: true
-  service: name=monit state=reloaded

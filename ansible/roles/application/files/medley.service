@@ -1,12 +1,25 @@
 [Unit]
 Description=Medley
+
 After=network.target
 
 [Service]
 WorkingDirectory=/srv/medley
+
 ExecStart=/srv/medley/venv/bin/python medley.py
+
 Type=forking
+
 PIDFile=/var/run/medley.pid
+
+# Try to restart automatically in case of trouble.
+Restart=always
+
+# How long to wait before attempting a restart. Defaults to 100ms.
+RestartSec=3
+
+# Keep trying to restart forever, do not rate limit.
+StartLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target
