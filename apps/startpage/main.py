@@ -15,66 +15,108 @@ class Controller:
 
     @staticmethod
     def registry_key(page_name):
-        """Format the name of a page into a registry key."""
+        """Format the name of a page as a registry key."""
+
         return "startpage:{}".format(page_name)
 
     def edit_page(self, page_name, page_content=None):
         """Present a form for editing the contents of a page."""
 
-        if not page_content:
+        if page_content:
+            is_new_page = False
+        else:
+            is_new_page = True
             registry_key = self.registry_key("template")
             page_content = cherrypy.engine.publish(
                 "registry:first_value",
                 registry_key
             ).pop()
 
-        return {
-            "html": ("edit.html", {
-                "app_name": self.name,
-                "page_name": page_name,
-                "page_content": page_content
-            })
-        }
-
-    @cherrypy.tools.negotiable()
-    def GET(self, page_name="default"):
-        """Render a page or present the edit form."""
-
-        registry_key = self.registry_key(page_name)
-
-        record = cherrypy.engine.publish(
-            "registry:search",
-            registry_key,
-            exact=True,
-            limit=1
-        ).pop()
-
-        if not record:
-            return self.edit_page(page_name)
-
-        page = record[0]
-
-        parser = Parser()
-        parsed_ini = parser.parse(page["value"])
-
-        created = page["created"]
-        print(created)
-
         post_url = cherrypy.engine.publish(
             "url:for_controller",
             self
         ).pop()
 
+        if is_new_page:
+            button_label = "Create"
+        else:
+            button_label = "Update"
+
+        if is_new_page:
+            cancel_url = post_url
+        else:
+            cancel_url = cherrypy.engine.publish(
+                "url:for_controller",
+                self,
+                page_name
+            ).pop()
+
         return {
-            "html": ("startpage.html", {
+            "html": ("edit.html", {
                 "app_name": self.name,
-                "parsed_ini": parsed_ini,
-                "post_url": post_url,
+                "button_label": button_label,
+                "cancel_url": cancel_url,
+                "page_name": page_name,
+                "page_content": page_content,
+                "post_url": post_url
             })
         }
 
+    def render_page(self, page_name, page_record):
+        """Render INI page content to HTML."""
+
+        parser = Parser()
+        page = parser.parse(page_record["value"])
+
+        anonymizer_url = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:url_anonymizer",
+            memorize=True
+        ).pop()
+
+        edit_url = cherrypy.engine.publish(
+            "url:for_controller",
+            self,
+            page_name,
+            {"action": "edit"}
+        ).pop()
+
+        return {
+            "html": ("startpage.html", {
+                "app_name": self.name,
+                "created": page_record["created"],
+                "anonymizer_url": anonymizer_url,
+                "edit_url": edit_url,
+                "page": page,
+            })
+        }
+
+    @cherrypy.tools.negotiable()
+    def GET(self, page_name="default", action="view"):
+        """Render a page or present the edit form."""
+
+        record = cherrypy.engine.publish(
+            "registry:search",
+            self.registry_key(page_name),
+            exact=True,
+            limit=1
+        ).pop()
+
+        # Display the edit form when a non-existent page is requested.
+        if not record:
+            return self.edit_page(page_name, None)
+
+        page = record[0]
+
+        # Display the edit form when explicitly requested.
+        if action == "edit":
+            return self.edit_page(page_name, page["value"])
+
+        # Render the page
+        return self.render_page(page_name, page)
+
     def POST(self, page_name, page_content):
-        """Store a new version of a page."""
+        """Create or update the INI version of a page."""
 
         registry_key = self.registry_key(page_name)
 
@@ -87,11 +129,8 @@ class Controller:
 
         redirect_url = cherrypy.engine.publish(
             "url:for_controller",
-            self
+            self,
+            page_name,
         ).pop()
-
-        redirect_url = "{}/{}".format(
-            redirect_url, page_name
-        )
 
         raise cherrypy.HTTPRedirect(redirect_url)

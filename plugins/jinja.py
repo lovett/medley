@@ -93,7 +93,6 @@ class Plugin(plugins.SimplePlugin):
         """
         return self.env.get_template(name)
 
-
     def localtime_filter(self, value, format="locale"):
         """Switch a datetime to the local timezone, then format it"""
 

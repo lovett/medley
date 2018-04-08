@@ -17,8 +17,8 @@
         <input type="hidden" name="page_name" value="{{ page_name }}" />
         <fieldset>
             <div id="toolbar">
-                <a href="/startpage/{{ page_name }}">Cancel</a>
-                <button>Save</button>
+                <a href="{{ cancel_url }}">Cancel</a>
+                <button>{{ button_label }}</button>
             </div>
             <textarea name="page_content">{{ page_content }}</textarea>
         </fieldset>

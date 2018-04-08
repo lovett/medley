@@ -14,5 +14,8 @@ class Parser():
             delimiters=('=',),
             strict=False
         )
+
+        config.optionxform = lambda option: option.upper()
+
         config.read_string(text)
         return config
