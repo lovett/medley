@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros -%}
+
+{% block stylesheets %}
+{{ macros.cacheBustedStylesheet('startpage', 'startpage.css') }}
+{% endblock %}
+
+{% block scripts %}
+{{ macros.cacheBustedScript('template', 'template.js') }}
+{{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
+{{ macros.cacheBustedScript('startpage', 'startpage.js') }}
+{% endblock %}
+
+{% block page_body %}
+
+<main>
+    <a id="appcache-message" href="{{ page_url }}">Update available at next reload.</a>
+
+    <div class="content-wrapper">
+        {{ page_content }}
+
+        {% for section in parsed_ini.sections()  %}
+        <section id="{{ section|slug }}">
+            <h1>
+                <a href="#{{ section|slug }}" title="#{{ section|slug }}">{{ section }}</a>
+            </h1>
+            <ul>
+                {% for url in parsed_ini.options(section): -%}
+                {% set title = parsed_ini.get(section, url) %}
+
+                {%- if loop.first -%}
+                <li>
+                    {%- endif -%}
+
+                    {%- if title|slice(0, 1) != "+" and not loop.first -%}
+                </li>
+                <li>
+                    {% endif %}
+
+                    {%- if title|slice(0, 1) == "+" -%}
+                    {{ macros.link(title|slice(1), url, ",") }}
+                    {%- else -%}
+                    {{ macros.link(title, url) }}
+                    {%- endif -%}
+
+                    {% if loop.last -%}
+                </li>
+                {% endif -%}
+
+                {% endfor %}
+            </ul>
+        </section>
+        {% endfor %}
+
+        <section>
+            <ul>
+                <li>
+                    <time id="modified" datetime="{{ modified|localtime }}"></time>
+                </li>
+                {% if anonymizer %}
+                <li>
+                    <label>
+                        <input type="checkbox" id="anonymize" value="1" disabled="disabled" checked="false"/>
+                        Anonymize links
+                    </label>
+                </li>
+                {% endif %}
+                <li>
+                    <a href="{{ edit_url }}">Edit page</a>
+                </li>
+                <li class="focus-buffer-display"></li>
+            </ul>
+        </section>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros -%}
+
+{% block stylesheets %}
+{{ macros.cacheBustedStylesheet('startpage', 'edit.css') }}
+{% endblock %}
+
+{% block scripts %}
+{{ macros.cacheBustedScript('startpage', 'startpage.js') }}
+{% endblock %}
+
+
+{% block page_body %}
+
+<main id="edit" class="content-wrapper">
+    <form method="post" action="{{ post_url }}">
+        <input type="hidden" name="page_name" value="{{ page_name }}" />
+        <fieldset>
+            <div id="toolbar">
+                <a href="/startpage/{{ page_name }}">Cancel</a>
+                <button>Save</button>
+            </div>
+            <textarea name="page_content">{{ page_content }}</textarea>
+        </fieldset>
+    </form>
+</main>
+{% endblock %}

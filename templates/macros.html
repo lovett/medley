@@ -18,4 +18,8 @@
 <script src="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}"></script>
 {% endmacro %}
 
+{% macro link(text, url, separator="") %}
+{{separator}} <a href="{{url}}" rel="noreferrer">{{text}}</a>
+{% endmacro %}
+
 {% set bookmarkletIcon = "🔖" %}

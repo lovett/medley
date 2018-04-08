@@ -70,6 +70,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["escapejs"] = self.escapejs_filter
         self.env.filters["hostname_truncate"] = self.hostname_truncate_filter
         self.env.filters["logline_with_links"] = self.logline_with_links_filter
+        self.env.filters["slug"] = self.slug_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -309,3 +310,6 @@ class Plugin(plugins.SimplePlugin):
         result = result.replace(record["ip"], link)
 
         return result
+
+    def slug_filter(self, value):
+        return value
