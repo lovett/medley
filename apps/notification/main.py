@@ -16,9 +16,10 @@ class Controller:
 
     user_facing = False
 
+    @staticmethod
     @cherrypy.tools.capture()
     @cherrypy.tools.json_in()
-    def POST(self):
+    def POST():
         """Decide whether a notification is speakable.
 
         Disregard retractions, because they are not actionable here.

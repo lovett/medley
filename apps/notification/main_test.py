@@ -1,18 +1,28 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.notification.main
-import mock
-import unittest
+"""
+Test suite for the notification app
+"""
 
-class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.notification.main
+
+
+class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the notification application controller
+    """
 
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.notification.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
     def test_allow(self):
@@ -20,7 +30,7 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("POST",))
 
-    def test_requiresJson(self):
+    def test_requires_json(self):
         """Request bodies must be JSON"""
         response = self.request("/", method="POST", hello="world")
         self.assertEqual(response.code, 415)
@@ -55,7 +65,7 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
 
         self.assertEqual(response.code, 204)
 
-    def test_noTitle(self):
+    def test_no_title(self):
         """Notifications without a title are ignored"""
         fixture = {
             "group": "test",
@@ -70,7 +80,7 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_muted(self, publishMock):
+    def test_muted(self, publish_mock):
         """If the application is muted, responses are returned with 202"""
 
         fixture = {
@@ -78,11 +88,13 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
             "title": "hello world",
         }
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0] == "speak:can_speak":
                 return [False]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -93,7 +105,7 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_notMuted(self, publishMock):
+    def test_not_muted(self, publish_mock):
         """Valid notifications trigger a speak event"""
 
         fixture = {
@@ -101,11 +113,13 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
             "title": "hello world",
         }
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0] == "speak:can_speak":
                 return [True]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -115,7 +129,7 @@ class TestHeaders(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions
 
         self.assertEqual(response.code, 204)
 
-        self.assertEqual(publishMock.call_args[0][1], "hello world")
+        self.assertEqual(publish_mock.call_args[0][1], "hello world")
 
 
 if __name__ == "__main__":
