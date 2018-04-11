@@ -65,14 +65,8 @@ class Controller:
         if len(topics) > count:
             topics = topics[0:count]
 
-        expiration = now.end_of('day').in_timezone('GMT')
-
-        cherrypy.response.headers["Expires"] = expiration.format(
-            'ddd, dd MMM YYYY HH:mm:ss zz',
-            formatter='alternative'
-        )
-
         return {
+            "max_age": cache_lifespan,
             "html": ("topics.html", {
                 "topics": topics,
                 "count": count,

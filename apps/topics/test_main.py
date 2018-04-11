@@ -133,17 +133,13 @@ class TestTopics(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 503)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_expires_header(self, publish_mock):
-        """The response sends an expires header
-
-        By testing against the JSON repsonse, there aren't any complications
-        with the publish mock and the HTML template lookup.
-        """
+    def test_cache_header(self, publish_mock):
+        """The response sends a Cache-Control header."""
 
         publish_mock.side_effect = self.default_side_effect_callback
 
-        response = self.request("/", count=8, as_json=True)
-        self.assertTrue("GMT" in response.headers.get("Expires"))
+        response = self.request("/", count=8)
+        self.assertIsNotNone(response.headers.get("Cache-Control"))
 
 
 if __name__ == "__main__":
