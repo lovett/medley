@@ -30,10 +30,15 @@ def main():
     server_root = os.path.dirname(os.path.abspath(__file__))
     app_root = os.path.join(server_root, "apps")
 
-    # Jinja templating won't work unless tools.encode is off
     cherrypy.config.update({
         "server_root": server_root,
-        "tools.encode.on": False
+
+        # Jinja templating won't work unless tools.encode is off
+        "tools.encode.on": False,
+
+        # Gzipping locally avoids Etag complexity. If a reverse
+        # proxy handles it, the Etag could be dropped.
+        "tools.gzip.on": True
     })
 
     # Configuration
