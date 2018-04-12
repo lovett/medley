@@ -19,6 +19,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
     def setUpClass(cls):
         """Start a faux cherrypy server"""
         helpers.start_server(apps.jenkins.main.Controller)
+        cls.controller = apps.jenkins.main.Controller()
 
     @classmethod
     def tearDownClass(cls):
@@ -51,6 +52,23 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             }
         }
 
+        self.plugin_mirror_fixture = {
+            "name": "test",
+            "url": "job/mirror/test/",
+            "build": {
+                "full_url": "http://example.com/job/mirror/test/1/",
+                "number": 1,
+                "phase": "FINALIZED",
+                "status": "SUCCESS",
+                "url": "job/mirror/test/1/",
+                "scm": {
+                    "url": "https://example.org/mirror/test.git",
+                    "branch": "origin/master",
+                    "commit": "1234567890"
+                }
+            }
+        }
+
         self.pipeline_fixture = {
             "format": "pipeline",
             "name": "testjob-pipeline",
@@ -60,7 +78,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             "url": "http://example.com/job/testjob-pipeline/1/"
         }
 
-    def get_fixture(self, kind, phase, status):
+    def get_fixture(self, kind, phase=None, status=None):
         """
         Select of the available fixtures based on its structure and
         values
@@ -74,6 +92,8 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             fixture = self.pipeline_fixture
             fixture["phase"] = phase
             fixture["status"] = status
+        if kind == "plugin_mirror":
+            fixture = self.plugin_mirror_fixture
 
         return fixture
 
@@ -185,6 +205,19 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="POST", json_body=payload_fixture)
 
         self.assertEqual(response.code, 204)
+
+    def test_build_action(self):
+        """Payload normalization looks for keywords in the URL to describe the
+        action that best fits the job.
+
+        """
+
+        payload_fixture = self.get_fixture("plugin_mirror")
+        normalized_payload = self.controller.normalize_payload(
+            payload_fixture
+        )
+
+        self.assertEqual(normalized_payload.get("action"), "mirroring")
 
 
 if __name__ == "__main__":

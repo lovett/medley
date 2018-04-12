@@ -11,14 +11,15 @@ or drop it.
 
 For notifications from the Jenkins Notification plugin, all event
 types will be accepted but the completed event will be silently
-dropped. The finalized event is favored instead. Otherwise there would be
-double notifications.
+dropped. The finalized event is favored instead to avoid double
+notifications.
 
 From the plugin documentation: "...[W]hen job is finalized all
 post-build activities, such as archiving artifacts, were executed
 as well. This is not the case with job being merely "completed"
 which usually involves only creation of job's artifacts without
 post-processing them."
+
 """
 
 import cherrypy
@@ -44,7 +45,7 @@ class Controller:
 
         payload = self.normalize_payload(cherrypy.request.json)
 
-        if self.can_skip(payload):
+        if self.payload_is_skippable(payload):
             cherrypy.response.status = 202
             return
 
@@ -56,7 +57,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def can_skip(payload):
+    def payload_is_skippable(payload):
         """Should the payload produce a notification?"""
 
         if payload["status"].lower() == "failure":
@@ -76,22 +77,23 @@ class Controller:
     @staticmethod
     def build_notification(payload):
         """
-        Transform a Jenkins message into a Notifier message
+        Transform a normalized Jenkins payload into a notification.
         """
 
         phase = payload["phase"].lower()
         status = payload["status"].lower()
         name = payload.get("name")
         group = "sysup"
+        action = payload.get("action")
 
         if phase == "started":
-            title = "Jenkins is building {}".format(name)
+            title = "Jenkins is {} {}".format(action, name)
 
         if phase == "finalized":
-            title = "Jenkins has finished building {}".format(name)
+            title = "Jenkins has finished {} {}".format(action, name)
 
         if status == "failure":
-            title = "Jenkins had trouble with {} ".format(name)
+            title = "Jenkins had trouble {} {} ".format(action, name)
             group = "sysdown"
 
         return {
@@ -111,10 +113,10 @@ class Controller:
 
         formats = {
             # Jenkins notifier plugin (non-pipeline)
-            "plugin": lambda x: "name" in x and "build" in x,
+            "plugin": lambda p: "name" in p and "build" in p,
 
             # Custom (Jenkins pipeline)
-            "pipeline": lambda x: x.get("format") == "pipeline"
+            "pipeline": lambda p: p.get("format") == "pipeline"
         }
 
         matches = (
@@ -132,11 +134,16 @@ class Controller:
             result["status"] = payload["build"].get("status")
             result["url"] = payload["build"].get("full_url")
 
+            result["action"] = "building"
+            if "mirror" in payload["build"].get("full_url").lower():
+                result["action"] = "mirroring"
+
         if kind == "pipeline":
             result["name"] = payload.get("name")
             result["build_number"] = payload.get("build_number")
             result["phase"] = payload.get("phase")
             result["status"] = payload.get("status")
             result["url"] = payload.get("url")
+            result["action"] = "building"
 
         return result
