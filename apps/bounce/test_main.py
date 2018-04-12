@@ -1,39 +1,63 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import unittest
-import apps.bounce.main
-import mock
+"""
+Test suite for the whois app
+"""
 
-class TestBounce(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.bounce.main
+
+
+class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the bounce application controller
+    """
+
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.bounce.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
-
     def setUp(self):
+        """Provide a separate controller instance for testing helper methods.
+
+        """
+
         self.controller = apps.bounce.main.Controller()
 
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
+
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "PUT"))
 
+    def test_site_url(self):
+        """An incoming URL is reduced to its protocol and hostname."""
 
-    def test_siteUrl(self):
         candidates = (
-            ("https://example.com/with/a/path", "https://example.com"),
-            ("http://example.com/path?and=querystring#andfragment", "http://example.com"),
+            ("https://example.com/with/a/path",
+             "https://example.com"),
+            ("http://example.com/path?and=querystring#andfragment",
+             "http://example.com"),
         )
 
         for pair in candidates:
-            result = self.controller.siteUrl(pair[0])
+            result = self.controller.site_url(pair[0])
             self.assertEqual(result, pair[1])
 
-    def test_guessGroup(self):
+    def test_guess_group(self):
+        """URLs are grouped by subtracting known keywords from the
+        hostname.
+
+        """
+
         candidates = (
             ("http://example.com", "example"),
             ("http://dev.example.com", "example"),
@@ -46,13 +70,12 @@ class TestBounce(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions)
         )
 
         for pair in candidates:
-            result = self.controller.guessGroup(pair[0])
+            result = self.controller.guess_group(pair[0])
             self.assertEqual(result, pair[1])
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
+    def test_guess_name(self):
+        """URLs are named by looking for known keywords in the hostname."""
 
-    def test_guessName(self):
         candidates = (
             ("http://example.co.uk", "live"),
             ("http://dev.example.com", "dev"),
@@ -65,21 +88,23 @@ class TestBounce(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions)
         )
 
         for pair in candidates:
-            result = self.controller.guessName(pair[0])
+            result = self.controller.guess_name(pair[0])
             self.assertEqual(result, pair[1])
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_siteInGroup(self, publishMock, renderMock):
+    def test_site_in_group(self, publish_mock, render_mock):
         """A request with a URL that belongs to known group returns
         equivalent URLs for other members of the group
         """
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:first_key"):
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "registry:first_key":
                 return ["example"]
 
-            if (args[0] == "registry:search"):
+            if args[0] == "registry:search":
                 return [[
                     {
                         "rowid": 1,
@@ -93,87 +118,126 @@ class TestBounce(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions)
                     }
                 ]]
 
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", u="http://dev.example.com/with/subpath")
+        self.request("/", u="http://dev.example.com/with/subpath")
 
-        template_vars = self.extract_template_vars(renderMock)
+        self.assertEqual(
+            helpers.html_var(render_mock, "group"),
+            "example"
+        )
 
-        self.assertEqual(template_vars["group"], "example")
+        self.assertIsNone(
+            helpers.html_var(render_mock, "name")
+        )
 
-        self.assertIsNone(template_vars["name"])
+        bounce_var = helpers.html_var(render_mock, "bounces")
 
-        self.assertEqual(template_vars["bounces"][1][0], "http://stage.example.com/with/subpath")
-        self.assertEqual(template_vars["bounces"][1][1], "stage")
+        self.assertEqual(
+            bounce_var[1][0],
+            "http://stage.example.com/with/subpath"
+        )
 
-        self.assertEqual(template_vars["bounces"][2][0], "http://othersite.example.com/with/subpath")
-        self.assertEqual(template_vars["bounces"][2][1], "othersite")
+        self.assertEqual(
+            bounce_var[1][1],
+            "stage"
+        )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    @mock.patch("cherrypy.engine.publish")
-    def test_unrecognizedSite(self, publishMock, renderMock):
-        """A request with a URL that does not belong to known group returns a form"""
+        self.assertEqual(
+            bounce_var[2][0],
+            "http://othersite.example.com/with/subpath"
+        )
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:first_key"):
-                return [None]
-
-            if (args[0] == "registry:search"):
-                return [None]
-
-            if (args[0] == "registry:distinct_keys"):
-                return [None]
-
-        publishMock.side_effect = side_effect
-
-        response = self.request("/", u="http://unrecognized.example.com")
-
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertEqual(template_vars["group"], "example")
-
-        self.assertEqual(template_vars["name"], "live")
-
-        self.assertIsNone(template_vars["bounces"])
-        self.assertEqual(template_vars["all_groups"], [])
+        self.assertEqual(
+            bounce_var[2][1],
+            "othersite"
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_bookmarkletUrlHonorsHttps(self, publishMock, renderMock):
-        """If the site is served over HTTPs, the bookmarklet URL reflects that"""
+    def test_unrecognized_site(self, publish_mock, render_mock):
+        """A  URL that does not belong to known group returns a form."""
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:first_key"):
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "registry:first_key":
                 return [None]
 
-            if (args[0] == "registry:search"):
+            if args[0] == "registry:search":
                 return [None]
 
-            if (args[0] == "registry:distinct_keys"):
+            if args[0] == "registry:distinct_keys":
                 return [None]
 
-        publishMock.side_effect = side_effect
+            return mock.DEFAULT
 
-        response = self.request(
+        publish_mock.side_effect = side_effect
+
+        self.request("/", u="http://unrecognized.example.com")
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "group"),
+            "example"
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "name"),
+            "live"
+        )
+
+        self.assertIsNone(
+            helpers.html_var(render_mock, "bounces")
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "all_groups"),
+            []
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_bookmarklet_url_https(self, publish_mock, render_mock):
+        """The bookmarklet URL respects HTTPS."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:first_key":
+                return [None]
+
+            if args[0] == "registry:search":
+                return [None]
+
+            if args[0] == "registry:distinct_keys":
+                return [None]
+
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request(
             "/",
             headers={"X-HTTPS": "On"},
             u="http://unrecognized.example.com"
         )
 
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertTrue(template_vars["app_url"].startswith("https"))
+        self.assertTrue(
+            helpers.html_var(render_mock, "app_url").startswith("https")
+        )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_addSite(self, publishMock):
+    def test_add_site(self, publish_mock):
         """A new site can be added to a group"""
 
-        def side_effect(*args, **kwargs):
-            if (args[0] == "registry:add"):
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:add":
                 return [{"uid": 1, "group": "example"}]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -184,7 +248,6 @@ class TestBounce(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions)
         )
 
         self.assertEqual(response.code, 204)
-
 
 
 if __name__ == "__main__":

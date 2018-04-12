@@ -1,7 +1,7 @@
 """Redirect to an equivalent page on a different domain."""
 
+from urllib.parse import urlparse
 import cherrypy
-from urllib.parse import urlparse, urlunparse
 
 
 class Controller:
@@ -20,17 +20,18 @@ class Controller:
         "local",
     }
 
-    def siteUrl(self, url):
+    @staticmethod
+    def site_url(url):
         """Reduce a URL to its root: protocol and domain"""
-        parsedUrl = urlparse(url)
-        return "{}://{}".format(parsedUrl.scheme, parsedUrl.netloc)
+        parsed_url = urlparse(url)
+        return "{}://{}".format(parsed_url.scheme, parsed_url.netloc)
 
-    def guessGroup(self, url):
+    def guess_group(self, url):
         """Reduce a URL to its domain with no suffixes or prefixes"""
 
-        parsedUrl = urlparse(url)
+        parsed_url = urlparse(url)
 
-        segments = parsedUrl.hostname.split(".")
+        segments = parsed_url.hostname.split(".")
 
         if len(segments) > 1:
             segments.pop()
@@ -42,19 +43,19 @@ class Controller:
         ]
         return diff[-1]
 
-    def guessName(self, url):
+    def guess_name(self, url):
         """Reduce a URL to a keyword"""
 
-        parsedUrl = urlparse(url)
+        parsed_url = urlparse(url)
 
-        segments = parsedUrl.hostname.split(".")
+        segments = parsed_url.hostname.split(".")
 
         intersect = [
             segment for segment in segments
             if segment in self.common_names
         ]
 
-        if len(intersect):
+        if intersect:
             return intersect[0]
 
         if len(segments) == 1:
@@ -62,21 +63,36 @@ class Controller:
 
         return "live"
 
+    @staticmethod
+    def to_registry_key(value):
+        """Convert a value to a registry key using the application
+        namespace.
 
-    def toRegistryKey(self, value):
+        """
         return "bounce:{}".format(value)
 
-    def fromRegistryKey(self, value):
+    @staticmethod
+    def from_registry_key(value):
+        """Remove the application namespace from a registry key."""
         return value.replace("bounce:", "")
 
-    def toRegistryValue(self, url, name):
+    @staticmethod
+    def to_registry_value(url, name):
+        """Join a URL and name into a value that can be stored in the
+        registry.
+
+        """
         return "{}\n{}".format(url, name)
 
-    def fromRegistryValue(self, value):
+    @staticmethod
+    def from_registry_value(value):
+        """Extract a URL and name from a registry value."""
         return value.split("\n")
 
     @cherrypy.tools.negotiable()
-    def GET(self, u=None, group=None):
+    def GET(self, u=None, group=None):  # pylint: disable=invalid-name
+        """Display all the URLs in a group."""
+
         site = False
         bounces = None
         name = None
@@ -84,23 +100,30 @@ class Controller:
         group = None
 
         if u:
-            site = self.siteUrl(u)
+            site = self.site_url(u)
             search_value = "{}*".format(site)
-            group = cherrypy.engine.publish("registry:first_key", search_value).pop()
+            group = cherrypy.engine.publish(
+                "registry:first_key",
+                search_value
+            ).pop()
+
             if group:
-                group = self.fromRegistryKey(group)
+                group = self.from_registry_key(group)
 
         if group:
-            search_key = self.toRegistryKey(group)
-            bounces = cherrypy.engine.publish("registry:search", search_key, exact=True).pop()
+            search_key = self.to_registry_key(group)
+            bounces = cherrypy.engine.publish(
+                "registry:search",
+                search_key, exact=True
+            ).pop()
 
         if site and not group:
-            group = self.guessGroup(site)
-            name = self.guessName(site)
+            group = self.guess_group(site)
+            name = self.guess_name(site)
 
         if bounces:
             bounces = {
-                bounce["rowid"]:  self.fromRegistryValue(bounce["value"])
+                bounce["rowid"]:  self.from_registry_value(bounce["value"])
                 for bounce in bounces
             }
 
@@ -136,9 +159,11 @@ class Controller:
         }
 
     def PUT(self, site, name, group):
-        site_url = self.siteUrl(site)
-        registry_key = self.toRegistryKey(group)
-        registry_value = self.toRegistryValue(site_url, name)
+        """Add a new URL to a group."""
+
+        site_url = self.site_url(site)
+        registry_key = self.to_registry_key(group)
+        registry_value = self.to_registry_value(site_url, name)
 
         cherrypy.engine.publish(
             "registry:add",
