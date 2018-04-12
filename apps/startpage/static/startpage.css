@@ -1,134 +1,94 @@
-SECTION A {
+body {
+    background-color: #fff;
+    background-color: red;
+}
+
+main {
+    background-color: blue;
+}
+
+section {
+    -webkit-column-break-inside: avoid;
+    break-inside: avoid;
+    display: block;
+    overflow: hidden;
+    page-break-inside: avoid;
+    margin-bottom: 1em;
+    background-color: yellow;
+    padding: .5em;
+    box-sizing: border-box;
+}
+
+section:last-of-type {
+    background-color: #eee;
+    margin-bottom: 0;
+}
+
+section.active {
+    background-color: #D1E2F2;
+}
+
+section.active H1 {
+    border-bottom-color: inherit;
+}
+
+section a {
     color: #FF4500;
     font-style: italic;
     text-decoration: none;
 }
 
-SECTION A:focus {
+section a:focus {
     outline: 0;
     background-color: #369;
     color: white;
 }
 
-SECTION A:hover {
+section a:hover {
     text-decoration: underline;
 }
 
-/* Medium screens */
-@media only screen and (min-width: 40.063em) {
-    BODY {
-        font-size: 1em;
-    }
-}
-
-A.top {
-    display: block;
-    font-size: .75em;
-    margin: 1em auto 2em auto;
-    text-align: center;
-}
-
-H1 {
-    font-size: .75em;
+section h1 {
+    font-size: 1em;
     margin: 0;
     padding: 0;
+    border-bottom: 1px solid #cccccc;
+    line-height: 2;
+    margin-bottom: .5em;
 }
 
-SECTION H1 A {
+section h1 a {
     color: inherit;
     font-style: inherit;
 }
 
-SECTION H1 A:hover {
+
+section h1 a:hover {
     text-decoration: inherit;
 }
 
-SECTION H2 {
-    color: #ccc;
-    font-size: .85em;
-    margin-bottom: 1em;
-    text-align: right;
-}
-
-UL {
+ul {
     list-style-type: none;
     margin: 0;
     overflow: hidden;
     padding: 0;
 }
 
-LI {
-    font-size: .75em;
+li {
     line-height: 1.5;
     margin: 0;
-    padding: .1em;
 }
 
-
-LI.group .all {
-    font-size: .75em;
+li.group .all {
     font-style: normal;
     padding-left: .75em;
     text-transform: uppercase;
     visibility: hidden;
 }
 
-
-LI.group:hover .all {
+li.group:hover .all {
     visibility: visible;
     color: green;
-}
-
-SECTION {
-    -webkit-column-break-inside: avoid;
-    break-inside: avoid;
-    display: block;
-    overflow: hidden;
-    page-break-inside: avoid;
-    padding: .25em;
-    margin-bottom: .5em;
-}
-
-SECTION.active {
-    background-color: #D1E2F2;
-}
-
-SECTION.active H1 {
-    border-bottom-color: inherit;
-}
-
-LABEL INPUT {
-    vertical-align: middle;
-}
-
-SECTION:last-of-type {
-    background-color: #eee;
-}
-
-SECTION:last-of-type LI {
-    padding-bottom: 1em;
-}
-
-.open-group {
-    color: inherit;
-    display: block;
-    font-style: normal;
-}
-
-.open-group:hover {
-    background-color: #369;
-    color: white;
-    text-decoration: none;
-}
-
-@media (orientation: portrait) or (orientation: landscape) {
-    A {
-        -webkit-touch-callout: none;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
 }
 
 #appcache-message {
@@ -141,66 +101,26 @@ SECTION:last-of-type LI {
     text-decoration: none;
 }
 
-@media (orientation: portrait) {
-    MAIN {
-        padding: .6em;
-    }
+.content-wrapper {
+    width: auto;
+    background-color: orange;
 }
 
-@media (orientation: portrait) and (min-width: 30em) {
-    MAIN {
-        -webkit-column-width: 10em;
-        -moz-column-width: 10em;
-        column-width: 10em;
-        -webkit-column-gap: 0em;
-        -moz-column-gap: 0em;
-        column-gap: 0em;
-    }
-}
-
-@media (orientation: landscape) {
-    MAIN {
-        -moz-column-gap: 0em;
-        -moz-column-width: 10em;
-        -webkit-column-gap: 0em;
-        -webkit-column-width: 10em;
-        column-gap: 0em;
-        column-width: 10em;
-        padding: .6em;
-    }
-}
-
-/* Medium screens */
-@media only screen and (min-width: 40.063em) {
-    H1 {
-        border-bottom: 1px solid #cccccc;
-        line-height: 1.75;
-        margin-bottom: .75em;
+/* Tablet and up */
+@media (min-width: 768px) {
+    body {
+        font-size: .8em;
     }
 
     A.top {
         display: none;
     }
 
-    MAIN {
-        -moz-column-gap: 2em;
-        -moz-column-width: 12em;
-        -webkit-column-gap: 2em;
-        -webkit-column-width: 12em;
+    .content-wrapper {
         column-gap: 2em;
         column-width: 12em;
         display: block;
         padding: 1em 2em 0 2em;
     }
-}
 
-
-A[href^="{{anonymizer}}"] {
-    color: #369;
-    font-style: normal;
-}
-
-.focus-candidate {
-    background-color: orange;
-    color: white;
 }

@@ -65,14 +65,20 @@ class Controller:
     def render_page(self, page_name, page_record):
         """Render INI page content to HTML."""
 
-        parser = Parser()
-        page = parser.parse(page_record["value"])
+        local_domains = cherrypy.engine.publish(
+            "registry:search",
+            "startpage:local",
+            as_value_list=True
+        ).pop()
 
         anonymizer_url = cherrypy.engine.publish(
             "registry:first_value",
             "config:url_anonymizer",
             memorize=True
         ).pop()
+
+        parser = Parser(anonymizer_url, local_domains)
+        page = parser.parse(page_record["value"])
 
         edit_url = cherrypy.engine.publish(
             "url:for_controller",

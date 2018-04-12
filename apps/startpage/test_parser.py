@@ -7,13 +7,15 @@ from apps.startpage.parser import Parser
 class TestStartpageParser(unittest.TestCase):
     """Tests for the config parser used by the startpage app."""
 
+    anonymizer_url = "http://a.example.com?u="
+
     @classmethod
     def setUp(cls):
         cls.parser = Parser()
-
-    def parse(self, text):
-        """Send a value to the parser."""
-        return self.parser.parse(text)
+        cls.anonParser = Parser(
+            cls.anonymizer_url,
+            ["localhost"]
+        )
 
     def test_basic_parsing(self):
         """A simplistic input parses successfully."""
@@ -22,7 +24,7 @@ class TestStartpageParser(unittest.TestCase):
         key1 = value1
         key2 = value2"""
 
-        config = self.parse(content)
+        config = self.parser.parse(content)
 
         self.assertEqual(config["section1"]["key1"], "value1")
         self.assertEqual(config["section1"]["key2"], "value2")
@@ -34,7 +36,7 @@ class TestStartpageParser(unittest.TestCase):
         key1 = value1
         key1 = value2"""
 
-        config = self.parse(content)
+        config = self.parser.parse(content)
 
         self.assertEqual(config["section1"]["key1"], "value2")
 
@@ -47,7 +49,7 @@ class TestStartpageParser(unittest.TestCase):
         [section1]
         key1 = value2"""
 
-        config = self.parse(content)
+        config = self.parser.parse(content)
 
         self.assertEqual(config["section1"]["key1"], "value2")
 
@@ -57,6 +59,22 @@ class TestStartpageParser(unittest.TestCase):
         content = """[section1]
         http://example.com = example"""
 
-        config = self.parse(content)
+        config = self.parser.parse(content)
 
-        self.assertEqual(config["section1"]["http://example.com"], "example")
+        self.assertEqual(
+            config.get("section1", "http://example.com"),
+            "example"
+        )
+
+    def test_anonymizer_prepend(self):
+        """URLs are prepended with the anonymizer URL."""
+
+        content = """[section1]
+        http://example.com = example"""
+
+        config = self.anonParser.parse(content)
+
+        self.assertIn(
+            "{}http://example.com".format(self.anonymizer_url),
+            list(config["section1"].keys())
+        )

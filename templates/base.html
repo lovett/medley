@@ -55,6 +55,7 @@
         </svg>
 
 
+        {% block page_header %}
         <header id="page-header">
             <h1>{{ app_name or "Medley" }}</h1>
 
@@ -63,12 +64,14 @@
             {% if app_name|lower != "homepage" %}
             <a class="home" href="/" title="Return to the homepage"><svg class="icon icon-home"><use xlink:href="#icon-home"></use></svg></a>
             {% endif %}
-
         </header>
+        {% endblock %}
 
         {% block page_body %}{% endblock %}
+
         {{ macros.cacheBustedScript('shared', 'js/jquery-3.2.1.min.js') }}
         {{ macros.cacheBustedScript('shared', 'js/medley.js') }}
+
         {% block scripts %}{% endblock %}
     </body>
 </html>
