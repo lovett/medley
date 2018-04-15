@@ -9,10 +9,6 @@ class Controller:
 
     name = "Weather"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self):
         """Display selected parts of the most recent Darksky API query"""

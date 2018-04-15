@@ -9,10 +9,6 @@ class Controller:
 
     name = "Bounce"
 
-    exposed = True
-
-    user_facing = True
-
     common_names = {
         "dev",
         "stage",

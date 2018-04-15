@@ -8,10 +8,6 @@ class Controller:
 
     name = "Calls"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, offset=0):
         offset = int(offset)

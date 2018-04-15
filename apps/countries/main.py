@@ -8,8 +8,6 @@ class Controller:
 
     name = "Country Codes"
 
-    exposed = True
-
     user_facing = False
 
     cache_key = "countries"

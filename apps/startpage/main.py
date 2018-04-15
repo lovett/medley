@@ -9,10 +9,6 @@ class Controller:
 
     name = "Startpage"
 
-    exposed = True
-
-    user_facing = True
-
     @staticmethod
     def registry_key(page_name):
         """Format the name of a page as a registry key."""

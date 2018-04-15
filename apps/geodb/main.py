@@ -13,8 +13,6 @@ class Controller:
 
     name = "GeoDB"
 
-    exposed = True
-
     user_facing = True
 
     download_url = "http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz"

@@ -8,10 +8,6 @@ class Controller:
 
     name = "Captures"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, q=None):
         if q:

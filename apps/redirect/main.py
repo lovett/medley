@@ -9,10 +9,6 @@ class Controller:
 
     name = "Redirect"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, u=None):  # pylint: disable=invalid-name
         """Perform a client-side redirect to the URL specified in the

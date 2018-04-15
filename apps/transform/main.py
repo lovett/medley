@@ -9,10 +9,6 @@ class Controller:
 
     name = "Transform"
 
-    exposed = True
-
-    user_facing = True
-
     transforms = {}
 
     def __init__(self):

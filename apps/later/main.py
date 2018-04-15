@@ -9,10 +9,6 @@ class Controller:
 
     name = "Later"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, url=None, title=None, tags=None, comments=None):
         """Display a form for for bookmarking a URL"""

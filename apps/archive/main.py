@@ -10,10 +10,6 @@ class Controller:
 
     name = "Archive"
 
-    exposed = True
-
-    user_facing = True
-
     def checkWaybackAvailability(self, url):
         response = cherrypy.engine.publish(
             "urlfetch:get",

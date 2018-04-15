@@ -10,10 +10,6 @@ class Controller:
 
     name = "Homepage"
 
-    exposed = True
-
-    user_facing = True
-
     @decorators.log_runtime
     def catalog_apps(self, apps):
         """Extract app summaries from module docstrings."""

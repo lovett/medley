@@ -8,10 +8,6 @@ class Controller:
 
     name = "Registry"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, q=None, uid=None, view="search"):
         entries = []

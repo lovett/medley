@@ -10,8 +10,6 @@ class Controller:
 
     name = "Log Index"
 
-    exposed = True
-
     user_facing = False
 
     @staticmethod

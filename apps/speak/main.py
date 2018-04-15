@@ -8,8 +8,6 @@ class Controller:
 
     name = "Speak"
 
-    exposed = True
-
     user_facing = False
 
     def POST(self, statement, locale="en-IE", gender="Male"):

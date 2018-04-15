@@ -9,10 +9,6 @@ class Controller:
 
     name = "Reminder"
 
-    exposed = True
-
-    user_facing = True
-
     registry_key = "reminder:template"
 
     list_command = "scheduler:upcoming"

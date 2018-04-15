@@ -8,10 +8,6 @@ class Controller:
 
     name = "Phone"
 
-    exposed = True
-
-    user_facing = True
-
     messages = {
         "invalid": "The number provided was invalid",
         "missing": "A number was not provided"

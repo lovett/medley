@@ -10,10 +10,6 @@ class Controller:
 
     name = "Topics"
 
-    exposed = True
-
-    user_facing = True
-
     cache_key = "topics:html"
 
     @cherrypy.tools.negotiable()

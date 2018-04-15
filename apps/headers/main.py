@@ -8,10 +8,6 @@ class Controller:
 
     name = "Headers"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self):
         """Display the headers of the current request"""

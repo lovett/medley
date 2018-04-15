@@ -8,8 +8,6 @@ class Controller:
 
     name = "Shared"
 
-    exposed = True
-
     user_facing = False
 
     @staticmethod

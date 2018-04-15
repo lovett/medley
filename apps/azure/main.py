@@ -9,8 +9,6 @@ class Controller:
 
     name = "Azure"
 
-    exposed = True
-
     user_facing = False
 
     @cherrypy.tools.json_in()

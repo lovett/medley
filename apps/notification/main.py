@@ -12,8 +12,6 @@ class Controller:
         'tools.conditional_auth.on': False
     }
 
-    exposed = True
-
     user_facing = False
 
     @staticmethod

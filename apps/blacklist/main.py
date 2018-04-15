@@ -7,8 +7,6 @@ class Controller:
 
     name = "Blacklist"
 
-    exposed = True
-
     user_facing = False
 
     def PUT(self, number):

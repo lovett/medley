@@ -12,10 +12,6 @@ class Controller:
 
     name = "Whois"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, address=None):
         """Display a search form and lookup results."""

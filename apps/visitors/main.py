@@ -16,10 +16,6 @@ class Controller:
 
     name = "Visitors"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, query=None):
         """Display a search interface, and the results of the default query"""

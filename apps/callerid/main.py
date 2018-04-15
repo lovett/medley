@@ -7,8 +7,6 @@ class Controller:
 
     name = "Caller ID"
 
-    exposed = True
-
     user_facing = False
 
     @cherrypy.tools.json_out()

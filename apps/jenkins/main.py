@@ -30,8 +30,6 @@ class Controller:
 
     name = "Jenkins"
 
-    exposed = True
-
     user_facing = False
 
     _cp_config = {

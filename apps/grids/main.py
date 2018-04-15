@@ -10,10 +10,6 @@ class Controller:
 
     name = "Grids"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self, name="", start=None):
         """Display the list of available grids, or the current grid"""

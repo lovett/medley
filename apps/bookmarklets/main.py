@@ -7,10 +7,6 @@ class Controller:
 
     name = "Bookmarklets"
 
-    exposed = True
-
-    user_facing = True
-
     @cherrypy.tools.negotiable()
     def GET(self):
 

@@ -97,6 +97,17 @@ def main():
 
         app_module = importlib.import_module("apps.{}.main".format(app))
 
+        # Treat all controllers as exposed by default.
+        # This is a Cherrypy-ism.
+        if not hasattr(app_module.Controller, "exposed"):
+            app_module.Controller.exposed = True
+
+        # Treat all controllers as user-facing by default. This is a
+        # Medley-ism. Service apps should override this attribute
+        # locally.
+        if not hasattr(app_module.Controller, "user_facing"):
+            app_module.Controller.user_facing = True
+
         app_config = {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher()

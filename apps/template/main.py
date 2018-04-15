@@ -6,10 +6,6 @@ class Controller:
 
     name = "Template"
 
-    exposed = True
-
-    user_facing = True
-
     cache_key = "template:cache"
 
     @cherrypy.tools.negotiable()

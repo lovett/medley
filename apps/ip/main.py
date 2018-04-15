@@ -8,10 +8,6 @@ class Controller:
 
     name = "IP"
 
-    exposed = True
-
-    user_facing = True
-
     cache_key = "ip:external"
 
     @cherrypy.tools.negotiable()
