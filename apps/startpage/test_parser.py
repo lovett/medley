@@ -78,3 +78,19 @@ class TestStartpageParser(unittest.TestCase):
             "{}http://example.com".format(self.anonymizer_url),
             list(config["section1"].keys())
         )
+
+    def test_anonymizer_skips_local(self):
+        """URLs are not anonymized if they match one of the values specified
+        as a local domain.
+
+        """
+
+        content = """[section1]
+        http://localhost = localhost"""
+
+        config = self.anonParser.parse(content)
+
+        self.assertEqual(
+            ['http://localhost'],
+            list(config["section1"].keys())
+        )

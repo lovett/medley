@@ -78,6 +78,7 @@ class Controller:
         ).pop()
 
         parser = Parser(anonymizer_url, local_domains)
+
         page = parser.parse(page_record["value"])
 
         edit_url = cherrypy.engine.publish(

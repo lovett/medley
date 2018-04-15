@@ -1,20 +1,15 @@
 body {
     background-color: #fff;
-    background-color: red;
-}
-
-main {
-    background-color: blue;
 }
 
 section {
-    -webkit-column-break-inside: avoid;
+    column-break-inside: avoid;
     break-inside: avoid;
-    display: block;
+    display: inline-block;
+    width: 100%;
     overflow: hidden;
     page-break-inside: avoid;
     margin-bottom: 1em;
-    background-color: yellow;
     padding: .5em;
     box-sizing: border-box;
 }
@@ -81,6 +76,7 @@ li {
 
 li.group .all {
     font-style: normal;
+    font-size: .75em;
     padding-left: .75em;
     text-transform: uppercase;
     visibility: hidden;
@@ -103,7 +99,6 @@ li.group:hover .all {
 
 .content-wrapper {
     width: auto;
-    background-color: orange;
 }
 
 /* Tablet and up */
@@ -118,9 +113,9 @@ li.group:hover .all {
 
     .content-wrapper {
         column-gap: 2em;
-        column-width: 12em;
+        column-width: 15em;
         display: block;
-        padding: 1em 2em 0 2em;
+        padding: 1em;
     }
 
 }
