@@ -1,65 +1,99 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.redirect.main
-import cherrypy
-import datetime
-import mock
-import unittest
+"""
+Test suite for the redirect app
+"""
 
-class TestTemplate(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
-    """Unit tests for the redirect app"""
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.redirect.main
+
+
+class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the redirect application controller
+    """
 
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.redirect.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
-
     def test_allow(self):
+        """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    def test_noDestination(self, renderMock):
-        response = self.request("/")
+    def test_no_destination(self, render_mock):
+        """If no URL is provided, no redirect occurs."""
+        self.request("/")
 
-        template_vars = self.extract_template_vars(renderMock)
+        self.assertEqual(
+            helpers.html_var(render_mock, "app_name"),
+            apps.redirect.main.Controller.name
+        )
 
-        self.assertEqual(template_vars["app_name"], apps.redirect.main.Controller.name)
-        self.assertEqual(template_vars["dest"], None)
-
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    def test_encodedDestination(self, renderMock):
-        response = self.request("/", u="http%3A%2F%2Fexample.com")
-
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertEqual(template_vars["app_name"], apps.redirect.main.Controller.name)
-        self.assertEqual(template_vars["dest"], "http://example.com")
+        self.assertIsNone(
+            helpers.html_var(render_mock, "dest")
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    def test_unencodedDestination(self, renderMock):
-        response = self.request("/", u="http://example.net")
+    def test_encoded_destination(self, render_mock):
+        """Encoded URLs are decoded."""
 
-        template_vars = self.extract_template_vars(renderMock)
+        self.request("/", u="http%3A%2F%2Fexample.com")
 
-        self.assertEqual(template_vars["app_name"], apps.redirect.main.Controller.name)
-        self.assertEqual(template_vars["dest"], "http://example.net")
+        self.assertEqual(
+            helpers.html_var(render_mock, "app_name"),
+            apps.redirect.main.Controller.name
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "dest"),
+            "http://example.com"
+        )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    def test_destinationWithEncodedQuerystring(self, renderMock):
-        response = self.request("/", u="http%3A%2F%2Fexample.com%3Fhello%3Dworld")
+    def test_unencoded_destination(self, render_mock):
+        """Unencoded URLs are used as-is."""
 
-        template_vars = self.extract_template_vars(renderMock)
+        self.request("/", u="http://example.net")
 
-        self.assertEqual(template_vars["app_name"], apps.redirect.main.Controller.name)
-        self.assertEqual(template_vars["dest"], "http://example.com?hello=world")
+        self.assertEqual(
+            helpers.html_var(render_mock, "app_name"),
+            apps.redirect.main.Controller.name
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "dest"),
+            "http://example.net"
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    def test_encoded_querystring(self, render_mock):
+        """URL decoding preserves querystring values."""
+
+        self.request(
+            "/",
+            u="http%3A%2F%2Fexample.com%3Fhello%3Dworld"
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "app_name"),
+            apps.redirect.main.Controller.name
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "dest"),
+            "http://example.com?hello=world"
+        )
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 """URL redirection for referrer privacy."""
 
+from urllib.parse import unquote_plus
 import cherrypy
-import urllib.parse
 
 
 class Controller:
@@ -14,10 +14,14 @@ class Controller:
     user_facing = True
 
     @cherrypy.tools.negotiable()
-    def GET(self, u=None):
+    def GET(self, u=None):  # pylint: disable=invalid-name
+        """Perform a client-side redirect to the URL specified in the
+        querystring.
+
+        """
 
         if u is not None:
-            u = urllib.parse.unquote_plus(u)
+            u = unquote_plus(u)
 
         return {
             "html": ("redirect.html", {
