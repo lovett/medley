@@ -2,6 +2,7 @@
 
 import cherrypy
 
+
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
@@ -9,7 +10,8 @@ class Controller:
 
     user_facing = False
 
-    def PUT(self, number):
+    @staticmethod
+    def PUT(number):
         """Add a number to the blacklist"""
 
         clean_number = cherrypy.engine.publish(
@@ -23,10 +25,9 @@ class Controller:
         )
 
         cherrypy.response.status = 204
-        return
 
-
-    def DELETE(self, number):
+    @staticmethod
+    def DELETE(number):
         """Remove a number from the blacklist"""
 
         clean_number = cherrypy.engine.publish(
@@ -40,4 +41,3 @@ class Controller:
         )
 
         cherrypy.response.status = 204
-        return

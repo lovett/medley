@@ -31,6 +31,10 @@ def start_server(app):
         }
     }
 
+    # Treat the app as exposed by default. Apps that are not exposed
+    # return 404s, which interferes with testing.
+    app.exposed = True
+
     cherrypy.tree.mount(app(), "/", app_config)
 
     # Always load the shared app
