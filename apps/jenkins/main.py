@@ -83,12 +83,14 @@ class Controller:
         name = payload.get("name")
         group = "sysup"
         action = payload.get("action")
+        url = payload.get("jenkins_url")
 
         if phase == "started":
             title = "Jenkins is {} {}".format(action, name)
 
         if phase == "finalized":
             title = "Jenkins has finished {} {}".format(action, name)
+            url = payload.get("site_url", url)
 
         if status == "failure":
             title = "Jenkins had trouble {} {}".format(action, name)
@@ -97,7 +99,7 @@ class Controller:
         return {
             "group": group,
             "badge": "jenkins.svg",
-            "url": payload.get("url"),
+            "url": url,
             "localId": "jenkins.{}".format(payload["name"]),
             "title": title,
             "body": "Build #{}, {}".format(
@@ -123,9 +125,12 @@ class Controller:
         result["commit"] = scm.get("commit")
         result["repository_url"] = scm.get("url")
 
-        result["url"] = build.get("full_url")
-        if result["url"]:
-            result["url"] += "/console"
+        result["jenkins_url"] = build.get("full_url", "") + "console"
+
+        result["site_url"] = cherrypy.engine.publish(
+            "registry:first_value",
+            "site_url:{}:{}".format(result["name"], result["branch"])
+        ).pop()
 
         result["action"] = "building"
         if "mirror" in build.get("full_url").lower():
