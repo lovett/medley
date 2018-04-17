@@ -69,15 +69,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             }
         }
 
-        self.pipeline_fixture = {
-            "format": "pipeline",
-            "name": "testjob-pipeline",
-            "build_number": 1,
-            "phase": "completed",
-            "status": "success",
-            "url": "http://example.com/job/testjob-pipeline/1/"
-        }
-
     def get_fixture(self, kind, phase=None, status=None):
         """
         Select of the available fixtures based on its structure and
@@ -88,10 +79,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             fixture = self.plugin_fixture
             fixture["build"]["phase"] = phase.upper()
             fixture["build"]["status"] = status.upper()
-        if kind == "pipeline":
-            fixture = self.pipeline_fixture
-            fixture["phase"] = phase
-            fixture["status"] = status
         if kind == "plugin_mirror":
             fixture = self.plugin_mirror_fixture
 
@@ -125,22 +112,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("plugin", "finalized", "success")
-
-        publish_mock.side_effect = self.default_side_effect_callback
-
-        response = self.request(
-            "/",
-            method="POST",
-            json_body=payload_fixture,
-        )
-
-        self.assertEqual(response.code, 204)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_accepts_pipeline_format(self, publish_mock):
-        """JSON bodies from the Jenkins Notification plugin are accepted"""
-
-        payload_fixture = self.get_fixture("pipeline", "finalized", "success")
 
         publish_mock.side_effect = self.default_side_effect_callback
 

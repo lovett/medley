@@ -83,6 +83,7 @@ class Controller:
         name = payload.get("name")
         group = "sysup"
         action = payload.get("action")
+        branch = payload.get("branch")
 
         if phase == "started":
             title = "Jenkins is {} {}".format(action, name)
@@ -91,8 +92,11 @@ class Controller:
             title = "Jenkins has finished {} {}".format(action, name)
 
         if status == "failure":
-            title = "Jenkins had trouble {} {} ".format(action, name)
+            title = "Jenkins had trouble {} {}".format(action, name)
             group = "sysdown"
+
+        if branch != "master":
+            title = "{} from {}".format(title, branch)
 
         return {
             "group": group,
@@ -105,43 +109,24 @@ class Controller:
 
     @staticmethod
     def normalize_payload(payload):
-        """Reshape an incoming payload to a standardized structure"""
+        """Reshape an incoming payload to a simpler, flatter structure"""
 
         result = {}
 
-        formats = {
-            # Jenkins notifier plugin (non-pipeline)
-            "plugin": lambda p: "name" in p and "build" in p,
+        build = payload.get("build", {})
+        scm = build.get("scm", {})
 
-            # Custom (Jenkins pipeline)
-            "pipeline": lambda p: p.get("format") == "pipeline"
-        }
+        result["name"] = payload.get("name")
+        result["build_number"] = build.get("number")
+        result["phase"] = build.get("phase")
+        result["status"] = build.get("status")
+        result["url"] = build.get("full_url")
+        result["branch"] = scm.get("branch", "").split("/", 1).pop()
+        result["commit"] = scm.get("commit")
+        result["repository_url"] = scm.get("url")
 
-        matches = (
-            name for name, callback
-            in formats.items()
-            if callback(payload)
-        )
-
-        kind = list(matches)[0]
-
-        if kind == "plugin":
-            result["name"] = payload.get("name")
-            result["build_number"] = payload["build"].get("number")
-            result["phase"] = payload["build"].get("phase")
-            result["status"] = payload["build"].get("status")
-            result["url"] = payload["build"].get("full_url")
-
-            result["action"] = "building"
-            if "mirror" in payload["build"].get("full_url").lower():
-                result["action"] = "mirroring"
-
-        if kind == "pipeline":
-            result["name"] = payload.get("name")
-            result["build_number"] = payload.get("build_number")
-            result["phase"] = payload.get("phase")
-            result["status"] = payload.get("status")
-            result["url"] = payload.get("url")
-            result["action"] = "building"
+        result["action"] = "building"
+        if "mirror" in build.get("full_url").lower():
+            result["action"] = "mirroring"
 
         return result
