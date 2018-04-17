@@ -83,7 +83,6 @@ class Controller:
         name = payload.get("name")
         group = "sysup"
         action = payload.get("action")
-        branch = payload.get("branch")
 
         if phase == "started":
             title = "Jenkins is {} {}".format(action, name)
@@ -95,16 +94,16 @@ class Controller:
             title = "Jenkins had trouble {} {}".format(action, name)
             group = "sysdown"
 
-        if branch != "master":
-            title = "{} from {}".format(title, branch)
-
         return {
             "group": group,
             "badge": "jenkins.svg",
             "url": payload.get("url"),
             "localId": "jenkins.{}".format(payload["name"]),
             "title": title,
-            "body": "Build #{}".format(payload["build_number"]),
+            "body": "Build #{}, {}".format(
+                payload.get("build_number"),
+                payload.get("branch")
+            ),
         }
 
     @staticmethod
@@ -120,10 +119,13 @@ class Controller:
         result["build_number"] = build.get("number")
         result["phase"] = build.get("phase")
         result["status"] = build.get("status")
-        result["url"] = build.get("full_url")
         result["branch"] = scm.get("branch", "").split("/", 1).pop()
         result["commit"] = scm.get("commit")
         result["repository_url"] = scm.get("url")
+
+        result["url"] = build.get("full_url")
+        if result["url"]:
+            result["url"] += "/console"
 
         result["action"] = "building"
         if "mirror" in build.get("full_url").lower():
