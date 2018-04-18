@@ -1,4 +1,5 @@
 .PHONY: dummy
+.DEFAULT_GOAL := setup
 
 PYTHONPATH := $(CURDIR):test
 COVERAGE_DIR := $(CURDIR)/coverage
