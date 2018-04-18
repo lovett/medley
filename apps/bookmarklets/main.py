@@ -2,6 +2,7 @@
 
 import cherrypy
 
+
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
@@ -9,8 +10,11 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self):
+        """Present a static list of bookmarlets"""
 
-        app_url = cherrypy.engine.publish("url:for_controller", self).pop()
+        app_url = cherrypy.engine.publish(
+            "url:for_controller", self
+        ).pop()
 
         anonymizer = cherrypy.engine.publish(
             "registry:first_value",
