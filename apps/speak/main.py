@@ -6,8 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Speak"
-
     user_facing = False
 
     def POST(self, statement, locale="en-IE", gender="Male"):

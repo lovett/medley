@@ -6,8 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Country Codes"
-
     user_facing = False
 
     cache_key = "countries"

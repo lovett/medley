@@ -8,8 +8,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Log Index"
-
     user_facing = False
 
     @staticmethod

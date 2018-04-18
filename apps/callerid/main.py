@@ -5,8 +5,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Caller ID"
-
     user_facing = False
 
     @cherrypy.tools.json_out()

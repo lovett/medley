@@ -6,8 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Notification"
-
     _cp_config = {
         'tools.conditional_auth.on': False
     }

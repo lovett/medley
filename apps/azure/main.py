@@ -6,8 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Azure"
-
     user_facing = False
 
     @staticmethod

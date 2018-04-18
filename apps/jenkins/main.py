@@ -28,8 +28,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Jenkins"
-
     user_facing = False
 
     _cp_config = {
