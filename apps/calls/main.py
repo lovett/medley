@@ -10,6 +10,7 @@ class Controller:
 
     @cherrypy.tools.negotiable()
     def GET(self, offset=0):
+        """Display a list of recent calls"""
         offset = int(offset)
 
         exclusions = cherrypy.engine.publish(
@@ -17,8 +18,15 @@ class Controller:
             "calls:exclude",
         ).pop()
 
-        src_exclusions = [ex["value"] for ex in exclusions if ex["key"].endswith("src")]
-        dst_exclusions = [ex["value"] for ex in exclusions if ex["key"].endswith("dst")]
+        src_exclusions = [
+            ex["value"] for ex in exclusions
+            if ex["key"].endswith("src")
+        ]
+
+        dst_exclusions = [
+            ex["value"] for ex in exclusions
+            if ex["key"].endswith("dst")
+        ]
 
         total = cherrypy.engine.publish(
             "cdr:call_count",
