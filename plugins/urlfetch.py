@@ -1,3 +1,6 @@
+import os.path
+import shutil
+import subprocess
 import cherrypy
 import requests
 import json
@@ -9,6 +12,7 @@ class Plugin(plugins.SimplePlugin):
 
     def start(self):
         self.bus.subscribe("urlfetch:get", self.get)
+        self.bus.subscribe("urlfetch:get_file", self.get_file)
         self.bus.subscribe("urlfetch:post", self.post)
 
     def stop(self):
@@ -47,6 +51,31 @@ class Plugin(plugins.SimplePlugin):
 
         except requests.exceptions.RequestException:
             return None
+
+    def get_file(self, url, destination, auth=(), headers={}, params={}, timeout=5, as_json=False):
+        """Download a URL to the local filesystem"""
+
+        cherrypy.log("Downloading {}".format(url))
+
+        local_path = os.path.join(
+            destination,
+            url.rsplit('/', 1).pop()
+        )
+
+        with requests.get(url, stream=True) as req:
+            req.raise_for_status()
+
+            with open(local_path, "wb") as db_file:
+                shutil.copyfileobj(req.raw, db_file)
+
+        # Unpack the downloaded file
+        if local_path.endswith(".gz"):
+            try:
+                subprocess.check_call(["gunzip", "-f", local_path])
+                cherrypy.log("Download complete")
+            except subprocess.CalledProcessError:
+                cherrypy.log("Failed to gunzip geodb database")
+                os.unlink(local_path)
 
     def post(self, url, data, auth=(), headers={}, timeout=5, as_json=False):
         """Send a POST request"""
