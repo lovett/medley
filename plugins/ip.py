@@ -33,7 +33,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         geodb_download_url = cherrypy.engine.publish(
             "registry:first_value",
-            "geodb:download_url"
+            "geodb:url"
         ).pop()
 
         geodb_path = os.path.join(
