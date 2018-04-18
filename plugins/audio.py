@@ -19,6 +19,13 @@ class Plugin(plugins.SimplePlugin):
         pass
 
     def play(self, path):
+        cherrypy.engine.publish(
+            "applog:add",
+            "audio",
+            "play",
+            "playing {}".format(path)
+        )
+
         wave_obj = sa.WaveObject.from_wave_file(path)
         play_obj = wave_obj.play()
         play_obj.wait_done()
