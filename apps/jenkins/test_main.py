@@ -94,6 +94,9 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
                 return [self.config_fixture]
             if args[1] == "jenkins:skip":
                 return [["skippable"]]
+        if args[0] == "registry:first_value":
+            if args[1].startswith("site_url"):
+                return [None]
         return mock.DEFAULT
 
     def test_allow(self):
@@ -141,7 +144,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.engine.publish")
     def test_skippable_by_phase(self, publish_mock):
-        """Skip logic consiers project name and phase"""
+        """Skip logic considers project name and phase"""
         payload_fixture = self.get_fixture("plugin", "started", "success")
         payload_fixture["name"] = "skippable"
 
@@ -153,7 +156,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.engine.publish")
     def test_skippable_by_status(self, publish_mock):
-        """Skip logic consiers project name and status"""
+        """Skip logic considers project name and status"""
 
         payload_fixture = self.get_fixture("plugin", "completed", "success")
         payload_fixture["name"] = "skippable"
@@ -163,6 +166,32 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="POST", json_body=payload_fixture)
 
         self.assertEqual(response.code, 202)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skippable_no_status(self, publish_mock):
+        """Skip logic handles absence of status value gracefully"""
+
+        payload_fixture = self.get_fixture("plugin", "started", "success")
+        payload_fixture["status"] = None
+
+        publish_mock.side_effect = self.default_side_effect_callback
+
+        skippable = self.controller.payload_is_skippable(payload_fixture)
+
+        self.assertFalse(skippable)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_skippable_no_phase(self, publish_mock):
+        """Skip logic handles absence of phase value gracefully"""
+
+        payload_fixture = self.get_fixture("plugin", "started", "success")
+        payload_fixture["phase"] = None
+
+        publish_mock.side_effect = self.default_side_effect_callback
+
+        skippable = self.controller.payload_is_skippable(payload_fixture)
+
+        self.assertFalse(skippable)
 
     @mock.patch("cherrypy.engine.publish")
     def test_skippable_but_not_on_fail(self, publish_mock):
@@ -177,11 +206,14 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(response.code, 204)
 
-    def test_build_action(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_build_action(self, publish_mock):
         """Payload normalization looks for keywords in the URL to describe the
         action that best fits the job.
 
         """
+
+        publish_mock.side_effect = self.default_side_effect_callback
 
         payload_fixture = self.get_fixture("plugin_mirror")
         normalized_payload = self.controller.normalize_payload(

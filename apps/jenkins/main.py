@@ -58,10 +58,13 @@ class Controller:
     def payload_is_skippable(payload):
         """Should the payload produce a notification?"""
 
-        if payload["status"].lower() == "failure":
+        status = payload.get("status") or ""
+        phase = payload.get("phase") or ""
+
+        if status.lower() == "failure":
             return False
 
-        if payload["phase"].lower() == "completed":
+        if phase.lower() == "completed":
             return True
 
         skips = cherrypy.engine.publish(

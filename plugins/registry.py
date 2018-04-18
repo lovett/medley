@@ -138,7 +138,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if memorize:
             cherrypy.engine.publish("memorize:set", key, value)
-        return  value
+        return value
 
     def distinctKeys(self, key, value=None, stripPrefix=True):
         sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
