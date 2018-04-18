@@ -30,6 +30,13 @@ class Plugin(plugins.SimplePlugin):
 
         request_headers.update(headers)
 
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch",
+            "get",
+            "Requesting {}".format(url)
+        )
+
         try:
             req = requests.get(
                 url,
@@ -50,12 +57,27 @@ class Plugin(plugins.SimplePlugin):
             return req.text
 
         except requests.exceptions.RequestException:
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch",
+                "get",
+                "Request failed"
+            )
+
             return None
 
     def get_file(self, url, destination, auth=(), headers={}, params={}, timeout=5, as_json=False):
         """Download a URL to the local filesystem"""
 
-        cherrypy.log("Downloading {}".format(url))
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch",
+            "get_file",
+            "Downloading {} to {}".format(
+                url,
+                destination
+            )
+        )
 
         local_path = os.path.join(
             destination,
@@ -72,9 +94,19 @@ class Plugin(plugins.SimplePlugin):
         if local_path.endswith(".gz"):
             try:
                 subprocess.check_call(["gunzip", "-f", local_path])
-                cherrypy.log("Download complete")
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "urlfetch",
+                    "get_file",
+                    "Download complete"
+                )
             except subprocess.CalledProcessError:
-                cherrypy.log("Failed to gunzip geodb database")
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "urlfetch",
+                    "get_file",
+                    "Failed to gunzip"
+                )
                 os.unlink(local_path)
 
     def post(self, url, data, auth=(), headers={}, timeout=5, as_json=False):
@@ -89,6 +121,13 @@ class Plugin(plugins.SimplePlugin):
         if (as_json):
             data=json.dumps(data)
             request_headers["Content-Type"] = "application/json"
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch",
+            "post",
+            "Posting to {}".format(url)
+        )
 
         try:
             req = requests.post(
@@ -110,4 +149,11 @@ class Plugin(plugins.SimplePlugin):
             return req.text
 
         except requests.exceptions.RequestException:
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch",
+                "post",
+                "Request failed"
+            )
+
             return None

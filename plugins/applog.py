@@ -1,6 +1,6 @@
 import cherrypy
-import inspect
 from . import mixins
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
@@ -31,7 +31,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         except AttributeError:
             source = caller
 
-        return self._insert(
+        self._insert(
             "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
             [(source, key, value)]
         )
+
+        # Also write a message to the application log for convenience.
+        cherrypy.log("applog:{}: {}".format(
+            source,
+            value
+        ))
