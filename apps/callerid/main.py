@@ -2,13 +2,15 @@
 
 import cherrypy
 
+
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     user_facing = False
 
+    @staticmethod
     @cherrypy.tools.json_out()
-    def PUT(self, cid_number, cid_value):
+    def PUT(cid_number, cid_value):
         """Set the caller id for a number"""
 
         number = cid_number.strip()
