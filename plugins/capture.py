@@ -1,6 +1,10 @@
+"""Store HTTP requests and responses for later review"""
+
+import msgpack
 import cherrypy
-from urllib.parse import urlparse
+import sqlite3
 from . import mixins
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
@@ -15,9 +19,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             request_line, request, response,
             created DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE INDEX IF NOT EXISTS index_request_line
+            on captures(request_line);
+
         """)
 
     def start(self):
+        self.bus.subscribe("capture:add", self.add)
         self.bus.subscribe("capture:search", self.search)
         self.bus.subscribe("capture:recent", self.recent)
 
@@ -25,7 +34,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         pass
 
     def add(self, request, response):
-        packed_value = msgpack.packb({
+        """Store a single HTTP request and response pair
+
+        This is usually invoked from the capture Cherrypy tool.
+
+        """
+
+        if not hasattr(request, "json"):
+            request.json = None
+
+        request_bin = msgpack.packb({
             "headers": request.headers,
             "params": request.body.params,
             "json": request.json
@@ -35,11 +53,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "status": response.status
         }, use_bin_type=True)
 
-        sql = "INSERT INTO captures (request_line, request, response) VALUES (?, ?, ?)"
-        self._insert(
-            sql,
-            [(request.request_line, sqlite3.Binary(request_bin), sqlite3.Binary(response_bin))]
+        sql = """INSERT INTO captures
+        (request_line, request, response)
+        VALUES (?, ?, ?)"""
+
+        placeholder_values = (
+            request.request_line,
+            sqlite3.Binary(request_bin),
+            sqlite3.Binary(response_bin)
         )
+
+        self._insert(sql, [placeholder_values])
 
         return True
 
