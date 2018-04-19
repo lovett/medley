@@ -8,8 +8,10 @@ class Controller:
 
     user_facing = False
 
+    @staticmethod
     @cherrypy.tools.capture()
-    def POST(self, statement, locale="en-IE", gender="Male"):
+    def POST(statement, locale="en-IE", gender="Male"):
+        """Accept a piece of text for text-to-speech conversion"""
 
         can_speak = cherrypy.engine.publish("speak:can_speak").pop()
 
