@@ -8,6 +8,7 @@ class Controller:
 
     user_facing = False
 
+    @cherrypy.tools.capture()
     def POST(self, statement, locale="en-IE", gender="Male"):
 
         can_speak = cherrypy.engine.publish("speak:can_speak").pop()
