@@ -37,7 +37,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         # Also write a message to the application log for convenience.
-        cherrypy.log("applog:{}: {}".format(
+        cherrypy.log("{}: {}".format(
             source,
             value
         ))

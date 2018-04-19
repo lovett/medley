@@ -270,9 +270,13 @@ class Plugin(plugins.SimplePlugin):
 
         try:
             fields = self.appengine_grammar.parseString(val).asDict()
-        except ParseException:
-            cherrypy.log("could not parse an appengine logline", traceback=True)
-            cherrypy.log(val)
+        except ParseException as e:
+            cherrypy.engine.publish(
+                "applog:add",
+                "parse",
+                "fail:column:{}".format(e.col),
+                val
+            )
 
         timestamp = pendulum.from_format(
             fields["timestamp"],

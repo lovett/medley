@@ -167,21 +167,46 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         period = pendulum.period(start_date, end_date)
 
         if self.queue.count(period) > 0:
-            cherrypy.log("Ignoring a request to queue an already-queued range")
+            cherrypy.engine.publish(
+                "applog:add",
+                "logindex",
+                "enqueue",
+                "Ignoring a request to queue an already-queued range"
+            )
+
             return False
 
         self.queue.append(period)
         cherrypy.engine.publish("scheduler:add", 5, "logindex:process_queue")
-        cherrypy.log("Queueing complete, processing scheduled")
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "logindex",
+            "enqueue",
+            "Queueing complete, processing scheduled"
+        )
+
         return True
 
     def process_queue(self):
         try:
             period = self.queue[0]
-            cherrypy.log("Queue is non-empty")
+            cherrypy.engine.publish(
+                "applog:add",
+                "logindex",
+                "process_queue",
+                "Queue is non-empty"
+            )
         except IndexError:
             cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
-            cherrypy.log("Queue is empty, parsing scheduled")
+
+            cherrypy.engine.publish(
+                "applog:add",
+                "logindex",
+                "process_queue",
+                "Queue is empty, parsing scheduled"
+            )
+
             return
 
         for dt in period.range('days'):
@@ -231,7 +256,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if batch:
             line_count += self.insertLine(dt, batch)
 
-        cherrypy.log("Ingested {}".format(file_path))
+        cherrypy.engine.publish(
+            "applog:add",
+            "logindex",
+            "ingest_file",
+            "Ingested {}".format(file_path)
+        )
 
     @decorators.log_runtime_in_applog
     def reversal(self, batch_size=50):
@@ -253,7 +283,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         unreversed_ips = records[0]["value"]
 
-        cherrypy.log("Logindex found {} unreversed ips".format(unreversed_ips))
+        cherrypy.engine.publish(
+            "applog:add",
+            "logindex",
+            "reversal",
+            "{} unreversed ips".format(unreversed_ips)
+        )
 
         if unreversed_ips == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
@@ -300,7 +335,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         unparsed_count = self._selectFirst(count_sql)
 
-        cherrypy.log("Logindex found {} unparsed rows".format(unparsed_count))
+        cherrypy.engine.publish(
+            "applog:add",
+            "logindex",
+            "parse",
+            "{} unparsed rows".format(unparsed_count)
+        )
 
         if unparsed_count == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
@@ -438,7 +478,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         for query in saved_queries:
             self.query(query["value"], for_precache=True)
-
-        cherrypy.log(
-            "Logindex pre-cached {} queries".format(len(saved_queries))
-        )
