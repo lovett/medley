@@ -8,18 +8,25 @@ class Controller:
 
     name = "Registry"
 
+    # pylint: disable=invalid-name
     @cherrypy.tools.negotiable()
     def GET(self, q=None, uid=None, view="search"):
-        entries = []
+        """Display a UI to search for entries and add new ones."""
+
+        entries = ()
 
         if uid:
-            entry = cherrypy.engine.publish("registry:find_id", uid).pop()
-            if entry:
-                entries.append(entry)
+            entries = cherrypy.engine.publish(
+                "registry:find_id",
+                uid
+            )
         elif q:
-            entries.extend(cherrypy.engine.publish("registry:search", key=q).pop())
+            entries = cherrypy.engine.publish(
+                "registry:search",
+                key=q
+            ).pop()
 
-        if not view in ["add", "search"]:
+        if view not in ["add", "search"]:
             view = "search"
 
         return {
@@ -32,15 +39,27 @@ class Controller:
             })
         }
 
-    def PUT(self, key, value, replace=False):
-        result = cherrypy.engine.publish("registry:add", key, [value], replace).pop()
+    @staticmethod
+    def PUT(key, value, replace=False):
+        """Store a new entry in the database or replace an existing entry"""
 
-        print(cherrypy.request.headers)
-        if cherrypy.request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        cherrypy.engine.publish(
+            "registry:add",
+            key,
+            [value],
+            replace
+        ).pop()
+
+        requested_with = cherrypy.request.headers.get("X-Requested-With")
+
+        if requested_with != "XMLHttpRequest":
             raise cherrypy.HTTPRedirect("/registry?q={}&view=add".format(key))
 
         cherrypy.response.status = 204
 
-    def DELETE(self, uid):
+    @staticmethod
+    def DELETE(uid):
+        """Remove an existing entry by its ID"""
+
         cherrypy.engine.publish("registry:remove_id", uid)
         cherrypy.response.status = 204
