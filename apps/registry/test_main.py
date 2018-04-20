@@ -46,7 +46,6 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", uid="test")
 
         entries = helpers.html_var(render_mock, "entries")
-        print(entries)
         self.assertEqual(entries[0]["rowid"], "test")
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")

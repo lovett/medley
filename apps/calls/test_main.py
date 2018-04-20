@@ -56,7 +56,6 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
             src_exclude=["test"]
         )
 
-        print(publish_mock.mock_calls)
         publish_mock.assert_any_call(
             "cdr:call_log",
             dst_exclude=["test2"],

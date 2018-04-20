@@ -7,7 +7,6 @@ class Plugin(plugins.SimplePlugin):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        print("subscribing!")
         self.bus.subscribe("formatting:dbpedia_abstract", self.dbpediaAbstract)
         self.bus.subscribe("formatting:http_timestamp", self.http_timestamp)
 
