@@ -9,8 +9,8 @@ section {
     width: 100%;
     overflow: hidden;
     page-break-inside: avoid;
-    margin-bottom: 1em;
-    padding: 0.5em;
+    margin-bottom: .5em;
+    padding: .5em;
     box-sizing: border-box;
 }
 
@@ -78,7 +78,7 @@ ul {
 }
 
 li {
-    line-height: 1.5;
+    line-height: 1.6;
     margin: 0;
 }
 
