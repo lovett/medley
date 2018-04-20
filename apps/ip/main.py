@@ -1,4 +1,4 @@
-"""Determine the internal and exteranl IP address."""
+"""Determine the internal and external IP address."""
 
 import cherrypy
 
