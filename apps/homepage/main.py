@@ -53,7 +53,7 @@ class Controller:
         apps = self.catalog_apps(cherrypy.tree.apps)
 
         return {
-            "with_etag": True,
+            "etag_key": template,
             "html": (template, {
                 "app_name": self.name,
                 "apps": apps

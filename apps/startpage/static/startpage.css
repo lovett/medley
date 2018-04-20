@@ -10,7 +10,7 @@ section {
     overflow: hidden;
     page-break-inside: avoid;
     margin-bottom: 1em;
-    padding: .5em;
+    padding: 0.5em;
     box-sizing: border-box;
 }
 
@@ -18,6 +18,15 @@ section:last-of-type {
     background-color: #eee;
     margin-bottom: 0;
 }
+
+section:last-of-type li {
+    padding: .5em 0;
+}
+
+section:last-of-type li:last-of-type {
+    padding-bottom: 0;
+}
+
 
 section.active {
     background-color: #D1E2F2;
@@ -29,7 +38,6 @@ section.active H1 {
 
 section a {
     color: #FF4500;
-    font-style: italic;
     text-decoration: none;
 }
 

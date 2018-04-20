@@ -39,7 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         key = "etag:{}".format(template)
         self.set(key, value)
 
-    def check_etag(self, template):
+    def check_etag(self, identifier):
         """Decide whether an etag hash is valid.
 
         The hash being checked is taken out of the request headers
@@ -52,7 +52,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not wanted_value:
             return False
 
-        key = "etag:{}".format(template)
+        key = "etag:{}".format(identifier)
         cache_hit, cache_value = self.get(key)
 
         return cache_value == wanted_value

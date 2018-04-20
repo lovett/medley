@@ -108,14 +108,12 @@ class Tool(cherrypy.Tool):
 
         html = template.render(**values)
 
-        if body.get("with_etag"):
+        if body.get("etag_key"):
             hash = cherrypy.engine.publish("hasher:md5", html).pop()
 
-            cherrypy.engine.publish(
-                "memorize:etag",
-                template_file,
-                hash
-            )
+            key = body.get("etag_key")
+
+            cherrypy.engine.publish("memorize:etag", key, hash)
 
             cherrypy.response.headers["ETag"] = hash
 

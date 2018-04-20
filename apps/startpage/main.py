@@ -12,7 +12,6 @@ class Controller:
     @staticmethod
     def registry_key(page_name):
         """Format the name of a page as a registry key."""
-
         return "startpage:{}".format(page_name)
 
     def edit_page(self, page_name, page_content=None):
@@ -61,6 +60,15 @@ class Controller:
     def render_page(self, page_name, page_record):
         """Render INI page content to HTML."""
 
+        etag_match = cherrypy.engine.publish(
+            "memorize:check_etag",
+            page_name,
+        ).pop()
+
+        if etag_match:
+            cherrypy.response.status = 304
+            return None
+
         local_domains = cherrypy.engine.publish(
             "registry:search",
             "startpage:local",
@@ -85,6 +93,7 @@ class Controller:
         ).pop()
 
         return {
+            "etag_key": page_name,
             "html": ("startpage.html", {
                 "app_name": self.name,
                 "created": page_record["created"],
@@ -128,6 +137,11 @@ class Controller:
             registry_key,
             [page_content],
             replace=True
+        )
+
+        cherrypy.engine.publish(
+            "memorize:clear",
+            self.registry_key(page_name)
         )
 
         redirect_url = cherrypy.engine.publish(

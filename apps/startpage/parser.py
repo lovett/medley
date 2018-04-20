@@ -51,7 +51,6 @@ class Parser():
             for line in text.split("\n")
         ]
 
-        print(processed_text)
         return "\n".join(processed_text)
 
     @staticmethod
