@@ -14,18 +14,17 @@ if (window.applicationCache) {
 
 // Display the last modified time of the data file
 var el = document.getElementById('modified');
-var dt_string;
-if (document.getElementById('old-ie')) {
-    dt_string = el.getAttribute('datetime');
-} else {
+
+if (el) {
+    var dt_string;
     var dt = new Date(Date.parse(el.getAttribute('datetime')));
     dt_string = dt.toLocaleString();
-}
 
-// remove seconds, timezone, and year
-dt_string = dt_string.replace(/(\d\d):\d\d ([AP]M).*/, "$1 $2");
-dt_string = dt_string.replace(', ' + (new Date().getYear() + 1900), '');
-el.innerHTML = 'Updated ' + dt_string;
+    // remove seconds, timezone, and year
+    dt_string = dt_string.replace(/(\d\d):\d\d ([AP]M).*/, "$1 $2");
+    dt_string = dt_string.replace(', ' + (new Date().getYear() + 1900), '');
+    el.innerHTML = 'Updated ' + dt_string;
+}
 
 // Determine the anonymizer URL
 var meta = document.getElementsByTagName('META');

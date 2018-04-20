@@ -38,8 +38,6 @@
     <a id="appcache-message" href="{{ page_url }}">Update available at next reload.</a>
 
     <div class="content-wrapper">
-        {{ page_content }}
-
         {% for section in page.sections() if not section.startswith("-") %}
         <section id="{{ section|slug }}">
             <h1>
