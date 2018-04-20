@@ -1,10 +1,10 @@
 BODY {
-    font-family: 'Lato', sans-serif;
+    font-family: system-ui, 'Corbel', 'FreeSans', 'Lucida Grande', sans-serif;
     background-color: #efefef;
 }
 
 BUTTON {
-    font-family: 'Lato', sans-serif;
+    font-family: inherit;
     border-radius: .25em;
     border: 0;
     color: #fff;
