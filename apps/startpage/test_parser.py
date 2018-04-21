@@ -67,15 +67,21 @@ class TestStartpageParser(unittest.TestCase):
         )
 
     def test_anonymizer_prepend(self):
-        """URLs are prepended with the anonymizer URL."""
+        """URLs are prepended with the anonymizer URL.
+
+        Anonymized URLs are also escaped.
+
+        """
 
         content = """[section1]
-        http://example.com = example"""
+        http://example.com?key1=value1 = example"""
 
         config = self.anonParser.parse(content)
 
         self.assertIn(
-            "{}http://example.com".format(self.anonymizer_url),
+            "{}http%3A//example.com%3Fkey1%3Dvalue1".format(
+                self.anonymizer_url
+            ),
             list(config["section1"].keys())
         )
 

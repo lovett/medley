@@ -2,6 +2,7 @@
 
 """
 
+from urllib.parse import quote
 import configparser
 import re
 
@@ -27,7 +28,7 @@ class Parser():
         if any([d for d in self.local_domains if d in url]):
             return self.postprocess(url)
 
-        return self.anonymizer + self.postprocess(url)
+        return self.anonymizer + quote(self.postprocess(url))
 
     @staticmethod
     def preprocess(text):
