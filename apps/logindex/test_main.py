@@ -65,8 +65,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         calls = publish_mock.call_args_list
 
-        print(calls)
-
         self.assertEqual(
             calls[-1],
             mock.call(

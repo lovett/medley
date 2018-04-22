@@ -262,6 +262,35 @@
         </div>
         {% endif %}
     </div>
+
+    {% if query_plan|count > 0 %}
+    <div class="content-wrapper debug">
+        <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> query details</a>
+        <div class="toggle-target hidden" style="padding-top: 1em">
+            <table>
+                <thead>
+                    <tr>
+                        <th>selectid</th>
+                        <th>order</th>
+                        <th>from</th>
+                        <th>detail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in query_plan %}
+                    <tr>
+                        <td>{{ row.selectid }}</td>
+                        <td>{{ row.order }}</td>
+                        <td>{{ row.from }}</td>
+                        <td>{{ row.detail }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
 </main>
 
 {% endblock %}

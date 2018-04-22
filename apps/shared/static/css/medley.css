@@ -350,6 +350,10 @@ TABLE.natural-width {
     text-align: right;
 }
 
+.debug {
+    margin: 2em auto;
+}
+
 .inline-list {
     display: inline;
     list-style-type: none;

@@ -34,10 +34,11 @@ class Controller:
                 "date today"
             )
 
-        log_records = cherrypy.engine.publish(
+        log_records, query_plan = cherrypy.engine.publish(
             "logindex:query",
             query
         ).pop() or []
+
 
         deltas = self.get_deltas(log_records)
 
@@ -62,6 +63,7 @@ class Controller:
         return {
             "html": ("visitors.html", {
                 "query": query,
+                "query_plan": query_plan,
                 "active_date": active_date,
                 "results": log_records,
                 "country_names": country_names,

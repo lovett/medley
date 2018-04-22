@@ -466,7 +466,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if for_precache:
             return self._selectToCache(sql, ())
         else:
-            return self._select(sql, (), cacheable=True)
+            query_plan = self._explain(sql, ())
+            result = self._select(sql, (), cacheable=True)
+            return (result, query_plan)
 
     @decorators.log_runtime
     def preCache(self):

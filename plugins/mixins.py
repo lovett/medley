@@ -71,6 +71,13 @@ class Sqlite:
             cur.execute(query, values)
             return cur.fetchall() or []
 
+    def _explain(self, query, values=()):
+        return self._select(
+            "EXPLAIN QUERY PLAN {}".format(query),
+            values
+        )
+
+
     def _cacheTable(self, query):
         """The name of the table that will cache results for the specified query"""
         checksum = cherrypy.engine.publish("checksum:string", query).pop()
