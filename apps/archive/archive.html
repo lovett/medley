@@ -18,7 +18,7 @@
     <form class="content-wrapper" method="get" action="/archive">
         <div class="field">
             <label for="q">Search terms</label>
-            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+            <input type="text" id="query" name="query" value="{{ query|default('', true) }}"/>
         </div>
         <div class="field-group">
             <div class="field">

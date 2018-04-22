@@ -1,16 +1,19 @@
 """Manage a collection of bookmarked URLs."""
 
-import cherrypy
-import pytz
 from urllib.parse import urlparse
 from collections import OrderedDict
+import cherrypy
+
 
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Archive"
 
-    def checkWaybackAvailability(self, url):
+    @staticmethod
+    def check_wayback_availability(url):
+        """See if an archived copy of the URL is available."""
+
         response = cherrypy.engine.publish(
             "urlfetch:get",
             "http://archive.org/wayback/available",
@@ -23,23 +26,27 @@ class Controller:
         return closest_snapshot
 
     @cherrypy.tools.negotiable()
-    def GET(self, date=None, q=None, action=None, bookmark_id=None, wayback=None):
-        entries = OrderedDict()
+    def GET(self, query=None, wayback=None):
+        """Display a list of recently bookmarked URLs, or URLs matching a
+        search.
 
+        """
         if wayback:
             return {
-                "json": self.checkWaybackAvailability(wayback)
+                "json": self.check_wayback_availability(wayback)
             }
 
-        if not q:
-            records = cherrypy.engine.publish("archive:recent", limit=50).pop()
+        if query:
+            records = cherrypy.engine.publish("archive:search", query).pop()
         else:
-            records = cherrypy.engine.publish("archive:search", q).pop()
+            records = cherrypy.engine.publish("archive:recent", limit=50).pop()
+
+        entries = OrderedDict()
 
         for record in records:
             key = record["created"].strftime("%Y-%m-%d")
 
-            if not key in entries:
+            if key not in entries:
                 entries[key] = []
 
             entries[key].append(record)
@@ -48,12 +55,15 @@ class Controller:
             "html": ("archive.html", {
                 "app_name": self.name,
                 "entries": entries,
-                "q": q
+                "query": query
             })
         }
 
-    def POST(self, url, title=None, tags=None, comments=None):
-        parsed_url = urlparse(url.lower())
+    @staticmethod
+    def POST(url, title=None, tags=None, comments=None):
+        """Accept a bookmark URL for storage."""
+
+        parsed_url = urlparse(url)
 
         if not parsed_url.netloc:
             raise cherrypy.HTTPError(400, "Invalid URL")
@@ -68,7 +78,10 @@ class Controller:
 
         cherrypy.response.status = 204
 
-    def DELETE(self, uid):
+    @staticmethod
+    def DELETE(uid):
+        """Remove a previously bookmarked URL from storage."""
+
         deletion_count = cherrypy.engine.publish(
             "archive:remove", uid
         ).pop()
