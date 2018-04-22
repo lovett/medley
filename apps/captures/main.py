@@ -9,15 +9,20 @@ class Controller:
     name = "Captures"
 
     @cherrypy.tools.negotiable()
-    def GET(self, q=None):
-        if q:
-            captures = cherrypy.engine.publish("capture:search", q).pop()
+    def GET(self, query=None):
+        """Display a list of recent captures, or captures matching a search
+        query.
+
+        """
+
+        if query:
+            captures = cherrypy.engine.publish("capture:search", query).pop()
         else:
             captures = cherrypy.engine.publish("capture:recent").pop()
 
         return {
             "html": ("captures.html", {
-                "q": q,
+                "query": query,
                 "captures": captures,
                 "app_name": self.name
             })

@@ -1,64 +1,69 @@
-from testing import assertions
-from testing import cptestcase
-from testing import helpers
-import apps.captures.main
-import cherrypy
-import datetime
-import mock
-import unittest
+"""
+Test suite for the captures app
+"""
 
-class TestRegistry(cptestcase.BaseCherryPyTestCase, assertions.ResponseAssertions):
-    """Unit tests for the captures app controller"""
+import unittest
+import mock
+from testing.assertions import ResponseAssertions
+from testing import helpers
+from testing.cptestcase import BaseCherryPyTestCase
+import apps.captures.main
+
+
+class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
+    """
+    Tests for the captures application controller
+    """
 
     @classmethod
     def setUpClass(cls):
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.captures.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
+        """Shut down the faux server"""
         helpers.stop_server()
 
-    def extract_template_vars(self, mock):
-        return mock.call_args[0][0]["html"][1]
-
     def test_allow(self):
-        """The app supports GET requests only"""
+        """Verify the controller's supported HTTP methods"""
+
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_recent(self, publishMock, renderMock):
+    def test_recent(self, publish_mock, render_mock):
         """The default view is a list of recent captures"""
-        def side_effect(*args, **kwargs):
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0] == "capture:recent":
                 return [[{}, {}, {}]]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/")
+        self.request("/")
 
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertEqual(len(template_vars["captures"]), 3)
+        self.assertEqual(len(helpers.html_var(render_mock, "captures")), 3)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_recent(self, publishMock, renderMock):
-        """Captures can be searched by URI"""
-        def side_effect(*args, **kwargs):
+    def test_search(self, publish_mock, render_mock):
+        """Captures can be searched"""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
             if args[0] == "capture:search":
                 return [[{}]]
+            return mock.DEFAULT
 
-        publishMock.side_effect = side_effect
+        publish_mock.side_effect = side_effect
 
-        response = self.request("/", q="test")
+        self.request("/", query="test")
 
-        template_vars = self.extract_template_vars(renderMock)
-
-        self.assertEqual(len(template_vars["captures"]), 1)
-
+        self.assertEqual(len(helpers.html_var(render_mock, "captures")), 1)
 
 
 if __name__ == "__main__":

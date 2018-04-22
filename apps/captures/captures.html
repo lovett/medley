@@ -16,7 +16,7 @@
     <form class="content-wrapper" method="get" action="/captures">
         <div class="field">
             <label for="number">Request URI</label>
-            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+            <input type="text" id="query" name="query" value="{{ q|default('', true) }}"/>
         </div>
         <div class="field">
             <button>Search</button>
