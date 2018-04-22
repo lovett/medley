@@ -10,6 +10,7 @@ import json
 import time
 import pendulum
 from tzlocal import get_localzone
+from urllib.parse import quote
 from cherrypy.process import plugins
 from string import Template
 
@@ -177,7 +178,7 @@ class Plugin(plugins.SimplePlugin):
         if not anonymizer:
             return url
 
-        return "{}{}".format(anonymizer, url)
+        return anonymizer + quote(url)
 
     def urlencode_filter(self, value):
         return urllib.parse.quote(value)
