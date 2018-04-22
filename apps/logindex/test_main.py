@@ -65,24 +65,15 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         calls = publish_mock.call_args_list
 
-        self.assertEqual(
-            calls[-4],
-            mock.call('logindex:enqueue', pendulum.create(2017, 1, 1, 0, 0))
-        )
-
-        self.assertEqual(
-            calls[-3],
-            mock.call('logindex:enqueue', pendulum.create(2017, 1, 2, 0, 0))
-        )
-
-        self.assertEqual(
-            calls[-2],
-            mock.call('logindex:enqueue', pendulum.create(2017, 1, 3, 0, 0))
-        )
+        print(calls)
 
         self.assertEqual(
             calls[-1],
-            mock.call('logindex:parse')
+            mock.call(
+                'logindex:enqueue',
+                pendulum.datetime(2017, 1, 1, 0, 0, tz='UTC'),
+                pendulum.datetime(2017, 1, 3, 0, 0, tz='UTC')
+            )
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -99,13 +90,14 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         calls = publish_mock.call_args_list
 
+        start = pendulum.datetime(2017, 1, 1, 0, 0, tz='UTC')
         self.assertEqual(
-            calls[-2],
-            mock.call('logindex:enqueue', pendulum.create(2017, 1, 1, 0, 0))
-        )
-
-        self.assertEqual(
-            calls[-1], mock.call('logindex:parse')
+            calls[-1],
+            mock.call(
+                'logindex:enqueue',
+                start,
+                start
+            )
         )
 
 
