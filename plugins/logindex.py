@@ -160,7 +160,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def enqueue(self, start_date, end_date):
         """Add log lines to the database for later parsing"""
 
@@ -263,7 +263,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "Ingested {}".format(file_path)
         )
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def reversal(self, batch_size=50):
         records = self._select(
             """SELECT 0 as id, count(*) as value
@@ -315,7 +315,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:reversal")
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
 
@@ -434,7 +434,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("scheduler:add", 1, "logindex:parse")
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def insertLine(self, dt, records):
         if not records:
             return 0
@@ -447,7 +447,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return len(records)
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def query(self, q, for_precache=False):
         parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
 
@@ -466,7 +466,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         else:
             return self._select(sql, (), cacheable=True)
 
-    @decorators.log_runtime_in_applog
+    @decorators.log_runtime
     def preCache(self):
         saved_queries = cherrypy.engine.publish(
             "registry:search",
