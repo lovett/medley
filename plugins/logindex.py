@@ -319,10 +319,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
 
-        count_sql = "SELECT count(*) FROM logs WHERE ip IS NULL"
-
         select_sql = """
-        SELECT rowid, logline
+        SELECT 0 as id, count(*) as value
+        FROM logs
+        WHERE ip IS NULL
+        UNION
+        SELECT rowid as id, logline as value
         FROM logs
         WHERE ip IS NULL
         LIMIT {}""".format(batch_size)
@@ -333,20 +335,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         latitude=?, longitude=?, cookie=?, referrer=?,
         referrer_domain=?  WHERE rowid=?"""
 
-        unparsed_count = self._selectFirst(count_sql)
+        records = self._select(select_sql)
+
+        unparsed_rows = records[0]["value"]
 
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
             "parse",
-            "{} unparsed rows".format(unparsed_count)
+            "{} unparsed rows".format(unparsed_rows)
         )
 
-        if unparsed_count == 0:
+        if unparsed_rows == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
-
-        records = self._select(select_sql)
 
         batch = []
         ips = set()
@@ -354,10 +356,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ip_facts_cache = {}
         agent_cache = {}
 
-        for record in records:
+        for record in records[1:]:
             fields = cherrypy.engine.publish(
                 "parse:appengine",
-                record["logline"]
+                record["value"]
             ).pop()
 
             ip = fields["ip"]
@@ -416,7 +418,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 fields.get("cookie"),
                 fields.get("referrer"),
                 fields.get("referrer_domain"),
-                record["rowid"]
+                record["id"]
             )
 
             batch.append(values)
