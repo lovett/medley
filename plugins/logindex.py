@@ -20,9 +20,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE TABLE IF NOT EXISTS logs (
             unix_timestamp integer,
-            year integer,
-            month integer,
-            day integer,
             hash,
             source_file,
             source_offset integer,
@@ -47,12 +44,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             UNIQUE(hash)
         );
 
-        CREATE INDEX IF NOT EXISTS index_year
-            ON logs(year);
-        CREATE INDEX IF NOT EXISTS index_month
-            ON logs(month);
-        CREATE INDEX IF NOT EXISTS index_day
-            ON logs(day);
+        CREATE INDEX IF NOT EXISTS index_date
+            ON logs(strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch') desc);
         CREATE INDEX IF NOT EXISTS index_ip
             ON logs(ip);
         CREATE INDEX IF NOT EXISTS index_host
@@ -330,7 +323,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         WHERE ip IS NULL
         LIMIT {}""".format(batch_size)
 
-        update_sql = """UPDATE logs SET unix_timestamp=?, year=?, month=?, day=?, ip=?,
+        update_sql = """UPDATE logs SET unix_timestamp=?, ip=?,
         host=?, uri=?, query=?, statusCode=?, method=?, agent=?,
         agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, cookie=?, referrer=?,
@@ -399,9 +392,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             values = (
                 fields.get("unix_timestamp"),
-                fields.get("year"),
-                fields.get("month"),
-                fields.get("day"),
                 fields.get("ip"),
                 fields.get("host"),
                 fields.get("uri"),
@@ -460,8 +450,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         region, city, latitude, longitude, cookie,
         referrer, referrer_domain, logline
         FROM logs
-        WHERE {}
-        ORDER BY unix_timestamp DESC""".format(parsed_query)
+        WHERE {}""".format(parsed_query)
 
         if for_precache:
             return self._selectToCache(sql, ())

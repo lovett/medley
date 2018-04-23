@@ -118,7 +118,6 @@ class Plugin(plugins.SimplePlugin):
         if "?" in uri:
             t["uri"], t["query"] = t["uri"].split('?', 1)
 
-
     def firstInGroup(self, s, l, t):
         return t[0][0]
 
@@ -126,23 +125,47 @@ class Plugin(plugins.SimplePlugin):
         """Coerce a bare hypen to None"""
         return None if t[0] == "-" else t[0]
 
-
     def logQueryRelativeDate(self, s, l, t):
+        """Generate an SQL where clause for a date expressed via keyword.
+
+        Recognized keywords are "today" and "yesterday".
+
+        The SQL describes a range rather than a fixed day to account
+        for timezone differences between the query and the source
+        data. For example, "today" in local time is more like "today
+        and a bit of tomorrow" in UTC.
+
+        For performance, the query is structured to take advantage of
+        an expression-based index. This only works when the query expression
+        matches the expression used in the create index statement.
+        """
+
         if t[1] == "today":
             reference_date = pendulum.today()
         elif t[1] == "yesterday":
             reference_date = pendulum.yesterday()
 
-        utc_reference_date = reference_date.in_timezone('utc')
-
-        return "year={} and month={} and day={}".format(
-            utc_reference_date.year,
-            utc_reference_date.month,
-            utc_reference_date.day
+        return """strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch')
+        BETWEEN '{}' AND '{}'""".format(
+            reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
+            reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
         )
 
-
     def logQueryAbsoluteDate(self, s, l, t):
+        """Generate an SQL where clause for a date expressed literally.
+
+        Dates can either be in YYYY-mm or YYYY-mm-dd format.
+
+        The SQL describes a range rather than a fixed day to account
+        for timezone differences between the query and the source
+        data. For example, a given date in local time also extends
+        into the following day (or prior day) when converted to UTC.
+
+        For performance, the query is structured to take advantage of
+        an expression-based index. This only works when the query expression
+        matches the expression used in the create index statement.
+        """
+
         field = t[0]
 
         dates = t[1:]
@@ -161,29 +184,21 @@ class Plugin(plugins.SimplePlugin):
             ints = tuple(map(int, date))
             if len(date) == 2:
                 year, month = ints
-                start_date = pendulum.create(year, month, 1, tz=tz).start_of('day')
-                utc_start_date = start_date.in_timezone('utc')
-
-                sql.append("year={} and month={}".format(
-                    utc_start_date.year,
-                    utc_start_date.month
-                ))
+                day = 1
 
             if len(date) == 3:
                 year, month, day = ints
-                start_date = pendulum.create(year, month, day, tz=tz).start_of('day')
-                utc_start_date = start_date.in_timezone('utc')
 
-                sql.append("year={} and month={} and day={}".format(
-                    utc_start_date.year,
-                    utc_start_date.month,
-                    utc_start_date.day,
-                ))
+            reference_date = pendulum.datetime(year, month, day, tz=tz)
 
+            sql.append("""strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch')
+            BETWEEN '{}' AND '{}'""".format(
+                reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
+                reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
+            ))
 
         joined_sql = " OR ".join(sql)
         return "({})".format(joined_sql)
-
 
     def logQueryNumeric(self, s, l, t):
         field = t[0]
@@ -284,9 +299,6 @@ class Plugin(plugins.SimplePlugin):
         ).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
-        fields["year"] = timestamp.year
-        fields["month"] = timestamp.month
-        fields["day"] = timestamp.day
 
         if "referrer" in fields:
             parse_result = urlparse(fields["referrer"])
