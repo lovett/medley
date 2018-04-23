@@ -39,6 +39,10 @@ class Controller:
             query
         ).pop() or []
 
+        reversed_ips = cherrypy.engine.publish(
+            "logindex:query:reverse_ip",
+            {record["ip"] for record in log_records}
+        ).pop() or {}
 
         deltas = self.get_deltas(log_records)
 
@@ -64,6 +68,7 @@ class Controller:
             "html": ("visitors.html", {
                 "query": query,
                 "query_plan": query_plan,
+                "reversed_ips": reversed_ips,
                 "active_date": active_date,
                 "results": log_records,
                 "country_names": country_names,

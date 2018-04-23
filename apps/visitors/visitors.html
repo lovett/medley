@@ -127,6 +127,8 @@
                     {% for result in results %}
 
                     {% set new_ip = loop.changed(result.ip) %}
+                    {% set reverse_domain = reversed_ips.get(result.ip) %}
+
 
                     <tr class="result code-{{ result.statusCode }}">
                         {% if new_ip %}
@@ -150,9 +152,9 @@
                         </td>
 
                         <td>
-                            {% if result.reverse_domain %}
-                            <a href="/visitors?query=reverse_domain+{{ result.reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
-                                {{ result.reverse_domain|hostname_truncate(3) }}
+                            {% if reverse_domain %}
+                            <a href="/visitors?query=reverse_domain+{{ reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
+                                {{ reverse_domain|hostname_truncate(3) }}
                             </a>
                             {% else %}
                             unknown

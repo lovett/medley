@@ -99,6 +99,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
+        self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
         self.bus.subscribe('logindex:precache', self.preCache)
 
     def stop(self):
@@ -457,9 +458,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
         region, city, latitude, longitude, cookie,
-        referrer, referrer_domain, logline, reverse_ip.reverse_domain
+        referrer, referrer_domain, logline
         FROM logs
-        LEFT JOIN reverse_ip ON logs.ip=reverse_ip.ip
         WHERE {}
         ORDER BY unix_timestamp DESC""".format(parsed_query)
 
@@ -469,6 +469,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query_plan = self._explain(sql, ())
             result = self._select(sql, (), cacheable=True)
             return (result, query_plan)
+
+    @decorators.log_runtime
+    def query_reverse_ip(self, ips=()):
+
+        placeholders = "?, " * len(ips)
+
+        sql = """SELECT ip, reverse_domain
+        FROM reverse_ip
+        WHERE ip IN ({})""".format(placeholders[:-2])
+
+        result = self._select(sql, tuple(ips))
+
+        return {row["ip"]: row["reverse_domain"] for row in result}
 
     @decorators.log_runtime
     def preCache(self):
