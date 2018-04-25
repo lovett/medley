@@ -145,8 +145,7 @@ class Plugin(plugins.SimplePlugin):
         elif t[1] == "yesterday":
             reference_date = pendulum.yesterday()
 
-        return """strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch')
-        BETWEEN '{}' AND '{}'""".format(
+        return "datestamp BETWEEN '{}' AND '{}'".format(
             reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
             reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
         )
@@ -191,8 +190,7 @@ class Plugin(plugins.SimplePlugin):
 
             reference_date = pendulum.datetime(year, month, day, tz=tz)
 
-            sql.append("""strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch')
-            BETWEEN '{}' AND '{}'""".format(
+            sql.append("datestamp BETWEEN '{}' AND '{}'""".format(
                 reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
                 reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
             ))
@@ -299,6 +297,7 @@ class Plugin(plugins.SimplePlugin):
         ).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
+        fields["datestamp"] = timestamp.format("%Y-%m-%d-%H")
 
         if "referrer" in fields:
             parse_result = urlparse(fields["referrer"])

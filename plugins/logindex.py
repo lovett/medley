@@ -20,6 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE TABLE IF NOT EXISTS logs (
             unix_timestamp integer,
+            datestamp,
             hash,
             source_file,
             source_offset integer,
@@ -44,8 +45,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             UNIQUE(hash)
         );
 
-        CREATE INDEX IF NOT EXISTS index_date
-            ON logs(strftime('%Y-%m-%d-%H', unix_timestamp, 'unixepoch') desc);
+        CREATE INDEX IF NOT EXISTS index_datestamp
+            ON logs (datestamp desc);
         CREATE INDEX IF NOT EXISTS index_ip
             ON logs(ip);
         CREATE INDEX IF NOT EXISTS index_host
@@ -323,7 +324,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         WHERE ip IS NULL
         LIMIT {}""".format(batch_size)
 
-        update_sql = """UPDATE logs SET unix_timestamp=?, ip=?,
+        update_sql = """UPDATE logs SET unix_timestamp=?, datestamp=?, ip=?,
         host=?, uri=?, query=?, statusCode=?, method=?, agent=?,
         agent_domain=?, classification=?, country=?, region=?, city=?,
         latitude=?, longitude=?, cookie=?, referrer=?,
@@ -392,6 +393,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             values = (
                 fields.get("unix_timestamp"),
+                fields.get("datestamp"),
                 fields.get("ip"),
                 fields.get("host"),
                 fields.get("uri"),
