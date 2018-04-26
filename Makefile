@@ -11,6 +11,9 @@ APP_PATHS := $(wildcard $(APP_DIR)/*)
 APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
 APP_NAMES := $(notdir $(APP_PATHS))
 
+PLUGIN_DIR := $(CURDIR)/plugins
+PLUGINS := $(notdir $(wildcard $(PLUGIN_DIR)/*.py))
+
 REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
 REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
@@ -157,6 +160,10 @@ $(APP_NAMES): $(COVERAGE_DIR)
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
 
+# Lint a single plugin
+$(PLUGINS): dummy
+	flake8 $(PLUGIN_DIR)/$@
+	pylint $(PLUGIN_DIR)/$@
 
 vagrant-install: dummy
 	vagrant box update
