@@ -116,7 +116,7 @@
                 <thead>
                     <tr>
                         <th width="20%">Location</th>
-                        <th width="20%">Network</th>
+                        <th width="20%">Source</th>
                         <th width="25%">Date</th>
                         <th widtt="25%">Request</th>
                         <th width="5%">Code</th>
@@ -152,12 +152,17 @@
                         </td>
 
                         <td>
+                            <p>
+                                <a href="/visitors?query=ip+{{ result.ip }}" title="Search for visits from this address" rel="noreferrer">
+                                    {{ result.ip|truncate(20, True)  }}
+                                </a>
+                            </p>
                             {% if reverse_domain %}
-                            <a href="/visitors?query=reverse_domain+{{ reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
-                                {{ reverse_domain|hostname_truncate(3) }}
-                            </a>
-                            {% else %}
-                            unknown
+                            <p class="smaller">
+                                <a href="/visitors?query=reverse_domain+{{ reverse_domain }}" title="Search for visits from this network" rel="noreferrer">
+                                    {{ reverse_domain|hostname_truncate(3) }}
+                                </a>
+                            </p>
                             {% endif %}
 
                             {% if result.organization %}
