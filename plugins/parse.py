@@ -291,10 +291,17 @@ class Plugin(plugins.SimplePlugin):
                 val
             )
 
-        timestamp = pendulum.from_format(
+        # This is a workaround for Pendulum's alternative formatter
+        # not accepting the tokens listed in the documentation. It
+        # rejects "MMM" and "Z" in:
+        # pendulum.from_format(d, "DD/MMM/YYYY:HH:mm:ss Z", formatter='alternative')
+
+        d = datetime.strptime(
             fields["timestamp"],
             "%d/%b/%Y:%H:%M:%S %z"
-        ).in_timezone("UTC")
+        )
+
+        timestamp = pendulum.instance(d).in_timezone("UTC")
 
         fields["unix_timestamp"] = timestamp.timestamp()
         fields["datestamp"] = timestamp.format("%Y-%m-%d-%H")
