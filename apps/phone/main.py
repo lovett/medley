@@ -90,7 +90,7 @@ class Controller:
 
         if not caller_id:
             try:
-                caller_id = call_history[0][0]["clid"]
+                caller_id = call_history[0]["clid"]
             except IndexError:
                 caller_id = None
 

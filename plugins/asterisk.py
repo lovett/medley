@@ -19,6 +19,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the asterisk prefix.
         """
+
         self.bus.subscribe("asterisk:set_caller_id", self.set_caller_id)
         self.bus.subscribe("asterisk:get_caller_id", self.get_caller_id)
         self.bus.subscribe("asterisk:blacklist", self.blacklist)
@@ -27,21 +28,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def stop(self):
         """Clean up the socket used to talk to Asterisk."""
+
         self.disconnect()
 
     @staticmethod
     def get_value(line):
         """Return the value part of a key-value line whose key is Value."""
+
         return line.strip().replace("Value: ", "")
 
     @staticmethod
     def get_last_line(response):
         """Returns the last data line from a response. Ignores blank lines and
         the end command line."""
+
         return response.strip().split("\n")[-2]
 
     def authenticate(self):
         """Authenticate with a remote Asterisk server."""
+
         if self.sock:
             return True
 
@@ -54,10 +59,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not config:
             return False
 
-        self.sock = socket.create_connection((
-            config["asterisk:host"],
-            int(config["asterisk:port"])
-        ))
+        try:
+            self.sock = socket.create_connection((
+                config["asterisk:host"],
+                int(config["asterisk:port"])
+            ))
+        except ConnectionRefusedError:
+            return False
 
         self.send_command([
             "Action: login",
@@ -124,7 +132,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def get_caller_id(self, number):
         """Look up the callerid value for a number."""
 
-        self.authenticate()
+        if not self.authenticate():
+            return False
 
         self.send_command([
             "Action: Command",
@@ -134,10 +143,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         last_line = self.get_response(return_last=True)
 
         if not last_line:
-            return False
+            return None
 
         if "Database entry not found" in last_line:
-            return False
+            return None
 
         self.disconnect()
 
@@ -146,7 +155,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def set_caller_id(self, number, value):
         """Set the callerid value for a number."""
 
-        self.authenticate()
+        if not self.authenticate():
+            return False
 
         self.send_command([
             "Action: Command",
@@ -162,7 +172,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def blacklist(self, number):
         """Add a number to the Asterisk blacklist"""
 
-        self.authenticate()
+        if not self.authenticate():
+            return False
 
         self.send_command([
             "Action: Command",
@@ -179,7 +190,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def unblacklist(self, number):
         """Remove a number from the Asterisk blacklist."""
 
-        self.authenticate()
+        if not self.authenticate():
+            return False
 
         self.send_command([
             "Action: Command",
@@ -200,7 +212,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        self.authenticate()
+        if not self.authenticate():
+            return False
 
         self.send_command([
             "Action: Command",
