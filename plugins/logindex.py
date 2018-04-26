@@ -94,7 +94,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
-        self.bus.subscribe('logindex:precache', self.preCache)
 
     def stop(self):
         pass
@@ -286,7 +285,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         if unreversed_ips == 0:
-            cherrypy.engine.publish("scheduler:add", 1, "logindex:precache")
             return
 
         for record in records[1:]:
@@ -443,8 +441,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return len(records)
 
     @decorators.log_runtime
-    def query(self, q, for_precache=False):
-        parsed_query = cherrypy.engine.publish("parse:log_query", q).pop()
+    def query(self, query):
+        parsed_query = cherrypy.engine.publish(
+            "parse:log_query",
+            query
+        ).pop()
 
         sql = """SELECT unix_timestamp, logs.ip,
         host, uri, query as "query [querystring]",
@@ -456,12 +457,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY unix_timestamp DESC
         """.format(parsed_query)
 
-        if for_precache:
-            return self._selectToCache(sql, ())
-        else:
-            query_plan = self._explain(sql, ())
-            result = self._select(sql, (), cacheable=True)
-            return (result, query_plan)
+        query_plan = self._explain(sql, ())
+        result = self._select(sql, ())
+        return (result, query_plan)
 
     @decorators.log_runtime
     def query_reverse_ip(self, ips=()):
@@ -475,16 +473,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._select(sql, tuple(ips))
 
         return {row["ip"]: row["reverse_domain"] for row in result}
-
-    @decorators.log_runtime
-    def preCache(self):
-        saved_queries = cherrypy.engine.publish(
-            "registry:search",
-            "visitors*",
-            key_slice=1
-        ).pop()
-
-        self._dropCacheTables()
-
-        for query in saved_queries:
-            self.query(query["value"], for_precache=True)

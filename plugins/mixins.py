@@ -55,16 +55,9 @@ class Sqlite:
         con.close()
         return rows
 
-    def _select(self, query, values=(), cacheable=False):
+    def _select(self, query, values=()):
         con = self._open()
         con.row_factory = sqlite3.Row
-
-        if cacheable:
-            cache_table = self._cacheTable(query)
-            all_tables = self._tableNames()
-            if cache_table in all_tables:
-                query = "SELECT * FROM {}".format(cache_table)
-                values = ()
 
         with con:
             cur = con.cursor()
