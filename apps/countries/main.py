@@ -49,6 +49,10 @@ class Controller:
             alpha2 = code.get("ISO3166-1-Alpha-2")
 
             if name and alpha2:
+                # Convert some overly verbose names to shorter forms.
+                if name.startswith("United Kingdom of"):
+                    name = "United Kingdom"
+
                 key = self.registry_key.format(alpha2)
                 cherrypy.engine.publish("registry:add", key, (name,), True)
 
