@@ -157,10 +157,9 @@ class Controller:
                 query
             ).group(1)
 
-            active_date = pendulum.from_format(
+            active_date = pendulum.parse(
                 date_string,
-                '%Y-%m-%d',
-                timezone
+                tz=timezone
             )
 
         except AttributeError:
