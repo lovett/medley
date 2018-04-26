@@ -2,17 +2,17 @@
 import cherrypy
 import jinja2
 import http.client
-import pytz
 import os.path
 import urllib
 import os
 import json
-import time
+import re
 import pendulum
 from tzlocal import get_localzone
 from urllib.parse import quote
 from cherrypy.process import plugins
 from string import Template
+
 
 class Plugin(plugins.SimplePlugin):
     """A WSPBus plugin that manages Jinja2 templates"""
@@ -71,6 +71,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["escapejs"] = self.escapejs_filter
         self.env.filters["hostname_truncate"] = self.hostname_truncate_filter
         self.env.filters["logline_with_links"] = self.logline_with_links_filter
+        self.env.filters["slug"] = self.slug_filter
         self.env.filters["sane_callerid"] = self.sane_callerid_filter
 
         plugins.SimplePlugin.__init__(self, bus)
@@ -309,6 +310,11 @@ class Plugin(plugins.SimplePlugin):
         result = result.replace(record["ip"], link)
 
         return result
+
+    def slug_filter(self, value):
+        slug = value.lower()
+
+        return re.sub(r"\s+", "-", slug)
 
     def sane_callerid_filter(self, value, default="unknown caller"):
         """Prevent Google Voice callerid strings from being displayed.
