@@ -78,7 +78,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def callHistory(self, number, limit=50):
         query = """
-        SELECT calldate as "date [naive_date]",
+        SELECT calldate as "date [calldate_to_utc]",
         CASE LENGTH(src) WHEN 3 THEN "outgoing" else "incoming" END as direction,
         duration as "duration [duration]", clid as "clid [clid]"
         FROM cdr
@@ -87,6 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LIMIT ?
         """
 
-        params = (number, "%" + number, limit)
-
-        return self._select(query, params)
+        return self._select(
+            query,
+            (number, "%" + number, limit)
+        )

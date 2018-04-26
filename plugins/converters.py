@@ -3,10 +3,11 @@ import datetime
 import msgpack
 import pickle
 import pytz
-import pytz
 import re
 import sqlite3
 import urllib
+from tzlocal import get_localzone
+import pendulum
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     def __init__(self, bus):
@@ -16,6 +17,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         sqlite3.register_converter("datetime", self.datetime)
         sqlite3.register_converter("binary", self.binary)
         sqlite3.register_converter("naive_date", self.naiveDate)
+        sqlite3.register_converter("calldate_to_utc", self.calldate_to_utc)
         sqlite3.register_converter("duration", self.duration)
         sqlite3.register_converter("clid", self.callerid)
         sqlite3.register_converter("querystring", self.querystring)
@@ -35,6 +37,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def naiveDate(self, s):
         return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
+
+    def local_timezone(self):
+        tz = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:timezone",
+            memorize=True
+        ).pop()
+
+        if not tz:
+            tz = get_localzone()
+
+        return tz
+
+    def calldate_to_utc(self, s):
+        """Convert a local datetime string to a UTC Pendulum instance."""
+
+        local_tz = self.local_timezone()
+
+        return pendulum.from_format(
+            s.decode("utf-8"),
+            "YYYY-MM-DD HH:mm:ss",
+            tz=local_tz,
+            formatter='alternative'
+        ).in_timezone('utc')
 
     def duration(self, s):
         seconds = int(s)
