@@ -452,7 +452,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         region, city, latitude, longitude, cookie,
         referrer, referrer_domain, logline
         FROM logs
-        WHERE {}""".format(parsed_query)
+        WHERE {}
+        ORDER BY unix_timestamp DESC
+        """.format(parsed_query)
 
         if for_precache:
             return self._selectToCache(sql, ())
