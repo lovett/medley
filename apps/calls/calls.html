@@ -26,7 +26,7 @@
                             <div class="smaller">{{ call["date"]|localtime("time12")}}</div>
                         </td>
                         <td>
-                            {{ call["clid"] }}
+                            {{ call["clid"]|sane_callerid() }}
                             <div class="smaller">{{ call["src"]|phonenumber(as_link=True) }}</div>
                         </td>
                         <td>

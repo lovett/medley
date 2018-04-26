@@ -71,7 +71,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["escapejs"] = self.escapejs_filter
         self.env.filters["hostname_truncate"] = self.hostname_truncate_filter
         self.env.filters["logline_with_links"] = self.logline_with_links_filter
-        self.env.filters["slug"] = self.slug_filter
+        self.env.filters["sane_callerid"] = self.sane_callerid_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -294,7 +294,6 @@ class Plugin(plugins.SimplePlugin):
             ord('\u2029'): '\\u2029'
         })
 
-
     def hostname_truncate_filter(self, val, length=4):
         segments = val.split(".")[::-1]
         slice = segments[:length]
@@ -311,5 +310,14 @@ class Plugin(plugins.SimplePlugin):
 
         return result
 
-    def slug_filter(self, value):
+    def sane_callerid_filter(self, value, default="unknown caller"):
+        """Prevent Google Voice callerid strings from being displayed.
+
+        Example: +12223334444@voice.google.com/srvenc-randomstring/otherrandomstring/
+
+        """
+
+        if "@voice.google.com" in value:
+            return default
+
         return value
