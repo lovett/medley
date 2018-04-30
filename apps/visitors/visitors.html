@@ -133,13 +133,13 @@
                     <tr class="result code-{{ result.statusCode }}">
                         {% if new_ip %}
                         <td>
+                            {% if result.country not in flagless_countries %}
                             <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
+                            {% endif %}
 
                             <p>
                                 {% if result.city %}
-                                {{ result.city|default("", true) }}<br/>
-                                {% endif %}
-
+                                {{ result.city }}<br/>
                                 <span class="smaller">
                                     {% if result.country == "US" %}
                                     {{ result.region|default("", true) }}
@@ -147,8 +147,10 @@
                                     {{ country_names[result.country] }}
                                     {% endif %}
                                 </span>
+                                {% else %}
+                                {{ country_names[result.country]|default(result.country) }}
+                                {% endif %}
                             </p>
-
                         </td>
 
                         <td>

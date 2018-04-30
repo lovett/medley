@@ -62,8 +62,10 @@ class Controller:
             self
         ).pop()
 
+
         return {
             "html": ("visitors.html", {
+                "flagless_countries": ("AP",),
                 "query": query,
                 "query_plan": query_plan,
                 "reversed_ips": reversed_ips,
