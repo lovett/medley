@@ -44,12 +44,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
              [(key, value) for value in values]
         )
 
-    def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False, as_multivalue_dict=False, key_slice=None):
+    def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False, as_multivalue_dict=False, key_slice=0):
         params = []
 
         sql = "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE (1) "
 
-        if len(keys) > 0:
+        if keys:
             sql += "AND key IN ("
             sql += ", ".join("?" * len(keys))
             sql += ") "
@@ -86,14 +86,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._select(sql, params)
 
         if as_dict:
-            result = {row["key"]: row["value"] for row in result}
+            result = {
+                row["key"].split(":", key_slice).pop():
+                row["value"]
+                for row in result
+            }
 
         if as_multivalue_dict:
             d = defaultdict(list)
 
             for row in result:
                 k = row["key"]
-                if key_slice:
+                if key_slice > 0:
                     sliced_key = k.split(":")[key_slice:]
                     k = ":".join(sliced_key)
                 d[k].append(row["value"])
