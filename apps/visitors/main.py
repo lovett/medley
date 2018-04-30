@@ -48,14 +48,12 @@ class Controller:
 
         active_date = self.get_active_date(log_records, query)
 
-        countries = {record["country"] for record in log_records}
+        country_names = cherrypy.engine.publish(
+            "geography:country_by_abbreviation",
+            (record["country"] for record in log_records)
+        ).pop()
 
-        country_names = {
-            country: cherrypy.engine.publish(
-                "geography:country_by_abbreviation", country
-            ).pop()
-            for country in countries
-        }
+        print(country_names)
 
         annotations = self.get_annotations(log_records)
 

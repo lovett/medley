@@ -99,6 +99,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except:
             return (None, None)
 
-    def countryByAbbreviation(self, abbreviation):
-        key = "country_code:alpha2:{}".format(abbreviation)
-        return cherrypy.engine.publish("registry:first_value", key).pop()
+    def countryByAbbreviation(self, abbreviations=()):
+        keys = (
+            "country_code:alpha2:{}".format(abbreviation)
+            for abbreviation in abbreviations
+        )
+
+        return cherrypy.engine.publish(
+            "registry:search",
+            keys=tuple(keys),
+            as_dict=True,
+            key_slice=2
+        ).pop()
