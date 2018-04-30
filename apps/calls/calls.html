@@ -3,11 +3,9 @@
 {% block page_body %}
 <main>
     <div class="content-wrapper">
-        {% if calls|length == 0 %}
+        {% if not calls %}
         <p>No calls.</p>
-        {% endif %}
-
-        {% if calls|length > 0 %}
+        {% else %}
         <div class="table-wrapper">
             <table>
                 <thead>
