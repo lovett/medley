@@ -37,11 +37,9 @@ MEDLEY.phone = (function () {
                 'cid_value': cidValue.val()
             }
         }).done(function (data, status, xhr) {
-            if (xhr.status === 204) {
-                jQuery('#callerid-display-value').text(cidValue.val());
-                cidValue.val('');
-                hideCalleridForm();
-            }
+            jQuery('#callerid-display-value').text(cidValue.val());
+            cidValue.val('');
+            hideCalleridForm();
         }).fail(function (xhr) {
             form.find('.error.message').text(xhr.statusText).removeClass('hidden');
         });

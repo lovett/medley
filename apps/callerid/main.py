@@ -1,4 +1,4 @@
-"""Add entries to an Asterisk callerid database."""
+"""Add callerid entries to an Asterisk database."""
 
 import cherrypy
 
