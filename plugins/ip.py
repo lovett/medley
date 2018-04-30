@@ -1,35 +1,42 @@
-import cherrypy
-import ipaddress
+"""Look up geographic and network information for an IP address."""
+
 import os.path
-import pygeoip
 import socket
 from collections import defaultdict
-import re
+import cherrypy
+import pygeoip
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for looking up information about an IP address."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the ip prefix.
+        """
         self.bus.subscribe("ip:facts", self.facts)
         self.bus.subscribe("ip:reverse", self.reverse)
 
-    def stop(self):
-        pass
-
-    def facts(self, ip):
-        facts = defaultdict()
-
-        address = ipaddress.ip_address(ip)
+    @staticmethod
+    def facts(ip_address):
+        """Look up geographic information for an IP address."""
 
         annotations = cherrypy.engine.publish(
             "registry:search",
-            "ip:{}".format(ip)
+            "ip:{}".format(ip_address)
         ).pop()
 
+        facts = defaultdict()
+
         if annotations:
-            facts["annotations"] = [(a["value"], a["rowid"]) for a in annotations]
+            facts["annotations"] = [
+                (a["value"], a["rowid"])
+                for a in annotations
+            ]
 
         geodb_download_url = cherrypy.engine.publish(
             "registry:first_value",
@@ -45,7 +52,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             geodb_path = geodb_path[0:-3]
 
         geodb = pygeoip.GeoIP(geodb_path)
-        geodb_record = geodb.record_by_addr(ip) or {}
+        geodb_record = geodb.record_by_addr(ip_address) or {}
         facts["geo"] = geodb_record
 
         # Google charts
@@ -59,30 +66,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return facts
 
+    @staticmethod
+    def reverse(ip_address):
+        """Look up the reverse host and domain for an IP address.
 
-    def reverse(self, ip):
-        # Reverse host and domain
-        #
-        # These are treated as separate values because the reverse host
-        # may embed the IP (reversed or otherwise). The non-IP parts are
-        # the more interesting ones.
+        These are treated as separate values because the reverse host
+        may embed the IP (reversed or otherwise). The non-IP parts are
+        the more interesting ones.
+
+        """
 
         facts = defaultdict()
 
-        reverse_host = socket.getfqdn(ip)
+        reverse_host = socket.getfqdn(ip_address)
 
-        if reverse_host != ip:
+        if reverse_host != ip_address:
             # Reverse by IPv4 quads (12.34.56.78 becomes 78.56.34.21)
-            quads = ip.split(".")
+            quads = ip_address.split(".")
             reversed_ip = ".".join(quads[::-1])
             zero_filled_quads = tuple(map(lambda x: x.zfill(3), quads))
 
             ip_representations = {
-                ip,
-                ip.replace(".", ""),
-                ip.replace(".", "-"),
-                ip.replace(":", ""),
-                ip.replace(":", "-"),
+                ip_address,
+                ip_address.replace(".", ""),
+                ip_address.replace(".", "-"),
+                ip_address.replace(":", ""),
+                ip_address.replace(":", "-"),
                 reversed_ip,
                 reversed_ip.replace(".", ""),
                 reversed_ip.replace(".", "-"),
