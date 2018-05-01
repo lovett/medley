@@ -1,0 +1,12 @@
+{% import "macros.html" as macros -%}
+CACHE MANIFEST
+#rev {{ rev }}
+CACHE:
+{{ '/startpage/static/startpage.css'|cache_bust }}
+{{ '/startpage/static/startpage.js'|cache_bust }}
+{{ '/shared/static/css/normalize.css'|cache_bust }}
+{{ '/shared/static/css/medley.css'|cache_bust }}
+{{ '/shared/static/js/jquery-3.2.1.min.js'|cache_bust }}
+{{ '/shared/static/js/medley.js'|cache_bust }}
+{{ '/shared/static/js/focus-as-you-type.js'|cache_bust }}
+/shared/static/favicon/favicon.ico

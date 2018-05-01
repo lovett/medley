@@ -1,6 +1,6 @@
 {% import "macros.html" as macros -%}
 <!DOCTYPE html>
-<html>
+<html{% if appcache_manifest %} manifest="{{ appcache_manifest }}"{% endif %}>
     <head>
         <title>{{ app_name or "Medley" }}</title>
 

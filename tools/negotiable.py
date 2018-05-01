@@ -1,5 +1,5 @@
-import cherrypy
 import json
+import cherrypy
 
 class Tool(cherrypy.Tool):
     """Decide on a suitable format for the response
@@ -51,14 +51,18 @@ class Tool(cherrypy.Tool):
         candidates = list(self.renderers.keys())
         self.response_format = cherrypy.tools.accept.callable(candidates)
 
-
     def _finalize(self):
-        """Select the response body that matches the previously negotiated format"""
+        """Transform the response body provided by the controller to its final form."""
 
         if not isinstance(cherrypy.response.body, dict):
             return
 
-        renderer = self.renderers.get(self.response_format)
+        # If the body only provides one format, use it instead of
+        # the negotiated format.
+        if len(cherrypy.response.body) == 1:
+            renderer = "_render" + next(iter(cherrypy.response.body)).capitalize()
+        else:
+            renderer = self.renderers.get(self.response_format)
 
         final_body = getattr(self, renderer)(cherrypy.response.body)
 
@@ -82,6 +86,21 @@ class Tool(cherrypy.Tool):
         cherrypy.response.headers["Content-Type"] = "application/json"
 
         return json.JSONEncoder().encode(part) if part else None
+
+    def _renderManifest(self, body):
+        template_file, values = body.get("manifest", (None, None))
+
+        if not template_file:
+            return None
+
+        template = cherrypy.engine.publish("lookup-template", template_file).pop()
+
+        if not template:
+            return None
+
+        cherrypy.response.headers["Content-Type"] = "text/cache-manifest"
+
+        return template.render(**values)
 
     def _renderText(self, body):
         part = body.get("text")

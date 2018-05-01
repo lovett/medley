@@ -57,6 +57,19 @@ class Controller:
             })
         }
 
+    def render_appcache_manifest(self, page_name, page_record):
+        """Render an Appcache Manifest for the specified page."""
+
+        cherrypy.response.headers["content-type"] = "text/cache-manifest"
+
+        timestamp = page_record["created"].timestamp()
+
+        return {
+            "manifest": ("startpage.manifest", {
+                "rev": timestamp,
+            })
+        }
+
     def render_page(self, page_name, page_record):
         """Render INI page content to HTML."""
 
@@ -92,6 +105,12 @@ class Controller:
             {"action": "edit"}
         ).pop()
 
+        manifest_url = cherrypy.engine.publish(
+            "url:for_controller",
+            self,
+            page_name + "/manifest",
+        ).pop()
+
         return {
             "etag_key": page_name,
             "html": ("startpage.html", {
@@ -100,6 +119,7 @@ class Controller:
                 "anonymizer_url": anonymizer_url,
                 "edit_url": edit_url,
                 "page": page,
+                "appcache_manifest": manifest_url,
             })
         }
 
@@ -119,6 +139,10 @@ class Controller:
             return self.edit_page(page_name, None)
 
         page = record[0]
+
+        # Serve an appcache manifest
+        if cherrypy.request.path_info.endswith("manifest"):
+            return self.render_appcache_manifest(page_name, page)
 
         # Display the edit form when explicitly requested.
         if action == "edit":

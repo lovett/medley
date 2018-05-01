@@ -35,8 +35,6 @@
 {% block page_body %}
 
 <main>
-    <a id="appcache-message" href="{{ page_url }}">Update available at next reload.</a>
-
     <div class="content-wrapper">
         {% for section in page.sections() if not section.startswith("-") %}
         <section id="{{ section|slug }}">
@@ -86,6 +84,11 @@
                 <li>
                     <a href="{{ edit_url }}">Edit page</a>
                 </li>
+
+                <li id="appcache-message">
+                    <a href="{{ page_url }}">Update available</a>
+                </li>
+
                 <li class="focus-buffer-display"></li>
             </ul>
         </section>
