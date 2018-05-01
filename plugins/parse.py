@@ -333,6 +333,8 @@ class Plugin(plugins.SimplePlugin):
                 fields["latitude"], fields["longitude"] = value.split(",")
                 continue
 
+            fields[key] = value
+
         del fields["extras"]
         return fields
 
