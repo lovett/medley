@@ -16,7 +16,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self):
         sqlite3.register_converter("datetime", self.datetime)
         sqlite3.register_converter("binary", self.binary)
-        sqlite3.register_converter("naive_date", self.naiveDate)
         sqlite3.register_converter("calldate_to_utc", self.calldate_to_utc)
         sqlite3.register_converter("duration", self.duration)
         sqlite3.register_converter("clid", self.callerid)
@@ -34,9 +33,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             last_colon_index = s.rindex(":")
             date = s[:last_colon_index] + s[last_colon_index + 1:]
             return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S%z")
-
-    def naiveDate(self, s):
-        return datetime.datetime.strptime(s.decode("utf-8"), "%Y-%m-%d %H:%M:%S")
 
     def local_timezone(self):
         tz = cherrypy.engine.publish(
