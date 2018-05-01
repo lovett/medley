@@ -1,4 +1,4 @@
-"""Add and remove entries from the Asterisk blacklist database."""
+"""Manage blacklisted numbers in an Asterisk database."""
 
 import cherrypy
 

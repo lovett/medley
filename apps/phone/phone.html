@@ -67,9 +67,12 @@
                 <input type="hidden" name="number" value="{{ number|default('') }}" />
                 <input type="hidden" name="action" value="remove" />
 
-                <div class="hidden error message">asdf</div>
+                <div class="hidden error message"></div>
 
-                <p class="blacklisted">Blacklisted on <span id="blacklist-date">{{ blacklisted|localtime("date-full") }}</span></p>
+                <p class="blacklisted">
+                    Blacklisted
+                    <span id="blacklist-date">on {{ blacklisted|localtime("date-full") }}</span>
+                </p>
 
                 <button class="small">Remove</button>
             </form>
