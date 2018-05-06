@@ -85,6 +85,7 @@ class Plugin(plugins.SimplePlugin):
         auth = kwargs.get("auth")
         headers = kwargs.get("headers")
         params = kwargs.get("params")
+        unpack_command = kwargs.get("unpack_command")
 
         request_headers = {
             "User-Agent": "python",
@@ -124,10 +125,23 @@ class Plugin(plugins.SimplePlugin):
         with open(local_path, "wb") as db_file:
             shutil.copyfileobj(req.raw, db_file)
 
-        # Unpack the downloaded file
-        if local_path.endswith(".gz"):
+        if not unpack_command:
+            # Default commands for unpacking. They should contain
+            # everything but the file path to be unpacked.
+            if local_path.endswith(".tar.gz"):
+                unpack_command = (
+                    "tar", "-C", destination,
+                    "-x", "-z", "-f"
+                )
+            elif local_path.endswith(".gz"):
+                unpack_command = ("gunzip", "-f")
+
+        if unpack_command:
+            # Add the target file to the unpack command.
+            unpack_command_with_local_path = unpack_command + (local_path,)
+
             try:
-                subprocess.check_call(["gunzip", "-f", local_path])
+                subprocess.check_call(unpack_command_with_local_path)
                 cherrypy.engine.publish(
                     "applog:add",
                     "urlfetch",
@@ -141,6 +155,7 @@ class Plugin(plugins.SimplePlugin):
                     "get_file",
                     "Failed to gunzip"
                 )
+            finally:
                 os.unlink(local_path)
 
     @staticmethod

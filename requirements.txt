@@ -1,9 +1,9 @@
 CherryPy==14.2.0
 Jinja2==2.10
+geoip2==2.8.0
 httplib2==0.11.3
 msgpack-python==0.5.6
 pendulum==1.5.1
-pygeoip==0.3.2
 pyparsing==2.2.0
 pytz==2018.4
 pytzdata==2018.4

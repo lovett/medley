@@ -25,7 +25,13 @@ class Controller:
             5,
             "urlfetch:get_file",
             download_url,
-            destination
+            destination,
+            unpack_command=(
+                "tar", "-C", destination,
+                "--strip-components=1",
+                "-x", "-z", "-f"
+            )
+
         )
 
         cherrypy.response.status = 204

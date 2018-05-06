@@ -4,7 +4,7 @@ import os.path
 import socket
 from collections import defaultdict
 import cherrypy
-import pygeoip
+import geoip2.database
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -38,26 +38,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 for a in annotations
             ]
 
-        geodb_download_url = cherrypy.engine.publish(
-            "registry:first_value",
-            "geodb:url"
-        ).pop()
-
         geodb_path = os.path.join(
             cherrypy.config.get("database_dir"),
-            os.path.basename(geodb_download_url)
+            "GeoLite2-City.mmdb"
         )
 
-        if geodb_path.endswith(".gz"):
-            geodb_path = geodb_path[0:-3]
+        geodb = geoip2.database.Reader(geodb_path)
 
-        geodb = pygeoip.GeoIP(geodb_path)
-        geodb_record = geodb.record_by_addr(ip_address) or {}
-        facts["geo"] = geodb_record
+        facts["geo"] = geodb.city(ip_address) or {}
 
         # Google charts
-        map_region = geodb_record.get("country_code", "")
-        region_code = geodb_record.get("region_code", "")
+        map_region = facts["geo"].get("country_code", "")
+        region_code = facts["geo"].get("region_code", "")
         if map_region == "US" and region_code:
             facts["map_region"] = "{}-{}".format(
                 map_region,
