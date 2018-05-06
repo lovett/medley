@@ -39,29 +39,33 @@ class Controller:
             query
         ).pop() or []
 
-        reversed_ips = cherrypy.engine.publish(
-            "logindex:query:reverse_ip",
-            {record["ip"] for record in log_records}
-        ).pop() or {}
+        if not log_records:
+            reversed_ips = None
+            deltas = None
+            active_date = None
+            country_names = None
+            annotations = None
+        else:
+            reversed_ips = cherrypy.engine.publish(
+                "logindex:query:reverse_ip",
+                {record["ip"] for record in log_records}
+            ).pop() or {}
 
-        deltas = self.get_deltas(log_records)
+            deltas = self.get_deltas(log_records)
 
-        active_date = self.get_active_date(log_records, query)
+            active_date = self.get_active_date(log_records, query)
 
-        country_names = cherrypy.engine.publish(
-            "geography:country_by_abbreviation",
-            (record["country"] for record in log_records)
-        ).pop()
+            country_names = cherrypy.engine.publish(
+                "geography:country_by_abbreviation",
+                (record["country"] for record in log_records)
+            ).pop()
 
-        print(country_names)
-
-        annotations = self.get_annotations(log_records)
+            annotations = self.get_annotations(log_records)
 
         app_url = cherrypy.engine.publish(
             "url:for_controller",
             self
         ).pop()
-
 
         return {
             "html": ("visitors.html", {
