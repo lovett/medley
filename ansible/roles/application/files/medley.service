@@ -3,6 +3,9 @@ Description=Medley
 
 After=network.target
 
+# Keep trying to restart forever, do not rate limit.
+StartLimitIntervalSec=0
+
 [Service]
 WorkingDirectory=/srv/medley
 
@@ -13,13 +16,11 @@ Type=forking
 PIDFile=/var/run/medley.pid
 
 # Try to restart automatically in case of trouble.
-Restart=always
+Restart=on-abnormal
 
 # How long to wait before attempting a restart. Defaults to 100ms.
-RestartSec=3
+RestartSec=1m
 
-# Keep trying to restart forever, do not rate limit.
-StartLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target
