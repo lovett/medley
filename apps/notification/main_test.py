@@ -49,13 +49,23 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             json_body=fixture
         )
 
-        self.assertEqual(response.code, 204)
+        self.assertEqual(response.code, 202)
 
-    def test_reminder(self):
-        """Reminders are ignored"""
+    @mock.patch("cherrypy.engine.publish")
+    def test_skip(self, publish_mock):
+        """Reminders in skipped groups are ignored"""
+
         fixture = {
             "group": "reminder",
         }
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args == ("registry:search", "notification:skip:group"):
+                return ["reminder"]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -63,13 +73,22 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             json_body=fixture
         )
 
-        self.assertEqual(response.code, 204)
+        self.assertEqual(response.code, 202)
 
-    def test_no_title(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_no_title(self, publish_mock):
         """Notifications without a title are ignored"""
         fixture = {
             "group": "test",
         }
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args == ("registry:search", "notification:skip:group"):
+                return [[]]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
