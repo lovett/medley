@@ -168,32 +168,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippable_no_status(self, publish_mock):
-        """Skip logic handles absence of status value gracefully"""
-
-        payload_fixture = self.get_fixture("plugin", "started", "success")
-        payload_fixture["status"] = None
-
-        publish_mock.side_effect = self.default_side_effect_callback
-
-        skippable = self.controller.payload_is_skippable(payload_fixture)
-
-        self.assertFalse(skippable)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_skippable_no_phase(self, publish_mock):
-        """Skip logic handles absence of phase value gracefully"""
-
-        payload_fixture = self.get_fixture("plugin", "started", "success")
-        payload_fixture["phase"] = None
-
-        publish_mock.side_effect = self.default_side_effect_callback
-
-        skippable = self.controller.payload_is_skippable(payload_fixture)
-
-        self.assertFalse(skippable)
-
-    @mock.patch("cherrypy.engine.publish")
     def test_skippable_but_not_on_fail(self, publish_mock):
         """Failure status supersedes skip logic"""
 

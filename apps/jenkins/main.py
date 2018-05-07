@@ -22,6 +22,7 @@ post-processing them."
 
 """
 
+from collections import defaultdict
 import cherrypy
 
 
@@ -41,7 +42,7 @@ class Controller:
 
         payload = self.normalize_payload(cherrypy.request.json)
 
-        if self.payload_is_skippable(payload):
+        if payload["send_notification"] is False:
             cherrypy.response.status = 202
             return
 
@@ -53,38 +54,20 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def payload_is_skippable(payload):
-        """Should the payload produce a notification?"""
-
-        status = payload.get("status") or ""
-        phase = payload.get("phase") or ""
-
-        if status.lower() == "failure":
-            return False
-
-        if phase.lower() == "completed":
-            return True
-
-        skips = cherrypy.engine.publish(
-            "registry:search",
-            "jenkins:skip",
-            as_value_list=True
-        ).pop()
-
-        return payload.get("name") in skips
-
-    @staticmethod
     def build_notification(payload):
         """
         Transform a normalized Jenkins payload into a notification.
         """
 
-        phase = payload["phase"].lower()
-        status = payload["status"].lower()
+        phase = payload["phase"]
+        status = payload["status"]
         name = payload.get("name")
         group = "sysup"
         action = payload.get("action")
         url = None
+
+        if phase == "queued":
+            title = "Jenkins has queued {}".format(name)
 
         if phase == "started":
             title = "Jenkins is {} {}".format(action, name)
@@ -111,31 +94,67 @@ class Controller:
         }
 
     @staticmethod
-    def normalize_payload(payload):
-        """Reshape an incoming payload to a simpler, flatter structure"""
+    def normalize_payload(raw_payload):
+        """Reshape an incoming payload to a flatter structure."""
 
-        result = {}
+        def empty_string():
+            """Initial value for defaultdict default_factory."""
+            return ""
 
-        build = payload.get("build", {})
-        scm = build.get("scm", {})
+        build = defaultdict(
+            empty_string,
+            raw_payload.get("build", ())
+        )
 
-        result["name"] = payload.get("name")
-        result["build_number"] = build.get("number")
-        result["phase"] = build.get("phase")
-        result["status"] = build.get("status")
-        result["branch"] = scm.get("branch", "").split("/", 1).pop()
-        result["commit"] = scm.get("commit")
-        result["repository_url"] = scm.get("url")
+        scm = defaultdict(
+            empty_string,
+            build.get("scm", ())
+        )
 
-        result["jenkins_url"] = build.get("full_url", "") + "console"
+        result = defaultdict(empty_string)
+
+        result["name"] = raw_payload.get("name").lower()
+        result["build_number"] = build["number"]
+        result["phase"] = build["phase"].lower()
+        result["status"] = build["status"].lower()
+        result["branch"] = scm["branch"].split("/", 1).pop()
+        result["commit"] = scm["commit"]
+        result["repository_url"] = scm["url"]
+
+        result["jenkins_url"] = build["full_url"].rstrip("/") + "/console"
 
         result["site_url"] = cherrypy.engine.publish(
             "registry:first_value",
             "site_url:{}:{}".format(result["name"], result["branch"])
         ).pop()
 
-        result["action"] = "building"
         if "mirror" in build.get("full_url").lower():
             result["action"] = "mirroring"
+        else:
+            result["action"] = "building"
+
+        result["send_notification"] = True
+
+        # Don't notify about queued builds. Wait for started phase instead.
+        if result["phase"] == "queued":
+            result["send_notification"] = False
+
+        # Don't notify if the build is considered skippable.
+        skippable_builds = cherrypy.engine.publish(
+            "registry:search",
+            "jenkins:skip",
+            as_value_list=True
+        ).pop()
+
+        if result["name"] in skippable_builds:
+            result["send_notification"] = False
+
+        # Don't notify about completed builds. Wait for finalized instead.
+        if result["phase"] == "completed":
+            result["send_notification"] = False
+
+        # Build failure overrides takes precedence over everything else.
+        if result["status"] == "failure":
+            result["send_notification"] = True
 
         return result

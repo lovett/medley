@@ -1,0 +1,53 @@
+POST http://127.0.0.1:8085/jenkins
+Content-Type: application/json
+
+{
+  "build": {
+    "artifacts": {},
+    "full_url": "http://example.com/job/example/123/",
+    "log": "",
+    "number": 68,
+    "phase": "QUEUED",
+    "queue_id": 155,
+    "scm": {
+      "branch": "origin/master",
+      "changes": [],
+      "commit": "abc123",
+      "culprits": []
+    },
+    "timestamp": 1525656472964,
+    "url": "job/example/123/"
+  },
+  "display_name": "test",
+  "name": "test",
+  "url": "job/example/123/"
+}
+
+#
+
+POST http://127.0.0.1:8085/jenkins
+Content-Type: application/json
+
+{
+  "build": {
+    "artifacts": {},
+    "full_url": "http://example.com/job/example/123/",
+    "log": "",
+    "number": 68,
+    "phase": "STARTED",
+    "queue_id": 155,
+    "scm": {
+      "branch": "origin/master",
+      "changes": [],
+      "commit": "abc123",
+      "culprits": []
+    },
+    "timestamp": 1525656472974,
+    "url": "job/example/123/"
+  },
+  "display_name": "test",
+  "name": "test",
+  "url": "job/example/123/"
+}
+
+#
