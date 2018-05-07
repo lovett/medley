@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for Medley geodb app
+
+[Timer]
+# Second Saturday of the month at 1 AM
+OnCalendar=Sat *-*-8..14 01:00:00
+
+[Install]
+WantedBy=timers.target

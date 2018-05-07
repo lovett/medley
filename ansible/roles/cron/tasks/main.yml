@@ -15,17 +15,6 @@
     user="{{ project_user }}"
     state="absent"
 
-- name: Update geodb database
-  become: true
-  cron:
-    cron_file="{{ project_name }}"
-    name="geodb_update"
-    minute="3"
-    hour="8"
-    day="10"
-    job="curl -k --fail --silent --show-error 'https://localhost/geodb/download'"
-    user="{{ project_user }}"
-
 - name: Check external ip
   become: true
   cron:

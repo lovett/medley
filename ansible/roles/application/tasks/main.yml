@@ -92,13 +92,28 @@
     chdir: "{{ project_root }}"
   when: global_config_check.stat.exists == False
 
-- name: Install medley systemd unit file
+- name: Install medley systemd service files
   become: true
   copy: src={{ item }} dest=/etc/systemd/system/
   with_items:
     - files/medley.service
-  notify: reload systemd
+    - files/medley-geodb.service
+    - files/medley-geodb.timer
 
-- name: Start medley systemd service
+- name: Enable medley systemd service
   become: true
-  command: systemctl restart medley.service
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    name: medley
+    state: restarted
+
+- name: Enable medley geodb timer
+  become: true
+  systemd:
+    daemon_reload: yes
+    enabled: yes
+    masked: no
+    name: medley-geodb.timer
+    state: started
