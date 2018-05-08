@@ -43,17 +43,46 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "GeoLite2-City.mmdb"
         )
 
-        geodb = geoip2.database.Reader(geodb_path)
+        reader = geoip2.database.Reader(geodb_path)
 
-        facts["geo"] = geodb.city(ip_address) or {}
+        result = reader.city(ip_address)
+
+        facts["geo"] = defaultdict(lambda: None)
+
+        try:
+            facts["geo"]["city"] = result.city.name
+        except (AttributeError, geoip2.errors.AddressNotFoundError):
+            pass
+
+        try:
+            facts["geo"]["country_code"] = result.country.iso_code
+        except (AttributeError, geoip2.errors.AddressNotFoundError):
+            pass
+
+        try:
+            facts["geo"]["country_name"] = result.country.name
+        except (AttributeError, geoip2.errors.AddressNotFoundError):
+            pass
+
+        try:
+            subdivision = result.subdivisions.most_specific
+            facts["geo"]["region_code"] = subdivision.iso_code
+        except (AttributeError, geoip2.errors.AddressNotFoundError):
+            pass
+
+        try:
+            location = result.location
+            facts["geo"]["latitude"] = location.latitude
+            facts["geo"]["longitude"] = location.longitude
+            facts["geo"]["metro_code"] = location.metro_code
+        except (AttributeError, geoip2.errors.AddressNotFoundError):
+            pass
 
         # Google charts
-        map_region = facts["geo"].get("country_code", "")
-        region_code = facts["geo"].get("region_code", "")
-        if map_region == "US" and region_code:
-            facts["map_region"] = "{}-{}".format(
-                map_region,
-                region_code
+        if facts["geo"]["country_code"] == "US" and facts["geo"]["region_code"]:
+            facts["geo"]["map_region"] = "{}-{}".format(
+                facts["geo"]["country_code"],
+                facts["geo"]["region_code"]
             )
 
         return facts

@@ -61,7 +61,14 @@ class Controller:
             if whois:
                 cherrypy.engine.publish("cache:set", whois_cache_key, whois)
 
-        facts = cherrypy.engine.publish("ip:facts", ip_address).pop()
+        facts_cache_key = "ipfacts:{}".format(ip_address)
+        facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
+
+        if not facts:
+            facts = cherrypy.engine.publish("ip:facts", ip_address).pop()
+
+            if facts:
+                cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
         return {
             "html": ("whois.html", {

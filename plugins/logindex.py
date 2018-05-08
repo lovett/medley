@@ -365,13 +365,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 ip_facts = cherrypy.engine.publish("ip:facts", ip).pop()
                 ip_facts_cache[ip] = ip_facts
 
-            geo = ip_facts.get("geo", {})
+            geo = ip_facts["geo"]
 
-            fields["country"] = fields.get("country", geo.get("country_code"))
-            fields["region"] = fields.get("region", geo.get("region_code"))
-            fields["city"] = fields.get("city", geo.get("city"))
-            fields["latitude"] = fields.get("latitude", geo.get("latitude"))
-            fields["longitude"] = fields.get("latitude", geo.get("longitude"))
+            fields["country"] = fields.get("country", geo["country_code"])
+            fields["region"] = fields.get("region", geo["region_code"])
+            fields["city"] = fields.get("city", geo["city"])
+            fields["latitude"] = fields.get("latitude", geo["latitude"])
+            fields["longitude"] = fields.get("latitude", geo["longitude"])
 
             agent = fields.get("agent", "")
             if agent in agent_cache:
