@@ -19,7 +19,7 @@ remote = cherrypy.lib.httputil.Host('127.0.0.1', 50001, "")
 __all__ = ['BaseCherryPyTestCase']
 
 class BaseCherryPyTestCase(unittest.TestCase):
-    def request(self, path='/', method='GET', app_path='',
+    def request(self, request_path='/', method='GET', app_path='',
                 scheme='http', proto='HTTP/1.1', data=None,
                 headers={}, as_json=False, as_text=False,
                 json_body={}, **kwargs):
@@ -89,7 +89,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         request, response = app.get_serving(local, remote, scheme, proto)
         try:
             header_tuples = [(k, v) for k, v in h.items()]
-            response = request.run(method, path, qs, proto, header_tuples, fd)
+            response = request.run(method, request_path, qs, proto, header_tuples, fd)
         finally:
             if fd:
                 fd.close()

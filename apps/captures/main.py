@@ -9,21 +9,38 @@ class Controller:
     name = "Captures"
 
     @cherrypy.tools.negotiable()
-    def GET(self, query=None):
-        """Display a list of recent captures, or captures matching a search
-        query.
-
+    def GET(self, path=None, cid=None, offset=0):
+        """Display a list of recent captures, or captures matching a URI path.
         """
 
-        if query:
-            captures = cherrypy.engine.publish("capture:search", query).pop()
+        if cid:
+            captures = cherrypy.engine.publish(
+                "capture:get",
+                int(cid)
+            ).pop()
+            older_offset = None
+            newer_offset = None
         else:
-            captures = cherrypy.engine.publish("capture:recent").pop()
+            total, captures = cherrypy.engine.publish(
+                "capture:search",
+                path,
+                offset
+            ).pop()
+
+            older_offset = len(captures) + offset
+            if older_offset >= total:
+                older_offset = None
+
+            newer_offset = offset - len(captures)
+            if newer_offset <= 0:
+                newer_offset = None
 
         return {
             "html": ("captures.html", {
-                "query": query,
+                "path": path,
                 "captures": captures,
+                "newer_offset": newer_offset,
+                "older_offset": older_offset,
                 "app_name": self.name
             })
         }

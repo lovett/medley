@@ -9,6 +9,15 @@
     padding: .5em 1em;
 }
 
+.capture HEADER A {
+    float: right;
+}
+
+.capture HEADER svg {
+    fill: #fff;
+}
+
+
 .capture .half-column {
     padding: 1em 1em 0 1em;
 }

@@ -33,35 +33,20 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_recent(self, publish_mock, render_mock):
-        """The default view is a list of recent captures"""
-
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "capture:recent":
-                return [[{}, {}, {}]]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/")
-
-        self.assertEqual(len(helpers.html_var(render_mock, "captures")), 3)
-
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
-    @mock.patch("cherrypy.engine.publish")
-    def test_search(self, publish_mock, render_mock):
-        """Captures can be searched"""
+    def test_search_by_path(self, publish_mock, render_mock):
+        """Captures can be searched by path"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "capture:search":
-                return [[{}]]
+                return [(1, [{}])]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", query="test")
+        self.request("/", path="test")
+
+        print(render_mock.call_args_list)
 
         self.assertEqual(len(helpers.html_var(render_mock, "captures")), 1)
 
