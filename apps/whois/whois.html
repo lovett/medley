@@ -40,8 +40,6 @@
         <div class="half-column">
 
             <div class="module">
-                <h1>Details</h1>
-
                 <dl>
                     {% if "customerRef" in whois.net %}
                     <dt>Owned By</dt>
@@ -103,7 +101,6 @@
     <div class="half-column">
         <div class="module">
             {% if ip_facts.geo.map_region %}
-            <h1>Location</h1>
             <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ ip_facts.geo.map_region }}"></div>
             {% endif %}
         </div>
