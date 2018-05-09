@@ -62,10 +62,19 @@ class Controller:
                 cherrypy.engine.publish("cache:set", whois_cache_key, whois)
 
         facts_cache_key = "ipfacts:{}".format(ip_address)
-        facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
+
+        #facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
+        facts = None
 
         if not facts:
             facts = cherrypy.engine.publish("ip:facts", ip_address).pop()
+
+            reverse_ip = cherrypy.engine.publish(
+                "ip:reverse",
+                ip_address
+            ).pop()
+
+            facts.update(reverse_ip)
 
             if facts:
                 cherrypy.engine.publish("cache:set", facts_cache_key, facts)
