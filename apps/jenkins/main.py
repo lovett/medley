@@ -64,7 +64,7 @@ class Controller:
         name = payload.get("name")
         group = "sysup"
         action = payload.get("action")
-        url = None
+        url = payload.get("jenkins_url")
 
         if phase == "queued":
             title = "Jenkins has queued {}".format(name)
@@ -78,7 +78,6 @@ class Controller:
 
         if status == "failure":
             title = "Jenkins had trouble {} {}".format(action, name)
-            url = payload.get("jenkins_url")
             group = "sysdown"
 
         return {
