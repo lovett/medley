@@ -353,5 +353,21 @@ class Plugin(plugins.SimplePlugin):
 
         result = self.logquery_grammar.parseString(val).asList()
 
+        # Force usage of the datestamp index.
+        #
+        # A query with multiple criteria might otherwise be mis-optimized
+        # by sqlite and use an index that is less performant. Prefixing columns
+        # with "+" prevents the term from influencing index choice.
+        #
+        # In the majority of cases, queries will be date-limited and
+        # the datestamp index is the better choice.
+        #
+        # see https://www.sqlite.org/optoverview.html
+        if any(("datestamp" for item in result)):
+            result = tuple(
+                item.replace("(", "(+") if "datestamp" not in item else item
+                for item in result
+            )
+
         sql = " AND ".join(result)
         return sql
