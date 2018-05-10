@@ -1,8 +1,11 @@
+"""Capture log messages to an Sqlite database."""
+
 import cherrypy
 from . import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
+    """A CherryPy plugin for storing application-centric log messages."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -20,12 +23,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the applog prefix.
+        """
         self.bus.subscribe("applog:add", self.add)
 
-    def stop(self):
-        pass
-
     def add(self, caller, key, value):
+        """Accept a log message for storage."""
+
         try:
             source = caller.__module__
         except AttributeError:
@@ -36,7 +42,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             [(source, key, value)]
         )
 
-        # Also write a message to the application log for convenience.
+        # Mirror the log message on the cherrypy log for convenience.
         cherrypy.log("{}: {}".format(
             source,
             value
