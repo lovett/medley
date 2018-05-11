@@ -1,24 +1,30 @@
+"""Play audio files
+
+see https://github.com/hamiltron/py-simple-audio
+"""
+
 import cherrypy
-import simpleaudio as sa
 from cherrypy.process import plugins
+import simpleaudio as sa
+
 
 class Plugin(plugins.SimplePlugin):
-    """
-    Play audio files
-
-    https://github.com/hamiltron/py-simple-audio
-    """
+    """A CherryPy plugin for audio playback."""
 
     def __init__(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the audio prefix.
+        """
         self.bus.subscribe('audio:wav:play', self.play)
 
-    def stop(self):
-        pass
+    @staticmethod
+    def play(path):
+        """Play a file. So far only WAVE is supported."""
 
-    def play(self, path):
         cherrypy.engine.publish(
             "applog:add",
             "audio",
