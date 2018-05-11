@@ -363,7 +363,8 @@ class Plugin(plugins.SimplePlugin):
         # the datestamp index is the better choice.
         #
         # see https://www.sqlite.org/optoverview.html
-        if any(("datestamp" for item in result)):
+
+        if any(("datestamp" in item for item in result)):
             result = tuple(
                 item.replace("(", "(+") if "datestamp" not in item else item
                 for item in result
