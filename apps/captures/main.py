@@ -13,6 +13,8 @@ class Controller:
         """Display a list of recent captures, or captures matching a URI path.
         """
 
+        offset = int(offset)
+
         if cid:
             captures = cherrypy.engine.publish(
                 "capture:get",
@@ -28,6 +30,7 @@ class Controller:
             ).pop()
 
             older_offset = len(captures) + offset
+
             if older_offset >= total:
                 older_offset = None
 

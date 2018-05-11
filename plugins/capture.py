@@ -65,7 +65,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
-    def search(self, path=None, offset=0, limit=20):
+    def search(self, path=None, offset=0, limit=10):
         if path:
             search_clause = "AND request_uri=?"
             placeholders = (path, path, limit, offset)
@@ -73,28 +73,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             search_clause = ""
             placeholders = (limit, offset)
 
-        # Annoyingly, the count query must use the same converters
-        # as the main query in spite of the null values.
-        sql = """SELECT 0 as rowid, count(*) as request_line,
-        null as 'request [binary]',
-        null as 'response [binary]', null as 'created [datetime]'
-        FROM captures WHERE 1=1 {search_clause}
-        UNION
-        SELECT rowid, request_line, request as 'request [binary]',
+        sql = """SELECT rowid, request_line,
+        request as 'request [binary]',
         response as 'response [binary]',
-        created as 'created [datetime]'
+        created as 'created [datetime]',
+        (SELECT count(*) FROM captures WHERE 1=1 {search_clause})
+        as total
         FROM captures
         WHERE 1=1 {search_clause}
-        ORDER BY rowid DESC
+        ORDER BY created DESC
         LIMIT ? OFFSET ?""".format(search_clause=search_clause)
 
         result = self._select(sql, placeholders)
 
-        # Because the query is ordered by rowid, the row with the
-        # count is last.
-        count = result[-1]["request_line"]
+        if result:
+            count = result[0]["total"]
+        else:
+            count = 0
 
-        return (count, result[0:-1])
+        return (count, result)
 
     def get(self, capture_id):
         sql = """SELECT rowid, request_line, request as 'request [binary]',
