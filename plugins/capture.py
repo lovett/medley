@@ -81,7 +81,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         as total
         FROM captures
         WHERE 1=1 {search_clause}
-        ORDER BY created DESC
+        ORDER BY rowid DESC
         LIMIT ? OFFSET ?""".format(search_clause=search_clause)
 
         result = self._select(sql, placeholders)

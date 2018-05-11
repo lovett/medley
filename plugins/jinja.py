@@ -134,7 +134,7 @@ class Plugin(plugins.SimplePlugin):
         elif format == "time12_short":
             directives = "%I:%M %p"
         elif format == "datetime12":
-            directives = "%A %b %d, %Y %I:%M %p"
+            directives = "%A %b %d, %Y %I:%M:%S %p"
         else:
             directives = format
 
