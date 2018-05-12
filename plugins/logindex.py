@@ -465,7 +465,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("scheduler:add", 1, "logindex:parse")
 
-    @decorators.log_runtime
     def insert_line(self, records):
         """Write a batch of log lines to the database.
 
