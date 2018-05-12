@@ -71,6 +71,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON logs(city);
         CREATE INDEX IF NOT EXISTS index_cookie
             ON logs(cookie);
+        CREATE INDEX IF NOT EXISTS index_source_file
+            ON logs(source_file);
 
         CREATE TABLE IF NOT EXISTS reverse_ip (
             ip,
@@ -129,22 +131,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def last_known_offset(self, path):
-        """Determine the byte offset of the last indexed log line."""
+        """Figure out the last known position within a log file.
 
-        sql = """SELECT source_offset FROM logs WHERE source_file=?
-                  ORDER BY source_offset DESC LIMIT 1"""
+        Tracking the byte offset of each line within a file makes it
+        possible to skip over previously-processed lines. Always
+        starting from the beginning would take longer and longer as the
+        size of the log file grew, and waste time."""
 
         source = self.file_path_to_source(path)
 
         row = self._selectOne(
-            sql,
+            """SELECT COALESCE(MAX(source_offset), 0) as offset
+            FROM logs
+            WHERE source_file=?""",
             (source,)
         )
 
-        if row:
-            return row["source_offset"]
-
-        return 0
+        return row["offset"]
 
     def file_for_date(self, log_date):
         """The filesystem path of the log file for the given date"""
@@ -170,7 +173,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def enqueue(self, start_date, end_date):
-        """Add log lines to the database for later parsing"""
+        """Schedule logfile processing.
+
+        This is the start of the indexing process. The time period
+        described by start_date and end_date determines how many days
+        of logs will be processed.
+
+        Other than scheduling work to occur in the future, not much
+        happens here. The main goal is to prevent unnecessary work
+        by allowing the same time period to be submitted multiple times.
+
+        """
 
         period = pendulum.period(start_date, end_date)
 
@@ -200,8 +213,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def process_queue(self):
         """Trigger log file ingestion and parsing.
 
-        This is the initial phase of work where new log entries
-        are ingested. When that is done, the stage is parsing."""
+        The first stage of processing, where queued time periods are
+        matched with the relevant log files on the local
+        filesystem and individual lines are ingested into the database.
+
+        Once ingestion is complete, the next stage is parsing.
+
+        """
 
         try:
             period = self.queue[0]
