@@ -23,7 +23,7 @@ class Controller:
         filename = os.path.splitext(val)[0]
 
         try:
-            return pendulum.strptime(filename, "%Y-%m-%d")
+            return pendulum.from_format(filename, "YYYY-MM-DD")
         except ValueError:
             raise cherrypy.HTTPError(
                 400,

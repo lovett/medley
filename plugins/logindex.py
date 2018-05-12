@@ -1,14 +1,18 @@
-import cherrypy
+"""Parse webserver log files for storage in an SQLite database."""
+
 import os
 import os.path
-from collections import deque
 import re
+from collections import deque
+from collections import defaultdict
+import cherrypy
 import pendulum
 from . import mixins
 from . import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
+    """A CherryPy plugin for searching webserver logs."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -88,6 +92,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the logindex prefix.
+        """
+
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
@@ -95,11 +104,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
 
-    def stop(self):
-        pass
-
-    def getRoot(self):
+    @staticmethod
+    def get_root():
         """Look up the root path for indexable log files in the registry"""
+
         key = "logindex:root"
         memorize_hit, memorize_value = cherrypy.engine.publish(
             "memorize:get",
@@ -119,11 +127,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return value
 
-    def lastKnownOffset(self, path):
+    @decorators.log_runtime
+    def last_known_offset(self, path):
+        """Determine the byte offset of the last indexed log line."""
+
         sql = """SELECT source_offset FROM logs WHERE source_file=?
                   ORDER BY source_offset DESC LIMIT 1"""
 
-        source = self.filePathToSource(path)
+        source = self.file_path_to_source(path)
 
         row = self._selectOne(
             sql,
@@ -135,22 +146,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return 0
 
-    def fileForDate(self, dt):
+    def file_for_date(self, log_date):
         """The filesystem path of the log file for the given date"""
 
-        root = self.getRoot()
+        root = self.get_root()
 
         log_file = "{}/{}/{}".format(
             root,
-            dt.strftime("%Y-%m"),
-            dt.strftime("%Y-%m-%d.log")
+            log_date.strftime("%Y-%m"),
+            log_date.strftime("%Y-%m-%d.log")
         )
 
         if not os.path.isfile(log_file):
             return False
         return log_file
 
-    def filePathToSource(self, path):
+    @staticmethod
+    def file_path_to_source(path):
+        """Extract the file name without extension of a file path."""
+
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
 
@@ -182,7 +196,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
+    @decorators.log_runtime
     def process_queue(self):
+        """Trigger log file ingestion and parsing.
+
+        This is the initial phase of work where new log entries
+        are ingested. When that is done, the stage is parsing."""
+
         try:
             period = self.queue[0]
             cherrypy.engine.publish(
@@ -203,40 +223,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             return
 
-        for dt in period.range('days'):
-            log_file = self.fileForDate(dt)
+        for day in period.range('days'):
+            log_file = self.file_for_date(day)
             if log_file:
-                self.ingest_file(dt, log_file)
+                self.ingest_file(log_file)
 
         self.queue.popleft()
         self.process_queue()
 
-    def ingest_file(self, dt, file_path, batch_size=100):
+    @decorators.log_runtime
+    def ingest_file(self, file_path, batch_size=100):
+        """Read new lines from a log file in batches."""
 
         batch = []
         line_count = 0
 
-        max_offset = self.lastKnownOffset(file_path)
+        max_offset = self.last_known_offset(file_path)
 
-        with open(file_path, "r") as f:
+        with open(file_path, "r") as file_handle:
 
             # When indexing a previously indexed log file, max_offset
             # is the position of the last line that was added to the
             # database. Since it has already been seen, it can be
             # skipped. The next line is the first new line.
             if max_offset > 0:
-                f.seek(max_offset)
-                f.readline()
+                file_handle.seek(max_offset)
+                file_handle.readline()
 
             while True:
-                offset = f.tell()
-                line = f.readline()
+                offset = file_handle.tell()
+                line = file_handle.readline()
 
                 if not line:
                     break
 
                 values = (
-                    self.filePathToSource(file_path),
+                    self.file_path_to_source(file_path),
                     offset,
                     cherrypy.engine.publish("hasher:md5", line).pop(),
                     line
@@ -244,11 +266,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
                 batch.append(values)
                 if len(batch) > batch_size:
-                    line_count += self.insertLine(dt, batch)
+                    line_count += self.insert_line(batch)
                     batch = []
 
         if batch:
-            line_count += self.insertLine(dt, batch)
+            line_count += self.insert_line(batch)
 
         cherrypy.engine.publish(
             "applog:add",
@@ -259,6 +281,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def reversal(self, batch_size=50):
+        """Store the reverse hostname of an IP address."""
+
         records = self._select(
             """SELECT 0 as id, count(*) as value
             FROM reverse_ip
@@ -312,7 +336,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def parse(self, batch_size=100):
         """Parse previously-added log lines"""
 
-        select_sql = """
+        update_sql = """UPDATE logs SET unix_timestamp=?, datestamp=?, ip=?,
+        host=?, uri=?, query=?, statusCode=?, method=?, agent=?,
+        agent_domain=?, classification=?, country=?, region=?, city=?,
+        latitude=?, longitude=?, cookie=?, referrer=?,
+        referrer_domain=?  WHERE rowid=?"""
+
+        records = self._select("""
         SELECT 0 as id, count(*) as value
         FROM logs
         WHERE ip IS NULL
@@ -320,34 +350,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         SELECT rowid as id, logline as value
         FROM logs
         WHERE ip IS NULL
-        LIMIT {}""".format(batch_size)
-
-        update_sql = """UPDATE logs SET unix_timestamp=?, datestamp=?, ip=?,
-        host=?, uri=?, query=?, statusCode=?, method=?, agent=?,
-        agent_domain=?, classification=?, country=?, region=?, city=?,
-        latitude=?, longitude=?, cookie=?, referrer=?,
-        referrer_domain=?  WHERE rowid=?"""
-
-        records = self._select(select_sql)
-
-        unparsed_rows = records[0]["value"]
+        LIMIT {}""".format(batch_size))
 
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
             "parse",
-            "{} unparsed rows".format(unparsed_rows)
+            "{} unparsed rows".format(records[0]["value"])
         )
 
-        if unparsed_rows == 0:
+        if records[0]["value"] == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
 
         batch = []
         ips = set()
-
-        ip_facts_cache = {}
-        agent_cache = {}
+        cache = {
+            "ip": defaultdict(),
+            "agent": defaultdict()
+        }
 
         for record in records[1:]:
             fields = cherrypy.engine.publish(
@@ -355,17 +376,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 record["value"]
             ).pop()
 
-            ip = fields["ip"]
+            ip_address = fields["ip"]
 
-            ips.add(ip)
+            ips.add(ip_address)
 
-            if ip in ip_facts_cache:
-                ip_facts = ip_facts_cache[ip]
-            else:
-                ip_facts = cherrypy.engine.publish("ip:facts", ip).pop()
-                ip_facts_cache[ip] = ip_facts
+            if ip_address not in cache["ip"]:
+                cache["ip"][ip_address] = cherrypy.engine.publish(
+                    "ip:facts", ip_address
+                ).pop()
 
-            geo = ip_facts["geo"]
+            geo = cache["ip"][ip_address]["geo"]
 
             fields["country"] = fields.get("country", geo["country_code"])
             fields["region"] = fields.get("region", geo["region_code"])
@@ -374,18 +394,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             fields["longitude"] = fields.get("latitude", geo["longitude"])
 
             agent = fields.get("agent", "")
-            if agent in agent_cache:
-                fields["agent_domain"] = agent_cache[agent]["agent_domain"]
+            if agent in cache["agent"]:
+                fields["agent_domain"] = cache["agent"][agent]["agent_domain"]
             else:
                 agent_url_matches = re.search(
-                    "https?://(www\.)?(.*?)[/; ]",
+                    r"https?://(www\.)?(.*?)[/; ]",
                     agent
                 )
 
                 if agent_url_matches:
                     fields["agent_domain"] = agent_url_matches.group(2).lower()
 
-                agent_cache[agent] = {
+                cache["agent"][agent] = {
                     "agent_domain": fields.get("agent_domain"),
                 }
 
@@ -428,20 +448,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("scheduler:add", 1, "logindex:parse")
 
     @decorators.log_runtime
-    def insertLine(self, dt, records):
+    def insert_line(self, records):
+        """Write a batch of log lines to the database.
+
+        This is the initial insert, where the line is added in its
+        entirety. Parsing next in a later stage of processing."""
+
         if not records:
             return 0
 
-        sql = """INSERT OR IGNORE INTO logs
+        self._insert("""INSERT OR IGNORE INTO logs
         (source_file, source_offset, hash, logline)
-        VALUES (?, ?, ?, ?)"""
-
-        self._insert(sql, records)
+        VALUES (?, ?, ?, ?)""", records)
 
         return len(records)
 
     @decorators.log_runtime
     def query(self, query):
+        """Perform a search against parsed log lines."""
+
         parsed_query = cherrypy.engine.publish(
             "parse:log_query",
             query
@@ -463,6 +488,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def query_reverse_ip(self, ips=()):
+        """Look up the reverse hostname of an IP address."""
 
         placeholders = "?, " * len(ips)
 
