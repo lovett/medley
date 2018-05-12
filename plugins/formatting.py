@@ -50,8 +50,4 @@ class Plugin(plugins.SimplePlugin):
         Example output: Thu, 01 Dec 1994 16:00:00 GMT
 
         """
-
-        return instance.format(
-            'ddd, DD MMM YYYY HH:mm:ss zz',
-            formatter='alternative'
-        )
+        return instance.format('ddd, DD MMM YYYY HH:mm:ss zz')

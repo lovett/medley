@@ -146,8 +146,8 @@ class Plugin(plugins.SimplePlugin):
             reference_date = pendulum.yesterday()
 
         return "datestamp BETWEEN '{}' AND '{}'".format(
-            reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
-            reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
+            reference_date.start_of('day').in_timezone('utc').format('YYYY-MM-DD-HH'),
+            reference_date.end_of('day').in_timezone('utc').format('YYYY-MM-DD-HH')
         )
 
     def logQueryAbsoluteDate(self, s, l, t):
@@ -176,7 +176,7 @@ class Plugin(plugins.SimplePlugin):
         ).pop()
 
         if not tz:
-            tz = pendulum.now().get_timezone()
+            tz = pendulum.now().timezone.name
 
         sql = []
         for date in dates:
@@ -191,8 +191,8 @@ class Plugin(plugins.SimplePlugin):
             reference_date = pendulum.datetime(year, month, day, tz=tz)
 
             sql.append("datestamp BETWEEN '{}' AND '{}'""".format(
-                reference_date.start_of('day').in_timezone('utc').format('%Y-%m-%d-%H'),
-                reference_date.end_of('day').in_timezone('utc').format('%Y-%m-%d-%H')
+                reference_date.start_of('day').in_timezone('utc').format('YYYY-MM-DD-HH'),
+                reference_date.end_of('day').in_timezone('utc').format('YYYY-MM-DD-HH')
             ))
 
         joined_sql = " OR ".join(sql)
@@ -291,20 +291,13 @@ class Plugin(plugins.SimplePlugin):
                 val
             )
 
-        # This is a workaround for Pendulum's alternative formatter
-        # not accepting the tokens listed in the documentation. It
-        # rejects "MMM" and "Z" in:
-        # pendulum.from_format(d, "DD/MMM/YYYY:HH:mm:ss Z", formatter='alternative')
-
-        d = datetime.strptime(
+        utc_time = pendulum.from_format(
             fields["timestamp"],
-            "%d/%b/%Y:%H:%M:%S %z"
-        )
+            "DD/MMM/YYYY:HH:mm:ss ZZ"
+        ).in_tz('utc')
 
-        timestamp = pendulum.instance(d).in_timezone("UTC")
-
-        fields["unix_timestamp"] = timestamp.timestamp()
-        fields["datestamp"] = timestamp.format("%Y-%m-%d-%H")
+        fields["unix_timestamp"] = utc_time.timestamp()
+        fields["datestamp"] = utc_time.format("YYYY-MM-DD-HH")
 
         if "referrer" in fields:
             parse_result = urlparse(fields["referrer"])

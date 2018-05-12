@@ -160,6 +160,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             log_date.strftime("%Y-%m-%d.log")
         )
 
+        print(log_file)
+
         if not os.path.isfile(log_file):
             return False
         return log_file

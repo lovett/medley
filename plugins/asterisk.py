@@ -227,5 +227,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.disconnect()
 
-        value = self.get_value(last_line)
-        return pendulum.strptime(value, "%Y-%m-%d")
+        return pendulum.from_format(
+            self.get_value(last_line),
+            "YYYY-MM-DD",
+            tz='local'
+        )

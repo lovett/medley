@@ -62,7 +62,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         if not timezone:
-            timezone = get_localzone()
+            timezone = pendulum.now().timezone.name
 
         return timezone
 
@@ -75,7 +75,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             value.decode("utf-8"),
             "YYYY-MM-DD HH:mm:ss",
             tz=local_tz,
-            formatter='alternative'
         ).in_timezone('utc')
 
     @staticmethod

@@ -8,7 +8,6 @@ import os
 import json
 import re
 import pendulum
-from tzlocal import get_localzone
 from urllib.parse import quote
 from cherrypy.process import plugins
 from string import Template
@@ -124,17 +123,17 @@ class Plugin(plugins.SimplePlugin):
             value = pendulum.instance(value)
 
         if format == "locale":
-            directives = "%c"
+            directives = "LLLL"
         elif format == "date":
-            directives = "%Y-%m-%d"
+            directives = "YYYY-MM-DD"
         elif format == "date-full":
-            directives = "%A %b %d, %Y"
+            directives = "LL",
         elif format == "time12":
-            directives = "%I:%M:%S %p"
+            directives = "LTS"
         elif format == "time12_short":
-            directives = "%I:%M %p"
+            directives = "LT"
         elif format == "datetime12":
-            directives = "%A %b %d, %Y %I:%M:%S %p"
+            directives = "LLLL"
         else:
             directives = format
 
@@ -192,10 +191,9 @@ class Plugin(plugins.SimplePlugin):
         ).pop()
 
         if not tz:
-            tz = get_localzone()
+            tz = pendulum.now().timezone.name
 
         return tz
-
 
     def ago_filter(self, unix_timestamp):
         dt = pendulum.from_timestamp(unix_timestamp)
