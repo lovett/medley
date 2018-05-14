@@ -1,7 +1,6 @@
 """Manage a collection of bookmarked URLs."""
 
 from urllib.parse import urlparse
-from collections import OrderedDict
 import cherrypy
 
 
@@ -37,24 +36,14 @@ class Controller:
             }
 
         if query:
-            records = cherrypy.engine.publish("archive:search", query).pop()
+            bookmarks = cherrypy.engine.publish("archive:search", query).pop()
         else:
-            records = cherrypy.engine.publish("archive:recent", limit=50).pop()
-
-        entries = OrderedDict()
-
-        for record in records:
-            key = record["created"].strftime("%Y-%m-%d")
-
-            if key not in entries:
-                entries[key] = []
-
-            entries[key].append(record)
+            bookmarks = cherrypy.engine.publish("archive:recent").pop()
 
         return {
             "html": ("archive.html", {
                 "app_name": self.name,
-                "entries": entries,
+                "bookmarks": bookmarks,
                 "query": query
             })
         }

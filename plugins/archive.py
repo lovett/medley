@@ -98,16 +98,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._selectOne(sql, (int(uid),))
         return result["total"]
 
-    def search(self, search):
+    def search(self, search, limit=50):
         """Search for bookmarks by fulltext keyword."""
 
         sql = """SELECT u.rowid, u.url, u.domain, m.title,
             u.created as 'created [datetime]', m.tags, m.comments
             FROM urls u, meta m WHERE u.rowid=m.url_id AND meta MATCH ?
-            ORDER BY u.created DESC"""
-        return self._select(sql, (search,))
+            ORDER BY u.created DESC LIMIT ?"""
+        return self._select(sql, (search, limit))
 
-    def recent(self, limit=100):
+    def recent(self, limit=50):
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT u.rowid, u.url, u.domain, m.title,
@@ -118,7 +118,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         m.tags, m.comments, 'bookmark' as record_type
         FROM urls u, meta m
         WHERE u.rowid=m.url_id
-        ORDER BY u.created
-        DESC LIMIT ?"""
+        ORDER BY u.created DESC
+        LIMIT ?"""
 
         return self._select(sql, (limit,))

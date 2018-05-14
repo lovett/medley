@@ -1,14 +1,11 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
-import datetime
 import pickle
 import re
 import urllib
 import sqlite3
-from tzlocal import get_localzone
 import cherrypy
 import msgpack
-import pytz
 import pendulum
 
 
@@ -37,13 +34,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Convert a datetime string to a datetime instance."""
 
         value = value.decode("utf-8")
+
         try:
-            date = datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-            return pytz.utc.localize(date)
+            utc_date = pendulum.from_format(value, "YYYY-MM-DD HH:mm:ss")
         except ValueError:
             last_colon_index = value.rindex(":")
             date = value[:last_colon_index] + value[last_colon_index + 1:]
-            return datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S%z")
+            utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
+
+        return utc_date
 
     @staticmethod
     def local_timezone():

@@ -32,41 +32,38 @@
 
     <div class="content-wrapper">
 
-        <p {% if entries %}class="hidden nothing-message"{% endif %}>Nothing found</p>
+        <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
-        {% for key, entries in entries.items() %}
-        <div class="date-group">
-            <h1>{{ entries[0].created|localtime("date-full") }}</h1>
-            {% for entry in entries %}
-            <div class="bookmark">
-                <div class="actions">
-                    <a href="#" class="delete" data-uid="{{ entry.rowid }}" rel="noreferrer" title="Delete this bookmark">
-                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                    </a>
-                </div>
+        {% for bookmark in bookmarks %}
 
-                <p class="meta">
-                    <time>
-                        {{ entry.created|localtime("time12") }}
-                    </time>
-
-                    from <span class="domain">{{ entry.domain }}</span>
-                </p>
-
-                <h2><a href="{{ entry.url|anonymize }}" rel="noreferrer" target="_blank">{{ entry.title }}</a></h2>
-
-                {% if entry.comments %}
-                <p class="comments">
-                    {{ entry.comments }}
-                </p>
-                {% endif %}
-                <div class="align-right">
-                    <a class="wayback" href="#" data-url="{{ entry.url }}">cache</a>
-                </div>
-
+        <div class="bookmark">
+            <div class="actions">
+                <a href="#" class="delete" data-uid="{{ bookmark.rowid }}" rel="noreferrer" title="Delete this bookmark">
+                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
+                </a>
             </div>
-            {% endfor %}
+
+            <p class="meta">
+                <time>
+                    {{ bookmark.created|localtime|dateformat("MMMM D, YYYY") }}
+                </time>
+
+                from <span class="domain">{{ bookmark.domain }}</span>
+            </p>
+
+            <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
+
+            {% if bookmark.comments %}
+            <p class="comments">
+                {{ bookmark.comments }}
+            </p>
+            {% endif %}
+
+            <div class="align-right">
+                <a class="wayback" href="#" data-url="{{ bookmark.url }}">cache</a>
+            </div>
         </div>
+
         {% endfor %}
     </div>
 </main>

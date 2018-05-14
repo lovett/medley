@@ -51,6 +51,7 @@ class Plugin(plugins.SimplePlugin):
             bytecode_cache = cache
         )
 
+        self.env.filters["dateformat"] = self.dateformat_filter
         self.env.filters["datetime"] = self.datetime_filter
         self.env.filters["ago"] = self.ago_filter
         self.env.filters["localtime"] = self.localtime_filter
@@ -94,7 +95,7 @@ class Plugin(plugins.SimplePlugin):
         """
         return self.env.get_template(name)
 
-    def localtime_filter(self, value, format="locale"):
+    def localtime_filter(self, value):
         """Switch a datetime to the local timezone, then format it"""
 
         if not value:
@@ -107,9 +108,12 @@ class Plugin(plugins.SimplePlugin):
         else:
             value = pendulum.instance(value)
 
-        local_value = value.in_timezone(tz)
+        return value.in_timezone(tz)
 
-        return self.datetime_filter(local_value, format)
+    def dateformat_filter(self, value, format_string):
+        """Format a datetime instance to a string."""
+
+        return value.format(format_string)
 
     def datetime_filter(self, value, format="locale"):
         """Format a datetime as a string based on a format keyword"""
@@ -136,6 +140,8 @@ class Plugin(plugins.SimplePlugin):
             directives = "LLLL"
         else:
             directives = format
+
+        print(directives)
 
         return value.format(directives).lstrip("0")
 
