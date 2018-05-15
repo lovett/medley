@@ -162,6 +162,10 @@ TABLE.key-value TH {
     color: white;
 }
 
+.notice {
+    background-color: #ffffcc;
+}
+
 .field-group {
     display: flex;
     justify-content: space-between;
@@ -234,7 +238,7 @@ TABLE.key-value TH {
 }
 
 .message {
-    margin: 1em 0;
+    margin: 1em 0 2em 0;
     padding: 1em;
 }
 

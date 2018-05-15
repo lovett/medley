@@ -12,6 +12,7 @@ class Controller:
     @cherrypy.tools.negotiable()
     def GET(self, url=None, title=None, tags=None, comments=None):
         """Display a form for for bookmarking a URL"""
+
         error = None
         bookmark = None
 
@@ -43,14 +44,12 @@ class Controller:
             comments += "."
 
         if url:
-            answer = cherrypy.engine.publish(
+            bookmark = cherrypy.engine.publish(
                 "archive:find",
                 url=url
-            )
-            bookmark = answer.pop() if answer else None
+            ).pop()
 
         if bookmark:
-            error = "This URL has already been bookmarked"
             title = bookmark["title"]
             tags = bookmark["tags"]
             comments = bookmark["comments"]
@@ -66,6 +65,7 @@ class Controller:
             "html": ("later.html", {
                 "base": base,
                 "error": error,
+                "bookmark": bookmark,
                 "title": title,
                 "url": url,
                 "tags": tags,

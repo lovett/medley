@@ -10,7 +10,7 @@ MEDLEY.archive = (function () {
         form = trigger.closest('FORM');
         jQuery.ajax({
             type: 'DELETE',
-            url: '/archive?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
+            url: '/archive?url=' + escape(trigger.attr('data-url'))
         }).done(function () {
             trigger.closest('.bookmark').remove();
             if (group.find('.bookmark').length === 0) {

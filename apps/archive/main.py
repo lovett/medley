@@ -1,6 +1,5 @@
 """Manage a collection of bookmarked URLs."""
 
-from urllib.parse import urlparse
 import cherrypy
 
 
@@ -50,32 +49,33 @@ class Controller:
 
     @staticmethod
     def POST(url, title=None, tags=None, comments=None):
-        """Accept a bookmark URL for storage."""
+        """Add a new bookmark, or update an existing one."""
 
-        parsed_url = urlparse(url)
-
-        if not parsed_url.netloc:
-            raise cherrypy.HTTPError(400, "Invalid URL")
-
-        cherrypy.engine.publish(
+        result = cherrypy.engine.publish(
+            "scheduler:add",
+            2,
             "archive:add",
-            parsed_url,
+            url,
             title,
             comments,
             tags
-        )
+        ).pop()
+
+        if not result:
+            raise cherrypy.HTTPError(400)
 
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(uid):
-        """Remove a previously bookmarked URL from storage."""
+    def DELETE(url):
+        """Discard a previously bookmarked URL."""
 
-        deletion_count = cherrypy.engine.publish(
-            "archive:remove", uid
+        deleted_rows = cherrypy.engine.publish(
+            "archive:remove",
+            url
         ).pop()
 
-        if deletion_count != 1:
+        if not deleted_rows:
             raise cherrypy.HTTPError(404, "Invalid id")
 
         cherrypy.response.status = 204

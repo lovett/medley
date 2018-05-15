@@ -29,7 +29,6 @@ MEDLEY.later = (function () {
         }).done(function (data) {
             jQuery('.error.message').addClass('hidden');
             jQuery('.success.message').removeClass('hidden');
-            window.location.href = '/archive';
         }).fail(function (data) {
             jQuery('.error.message').removeClass('hidden').text(data.statusText);
             jQuery('.success.message').addClass('hidden');

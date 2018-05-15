@@ -31,7 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def datetime(value):
-        """Convert a datetime string to a datetime instance."""
+        """Convert a datetime string to a Pendulum instance."""
 
         value = value.decode("utf-8")
 

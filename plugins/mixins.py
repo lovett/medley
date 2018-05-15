@@ -51,9 +51,9 @@ class Sqlite:
     def _delete(self, query, values):
         con = self._open()
         with con:
-            rows = con.execute(query, values).rowcount
+            row_count = con.execute(query, values).rowcount
         con.close()
-        return rows
+        return row_count
 
     def _select(self, query, values=()):
         con = self._open()
