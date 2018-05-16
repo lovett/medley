@@ -1,6 +1,8 @@
-import cherrypy
-import sqlite3
 import os.path
+import sqlite3
+from itertools import zip_longest
+import cherrypy
+
 
 class Sqlite:
     def _path(self, name):
@@ -131,3 +133,71 @@ class Sqlite:
             return row[0]
         except IndexError:
             return None
+
+    @staticmethod
+    def _fts_rank(match_info, *weights):
+        """Sqlite user function for search ranking
+
+        This is based on an example C provided in the SQLite
+        documentation.
+
+        The SQL query is expected to call matchinfo with the default
+        format string, "pcx".
+
+        Returns a float representing the combined relevance of all
+        terms across all fulltext columns. The larger the value, the
+        higher the relevance.
+
+        see http://www.sqlite.org/fts3.html#appendix_a
+
+        """
+
+        view = memoryview(match_info).cast('@I')
+
+        # Value corresponding to the p character of the matchinfo format
+        # string. A single value.
+        phrase_count = view[0]
+
+        # Value corresponding to the c character of the matchinfo
+        # format string. A single value.
+        column_count = view[1]
+
+        # Value corresponding to the x character of matchinfo format
+        # string. A trio of values per phrase and column as one list.
+        # End of slice adds 2 to account for phrase and column count.
+        hits = view[2:(phrase_count * column_count * 3 + 2)]
+
+        # Chunk the list.
+        # see https://docs.python.org/3.5/library/itertools.html
+        hit_triples = zip_longest(*[iter(hits)] * 3, fillvalue=999999)
+
+        score = 0.0
+
+        for triple_index, triple in enumerate(hit_triples):
+            # How many times phrase X matched in column Y of record Z.
+            hits_this_row = triple[0]
+
+            # How many times phrase X matched in column Y of all records.
+            hits_all_rows = triple[1]
+
+            # How many records phrase X matched in column Y of all records.
+            # docs_with_hits = triple[2]
+
+            if hits_all_rows == 0:
+                continue
+
+            weight = weights[triple_index % len(weights)]
+            score += (hits_this_row / hits_all_rows) * weight
+
+        return score
+
+    def _fts_search(self, query, values=(), *args):
+        con = self._open()
+        con.row_factory = sqlite3.Row
+
+        con.create_function("rank", -1, self._fts_rank)
+
+        with con:
+            cur = con.cursor()
+            cur.execute(query, values)
+            return cur.fetchall() or []

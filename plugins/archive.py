@@ -14,16 +14,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("bookmarks.sqlite")
 
+        # Because this is a virtual table, the added field can't
         self._create("""
         CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks USING fts4 (
             url,
             domain,
             added,
+            retrieved,
             title,
             tags,
             comments,
             fulltext,
-            tokenize=porter
+            tokenize=porter,
+            notindexed=added,
+            notindexed=retrieved,
+            order=desc
         );
         """)
 
@@ -124,16 +129,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url
         ).pop()
 
-        if not html:
-            return False
-
         text = cherrypy.engine.publish(
             "markup:plaintext",
             html
         ).pop()
 
         self._insert(
-            "UPDATE bookmarks SET fulltext=? WHERE url=?",
+            """UPDATE bookmarks
+            SET fulltext=?, retrieved=CURRENT_TIMESTAMP
+            WHERE url=?""",
             [(text, url)]
         )
 
@@ -147,30 +151,52 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(self, query, limit=20):
-        """Search for bookmarks by fulltext keyword."""
+    def search(self, query, limit=20, offset=0):
+        """Locate bookmarks via fulltext search.
 
-        return self._select(
-            """SELECT rowid, url, domain, title,
-            added 'added [datetime]', tags, comments
-            FROM bookmarks
-            WHERE bookmarks MATCH ?
-            LIMIT ?""",
-            (query, limit)
+        Ranking is based on term frequency.
+        """
+
+        # How much value to give matches from each column of the
+        # virtual table, in the order they appear in the create table
+        # statement. Includes non-indexed fields.
+        weights = (
+            0.00,   # url
+            0.25,   # domain
+            -1.00,  # added (not indexed)
+            -1.00,  # retrieved (not indexed)
+            0.75,   # title
+            0.80,   # tags
+            0.50,   # comments
+            0.60    # fulltext
+        )
+
+        weight_string = ",".join(map(repr, weights))
+
+        return self._fts_search(
+            """SELECT url, domain, title,
+            added as 'added [datetime]', rank
+            FROM bookmarks JOIN (
+                SELECT docid, rank(matchinfo(bookmarks, 'pcx'), {}) as rank
+                FROM bookmarks
+                WHERE bookmarks MATCH ?
+                ORDER BY rank DESC
+                LIMIT ? OFFSET ?
+            ) as ranktable USING(docid)
+            ORDER BY ranktable.rank DESC""".format(weight_string),
+            (query, limit, offset)
         )
 
     @decorators.log_runtime
     def recent(self, limit=20):
         """Get a newest-first list of recently bookmarked URLs."""
 
-        sql = """SELECT rowid, url, domain, title,
-        CASE WHEN fulltext is null then 0
-        else 1
-        end as has_fulltext,
+        sql = """SELECT url, domain, title,
         added as 'added [datetime]',
+        retrieved 'retrieved [datetime]',
         tags, comments
         FROM bookmarks
-        ORDER BY added
+        ORDER BY rowid DESC
         LIMIT ?"""
 
         return self._select(sql, (limit,))

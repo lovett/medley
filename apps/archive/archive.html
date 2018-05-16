@@ -17,7 +17,6 @@
 <main>
     <form class="content-wrapper" method="get" action="/archive">
         <div class="field">
-            <label for="q">Search terms</label>
             <input type="text" id="query" name="query" value="{{ query|default('', true) }}"/>
         </div>
         <div class="field-group">
@@ -43,15 +42,13 @@
                 </a>
             </div>
 
-            <p class="meta">
-                <time>
-                    {{ bookmark.created|localtime|dateformat("MMMM D, YYYY") }}
-                </time>
-
-                from <span class="domain">{{ bookmark.domain }}</span>
-            </p>
-
             <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
+            <p class="meta">
+                <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                |
+                <span class="domain">{{ bookmark.domain }}</span>
+                | <a class="wayback" href="#" data-url="{{ bookmark.url }}">cache</a>
+            </p>
 
             {% if bookmark.comments %}
             <p class="comments">
@@ -60,7 +57,7 @@
             {% endif %}
 
             <div class="align-right">
-                <a class="wayback" href="#" data-url="{{ bookmark.url }}">cache</a>
+
             </div>
         </div>
 

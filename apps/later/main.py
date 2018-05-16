@@ -14,7 +14,6 @@ class Controller:
         """Display a form for for bookmarking a URL"""
 
         error = None
-        bookmark = None
 
         if title:
             title = cherrypy.engine.publish(
@@ -43,6 +42,7 @@ class Controller:
         if comments and not comments.endswith("."):
             comments += "."
 
+        bookmark = None
         if url:
             bookmark = cherrypy.engine.publish(
                 "archive:find",
