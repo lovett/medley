@@ -159,7 +159,7 @@ class Plugin(plugins.SimplePlugin):
                 os.unlink(local_path)
 
     @staticmethod
-    def post(url, data, as_json=False, **kwargs):
+    def post(url, data, as_json=False, as_bytes=False, **kwargs):
         """Send a POST request."""
 
         auth = kwargs.get("auth")
@@ -199,6 +199,9 @@ class Plugin(plugins.SimplePlugin):
 
             if as_json:
                 return req.json()
+
+            if as_bytes:
+                return req.content
 
             return req.text
 
