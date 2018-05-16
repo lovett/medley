@@ -2,7 +2,7 @@
 {% import "macros.html" as macros -%}
 
 {% block page_meta %}
-<meta name="active_date" content="{{ active_date|localtime('date') }}" />
+<meta name="active_date" content="{{ active_date|localtime|dateformat("YYYY-MM-DD") }}" />
 {% endblock %}
 
 {% block stylesheets %}
@@ -202,9 +202,9 @@
                                 <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
                                     <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
                                 </a>
-                                {{ result.unix_timestamp|localtime('date') }}
+                                {{ result.unix_timestamp|localtime|dateformat("YYYY-MM-DD") }}
                                 at
-                                {{ result.unix_timestamp|localtime('time12') }}
+                                {{ result.unix_timestamp|localtime|dateformat("LTS") }}
                             </p>
 
                             <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
@@ -215,7 +215,7 @@
                         </td>
                         <td nowrap="nowrap">
                             <p>
-                                <a href="/visitors?query=date+{{ result.unix_timestamp|localtime('date') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                <a href="/visitors?query=date+{{ result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                     {{ result.method }} {{ result.uri|truncate(30, True) }}
                                 </a>
                             </p>
@@ -230,7 +230,7 @@
 
                             {% if result.referrer and result.referrer_domain not in site_domains %}
                             <p>
-                                Referrer: <a href="/visitors?query=date+{{ result.unix_timestamp|localtime('date') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                Referrer: <a href="/visitors?query=date+{{ result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                             </p>
                             {% endif %}
                         </td>
@@ -254,7 +254,7 @@
                                 <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
                                 {{ result.unix_timestamp|ago() }}
                                 {% if result.time_zone %}
-                                at {{ result.unix_timestamp|localtime('time12', result.time_zone) }} local time
+                                at {{ result.unix_timestamp|localtime(result.time_zone)|dateformat('LTS') }} local time
                                 {% endif %}
                             </p>
 

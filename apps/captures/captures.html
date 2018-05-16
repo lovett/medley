@@ -36,7 +36,7 @@
                 </a>
 
                 <div>
-                    #{{ capture.rowid}} {{ capture.created|localtime("datetime12")}}
+                    #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
                 </div>
 
             </header>

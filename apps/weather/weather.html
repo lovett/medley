@@ -10,13 +10,13 @@
         <h1>
             {{ label }}
             {% if forecast.time %}
-            at {{ forecast.time|datetime('time12_short') }}
+            at {{ forecast.time|dateformat('LT') }}
             {% endif %}
         </h1>
 
 
         <h2>Currently</h2>
-        <p>{{ forecast.current_temperature }}° F as of {{ forecast.current_time|datetime('time12_short') }}.</p>
+        <p>{{ forecast.current_temperature }}° F as of {{ forecast.current_time|dateformat('LT') }}.</p>
 
         <p>{{ forecast.current_summary }}</p>
 
@@ -34,13 +34,13 @@
             {% if forecast.high %}
             <tr>
                 <th>High</th>
-                <td>{{ forecast.high }}° F at {{ forecast.high_at|datetime('time12_short') }}</td>
+                <td>{{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}</td>
             </tr>
             {% endif %}
             {% if forecast.low %}
             <tr>
                 <th>Low</th>
-                <td>{{ forecast.low }}° F at {{ forecast.low_at|datetime('time12_short') }}</td>
+                <td>{{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}</td>
             </tr>
             {% endif %}
             <tr>
@@ -61,14 +61,14 @@
             {% if forecast.sunrise %}
             <tr>
                 <th>Sunrise</th>
-                <td>{{ forecast.sunrise|datetime('time12_short') }}</td>
+                <td>{{ forecast.sunrise|dateformat('LT') }}</td>
             </tr>
             {% endif %}
 
             {% if forecast.sunset %}
             <tr>
                 <th>Sunset</th>
-                <td>{{ forecast.sunset|datetime('time12_short') }}</td>
+                <td>{{ forecast.sunset|dateformat('LT') }}</td>
             </tr>
             {% endif %}
         </table>
@@ -79,7 +79,7 @@
         <table>
             {% for record in forecast.hourly %}
             <tr>
-                <th>{{ record.time|datetime('time12_short') }}</th>
+                <th>{{ record.time|dateformat('LT') }}</th>
                 <td>{{ record.summary }}</td>
                 <td>
                     <p>{{ record.temperature }}° F</p>

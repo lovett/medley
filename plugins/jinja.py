@@ -52,7 +52,6 @@ class Plugin(plugins.SimplePlugin):
         )
 
         self.env.filters["dateformat"] = self.dateformat_filter
-        self.env.filters["datetime"] = self.datetime_filter
         self.env.filters["ago"] = self.ago_filter
         self.env.filters["localtime"] = self.localtime_filter
         self.env.filters["unindent"] = self.unindent_filter
@@ -95,13 +94,14 @@ class Plugin(plugins.SimplePlugin):
         """
         return self.env.get_template(name)
 
-    def localtime_filter(self, value):
+    def localtime_filter(self, value, timezone=None):
         """Switch a datetime to the local timezone, then format it"""
 
         if not value:
             return ""
 
-        tz = self.local_timezone()
+        if not timezone:
+            tz = self.local_timezone()
 
         if isinstance(value, (int, float)):
             value = pendulum.from_timestamp(value)
@@ -114,36 +114,6 @@ class Plugin(plugins.SimplePlugin):
         """Format a datetime instance to a string."""
 
         return value.format(format_string)
-
-    def datetime_filter(self, value, format="locale"):
-        """Format a datetime as a string based on a format keyword"""
-
-        if not value:
-            return ""
-
-        if isinstance(value, (int, float)):
-            value = pendulum.from_timestamp(value)
-        else:
-            value = pendulum.instance(value)
-
-        if format == "locale":
-            directives = "LLLL"
-        elif format == "date":
-            directives = "YYYY-MM-DD"
-        elif format == "date-full":
-            directives = "LL",
-        elif format == "time12":
-            directives = "LTS"
-        elif format == "time12_short":
-            directives = "LT"
-        elif format == "datetime12":
-            directives = "LLLL"
-        else:
-            directives = format
-
-        print(directives)
-
-        return value.format(directives).lstrip("0")
 
     def unindent_filter(self, string):
         """Remove leading whitespace from a multiline string without losing indentation"""

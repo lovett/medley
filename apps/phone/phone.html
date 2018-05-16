@@ -71,7 +71,7 @@
 
                 <p class="blacklisted">
                     Blacklisted
-                    <span id="blacklist-date">on {{ blacklisted|localtime("date-full") }}</span>
+                    <span id="blacklist-date">on {{ blacklisted|localtime|dateformat("LLL") }}</span>
                 </p>
 
                 <button class="small">Remove</button>
@@ -119,8 +119,8 @@
             <tbody>
                 {% for entry in history %}
                 <tr>
-                    <td nowrap="nowrap">{{ entry["date"]|localtime("date") }}</td>
-                    <td>{{ entry["date"]|localtime("time12")}}</td>
+                    <td nowrap="nowrap">{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
+                    <td>{{ entry["date"]|localtime|dateformat("LT")}}</td>
                     <td>{{ entry["duration"] }}</td>
                     <td>{{ entry["direction"] }}</td>
                 </tr>

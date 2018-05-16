@@ -33,7 +33,7 @@
                 </a>
                 <div class="summary">
                     <time datetime="{{ event.time * 1000 }}">
-                        {{ event.time|localtime(format="time12_short") }}
+                        {{ event.time|localtime|dateformat("LT") }}
                     </time>
                     {{ event.argument[1].title }}
                     <p class="remaining smaller">calculating time remaining...</p>

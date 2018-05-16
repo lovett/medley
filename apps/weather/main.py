@@ -1,7 +1,9 @@
 """Display current and upcoming weather conditions."""
 
 import math
+from collections import defaultdict
 import cherrypy
+import pendulum
 
 
 class Controller:
@@ -53,19 +55,19 @@ class Controller:
 
             endpoint += "?lang=en&units=us&exclude=minutely"
 
-            answer = cherrypy.engine.publish(
+            api_response = cherrypy.engine.publish(
                 "urlfetch:get",
                 endpoint,
                 as_json=True,
             ).pop()
 
-            if answer:
-                forecasts[label] = self.shape_forecast(answer)
+            if api_response:
+                forecasts[label] = self.shape_forecast(api_response)
 
                 cherrypy.engine.publish(
                     "cache:set",
                     cache_key,
-                    answer,
+                    api_response,
                 )
 
         return {
@@ -79,7 +81,9 @@ class Controller:
     def shape_forecast(forecast):
         """Reduce an API response object to wanted values"""
 
-        result = {}
+        result = defaultdict()
+
+        timezone = forecast.get("timezone")
 
         daily_block = forecast.get("daily", {})
         days = daily_block.get("data", [{}, {}])
@@ -90,28 +94,53 @@ class Controller:
         hourly = forecast.get("hourly", {})
 
         result["current_summary"] = currently.get("summary")
+
         result["current_temperature"] = math.ceil(
             currently.get("temperature")
         )
-        result["current_time"] = currently.get("time")
+
+        result["current_time"] = pendulum.from_timestamp(
+            currently.get("time"), tz=timezone
+        )
+
         result["current_humidity"] = currently.get("humidity", 0)
 
         result["summary"] = today.get("summary")
+
         result["temperature"] = math.ceil(today.get("temperature", 0))
-        result["sunrise"] = today.get("sunriseTime")
-        result["sunset"] = today.get("sunsetTime")
+
+        result["sunrise"] = pendulum.from_timestamp(
+            today.get("sunriseTime"), tz=timezone
+        )
+
+        result["sunset"] = pendulum.from_timestamp(
+            today.get("sunsetTime"), tz=timezone
+        )
+
         result["humidity"] = currently.get("humidity", 0)
 
         result["high"] = math.ceil(today.get("temperatureHigh"))
-        result["high_at"] = today.get("temperatureHighTime")
+
+        result["high_at"] = pendulum.from_timestamp(
+            today.get("temperatureHighTime"), tz=timezone
+        )
 
         result["low"] = math.ceil(today.get("temperatureLow"))
-        result["low_at"] = today.get("temperatureLowTime")
+
+        result["low_at"] = pendulum.from_timestamp(
+            today.get("temperatureLowTime"), tz=timezone
+        )
 
         result["precip_prob"] = currently.get("precipProbability", 0) * 100
+
         result["precip_type"] = currently.get("precipType")
 
         if "data" in hourly:
-            result["hourly"] = [item for item in hourly["data"]][0:24]
+            result["hourly"] = []
+            for hour in hourly["data"][0:24]:
+                hour["time"] = pendulum.from_timestamp(
+                    hour["time"], tz=timezone
+                )
+                result["hourly"].append(hour)
 
         return result

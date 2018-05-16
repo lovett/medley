@@ -62,7 +62,7 @@
             </dt>
 
             <dd class="secondary">
-                Created {{ entry.created|localtime("datetime12") }}
+                Created {{ entry.created|localtime|dateformat("LLL") }}
                 <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
                     <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
                 </a>
