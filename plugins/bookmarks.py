@@ -35,14 +35,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def start(self):
         """Define the CherryPy messages to listen for.
 
-        This plugin owns the archive prefix.
+        This plugin owns the bookmarks prefix.
         """
-        self.bus.subscribe("archive:find", self.find)
-        self.bus.subscribe("archive:add", self.add)
-        self.bus.subscribe("archive:add:fulltext", self.add_full_text)
-        self.bus.subscribe("archive:search", self.search)
-        self.bus.subscribe("archive:recent", self.recent)
-        self.bus.subscribe("archive:remove", self.remove)
+        self.bus.subscribe("bookmarks:find", self.find)
+        self.bus.subscribe("bookmarks:add", self.add)
+        self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
+        self.bus.subscribe("bookmarks:search", self.search)
+        self.bus.subscribe("bookmarks:recent", self.recent)
+        self.bus.subscribe("bookmarks:remove", self.remove)
 
     def find(self, uid=None, url=None):
         """Locate a bookmark by ID or URL."""
@@ -114,7 +114,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "scheduler:add",
             2,
-            "archive:add:fulltext",
+            "bookmarks:add:fulltext",
             parsed_url.geturl(),
         )
 

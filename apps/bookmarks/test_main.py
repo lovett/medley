@@ -1,25 +1,24 @@
 """
-Test suite for the archive app
+Test suite for the bookmarks app.
 """
 
 import unittest
 import mock
-import pendulum
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.archive.main
+import apps.bookmarks.main
 
 
-class TestArchive(BaseCherryPyTestCase, ResponseAssertions):
+class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the archive application controller
+    Tests for the bookmarks application controller
     """
 
     @classmethod
     def setUpClass(cls):
         """Start a faux cherrypy server"""
-        helpers.start_server(apps.archive.main.Controller)
+        helpers.start_server(apps.bookmarks.main.Controller)
 
     @classmethod
     def tearDownClass(cls):
@@ -38,7 +37,7 @@ class TestArchive(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "archive:recent":
+            if args[0] == "bookmarks:recent":
                 return [[]]
             return mock.DEFAULT
 
@@ -47,45 +46,36 @@ class TestArchive(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            len(helpers.html_var(render_mock, "entries")),
+            len(helpers.html_var(render_mock, "bookmarks")),
             0
         )
         self.assertIsNone(helpers.html_var(render_mock, "query"))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
-    def test_search(self, publish_mock, render_mock):
-        """Search results are grouped by date"""
+    def test_add_success(self, publish_mock):
+        """A URL can be added to the database"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
-
-            if args[0] == "archive:search":
-                return [[
-                    {"created": pendulum.parse("1999-01-02 11:12:13")},
-                    {"created": pendulum.parse("1999-01-02 12:13:14")},
-                    {"created": pendulum.parse("1999-01-03 11:12:13")},
-                ]]
+            if args[0] == "scheduler:add":
+                return [True]
             return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", query="test")
-
-        self.assertEqual(
-            len(helpers.html_var(render_mock, "entries")),
-            2
-        )
-
-    def test_add_success(self):
-        """A URL can be added to the database"""
 
         response = self.request("/", url="http://example.com", method="POST")
 
         self.assertEqual(response.code, 204)
 
-    def test_add_fail(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_add_fail(self, publish_mock):
         """URLs must be well-formed"""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "scheduler:add":
+                return [False]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request("/", url="not-a-url", method="POST")
 
@@ -93,17 +83,17 @@ class TestArchive(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.engine.publish")
     def test_delete_fail(self, publish_mock):
-        """Deletion fails if the bookmark id is not found"""
+        """Deletion fails if the URL is not found"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "archive:remove":
+            if args[0] == "bookmarks:remove":
                 return [0]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", uid=123456789, method="DELETE")
+        response = self.request("/", url="http://example.com", method="DELETE")
         self.assertEqual(response.code, 404)
 
     @mock.patch("cherrypy.engine.publish")
@@ -112,13 +102,13 @@ class TestArchive(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "archive:remove":
+            if args[0] == "bookmarks:remove":
                 return [1]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", uid=123, method="DELETE")
+        response = self.request("/", url="http://example.com", method="DELETE")
         self.assertEqual(response.code, 204)
 
 

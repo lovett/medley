@@ -6,7 +6,7 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Archive"
+    name = "Bookmarks"
 
     @staticmethod
     def check_wayback_availability(url):
@@ -35,13 +35,22 @@ class Controller:
             }
 
         if query:
-            bookmarks = cherrypy.engine.publish("archive:search", query).pop()
+            bookmarks = cherrypy.engine.publish(
+                "bookmarks:search", query
+            ).pop()
         else:
-            bookmarks = cherrypy.engine.publish("archive:recent").pop()
+            bookmarks = cherrypy.engine.publish(
+                "bookmarks:recent"
+            ).pop()
+
+        app_url = cherrypy.engine.publish(
+            "url:for_controller", self
+        ).pop()
 
         return {
-            "html": ("archive.html", {
+            "html": ("bookmarks.html", {
                 "app_name": self.name,
+                "app_url": app_url,
                 "bookmarks": bookmarks,
                 "query": query
             })
@@ -54,7 +63,7 @@ class Controller:
         result = cherrypy.engine.publish(
             "scheduler:add",
             2,
-            "archive:add",
+            "bookmarks:add",
             url,
             title,
             comments,
@@ -71,7 +80,7 @@ class Controller:
         """Discard a previously bookmarked URL."""
 
         deleted_rows = cherrypy.engine.publish(
-            "archive:remove",
+            "bookmarks:remove",
             url
         ).pop()
 

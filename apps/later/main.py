@@ -45,7 +45,7 @@ class Controller:
         bookmark = None
         if url:
             bookmark = cherrypy.engine.publish(
-                "archive:find",
+                "bookmarks:find",
                 url=url
             ).pop()
 

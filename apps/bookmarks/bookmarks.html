@@ -2,7 +2,7 @@
 {% import "macros.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('archive', 'archive.css') }}
+{{ macros.cacheBustedStylesheet('bookmarks', 'bookmarks.css') }}
 {% endblock %}
 
 {% block scripts %}
@@ -14,7 +14,7 @@
 <main>
     {{ macros.svgSymbols("delete") }}
 
-    <form class="content-wrapper" method="get" action="/archive">
+    <form class="content-wrapper" method="get" action="{{ app_url }}">
         <div class="field">
             <input type="text" id="query" name="query" value="{{ query|default('', true) }}"/>
         </div>
@@ -23,7 +23,7 @@
                 <button>Search</button>
             </div>
             <div class="field align-right">
-                <a href="/archive">Reset</a>
+                <a href="{{ app_url }}">Reset</a>
             </div>
         </div>
     </form>
@@ -33,7 +33,7 @@
 
         {% for bookmark in bookmarks %}
 
-        <discardable-record inline-template url="/archive?url={{ bookmark.url|urlencode }}">
+        <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
             <div class="bookmark" v-bind:style="styles">
                 <div class="actions">
                     <discard-button tooltip="Delete this bookmark" />
@@ -45,7 +45,7 @@
                     <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
                     |
                     <span class="domain">{{ bookmark.domain }}</span>
-                    | <wayback-link url="/archive?wayback={{ bookmark.url|urlencode }}" />
+                    | <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
                 </p>
 
                 {% if bookmark.comments %}

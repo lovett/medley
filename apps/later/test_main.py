@@ -108,7 +108,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
-            if args[0] == "archive:find":
+            if args[0] == "bookmarks:find":
                 return [{
                     "title": "existing title",
                     "tags": None,
