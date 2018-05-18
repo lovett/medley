@@ -15,6 +15,12 @@ pipeline {
         }
 
         stage("Build") {
+            steps {
+                sh "make build"
+            }
+        }
+
+        stage("Deploy") {
             when {
                 branch "production"
             }

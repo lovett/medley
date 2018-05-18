@@ -1,0 +1,16 @@
+{
+  "name": "medley",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Medley",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lovett/medley.git"
+  },
+  "author": "Bill Lovett",
+  "homepage": "https://github.com/lovett/medley",
+  "license": "MIT",
+  "devDependencies": {
+    "vue": "2.5.16"
+  }
+}

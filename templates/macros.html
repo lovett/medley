@@ -1,3 +1,43 @@
+{# Instantiate a Vue application instance.
+
+This loads the Vue library along with the desired component files. It also
+instantiates a root Vue instance which renders each component. #}
+{% macro vueApp(el_selector, components=(), app_name='app', with_library=True) %}
+
+    {% if with_library %}
+        <script src="/shared/static/js/vue.js"></script>
+    {% endif %}
+
+    {% for component in components %}
+        <script src="{{ '/shared/static/components/{}.js'.format(component)|cache_bust }}"></script>
+    {% endfor %}
+
+    <script>
+        const {{ app_name }} = new Vue({
+            el: '{{ el_selector }}',
+        })
+    </script>
+{% endmacro %}
+
+{# Bring SVG symbol definitions onto the page in a hidden SVG tag.
+
+This is the master list of all available symbols. Only the ones specified
+in the argument list are returned.  #}
+{% macro svgSymbols() %}
+    <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs>
+            {% if "delete" in varargs %}
+                <symbol id="delete" viewBox="0 0 1024 1024">
+                    <title>Delete</title>
+                    <path class="path1" d="M128 320v640c0 35.2 28.8 64 64 64h576c35.2 0 64-28.8 64-64v-640h-704zM320 896h-64v-448h64v448zM448 896h-64v-448h64v448zM576 896h-64v-448h64v448zM704 896h-64v-448h64v448z"></path>
+                    <path class="path2" d="M848 128h-208v-80c0-26.4-21.6-48-48-48h-224c-26.4 0-48 21.6-48 48v80h-208c-26.4 0-48 21.6-48 48v80h832v-80c0-26.4-21.6-48-48-48zM576 128h-192v-63.198h192v63.198z"></path>
+                </symbol>
+            {% endif %}
+        </defs>
+    </svg>
+{% endmacro %}
+
+
 {% macro copyToClipboard(value=None, light=False) %}
 <a class="copy-to-clipboard" data-copytarget="{{ value }}" data-copyselector="{{ selector }}" href="#">
     <svg class="icon icon-copy {% if light %}light{% endif %}"><use xlink:href="#icon-copy"></use></svg>

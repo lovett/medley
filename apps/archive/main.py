@@ -17,7 +17,7 @@ class Controller:
             "http://archive.org/wayback/available",
             params={"url": url},
             as_json=True
-        ).pop()
+        ).pop() or {}
 
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})
@@ -76,6 +76,6 @@ class Controller:
         ).pop()
 
         if not deleted_rows:
-            raise cherrypy.HTTPError(404, "Invalid id")
+            raise cherrypy.HTTPError(404, "Invalid url")
 
         cherrypy.response.status = 204

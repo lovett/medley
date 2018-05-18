@@ -20,3 +20,5 @@ ansible/*.hosts
 ansible/host_vars
 venv
 cache
+node_modules
+apps/shared/static

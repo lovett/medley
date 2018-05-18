@@ -6,15 +6,14 @@
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('archive', 'archive.js') }}
-{% endblock %}
-
-{% block svg_defs %}
+{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'wayback-link')) }}
 {% endblock %}
 
 {% block page_body %}
 
 <main>
+    {{ macros.svgSymbols("delete") }}
+
     <form class="content-wrapper" method="get" action="/archive">
         <div class="field">
             <input type="text" id="query" name="query" value="{{ query|default('', true) }}"/>
@@ -30,36 +29,32 @@
     </form>
 
     <div class="content-wrapper">
-
         <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
         {% for bookmark in bookmarks %}
 
-        <div class="bookmark">
-            <div class="actions">
-                <a href="#" class="delete" data-url="{{ bookmark.url }}" rel="noreferrer" title="Delete this bookmark">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                </a>
+        <discardable-record inline-template url="/archive?url={{ bookmark.url|urlencode }}">
+            <div class="bookmark" v-bind:style="styles">
+                <div class="actions">
+                    <discard-button tooltip="Delete this bookmark" />
+                </div>
+
+                <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
+
+                <p class="meta">
+                    <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                    |
+                    <span class="domain">{{ bookmark.domain }}</span>
+                    | <wayback-link url="/archive?wayback={{ bookmark.url|urlencode }}" />
+                </p>
+
+                {% if bookmark.comments %}
+                <p class="comments">
+                    {{ bookmark.comments }}
+                </p>
+                {% endif %}
             </div>
-
-            <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
-            <p class="meta">
-                <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
-                |
-                <span class="domain">{{ bookmark.domain }}</span>
-                | <a class="wayback" href="#" data-url="{{ bookmark.url }}">cache</a>
-            </p>
-
-            {% if bookmark.comments %}
-            <p class="comments">
-                {{ bookmark.comments }}
-            </p>
-            {% endif %}
-
-            <div class="align-right">
-
-            </div>
-        </div>
+        </discardable-record>
 
         {% endfor %}
     </div>

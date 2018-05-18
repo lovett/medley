@@ -183,3 +183,20 @@ vagrant-provision: dummy
 logindex-reset: dummy
 	rm db/logindex.sqlite
 	touch medley.py
+
+# Copy front-end assets from node_modules into apps/shared/static.
+#
+# Deliberately simplistic, and only needs to be run after an npm
+# upgrade.
+#
+assets: JS_DIR := apps/shared/static/js/
+assets: export NPM_CONFIG_PROGRESS = false
+assets: dummy
+	npm install -D --no-optional
+	cp node_modules/vue/dist/vue.js $(JS_DIR)
+	cp node_modules/vue/dist/vue.min.js $(JS_DIR)
+
+# Build the application
+#
+#
+build: assets
