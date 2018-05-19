@@ -2,40 +2,50 @@
 {% import "macros.html" as macros -%}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('shared', 'js/select-all.js') }}
+    {{ macros.vueApp('main', ('clipboard-button',)) }}
 {% endblock %}
 
 {% block page_body %}
-<main>
-    <form class="content-wrapper" method="post" action="/transform">
-        <div class="field">
-            <label for="value">Input:</label>
-            <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
-        </div>
-        <div class="field">
-            <label for="transform">Convert to:</label>
+    {{ macros.svgSymbols("copy") }}
+    <main>
+        <form class="content-wrapper" method="post" action="/transform">
+            <div class="field">
+                <label for="value">Input:</label>
+                <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
+            </div>
+            <div class="field">
+                <label for="transform">Convert to:</label>
+
+                <div class="field">
+                    {% for transform in transforms %}
+                        <input
+                            id="transform-{{ transform }}"
+                            type="radio"
+                            class="inline"
+                            name="transform"
+                            value="{{ transform }}"
+                            {% if transform == current_transform %}checked{% endif %}
+                        />
+                        <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
+                    {% endfor %}
+                </div>
+            </div>
 
             <div class="field">
-                {% for transform in transforms %}
-                <input id="transform-{{ transform }}" type="radio" class="inline" name="transform" value="{{ transform }}" {% if transform == current_transform %}checked{% endif %} />
-                <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
-                {% endfor %}
+                <button>Convert</button>
             </div>
-        </div>
-
-        <div class="field">
-            <button>Convert</button>
-        </div>
-    </form>
+        </form>
 
 
-    {% if result %}
-    <div class="content-wrapper">
-        <p><a href="#" data-selection-target="#result" class="select-all" data-selection-immediate="1" rel="noreferrer">Select All</a></p>
-        <div id="result">{{ result|escape()|nl2br() }}</div>
-    </div>
-    {% endif %}
-</form>
-</main>
+        {% if result %}
+            <div class="content-wrapper">
+                <p>
+                    <clipboard-button target-id="result" label="Copy to clipboard" />
+                </p>
+                <div id="result">{{ result|escape()|nl2br() }}</div>
+            </div>
+        {% endif %}
+        </form>
+    </main>
 
 {% endblock %}
