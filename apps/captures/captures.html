@@ -6,12 +6,13 @@
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('shared', 'js/copy-to-clipboard.js') }}
+{{ macros.vueApp('main', ('clipboard-button',)) }}
 {% endblock %}
 
 {% block page_body %}
 
 <main>
+    {{ macros.svgSymbols("copy", "delete") }}
 
     <form class="content-wrapper" method="get" action="/captures">
         <div class="field">
@@ -44,11 +45,11 @@
             <div class="half-column">
                 <section>
                     <div class="options">
-                        {{ macros.copyToClipboardBySelector("#reqhead-" ~ loop.index) }}
+                        <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" />
                     </div>
                     <h2>Request Headers</h2>
 
-                    <code id="reqhead-{{ capture.rowid }}">
+                    <code id="reqhead-{{ loop.index }}">
 {#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
                     {{- capture.request_line }}
 {%  for key, value in capture.request.headers.items() -%}
@@ -60,21 +61,21 @@
                 {% if capture.request.params %}
                 <section>
                     <div class="options">
-                        {{ macros.copyToClipboardBySelector("#reqbodyparam-" ~ capture.rowid) }}
+                        <clipboard-button target-id="{{ "reqbodyparam-" ~ loop.index }}" />
                     </div>
-                    <h2>Request body</h2>
-                    <code id="reqbodyparam-{{ capture.rowid }}">{{ capture.request.params }}</code>
+                    <h2>Request Body</h2>
+                    <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
                 </section>
                 {% endif %}
 
                 {% if capture.request.json %}
                 <section>
                     <div class="options">
-                        {{ macros.copyToClipboardBySelector("#reqbodyjson-" ~ capture.rowid) }}
+                        <clipboard-button target-id="{{ "reqbodyjson-" ~ loop.index }}" />
                     </div>
-                    <h2>Request Body </h2>
+                    <h2>Request JSON</h2>
 
-                    <pre id="reqbodyjson-{{ capture.rowid }}">{{ capture.request.json|json }}</pre>
+                    <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
                 </section>
                 {% endif %}
             </div>

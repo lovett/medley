@@ -1,22 +1,6 @@
 MEDLEY.registry = (function () {
     'use strict';
 
-    function deleteRecord (e) {
-        var trigger;
-
-        e.preventDefault();
-
-        trigger = jQuery(e.target).closest('A');
-        console.log(trigger);
-
-        jQuery.ajax({
-            type: 'DELETE',
-            url: '/registry?uid=' + (parseInt(trigger.data('uid'), 10) || 0)
-        }).done(function (data) {
-            window.location.reload();
-        });
-    }
-
     function submitRecord (e) {
         var field, form, errorMessage;
 
@@ -70,7 +54,6 @@ MEDLEY.registry = (function () {
     return {
         init: function () {
             jQuery('#insert-form').on('submit', submitRecord);
-            jQuery('#entries').on('click', 'A.delete', deleteRecord);
             jQuery('.views').on('click', 'A', switchView);
         }
     };

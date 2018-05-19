@@ -7,13 +7,16 @@
 
 {% block scripts %}
 {{ macros.cacheBustedScript('registry', 'registry.js') }}
-{{ macros.cacheBustedScript('shared', 'js/copy-to-clipboard.js') }}
+
+{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button')) }}
 {% endblock %}
 
 
 {% block page_body %}
 
 <main>
+    {{ macros.svgSymbols("copy", "delete") }}
+
     <div class="views content-wrapper">
         <ul>
             <li><a href="#search-form" class="{{ "active" if view == "search" }}">Search</a></li>
@@ -49,31 +52,29 @@
     </form>
 
     <div class="content-wrapper">
+
         {% if (uid or q) and not entries %}
         <p>No entries found.</p>
         {% endif %}
 
-        {% if entries %}
-        <dl id="entries">
-            {% for entry in entries %}
-            <dt>
-                {{ macros.copyToClipboard(entry.key, True) }}
-                <span class="counter">{{ loop.index }}.</span> {{ entry.key }}
-            </dt>
+        {% for entry in entries %}
+            <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
+                <div class="entry" v-bind:style="styles">
+                    <header>
+                        <div>
+                            <clipboard-button target-value="{{ entry.key }}" label="{{ entry.key }}" />
+                        </div>
 
-            <dd class="secondary">
-                Created {{ entry.created|localtime|dateformat("LLL") }}
-                <a href="#" data-uid="{{ entry.rowid }}" class="delete" title="Delete entry" rel="noreferrer">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                </a>
-            </dd>
-            <dd>
-                <div class="value">{{ macros.copyToClipboard(entry.value) }}<span>{{ entry.value }}</span></div>
-            </dd>
+                        <discard-button tooltip="Delete this entry" />
+                    </header>
 
-            {% endfor %}
-        </dl>
-        {% endif %}
+                    <div>
+                        <div><clipboard-button target-id="value-{{ loop.index }}" /></div>
+                        <div id="value-{{ loop.index }}" class="value">{{ entry.value }}</div>
+                    </div>
+                </div>
+            </discardable-record>
+        {% endfor %}
     </div>
 
 </main>

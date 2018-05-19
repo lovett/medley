@@ -1,43 +1,27 @@
-DT {
+.entry {
+    margin-bottom: 2em;
+    background-color: #fff;
+}
+
+.entry > * {
+    padding: .75em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.entry header {
     background-color: #768EBE;
     color: #fff;
-    padding: .5em;
 }
 
-.counter {
-    font-weight: normal;
-    font-size: .5em;
+.entry header .icon {
+    fill: #fff;
 }
 
-.secondary {
-    font-size: .85em;
-    margin: 0;
-    background-color: #ccc;
-    padding: .5em;
-}
-
-.secondary .icon {
-    margin-top: -.25em;
-    margin-left: 1em;
-}
-
-.value {
-    background-color: #fff;
-    padding: .5em;
+.entry .value {
     font-family: 'Courier New', Courier, monospace;
-    margin-bottom: 2em;
-    display: flex;
-}
-
-.value span {
     white-space: pre;
     overflow: hidden;
     overflow-wrap: break-word;
     flex-grow: 1;
-}
-
-
-
-.delete {
-    float: right;
 }
