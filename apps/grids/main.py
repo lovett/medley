@@ -61,7 +61,7 @@ class Controller:
             rows = [row for x in range(1, 30)]
 
         return {
-            "html": ("grids.html", {
+            "html": ("grids.jinja.html", {
                 "app_name": self.name,
                 "headers": headers,
                 "name": name,

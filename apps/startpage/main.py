@@ -47,7 +47,7 @@ class Controller:
             ).pop()
 
         return {
-            "html": ("edit.html", {
+            "html": ("edit.jinja.html", {
                 "app_name": self.name,
                 "button_label": button_label,
                 "cancel_url": cancel_url,
@@ -113,7 +113,7 @@ class Controller:
 
         return {
             "etag_key": page_name,
-            "html": ("startpage.html", {
+            "html": ("startpage.jinja.html", {
                 "app_name": self.name,
                 "created": page_record["created"],
                 "anonymizer_url": anonymizer_url,

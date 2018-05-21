@@ -143,7 +143,7 @@ class Controller:
             app_url = "http://" + app_url
 
         return {
-            "html": ("bounce.html", {
+            "html": ("bounce.jinja.html", {
                 "site": site,
                 "group": group,
                 "all_groups": all_groups,

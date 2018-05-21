@@ -68,7 +68,7 @@ class Controller:
         ).pop()
 
         return {
-            "html": ("visitors.html", {
+            "html": ("visitors.jinja.html", {
                 "flagless_countries": ("AP",),
                 "query": query,
                 "query_plan": query_plan,

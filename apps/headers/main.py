@@ -19,7 +19,7 @@ class Controller:
         return {
             "json": headers,
             "text": ["{}: {}".format(*header) for header in headers],
-            "html": ("headers.html", {
+            "html": ("headers.jinja.html", {
                 "headers": headers,
                 "app_name": self.name,
             })

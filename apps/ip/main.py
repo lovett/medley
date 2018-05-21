@@ -46,7 +46,7 @@ class Controller:
                 client_ip,
                 external_ip
             ),
-            "html": ("ip.html", {
+            "html": ("ip.jinja.html", {
                 "app_name": self.name,
                 "client_ip": client_ip,
                 "external_ip": external_ip,

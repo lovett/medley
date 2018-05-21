@@ -39,7 +39,7 @@ class Controller:
     def GET(self):
         """Display the list of applications"""
 
-        template = "homepage.html"
+        template = "homepage.jinja.html"
 
         etag_match = cherrypy.engine.publish(
             "memorize:check_etag",

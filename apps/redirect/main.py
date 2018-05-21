@@ -20,7 +20,7 @@ class Controller:
             u = unquote_plus(u)
 
         return {
-            "html": ("redirect.html", {
+            "html": ("redirect.jinja.html", {
                 "app_name": self.name,
                 "dest": u
             })

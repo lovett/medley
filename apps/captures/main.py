@@ -39,7 +39,7 @@ class Controller:
                 newer_offset = None
 
         return {
-            "html": ("captures.html", {
+            "html": ("captures.jinja.html", {
                 "path": path,
                 "captures": captures,
                 "newer_offset": newer_offset,

@@ -48,7 +48,7 @@ class Controller:
         newer_offset = offset - len(calls)
 
         return {
-            "html": ("calls.html", {
+            "html": ("calls.jinja.html", {
                 "calls": calls,
                 "total": total,
                 "newer_offset": newer_offset,

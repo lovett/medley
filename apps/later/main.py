@@ -62,7 +62,7 @@ class Controller:
             base = "http://" + base
 
         return {
-            "html": ("later.html", {
+            "html": ("later.jinja.html", {
                 "base": base,
                 "error": error,
                 "bookmark": bookmark,

@@ -32,7 +32,7 @@ class Controller:
         return {
             "json": {"transforms": self.list_of_transforms()},
             "text": "\n".join(self.list_of_transforms()),
-            "html": ("transform.html", {
+            "html": ("transform.jinja.html", {
                 "app_name": self.name,
                 "transforms": self.list_of_transforms()
             })
@@ -49,7 +49,7 @@ class Controller:
         return {
             "json": {"result": result},
             "text": result,
-            "html": ("transform.html", {
+            "html": ("transform.jinja.html", {
                 "app_name": self.name,
                 "result": result,
                 "transforms": self.list_of_transforms(),

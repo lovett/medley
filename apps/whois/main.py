@@ -18,7 +18,7 @@ class Controller:
 
         if not address:
             return {
-                "html": ("whois.html", {
+                "html": ("whois.jinja.html", {
                     "app_name": self.name
                 })
             }
@@ -80,7 +80,7 @@ class Controller:
                 cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
         return {
-            "html": ("whois.html", {
+            "html": ("whois.jinja.html", {
                 "address": address_clean,
                 "ip_address": ip_address,
                 "whois": whois,

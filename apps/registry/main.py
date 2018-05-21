@@ -30,7 +30,7 @@ class Controller:
             view = "search"
 
         return {
-            "html": ("registry.html", {
+            "html": ("registry.jinja.html", {
                 "q": q,
                 "uid": uid,
                 "entries": entries,

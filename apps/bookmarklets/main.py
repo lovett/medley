@@ -28,7 +28,7 @@ class Controller:
         ).pop()
 
         return {
-            "html": ("bookmarklets.html", {
+            "html": ("bookmarklets.jinja.html", {
                 "app_name": self.name,
                 "app_url": app_url,
                 "anonymizer": anonymizer,

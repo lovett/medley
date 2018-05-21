@@ -13,7 +13,7 @@ class Controller:
         """Lorem ipsum dolor sit"""
 
         return {
-            "html": ("template.html", {
+            "html": ("template.jinja.html", {
                 "app_name": self.name,
             }),
             "json": {"key": "value"},

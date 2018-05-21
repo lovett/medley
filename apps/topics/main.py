@@ -63,7 +63,7 @@ class Controller:
 
         return {
             "max_age": cache_lifespan,
-            "html": ("topics.html", {
+            "html": ("topics.jinja.html", {
                 "topics": topics,
                 "count": count,
                 "app_name": self.name

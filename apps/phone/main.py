@@ -28,13 +28,13 @@ class Controller:
 
         if not number:
             return {
-                "html": ("phone.html", {
+                "html": ("phone.jinja.html", {
                 }),
             }
 
         if not sanitized_number:
             return {
-                "html": ("phone.html", {
+                "html": ("phone.jinja.html", {
                     "error": self.messages.get("invalid")
                 }),
                 "json": {
@@ -101,7 +101,7 @@ class Controller:
         ]
 
         return {
-            "html": ("phone.html", {
+            "html": ("phone.jinja.html", {
                 "caller_id": caller_id,
                 "error": error,
                 "history": call_history,

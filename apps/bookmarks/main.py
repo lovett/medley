@@ -48,7 +48,7 @@ class Controller:
         ).pop()
 
         return {
-            "html": ("bookmarks.html", {
+            "html": ("bookmarks.jinja.html", {
                 "app_name": self.name,
                 "app_url": app_url,
                 "bookmarks": bookmarks,

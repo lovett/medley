@@ -43,7 +43,7 @@ class Controller:
         ).pop()
 
         return {
-            "html": ("reminder.html", {
+            "html": ("reminder.jinja.html", {
                 "app_name": self.name,
                 "templates": templates,
                 "upcoming": upcoming,

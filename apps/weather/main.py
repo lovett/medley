@@ -71,7 +71,7 @@ class Controller:
                 )
 
         return {
-            "html": ("weather.html", {
+            "html": ("weather.jinja.html", {
                 "app_name": self.name,
                 "forecasts": forecasts
             })
