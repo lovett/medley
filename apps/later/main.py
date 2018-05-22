@@ -54,16 +54,13 @@ class Controller:
             tags = bookmark["tags"]
             comments = bookmark["comments"]
 
-        base = cherrypy.request.headers.get("Host")
-
-        if "X-HTTPS" in cherrypy.request.headers:
-            base = "https://" + base
-        else:
-            base = "http://" + base
+        app_url = cherrypy.engine.publish(
+            "url:internal"
+        ).pop()
 
         return {
             "html": ("later.jinja.html", {
-                "base": base,
+                "app_url": app_url,
                 "error": error,
                 "bookmark": bookmark,
                 "title": title,

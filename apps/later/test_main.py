@@ -28,23 +28,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    def test_returns_html(self):
-        """A GET request returns a form for adding a bookmark"""
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-
-    def test_bookmarklet_url_protocol(self):
-        """If running under HTTPS, the bookmarklet url uses HTTPS"""
-
-        host = "bookmark.hostname.example.com"
-        response = self.request("/", headers={
-            "Host": host,
-            "X-HTTPS": "On"
-        })
-
-        self.assertEqual(response.code, 200)
-        self.assertTrue("https://{}".format(host) in response.body)
-
     def test_populates_title(self):
         """The title field is prepopulated if provided via querystring"""
 
@@ -123,11 +106,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(
             helpers.html_var(render_mock, "title"),
             "existing title"
-        )
-
-        self.assertTrue(
-            "already been bookmarked" in
-            helpers.html_var(render_mock, "error")
         )
 
 
