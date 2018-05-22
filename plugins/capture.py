@@ -1,12 +1,13 @@
 """Store HTTP requests and responses for later review"""
 
+import sqlite3
 import msgpack
 import cherrypy
-import sqlite3
 from . import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
+    """A CherryPy plugin for capturing HTTP requests."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -24,12 +25,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the capture prefix.
+        """
         self.bus.subscribe("capture:add", self.add)
         self.bus.subscribe("capture:search", self.search)
         self.bus.subscribe("capture:get", self.get)
 
     def add(self, request, response):
-        """Store a single HTTP request and response pair
+        """Store a single HTTP request and response pair.
 
         This is usually invoked from the capture Cherrypy tool.
 
@@ -66,6 +71,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return True
 
     def search(self, path=None, offset=0, limit=10):
+        """Locate previously stored requests by path."""
+
         if path:
             search_clause = "AND request_uri=?"
             placeholders = (path, path, limit, offset)
@@ -94,6 +101,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return (count, result)
 
     def get(self, capture_id):
+        """Locate previously stored requests by ID."""
+
         sql = """SELECT rowid, request_line, request as 'request [binary]',
         response as 'response [binary]',
         created as 'created [datetime]'
