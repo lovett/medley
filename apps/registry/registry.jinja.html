@@ -61,15 +61,18 @@
             <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
                 <div class="entry" v-bind:style="styles">
                     <header>
-                        <div>
-                            <clipboard-button target-value="{{ entry.key }}" label="{{ entry.key }}" />
-                        </div>
+                        {{ entry.key }}
+                        <div class="actions">
+                            <div><clipboard-button target-value="{{ entry.key }}" label="key" /></div>
+                            <div><clipboard-button target-id="value-{{ loop.index }}" label="value" /></div>
 
-                        <discard-button tooltip="Delete this entry" />
+                            <div>
+                                <discard-button tooltip="Delete this entry" />
+                            </div>
+                        </div>
                     </header>
 
                     <div>
-                        <div><clipboard-button target-id="value-{{ loop.index }}" /></div>
                         <div id="value-{{ loop.index }}" class="value">{{ entry.value }}</div>
                     </div>
                 </div>

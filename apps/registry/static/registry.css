@@ -4,15 +4,33 @@
 }
 
 .entry > * {
-    padding: .75em;
+    padding: .5em;
     display: flex;
+    align-items: center;
     justify-content: space-between;
 }
 
 .entry header {
+    display: flex;
     background-color: #768EBE;
     color: #fff;
 }
+
+.entry header > * {
+    vertical-align: middle;
+    margin-right: 1em;
+}
+
+.entry header .actions {
+    display: flex;
+    align-items: center;
+}
+
+.entry header .actions > * {
+    margin-left: 1em;
+}
+
+
 
 .entry header .icon {
     fill: #fff;

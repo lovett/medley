@@ -21,4 +21,4 @@ ansible/host_vars
 venv
 cache
 node_modules
-apps/shared/static
+apps/shared/static/js

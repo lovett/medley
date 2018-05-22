@@ -422,3 +422,61 @@ TABLE.natural-width {
         display: none;
     }
 }
+
+.clipboard-button {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.clipboard-button .label {
+    font-size: .5em;
+    line-height: 2;
+    text-transform: uppercase;
+}
+
+.clipboard-button a {
+    width: 1em;
+    height: 1em;
+    padding: .5em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #333;
+}
+
+.clipboard-button a:hover {
+    fill: white;
+    background-color: MediumSeaGreen;
+}
+
+.clipboard-button a.clicked {
+    animation: clipboard-button .5s 1;
+}
+
+.clipboard-button form {
+    position: absolute;
+    top: -999em;
+    left: -999em;
+}
+
+@keyframes clipboard-button {
+    0% {
+        transform: rotate(0) scale(1);
+
+    }
+
+    20% {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    60% {
+        transform: rotate(-10deg);
+    }
+
+    80% {
+        transform: rotate(0);
+    }
+
+}

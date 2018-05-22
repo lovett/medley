@@ -38,16 +38,3 @@
 .options {
     float: right;
 }
-
-.options .copy-to-clipboard {
-    padding-right: 0;
-}
-
-
-.options a svg {
-    text-align: center;
-    display: inline-block;
-    border: 1px solid #ccc;
-    padding: .5em;
-    background-color: #fff;
-}
