@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% import "macros.html" as macros -%}
+{% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
 
 {% block page_meta %}
 <meta name="active_date" content="{{ active_date|localtime|dateformat("YYYY-MM-DD") }}" />

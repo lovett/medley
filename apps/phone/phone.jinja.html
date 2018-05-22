@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% import "macros.html" as macros -%}
+{% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
 {{ macros.cacheBustedStylesheet('phone', 'phone.css') }}
