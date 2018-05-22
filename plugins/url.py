@@ -16,28 +16,20 @@ class Plugin(plugins.SimplePlugin):
 
         This plugin owns the url prefix.
         """
-        self.bus.subscribe("url:for_controller", self.url_for_controller)
+        self.bus.subscribe("url:internal", self.internal_url)
 
     @staticmethod
-    def url_for_controller(controller, path=None, query=()):
-        """Create a URL for an application given its controller."""
+    def internal_url(path=None, query=()):
+        """Create an absolute internal URL."""
 
-        host = cherrypy.request.headers.get("Host", "")
+        # A non-root path is treated as a sub-path of the current app.
+        if path and not path.startswith("/"):
+            path = "{}/{}".format(cherrypy.request.script_name, path)
 
-        if cherrypy.request.headers.get("X-Https", "") == "On":
-            proto = "https"
-        else:
-            proto = "http"
-
-        url = next(
-            ("{}://{}{}".format(proto, host, key)
-             for key in cherrypy.tree.apps
-             if isinstance(cherrypy.tree.apps[key].root, type(controller))),
-            None
+        url = "{}{}".format(
+            cherrypy.request.base,
+            path or cherrypy.request.script_name
         )
-
-        if path:
-            url = "{}/{}".format(url, path)
 
         if query:
             url = "{}?{}".format(url, urlencode(query))

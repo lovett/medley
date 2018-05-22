@@ -37,10 +37,7 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        url = cherrypy.engine.publish(
-            "url:for_controller",
-            self
-        ).pop()
+        url = cherrypy.engine.publish("url:internal").pop()
 
         return {
             "html": ("reminder.jinja.html", {
@@ -90,10 +87,7 @@ class Controller:
                 [registry_value]
             )
 
-        url = cherrypy.engine.publish(
-            "url:for_controller",
-            self
-        ).pop()
+        url = cherrypy.engine.publish("url:internal").pop()
 
         raise cherrypy.HTTPRedirect(url)
 

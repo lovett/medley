@@ -62,10 +62,7 @@ class Controller:
 
             annotations = self.get_annotations(log_records)
 
-        app_url = cherrypy.engine.publish(
-            "url:for_controller",
-            self
-        ).pop()
+        app_url = cherrypy.engine.publish("url:internal").pop()
 
         return {
             "html": ("visitors.jinja.html", {

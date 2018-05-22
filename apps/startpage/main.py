@@ -27,10 +27,7 @@ class Controller:
                 registry_key
             ).pop()
 
-        post_url = cherrypy.engine.publish(
-            "url:for_controller",
-            self
-        ).pop()
+        post_url = cherrypy.engine.publish("url:internal").pop()
 
         if is_new_page:
             button_label = "Create"
@@ -41,8 +38,7 @@ class Controller:
             cancel_url = post_url
         else:
             cancel_url = cherrypy.engine.publish(
-                "url:for_controller",
-                self,
+                "url:internal",
                 page_name
             ).pop()
 
@@ -57,7 +53,8 @@ class Controller:
             })
         }
 
-    def render_appcache_manifest(self, page_name, page_record):
+    @staticmethod
+    def render_appcache_manifest(page_record):
         """Render an Appcache Manifest for the specified page."""
 
         cherrypy.response.headers["content-type"] = "text/cache-manifest"
@@ -99,15 +96,13 @@ class Controller:
         page = parser.parse(page_record["value"])
 
         edit_url = cherrypy.engine.publish(
-            "url:for_controller",
-            self,
+            "url:internal",
             page_name,
             {"action": "edit"}
         ).pop()
 
         manifest_url = cherrypy.engine.publish(
-            "url:for_controller",
-            self,
+            "url:internal",
             page_name + "/manifest",
         ).pop()
 
@@ -142,7 +137,7 @@ class Controller:
 
         # Serve an appcache manifest
         if cherrypy.request.path_info.endswith("manifest"):
-            return self.render_appcache_manifest(page_name, page)
+            return self.render_appcache_manifest(page)
 
         # Display the edit form when explicitly requested.
         if action == "edit":
@@ -169,9 +164,8 @@ class Controller:
         )
 
         redirect_url = cherrypy.engine.publish(
-            "url:for_controller",
-            self,
-            page_name,
+            "url:internal",
+            page_name
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

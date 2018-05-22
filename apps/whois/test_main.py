@@ -1,6 +1,4 @@
-"""
-Test suite for the whois app
-"""
+"""Test suite for the whois app."""
 
 import unittest
 import mock
@@ -43,7 +41,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "url:for_controller":
+            if args[0] == "url:internal":
                 return ["/"]
             return True
 
@@ -77,7 +75,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Overrides to be returned by the mock"""
-            if args[0] == "url:for_controller":
+            if args[0] == "url:internal":
                 return ["/"]
             return mock.DEFAULT
 

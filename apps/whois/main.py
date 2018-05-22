@@ -41,10 +41,7 @@ class Controller:
                 result = socket.gethostbyname_ex(address_clean)
                 ip_address = result[2][0]
             except OSError:
-                redirect_url = cherrypy.engine.publish(
-                    "url:for_controller",
-                    self
-                ).pop()
+                redirect_url = cherrypy.engine.publish("url:internal").pop()
                 raise cherrypy.HTTPRedirect(redirect_url)
 
         whois_cache_key = "whois:{}".format(ip_address)
@@ -63,8 +60,7 @@ class Controller:
 
         facts_cache_key = "ipfacts:{}".format(ip_address)
 
-        #facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
-        facts = None
+        facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
 
         if not facts:
             facts = cherrypy.engine.publish("ip:facts", ip_address).pop()

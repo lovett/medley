@@ -43,9 +43,7 @@ class Controller:
                 "bookmarks:recent"
             ).pop()
 
-        app_url = cherrypy.engine.publish(
-            "url:for_controller", self
-        ).pop()
+        app_url = cherrypy.engine.publish("url:internal").pop()
 
         return {
             "html": ("bookmarks.jinja.html", {
