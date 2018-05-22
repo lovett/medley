@@ -2,98 +2,101 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block page_meta %}
-<meta name="lang.time.hour" content="hour,hours" />
-<meta name="lang.time.minute" content="minute,minutes" />
-<meta name="lang.time.second" content="second,seconds" />
-<meta name="lang.time.in" content="in" />
+    <meta name="lang.time.hour" content="hour,hours" />
+    <meta name="lang.time.minute" content="minute,minutes" />
+    <meta name="lang.time.second" content="second,seconds" />
+    <meta name="lang.time.in" content="in" />
 {% endblock %}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('reminder', 'reminder.css') }}
+    {{ macros.cacheBustedStylesheet('reminder', 'reminder.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('reminder', 'reminder.js') }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button')) }}
+    {{ macros.cacheBustedScript('reminder', 'reminder.js') }}
 {% endblock %}
 
 
 {% block page_body %}
+    {{ macros.svgSymbols("delete") }}
+    <main>
+        {% if upcoming %}
+            <div class="band">
+                <div id="scheduled-reminders" class="content-wrapper">
 
-<main>
-    {% if upcoming %}
-    <div class="band">
-        <div id="scheduled-reminders" class="content-wrapper">
+                    <h1>Upcoming Reminders</h1>
 
-            <h1>Scheduled</h1>
+                    {% for event in upcoming %}
+                        <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
+                            <div class="upcoming-reminder" v-bind:style="styles">
+                                <div><discard-button tooltip="Delete this reminder" /></div>
+                                <div class="summary">
+                                    <time datetime="{{ event.time * 1000 }}">
+                                        {{ event.time|localtime|dateformat("LT") }}
+                                    </time>
+                                    {{ event.argument[1].title }}
+                                    <p class="remaining smaller">calculating time remaining...</p>
+                                </div>
+                            </div>
+                        </discardable-record>
 
-            {% for event in upcoming %}
-            <div class="upcoming-reminder">
-                <a class="delete-reminder" data-uid="{{ event.time }}" href="#">
-                    <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                </a>
-                <div class="summary">
-                    <time datetime="{{ event.time * 1000 }}">
-                        {{ event.time|localtime|dateformat("LT") }}
-                    </time>
-                    {{ event.argument[1].title }}
-                    <p class="remaining smaller">calculating time remaining...</p>
+                    {% endfor %}
+
                 </div>
             </div>
+        {% endif %}
 
-            {% endfor %}
+        <div class="content-wrapper">
 
+            <form id="reminder-form" method="post" action="{{ app_url }}">
+                <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
+
+                {% if templates %}
+                    <h1>Saved Templates</h1>
+                    <div class="template-container">
+                        {% for id, template in templates.items() %}
+                            <discardable-record inline-template url="{{ template.delete_url }}">
+                                <div class="template" v-bind:style="styles">
+                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
+                                        {{ template.message }}
+                                        <br/>
+                                        <span class="smaller">{{ template.minutes|pluralize('minute', 'minutes') }}</span>
+                                    </a>
+                                    <div><discard-button tooltip="Delete this template" /></div>
+                                </div>
+                            </discardable-record>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <h1>New Reminder</h1>
+                <div class="field">
+                    <label for="message">Message</label>
+                    <input type="text" id="message" name="message" value="{{ message|default('', true)|e }}"/>
+                </div>
+
+                <div class="field">
+                    Send in
+                    <input type="text" class="inline" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
+                    minutes
+                </div>
+
+                <div class="field">
+                    <label for="comments">Comments</label>
+                    <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
+                </div>
+
+                <div class="field">
+                    <input type="checkbox" id="remember" name="remember" value="1" />
+                    <label for="remember" class="inline">Make this a template</later>
+                </div>
+
+                <div class="field">
+                    <button data-default="Save" data-alt="Please wait">Save</button>
+                </div>
+            </form>
         </div>
-    </div>
-    {% endif %}
-
-    <div class="content-wrapper">
-
-        <form id="reminder-form" method="post" action="{{ url }}">
-            <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-
-            {% if templates %}
-            <div class="template-container">
-                {% for id, template in templates.items() %}
-                <div class="template">
-                    <a href="#" class="delete-template" data-uid="{{ id }}">
-                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                    </a>
-                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
-                        {{ template.message }}
-                        <br/>
-                        <span class="smaller">{{ template.minutes|pluralize('minute', 'minutes') }}</span>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <div class="field">
-                <label for="message">Message</label>
-                <input type="text" id="message" name="message" value="{{ message|default('', true)|e }}"/>
-            </div>
-
-            <div class="field">
-                Send in
-                <input type="text" class="inline" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
-                minutes
-            </div>
-
-            <div class="field">
-                <label for="comments">Comments</label>
-                <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
-            </div>
-
-            <div class="field">
-                <input type="checkbox" id="remember" name="remember" value="1" />
-                <label for="remember" class="inline">Make this a template</later>
-            </div>
-
-            <div class="field">
-                <button data-default="Save" data-alt="Please wait">Save</button>
-            </div>
-        </form>
-    </div>
-</main>
+    </main>
 
 {% endblock %}

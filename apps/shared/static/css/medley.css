@@ -448,6 +448,10 @@ TABLE.natural-width {
     align-items: center;
 }
 
+.action-button svg {
+    height: 100%;
+}
+
 .action-button .label {
     font-size: .5em;
     line-height: 2;

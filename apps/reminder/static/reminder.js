@@ -3,44 +3,6 @@ MEDLEY.reminders = (function () {
 
     var timer, timeLabels = {};
 
-    function deleteTemplate(e) {
-        var option, uid;
-        e.preventDefault();
-        uid = parseInt(jQuery(this).data('uid'), 10) || 0;
-
-        jQuery.ajax({
-            type: 'DELETE',
-            url: '/registry?uid=' + uid
-        }).fail(function () {
-            alert('The reminder could not be deleted');
-        }).done(function (data) {
-            window.location.reload();
-        });
-    }
-
-    function deleteReminder(e) {
-        var reminder, trigger, uid;
-        e.preventDefault();
-
-        trigger = jQuery(this);
-        reminder = trigger.closest('.upcoming-reminder');
-
-        if (reminder.hasClass('done')) {
-            reminder.hide();
-            return;
-        }
-
-        uid = trigger.data('uid');
-
-        jQuery.ajax({
-            type: 'DELETE',
-            url: '/reminder?uid=' + uid
-        }).done(function (data) {
-            window.location.reload();
-        });
-    }
-
-
     function remaining(ms) {
         var seconds, bag, seconds, interval;
 
@@ -124,9 +86,6 @@ MEDLEY.reminders = (function () {
 
                 jQuery('#reminder-form').submit();
             });
-
-            jQuery('.delete-template').on('click', deleteTemplate);
-            jQuery('.delete-reminder').on('click', deleteReminder);
 
             jQuery('meta[name^="lang.time"]').each(function (index, el) {
                 var key, node, value;

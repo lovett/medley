@@ -32,19 +32,26 @@ class Controller:
             for row in registry_rows
         }
 
+        for id, template in templates.items():
+            template["delete_url"] = cherrypy.engine.publish(
+                "url:internal",
+                "/registry",
+                {"uid": id}
+            ).pop()
+
         upcoming = cherrypy.engine.publish(
             self.list_command,
             "notifier:send"
         ).pop()
 
-        url = cherrypy.engine.publish("url:internal").pop()
+        app_url = cherrypy.engine.publish("url:internal").pop()
 
         return {
             "html": ("reminder.jinja.html", {
                 "app_name": self.name,
                 "templates": templates,
                 "upcoming": upcoming,
-                "url": url,
+                "app_url": app_url,
             }),
         }
 
