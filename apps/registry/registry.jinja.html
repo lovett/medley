@@ -63,12 +63,9 @@
                     <header>
                         {{ entry.key }}
                         <div class="actions">
-                            <div><clipboard-button target-value="{{ entry.key }}" label="key" /></div>
-                            <div><clipboard-button target-id="value-{{ loop.index }}" label="value" /></div>
-
-                            <div>
-                                <discard-button tooltip="Delete this entry" />
-                            </div>
+                            <div><clipboard-button target-value="{{ entry.key }}" label="key" tooltip="Copy key" /></div>
+                            <div><clipboard-button target-id="value-{{ loop.index }}" label="value" tooltip="Copy value" /></div>
+                            <div><discard-button tooltip="Delete this entry" /></div>
                         </div>
                     </header>
 

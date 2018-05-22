@@ -16,26 +16,6 @@
     color: #fff;
 }
 
-.entry header > * {
-    vertical-align: middle;
-    margin-right: 1em;
-}
-
-.entry header .actions {
-    display: flex;
-    align-items: center;
-}
-
-.entry header .actions > * {
-    margin-left: 1em;
-}
-
-
-
-.entry header .icon {
-    fill: #fff;
-}
-
 .entry .value {
     font-family: 'Courier New', Courier, monospace;
     white-space: pre;

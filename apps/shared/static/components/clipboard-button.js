@@ -15,7 +15,14 @@ Vue.component('clipboard-button', {
             type: String,
             required: false,
             default: undefined
+        },
+
+        tooltip: {
+            type: String,
+            required: false,
+            default: 'Copy to clipboard'
         }
+
     },
 
     data: function () {
@@ -41,8 +48,8 @@ Vue.component('clipboard-button', {
     },
 
     template: `
-    <div class="clipboard-button">
-        <a href="#" v-on:click.prevent="click" v-bind:class="{ clicked: clicked }" title="Copy to clipboard">
+    <div class="action-button clipboard-button">
+        <a href="#" v-on:click.prevent="click" v-bind:class="{ clicked: clicked }" v-bind:title="tooltip">
             <svg><use xlink:href="#copy"></use></svg>
        </a>
        <span class="label">{{ this.label }}</span>

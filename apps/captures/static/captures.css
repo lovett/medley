@@ -3,18 +3,22 @@
     margin-bottom: 2em;
 }
 
-.capture HEADER {
+.capture header {
     background-color: #000;
     color: #fff;
     padding: .5em 1em;
 }
 
-.capture HEADER A {
+.capture header A {
     float: right;
 }
 
-.capture HEADER svg {
+.capture header svg {
     fill: #fff;
+}
+
+.capture .action-button a {
+    border: 1px solid #333;
 }
 
 

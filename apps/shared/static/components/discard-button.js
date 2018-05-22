@@ -22,5 +22,11 @@ Vue.component('discard-button', {
             this.$parent.$emit(this.emitEvent);
         }
     },
-    template: `<a href="#" v-on:click="click" v-bind:title="tooltip"><svg class="icon"><use v-bind:xlink:href="svgSymbol"></use></svg></a>`,
+    template: `
+    <div class="action-button discard-button">
+        <a href="#" v-on:click="click" v-bind:title="tooltip">
+            <svg><use v-bind:xlink:href="svgSymbol"></use></svg>
+        </a>
+    </div>
+    `
 })

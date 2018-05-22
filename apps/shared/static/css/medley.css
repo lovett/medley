@@ -423,19 +423,38 @@ TABLE.natural-width {
     }
 }
 
-.clipboard-button {
+.actions {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+}
+
+.actions > * {
+    margin: 0 .5em;
+}
+
+.actions > *:first-child {
+    margin-left: 0;
+}
+
+.actions > *:last-child {
+    margin-right: 0;
+}
+
+
+.action-button {
     display: flex;
     flex-flow: column;
     align-items: center;
 }
 
-.clipboard-button .label {
+.action-button .label {
     font-size: .5em;
     line-height: 2;
     text-transform: uppercase;
 }
 
-.clipboard-button a {
+.action-button a {
     width: 1em;
     height: 1em;
     padding: .5em;
@@ -443,7 +462,7 @@ TABLE.natural-width {
     justify-content: center;
     align-items: center;
     background-color: #fff;
-    border: 1px solid #333;
+    transition: all .25s;
 }
 
 .clipboard-button a:hover {
@@ -479,4 +498,9 @@ TABLE.natural-width {
         transform: rotate(0);
     }
 
+}
+
+.discard-button a:hover {
+    background-color: FireBrick;
+    fill: #fff;
 }
