@@ -1,19 +1,33 @@
+"""Text formatting function."""
+
 import re
 from cherrypy.process import plugins
 
 
 class Plugin(plugins.SimplePlugin):
+    """A CherryPy plugin for miscellaneous text formatting needs."""
+
     def __init__(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe("formatting:dbpedia_abstract", self.dbpediaAbstract)
-        self.bus.subscribe("formatting:http_timestamp", self.http_timestamp)
+        """Define the CherryPy messages to listen for.
 
-    def stop(self):
-        pass
+        This plugin owns the formatting prefix.
+        """
 
-    def dbpediaAbstract(self, text):
+        self.bus.subscribe(
+            "formatting:dbpedia_abstract",
+            self.dbpedia_abstract
+        )
+
+        self.bus.subscribe(
+            "formatting:http_timestamp",
+            self.http_timestamp
+        )
+
+    @staticmethod
+    def dbpedia_abstract(text):
         """Extract the first two meaningful sentences from a dbpedia
         abstract.
 
@@ -31,19 +45,29 @@ class Plugin(plugins.SimplePlugin):
         # Remove sentences referring to maps
         abbreviated_text = [
             sentence for sentence in abbreviated_text.split(". ")
-            if re.search(" in (red|blue) (is|are)", sentence, re.IGNORECASE) is None
-            and not re.match("The map to the right", sentence, re.IGNORECASE)
-            and not re.match("Error: ", sentence, re.IGNORECASE)
+            if not re.search(
+                " in (red|blue) (is|are)", sentence,
+                re.IGNORECASE
+            )
+            and not re.match(
+                "The map to the right", sentence,
+                re.IGNORECASE
+            )
+            and not re.match(
+                "Error: ", sentence,
+                re.IGNORECASE
+            )
         ][:2]
 
         abbreviated_text = ". ".join(abbreviated_text)
 
-        if len(abbreviated_text) > 0 and not abbreviated_text.endswith("."):
+        if abbreviated_text and not abbreviated_text.endswith("."):
             abbreviated_text += "."
 
         return abbreviated_text
 
-    def http_timestamp(self, instance):
+    @staticmethod
+    def http_timestamp(instance):
         """Custom Pendulum formatter for an HTTP-date timestamp, as defined in
         Section 7.1.1.1 of [RFC7231].
 
