@@ -1,17 +1,3 @@
-// Redirect when the querystring indicates an update has just occurred
-if (window.location.search.indexOf('updated=1') > -1) {
-    window.location.href = window.location.pathname;
-}
-
-// Display the page reload message when an appcache update is available
-if (window.applicationCache) {
-    applicationCache.addEventListener('updateready', function() {
-        if (window.applicationCache.status === window.applicationCache.UPDATEREADY) {
-            document.getElementById('appcache-message').style.display = 'block';
-        }
-    });
-}
-
 // Display the last modified time of the data file
 var el = document.getElementById('modified');
 

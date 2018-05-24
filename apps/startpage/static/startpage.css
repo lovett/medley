@@ -95,10 +95,6 @@ li.group:hover .all {
     color: green;
 }
 
-#appcache-message {
-    display: none;
-}
-
 .content-wrapper {
     width: auto;
 }
