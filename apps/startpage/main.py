@@ -1,5 +1,6 @@
 """A page of links for use as a web browser homepage."""
 
+import os
 import cherrypy
 from apps.startpage.parser import Parser
 
@@ -8,6 +9,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Startpage"
+
+    default_page_name = "default"
 
     @staticmethod
     def registry_key(page_name):
@@ -49,7 +52,7 @@ class Controller:
                 "cancel_url": cancel_url,
                 "page_name": page_name,
                 "page_content": page_content,
-                "post_url": post_url
+                "post_url": post_url,
             })
         }
 
@@ -87,6 +90,11 @@ class Controller:
             {"action": "edit"}
         ).pop()
 
+        worker_url = cherrypy.engine.publish(
+            "url:internal",
+            "worker.js"
+        ).pop()
+
         return {
             "etag_key": page_name,
             "html": ("startpage.jinja.html", {
@@ -94,28 +102,76 @@ class Controller:
                 "created": page_record["created"],
                 "anonymizer_url": anonymizer_url,
                 "edit_url": edit_url,
-                "page": page
+                "page": page,
+                "worker_url": worker_url
             })
         }
 
+    @staticmethod
+    def render_worker():
+        """Serve the service worker from an alternate path.
+
+        Serving the worker from the base URL of the app gives it
+        app-wide scope. If its URL reflected its actual location
+        within the static folder, it would only be able to manage
+        resources in that folder.
+
+        """
+
+        file_path = os.path.join(
+            os.path.dirname(__file__),
+            "static/worker.js"
+        )
+
+        return cherrypy.lib.static.serve_file(
+            file_path,
+            content_type="application/javascript"
+        )
+
     @cherrypy.tools.negotiable()
-    def GET(self, page_name="default", action="view"):
+    def GET(self, page_name=None, action="view"):
         """Render a page or present the edit form."""
+
+        # Give the service worker an application-root URI so that
+        # pages are within its scope.
+        if page_name == "worker.js":
+            return self.render_worker()
+
+        # Prevent the default page name from being exposed. This is
+        # only case where the canonical URL needs special
+        # consideration.
+        if page_name == self.default_page_name:
+            redirect_url = cherrypy.engine.publish(
+                "url:internal",
+                None,
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         record = cherrypy.engine.publish(
             "registry:search",
-            self.registry_key(page_name),
+            self.registry_key(page_name or self.default_page_name),
             exact=True,
             limit=1
         ).pop()
 
-        # Display the edit form when a non-existent page is requested.
-        if not record:
+        # Redirect to the edit form when a non-existent page is requested.
+        if action == "view" and not record:
+            redirect_url = cherrypy.engine.publish(
+                "url:internal",
+                page_name,
+                {"action": "edit"}
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
+
+        # Display the edit form with a starter template when editing a
+        # non-existent page.
+        if action == "edit" and not record:
             return self.edit_page(page_name, None)
 
+        # Display the edit form with the existing page.
         page = record[0]
-
-        # Display the edit form when explicitly requested.
         if action == "edit":
             return self.edit_page(page_name, page["value"])
 
@@ -125,7 +181,9 @@ class Controller:
     def POST(self, page_name, page_content):
         """Create or update the INI version of a page."""
 
-        registry_key = self.registry_key(page_name)
+        registry_key = self.registry_key(
+            page_name or self.default_page_name
+        )
 
         cherrypy.engine.publish(
             "registry:add",
