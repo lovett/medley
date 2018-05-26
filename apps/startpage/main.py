@@ -50,7 +50,7 @@ class Controller:
                 "app_name": self.name,
                 "button_label": button_label,
                 "cancel_url": cancel_url,
-                "page_name": page_name,
+                "page_name": page_name or "",
                 "page_content": page_content,
                 "post_url": post_url,
             })
@@ -137,6 +137,21 @@ class Controller:
         if page_name == "worker.js":
             return self.render_worker()
 
+        # Display an alternate template after a page has been edited
+        # to remove the newly-stale page from the client's cache.
+        if action == "updated":
+            page_url = cherrypy.engine.publish(
+                "url:internal",
+                page_name,
+            ).pop()
+
+            return {
+                "html": ("postedit.jinja.html", {
+                    "app_name": self.name,
+                    "page_url": page_url
+                })
+            }
+
         # Prevent the default page name from being exposed. This is
         # only case where the canonical URL needs special
         # consideration.
@@ -199,7 +214,8 @@ class Controller:
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
-            page_name
+            page_name,
+            {"action": "updated"}
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

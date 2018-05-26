@@ -18,11 +18,6 @@
 
 {% endblock %}
 
-{% block scripts %}
-{{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
-{{ macros.cacheBustedScript('startpage', 'startpage.js') }}
-{% endblock %}
-
 {% block page_meta %}
 <meta name="anonymizer" content="{{ anonymizer_url }}"/>
 {% endblock %}
@@ -90,4 +85,18 @@
         </section>
     </div>
 </main>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('{{ worker_url }}').then(registration => {
+                console.info(`Service worker registered with scope ${registration.scope}`);
+            }).catch(error => console.error(error));
+        } else {
+            console.info('Service workers are not supported here.');
+        }
+    </script>
+    {{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.cacheBustedScript('startpage', 'startpage.js') }}
 {% endblock %}

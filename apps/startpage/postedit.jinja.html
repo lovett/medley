@@ -1,0 +1,22 @@
+{% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block page_body %}
+    <main class="content-wrapper">
+        <p>Edit successful!</p>
+    </main>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Delete the newly-stale cached version of the page.
+        caches.open('{{ app_name|lower() }}').then(cache => {
+            cache.delete('{{ page_url }}').then(result => {
+                window.location.replace('{{ page_url }}');
+            });
+        });
+    </script>
+{% endblock %}
