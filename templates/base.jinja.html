@@ -25,7 +25,7 @@
         {% block page_meta %}{% endblock %}
 
     </head>
-    <body>
+    <body id="{{ body_id }}">
         <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
             <defs>
                 <symbol id="icon-link" viewBox="0 0 32 32">
@@ -48,7 +48,6 @@
                 {% block svg_defs %}{% endblock %}
             </defs>
         </svg>
-
 
         {% block page_header %}
         <header id="page-header">

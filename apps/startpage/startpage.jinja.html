@@ -1,6 +1,9 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
+{% set body_id = 'startpage-display' %}
+
+
 {% block stylesheets %}
 {{ macros.cacheBustedStylesheet('startpage', 'startpage.css') }}
 
@@ -8,11 +11,6 @@
     A[href^="{{anonymizer_url}}"] {
         color: #369;
         font-style: normal;
-    }
-
-    .focus-candidate {
-        background-color: orange;
-        color: white;
     }
 </style>
 
@@ -24,7 +22,7 @@
 
 
 {% block page_header %}
-{# This app does not display the standard header. #}
+{# This view does not display the standard header. #}
 {% endblock %}
 
 {% block page_body %}

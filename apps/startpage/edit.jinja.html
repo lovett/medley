@@ -1,22 +1,25 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
+{% set body_id = 'startpage-edit' %}
+
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('startpage', 'edit.css') }}
+    {{ macros.cacheBustedStylesheet('startpage', 'startpage.css') }}
 {% endblock %}
 
 {% block page_body %}
-
-<main id="edit" class="content-wrapper">
-    <form method="post" action="{{ post_url }}">
-        <input type="hidden" name="page_name" value="{{ page_name }}" />
-        <fieldset>
-            <div id="toolbar">
-                <a href="{{ cancel_url }}">Cancel</a>
-                <button>{{ button_label }}</button>
-            </div>
-            <textarea name="page_content">{{ page_content }}</textarea>
-        </fieldset>
-    </form>
-</main>
+    <main>
+        <div class="content-wrapper">
+            <form method="post" action="{{ post_url }}">
+                <input type="hidden" name="page_name" value="{{ page_name }}" />
+                <fieldset>
+                    <div id="toolbar">
+                        <a href="{{ cancel_url }}">Cancel</a>
+                        <button>{{ button_label }}</button>
+                    </div>
+                    <textarea name="page_content">{{ page_content }}</textarea>
+                </fieldset>
+            </form>
+        </div>
+    </main>
 {% endblock %}

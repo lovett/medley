@@ -1,7 +1,3 @@
-body {
-    background-color: #fff;
-}
-
 section {
     column-break-inside: avoid;
     break-inside: avoid;
@@ -95,21 +91,49 @@ li.group:hover .all {
     color: green;
 }
 
-.content-wrapper {
+#startpage-display {
+    background-color: #fff;
+}
+
+#startpage-display .content-wrapper {
     width: auto;
 }
 
+#startpage-edit FIELDSET {
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+
+#startpage-edit #toolbar {
+    padding: 1em 0;
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#startpage-edit TEXTAREA {
+    box-sizing: border-box;
+    padding: .5em;
+    width: 100%;
+    font-family: monospace;
+    height: 70vh;
+}
+
+.focus-candidate {
+    background-color: orange;
+    color: white;
+}
+
+
 /* Tablet and up */
 @media (min-width: 768px) {
-    body {
+    #startpage-display {
         font-size: .8em;
     }
 
-    A.top {
-        display: none;
-    }
-
-    .content-wrapper {
+    #startpage-display .content-wrapper {
         column-gap: 2em;
         column-width: 15em;
         display: block;
