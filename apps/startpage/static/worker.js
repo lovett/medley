@@ -31,7 +31,7 @@ function cacheCheck(request) {
 function fetchAndCache(request) {
     return fetch(request).then(response => {
         return caches.open(CACHE_NAME).then(cache => {
-            cache.put(request, response.clone()).then(() => {
+            return cache.put(request, response.clone()).then(() => {
                 return response;
             });
         });
