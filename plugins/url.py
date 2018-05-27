@@ -34,4 +34,7 @@ class Plugin(plugins.SimplePlugin):
         if query:
             url = "{}?{}".format(url, urlencode(query))
 
+        if cherrypy.request.headers.get("X-Https", "") == "On":
+            url = "https:{}".format(url.split(":", 1).pop())
+
         return url
