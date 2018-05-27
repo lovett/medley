@@ -132,6 +132,22 @@ class Controller:
     def GET(self, page_name=None, action="view"):
         """Render a page or present the edit form."""
 
+        # Require a trailing slash for the default page.
+        #
+        # This is for the benefit of the service worker, whose scope
+        # is the app root. Without a trailing slash, the worker thinks
+        # the app is a standalone page under the site root and out of
+        # scope. With a trailing slash, the worker sees the app root
+        # as a proper sub-directory.
+        if not page_name and cherrypy.request.path_info is not "/":
+            redirect_url = cherrypy.engine.publish(
+                "url:internal",
+                None,
+                trailing_slash=True
+            ).pop()
+            raise cherrypy.HTTPRedirect(redirect_url)
+
+
         # Give the service worker an application-root URI so that
         # pages are within its scope.
         if page_name == "worker.js":

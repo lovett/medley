@@ -19,7 +19,7 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe("url:internal", self.internal_url)
 
     @staticmethod
-    def internal_url(path=None, query=()):
+    def internal_url(path=None, query=(), trailing_slash=False):
         """Create an absolute internal URL."""
 
         # A non-root path is treated as a sub-path of the current app.
@@ -30,6 +30,9 @@ class Plugin(plugins.SimplePlugin):
             cherrypy.request.base,
             path or cherrypy.request.script_name
         )
+
+        if trailing_slash and not url.endswith("/"):
+            url += "/"
 
         if query:
             url = "{}?{}".format(url, urlencode(query))
