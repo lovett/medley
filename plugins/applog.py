@@ -39,7 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._insert(
             "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
-            [(source, key, value)]
+            [(source, key, str(value))]
         )
 
         # Mirror the log message on the cherrypy log for convenience.

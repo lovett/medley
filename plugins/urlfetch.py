@@ -205,12 +205,12 @@ class Plugin(plugins.SimplePlugin):
 
             return req.text
 
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch",
                 "post",
-                "Request failed"
+                exception
             )
 
             return None
