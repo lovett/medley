@@ -42,7 +42,8 @@ class Controller:
         else:
             cancel_url = cherrypy.engine.publish(
                 "url:internal",
-                page_name
+                page_name,
+                trailing_slash=(page_name is None)
             ).pop()
 
         return {
@@ -87,7 +88,8 @@ class Controller:
         edit_url = cherrypy.engine.publish(
             "url:internal",
             page_name,
-            {"action": "edit"}
+            {"action": "edit"},
+            trailing_slash=(page_name is None)
         ).pop()
 
         worker_url = cherrypy.engine.publish(
@@ -139,7 +141,7 @@ class Controller:
         # the app is a standalone page under the site root and out of
         # scope. With a trailing slash, the worker sees the app root
         # as a proper sub-directory.
-        if not page_name and cherrypy.request.path_info is not "/":
+        if action == "view" and page_name is None and cherrypy.request.path_info != "/":
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
                 None,
@@ -156,9 +158,11 @@ class Controller:
         # Display an alternate template after a page has been edited
         # to remove the newly-stale page from the client's cache.
         if action == "updated":
+            print("ok!!!!")
             page_url = cherrypy.engine.publish(
                 "url:internal",
                 page_name,
+                trailing_slash=(page_name is None)
             ).pop()
 
             return {
@@ -231,7 +235,8 @@ class Controller:
         redirect_url = cherrypy.engine.publish(
             "url:internal",
             page_name,
-            {"action": "updated"}
+            {"action": "updated"},
+            trailing_slash=(page_name is None)
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

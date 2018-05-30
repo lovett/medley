@@ -1,5 +1,9 @@
 const CACHE_NAME = 'startpage';
 
+self.addEventListener('activate', (event) => {
+    console.log('activated!');
+});
+
 self.addEventListener('fetch', (event) => {
     // Only consider GET requests.
     if (event.request.method !== 'GET') {
@@ -12,6 +16,15 @@ self.addEventListener('fetch', (event) => {
     }
 
     event.respondWith(cacheCheck(event.request));
+
+    // Always refetch non-hashed assets.
+    //
+    // This ensures the cached copy stays current with edits made by
+    // other clients, but means that the new version won't be visible
+    // until the next page load.
+    if (event.request.url.indexOf('?') === -1) {
+        fetchAndCache(event.request);
+    }
 });
 
 /**
