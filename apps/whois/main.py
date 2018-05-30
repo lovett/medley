@@ -75,12 +75,19 @@ class Controller:
             if facts:
                 cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
+        visitors_ip_url = cherrypy.engine.publish(
+            "url:internal",
+            "/visitors",
+            {"query": "ip {}".format(ip_address)}
+        ).pop()
+
         return {
             "html": ("whois.jinja.html", {
                 "address": address_clean,
                 "ip_address": ip_address,
                 "whois": whois,
                 "ip_facts": facts,
-                "app_name": self.name
+                "app_name": self.name,
+                "visitors_ip_url": visitors_ip_url
             })
         }
