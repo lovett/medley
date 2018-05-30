@@ -1,22 +1,44 @@
+"""Look up geographic information by various identifiers."""
+
 import cherrypy
 
+
 class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for retrieving geographic information by
+    abbreviation or other identifier.
+
+    """
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe("geography:unabbreviate_state", self.unabbreviateUsState)
-        self.bus.subscribe("geography:state_by_area_code", self.stateByAreaCode)
-        self.bus.subscribe("geography:country_by_abbreviation", self.countryByAbbreviation)
+        """Define the CherryPy messages to listen for.
 
-    def stop(self):
-        pass
+        This plugin owns the geography prefix.
+        """
 
-    def stateByAreaCode(self, area_code):
+        self.bus.subscribe(
+            "geography:unabbreviate_state",
+            self.unabbreviate_us_state
+        )
+
+        self.bus.subscribe(
+            "geography:state_by_area_code",
+            self.state_by_area_code
+        )
+
+        self.bus.subscribe(
+            "geography:country_by_abbreviation",
+            self.country_by_abbreviation
+        )
+
+    @staticmethod
+    def state_by_area_code(area_code):
         """Query dbpedia for the geographic location of a North American
         telephone area code. Returns a dictionary with keys for state
         abbreviation, full name, and comment.
+
         """
 
         sparql = """
@@ -46,7 +68,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             as_json=True
         ).pop()
 
-
         try:
             abstract = cherrypy.engine.publish(
                 "formatting:dbpedia_abstract",
@@ -58,12 +79,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 response["results"]["bindings"][0]["state_abbrev"]["value"],
                 abstract
             )
-        except:
+        except KeyError:
             return (None, None, None)
 
-    def unabbreviateUsState(self, abbreviation):
+    @staticmethod
+    def unabbreviate_us_state(abbreviation):
         """Query dbpedia for the full name of a U.S. state by its 2-letter
         abbreviation.
+
         """
 
         sparql = """
@@ -96,10 +119,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 sparql,
                 response["results"]["bindings"][0]["state_name"]["value"]
             )
-        except:
+        except KeyError:
             return (None, None)
 
-    def countryByAbbreviation(self, abbreviations=()):
+    @staticmethod
+    def country_by_abbreviation(abbreviations=()):
+        """Query the registry for the name of a country from its 2-letter
+        abbreviation.
+
+        """
+
         keys = (
             "country_code:alpha2:{}".format(abbreviation)
             for abbreviation in abbreviations
