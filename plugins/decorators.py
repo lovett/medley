@@ -1,19 +1,23 @@
+"""Decorators for use by plugins."""
+
 from time import perf_counter
 import functools
 import cherrypy
 
 
-def log_runtime(f):
-    """Calculate elapsed time and write to the applog."""
+def log_runtime(func):
+    """Measure and store the runtime of a method call."""
 
-    @functools.wraps(f)
+    @functools.wraps(func)
     def wrapper(*args, **kwargs):
+        """Calculate elapsed time and write to the applog."""
+
         source = '{}.{}.runtime'.format(
-            f.__module__,
-            f.__name__
+            func.__module__,
+            func.__name__
         )
         start = perf_counter()
-        result = f(*args, **kwargs)
+        result = func(*args, **kwargs)
         duration = perf_counter() - start
 
         cherrypy.engine.publish(
