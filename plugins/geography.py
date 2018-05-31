@@ -79,8 +79,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 response["results"]["bindings"][0]["state_abbrev"]["value"],
                 abstract
             )
-        except KeyError:
-            return (None, None, None)
+        except (KeyError, TypeError):
+            return (sparql, None, None)
 
     @staticmethod
     def unabbreviate_us_state(abbreviation):
@@ -119,8 +119,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 sparql,
                 response["results"]["bindings"][0]["state_name"]["value"]
             )
-        except KeyError:
-            return (None, None)
+        except (KeyError, TypeError):
+            return (sparql, None)
 
     @staticmethod
     def country_by_abbreviation(abbreviations=()):
