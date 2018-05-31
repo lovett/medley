@@ -36,11 +36,11 @@ class Plugin(plugins.SimplePlugin):
             "User-Agent": "python",
         }
 
-        if headers:
-            request_headers.update(headers)
-
         if as_json:
             request_headers["Accept"] = "application/json"
+
+        if headers:
+            request_headers.update(headers)
 
         cherrypy.engine.publish(
             "applog:add",
@@ -68,12 +68,12 @@ class Plugin(plugins.SimplePlugin):
 
             return req.text
 
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch",
                 "get",
-                "Request failed"
+                exception
             )
 
             return None
