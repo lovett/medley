@@ -1,23 +1,31 @@
-import cherrypy
+"""Generate MD5 hashes."""
+
 import hashlib
+import cherrypy
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for generating MD5 hashes."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe("hasher:md5", self.md5)
+        """Define the CherryPy messages to listen for.
 
-    def stop(self):
-        pass
+        This plugin owns the hasher prefix.
+        """
 
-    def md5(self, val, hex_digest=True):
-        m = hashlib.md5()
-        m.update(val.encode())
+        self.bus.subscribe("hasher:md5", self.md5_hash)
+
+    @staticmethod
+    def md5_hash(val, hex_digest=True):
+        """Calculate the MD5 digest of a value."""
+
+        md5_hasher = hashlib.md5()
+        md5_hasher.update(val.encode())
 
         if hex_digest:
-            return m.hexdigest()
+            return md5_hasher.hexdigest()
 
-        return m.digest()
+        return md5_hasher.digest()
