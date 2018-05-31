@@ -99,6 +99,8 @@
     - files/medley.service
     - files/medley-geodb.service
     - files/medley-geodb.timer
+    - files/medley-cacheclean.service
+    - files/medley-cacheclean.timer
 
 - name: Enable medley systemd service
   become: true
@@ -109,11 +111,14 @@
     name: medley
     state: restarted
 
-- name: Enable medley geodb timer
+- name: Enable medley systemd timers
   become: true
   systemd:
     daemon_reload: yes
     enabled: yes
     masked: no
-    name: medley-geodb.timer
+    name: {{ item }}
     state: started
+  with_items:
+    - medley-geodb.timer
+    - medley-cacheclean.timer

@@ -1,0 +1,7 @@
+[Unit]
+Description=Medley filesystem cache cleanup
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/find /var/cache/medley/speak -type f -daystart -mtime +45 -exec rm {} \;
+ExecStartPost=/usr/bin/find /var/cache/medley/speak -empty -exec rm {} \;
