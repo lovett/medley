@@ -30,19 +30,12 @@
             bufferDisplay.text(buffer);
         }
 
-        $(document).on('keypress', function (e) {
+        function match() {
             var matches, now, score;
 
-            if (e.which === 27) { // escape key
+            if (buffer === '') {
                 clearBuffer();
                 return;
-            }
-
-            if (e.which === 8 || e.which === 46) { // backspace, delete
-                buffer = buffer.slice(0, buffer.length - 1);
-            } else {
-                buffer = buffer + String.fromCharCode(e.which);
-                buffer = buffer.slice(0, settings.bufferLength);
             }
 
             displayBuffer();
@@ -66,6 +59,33 @@
                     }
                 });
             }
+        }
+
+        // Chrome won't send keypress events for non-printable
+        // keys. Handle them on keyup instead.
+        $(document).on('keyup', function (e) {
+            if (e.which === 27) { // escape key
+                clearBuffer();
+                return;
+            }
+
+            if (e.which === 8 || e.which === 46) { // backspace, delete
+                buffer = buffer.slice(0, buffer.length - 1);
+                match();
+            }
+        });
+
+        $(document).on('keypress', function (e) {
+            // Backspace, delete, and escape will be handled on keyup
+            // to accommodate Chrome.
+            if (e.which === 8 || e.which === 46 || e.which === 27) {
+                return;
+            }
+
+            buffer = buffer + String.fromCharCode(e.which);
+            buffer = buffer.slice(0, settings.bufferLength);
+
+            match();
         });
 
         return this;
