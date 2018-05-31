@@ -117,7 +117,7 @@
     daemon_reload: yes
     enabled: yes
     masked: no
-    name: {{ item }}
+    name: "{{ item }}"
     state: started
   with_items:
     - medley-geodb.timer
