@@ -116,12 +116,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
           END AS direction,
         duration as "duration [duration]", clid as "clid [clid]"
         FROM cdr
-        WHERE src=? OR dst LIKE ?
+        WHERE src LIKE ? OR dst LIKE ?
         ORDER BY calldate DESC
         LIMIT ?
         """
 
+        wildcard_number = "%{}".format(number)
+
         return self._select(
             query,
-            (number, "%" + number, limit)
+            (wildcard_number, wildcard_number, limit)
         )
