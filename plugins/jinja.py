@@ -7,7 +7,7 @@ import http.client
 import os
 import os.path
 import urllib
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 import json
 import re
 from cherrypy.process import plugins
@@ -162,10 +162,17 @@ class Plugin(plugins.SimplePlugin):
             memorize=True
         ).pop()
 
-        if not url.startswith("http"):
-            url = "http://" + url
-
         if not anonymizer:
+            return url
+
+        parsed_url = urlparse(url)
+
+        if not parsed_url.scheme:
+            url = "http://" + url
+            parsed_url = urlparse(url)
+
+        # Only consider HTTP and HTTPS.
+        if parsed_url.scheme not in ('http', 'https'):
             return url
 
         return anonymizer + quote(url)

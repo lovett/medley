@@ -2,7 +2,7 @@
 
 """
 
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 import configparser
 import re
 
@@ -25,6 +25,13 @@ class Parser():
 
         """
 
+        parsed_url = urlparse(url)
+
+        # Skip non-http URLs.
+        if parsed_url.scheme not in ('http', 'https'):
+            return self.postprocess(url)
+
+        # Skip URLs in local domains.
         if any([d for d in self.local_domains if d in url]):
             return self.postprocess(url)
 
