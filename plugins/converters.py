@@ -44,31 +44,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return utc_date
 
-    @staticmethod
-    def local_timezone():
-        """Determine the timezone of the application.
-
-        The registry is checked first so that the application timezone
-        can be independent of the server's timezone. But the server's
-        timezone also acts as a fallback.
-
-        """
-
-        timezone = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:timezone",
-            memorize=True
-        ).pop()
-
-        if not timezone:
-            timezone = pendulum.now().timezone.name
-
-        return timezone
-
     def calldate_to_utc(self, value):
         """Convert a local datetime string to a UTC Pendulum instance."""
 
-        local_tz = self.local_timezone()
+        local_tz = cherrypy.engine.publish(
+            "registry:local_timezone"
+        ).pop()
 
         return pendulum.from_format(
             value.decode("utf-8"),

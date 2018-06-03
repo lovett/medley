@@ -1,6 +1,8 @@
 import cherrypy
 from . import mixins
 from collections import defaultdict
+import pendulum
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
@@ -24,6 +26,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
+        self.bus.subscribe("registry:local_timezone", self.local_timezone)
 
     def stop(self):
         pass
@@ -157,3 +160,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return [key.split(":", 1).pop() for key in keys]
 
         return keys
+
+    def local_timezone(self):
+        """Determine the timezone of the application.
+
+        The registry is checked first so that the application timezone
+        can be independent of the server's timezone. But the server's
+        timezone also acts as a fallback.
+
+        """
+
+        timezone = self.firstValue(
+            "config:timezone",
+            memorize=True
+        )
+
+        if not timezone:
+            timezone = pendulum.now().timezone.name
+
+        return timezone

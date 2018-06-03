@@ -98,7 +98,9 @@ class Plugin(plugins.SimplePlugin):
             return ""
 
         if not timezone:
-            zone = self.local_timezone()
+            zone = cherrypy.engine.publish(
+                "registry:local_timezone"
+            ).pop()
 
         if isinstance(value, (int, float)):
             value = pendulum.from_timestamp(value)
@@ -174,21 +176,6 @@ class Plugin(plugins.SimplePlugin):
 
         return urllib.parse.quote(value)
 
-    @staticmethod
-    def local_timezone():
-        """Determine the timezone to be used for references to local time."""
-
-        zone = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:timezone",
-            memorize=True
-        ).pop()
-
-        if not zone:
-            zone = pendulum.now().timezone.name
-
-        return zone
-
     def ago_filter(self, unix_timestamp):
         """Calculate a human-readable time delta between a timestamp and
         now.
@@ -197,7 +184,9 @@ class Plugin(plugins.SimplePlugin):
 
         date = pendulum.from_timestamp(unix_timestamp)
 
-        zone = self.local_timezone()
+        zone = cherrypy.engine.publish(
+            "registry:local_timezone"
+        ).pop()
 
         return date.in_timezone(zone).diff_for_humans()
 

@@ -42,7 +42,6 @@ class Controller:
         if not log_records:
             reversed_ips = None
             deltas = None
-            active_date = None
             country_names = None
             annotations = None
         else:
@@ -53,8 +52,6 @@ class Controller:
 
             deltas = self.get_deltas(log_records)
 
-            active_date = self.get_active_date(log_records, query)
-
             country_names = cherrypy.engine.publish(
                 "geography:country_by_abbreviation",
                 (record["country"] for record in log_records)
@@ -63,6 +60,8 @@ class Controller:
             annotations = self.get_annotations(log_records)
 
         app_url = cherrypy.engine.publish("url:internal").pop()
+
+        active_date = self.get_active_date(log_records, query)
 
         return {
             "html": ("visitors.jinja.html", {
@@ -137,36 +136,48 @@ class Controller:
 
     @staticmethod
     def get_active_date(log_records, query):
-        """
-        Figure out which date the query pertains to
+        """Figure out which date the query pertains to.
 
-        This value is used by the calender widget in the UI
+        This value is used by the calender widget in the UI.
+
         """
 
         if log_records:
             return log_records[0]["unix_timestamp"]
 
         timezone = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:timezone",
-            memorize=True
+            "registry:local_timezone"
         ).pop()
 
-        try:
-            date_string = re.match(
-                r"date\s+(\d{4}-\d{2}-\d{2})",
-                query
-            ).group(1)
+        date_string = None
 
+        matches = re.match(
+            r"date\s+(\d{4}-\d{2})",
+            query
+        )
+
+        if matches:
+            date_string = matches.group(1) + "-01"
+
+        matches = re.match(
+            r"date\s+(\d{4}-\d{2}-\d{2})",
+            query
+        )
+
+        if matches:
+            date_string = matches.group(1)
+
+        if date_string:
             active_date = pendulum.parse(
                 date_string,
                 tz=timezone
             )
+        elif re.match(r"date\s+yesterday", query):
+            active_date = pendulum.yesterday(tz=timezone)
+        else:
+            active_date = pendulum.today(tz=timezone)
 
-        except AttributeError:
-            active_date = pendulum.now()
-
-        return active_date
+        return active_date.start_of('day')
 
     @staticmethod
     def get_annotations(log_records):
