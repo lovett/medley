@@ -1,5 +1,6 @@
 """Display current and upcoming weather conditions."""
 
+import copy
 import math
 from collections import defaultdict
 import cherrypy
@@ -138,9 +139,10 @@ class Controller:
         if "data" in hourly:
             result["hourly"] = []
             for hour in hourly["data"][0:24]:
-                hour["time"] = pendulum.from_timestamp(
-                    hour["time"], tz=timezone
+                hour_clone = copy.copy(hour)
+                hour_clone["time"] = pendulum.from_timestamp(
+                    hour_clone["time"], tz=timezone
                 )
-                result["hourly"].append(hour)
+                result["hourly"].append(hour_clone)
 
         return result
