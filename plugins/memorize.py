@@ -1,31 +1,40 @@
+"""An in-memory cache for frequently accessed values."""
+
 import cherrypy
-import time
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for managing an in-memory cache."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.cache = {}
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the memorize prefix.
+        """
+
         self.bus.subscribe("memorize:get", self.get)
         self.bus.subscribe("memorize:set", self.set)
         self.bus.subscribe("memorize:clear", self.clear)
         self.bus.subscribe("memorize:etag", self.etag)
         self.bus.subscribe("memorize:check_etag", self.check_etag)
 
-    def stop(self):
-        pass
-
     def get(self, key, default=None):
+        """Retrieve a value from the cache."""
+
         cache_hit = key in self.cache
         cache_value = self.cache.get(key, default)
         return (cache_hit, cache_value)
 
     def set(self, key, value):
+        """Store a value in the cache."""
         self.cache[key] = value
 
     def clear(self, key):
+        """Remove a value from the cache."""
         self.cache.pop(key, None)
 
     def etag(self, template, value):
@@ -53,6 +62,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return False
 
         key = "etag:{}".format(identifier)
-        cache_hit, cache_value = self.get(key)
+        _, cache_value = self.get(key)
 
         return cache_value == wanted_value
