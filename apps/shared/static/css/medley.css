@@ -1,3 +1,7 @@
+:root {
+    --discard-bg-color: FireBrick;
+}
+
 BODY {
     font-family: system-ui, 'Corbel', 'FreeSans', 'Lucida Grande', sans-serif;
     background-color: #efefef;
@@ -505,6 +509,6 @@ TABLE.natural-width {
 }
 
 .discard-button a:hover {
-    background-color: FireBrick;
+    background-color: var(--discard-bg-color);
     fill: #fff;
 }

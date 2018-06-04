@@ -2,6 +2,7 @@
 
 import re
 from cherrypy.process import plugins
+import pendulum
 
 
 class Plugin(plugins.SimplePlugin):
@@ -24,6 +25,11 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe(
             "formatting:http_timestamp",
             self.http_timestamp
+        )
+
+        self.bus.subscribe(
+            "formatting:time_duration",
+            self.time_duration
         )
 
     @staticmethod
@@ -75,3 +81,14 @@ class Plugin(plugins.SimplePlugin):
 
         """
         return instance.format('ddd, DD MMM YYYY HH:mm:ss zz')
+
+    @staticmethod
+    def time_duration(**kwargs):
+        """Convert a time interval expressed in one or more units to a human
+        readable string.
+
+        This is a wrapper for the Pendulum Duration class, so kwargs should match
+        the keywords supported there.
+
+        """
+        return pendulum.duration(**kwargs).in_words()

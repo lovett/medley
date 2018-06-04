@@ -53,7 +53,7 @@
                 <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
 
                 {% if templates %}
-                    <h1>Saved Templates</h1>
+                    <h1>Templates</h1>
                     <div class="template-container">
                         {% for id, template in templates.items() %}
                             <discardable-record inline-template url="{{ template.delete_url }}">
@@ -61,7 +61,7 @@
                                     <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
                                         {{ template.message }}
                                         <br/>
-                                        <span class="smaller">{{ template.minutes|pluralize('minute', 'minutes') }}</span>
+                                        <span class="smaller">{{ template.duration_in_words }}</span>
                                     </a>
                                     <div><discard-button tooltip="Delete this template" /></div>
                                 </div>

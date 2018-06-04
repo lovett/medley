@@ -33,6 +33,11 @@ class Controller:
         }
 
         for id, template in templates.items():
+            template["duration_in_words"] = cherrypy.engine.publish(
+                "formatting:time_duration",
+                minutes=int(template["minutes"])
+            ).pop()
+
             template["delete_url"] = cherrypy.engine.publish(
                 "url:internal",
                 "/registry",
