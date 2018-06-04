@@ -1,20 +1,27 @@
-import cherrypy
-import requests
-import json
+"""Send email."""
+
+import smtplib
+from email.mime.text import MIMEText
 import jinja2
 from cherrypy.process import plugins
 
+
 class Plugin(plugins.SimplePlugin):
+    """A CherryPy plugin for sending email."""
+
     def __init__(self, bus):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
-        self.bus.subscribe("mail:send", self.sendMessage)
+        """Define the CherryPy messages to listen for.
 
-    def stop(self):
-        pass
+        This plugin owns the mail prefix.
+        """
 
-    def sendMessage(self, message_data, template_data):
+        self.bus.subscribe("mail:send", self.send_message)
+
+    @staticmethod
+    def send_message(message_data, template_data):
         """Render an email template and send via SMTP"""
 
         loader = jinja2.FileSystemLoader(message_data["template_dir"])
