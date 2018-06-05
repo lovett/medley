@@ -15,11 +15,6 @@ INPUT[type=checkbox] {
 .content-wrapper H1 {
     font-size: 1.4em;
     font-weight: normal;
-
-}
-
-.content-wrapper > .half-column {
-    padding: 0 1em;
 }
 
 .upcoming-reminder {
@@ -54,6 +49,14 @@ INPUT[type=checkbox] {
     margin-bottom: .5em;
 }
 
+#reminder-form .numeric {
+    width: 3em;
+}
+
+#reminder-form .inline-container {
+    margin-right: 1em;
+}
+
 #template-options {
     padding-left: 1em;
 }
@@ -67,8 +70,7 @@ INPUT[type=checkbox] {
 }
 
 .template-container {
-    margin-bottom: 2em;
-    padding-bottom: 2em;
+    padding-bottom: 1em;
 }
 
 .template {

@@ -58,7 +58,7 @@
                         {% for id, template in templates.items() %}
                             <discardable-record inline-template url="{{ template.delete_url }}">
                                 <div class="template" v-bind:style="styles">
-                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}">
+                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}" data-notification_id="{{ template.notification_id }}">
                                         {{ template.message }}
                                         <br/>
                                         <span class="smaller">{{ template.duration_in_words }}</span>
@@ -72,19 +72,31 @@
 
                 <h1>New Reminder</h1>
                 <div class="field">
+                    <label for="hours">Send in</label>
+
+                    <span class="inline-container">
+                        <input type="text" class="inline numeric" id="hours" name="hours" value="" />
+                        hours
+                    </span>
+
+                    <span class="inline-container">
+                        <input type="text" class="inline numeric" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
+                        minutes
+                    </span>
+                </div>
+                <div class="field">
                     <label for="message">Message</label>
                     <input type="text" id="message" name="message" value="{{ message|default('', true)|e }}"/>
                 </div>
 
                 <div class="field">
-                    Send in
-                    <input type="text" class="inline" id="minutes" name="minutes" value="{{ delivery|default('', true)|e }}"/>
-                    minutes
+                    <label for="comments">Comments</label>
+                    <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
                 </div>
 
                 <div class="field">
-                    <label for="comments">Comments</label>
-                    <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
+                    <label for="notification_id">Notification ID</label>
+                    <input type="text" id="notification_id" name="notification_id" value="{{ notification_id|default('', true)|e }}" />
                 </div>
 
                 <div class="field">

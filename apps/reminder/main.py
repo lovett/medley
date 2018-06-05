@@ -60,13 +60,20 @@ class Controller:
             }),
         }
 
-    def POST(self, message, minutes=None, comments=None, remember=None):
+    def POST(self, message, minutes=None, hours=None, comments=None, notification_id=None, remember=None):
         """Queue a new reminder for delivery."""
 
         try:
             minutes = int(minutes)
         except (ValueError, TypeError):
             minutes = 0
+
+        try:
+            hours = int(hours)
+        except (ValueError, TypeError):
+            hours = 0
+
+        total_minutes = minutes + (hours * 60)
 
         try:
             remember = int(remember)
@@ -79,9 +86,12 @@ class Controller:
             "title": message
         }
 
+        if notification_id:
+            notification["localId"] = notification_id
+
         cherrypy.engine.publish(
             self.add_command,
-            minutes * 60,
+            total_minutes * 60,
             "notifier:send",
             notification
         )
@@ -89,8 +99,9 @@ class Controller:
         if remember == 1:
             registry_value = urlencode({
                 "message": message,
-                "minutes": minutes,
+                "minutes": total_minutes,
                 "comments": comments,
+                "notification_id": notification_id
             })
 
             cherrypy.engine.publish(
