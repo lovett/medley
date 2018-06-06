@@ -10,7 +10,7 @@
 <main>
     <div class="content-wrapper">
         <div class="bookmarklet-container">
-            <a href="javascript:e=encodeURIComponent;void(window.location.href='{{ app_url }}/bounce?u=' + e(location.href))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
+            <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}/bounce?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
         </div>
 
 
