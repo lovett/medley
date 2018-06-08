@@ -1,21 +1,40 @@
+"""Methods for issuing SQL queries against an SQLite database."""
+
 import os.path
 import sqlite3
 from itertools import zip_longest
 import cherrypy
 
 
+# pylint: disable=invalid-name
 class Sqlite:
-    def _path(self, name):
+    """Query an SQLite database using Python's DB-API."""
+
+    db_path = None
+
+    @staticmethod
+    def _path(name):
+        """Get the filesystem path of a database file relative to the
+        application database directory.
+
+        """
+
         return os.path.join(
             cherrypy.config.get("database_dir"),
             name
         )
 
     def _open(self):
-        con = sqlite3.connect(self.db_path, detect_types=sqlite3.PARSE_COLNAMES)
-        return con
+        """Open a connection to the current database."""
+
+        return sqlite3.connect(
+            self.db_path,
+            detect_types=sqlite3.PARSE_COLNAMES
+        )
 
     def _create(self, sql):
+        """Issue create table statements when a new database is created."""
+
         if os.path.isfile(self.db_path):
             return
 
@@ -24,8 +43,9 @@ class Sqlite:
         con.commit()
         con.close()
 
-
     def _multi(self, queries):
+        """Issue several queries."""
+
         con = self._open()
         with con:
             for query, params in queries:
@@ -33,17 +53,19 @@ class Sqlite:
             con.commit()
 
     def _insert(self, query, values):
+        """Issue an insert query to create one or more records."""
+
         con = self._open()
         with con:
             con.executemany(query, values)
-            cur = con.cursor()
-            rowid = cur.lastrowid
         con.close()
 
-        # cannot return lastrowid because it is not populated during executemany
+        # cannot return lastrowid because it is not populated
+        # during executemany
         return True
 
     def _update(self, query, values):
+        """Issue an update query."""
         con = self._open()
         with con:
             con.executemany(query, values)
@@ -51,6 +73,7 @@ class Sqlite:
         return True
 
     def _delete(self, query, values):
+        """Issue a delete query."""
         con = self._open()
         with con:
             row_count = con.execute(query, values).rowcount
@@ -58,6 +81,7 @@ class Sqlite:
         return row_count
 
     def _select(self, query, values=()):
+        """Issue a select query."""
         con = self._open()
         con.row_factory = sqlite3.Row
 
@@ -67,25 +91,30 @@ class Sqlite:
             return cur.fetchall() or []
 
     def _explain(self, query, values=()):
+        """Get the query plan for a query."""
+
         return self._select(
             "EXPLAIN QUERY PLAN {}".format(query),
             values
         )
 
+    @staticmethod
+    def _cacheTable(query):
+        """The name of the table that will cache results for the specified
+        query.
 
-    def _cacheTable(self, query):
-        """The name of the table that will cache results for the specified query"""
+        """
+
         checksum = cherrypy.engine.publish("checksum:string", query).pop()
         return "cache_{}".format(checksum)
 
-
     def _tableNames(self):
+        """Get a list of tables in the database."""
         result = self._select(
             "SELECT name FROM sqlite_master WHERE type=?",
             ("table",)
         )
         return [row["name"] for row in result]
-
 
     def _dropCacheTables(self):
         """Remove all existing cache tables"""
@@ -118,6 +147,7 @@ class Sqlite:
             )
 
     def _selectOne(self, query, values=()):
+        """Issue a select query and return the first row."""
         result = self._select(query, values)
 
         try:
@@ -126,6 +156,11 @@ class Sqlite:
             return {}
 
     def _selectFirst(self, query, values=()):
+        """Issue a select query and return the first value of the first
+        row.
+
+        """
+
         result = self._select(query, values)
 
         try:
@@ -191,7 +226,9 @@ class Sqlite:
 
         return score
 
-    def _fts_search(self, query, values=(), *args):
+    def _fts_search(self, query, values=()):
+        """Issue a fulltext search query."""
+
         con = self._open()
         con.row_factory = sqlite3.Row
 
