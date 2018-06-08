@@ -1,105 +1,188 @@
-import cherrypy
-import os
-from cherrypy.process import plugins
-from collections import defaultdict
-from pyparsing import *
-import string
-import os.path
-from urllib.parse import urlparse
-import pendulum
-from datetime import datetime, timedelta
+"""Grammar-based parsing using pyparsing.
 
-# Parse action helper methods receive 3 arguments:
-# s is the original parse string
-# l is the location in the string where matching started
-# t is the list of the matched tokens, packaged as a ParseResults_ object
-class Plugin(plugins.SimplePlugin):
+Action helper methods receive 3 arguments:
+  - s is the original parse string
+  - l is the location in the string where matching started
+  - t is the list of the matched tokens, packaged as a ParseResults object
+"""
+
+import string
+from urllib.parse import urlparse
+import pyparsing as pp
+import cherrypy
+import pendulum
+
+
+class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for interacting with pyparsing grammars."""
+
     def __init__(self, bus):
-        plugins.SimplePlugin.__init__(self, bus)
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         # Parsing primitives
-        self.integer = Word(nums)
-        self.ipv4 = Combine(self.integer + "." + self.integer + "." + self.integer + "." + self.integer)
-        self.ipv6 = Word(alphanums + ":")
-        self.month3 = Word(string.ascii_uppercase, string.ascii_lowercase, exact=3)
+        integer = pp.Word(pp.nums)
 
-        self.date10 = Group(
-            Word(nums, exact=4) + Suppress("-") +
-            Word(nums, exact=2) + Suppress("-") +
-            Word(nums, exact=2)
+        ipv4 = pp.Combine(
+            integer + "." + integer + "." + integer + "." + integer
         )
 
-        self.date7 = Group(
-             Word(nums, exact=4) + Suppress("-") +
-             Word(nums, exact=2)
+        ipv6 = pp.Word(pp.alphanums + ":")
+
+        month3 = pp.Word(
+            string.ascii_uppercase,
+            string.ascii_lowercase,
+            exact=3
         )
 
-        self.tzoffset = Word("+-", nums)
-        self.timestamp = Group(
-            Suppress("[") +
-            Combine(
-                self.integer + "/" + self.month3 + "/" + self.integer +
-                ":" + self.integer + ":" + self.integer + ":" + self.integer +
-                " " + self.tzoffset
+        date10 = pp.Group(
+            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2)
+        )
+
+        date7 = pp.Group(
+            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2)
+        )
+
+        tzoffset = pp.Word("+-", pp.nums)
+
+        timestamp = pp.Group(
+            pp.Suppress("[") +
+            pp.Combine(
+                integer + "/" + month3 + "/" + integer + ":" +
+                integer + ":" + integer + ":" + integer +
+                " " + tzoffset
             ) +
-            Suppress("]")
+            pp.Suppress("]")
         )
 
-        self.optionalNot = Optional(Literal("not"))
+        optional_not = pp.Optional(pp.Literal("not"))
 
         # Appengine Combined Log Grammar
-        # Field order is documented at https://cloud.google.com/appengine/docs/python/logs/#Python_how_to_read_a_log
-        # This is heavily based on  http://pyparsing.wikispaces.com/file/view/httpServerLogParser.py/30166005/httpServerLogParser.py
-        self.appengine_grammar = (self.ipv4 | self.ipv6).setResultsName("ip") + \
-        Suppress("-") + \
-        ("-" | dblQuotedString | Word( alphanums + "@._")).setResultsName("auth").setParseAction(self.dashToNone) + \
-        self.timestamp.setResultsName("timestamp").setParseAction(self.firstInGroup) + \
-        dblQuotedString.setResultsName("cmd").setParseAction(self.requestFields) + \
-        ("-" | self.integer).setResultsName("statusCode").setParseAction(self.dashToNone) + \
-        ("-" | self.integer).setResultsName("numBytesSent").setParseAction(self.dashToNone) + \
-        ("-" | dblQuotedString).setResultsName("referrer").setParseAction(removeQuotes, self.dashToNone) + \
-        ("-" | dblQuotedString).setResultsName("agent").setParseAction(removeQuotes, self.dashToNone) + \
-        Optional(dblQuotedString.setResultsName("host").setParseAction(removeQuotes)) + \
-        Optional(dictOf(Word(alphanums + "_") + Suppress("="), dblQuotedString).setResultsName("extras").setParseAction(self.toDict))
+        # Field order is documented at:
+        # https://cloud.google.com/appengine/docs/python/logs/
+        #
+        # This is heavily based on:
+        # http://pyparsing.wikispaces.com/file/view/httpServerLogParser.py/30166005/httpServerLogParser.py
+
+        # ip
+        appengine_fields = (ipv4 | ipv6).setResultsName("ip")
+
+        # ident
+        appengine_fields += pp.Suppress("-")
+
+        # auth
+        appengine_fields += (
+            "-" |
+            pp.dblQuotedString |
+            pp.Word(pp.alphanums + "@._")
+        ).setParseAction(self.dash_to_none)
+
+        # timestamp
+        appengine_fields += timestamp.setResultsName(
+            "timestamp"
+        ).setParseAction(
+            self.first_in_group
+        ).setResultsName("timestamp")
+
+        # cmd
+        appengine_fields += pp.dblQuotedString.setParseAction(
+            self.request_fields
+        ).setResultsName("cmd")
+
+        # status
+        appengine_fields += ("-" | integer).setParseAction(
+            self.dash_to_none
+        ).setResultsName("statusCode")
+
+        # bytes sent
+        appengine_fields += ("-" | integer).setParseAction(
+            self.dash_to_none
+        ).setResultsName("numBytesSent")
+
+        # referrer
+        appengine_fields += ("-" | pp.dblQuotedString).setParseAction(
+            pp.removeQuotes,
+            self.dash_to_none
+        ).setResultsName("referrer")
+
+        # agent
+        appengine_fields += ("-" | pp.dblQuotedString).setParseAction(
+            pp.removeQuotes,
+            self.dash_to_none
+        ).setResultsName("agent")
+
+        # host
+        appengine_fields += pp.Optional(
+            pp.dblQuotedString.setParseAction(pp.removeQuotes)
+        ).setResultsName("host")
+
+        # extras
+        appengine_fields += pp.Optional(
+            pp.dictOf(
+                pp.Word(pp.alphanums + "_") +
+                pp.Suppress("="),
+                pp.dblQuotedString
+            ).setParseAction(
+                self.to_dict
+            ).setResultsName("extras")
+        )
+
+        self.appengine_grammar = appengine_fields
 
         # Custom grammar for querying the logindex database
         # Converts a list key-value pairs to SQL
-        self.logquery_grammar = delimitedList(
-            Or([
-                # relative date
-                (Literal("date") + oneOf("today yesterday")).setParseAction(self.logQueryRelativeDate),
+        logquery_fields = (
+            pp.Literal("date") +
+            pp.oneOf("today yesterday")
+        ).setParseAction(self.log_query_relative_date)
 
-                # absolute date in yyyy-mm-dd or yyyy-mm format
-                (Literal("date") + OneOrMore(self.date10 | self.date7)).setParseAction(self.logQueryAbsoluteDate),
+        logquery_fields += (
+            pp.Literal("date") +
+            pp.OneOrMore(date10 | date7)
+        ).setParseAction(self.log_query_absolute_date)
 
-                # numeric fields
-                (oneOf("statusCode") +
-                 self.optionalNot +
-                 OneOrMore(self.integer)).setParseAction(self.logQueryNumeric),
+        logquery_fields += (
+            pp.oneOf("statusCode") +
+            optional_not +
+            pp.OneOrMore(integer)
+        ).setParseAction(self.log_query_numeric)
 
-                # url
-                (Literal("uri") + self.optionalNot + OneOrMore(Word(alphanums + "%/-."))).setParseAction(self.logQueryWildcard),
+        logquery_fields += (
+            pp.Literal("uri") +
+            optional_not +
+            pp.OneOrMore(pp.Word(pp.alphanums + "%/-."))
+        ).setParseAction(self.log_query_wildcard)
 
-                # string fields
-                (oneOf("city country region classification method cookie uri agent_domain classification reverse_domain referrer_domain") +
-                 self.optionalNot +
-                 OneOrMore(Word(alphanums + ".-"))).setParseAction(self.logQueryExactString),
+        logquery_fields += (
+            pp.oneOf("city country region classification method cookie uri \
+            agent_domain classification reverse_domain referrer_domain") +
+            optional_not + pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
+        ).setParseAction(self.log_query_exact_string)
 
-                # ip
-                (Literal("ip") + self.optionalNot + OneOrMore(self.ipv4 | self.ipv6)).setParseAction(self.logQueryExactString)
+        logquery_fields += (
+            pp.Literal("ip") +
+            optional_not +
+            pp.OneOrMore(ipv4 | ipv6)
+        ).setParseAction(self.log_query_exact_string)
 
-            ]),
+        self.logquery_grammar = pp.delimitedList(
+            pp.Or(logquery_fields),
             "|"
         )
 
     def start(self):
-        self.bus.subscribe('parse:appengine', self.parseAppengine)
-        self.bus.subscribe('parse:log_query', self.parseLogQuery)
+        """Define the CherryPy messages to listen for.
 
-    def stop(self):
-        pass
+        This plugin owns the parse prefix.
+        """
 
-    def requestFields(self, s, l, t):
+        self.bus.subscribe('parse:appengine', self.parse_appengine)
+        self.bus.subscribe('parse:log_query', self.parse_log_query)
+
+    @staticmethod
+    def request_fields(_string, _location, tokens):
         """Subdivide the cmd field to isolate method, uri, query, and version
 
         Extra care needs to be taken because the uri could contain
@@ -107,25 +190,32 @@ class Plugin(plugins.SimplePlugin):
         brittle, even though it's the straightforward approach that
         works for the normal case."""
 
-        fields = t[0].strip('"').split()
+        fields = tokens[0].strip('"').split()
 
         uri = ' '.join(fields[1:-1])
 
-        t["method"] = fields[0]
-        t["uri"] = uri
-        t["query"] = None
-        t["version"] = fields[-1]
+        tokens["method"] = fields[0]
+        tokens["uri"] = uri
+        tokens["query"] = None
+        tokens["version"] = fields[-1]
         if "?" in uri:
-            t["uri"], t["query"] = t["uri"].split('?', 1)
+            tokens["uri"], tokens["query"] = tokens["uri"].split('?', 1)
 
-    def firstInGroup(self, s, l, t):
-        return t[0][0]
+    @staticmethod
+    def first_in_group(_string, _location, tokens):
+        """Return the first item in a group."""
+        return tokens[0][0]
 
-    def dashToNone(self, s, l, t):
+    @staticmethod
+    def dash_to_none(_string, _location, tokens):
         """Coerce a bare hypen to None"""
-        return None if t[0] == "-" else t[0]
+        if tokens[0] == "-":
+            return None
 
-    def logQueryRelativeDate(self, s, l, t):
+        return tokens[0]
+
+    @staticmethod
+    def log_query_relative_date(_string, _location, tokens):
         """Generate an SQL where clause for a date expressed via keyword.
 
         Recognized keywords are "today" and "yesterday".
@@ -140,17 +230,22 @@ class Plugin(plugins.SimplePlugin):
         matches the expression used in the create index statement.
         """
 
-        if t[1] == "today":
+        if tokens[1] == "today":
             reference_date = pendulum.today()
-        elif t[1] == "yesterday":
+        elif tokens[1] == "yesterday":
             reference_date = pendulum.yesterday()
 
         return "datestamp BETWEEN '{}' AND '{}'".format(
-            reference_date.start_of('day').in_timezone('utc').format('YYYY-MM-DD-HH'),
-            reference_date.end_of('day').in_timezone('utc').format('YYYY-MM-DD-HH')
+            reference_date.start_of('day').in_timezone('utc').format(
+                'YYYY-MM-DD-HH'
+            ),
+            reference_date.end_of('day').in_timezone('utc').format(
+                'YYYY-MM-DD-HH'
+            )
         )
 
-    def logQueryAbsoluteDate(self, s, l, t):
+    @staticmethod
+    def log_query_absolute_date(_string, _location, tokens):
         """Generate an SQL where clause for a date expressed literally.
 
         Dates can either be in YYYY-mm or YYYY-mm-dd format.
@@ -165,18 +260,16 @@ class Plugin(plugins.SimplePlugin):
         matches the expression used in the create index statement.
         """
 
-        field = t[0]
+        dates = tokens[1:]
 
-        dates = t[1:]
-
-        tz = cherrypy.engine.publish(
+        timezone = cherrypy.engine.publish(
             "registry:first_value",
             "config:timezone",
             memorize=True
         ).pop()
 
-        if not tz:
-            tz = pendulum.now().timezone.name
+        if not timezone:
+            timezone = pendulum.now().timezone.name
 
         sql = []
         for date in dates:
@@ -188,40 +281,49 @@ class Plugin(plugins.SimplePlugin):
             if len(date) == 3:
                 year, month, day = ints
 
-            reference_date = pendulum.datetime(year, month, day, tz=tz)
+            reference_date = pendulum.datetime(year, month, day, tz=timezone)
 
             sql.append("datestamp BETWEEN '{}' AND '{}'""".format(
-                reference_date.start_of('day').in_timezone('utc').format('YYYY-MM-DD-HH'),
-                reference_date.end_of('day').in_timezone('utc').format('YYYY-MM-DD-HH')
+                reference_date.start_of('day').in_timezone('utc').format(
+                    'YYYY-MM-DD-HH'
+                ),
+                reference_date.end_of('day').in_timezone('utc').format(
+                    'YYYY-MM-DD-HH'
+                )
             ))
 
         joined_sql = " OR ".join(sql)
         return "({})".format(joined_sql)
 
-    def logQueryNumeric(self, s, l, t):
-        field = t[0]
+    @staticmethod
+    def log_query_numeric(_string, _location, tokens):
+        """Build an SQL string for a numeric comparison."""
 
-        if t[1] == "not":
-            values = t[2:]
+        field = tokens[0]
+
+        if tokens[1] == "not":
+            values = tokens[2:]
             sql = ["{} <> {}".format(field, value) for value in values]
             joined_sql = " AND ".join(sql)
         else:
-            values = t[1:]
+            values = tokens[1:]
             sql = ["{} = {}".format(field, value) for value in values]
             joined_sql = " OR ".join(sql)
 
         return "({})".format(joined_sql)
 
-    def logQueryWildcard(self, s, l, t):
-        field = t[0]
+    @staticmethod
+    def log_query_wildcard(_string, _location, tokens):
+        """Build an SQL string for a wildcard comparison."""
+        field = tokens[0]
 
-        if t[1] == "not":
-            values = t[2:]
+        if tokens[1] == "not":
+            values = tokens[2:]
             wildcard_operator = "NOT LIKE"
             equality_operator = "<>"
             boolean_keyword = " AND "
         else:
-            values = t[1:]
+            values = tokens[1:]
             wildcard_operator = "LIKE"
             equality_operator = "="
             boolean_keyword = " OR "
@@ -229,15 +331,22 @@ class Plugin(plugins.SimplePlugin):
         sql = []
         for value in values:
             if value.startswith("%") or value.endswith("%"):
-                sql.append("{} {} '{}'".format(field, wildcard_operator, value))
+                sql.append("{} {} '{}'".format(
+                    field, wildcard_operator, value
+                ))
             else:
-                sql.append("{} {} '{}'".format(field, equality_operator, value))
+                sql.append("{} {} '{}'".format(
+                    field, equality_operator, value
+                ))
 
         joined_sql = boolean_keyword.join(sql)
         return "({})".format(joined_sql)
 
-    def logQueryExactString(self, s, l, t):
-        field = t[0]
+    @staticmethod
+    def log_query_exact_string(_string, _location, tokens):
+        """Build an SQL string for an exact string comparison."""
+
+        field = tokens[0]
 
         # The IP field needs to be qualified because it is used
         # as the basis of a join. It is the only field that needs
@@ -245,29 +354,33 @@ class Plugin(plugins.SimplePlugin):
         if field == "ip":
             field = "logs.ip"
 
-        if t[1] == "not":
-            values = t[2:]
+        if tokens[1] == "not":
+            values = tokens[2:]
             sql = ["{} <> '{}'".format(field, value) for value in values]
             joined_sql = " AND ".join(sql)
         else:
-            values = t[1:]
+            values = tokens[1:]
             sql = ["{} = '{}'".format(field, value) for value in values]
             joined_sql = " OR ".join(sql)
 
         return "({})".format(joined_sql)
 
-    def toDict(self, s, l, t):
-        """Apply the keys and values returned by pyparsing.dictOf to the main parse result"""
-        d = {}
-        for k, v, in t[0].items():
-            if v.startswith('"') and v.endswith('"'):
-                d[k] = v[1:-1]
+    @staticmethod
+    def to_dict(_string, _location, tokens):
+        """Apply the keys and values returned by pyparsing.dictOf to the main
+        parse result
+
+        """
+        result = {}
+        for key, val, in tokens[0].items():
+            if val.startswith('"') and val.endswith('"'):
+                result[key] = val[1:-1]
             else:
-                d[k] = v
+                result[key] = val
 
-        return d
+        return result
 
-    def parseAppengine(self, val):
+    def parse_appengine(self, val):
         """Parse a log line in combined-plus-Appengine-extras format
 
         App Engine extras consist of additional key=value pairs after
@@ -283,11 +396,11 @@ class Plugin(plugins.SimplePlugin):
 
         try:
             fields = self.appengine_grammar.parseString(val).asDict()
-        except ParseException as e:
+        except pp.ParseException as exception:
             cherrypy.engine.publish(
                 "applog:add",
                 "parse",
-                "fail:column:{}".format(e.col),
+                "fail:column:{}".format(exception.col),
                 val
             )
 
@@ -331,15 +444,18 @@ class Plugin(plugins.SimplePlugin):
         del fields["extras"]
         return fields
 
-    def parseLogQuery(self, val):
+    def parse_log_query(self, val):
         """Convert a logindex query to sql
 
-        The query is used to build the WHERE clause of an SQL query, which is otherwise
-        built within the logindex plugin. The parsing that occurs here deals with things like
-        exact and wildcard matching, multiple values for the same field, and basic boolean logic.
+        The query is used to build the WHERE clause of an SQL query,
+        which is otherwise built within the logindex plugin. The
+        parsing that occurs here deals with things like exact and
+        wildcard matching, multiple values for the same field, and
+        basic boolean logic.
 
         The query is expected to be a multi-line string containing
         space-separated field names and search values.
+
         """
 
         val = val.replace("\r", "").strip().replace("\n", "|")
@@ -364,4 +480,6 @@ class Plugin(plugins.SimplePlugin):
             )
 
         sql = " AND ".join(result)
+
+        print(sql)
         return sql
