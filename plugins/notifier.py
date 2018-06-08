@@ -1,5 +1,8 @@
+"""Send messages to a Notifier instance."""
+
 import cherrypy
 from cherrypy.process import plugins
+
 
 class Plugin(plugins.SimplePlugin):
     """Send messages to a Notifier instance
@@ -13,12 +16,14 @@ class Plugin(plugins.SimplePlugin):
         plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the notifier prefix.
+        """
         self.bus.subscribe("notifier:send", self.send)
 
-    def stop(self):
-        pass
-
-    def send(self, notification):
+    @staticmethod
+    def send(notification):
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
@@ -42,3 +47,5 @@ class Plugin(plugins.SimplePlugin):
             auth=auth,
             as_json=True
         )
+
+        return True
