@@ -19,6 +19,7 @@ import plugins
 import tools
 
 
+# pylint: disable=too-many-statements
 def main():
     """Configure and start the application server
 
@@ -73,11 +74,10 @@ def main():
     for key in ("database_dir", "cache_dir", "log_dir"):
         value = cherrypy.config.get(key)
 
-        if os.path.isdir(value):
-            continue
-
         try:
             os.mkdir(value)
+        except FileExistsError:
+            pass
         except PermissionError:
             raise SystemExit(
                 "Unable to create {} directory at {}".format(key, value)
@@ -86,13 +86,7 @@ def main():
     # Mount the apps
     for app in os.listdir(app_root):
 
-        # The template app is scaffolding and not meant to be mounted
-        if app == "template":
-            continue
-
-        main_path = os.path.join(app_root, app, "main.py")
-
-        if not os.path.isfile(main_path):
+        if not os.path.isfile(os.path.join(app_root, app, "main.py")):
             continue
 
         app_module = importlib.import_module("apps.{}.main".format(app))
@@ -114,20 +108,17 @@ def main():
             },
         }
 
-        # The homepage app is unique. Its app name is not its url.
+        # The homepage app is unique. Its app name is not its url, and
+        # its static path is not under its app path.
         app_path = "/{}".format(app)
+        static_url = "/static"
         if app == "homepage":
             app_path = "/"
+            static_url = "/homepage/static"
 
         # An app can optionally have a dedicated directory for static assets
         static_path = os.path.join(app_root, app, "static")
         if os.path.isdir(static_path):
-
-            # The homepage app is unique. Its static path is not under
-            # its app path.
-            static_url = "/static"
-            if app_path == "/":
-                static_url = "/homepage/static"
 
             app_config[static_url] = {
                 "tools.gzip.on": True,
@@ -143,12 +134,6 @@ def main():
             app_path,
             app_config
         )
-
-    # Customize the error page
-    if cherrypy.config.get("request.show_tracebacks") is not False:
-        cherrypy.config.update({
-            "error_page.default": os.path.join(server_root, "error.html")
-        })
 
     # Attempt to drop privileges if daemonized
     if cherrypy.config.get("server.daemonize"):
@@ -197,30 +182,38 @@ def main():
     cherrypy.tools.capture = tools.capture.Tool()
 
     # Logging
-    log_dir = cherrypy.config.get("log_dir")
-    access_log_path = os.path.join(log_dir, "access.log")
-    error_log_path = os.path.join(log_dir, "error.log")
-
     error_log_handler = logging.handlers.TimedRotatingFileHandler(
-        error_log_path,
+        os.path.join(
+            cherrypy.config.get("log_dir"),
+            "error.log"
+        ),
         when="D",
         interval=1,
         backupCount=14,
         encoding="utf8"
     )
     error_log_handler.setLevel(logging.INFO)
+
+    # pylint: disable=protected-access
     error_log_handler.setFormatter(cherrypy._cplogging.logfmt)
+
     cherrypy.log.error_log.addHandler(error_log_handler)
 
     access_log_handler = logging.handlers.TimedRotatingFileHandler(
-        access_log_path,
+        os.path.join(
+            cherrypy.config.get("log_dir"),
+            "access.log"
+        ),
         when="D",
         interval=1,
         backupCount=14,
         encoding="utf8"
     )
     access_log_handler.setLevel(logging.INFO)
+
+    # pylint: disable=protected-access
     access_log_handler.setFormatter(cherrypy._cplogging.logfmt)
+
     cherrypy.log.access_log.addHandler(access_log_handler)
 
     cherrypy.engine.start()
