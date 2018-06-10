@@ -1,11 +1,13 @@
-import cherrypy
-from . import mixins
+"""Key-value storage for app configuration and data."""
+
 from collections import defaultdict
+import cherrypy
 import pendulum
+from . import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
-
+    """A key-value style storage resource backed by an SQLite database."""
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -18,39 +20,60 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             created DEFAULT CURRENT_TIMESTAMP)""")
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the registry prefix.
+        """
+
         self.bus.subscribe("registry:remove", self.remove)
-        self.bus.subscribe("registry:remove_id", self.removeId)
+        self.bus.subscribe("registry:remove_id", self.remove_id)
         self.bus.subscribe("registry:find_id", self.find)
-        self.bus.subscribe("registry:first_key", self.firstKey)
-        self.bus.subscribe("registry:first_value", self.firstValue)
-        self.bus.subscribe("registry:distinct_keys", self.distinctKeys)
+        self.bus.subscribe("registry:first_key", self.first_key)
+        self.bus.subscribe("registry:first_value", self.first_value)
+        self.bus.subscribe("registry:distinct_keys", self.distinct_keys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:local_timezone", self.local_timezone)
 
-    def stop(self):
-        pass
-
     def find(self, uid):
+        """Select a single record by unique id (sqlite rowid)."""
+
         return self._selectOne(
-            "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE rowid=?",
+            """SELECT rowid, key, value, created as 'created [datetime]'
+            FROM registry
+            WHERE rowid=?""",
             (uid,)
         )
 
-    def add(self, key, values=[], replace=False):
+    def add(self, key, values=(), replace=False):
+        """Add one or more values for the given key, optionally deletign any
+        existing values.
+
+        """
+
         cherrypy.engine.publish("memorize:clear", key)
         if replace:
             self.remove(key)
 
         return self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
-             [(key, value) for value in values]
+            [(key, value) for value in values]
         )
 
-    def search(self, key=None, keys=[], value=None, limit=100, exact=False, as_dict=False, as_value_list=False, as_multivalue_dict=False, key_slice=0):
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-branches
+    def search(self, key=None, keys=(), value=None, limit=100, exact=False,
+               as_dict=False, as_value_list=False, as_multivalue_dict=False,
+               key_slice=0):
+        """Search for records by key or value."""
+
         params = []
 
-        sql = "SELECT rowid, key, value, created as 'created [datetime]' FROM registry WHERE (1) "
+        sql = """
+        SELECT rowid, key, value, created as 'created [datetime]'
+        FROM registry
+        WHERE (1) """
 
         if keys:
             sql += "AND key IN ("
@@ -96,15 +119,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             }
 
         if as_multivalue_dict:
-            d = defaultdict(list)
+            multi_dict = defaultdict(list)
 
             for row in result:
                 k = row["key"]
                 if key_slice > 0:
                     sliced_key = k.split(":")[key_slice:]
                     k = ":".join(sliced_key)
-                d[k].append(row["value"])
-            result = d
+                multi_dict[k].append(row["value"])
+            result = multi_dict
 
         if as_value_list:
             result = [row["value"] for row in result]
@@ -112,17 +135,37 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return result
 
     def remove(self, key):
+        """Delete any records for a key."""
+
         cherrypy.engine.publish("memorize:clear", key)
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
-        cherrypy.engine.publish("applog:add", "registry", "remove_key:{}".format(key), deletions)
+        cherrypy.engine.publish(
+            "applog:add",
+            "registry",
+            "remove_key:{}".format(key),
+            deletions
+        )
+
         return deletions
 
-    def removeId(self, rowid):
-        deletions = self._delete("DELETE FROM registry WHERE rowid=?", (rowid,))
-        cherrypy.engine.publish("applog:add", "registry", "remove_id:{}".format(rowid), deletions)
+    def remove_id(self, rowid):
+        """Delete a record by unique id (sqlite rowid)."""
+
+        deletions = self._delete(
+            "DELETE FROM registry WHERE rowid=?",
+            (rowid,)
+        )
+        cherrypy.engine.publish(
+            "applog:add",
+            "registry",
+            "remove_id:{}".format(rowid),
+            deletions
+        )
+
         return deletions
 
-    def firstKey(self, value=None):
+    def first_key(self, value=None):
+        """Perform a search by value and return the key of the first match."""
         result = self.search(value=value, limit=1)
 
         if not result:
@@ -130,9 +173,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result[0]["key"]
 
-    def firstValue(self, key, memorize=False):
+    def first_value(self, key, memorize=False):
+        """Perform a search by key and return the value of the first match."""
+
         if memorize:
-            memorize_hit, memorize_value = cherrypy.engine.publish("memorize:get", key).pop()
+            memorize_hit, memorize_value = cherrypy.engine.publish(
+                "memorize:get",
+                key
+            ).pop()
+
             if memorize_hit:
                 return memorize_value
 
@@ -147,7 +196,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("memorize:set", key, value)
         return value
 
-    def distinctKeys(self, key, value=None, stripPrefix=True):
+    def distinct_keys(self, key, strip_prefix=True):
+        """Find all keys that share a common prefix."""
+
         sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
 
         key = key.replace("*", "%")
@@ -156,7 +207,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         keys = [row["key"] for row in rows]
 
-        if stripPrefix:
+        if strip_prefix:
             return [key.split(":", 1).pop() for key in keys]
 
         return keys
@@ -170,7 +221,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        timezone = self.firstValue(
+        timezone = self.first_value(
             "config:timezone",
             memorize=True
         )
