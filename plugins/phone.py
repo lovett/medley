@@ -1,18 +1,25 @@
-import cherrypy
-import re
-from cherrypy.process import plugins
+"""Formatting utilities for phone numbers."""
 
-class Plugin(plugins.SimplePlugin):
+import re
+import cherrypy
+
+
+class Plugin(cherrypy.process.plugins.SimplePlugin):
+    """A CherryPy plugin for formatting phone numbers."""
+
     def __init__(self, bus):
-        plugins.SimplePlugin.__init__(self, bus)
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self):
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the phone prefix.
+        """
+
         self.bus.subscribe("phone:sanitize", self.sanitize)
 
-    def stop(self):
-        pass
-
-    def sanitize(self, number):
+    @staticmethod
+    def sanitize(number):
         """Strip non-numeric characters from a numeric string"""
         if not number:
             return ""
