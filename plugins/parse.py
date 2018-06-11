@@ -1,10 +1,4 @@
-"""Grammar-based parsing using pyparsing.
-
-Action helper methods receive 3 arguments:
-  - s is the original parse string
-  - l is the location in the string where matching started
-  - t is the list of the matched tokens, packaged as a ParseResults object
-"""
+"""Grammar-based parsing using pyparsing."""
 
 import string
 from urllib.parse import urlparse
@@ -133,42 +127,60 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         # Custom grammar for querying the logindex database
         # Converts a list key-value pairs to SQL
-        logquery_fields = (
-            pp.Literal("date") +
-            pp.oneOf("today yesterday")
-        ).setParseAction(self.log_query_relative_date)
-
-        logquery_fields += (
-            pp.Literal("date") +
-            pp.OneOrMore(date10 | date7)
-        ).setParseAction(self.log_query_absolute_date)
-
-        logquery_fields += (
-            pp.oneOf("statusCode") +
-            optional_not +
-            pp.OneOrMore(integer)
-        ).setParseAction(self.log_query_numeric)
-
-        logquery_fields += (
-            pp.Literal("uri") +
-            optional_not +
-            pp.OneOrMore(pp.Word(pp.alphanums + "%/-."))
-        ).setParseAction(self.log_query_wildcard)
-
-        logquery_fields += (
-            pp.oneOf("city country region classification method cookie uri \
-            agent_domain classification reverse_domain referrer_domain") +
-            optional_not + pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
-        ).setParseAction(self.log_query_exact_string)
-
-        logquery_fields += (
-            pp.Literal("ip") +
-            optional_not +
-            pp.OneOrMore(ipv4 | ipv6)
-        ).setParseAction(self.log_query_exact_string)
 
         self.logquery_grammar = pp.delimitedList(
-            pp.Or(logquery_fields),
+            pp.Or([
+                # relative date
+                (
+                    pp.Literal("date") +
+                    pp.oneOf("today yesterday")
+                ).setParseAction(self.log_query_relative_date),
+
+                # absolute date in yyyy-mm-dd or yyyy-mm format
+                (
+                    pp.Literal("date") +
+                    pp.OneOrMore(date10 | date7)
+                ).setParseAction(self.log_query_absolute_date),
+
+                # numeric fields
+                (
+                    pp.oneOf("statusCode") +
+                    optional_not +
+                    pp.OneOrMore(integer)
+                ).setParseAction(self.log_query_numeric),
+
+                # url
+                (
+                    pp.Literal("uri") +
+                    optional_not +
+                    pp.OneOrMore(pp.Word(pp.alphanums + "%/-."))
+                ).setParseAction(self.log_query_wildcard),
+
+                # string fields
+                (
+                    pp.oneOf("""
+                    city
+                    country
+                    region
+                    classification
+                    method
+                    cookie
+                    uri
+                    agent_domain
+                    classification
+                    reverse_domain
+                    referrer_domain""") +
+                    optional_not +
+                    pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
+                ).setParseAction(self.log_query_exact_string),
+
+                # ip
+                (
+                    pp.Literal("ip") +
+                    optional_not +
+                    pp.OneOrMore(ipv4 | ipv6)
+                ).setParseAction(self.log_query_exact_string)
+            ]),
             "|"
         )
 
@@ -462,6 +474,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         result = self.logquery_grammar.parseString(val).asList()
 
+        print(result)
+
         # Force usage of the datestamp index.
         #
         # A query with multiple criteria might otherwise be mis-optimized
@@ -481,5 +495,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         sql = " AND ".join(result)
 
-        print(sql)
+        print("SQL: {}".format(sql))
         return sql
