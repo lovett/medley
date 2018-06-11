@@ -56,9 +56,15 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
             response = self.request("/", method=method)
             self.assertEqual(response.code, 405)
 
+    def test_action_required(self):
+        """A post request without a valid action fails."""
+
+        response = self.request("/", method="POST")
+        self.assertEqual(response.code, 400)
+
     @mock.patch("cherrypy.engine.publish")
     def test_success(self, publish_mock):
-        """A post request with no parameters returns successfully"""
+        """A post request with a valid action returns successfully"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
@@ -68,7 +74,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", method="POST")
+        response = self.request("/", method="POST", action="update")
         self.assertEqual(response.code, 204)
 
 

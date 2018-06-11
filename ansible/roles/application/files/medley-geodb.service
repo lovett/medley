@@ -3,4 +3,4 @@ Description=Medley Geodb Database Download
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/curl --silent --show-error -X POST "http://127.0.0.1:8085/geodb"
+ExecStart=/usr/bin/curl --silent --show-error -d "action=update" "http://127.0.0.1:8085/geodb"

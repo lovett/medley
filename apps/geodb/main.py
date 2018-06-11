@@ -10,8 +10,11 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.negotiable()
-    def POST():
+    def POST(action=None):
         """Schedule a database download."""
+
+        if action != "update":
+            raise cherrypy.HTTPError(400, "No action specified")
 
         download_url = cherrypy.engine.publish(
             "registry:first_value",
