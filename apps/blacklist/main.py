@@ -13,7 +13,7 @@ class Controller:
         """Add a number to the blacklist"""
 
         clean_number = cherrypy.engine.publish(
-            "phone:sanitize",
+            "formatting:phone_sanitize",
             number=number
         ).pop()
 
@@ -29,7 +29,7 @@ class Controller:
         """Remove a number from the blacklist"""
 
         clean_number = cherrypy.engine.publish(
-            "phone:sanitize",
+            "formatting:phone_sanitize",
             number=number
         ).pop()
 

@@ -33,7 +33,7 @@ class TestBlacklist(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [123]
             return mock.DEFAULT
 
@@ -50,7 +50,7 @@ class TestBlacklist(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [9998887777]
             return mock.DEFAULT
 

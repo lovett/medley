@@ -167,7 +167,6 @@ def main():
     plugins.markup.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.parse.Plugin(cherrypy.engine).subscribe()
-    plugins.phone.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.memorize.Plugin(cherrypy.engine).subscribe()

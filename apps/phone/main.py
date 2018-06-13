@@ -20,7 +20,7 @@ class Controller:
         look up a number
         """
         sanitized_number = cherrypy.engine.publish(
-            "phone:sanitize",
+            "formatting:phone_sanitize",
             number=number
         ).pop()
 

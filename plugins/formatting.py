@@ -32,6 +32,11 @@ class Plugin(plugins.SimplePlugin):
             self.time_duration
         )
 
+        self.bus.subscribe(
+            "formatting:phone_sanitize",
+            self.phone_sanitize
+        )
+
     @staticmethod
     def dbpedia_abstract(text):
         """Extract the first two meaningful sentences from a dbpedia
@@ -92,3 +97,13 @@ class Plugin(plugins.SimplePlugin):
 
         """
         return pendulum.duration(**kwargs).in_words()
+
+    @staticmethod
+    def phone_sanitize(number):
+        """Strip non-numeric characters from a numeric string"""
+        if not number:
+            return ""
+
+        number = re.sub(r"\D", "", number)
+        number = re.sub(r"^1(\d{10})", r"\1", number)
+        return number

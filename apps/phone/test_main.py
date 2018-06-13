@@ -37,7 +37,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [None]
             return mock.DEFAULT
 
@@ -52,7 +52,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [None]
             return mock.DEFAULT
 
@@ -66,7 +66,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [None]
             return mock.DEFAULT
 
@@ -85,7 +85,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return [None]
             return mock.DEFAULT
 
@@ -116,7 +116,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 "geography:unabbreviate_state": [
                     (None, "Unabbreviated State")
                 ],
-                "phone:sanitize": ["1234567890"],
+                "formatting:phone_sanitize": ["1234567890"],
                 "asterisk:is_blacklisted": [False],
                 "cdr:call_history": [[]],
             }
@@ -144,7 +144,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                         "Unabbreviated State"
                     )
                 }]
-            if args[0] == "phone:sanitize":
+            if args[0] == "formatting:phone_sanitize":
                 return ["1234567890"]
             if args[0] == "asterisk:is_blacklisted":
                 return [False]
