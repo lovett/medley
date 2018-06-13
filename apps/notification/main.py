@@ -6,10 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    _cp_config = {
-        'tools.conditional_auth.on': False
-    }
-
     user_facing = False
 
     @staticmethod

@@ -31,10 +31,6 @@ class Controller:
 
     user_facing = False
 
-    _cp_config = {
-        'tools.conditional_auth.on': False
-    }
-
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
     def POST(self):
