@@ -109,12 +109,20 @@ def main():
         }
 
         # The homepage app is unique. Its app name is not its url, and
-        # its static path is not under its app path.
+        # its static path is not under its app path. It also has additional
+        # configuration for serving the favicon.
         app_path = "/{}".format(app)
         static_url = "/static"
         if app == "homepage":
             app_path = "/"
             static_url = "/homepage/static"
+
+            app_config["/favicon.ico"] = {
+                "tools.staticfile.on": True,
+                "tools.staticfile.filename": os.path.realpath(
+                    "./apps/shared/static/favicon/favicon.ico"
+                ),
+            }
 
         # An app can optionally have a dedicated directory for static assets
         static_path = os.path.join(app_root, app, "static")
