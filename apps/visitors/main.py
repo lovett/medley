@@ -65,7 +65,7 @@ class Controller:
 
         return {
             "html": ("visitors.jinja.html", {
-                "flagless_countries": ("AP",),
+                "flagless_countries": ("AP", None),
                 "query": query,
                 "query_plan": query_plan,
                 "reversed_ips": reversed_ips,
