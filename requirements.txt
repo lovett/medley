@@ -7,5 +7,5 @@ pendulum==2.0.2
 pyparsing==2.2.0
 pytz==2018.4
 pytzdata==2018.5
-requests==2.18.4
+requests==2.19.1
 simpleaudio==1.0.2
