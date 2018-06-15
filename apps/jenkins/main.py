@@ -42,10 +42,13 @@ class Controller:
             cherrypy.response.status = 202
             return
 
-        cherrypy.engine.publish(
-            "notifier:send",
-            self.build_notification(payload),
-        )
+        notification = self.build_notification(payload)
+
+        if notification.get("title"):
+            cherrypy.engine.publish(
+                "notifier:send",
+                notification
+            )
 
         cherrypy.response.status = 204
 
@@ -55,26 +58,27 @@ class Controller:
         Transform a normalized Jenkins payload into a notification.
         """
 
-        phase = payload["phase"]
-        status = payload["status"]
+        phase = payload.get("phase")
+        status = payload.get("status")
         name = payload.get("name")
-        group = "sysup"
         action = payload.get("action")
+        group = "sysup"
         url = payload.get("jenkins_url")
+        title = None
 
         if phase == "queued":
             title = "Jenkins has queued {}".format(name)
 
-        if phase == "started":
+        if phase == "started" and status == "success":
             title = "Jenkins is {} {}".format(action, name)
 
-        if phase == "finalized":
+        if phase == "finalized" and status == "success":
             title = "Jenkins has finished {} {}".format(action, name)
             url = payload.get("site_url", url)
 
-        if status == "failure":
-            title = "Jenkins had trouble {} {}".format(action, name)
+        if phase == "finalized" and status == "failure":
             group = "sysdown"
+            title = "Jenkins had trouble {} {}".format(action, name)
 
         return {
             "group": group,
