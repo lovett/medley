@@ -92,13 +92,13 @@
         {% if captures %}
         <div class="pagination">
             {% if newer_offset %}
-            <a href="/captures?offset={{ newer_offset }}" rel="noreferrer" class="next">
+            <a href="/captures?offset={{ newer_offset }}&path={{ path }}" rel="noreferrer" class="next">
                 <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
                 Newer
             </a>
             {% endif %}
             {% if older_offset %}
-            <a href="/captures?offset={{ older_offset }}" rel="noreferrer" class="previous">
+            <a href="/captures?offset={{ older_offset }}&path={{ path }}" rel="noreferrer" class="previous">
                 Older
                 <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
             </a>
