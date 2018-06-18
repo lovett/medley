@@ -26,11 +26,6 @@ venv: dummy
 	echo "format = columns" >> venv/pip.conf
 	@echo "Virtual env created. Now do: source venv/bin/activate"
 
-lint-server: dummy
-	flake8 medley.py
-	pylint --rcfile=.pylintrc medley.py;
-
-
 # Filter the list of outdated packages to direct dependencies
 #
 # By default, pip returns a list of all outdated packages. It can be
@@ -155,26 +150,28 @@ test: $(APP_NAMES)
 # everything else just to reflect changes in one app.
 #
 $(APP_NAMES): $(COVERAGE_DIR)
-	flake8 $(APP_DIR)/$@
-	pylint --rcfile=.pylintrc $(APP_DIR)/$@/*.py
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
 
-# Lint a single plugin
-$(PLUGINS): dummy
-	flake8 $(PLUGIN_DIR)/$@
-	pylint $(PLUGIN_DIR)/$@
+# Run lint checks across the project
+#
+# This will consider plugins app controllers and their tests, and the
+# main server file.
+#
+# Two linters are used for the sake of being comprehensive.
+lint: dummy
+	flake8 $(APP_DIR) $(PLUGIN_DIR) medley.py
+	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) medley.py
+
 
 vagrant-install: dummy
 	vagrant box update
 	vagrant up
 
-
 vagrant-provision: dummy
 	vagrant provision
 
 
-#
 # Empty the logindex database and re-index
 #
 # For use when changes to the logindex or visitors apps require a
