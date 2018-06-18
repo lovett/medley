@@ -63,7 +63,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Get a list of calls in reverse-chronological order."""
 
         query = Template("""
-        SELECT calldate as "date [calldate_to_utc]", end as "end_date [calldate_to_utc]",
+        SELECT calldate as "date [calldate_to_utc]", end as
+        "end_date [calldate_to_utc]",
         CASE LENGTH(src)
           WHEN 3 THEN "outgoing"
           ELSE "incoming"

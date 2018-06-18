@@ -92,8 +92,8 @@ class Plugin(plugins.SimplePlugin):
         """Convert a time interval expressed in one or more units to a human
         readable string.
 
-        This is a wrapper for the Pendulum Duration class, so kwargs should match
-        the keywords supported there.
+        This is a wrapper for the Pendulum Duration class, so kwargs
+        should match the keywords supported there.
 
         """
         return pendulum.duration(**kwargs).in_words()

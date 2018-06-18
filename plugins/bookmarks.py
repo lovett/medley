@@ -1,7 +1,7 @@
 """Storage and search for bookmarked URLs."""
 
-import cherrypy
 from urllib.parse import urlparse
+import cherrypy
 from . import mixins
 from . import decorators
 

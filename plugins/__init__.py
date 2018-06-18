@@ -1,10 +1,12 @@
+"""Import all plugin submodules."""
+
 import importlib
 import os.path
 
-module_dir = os.path.dirname(__file__)
-module_name = os.path.basename(module_dir)
+MODULE_DIR = os.path.dirname(__file__)
+MODULE_NAME = os.path.basename(MODULE_DIR)
 
-for item in os.listdir(module_dir):
+for item in os.listdir(MODULE_DIR):
     if item.startswith("__"):
         continue
 
@@ -23,7 +25,7 @@ for item in os.listdir(module_dir):
     if not item.endswith(".py"):
         continue
 
-    importlib.import_module(".{}".format(item[:-3]), module_name)
+    importlib.import_module(".{}".format(item[:-3]), MODULE_NAME)
 
-del(module_dir)
-del(module_name)
+del MODULE_DIR
+del MODULE_NAME

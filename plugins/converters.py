@@ -44,7 +44,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return utc_date
 
-    def calldate_to_utc(self, value):
+    @staticmethod
+    def calldate_to_utc(value):
         """Convert a local datetime string to a UTC Pendulum instance."""
 
         local_tz = cherrypy.engine.publish(

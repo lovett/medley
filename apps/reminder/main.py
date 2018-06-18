@@ -60,7 +60,8 @@ class Controller:
             }),
         }
 
-    def POST(self, message, minutes=None, hours=None, comments=None, notification_id=None, remember=None):
+    def POST(self, message, minutes=None, hours=None, comments=None,
+             notification_id=None, remember=None):
         """Queue a new reminder for delivery."""
 
         try:

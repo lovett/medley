@@ -91,7 +91,8 @@ class Plugin(plugins.SimplePlugin):
 
         return self.env.get_template(name)
 
-    def localtime_filter(self, value, timezone=None):
+    @staticmethod
+    def localtime_filter(value, timezone=None):
         """Switch a datetime to the local timezone, then format it"""
 
         if not value:
@@ -183,7 +184,8 @@ class Plugin(plugins.SimplePlugin):
 
         return urllib.parse.quote(value)
 
-    def ago_filter(self, unix_timestamp):
+    @staticmethod
+    def ago_filter(unix_timestamp):
         """Calculate a human-readable time delta between a timestamp and
         now.
 

@@ -141,14 +141,14 @@ class Controller:
         # the app is a standalone page under the site root and out of
         # scope. With a trailing slash, the worker sees the app root
         # as a proper sub-directory.
-        if action == "view" and page_name is None and cherrypy.request.path_info != "/":
-            redirect_url = cherrypy.engine.publish(
-                "url:internal",
-                None,
-                trailing_slash=True
-            ).pop()
-            raise cherrypy.HTTPRedirect(redirect_url)
-
+        if action == "view":
+            if page_name is None and cherrypy.request.path_info != "/":
+                redirect_url = cherrypy.engine.publish(
+                    "url:internal",
+                    None,
+                    trailing_slash=True
+                ).pop()
+                raise cherrypy.HTTPRedirect(redirect_url)
 
         # Give the service worker an application-root URI so that
         # pages are within its scope.

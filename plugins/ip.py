@@ -80,11 +80,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         # Google charts
         facts["geo"]["map_region"] = facts["geo"]["country_code"]
-        if facts["geo"]["country_code"] == "US" and facts["geo"]["region_code"]:
-            facts["geo"]["map_region"] = "{}-{}".format(
-                facts["geo"]["country_code"],
-                facts["geo"]["region_code"]
-            )
+        if facts["geo"]["country_code"] == "US":
+            if facts["geo"]["region_code"]:
+                facts["geo"]["map_region"] = "{}-{}".format(
+                    facts["geo"]["country_code"],
+                    facts["geo"]["region_code"]
+                )
 
         return facts
 
