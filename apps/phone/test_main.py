@@ -151,7 +151,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "asterisk:get_caller_id":
                 return [None]
             if args[0] == "cdr:call_history":
-                return [[[{"clid": "test"}]]]
+                return [[{"clid": "test"}]]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
