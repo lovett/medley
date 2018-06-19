@@ -32,7 +32,7 @@ class Controller:
             unpack_command=(
                 "tar", "-C", destination,
                 "--strip-components=1",
-                "-x", "-z", "-f"
+                "-o", "-p", "-x", "-z", "-f"
             )
 
         )
