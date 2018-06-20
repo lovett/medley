@@ -55,7 +55,7 @@ class Controller:
         }
 
     @staticmethod
-    def POST(url, title=None, tags=None, comments=None):
+    def POST(url, title=None, tags=None, comments=None, added=None):
         """Add a new bookmark, or update an existing one."""
 
         result = cherrypy.engine.publish(
@@ -65,7 +65,8 @@ class Controller:
             url,
             title,
             comments,
-            tags
+            tags,
+            added
         ).pop()
 
         if not result:

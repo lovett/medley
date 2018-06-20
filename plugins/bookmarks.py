@@ -2,6 +2,7 @@
 
 from urllib.parse import urlparse
 import cherrypy
+import pendulum
 from . import mixins
 from . import decorators
 
@@ -68,7 +69,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def add(self, url=None, title=None, comments=None, tags=None):
+    def add(self, url=None, title=None, comments=None, tags=None, added=None):
         """Store a bookmarked URL and its metadata."""
 
         parsed_url = urlparse(
@@ -96,24 +97,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 comments,
                 bookmark_id
             )
-        else:
-            sql = """INSERT INTO bookmarks
-            (url, domain, added, title, tags, comments)
-            VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)"""
 
-            values = (
-                parsed_url.geturl(),
-                parsed_url.netloc.lower(),
-                title,
-                tags,
-                comments
-            )
+            self._update(sql, [values])
+            return True
+
+        sql = """INSERT INTO bookmarks
+        (url, domain, added, title, tags, comments)
+        VALUES (?, ?, ?, ?, ?, ?)"""
+
+        if added and added.isnumeric():
+            numeric_timestamp = int(added)
+            add_date = pendulum.from_timestamp(numeric_timestamp)
+        else:
+            add_date = pendulum.now()
+
+        values = (
+            parsed_url.geturl(),
+            parsed_url.netloc.lower(),
+            add_date.format('YYYY-MM-DD HH:mm:ss'),
+            title,
+            tags,
+            comments
+        )
 
         self._insert(sql, [values])
 
         cherrypy.engine.publish(
             "scheduler:add",
-            2,
+            10,
             "bookmarks:add:fulltext",
             parsed_url.geturl(),
         )
@@ -124,6 +135,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def add_full_text(self, url):
         """Store the source markup of a bookmarked URL."""
 
+        parsed_url = urlparse(
+            url.split('#', 1)[0],
+            scheme='http',
+            allow_fragments=False
+        )
+
+        domain = parsed_url.netloc.lower()
+
         html = cherrypy.engine.publish(
             "urlfetch:get",
             url
@@ -131,8 +150,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         text = cherrypy.engine.publish(
             "markup:plaintext",
-            html
+            html,
+            domain
         ).pop()
+
+        print(text)
 
         self._insert(
             """UPDATE bookmarks
