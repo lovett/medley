@@ -124,7 +124,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish(
             "scheduler:add",
-            10,
+            2,
             "bookmarks:add:fulltext",
             parsed_url.geturl(),
         )
@@ -135,14 +135,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def add_full_text(self, url):
         """Store the source markup of a bookmarked URL."""
 
-        parsed_url = urlparse(
-            url.split('#', 1)[0],
-            scheme='http',
-            allow_fragments=False
-        )
-
-        domain = parsed_url.netloc.lower()
-
         html = cherrypy.engine.publish(
             "urlfetch:get",
             url
@@ -151,7 +143,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         text = cherrypy.engine.publish(
             "markup:plaintext",
             html,
-            domain
+            url
         ).pop()
 
         print(text)

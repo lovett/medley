@@ -18,7 +18,8 @@ class Controller:
         if title:
             title = cherrypy.engine.publish(
                 "markup:plaintext",
-                title
+                title,
+                url
             ).pop()
 
             title = cherrypy.engine.publish(

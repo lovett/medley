@@ -1,8 +1,9 @@
 """Tools for working with text containing HTML markup."""
 
-from html.entities import name2codepoint
+from urllib.parse import urlparse
 from html.parser import HTMLParser
 import cherrypy
+import parsers.htmltext
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -37,11 +38,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return self.reduce_title(reduced_title)
 
     @staticmethod
-    def plain_text(html):
+    def plain_text(html, url=None):
         """Remove markup and entities from a string"""
-        parser = HtmlTextParser()
-        return parser.parse(html)
 
+        domain = None
+        if url:
+            parsed_url = urlparse(
+                url,
+                scheme='http',
+                allow_fragments=False
+            )
+            domain = parsed_url.netloc.lower()
+
+        parser = parsers.htmltext.Parser()
+
+        if domain == "news.ycombinator.com":
+            blacklist = (
+                "span.pagetop",
+                "span.yclinks",
+                "span.age",
+                "div.reply",
+                "td.subtext",
+                "td.title",
+                "div.votelinks"
+            )
+
+            parser = parsers.htmltext.Parser(blacklist)
+
+        return parser.parse(html)
 
 class HtmlTitleParser(HTMLParser):
     """Extract the title tag from an HTML document."""
@@ -75,40 +99,5 @@ class HtmlTitleParser(HTMLParser):
             "applog:add",
             "markup",
             "HtmlTitleParser",
-            message
-        )
-
-
-class HtmlTextParser(HTMLParser):
-    """Convert an HTML document to plain text."""
-
-    tag = None
-    result = []
-    blacklist = ["script", "style"]
-
-    def parse(self, markup):
-        """Parse an HTML string."""
-        self.result = []
-        self.feed(markup)
-        return " ".join(self.result)
-
-    def handle_starttag(self, tag, attrs):
-        """Track the current tag."""
-        self.tag = tag
-
-    def handle_data(self, data):
-        """Capture the text node for non-blacklisted tags."""
-
-        if self.tag not in self.blacklist:
-            self.result.append(data.strip())
-
-    def handle_entityref(self, name):
-        self.result.append(chr(name2codepoint[name]))
-
-    def error(self, message):
-        cherrypy.engine.publish(
-            "applog:add",
-            "markup",
-            "HtmlTextParser",
             message
         )
