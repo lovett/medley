@@ -67,15 +67,18 @@ class Controller:
         title = None
 
         if phase == "queued":
-            title = "Jenkins has queued {}".format(name)
+            title = "Jenkins has queued {} for {}".format(name, action)
 
-        if phase == "started" and status == "success":
+        if phase == "started":
             title = "Jenkins is {} {}".format(action, name)
 
+        # When a job finishes successfully, link to the corresponding
+        # site if known and fall back to the Jenkins URL if not.
         if phase == "finalized" and status == "success":
             title = "Jenkins has finished {} {}".format(action, name)
             url = payload.get("site_url", url)
 
+        # When a job fails, always link back to the Jenkins URL.
         if phase == "finalized" and status == "failure":
             group = "sysdown"
             title = "Jenkins had trouble {} {}".format(action, name)
@@ -133,10 +136,6 @@ class Controller:
             result["action"] = "building"
 
         result["send_notification"] = True
-
-        # Don't notify about queued builds. Wait for started phase instead.
-        if result["phase"] == "queued":
-            result["send_notification"] = False
 
         # Don't notify if the build is considered skippable.
         skippable_builds = cherrypy.engine.publish(

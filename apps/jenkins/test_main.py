@@ -35,6 +35,50 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             "notifier:password": "testpass",
         }
 
+        self.started_fixture = {
+            "name": "testjob",
+            "url": "job/testjob/",
+            "build": {
+                "artifacts": {},
+                "full_url": "http://example.com/job/testjob/1/",
+                "log": "",
+                "number": 1,
+                "phase": "STARTED",
+                "queue_id": 1,
+                "scm": {
+                    "branch": "origin/master",
+                    "changes": [],
+                    "commit": "1234567890",
+                    "culprits": []
+                },
+                "timestamp": 1529681225640,
+                "url": "job/testjob/1/"
+            },
+            "display_name": "testjob",
+        }
+
+        self.queued_fixture = {
+            "name": "testjob",
+            "url": "job/testjob/",
+            "build": {
+                "artifacts": {},
+                "full_url": "http://example.com/job/testjob/1/",
+                "log": "",
+                "number": 1,
+                "phase": "QUEUED",
+                "queue_id": 1,
+                "scm": {
+                    "branch": "origin/master",
+                    "changes": [],
+                    "commit": "1234567890",
+                    "culprits": []
+                },
+                "timestamp": 1529681225640,
+                "url": "job/testjob/1/"
+            },
+            "display_name": "testjob",
+        }
+
         self.plugin_fixture = {
             "name": "testjob",
             "url": "job/testjob/",
@@ -143,18 +187,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippable_by_phase(self, publish_mock):
-        """Skip logic considers project name and phase"""
-        payload_fixture = self.get_fixture("plugin", "started", "success")
-        payload_fixture["name"] = "skippable"
-
-        publish_mock.side_effect = self.default_side_effect_callback
-
-        response = self.request("/", method="POST", json_body=payload_fixture)
-
-        self.assertEqual(response.code, 202)
-
-    @mock.patch("cherrypy.engine.publish")
     def test_skippable_by_status(self, publish_mock):
         """Skip logic considers project name and status"""
 
@@ -195,6 +227,31 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(normalized_payload.get("action"), "mirroring")
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_queued(self, publish_mock):
+        """A notification is sent when the build is queued."""
+
+        publish_mock.side_effect = self.default_side_effect_callback
+
+        fixture = self.queued_fixture
+        payload = self.controller.normalize_payload(fixture)
+        notification = self.controller.build_notification(payload)
+
+        self.assertIn("has queued", notification.get("title"))
+        self.assertIn("for building", notification.get("title"))
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_queued(self, publish_mock):
+        """A notification is sent when the build is started."""
+
+        publish_mock.side_effect = self.default_side_effect_callback
+
+        fixture = self.started_fixture
+        payload = self.controller.normalize_payload(fixture)
+        notification = self.controller.build_notification(payload)
+
+        self.assertIn("is building", notification.get("title"))
 
 
 if __name__ == "__main__":
