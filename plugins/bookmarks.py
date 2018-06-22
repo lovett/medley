@@ -15,7 +15,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("bookmarks.sqlite")
 
-        # Because this is a virtual table, the added field can't
         self._create("""
         CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks USING fts4 (
             url,
@@ -125,15 +124,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "scheduler:add",
             2,
-            "bookmarks:add:fulltext",
-            parsed_url.geturl(),
+            "bookmarks:add:fulltext"
         )
 
         return True
 
     @decorators.log_runtime
-    def add_full_text(self, url):
-        """Store the source markup of a bookmarked URL."""
+    def add_full_text(self):
+        """Store the plain text of a bookmarked URL.
+
+        This is only used for searching.
+        """
+
+        url = self._selectFirst("""SELECT url
+        FROM bookmarks
+        WHERE retrieved IS NULL
+        LIMIT 1""")
+
+        if not url:
+            return
 
         html = cherrypy.engine.publish(
             "urlfetch:get",
@@ -146,13 +155,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url
         ).pop()
 
-        print(text)
-
         self._insert(
             """UPDATE bookmarks
             SET fulltext=?, retrieved=CURRENT_TIMESTAMP
             WHERE url=?""",
             [(text, url)]
+        )
+
+        cherrypy.engine.publish(
+            "scheduler:remove",
+            "bookmarks:add:fulltext"
+        )
+
+        cherrypy.engine.publish(
+            "scheduler:add",
+            10,
+            "bookmarks:add:fulltext"
         )
 
     @decorators.log_runtime
