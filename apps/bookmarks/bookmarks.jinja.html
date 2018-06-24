@@ -16,7 +16,7 @@
 
     <form class="content-wrapper" method="get" action="{{ app_url }}">
         <div class="field">
-            <input type="text" id="query" name="query" value="{{ query|default('', true) }}"/>
+            <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
         </div>
         <div class="field-group">
             <div class="field">

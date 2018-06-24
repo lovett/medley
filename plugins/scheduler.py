@@ -53,11 +53,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def remove(self, event):
         """Cancel a previously-scheduled event.
 
-        Event should be an object, either the one returned when the
-        event was added or the equivalent from the list of upcoming
-        events.
-
+        Event can either be a string name or an object.
         """
+
+        if isinstance(event, str):
+            for event_object in self.upcoming(event):
+                self.remove(event_object)
+            return
 
         try:
             self.scheduler.cancel(event)

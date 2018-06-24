@@ -36,6 +36,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Define the CherryPy messages to listen for.
 
         This plugin owns the bookmarks prefix.
+
+        It depends on the urlfetch plugin for URL retrieval.
         """
         self.bus.subscribe("bookmarks:find", self.find)
         self.bus.subscribe("bookmarks:add", self.add)
@@ -44,7 +46,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:remove", self.remove)
 
+        self.bus.subscribe("urlfetch:ready", self.ready)
+
+    def ready(self):
+        """Kick off a fulltext check at plugin startup.
+
+        Since fulltext extraction depends on the urlfetch plugin, wait
+        for that plugin to publish a "ready" event.
+
+        """
+        cherrypy.engine.unsubscribe("urlfetch:ready", self.ready)
+        self.add_full_text()
+
     def find(self, uid=None, url=None):
+
         """Locate a bookmark by ID or URL."""
 
         where_clause = None
