@@ -1,9 +1,0 @@
----
-- name: Install asterisk package
-  become: true
-  apt: name=asterisk state=present
-
-- name: Copy manager credentials
-  become: true
-  copy: src=files/medley.conf dest=/etc/asterisk/manager.d/medley.conf
-  notify: restart asterisk

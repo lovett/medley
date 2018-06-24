@@ -1,4 +1,0 @@
----
-- name: restart asterisk
-  become: true
-  service: name=asterisk state=restarted
