@@ -45,29 +45,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         reader = geoip2.database.Reader(geodb_path)
 
-        result = reader.city(ip_address)
+        try:
+            result = reader.city(ip_address)
+        except geoip2.errors.AddressNotFoundError:
+            result = {}
 
         facts["geo"] = defaultdict(lambda: None)
 
         try:
             facts["geo"]["city"] = result.city.name
-        except (AttributeError, geoip2.errors.AddressNotFoundError):
+        except AttributeError:
             pass
 
         try:
             facts["geo"]["country_code"] = result.country.iso_code
-        except (AttributeError, geoip2.errors.AddressNotFoundError):
+        except AttributeError:
             pass
 
         try:
             facts["geo"]["country_name"] = result.country.name
-        except (AttributeError, geoip2.errors.AddressNotFoundError):
+        except AttributeError:
             pass
 
         try:
             subdivision = result.subdivisions.most_specific
             facts["geo"]["region_code"] = subdivision.iso_code
-        except (AttributeError, geoip2.errors.AddressNotFoundError):
+        except AttributeError:
             pass
 
         try:
