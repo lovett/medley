@@ -432,7 +432,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 fields["referrer_domain"] = parse_result.netloc
 
         for key, value in fields["extras"].items():
-            if value in ("ZZ", "?"):
+            if value in ("ZZ", "?", ""):
                 continue
 
             if key == "country":
