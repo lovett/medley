@@ -50,6 +50,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ?s dbo:abstract ?abstract .
         ?s dbp:state ?_state_abbrev
         FILTER (regex(str(?o), "{0}", "i"))
+        FILTER (langMatches(lang(?abstract), "en"))
         BIND( str(?_state_abbrev) as ?state_abbrev )
         }} LIMIT 1
         """.format(area_code)
