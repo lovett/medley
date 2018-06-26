@@ -214,7 +214,7 @@ class Plugin(plugins.SimplePlugin):
         """Construct an offsite search URL for a term."""
 
         if engine == "google":
-            url = "https://www.google.com#q={}"
+            url = "https://www.google.com/search?q={}"
 
         if engine == "bing":
             url = "https://www.bing.com/search?q={}"
