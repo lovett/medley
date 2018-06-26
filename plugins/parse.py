@@ -474,8 +474,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         result = self.logquery_grammar.parseString(val).asList()
 
-        print(result)
-
         # Force usage of the datestamp index.
         #
         # A query with multiple criteria might otherwise be mis-optimized
@@ -495,5 +493,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         sql = " AND ".join(result)
 
-        print("SQL: {}".format(sql))
         return sql
