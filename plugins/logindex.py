@@ -69,6 +69,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON logs(country);
         CREATE INDEX IF NOT EXISTS index_city
             ON logs(city);
+        CREATE INDEX IF NOT EXISTS index_region
+            ON logs(region);
         CREATE INDEX IF NOT EXISTS index_cookie
             ON logs(cookie);
         CREATE INDEX IF NOT EXISTS index_source_file
