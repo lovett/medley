@@ -108,3 +108,34 @@ if (fragment.length > 0) {
 }
 
 jQuery('SECTION A, SECTION H1').focusAsYouType();
+
+// Hide the edit link when offline
+var onlineOnly = document.querySelectorAll('.online-only');
+var offlineOnly = document.querySelectorAll('.offline-only');
+
+var whenOffline = function () {
+    for (i=0; i < onlineOnly.length; i++) {
+        onlineOnly[i].classList.add('hidden');
+    }
+
+    for (i=0; i < offlineOnly.length; i++) {
+        offlineOnly[i].classList.remove('hidden');
+    }
+}
+
+var whenOnline = function () {
+    for (i=0; i < onlineOnly.length; i++) {
+        onlineOnly[i].classList.remove('hidden');
+    }
+
+    for (i=0; i < offlineOnly.length; i++) {
+        offlineOnly[i].classList.add('hidden');
+    }
+}
+
+window.addEventListener('offline', whenOffline);
+window.addEventListener('online', whenOnline);
+
+if (navigator.onLine === false) {
+    whenOffline();
+}

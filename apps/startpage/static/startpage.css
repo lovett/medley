@@ -126,6 +126,10 @@ li.group:hover .all {
     color: white;
 }
 
+.hidden {
+    display: none;
+}
+
 
 /* Tablet and up */
 @media (min-width: 768px) {
