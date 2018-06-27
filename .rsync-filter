@@ -12,9 +12,9 @@
 - /testing
 - test_main.py
 - /workspace.sh
-- /Vagrantfile
 - /.rsync-filter
 - medley.conf
+- medley.conf.example
 - .DS_Store
 - samples.http
 - /.Python
@@ -22,3 +22,8 @@
 - /venv
 - *.pyc
 - /requirements-dev.txt
+- /node_modules
+- /Jenkinsfile
+- package.json
+- package-lock.json
+- Makefile
