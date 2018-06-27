@@ -106,6 +106,50 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
 
+        self.verify()
+
+    @decorators.log_runtime
+    def verify(self):
+        """Look for and repair instances of wrongly-parsed log lines."""
+
+        # Rows where region is an empty string but the value is known.
+        rows = self._select(
+            """SELECT distinct ip, region
+            FROM logs
+            WHERE ip IN (
+                SELECT ip
+                FROM logs
+                WHERE region=''
+            )
+            AND region <> ''
+            """
+        )
+
+        if rows:
+            self._update(
+                "UPDATE logs SET region=? WHERE ip=? and region=''",
+                [(row["region"], row["ip"]) for row in rows]
+            )
+
+        # Rows where city is an empty string but the value is known.
+        rows = self._select(
+            """SELECT distinct ip, city
+            FROM logs
+            WHERE ip IN (
+                SELECT ip
+                FROM logs
+                WHERE city=''
+            )
+            AND city <> ''
+            """
+        )
+
+        if rows:
+            self._update(
+                "UPDATE logs SET city=? WHERE ip=? and city=''",
+                [(row["city"], row["ip"]) for row in rows]
+            )
+
     @staticmethod
     def get_root():
         """Look up the root path for indexable log files in the registry"""
