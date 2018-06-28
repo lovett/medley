@@ -101,6 +101,8 @@
     - files/medley-geodb.timer
     - files/medley-cacheclean.service
     - files/medley-cacheclean.timer
+    - files/medley-db-maintenance.service
+    - files/medley-db-maintenance.timer
 
 - name: Enable medley systemd service
   become: true
@@ -122,3 +124,4 @@
   with_items:
     - medley-geodb.timer
     - medley-cacheclean.timer
+    - medley-db-maintenance.timer

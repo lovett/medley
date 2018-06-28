@@ -59,7 +59,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if isinstance(event, str):
             for event_object in self.upcoming(event):
                 self.remove(event_object)
-            return
+            return True
 
         try:
             self.scheduler.cancel(event)

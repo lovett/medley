@@ -43,6 +43,14 @@ class Sqlite:
         con.commit()
         con.close()
 
+    def _execute(self, query, params=()):
+        """Execute a single query with no parameters."""
+
+        con = self._open()
+        con.execute(query, params)
+        con.commit()
+        con.close()
+
     def _multi(self, queries):
         """Issue several queries."""
 

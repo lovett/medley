@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for Medley database maintenance
+
+[Timer]
+# Daily at 6:03 AM
+OnCalendar=06:03
+
+[Install]
+WantedBy=timers.target

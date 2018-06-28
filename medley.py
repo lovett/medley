@@ -172,6 +172,7 @@ def main():
     plugins.ip.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
     plugins.logindex.Plugin(cherrypy.engine).subscribe()
+    plugins.maintenance.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.parse.Plugin(cherrypy.engine).subscribe()
