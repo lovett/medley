@@ -40,7 +40,7 @@ class Controller:
             today = pendulum.today()
 
             try:
-                start = pendulum.from_format(start, "%Y-%m")
+                start = pendulum.from_format(start, "YYYY-MM")
             except (TypeError, ValueError):
                 start = today.start_of("month")
 
@@ -49,12 +49,12 @@ class Controller:
             options["next_month"] = start.add(months=1)
             options["this_month"] = today
 
-            period = pendulum.period(start, start.add(months=1))
+            period = pendulum.period(start, start.end_of("month"))
 
             for day in period.range("days"):
                 row = [''] * len(headers)
-                row[0] = day.format("%B %d, %Y")
-                row[1] = day.format("%A")
+                row[0] = day.format("MMMM D, YYYY")
+                row[1] = day.format("dddd")
                 rows.append(row)
         elif headers:
             row = [''] * len(headers)

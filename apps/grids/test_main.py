@@ -71,7 +71,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             helpers.html_var(render_mock, "rows")[0][0],
-            first_of_current_month.strftime("%B %d, %Y")
+            first_of_current_month.strftime("%B %-d, %Y")
         )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
