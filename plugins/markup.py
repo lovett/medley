@@ -67,6 +67,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return parser.parse(html)
 
+
 class HtmlTitleParser(HTMLParser):
     """Extract the title tag from an HTML document."""
 

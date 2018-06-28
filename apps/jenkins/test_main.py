@@ -242,7 +242,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertIn("for building", notification.get("title"))
 
     @mock.patch("cherrypy.engine.publish")
-    def test_queued(self, publish_mock):
+    def test_started(self, publish_mock):
         """A notification is sent when the build is started."""
 
         publish_mock.side_effect = self.default_side_effect_callback
