@@ -34,8 +34,12 @@ venv: dummy
 # indirect dependencies (other things used by direct dependencies).
 #
 # This setup also handles multiple requirements files.
+#
+# Use of "or true" after the npm outdated command prevents a non-zero
+# exit code from producing a warning. Non-zero exit here is ok.
 outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
+	npm outdated || true
 
 setup: dummy
 	pip install --upgrade pip setuptools
