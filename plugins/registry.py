@@ -46,7 +46,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     def add(self, key, values=(), replace=False):
-        """Add one or more values for the given key, optionally deletign any
+        """Add one or more values for the given key, optionally deleting any
         existing values.
 
         """
