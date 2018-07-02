@@ -39,12 +39,13 @@ class Controller:
             query
         ).pop() or []
 
-        if not log_records:
-            reversed_ips = None
-            deltas = None
-            country_names = None
-            annotations = None
-        else:
+        reversed_ips = None
+        deltas = None
+        country_names = None
+        annotations = None
+        cookies = {}
+
+        if log_records:
             reversed_ips = cherrypy.engine.publish(
                 "logindex:query:reverse_ip",
                 {record["ip"] for record in log_records}
@@ -58,6 +59,15 @@ class Controller:
             ).pop()
 
             annotations = self.get_annotations(log_records)
+
+            cookies = {
+                record["ip"]: record["cookie"]
+                for record in log_records
+                if record["cookie"]
+                and record["ip"] not in cookies
+            }
+
+            print(cookies)
 
         app_url = cherrypy.engine.publish("url:internal").pop()
 
@@ -77,7 +87,8 @@ class Controller:
                 "saved_queries": saved_queries,
                 "app_name": self.name,
                 "annotations": annotations,
-                "app_url": app_url
+                "app_url": app_url,
+                "cookies": cookies
             })
         }
 

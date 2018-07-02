@@ -178,8 +178,8 @@
                             </div>
 
                             <div class="next-actions">
-                                {% if result.cookie %}
-                                <a href="/visitors?query=cookie+{{ result.cookie }}" title="Search for visits with this cookie" rel="noreferrer">
+                                {% if result.ip in cookies %}
+                                <a href="/visitors?query=cookie+{{ cookies.get(result.ip) }}" title="Search for visits with this cookie" rel="noreferrer">
                                     <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                 </a>
                                 {% endif %}
