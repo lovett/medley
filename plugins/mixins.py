@@ -80,7 +80,7 @@ class Sqlite:
         con.close()
         return True
 
-    def _delete(self, query, values):
+    def _delete(self, query, values=()):
         """Issue a delete query."""
         con = self._open()
         with con:

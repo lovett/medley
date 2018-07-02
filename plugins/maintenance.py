@@ -1,6 +1,7 @@
 """Perform maintenance tasks."""
 
 import glob
+import cherrypy
 from cherrypy.process import plugins
 from . import mixins
 from . import decorators
@@ -21,19 +22,14 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def db_maintenance(self, file_names=None):
-        """Run the SQLite vacuum and analyze commands on each known
-        database.
+        """Execute database maintenance tasks."""
 
-        """
+        cherrypy.engine.publish("cache:prune")
 
-        if file_names is None:
-            pattern = self._path("*.sqlite")
-            file_names = glob.glob(pattern, recursive=False)
-        if not file_names:
-            return
+        pattern = self._path("*.sqlite")
+        file_names = glob.glob(pattern, recursive=False)
 
-        self.db_path = file_names[0]
-        self._execute("vacuum")
-        self._execute("analyze")
-
-        self.db_maintenance(file_names[1:])
+        for file_name in file_names:
+            self.db_path = file_name
+            self._execute("vacuum")
+            self._execute("analyze")
