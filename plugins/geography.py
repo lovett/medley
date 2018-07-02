@@ -80,7 +80,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 response["results"]["bindings"][0]["state_abbrev"]["value"],
                 abstract
             )
-        except (KeyError, TypeError):
+        except (IndexError, KeyError, TypeError):
             return (sparql, None, None)
 
     @staticmethod
@@ -120,7 +120,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 sparql,
                 response["results"]["bindings"][0]["state_name"]["value"]
             )
-        except (KeyError, TypeError):
+        except (IndexError, KeyError, TypeError):
             return (sparql, None)
 
     @staticmethod
