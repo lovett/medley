@@ -13,7 +13,7 @@ class Controller:
 
     list_command = "scheduler:upcoming"
 
-    add_command = "scheduler:add"
+    add_command = "scheduler:persist"
 
     remove_command = "scheduler:remove"
 

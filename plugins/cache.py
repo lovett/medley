@@ -27,18 +27,37 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("cache:get", self.get)
+        self.bus.subscribe("cache:match", self.match)
         self.bus.subscribe("cache:set", self.set)
         self.bus.subscribe("cache:clear", self.clear)
+
+    def match(self, key_prefix):
+        """Retrieve multiple keys based on a common prefix."""
+
+        rows = self._select(
+            """SELECT value as 'value [binary]', created as 'created [datetime]'
+            FROM cache
+            WHERE key LIKE ?
+            AND expires < strftime('%s','now')""",
+            (key_prefix + "%",)
+        )
+
+        if not rows:
+            cherrypy.engine.publish("applog:add", "cache", "miss", key_prefix)
+            return ()
+
+        cherrypy.engine.publish("applog:add", "cache", "hit", key_prefix)
+
+        return [row["value"] for row in rows]
 
     def get(self, key):
         """Retrieve a value from the store by its key."""
 
-        self.prune(key)
-
         row = self._selectOne(
             """SELECT value as 'value [binary]', created as 'created [datetime]'
             FROM cache
-            WHERE key=?""",
+            WHERE key=?
+            AND expires < strftime('%s','now')""",
             (key,)
         )
 
