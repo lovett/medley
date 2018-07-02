@@ -30,6 +30,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cache:match", self.match)
         self.bus.subscribe("cache:set", self.set)
         self.bus.subscribe("cache:clear", self.clear)
+        self.bus.subscribe("cache:prune", self.prune)
 
     def match(self, key_prefix):
         """Retrieve multiple keys based on a common prefix."""
@@ -92,16 +93,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
         return deletions
 
-    def prune(self, key):
-        """Delete expired cache entries by key."""
+    def prune(self):
+        """Delete expired cache entries."""
 
-        deletions = self._delete(
-            "DELETE FROM cache WHERE key=? AND expires < ?",
-            (key, time.time())
-        )
+        deletions = self._delete("""
+        DELETE FROM cache
+        WHERE expires < strftime('%s', 'now')""")
+
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "prune:{}".format(key),
+            "prune",
             deletions
         )
