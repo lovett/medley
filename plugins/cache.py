@@ -16,7 +16,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._create("""CREATE TABLE IF NOT EXISTS cache (
             key UNIQUE NOT NULL,
-            value, expires,
+            value TEXT,
+            expires REAL,
             created DEFAULT CURRENT_TIMESTAMP
             )""")
 
@@ -39,15 +40,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT value as 'value [binary]', created as 'created [datetime]'
             FROM cache
             WHERE key LIKE ?
-            AND expires < strftime('%s','now')""",
+            AND expires > strftime('%s','now')""",
             (key_prefix + "%",)
         )
 
-        if not rows:
-            cherrypy.engine.publish("applog:add", "cache", "miss", key_prefix)
-            return ()
-
-        cherrypy.engine.publish("applog:add", "cache", "hit", key_prefix)
+        cherrypy.engine.publish(
+            "applog:add",
+            "cache",
+            "match",
+            "{} cache matches for {}".format(len(rows), key_prefix)
+        )
 
         return [row["value"] for row in rows]
 
@@ -58,15 +60,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT value as 'value [binary]', created as 'created [datetime]'
             FROM cache
             WHERE key=?
-            AND expires < strftime('%s','now')""",
+            AND expires > strftime('%s','now')""",
             (key,)
         )
 
         if "value" in row.keys():
-            cherrypy.engine.publish("applog:add", "cache", "hit", key)
+            cherrypy.engine.publish(
+                "applog:add",
+                "cache",
+                "get",
+                "hit for {}".format(key)
+            )
             return row["value"]
 
-        cherrypy.engine.publish("applog:add", "cache", "miss", key)
+        cherrypy.engine.publish(
+            "applog:add",
+            "cache",
+            "get",
+            "miss for {}".format(key)
+        )
+
         return False
 
     def set(self, key, value, lifespan_seconds=3600):
@@ -80,29 +93,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             VALUES (?, ?, ?)""",
             [(key, packed_value, expires)]
         )
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "cache",
+            "set",
+            "cached record for {} for {} seconds".format(
+                key, lifespan_seconds
+            )
+        )
         return True
 
     def clear(self, key):
         """Remove a value from the store by its key."""
-        deletions = self._delete("DELETE FROM cache WHERE key=?", (key,))
+        deletion_count = self._delete("DELETE FROM cache WHERE key=?", (key,))
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "clear:{}".format(key),
-            deletions
+            "clear",
+            "cleared {} records for {}".format(
+                deletion_count,
+                key
+            )
         )
-        return deletions
+        return deletion_count
 
     def prune(self):
         """Delete expired cache entries."""
 
-        deletions = self._delete("""
-        DELETE FROM cache
-        WHERE expires < strftime('%s', 'now')""")
+        deletion_count = self._delete(
+            """DELETE FROM cache
+            WHERE expires < strftime('%s', 'now')"""
+        )
 
         cherrypy.engine.publish(
             "applog:add",
             "cache",
             "prune",
-            deletions
+            "pruned {} records".format(deletion_count)
         )
