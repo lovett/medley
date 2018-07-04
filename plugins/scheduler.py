@@ -146,7 +146,7 @@ class ScheduledEvent():
 
     """
 
-    cache_prefix = "scheduler.event."
+    cache_prefix = "scheduler.event"
 
     event = ()
 
@@ -158,7 +158,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return "{}{}".format(
+        return "{}.{}".format(
             self.cache_prefix,
             round(self.event.time, 3)
         )
