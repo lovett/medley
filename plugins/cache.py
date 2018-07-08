@@ -82,8 +82,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return False
 
-    def set(self, key, value, lifespan_seconds=3600):
-        """Add a value to the store."""
+    def set(self, key, value, lifespan_seconds=604800):
+        """Add a value to the store.
+
+        The default lifespan for a cache entry is 1 week."""
 
         expires = time.time() + int(lifespan_seconds)
         packed_value = msgpack.packb(value, use_bin_type=True)
