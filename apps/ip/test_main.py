@@ -136,7 +136,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_any_call(
             "cache:set",
             apps.ip.main.Controller.cache_key,
-            "3.3.3.3"
+            "3.3.3.3",
+            300
         )
 
     @mock.patch("cherrypy.engine.publish")

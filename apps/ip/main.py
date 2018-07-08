@@ -27,14 +27,15 @@ class Controller:
         if not external_ip:
             external_ip = cherrypy.engine.publish(
                 "urlfetch:get",
-                "http://myip.dnsomatic.com",
+                "https://api.ipify.org",
             ).pop()
 
             if external_ip:
                 cherrypy.engine.publish(
                     "cache:set",
                     self.cache_key,
-                    external_ip
+                    external_ip,
+                    300
                 )
 
         return {
