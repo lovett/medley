@@ -227,6 +227,7 @@ def main():
     cherrypy.engine.start()
     cherrypy.engine.publish("scheduler:revive")
     cherrypy.engine.publish("logindex:parse")
+    cherrypy.engine.publish("bookmarks:add:fulltext")
 
     cherrypy.engine.block()
 

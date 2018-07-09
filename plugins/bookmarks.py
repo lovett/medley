@@ -46,18 +46,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:remove", self.remove)
 
-        self.bus.subscribe("urlfetch:ready", self.ready)
-
-    def ready(self):
-        """Kick off a fulltext check at plugin startup.
-
-        Since fulltext extraction depends on the urlfetch plugin, wait
-        for that plugin to publish a "ready" event.
-
-        """
-        cherrypy.engine.unsubscribe("urlfetch:ready", self.ready)
-        self.add_full_text()
-
     def find(self, uid=None, url=None):
 
         """Locate a bookmark by ID or URL."""
@@ -157,6 +145,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LIMIT 1""")
 
         if not url:
+            cherrypy.engine.publish(
+                "applog:add",
+                "bookmarks",
+                "add_full_text",
+                "0 unretrieved rows"
+            )
+
             return
 
         html = cherrypy.engine.publish(
