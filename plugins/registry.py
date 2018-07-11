@@ -164,9 +164,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return deletions
 
-    def first_key(self, value=None):
-        """Perform a search by value and return the key of the first match."""
-        result = self.search(value=value, limit=1)
+    def first_key(self, value=None, key_prefix=None):
+        """Perform a search by value and return the key of the first match.
+
+        For cases where the value may be associated with more than one
+        key, the key_prefix argument provides additional specificity.
+
+        """
+        result = self.search(key=key_prefix, value=value, limit=1)
 
         if not result:
             return None

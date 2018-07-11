@@ -100,7 +100,8 @@ class Controller:
             search_value = "{}*".format(site)
             group = cherrypy.engine.publish(
                 "registry:first_key",
-                search_value
+                value=search_value,
+                key_prefix="bounce*"
             ).pop()
 
             if group:
