@@ -50,6 +50,7 @@
             <div class="field">
                 <label for="url">Tags:</label>
                 <input type="text" id="tags" name="tags" value="{{ tags|default('', true)|e }}"/>
+                <p class="smaller">Separate multiple tags with commas.</p>
             </div>
 
             <div class="field">
@@ -63,7 +64,11 @@
             </div>
 
             <div class="field">
-                <button data-default="Save" data-alt="Please wait">Save</button>
+                {% if bookmark.rowid %}
+                    <button data-default="Save" data-alt="Please wait">Update</button>
+                {% else %}
+                    <button data-default="Save" data-alt="Please wait">Save</button>
+                {% endif %}
             </div>
         </div>
     </div>
