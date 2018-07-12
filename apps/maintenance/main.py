@@ -22,4 +22,12 @@ class Controller:
             cherrypy.response.status = 204
             return
 
+        if group == "filesystem":
+            cherrypy.engine.publish(
+                "scheduler:add",
+                2,
+                "maintenance:filesystem"
+            )
+            return
+
         raise cherrypy.HTTPError(400, "Invalid task group")

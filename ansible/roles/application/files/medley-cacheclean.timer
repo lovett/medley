@@ -1,9 +1,0 @@
-[Unit]
-Description=Timer for clearing Medley filesystem caches
-
-[Timer]
-# Daily at 2:22 AM
-OnCalendar=02:22
-
-[Install]
-WantedBy=timers.target

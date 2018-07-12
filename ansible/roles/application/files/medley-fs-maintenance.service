@@ -1,0 +1,6 @@
+[Unit]
+Description=Medley filesystem maintenance
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/curl --user-agent medley-fs-maintenance.service --silent --show-error -d "group=fs" "http://127.0.0.1:8085/maintenance"

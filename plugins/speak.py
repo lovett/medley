@@ -10,6 +10,7 @@ import os
 import os.path
 import xml.dom.minidom
 import cherrypy
+import time
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -96,6 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the speak prefix.
         """
         self.bus.subscribe("speak:can_speak", self.can_speak)
+        self.bus.subscribe("speak:prune", self.prune)
         self.bus.subscribe("speak", self.speak)
 
     @staticmethod
@@ -113,7 +115,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         }
 
     @staticmethod
-    def get_cache_path(hash_digest):
+    def get_cache_path(hash_digest=None):
         """The filesystem path of an audio file.
 
         Caching audio files prevents unnecessary requests to the
@@ -121,9 +123,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        return os.path.join(
+        cache_root = os.path.join(
             cherrypy.config.get("cache_dir"),
             "speak",
+        )
+
+        if not hash_digest:
+            return cache_root
+
+        return os.path.join(
+            cache_root,
             hash_digest[0:1],
             hash_digest[0:2],
             hash_digest + ".wav"
@@ -284,3 +293,52 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.play_cached_file(cache_path)
         return True
+
+    def prune(self, max_days=45):
+        """Delete cache files older than the specified age."""
+
+        cache_root = self.get_cache_path()
+
+        if not os.isdir(cache_root):
+            return
+
+        min_age = time.time() - (max_days * 86400)
+
+        files_pruned = 0
+        dirs_pruned = 0
+
+        for root, dirs, files in os.walk(cache_root, topdown=False):
+            for file_name in files:
+                file_path = os.path.join(root, file_name)
+                statinfo = os.stat(file_path)
+
+                if statinfo.st_mtime < min_age:
+                    os.remove(file_path)
+                    files_pruned += 1
+
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if not any(os.scandir(dir_path)):
+                    os.rmdir(dir_path)
+                    dirs_pruned += 1
+
+        files_pruned_label = "files"
+        dirs_pruned_label = "directories"
+
+
+        if files_pruned == 1:
+            files_pruned_label = "file"
+        if dirs_pruned == 1:
+            dirs_pruned_label = "directory"
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "speak",
+            "prune",
+            "pruned {} {} and {} {}".format(
+                files_pruned,
+                files_pruned_label,
+                dirs_pruned,
+                dirs_pruned_label
+            )
+        )
