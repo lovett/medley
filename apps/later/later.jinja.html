@@ -27,8 +27,17 @@
 
             {% if bookmark.rowid %}
             <div class="notice message">
-                This URL was bookmarked on
-                {{ bookmark.added|localtime|dateformat('LL') }}
+                <p>
+                    This URL was bookmarked on
+                    {{ bookmark.added|localtime|dateformat('LL') }}.
+                </p>
+
+                {% if bookmark.updated %}
+                    <p class="smaller">
+                        Last updated
+                        {{ bookmark.updated|localtime|dateformat('LL') }}.
+                    </p>
+                {% endif %}
             </div>
             {% endif %}
 

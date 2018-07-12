@@ -246,6 +246,14 @@ TABLE.key-value TH {
     padding: 1em;
 }
 
+.message p {
+    margin: 0 0 1em 0;
+}
+
+.message p:last-of-type {
+    margin-bottom: 0;
+}
+
 .middle-column {
     padding: 0 1em;
 }

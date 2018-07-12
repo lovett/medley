@@ -20,6 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url,
             domain,
             added,
+            updated,
             retrieved,
             title,
             tags,
@@ -27,6 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             fulltext,
             tokenize=porter,
             notindexed=added,
+            notindexed=updated,
             notindexed=retrieved,
             order=desc
         );
@@ -65,7 +67,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._selectOne(
             """SELECT rowid, url, domain, title,
-            added as 'added [datetime]', tags, comments
+            added as 'added [datetime]',
+            updated as 'updated [datetime]',
+            tags, comments
             FROM bookmarks WHERE 1=1 AND {}""".format(where_clause),
             values
         )
@@ -90,7 +94,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if bookmark_id:
             sql = """UPDATE bookmarks
-            SET title=?, tags=?, comments=?
+            SET title=?, tags=?, comments=?, updated=CURRENT_TIMESTAMP
             WHERE rowid=?"""
 
             values = (
@@ -206,6 +210,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             0.00,   # url
             0.25,   # domain
             -1.00,  # added (not indexed)
+            -1.00,  # updated (not indexed)
             -1.00,  # retrieved (not indexed)
             0.75,   # title
             0.80,   # tags
@@ -216,8 +221,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         weight_string = ",".join(map(repr, weights))
 
         return self._fts_search(
-            """SELECT url, domain, title,
-            added as 'added [datetime]', rank
+            """SELECT url, domain, title, rank,
+            added as 'added [datetime]',
+            updated as 'updated [datetime]',
             FROM bookmarks JOIN (
                 SELECT docid, rank(matchinfo(bookmarks, 'pcx'), {}) as rank
                 FROM bookmarks
@@ -235,6 +241,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT url, domain, title,
         added as 'added [datetime]',
+        updated as 'updated [datetime]',
         retrieved 'retrieved [datetime]',
         tags, comments
         FROM bookmarks
