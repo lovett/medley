@@ -42,11 +42,16 @@
                 <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
 
                 <p class="meta">
-                    <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
-                    |
-                    <span class="domain">{{ bookmark.domain }}</span>
-                    | <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                    Bookmarked <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                    / <span class="domain">{{ bookmark.domain }}</span>
+                    / <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
                 </p>
+
+                {% if bookmark.tags %}
+                    <p class="meta">
+                        Tags: {{ bookmark.tags }}
+                    </p>
+                {% endif %}
 
                 {% if bookmark.comments %}
                 <p class="comments">
