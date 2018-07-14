@@ -1,4 +1,5 @@
 [global]
+local_maintenance: True
 database_dir: "/var/db"
 log_dir: "/var/log/medley"
 cache_dir: "/var/cache/medley"
