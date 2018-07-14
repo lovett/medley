@@ -299,7 +299,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cache_root = self.get_cache_path()
 
-        if not os.isdir(cache_root):
+        if not os.path.isdir(cache_root):
             return
 
         min_age = time.time() - (max_days * 86400)
