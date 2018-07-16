@@ -58,7 +58,7 @@
                         {% for id, template in templates.items() %}
                             <discardable-record inline-template url="{{ template.delete_url }}">
                                 <div class="template" v-bind:style="styles">
-                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}" data-notification_id="{{ template.notification_id }}">
+                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}" data-notification_id="{{ template.notification_id }}" data-url="{{ template.url }}">
                                         {{ template.message }}
                                         <br/>
                                         <span class="smaller">{{ template.duration_in_words }}</span>
@@ -97,6 +97,14 @@
                 <div class="field">
                     <label for="notification_id">Notification ID</label>
                     <input type="text" id="notification_id" name="notification_id" value="{{ notification_id|default('', true)|e }}" />
+                </div>
+
+                <div class="field">
+                    <label for="url">URL</label>
+                    <input type="text" id="url" name="url" value="{{ url|default('', true)|e }}" />
+                    <div class="shortcuts">
+                        <a href="#" class="set-url" data-url="{{ app_url }}">this page</a>
+                    </div>
                 </div>
 
                 <div class="field">

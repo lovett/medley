@@ -83,7 +83,6 @@ MEDLEY.reminders = (function () {
                         jQuery(this).val(val);
                     }
                 });
-
                 jQuery('#reminder-form').submit();
             });
 
@@ -94,6 +93,13 @@ MEDLEY.reminders = (function () {
                 value = node.attr('content').split(',');
                 timeLabels[key] = value;
             });
+
+            jQuery('.shortcuts .set-url').on('click', function (e) {
+                e.preventDefault();
+                var url = jQuery(this).attr('data-url');
+                jQuery('#url').val(url);
+            });
+
             timer = setInterval(countdown, 1000);
         }
     }

@@ -61,7 +61,7 @@ class Controller:
         }
 
     def POST(self, message, minutes=None, hours=None, comments=None,
-             notification_id=None, remember=None):
+             notification_id=None, url=None, remember=None):
         """Queue a new reminder for delivery."""
 
         try:
@@ -90,6 +90,9 @@ class Controller:
         if notification_id:
             notification["localId"] = notification_id
 
+        if url:
+            notification["url"] = url
+
         cherrypy.engine.publish(
             self.add_command,
             total_minutes * 60,
@@ -102,7 +105,8 @@ class Controller:
                 "message": message,
                 "minutes": total_minutes,
                 "comments": comments,
-                "notification_id": notification_id
+                "notification_id": notification_id,
+                "url": url
             })
 
             cherrypy.engine.publish(
@@ -111,9 +115,11 @@ class Controller:
                 [registry_value]
             )
 
-        url = cherrypy.engine.publish("url:internal").pop()
+        redirect_url = cherrypy.engine.publish(
+            "url:internal"
+        ).pop()
 
-        raise cherrypy.HTTPRedirect(url)
+        raise cherrypy.HTTPRedirect(redirect_url)
 
     def DELETE(self, uid):
         """Remove a previously-scheduled reminder."""
