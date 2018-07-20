@@ -158,7 +158,6 @@ class Controller:
         # Display an alternate template after a page has been edited
         # to remove the newly-stale page from the client's cache.
         if action == "updated":
-            print("ok!!!!")
             page_url = cherrypy.engine.publish(
                 "url:internal",
                 page_name,
