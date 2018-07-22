@@ -78,17 +78,21 @@ INPUT[type=checkbox] {
     flex-flow: row nowrap;
     align-items: center;
     margin-bottom: .5em;
+}
+
+.template A {
     padding: 1em;
     background-color: #c3d4f0;
     border: 1px solid #c3d4f0;
     border-radius: .25em;
 }
 
-.template .action-button a {
-    background-color: inherit;
+.template A:focus {
+    background-color: #56904e;
+    color: white;
 }
 
-.template:hover {
+.template A:hover {
     border-color: #000;
     background-color: #fff;
     color: #000;

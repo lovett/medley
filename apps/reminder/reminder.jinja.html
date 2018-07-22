@@ -58,10 +58,15 @@
                         {% for id, template in templates.items() %}
                             <discardable-record inline-template url="{{ template.delete_url }}">
                                 <div class="template" v-bind:style="styles">
-                                    <a class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}" data-notification_id="{{ template.notification_id }}" data-url="{{ template.url }}">
+                                    <a id="{{ template.notification_id }}" class="summary" href="#" data-uid="{{ id }}" data-message="{{ template.message }}" data-minutes="{{ template.minutes }}" data-comments="{{ template.comments }}" data-notification_id="{{ template.notification_id }}" data-url="{{ template.url }}">
                                         {{ template.message }}
                                         <br/>
-                                        <span class="smaller">{{ template.duration_in_words }}</span>
+                                        <span class="smaller">
+                                            {{ template.duration_in_words }}
+                                            {%- if template.notification_id %}
+                                                / #{{ template.notification_id }}
+                                            {%- endif -%}
+                                        </span>
                                     </a>
                                     <div><discard-button tooltip="Delete this template" /></div>
                                 </div>
