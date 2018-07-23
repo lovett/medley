@@ -26,6 +26,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         """Execute database maintenance tasks."""
 
         cherrypy.engine.publish("cache:prune")
+        cherrypy.engine.publish("applog:prune")
 
         pattern = self._path("*.sqlite")
         file_names = glob.glob(pattern, recursive=False)

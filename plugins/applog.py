@@ -14,7 +14,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._create("""
         CREATE TABLE IF NOT EXISTS applog (
-            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'NOW')),
+            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             source VARCHAR(255) NOT NULL,
             key VARCHAR(255) NOT NULL,
             value VARCHAR(255) NOT NULL
@@ -28,6 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the applog prefix.
         """
         self.bus.subscribe("applog:add", self.add)
+        self.bus.subscribe("applog:prune", self.prune)
 
     def add(self, caller, key, value):
         """Accept a log message for storage."""
@@ -47,3 +48,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             source,
             value
         ))
+
+    def prune(self, cutoff_months=6):
+        """Delete old records.
+
+        This is normally invoked from the maintenance plugin, and
+        keeps the applog database from unlimited growth. The
+        likelihood of very old applog records being needed or wanted
+        is low.
+
+        """
+
+        cutoff_months = int(cutoff_months) * -1
+
+        deletion_count = self._delete(
+            """DELETE FROM applog
+            WHERE strftime('%s', created) < strftime('%s', 'now', '{} month')
+            """.format(cutoff_months)
+        )
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "applog",
+            "prune",
+            "pruned {} records".format(deletion_count)
+        )
