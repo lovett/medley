@@ -45,6 +45,7 @@ setup: dummy
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
+	npm install -D --no-optional
 
 serve: dummy
 	python medley.py
@@ -193,7 +194,6 @@ logindex-reset: dummy
 assets: JS_DIR := apps/shared/static/js/
 assets: export NPM_CONFIG_PROGRESS = false
 assets: dummy
-	npm install -D --no-optional
 	cp node_modules/vue/dist/vue.js $(JS_DIR)
 	cp node_modules/vue/dist/vue.min.js $(JS_DIR)
 
