@@ -8,14 +8,14 @@
 {% block scripts %}
 {{ macros.cacheBustedScript('registry', 'registry.js') }}
 
-{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button')) }}
+{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
 {% endblock %}
 
 
 {% block page_body %}
 
 <main>
-    {{ macros.svgSymbols("copy", "delete") }}
+    {{ macros.svgSymbols("copy", "delete", "new-item") }}
 
     <div class="views content-wrapper">
         <ul>
@@ -63,8 +63,8 @@
                     <header>
                         {{ entry.key|e }}
                         <div class="actions">
-                            <div><clipboard-button target-value="{{ entry.key|e }}" label="key" tooltip="Copy key" /></div>
-                            <div><clipboard-button target-id="value-{{ loop.index }}" label="value" tooltip="Copy value" /></div>
+                            <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
+                            <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
                             <div><discard-button tooltip="Delete this entry" /></div>
                         </div>
                     </header>

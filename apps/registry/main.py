@@ -10,7 +10,7 @@ class Controller:
 
     # pylint: disable=invalid-name
     @cherrypy.tools.negotiable()
-    def GET(self, q=None, uid=None, view="search"):
+    def GET(self, q=None, uid=None, key=None, view="search"):
         """Display a UI to search for entries and add new ones."""
 
         entries = ()
@@ -26,16 +26,22 @@ class Controller:
                 key=q
             ).pop()
 
-        if view not in ["add", "search"]:
-            view = "search"
+        app_url = cherrypy.engine.publish("url:internal").pop()
+
+        view = "search"
+        if key:
+            view = "add"
+
 
         return {
             "html": ("registry.jinja.html", {
+                "app_url": app_url,
                 "q": q,
                 "uid": uid,
                 "entries": entries,
                 "app_name": self.name,
                 "view": view,
+                "key": key
             })
         }
 
