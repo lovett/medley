@@ -8,9 +8,9 @@ import datetime
 import hashlib
 import os
 import os.path
+import time
 import xml.dom.minidom
 import cherrypy
-import time
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -322,23 +322,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     os.rmdir(dir_path)
                     dirs_pruned += 1
 
-        files_pruned_label = "files"
-        dirs_pruned_label = "directories"
-
-
-        if files_pruned == 1:
-            files_pruned_label = "file"
-        if dirs_pruned == 1:
-            dirs_pruned_label = "directory"
-
         cherrypy.engine.publish(
             "applog:add",
             "speak",
             "prune",
             "pruned {} {} and {} {}".format(
                 files_pruned,
-                files_pruned_label,
+                "file" if files_pruned == 1 else "files",
                 dirs_pruned,
-                dirs_pruned_label
+                "directory" if dirs_pruned == 1 else "directories"
             )
         )

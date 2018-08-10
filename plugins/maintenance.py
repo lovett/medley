@@ -37,7 +37,8 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             self._execute("analyze")
 
     @decorators.log_runtime
-    def fs_maintenance(self):
+    @staticmethod
+    def fs_maintenance():
         """Execute filesystem maintenance tasks."""
 
         cherrypy.engine.publish("speak:prune")

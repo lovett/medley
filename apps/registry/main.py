@@ -32,7 +32,6 @@ class Controller:
         if key:
             view = "add"
 
-
         return {
             "html": ("registry.jinja.html", {
                 "app_url": app_url,
