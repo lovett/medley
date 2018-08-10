@@ -23,7 +23,7 @@
         <form id="later-form" method="post" action="/bookmarks">
 
             <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-            <div class="hidden success message">Success!</div>
+            <div class="hidden success message">Success! <a href="{{ bookmarks_url }}">Go to bookmarks</a></div>
 
             {% if bookmark.rowid %}
             <div class="notice message">
@@ -38,6 +38,9 @@
                         {{ bookmark.updated|localtime|dateformat('LL') }}.
                     </p>
                 {% endif %}
+
+                <p><a href="{{ bookmarks_url }}">Go to bookmarks</a>
+
             </div>
             {% endif %}
 

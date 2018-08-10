@@ -29,6 +29,7 @@ MEDLEY.later = (function () {
         }).done(function (data) {
             jQuery('.error.message').addClass('hidden');
             jQuery('.success.message').removeClass('hidden');
+            button.attr('disabled', false).text(button.attr('data-default'));
         }).fail(function (data) {
             jQuery('.error.message').removeClass('hidden').text(data.statusText);
             jQuery('.success.message').addClass('hidden');

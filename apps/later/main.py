@@ -67,6 +67,7 @@ class Controller:
 
         return {
             "html": ("later.jinja.html", {
+                "bookmarks_url": bookmarks_url,
                 "app_url": app_url,
                 "error": error,
                 "bookmark": bookmark,
