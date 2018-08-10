@@ -65,6 +65,11 @@ class Controller:
             "url:internal"
         ).pop()
 
+        bookmarks_url = cherrypy.engine.publish(
+            "url:internal",
+            "/bookmarks"
+        ).pop()
+
         return {
             "html": ("later.jinja.html", {
                 "bookmarks_url": bookmarks_url,
