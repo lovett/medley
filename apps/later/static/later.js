@@ -60,15 +60,25 @@ MEDLEY.later = (function () {
     function applyShortcut(e) {
         var trigger = jQuery(e.target);
         var target = trigger.closest('.field').find('INPUT,TEXTAREA').first();
+        var node = document.createElement('a');
+        node.href = target.val();
 
         if (trigger.hasClass('remove-querystring')) {
-            target.val(target.val().replace(/\?[^#]+/, ''));
+            node.search = '';
+            target.val(node.href);
+            target.focus();
+        } else if (trigger.hasClass('remove-path')) {
+            node.pathname = '';
+            target.val(node.href);
             target.focus();
         } else if (trigger.hasClass('remove-hash')) {
-            target.val(target.val().replace(/#.*/, ''));
+            node.hash = '';
+            target.val(node.href);
             target.focus();
         } else if (trigger.hasClass('revert')) {
-            target.val(target.attr('data-original-value'));
+            node.href = target.attr('data-original-value');
+            target.val(node.href);
+            target.focus();
         } else if (trigger.hasClass('trim-sentence-from-start')) {
             target.val(target.val().replace(/^(.*?\.) ([A-Z].*)/m, '$2'));
             target.focus();
@@ -79,6 +89,8 @@ MEDLEY.later = (function () {
             target.val('');
             target.focus();
         }
+
+
     }
 
     function toggleShortcuts(e) {
