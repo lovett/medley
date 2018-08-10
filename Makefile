@@ -197,7 +197,17 @@ assets: dummy
 	cp node_modules/vue/dist/vue.js $(JS_DIR)
 	cp node_modules/vue/dist/vue.min.js $(JS_DIR)
 
+#
 # Build the application
 #
-#
 build: assets
+
+#
+# Create a package upgrade commit.
+#
+# "puc" stands for Package Upgrade Commit
+#
+puc: dummy
+	git checkout master
+	git add requirements.txt requirements-dev.txt package.json package-lock.json
+	git commit -m "Upgrade pip and npm packages"
