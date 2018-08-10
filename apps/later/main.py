@@ -39,6 +39,12 @@ class Controller:
             ).pop()
             comments = re.sub(r"\s+", " ", comments).strip()
             comments = re.sub(r",(\w)", ", \\1", comments)
+            comments = comments.capitalize()
+
+        # Discard comment if it came from a meta description tag on Reddit,
+        # since it isn't specific to the URL being bookmarked.
+        if comments.startswith("r/") and "reddit.com" in url:
+            comments = ""
 
         if comments and not comments.endswith("."):
             comments += "."
