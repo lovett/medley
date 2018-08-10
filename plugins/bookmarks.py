@@ -223,7 +223,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return self._fts_search(
             """SELECT url, domain, title, rank,
             added as 'added [datetime]',
-            updated as 'updated [datetime]',
+            updated as 'updated [datetime]'
             FROM bookmarks JOIN (
                 SELECT docid, rank(matchinfo(bookmarks, 'pcx'), {}) as rank
                 FROM bookmarks
