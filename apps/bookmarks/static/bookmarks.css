@@ -19,8 +19,14 @@
 }
 
 .bookmark .meta {
-    color: #666;
-    font-size: .85em;
+    font-size: .75em;
+}
+.bookmark .meta > * {
+    border: 1px solid #ccc;
+    background-color: #efefef;
+    display: inline-block;
+    padding: 0 .5em;
+    margin-right: 1em;
 }
 
 .bookmark H2 {
