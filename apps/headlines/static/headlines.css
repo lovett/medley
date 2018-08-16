@@ -1,0 +1,12 @@
+.content-wrapper {
+    padding: 1em 0;
+}
+
+#headlines ol li {
+    padding-left: 0;
+    padding-bottom: 1em;
+}
+
+#headlines ol p {
+    margin: .5em 0 1em;
+}

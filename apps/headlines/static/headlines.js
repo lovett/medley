@@ -18,9 +18,9 @@ MEDLEY.topics = (function () {
 
     return {
         init: function () {
-            links = jQuery('#topics A');
+            links = jQuery('#headlines A.search');
 
-            worker = new Worker('/topics/static/topics-worker.js');
+            worker = new Worker('/headlines/static/headlines-worker.js');
 
             worker.addEventListener('message', function (e) {
                 var fields = e.data.split(':');

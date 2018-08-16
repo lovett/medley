@@ -1,0 +1,47 @@
+{% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
+
+{% block stylesheets %}
+{{ macros.cacheBustedStylesheet('headlines', 'headlines.css') }}
+{% endblock %}
+
+{% block scripts %}
+{{ macros.cacheBustedScript('headlines', 'headlines.js') }}
+{% endblock %}
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper align-center">
+        <p>
+            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
+        </p>
+    </div>
+
+    <div class="content-wrapper align-center">
+        <button data-count="{{ count }}">Walk</button>
+    </div>
+    <div id="headlines" class="content-wrapper">
+
+        {% for category in headlines %}
+            <h1>{{ category|capitalize }}</h1>
+
+            <ol>
+            {% for article in headlines[category] %}
+                <li>
+                    {{ article["source"]["name"] }}: <a href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
+                    <p class="smaller">
+                        <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
+                           rel="noreferrer" target="_blank">search</a>
+                    </p>
+                </li>
+            {% endfor %}
+            </ol>
+        {% endfor %}
+    </div>
+
+    <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
+
+</main>
+
+{% endblock %}
