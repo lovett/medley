@@ -12,35 +12,41 @@
 {% block page_body %}
 
 <main>
-    <div class="content-wrapper align-center">
+    <header class="content-wrapper align-center">
         <p>
             <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
         </p>
-    </div>
+        <button data-limit="{{ limit }}" data-offset="{{ offset }}">Walk Headlines </button>
+        <p class="smaller">
+            From {{ offset }} to {{ offset + limit - 1}}
+        </p>
+    </header>
 
-    <div class="content-wrapper align-center">
-        <button data-count="{{ count }}">Walk</button>
-    </div>
     <div id="headlines" class="content-wrapper">
 
         {% for category in headlines %}
-            <h1>{{ category|capitalize }}</h1>
+            <div class="group">
+                <h1>{{ category|capitalize }}</h1>
 
-            <ol>
-            {% for article in headlines[category] %}
-                <li>
-                    {{ article["source"]["name"] }}: <a href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
-                    <p class="smaller">
-                        <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
-                           rel="noreferrer" target="_blank">search</a>
-                    </p>
-                </li>
-            {% endfor %}
-            </ol>
+                <ol>
+                    {% for article in headlines[category] %}
+                        <li>
+                            <a class="title" href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
+                            <footer>
+                                {{ article["source"]["name"] }}
+                                <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
+                                   rel="noreferrer" target="_blank">search</a>
+                            </footer>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>
         {% endfor %}
     </div>
 
-    <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
+    <footer class="content-wrapper align-center">
+        <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
+    </footer>
 
 </main>
 

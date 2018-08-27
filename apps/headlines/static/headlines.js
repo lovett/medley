@@ -4,16 +4,10 @@ MEDLEY.topics = (function () {
     var childWindow, links, worker;
 
     function visitLink(index) {
-        var link = links[index];
+        var target = links[index];
 
-        if (link.classList.contains('strikeout')) {
-            return;
-        }
-
-        if (!childWindow.closed) {
-            childWindow.location.href = links[index].getAttribute('href');
-            link.classList.add('strikeout');
-        }
+        childWindow.location = target.getAttribute('href');
+        target.classList.add('strikeout');
     }
 
     return {
@@ -34,7 +28,10 @@ MEDLEY.topics = (function () {
             });
 
             jQuery('BUTTON').on('click', function () {
-                var message = 'start:0:' + parseInt(jQuery(this).attr('data-count'), 10);
+                var message = 'start'
+                message += ':' + parseInt(jQuery(this).attr('data-limit'), 10);
+                message += ':' + parseInt(jQuery(this).attr('data-offset'), 10);
+
                 childWindow = window.open('about:blank');
                 worker.postMessage(message);
             });

@@ -12,13 +12,18 @@ class Controller:
     cache_key = "headlines"
 
     @cherrypy.tools.negotiable()
-    def GET(self, count=30):
+    def GET(self, limit=None, offset=None):
         """Display a list of headlines."""
 
         try:
-            count = int(count)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid count value")
+            limit = int(limit)
+        except (ValueError, TypeError):
+            limit = 40
+
+        try:
+            offset = int(offset)
+        except (ValueError, TypeError):
+            offset = 1
 
         now = pendulum.now()
 
@@ -67,7 +72,8 @@ class Controller:
             "max_age": cache_lifespan,
             "html": ("headlines.jinja.html", {
                 "headlines": headlines,
-                "count": count,
+                "limit": limit,
+                "offset": offset,
                 "app_name": self.name
             }),
             "json": headlines,
