@@ -73,26 +73,10 @@ class Controller:
                 }
             )
 
-        caller_id = cherrypy.engine.publish(
-            "asterisk:get_caller_id",
-            number=sanitized_number
-        ).pop()
-
-        blacklisted = cherrypy.engine.publish(
-            "asterisk:is_blacklisted",
-            number=sanitized_number
-        ).pop()
-
         call_history = cherrypy.engine.publish(
             "cdr:call_history",
             sanitized_number
         ).pop()
-
-        if not caller_id:
-            try:
-                caller_id = call_history[0]["clid"]
-            except IndexError:
-                caller_id = None
 
         sparql = [
             lookup[0]
@@ -102,11 +86,9 @@ class Controller:
 
         return {
             "html": ("phone.jinja.html", {
-                "caller_id": caller_id,
                 "error": error,
                 "history": call_history,
                 "number": sanitized_number,
-                "blacklisted": blacklisted,
                 "state_abbreviation": state_lookup[1],
                 "comment": state_lookup[2],
                 "state_name": state_name_lookup[1],

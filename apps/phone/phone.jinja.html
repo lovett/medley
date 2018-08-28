@@ -28,80 +28,20 @@
     <h1 class="align-center">{{ number|phonenumber }}</h1>
 
     <div class="content-wrapper flex-parent">
-        <div class="flex-item">
-            <section>
-                <h2>
-                    Caller ID
-
-                </h2>
-
-                <div id="caller-id-display">
-                    <p id="callerid-display-value">
-                        {{ caller_id or "Unknown" }}
-                    </p>
-
-                    <p><a href="#" class="edit-callerid" rel="noreferrer">Edit</a></p>
-                </div>
-
-                <form id="caller-id" class="hidden" method="post" action="/callerid">
-                    <input type="hidden" name="cid_number" value="{{ number|default('') }}" />
-
-                    <div class="hidden error message"></div>
-
-                    <div class="field">
-                        <input type="text" name="cid_value" value="{{ caller_id|default('') }}"/>
-                    </div>
-
-                    <div class="field">
-                        <button class="small">Update</button>
-                        <a href="#" class="cancel reset-callerid">Cancel</a>
-                    </div>
-                </form>
-            </section>
-        </div>
-
-        <div class="flex-item">
-            <h2>Status</h2>
-
-            <form class="blacklist form {% if not blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                <input type="hidden" name="number" value="{{ number|default('') }}" />
-                <input type="hidden" name="action" value="remove" />
-
-                <div class="hidden error message"></div>
-
-                <p class="blacklisted">
-                    Blacklisted
-                    <span id="blacklist-date">on {{ blacklisted|localtime|dateformat("LLL") }}</span>
-                </p>
-
-                <button class="small">Remove</button>
-            </form>
-
-            <form class="blacklist form {% if blacklisted %}hidden{% endif %} panel" method="post" action="/blacklist">
-                <input type="hidden" name="number" value="{{ number|default('') }}" />
-                <input type="hidden" name="action" value="add" />
-
-                <div class="hidden error message"></div>
-
-                <p>Not blacklisted</p>
-
-                <button class="small">Add</button>
-            </form>
-        </div>
+        {% if state_name %}
+            <div class="flex-item">
+                <h2>Location</h2>
+                {% if comment %}
+                    <p>{{ comment }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="flex-item">
             <h2>Search</h2>
             <p>{{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
         </div>
     </div>
 
-    {% if state_name %}
-    <div class="content-wrapper">
-        <h2>Location</h2>
-        {% if comment %}
-        <p>{{ comment }}</p>
-        {% endif %}
-    </div>
-    {% endif %}
 
     {% if history|length > 0 %}
     <div class="content-wrapper">
