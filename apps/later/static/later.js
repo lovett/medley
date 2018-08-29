@@ -97,7 +97,7 @@ MEDLEY.later = (function () {
     function toggleShortcuts(e) {
         var shortcuts, target, val;
         target = jQuery(this);
-        shortcuts = target.closest('.field').find('.shortcuts A');
+        shortcuts = target.closest('.field').find('.shortcuts');
         val = jQuery.trim(target.val());
         if (val === '') {
             shortcuts.addClass('hidden');

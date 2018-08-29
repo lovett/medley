@@ -218,6 +218,11 @@ TABLE.key-value TH {
     padding-bottom: 1em;
 }
 
+.field .note {
+    font-size: .75em;
+    margin-top: .5em;
+}
+
 .half-column {
     box-sizing: border-box;
     display: inline-block;
@@ -291,11 +296,12 @@ TABLE.key-value TH {
 }
 
 .shortcuts A {
+    display: inline-block;
     margin-left: 1em;
+    padding: .5em 0;
 }
 
 .shortcuts {
-    padding: 1em 0;
     font-size: .85em;
     text-align: right;
 }
