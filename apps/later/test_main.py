@@ -78,8 +78,36 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             helpers.html_var(render_mock, "comments"),
-            "abc456."
+            "Abc456."
         )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_ignores_reddit_comment(self, publish_mock, render_mock):
+        """The comments field of a reddit.com URL is discarded if it came from
+        a meta tag."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0].startswith("markup:"):
+                return [args[1]]
+            if args[0] == "bookmarks:find":
+                return [{
+                    "title": "existing title",
+                    "tags": None,
+                    "comments": None
+                }]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request(
+            "/",
+            url="http://reddit.com",
+            comments="r/subredditname: Lorem ipsum"
+        )
+
+        self.assertIsNone(helpers.html_var(render_mock, "comments"))
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
