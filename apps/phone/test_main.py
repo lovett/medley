@@ -109,7 +109,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             value_map = {
                 "cache:get": [None],
-                "asterisk:get_caller_id": [None],
                 "geography:state_by_area_code": [
                     (None, "XY", None)
                 ],
@@ -117,7 +116,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                     (None, "Unabbreviated State")
                 ],
                 "formatting:phone_sanitize": ["1234567890"],
-                "asterisk:is_blacklisted": [False],
                 "cdr:call_history": [[]],
             }
 
@@ -146,10 +144,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 }]
             if args[0] == "formatting:phone_sanitize":
                 return ["1234567890"]
-            if args[0] == "asterisk:is_blacklisted":
-                return [False]
-            if args[0] == "asterisk:get_caller_id":
-                return [None]
             if args[0] == "cdr:call_history":
                 return [[{"clid": "test"}]]
             return mock.DEFAULT
