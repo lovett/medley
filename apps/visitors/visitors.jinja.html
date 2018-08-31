@@ -228,7 +228,7 @@
                             </ul>
                             {% endif %}
 
-                            {% if result.referrer and result.referrer_domain not in site_domains %}
+                            {% if result.referrer_domain and result.referrer_domain not in site_domains %}
                             <p>
                                 Referrer: <a href="/visitors?query=date+{{ result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                             </p>
