@@ -53,7 +53,7 @@ class Controller:
 
             for day in period.range("days"):
                 row = [''] * len(headers)
-                row[0] = day.format("MMMM D, YYYY")
+                row[0] = day.format("MMM D, YYYY")
                 row[1] = day.format("dddd")
                 rows.append(row)
         elif headers:
