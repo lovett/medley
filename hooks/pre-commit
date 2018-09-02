@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+
+set -eu
+
+ROOT=$(mktemp -d)
+
+cleanup() {
+    rm -rf $ROOT
+}
+
+echo "Runing pre-commit hook..."
+
+mkdir -p $ROOT
+git checkout-index --prefix=$ROOT/ -af
+
+# Exclude deleted, copied, and renamed files.
+for CHANGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
+    FILE_EXTENSION="${CHANGED_FILE##*.}"
+    FILE_NAME=$(basename "${CHANGED_FILE%.*}")
+    PARENT_PATH=$(dirname "$CHANGED_FILE")
+    PARENT_DIR=$(basename "$PARENT_PATH")
+
+    if [[ "$FILE_EXTENSION"  == "py" ]]; then
+        TEST_FILE="${PARENT_PATH}/test_${FILE_NAME}.py"
+
+        flake8 "$CHANGED_FILE"
+        pylint --rcfile=.pylintrc "$CHANGED_FILE"
+
+        if [[ -f "$TEST_FILE" ]]; then
+            make "$PARENT_DIR"
+        fi
+    fi
+done
+
+trap "cleanup" EXIT

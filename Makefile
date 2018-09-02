@@ -154,6 +154,9 @@ test: $(APP_NAMES)
 # it would get deleted during combination and you'd have to regenerate
 # everything else just to reflect changes in one app.
 #
+# This target can be invoked directly. It is also invoked by the Git
+# pre-commit hook.
+#
 $(APP_NAMES): $(COVERAGE_DIR)
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
@@ -164,6 +167,9 @@ $(APP_NAMES): $(COVERAGE_DIR)
 # main server file.
 #
 # Two linters are used for the sake of being comprehensive.
+#
+# These commands are also present in the Git pre-commit hook, but
+# operate one file at a time.
 lint: dummy
 	flake8 $(APP_DIR) $(PLUGIN_DIR) medley.py
 	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) medley.py
@@ -211,3 +217,9 @@ puc: dummy
 	git checkout master
 	git add requirements.txt requirements-dev.txt package.json package-lock.json
 	git commit -m "Upgrade pip and npm packages"
+
+#
+# Set up git hooks
+#
+hooks: dummy
+	ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
