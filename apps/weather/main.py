@@ -65,10 +65,12 @@ class Controller:
             if api_response:
                 forecasts[label] = self.shape_forecast(api_response)
 
+                # Cache for 1 hour.
                 cherrypy.engine.publish(
                     "cache:set",
                     cache_key,
                     api_response,
+                    3600
                 )
 
         return {
