@@ -12,12 +12,25 @@ APP_PATHS := $(filter-out $(APP_DIR)/__%,$(APP_PATHS))
 APP_NAMES := $(notdir $(APP_PATHS))
 
 PLUGIN_DIR := $(CURDIR)/plugins
-PLUGINS := $(notdir $(wildcard $(PLUGIN_DIR)/*.py))
+PLUGIN_PATHS := $(wildcard $(PLUGIN_DIR)/[a-z]*.py)
+PLUGIN_PATHS := $(filter-out $(PLUGIN_DIR)/test_%,$(PLUGIN_PATHS))
+PLUGIN_PATHS := $(notdir $(PLUGIN_PATHS))
+PLUGIN_PATHS := $(addprefix plugins/,$(PLUGIN_PATHS))
+PLUGIN_MODULES := $(basename $(PLUGIN_PATHS))
+PLUGIN_MODULES := $(notdir $(PLUGIN_MODULES))
+PLUGIN_MODULES := $(addprefix plugins., $(PLUGIN_MODULES))
 
 REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
 REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
+
+# Debugging tool to print the value of a variable.
+#
+# Example: make print-PLUGIN_DIR
+#
+print-%:
+	@echo $* = $($*)
 
 venv: dummy
 	rm -rf venv
@@ -82,8 +95,6 @@ $(REQUIREMENTS_FILES): dummy
 #
 # Don't invoke directly.
 #
-# Uses an order-only prerequisite to create the coverage directory.
-#
 %.cov: $(APP_DIR)/%/main.py $(APP_DIR)/%/test.py | $(COVERAGE_DIR)
 	PYTHONPATH=$(PYTHONPATH)  COVERAGE_FILE=$(COVERAGE_DIR)/$*.cov \
 	coverage run --branch --source $(APP_DIR)/$* --omit $(APP_DIR)/$*/test.py $(APP_DIR)/$*/test.py
@@ -108,24 +119,15 @@ $(REQUIREMENTS_FILES): dummy
 
 # Build a coverage report
 #
-# Example: make coverage
+# Creates a unified coverage report for all apps and plugins.
 #
-# Creates a unifed coverage report for all apps in both CLI and HTML
-# formats. Depends on the .coverage.appname target to copy individual
-# coverage files to what the coverage utility expects to see.
+# The unified report is built indirectly from the .cov files in the
+# coverage directory.
 #
-coverage: $(addprefix .coverage., $(APP_NAMES))
+coverage: $(addprefix .coverage., $(APP_NAMES) $(PLUGIN_MODULES))
 	coverage combine $(COVERAGE_DIR)
 	coverage report
-
-# Build a coverage report and view the HTML report in a browser
-#
-# Example: make htmlcov
-#
-# Uses the macOS-specific open utility to launch the default browser.
-htmlcov: coverage
 	coverage html
-	open htmlcov/index.html
 
 
 # Test all apps
@@ -161,6 +163,30 @@ $(APP_NAMES): $(COVERAGE_DIR)
 	COVERAGE_FILE=$(COVERAGE_DIR)/$@.cov \
 	python -m pytest --cov=apps.$@ --cov-branch  $(APP_DIR)/$@
 
+
+# Test a single plugin
+#
+# Example: make plugins/myplugin.py
+#
+# Invokes pytest with the pytest-cov plugin and writes a plugin-specific
+# coverage file to the coverage directory.
+#
+# The coverage file uses a non-standard name (ex: plugins.myplugin.cov) so
+# that report generation is re-runnable.
+#
+# If the coverage file had a standard name (ex:
+# .coverage.plugins.myplugin) it would get deleted during combination
+# and you'd have to regenerate everything else just to reflect changes
+# in one plugin.
+#
+# This target can be invoked directly.
+#
+$(PLUGIN_PATHS): $(COVERAGE_DIR)
+	$(eval MODULE=$(addprefix plugins.,$(notdir $(basename $@))))
+	COVERAGE_FILE=$(COVERAGE_DIR)/$(MODULE).cov \
+	python -m pytest --cov=$(MODULE) --cov-branch  $@
+
+
 # Run lint checks across the project
 #
 # This will consider plugins app controllers and their tests, and the
@@ -169,7 +195,8 @@ $(APP_NAMES): $(COVERAGE_DIR)
 # Two linters are used for the sake of being comprehensive.
 #
 # These commands are also present in the Git pre-commit hook, but
-# operate one file at a time.
+# are only applied to changed files.
+#
 lint: dummy
 	flake8 $(APP_DIR) $(PLUGIN_DIR) medley.py
 	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) medley.py
