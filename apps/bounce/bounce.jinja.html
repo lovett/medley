@@ -66,15 +66,41 @@
         </table>
         {% endif %}
 
-
         {% if bounces %}
+        <h1 class="align-center">{{ group }} destinations</h1>
         <table id="bounces" class="key-value natural-width bordered">
-            <caption>{{ group }} Destinations</caption>
             <tbody>
                 {% for id, values in bounces.items() %}
                 <tr>
-                    <th>{{ values[1] }}</th>
-                    <td><a href="{{ values[0]|anonymize }}" rel="noreferer noopener">{{ values[0]|truncate(100) }}</a></td>
+                    <th>
+                        {% if values[1] == departing_from %}
+                            ⬅
+                        {% endif %}
+                        {{ values[1] }}
+                        {% if values[1] != departing_from %}
+                            ➡
+                        {% endif %}
+                    </th>
+                    <td>
+                        <a href="{{ values[0]|anonymize }}" rel="noreferer noopener">{{ values[0]|truncate(100) }}</a>
+                        {% if values[0].startswith('https:') %}
+                            <p class="smaller">
+                                <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
+                                   class="plain"
+                                   rel="noreferer noopener"
+                                >with HTTP</a>
+                            </p>
+                        {% endif %}
+
+                        {% if values[0].startswith('http:') %}
+                            <p class="smaller">
+                                <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
+                                   class="plain"
+                                   rel="noreferer noopener"
+                                >with HTTPS</a>
+                            </p>
+                        {% endif %}
+                    </td>
                     <td align="right">
                         <a href="#" data-uid="{{ id }}" class="delete" title="Delete entry" rel="noreferrer">
                             <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>

@@ -37,6 +37,7 @@ class Controller:
             if segment not in self.common_names
             and len(segment) > 2
         ]
+
         return diff[-1]
 
     def guess_name(self, url):
@@ -97,7 +98,7 @@ class Controller:
 
         if u:
             site = self.site_url(u)
-            search_value = "{}*".format(site)
+            search_value = "{}\n*".format(site)
             group = cherrypy.engine.publish(
                 "registry:first_key",
                 value=search_value,
@@ -124,11 +125,18 @@ class Controller:
                 for bounce in bounces
             }
 
+        departing_from = None
         if site and bounces:
+            # Match the current URL to a known site.
+            for (_, values) in bounces.items():
+                if urlparse(site).netloc == urlparse(values[0]).netloc:
+                    departing_from = values[1]
+                    break
+
+            # Re-scope the current URL to each known destination.
             bounces = {
                 k: (u.replace(site, v[0]), v[1])
                 for (k, v) in bounces.items()
-                if site not in v[0]
             }
 
         if not site and not bounces:
@@ -145,6 +153,7 @@ class Controller:
 
         return {
             "html": ("bounce.jinja.html", {
+                "departing_from": departing_from,
                 "site": site,
                 "group": group,
                 "all_groups": all_groups,

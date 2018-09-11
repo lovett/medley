@@ -314,6 +314,10 @@ TABLE.key-value TH {
     text-decoration: line-through;
 }
 
+.plain {
+    text-decoration: none;
+}
+
 .success {
     background-color: #90EE90;
     padding: .5em;

@@ -42,10 +42,17 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """An incoming URL is reduced to its protocol and hostname."""
 
         candidates = (
+            # path is ignored
             ("https://example.com/with/a/path",
              "https://example.com"),
+
+            # querystring and fragment are ignored
             ("http://example.com/path?and=querystring#andfragment",
              "http://example.com"),
+
+            # port is preserved
+            ("http://example.com:12345",
+             "http://example.com:12345"),
         )
 
         for pair in candidates:
