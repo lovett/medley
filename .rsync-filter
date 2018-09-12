@@ -27,3 +27,7 @@
 - package.json
 - package-lock.json
 - Makefile
+- README.org
+- /hooks
+- /.ackrc
+- /.pylintrc
