@@ -82,6 +82,11 @@
                 return;
             }
 
+            // Take no action when the control or alt keys are being pressed.
+            if (e.ctrlKey || e.altKey) {
+                return;
+            }
+
             buffer = buffer + String.fromCharCode(e.which);
             buffer = buffer.slice(0, settings.bufferLength);
 
