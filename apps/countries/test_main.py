@@ -50,7 +50,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
             "WMO": "US",
             "is_independent": "Yes",
             "name": "US",
-            "official_name_en": "United States of America",
+            "official_name_en": "USA",
             "official_name_fr": "États-Unis d'Amérique"
         }]
 
@@ -78,7 +78,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_called_with(
             "registry:add",
             "country_code:alpha2:US",
-            ("United States of America",),
+            ("USA",),
             True
         )
 
@@ -135,7 +135,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_any_call(
             "registry:add",
             "country_code:alpha2:US",
-            ("United States of America",),
+            ("USA",),
             True
         )
 

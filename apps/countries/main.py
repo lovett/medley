@@ -53,8 +53,10 @@ class Controller:
                 if name.startswith("United Kingdom of"):
                     name = "United Kingdom"
 
+                if name == "United States of America":
+                    name = "USA"
+
                 key = self.registry_key.format(alpha2)
                 cherrypy.engine.publish("registry:add", key, (name,), True)
 
         cherrypy.response.status = 204
-        return
