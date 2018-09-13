@@ -280,3 +280,12 @@ puc: dummy
 #
 hooks: dummy
 	ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+
+# Automation for merging changes from the master branch into the
+# production branch.
+#
+master-to-production: dummy
+	git checkout production
+	git merge master
+	git push
+	git checkout master
