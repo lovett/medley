@@ -28,6 +28,8 @@ PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 USE_APT := $(shell command -v apt 2> /dev/null)
 USE_PKGIN := $(shell command -v pkgin 2> /dev/null)
 
+SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
+
 # Debugging tool to print the value of a variable.
 #
 # Example: make print-PLUGIN_DIR
@@ -73,17 +75,13 @@ endif
 #
 # This setup also handles multiple requirements files.
 #
-# Use of "or true" after the npm outdated command prevents a non-zero
-# exit code from producing a warning. Non-zero exit here is ok.
 outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
-	npm outdated || true
 
-setup: system-packages
+setup: system-packages assets
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
-	npm install -D --no-optional
 
 serve: dummy
 	python medley.py
@@ -244,21 +242,28 @@ logindex-reset: dummy
 	rm db/logindex.sqlite
 	touch medley.py
 
-# Copy front-end assets from node_modules into apps/shared/static.
+# Download third-party front-end assets.
 #
-# Deliberately simplistic, and only needs to be run after an npm
-# upgrade.
+# This is deliberately simplistic in order to avoid having to bother
+# with Node.js, npm, and the like. This application doesn't need any
+# of that.
 #
-assets: JS_DIR := apps/shared/static/js/
-assets: export NPM_CONFIG_PROGRESS = false
 assets: dummy
-	cp node_modules/vue/dist/vue.js $(JS_DIR)
-	cp node_modules/vue/dist/vue.min.js $(JS_DIR)
+	mkdir -p $(SHARED_JS_DIR)
+	curl --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
+	curl --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
 
-#
 # Build the application
 #
-build: assets
+# There isn't a whole lot going on here because there isn't much to
+# build. The front-end deliberately doesn't use NPM or anything else
+# that involves Node.js.
+#
+# The one operation that will be done here is to switch from the
+# development version of Vue to the production version.
+#
+build: dummy
+	mv $(SHARED_JS_DIR)/vue.min.js $(SHARED_JS_DIR)/vue.js
 
 #
 # Create a package upgrade commit.
