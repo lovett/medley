@@ -58,6 +58,7 @@ venv: dummy
 	@echo  "done."
 	@echo "Now run: source venv/bin/activate"
 	@echo "After that, run: make setup"
+	@echo "Also consider running: make hooks"
 
 # Install OS packages.
 #
@@ -249,7 +250,6 @@ logindex-reset: dummy
 # of that.
 #
 assets: dummy
-	mkdir -p $(SHARED_JS_DIR)
 	curl --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
 	curl --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
 
@@ -275,8 +275,12 @@ puc: dummy
 	git add requirements.txt requirements-dev.txt package.json package-lock.json
 	git commit -m "Upgrade pip and npm packages"
 
-#
 # Set up git hooks
+#
+# This is kept away from other targets like venv and setup so that it
+# doesn't interfere with CI. The suggestion printed by the venv target
+# is enough of a reminder, given how infrequently this target is
+# needed.
 #
 hooks: dummy
 	ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
