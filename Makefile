@@ -25,6 +25,9 @@ REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
+USE_APT := $(shell command -v apt 2> /dev/null)
+USE_PKGIN := $(shell command -v pkgin 2> /dev/null)
+
 # Debugging tool to print the value of a variable.
 #
 # Example: make print-PLUGIN_DIR
@@ -32,14 +35,36 @@ PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 print-%:
 	@echo $* = $($*)
 
+# Set up a virtualenv
+#
+# The --system-site-packages flag is not used because it results in a
+# venv without pip. Instead, system packages are enabled
+# after-the-fact by editing the pyvenv.cfg file.
+#
+# This results in the best of both worlds: a local copy
+# of pip with a predictable name (no confusion about pip vs pip3) and
+# access to site packages for faster builds.
+#
 venv: dummy
-	rm -rf venv
-	python3 -m venv --system-site-packages venv
-	echo "[global]" > venv/pip.conf
-	echo "format = columns" >> venv/pip.conf
-	@echo "Virtual env created. Now do: source venv/bin/activate"
+	@echo -n "Creating a new virtual environment..."
+	@rm -rf venv
+	@python3 -m venv venv
+	@echo "[global]" > venv/pip.conf
+	@echo "format = columns" >> venv/pip.conf
+	@sed 's/include-system-site-packages = false/include-system-site-packages = true/' venv/pyvenv.cfg > venv/pyvenv.cfg.tmp
+	@mv venv/pyvenv.cfg.tmp venv/pyvenv.cfg
+	@echo  "done."
+	@echo "Now run: source venv/bin/activate"
+	@echo "After that, run: make setup"
 
-# Filter the list of outdated packages to direct dependencies
+# Install OS packages.
+#
+system-packages: dummy
+ifdef USE_APT
+	sudo apt install libasound2-dev rsync
+endif
+
+# Filter the list of outdated Python packages to direct dependencies
 #
 # By default, pip returns a list of all outdated packages. It can be
 # annoying to reconcile this list to the contents of requirements.txt
@@ -54,7 +79,7 @@ outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
 	npm outdated || true
 
-setup: dummy
+setup: system-packages
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
