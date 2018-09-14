@@ -36,7 +36,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """Verify the controller's supported HTTP methods"""
 
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET", "PUT"))
+        self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
 
     def test_site_url(self):
         """An incoming URL is reduced to its protocol and hostname."""

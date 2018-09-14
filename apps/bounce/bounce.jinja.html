@@ -3,14 +3,17 @@
 
 {% block scripts %}
 {{ macros.cacheBustedScript('bounce', 'bounce.js') }}
+{{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
 {% endblock %}
+
 
 {% block page_body %}
 
 <main>
+    {{ macros.svgSymbols("delete") }}
     <div class="content-wrapper">
         <div class="bookmarklet-container">
-            <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}/bounce?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
+            <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
         </div>
 
 
@@ -58,10 +61,10 @@
             <caption class="one-line">Bounce Groups</caption>
             <tbody>
                 {% for group in all_groups %}
-                <tr>
-                    <td align="center"><a href="{{ app_url }}/bounce?group={{ group }}">{{ group }}</a></td>
-                </tr>
-                {% endfor %}
+                    <tr>
+                        <td align="center"><a href="{{ app_url }}/bounce?group={{ group }}">{{ group }}</a></td>
+                    </tr>
+            {% endfor %}
             </tbody>
         </table>
         {% endif %}
@@ -69,9 +72,9 @@
         {% if bounces %}
         <h1 class="align-center">{{ group }} destinations</h1>
         <table id="bounces" class="key-value natural-width bordered">
-            <tbody>
-                {% for id, values in bounces.items() %}
-                <tr>
+             {% for id, values in bounces.items() %}
+             <tbody is="discardable-record" inline-template url="{{ app_url }}?uid={{ id }}">
+                 <tr v-bind:style="styles">
                     <th>
                         {% if values[1] == departing_from %}
                             ⬅
@@ -102,9 +105,7 @@
                         {% endif %}
                     </td>
                     <td align="right">
-                        <a href="#" data-uid="{{ id }}" class="delete" title="Delete entry" rel="noreferrer">
-                            <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                        </a>
+                        <discard-button tooltip="Delete this entry" />
                     </td>
                 </tr>
                 {% endfor %}

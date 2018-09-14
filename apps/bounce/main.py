@@ -144,12 +144,7 @@ class Controller:
                 "registry:distinct_keys", "bounce:*"
             ).pop()
 
-        app_url = cherrypy.request.headers.get("Host")
-
-        if "X-HTTPS" in cherrypy.request.headers:
-            app_url = "https://" + app_url
-        else:
-            app_url = "http://" + app_url
+        app_url = cherrypy.engine.publish("url:internal").pop()
 
         return {
             "html": ("bounce.jinja.html", {
@@ -178,4 +173,10 @@ class Controller:
             replace=False
         )
 
+        cherrypy.response.status = 204
+
+    @staticmethod
+    def DELETE(uid):
+        """Remove a site from a group by its ID."""
+        cherrypy.engine.publish("registry:remove_id", uid)
         cherrypy.response.status = 204

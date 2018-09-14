@@ -1,19 +1,4 @@
 MEDLEY.bounce = (function () {
-    function deleteRecord (e) {
-        var trigger;
-
-        e.preventDefault();
-
-        trigger = jQuery(e.target).closest('A');
-
-        jQuery.ajax({
-            type: 'DELETE',
-            url: '/bounce?uid=' + (parseInt(trigger.attr('data-uid'), 10) || 0)
-        }).done(function (data) {
-            window.location.reload();
-        });
-    }
-
     function submitRecord (e) {
         var field, form, errorMessage;
 
@@ -63,7 +48,6 @@ MEDLEY.bounce = (function () {
     return {
         init: function () {
             jQuery('#insert-form').on('submit', submitRecord);
-            jQuery('#bounces').on('click', 'A.delete', deleteRecord);
         }
     };
 
