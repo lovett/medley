@@ -272,7 +272,7 @@ build: dummy
 #
 puc: dummy
 	git checkout master
-	git add requirements.txt requirements-dev.txt package.json package-lock.json
+	git add requirements.txt requirements-dev.txt
 	git commit -m "Upgrade pip and npm packages"
 
 # Set up git hooks
