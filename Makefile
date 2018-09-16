@@ -25,8 +25,17 @@ REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
-USE_APT := $(shell command -v apt 2> /dev/null)
-USE_PKGIN := $(shell command -v pkgin 2> /dev/null)
+# Identify a suitable package manager.
+#
+# This has to consider the OS because apt may exist on macOS as a
+# symlink to a Java utility within /System/Library/Frameworks.
+UNAME := $(shell uname -s)
+ifeq ($(UNAME),Linux)
+	USE_APT := $(shell command -v apt 2> /dev/null)
+endif
+ifeq ($(UNAME),Darwin)
+	USE_PKGIN := $(shell command -v pkgin 2> /dev/null)
+endif
 
 SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
 
