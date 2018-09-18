@@ -168,11 +168,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     uri
                     agent_domain
                     classification
-                    reverse_domain
                     referrer_domain""") +
                     optional_not +
                     pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
                 ).setParseAction(self.log_query_exact_string),
+
+                # string field involving a subquery
+                (
+                    pp.oneOf("""
+                    reverse_domain
+                    """) +
+                    pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
+                ).setParseAction(self.log_query_subquery),
+
 
                 # ip
                 (
@@ -355,6 +363,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return "({})".format(joined_sql)
 
     @staticmethod
+    def log_query_subquery(_string, _location, tokens):
+        """Build an SQL where clause fragment for a field lookup that involves
+        a subquery.
+
+        """
+
+        field = tokens[0]
+
+        sql = ""
+        if field == "reverse_domain":
+            values = ["'{}'".format(value) for value in tokens[1:]]
+            sql = """logs.ip IN (
+                SELECT ip
+                FROM reverse_ip
+                WHERE reverse_domain IN ({}))""".format(
+                    ",".join(values)
+                )
+
+        return sql
+
+    @staticmethod
     def log_query_exact_string(_string, _location, tokens):
         """Build an SQL string for an exact string comparison."""
 
@@ -487,7 +516,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if any(("datestamp" in item for item in result)):
             result = tuple(
-                item.replace("(", "(+") if "datestamp" not in item else item
+                item.replace("(", "(+") if "datestamp" not in item
+                and "reverse_domain" not in item
+                else item
                 for item in result
             )
 
