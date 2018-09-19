@@ -1,35 +1,8 @@
 MEDLEY.bounce = (function () {
     function submitRecord (e) {
-        var field, form, errorMessage;
-
         e.preventDefault();
 
-        form = jQuery(e.target);
-
-        field = jQuery('#site', form);
-
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Site URL.';
-        }
-
-        field = jQuery('#group', form);
-
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Group.';
-        }
-
-        field = jQuery('#name', form);
-
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Site Name.';
-        }
-
-        if (errorMessage) {
-            jQuery('.error.message').removeClass('hidden').text(errorMessage);
-            jQuery('.success.messsage').addClass('hidden');
-            return;
-        }
-
+        var form = jQuery(e.target);
 
         jQuery.ajax({
             type: 'PUT',

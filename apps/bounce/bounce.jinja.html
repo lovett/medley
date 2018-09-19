@@ -33,16 +33,16 @@
             <div class="field-group">
                 <div class="field">
                     <label for="title">Site URL</label>
-                    <input type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
+                    <input required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
                 </div>
                 <div class="field">
                     <label for="title">Site Name</label>
-                    <input type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
+                    <input required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
                 </div>
 
                 <div class="field">
                     <label for="title">Group</label>
-                    <input type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
+                    <input required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
                 </div>
             </div>
 
