@@ -1,29 +1,36 @@
-MEDLEY.bounce = (function () {
-    function submitRecord (e) {
-        e.preventDefault();
-
-        var form = jQuery(e.target);
-
-        jQuery.ajax({
-            type: 'PUT',
-            dataType: 'json',
-            url: '/bounce',
-            data: $('INPUT', form).serialize()
-        }).done(function (data, status, request) {
-            var href = window.location.pathname + '?group=' + jQuery('#group').val();
-            window.location.href = href;
-        }).fail(function () {
-            jQuery('.error.message').removeClass('hidden').text('Invalid values');
-            jQuery('.success.message').addClass('hidden');
-        });
-    }
-
-    return {
-        init: function () {
-            jQuery('#insert-form').on('submit', submitRecord);
+Vue.component('bounce-form', {
+    props: {
+        endpoint: {
+            type: String,
+            required: true,
         }
-    };
+    },
 
-})();
+    data: function () {
+        return {
+            site: '',
+            name: '',
+            group: ''
+        }
+    },
 
-jQuery(document).ready(MEDLEY.bounce.init);
+    methods: {
+        submit: function (e) {
+            let destination = `${window.location.pathname}?group=${this.group}`;
+
+            fetch(this.endpoint, {
+                method: 'PUT',
+                headers: {
+                    'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                body: `site=${this.site}&name=${this.name}&group=${this.group}`
+            }).then(function (res) {
+                if (res.status === 204) {
+                    window.location.href = destination;
+                } else {
+                    alert(res.status);
+                }
+            });
+        }
+    }
+});

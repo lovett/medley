@@ -2,8 +2,7 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('bounce', 'bounce.js') }}
-{{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', '/bounce/static/bounce.js')) }}
 {% endblock %}
 
 
@@ -18,7 +17,8 @@
 
 
         {% if not bounces %}
-        <form id="insert-form" method="post" action="/bounce">
+            <bounce-form inline-template endpoint="/bounce">
+                <form v-on:submit.prevent="submit" method="post" action="/bounce">
             {% if bounceless_domain %}
             <p class="error message">No bounces found for {{ bounceless_domain }}</p>
             {% else %}
@@ -33,16 +33,16 @@
             <div class="field-group">
                 <div class="field">
                     <label for="title">Site URL</label>
-                    <input required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
+                    <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
                 </div>
                 <div class="field">
                     <label for="title">Site Name</label>
-                    <input required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
+                    <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
                 </div>
 
                 <div class="field">
                     <label for="title">Group</label>
-                    <input required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
+                    <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
                 </div>
             </div>
 
@@ -50,6 +50,7 @@
                 <button data-default="Add" data-alt="Please wait">Add</button>
             </div>
         </form>
+        </bounce-form>
         {% endif %}
 
         {% if group and not bounces %}

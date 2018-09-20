@@ -9,7 +9,11 @@ instantiates a root Vue instance which renders each component. #}
     {% endif %}
 
     {% for component in components %}
-        <script src="{{ '/shared/static/components/{}.js'.format(component)|cache_bust }}"></script>
+        {% if component.startswith('/') %}
+            <script src="{{ component|cache_bust }}"></script>
+        {% else %}
+            <script src="{{ '/shared/static/components/{}.js'.format(component)|cache_bust }}"></script>
+        {% endif %}
     {% endfor %}
 
     <script>
