@@ -282,7 +282,7 @@ build: dummy
 puc: dummy
 	git checkout master
 	git add requirements.txt requirements-dev.txt
-	git commit -m "Upgrade pip and npm packages"
+	git commit -m "Upgrade third-party libraries"
 
 # Set up git hooks
 #
