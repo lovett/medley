@@ -1,0 +1,37 @@
+.smaller {
+    font-weight: normal;
+}
+
+TABLE.key-value TH {
+    text-align: left;
+}
+
+TABLE.key-value TD {
+    padding: 0;
+}
+
+TABLE.key-value CAPTION {
+    text-align: left;
+    font-weight: normal;
+    line-height: 2;
+    padding: 1em;
+}
+
+DL {
+    margin: 0;
+    padding: 1em;
+    background-color: #D2F1E4;
+}
+
+DT {
+    color: green;
+}
+
+DD {
+    font-family: monospace;
+}
+
+.text {
+    padding: 1em;
+    font-family: monospace;
+}

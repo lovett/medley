@@ -1,0 +1,56 @@
+{% extends "base.jinja.html" %}
+
+{% block stylesheets %}
+    {{ macros.cacheBustedStylesheet('htmlhead', 'htmlhead.css') }}
+{% endblock %}
+
+{% block page_body %}
+
+<main>
+    <div class="content-wrapper">
+        <form method="get" action="{{ app_url }}">
+            <div class="field">
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" value="{{ url|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <button>Fetch</button>
+            </div>
+        </form>
+
+        {% if tags %}
+
+        <div class="table-wrapper">
+
+            <table class="key-value">
+                <caption>Found {{ tags|length }} tags.</caption>
+                <tbody>
+                    {% for tag, attributes, text in tags %}
+                    <tr>
+                        <th>
+                            {{ tag }}
+                            <div class="smaller">tag #{{ loop.index }}</div>
+                        </th>
+                        <td>
+                            {% if attributes %}
+                                <dl>
+                                {% for key, value in attributes %}
+                                    <dt>{{ key }}</dt>
+                                    <dd>{{ value }}</dd>
+                                {% endfor %}
+                                </dl>
+                            {% endif %}
+
+                            {% if text %}
+                                <div class="text">{{ text }}</div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}
