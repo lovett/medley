@@ -15,7 +15,7 @@ class Controller:
 
         app_url = cherrypy.engine.publish("url:internal").pop()
 
-        head_tags = None
+        head_tags = []
         if url:
             page = cherrypy.engine.publish(
                 "urlfetch:get",
