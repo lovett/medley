@@ -1,14 +1,12 @@
 {% extends "base.jinja.html" %}
 
 {% block page_body %}
-
-<main class="content-wrapper align-center">
-    {% if result %}
-    <p>{{ result }}</p>
-    {% else %}
-    <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
-    <p>The client address is <a href="/whois?address={{ client_ip }}">{{ client_ip }}</a></p>
-    {% endif %}
-</main>
-
+    <main class="content-wrapper align-center">
+        {% if result %}
+            <p>{{ result }}</p>
+        {% else %}
+            <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
+            <p>The client address is <a href="/whois?address={{ client_ip }}">{{ client_ip }}</a></p>
+        {% endif %}
+    </main>
 {% endblock %}

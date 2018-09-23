@@ -2,88 +2,86 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('phone', 'phone.css') }}
+    {{ macros.cacheBustedStylesheet('phone', 'phone.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('phone', 'phone.js') }}
+    {{ macros.cacheBustedScript('phone', 'phone.js') }}
 {% endblock %}
 
 {% block page_body %}
-
-<main>
-    <form class="content-wrapper" method="get" action="/phone">
-        <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-        <div class="field">
-            <label for="number">Number</label>
-            <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
-        </div>
-        <div class="field">
-            <button>Search</button>
-        </div>
-    </form>
-
-    {% if number %}
-
-    <h1 class="align-center">{{ number|phonenumber }}</h1>
-
-    <div class="content-wrapper flex-parent">
-        {% if state_name %}
-            <div class="flex-item">
-                <h2>Location</h2>
-                {% if comment %}
-                    <p>{{ comment }}</p>
-                {% endif %}
+    <main>
+        <form class="content-wrapper" method="get" action="/phone">
+            <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
+            <div class="field">
+                <label for="number">Number</label>
+                <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
             </div>
+            <div class="field">
+                <button>Search</button>
+            </div>
+        </form>
+
+        {% if number %}
+
+            <h1 class="align-center">{{ number|phonenumber }}</h1>
+
+            <div class="content-wrapper flex-parent">
+                {% if state_name %}
+                    <div class="flex-item">
+                        <h2>Location</h2>
+                        {% if comment %}
+                            <p>{{ comment }}</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <div class="flex-item">
+                    <h2>Search</h2>
+                    <p>{{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
+                </div>
+            </div>
+
+
+            {% if history|length > 0 %}
+                <div class="content-wrapper">
+                    <h2>History</h2>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Duration</th>
+                                <th>Direction</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                                <tr>
+                                    <td nowrap="nowrap">{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
+                                    <td>{{ entry["date"]|localtime|dateformat("LT")}}</td>
+                                    <td>{{ entry["duration"] }}</td>
+                                    <td>{{ entry["direction"] }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+
+            {% if number %}
+                <div class="content-wrapper debug">
+                    <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> SPARQL queries</a>
+                    <div class="toggle-target hidden">
+                        {% for query in sparql %}
+                            <p><a href="{{ query|snorql }}" rel="noreferrer" target="_blank">view</a></p>
+                            <pre>{{ query|unindent|escape }}</pre>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+
         {% endif %}
-        <div class="flex-item">
-            <h2>Search</h2>
-            <p>{{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
-        </div>
-    </div>
-
-
-    {% if history|length > 0 %}
-    <div class="content-wrapper">
-        <h2>History</h2>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Duration</th>
-                    <th>Direction</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for entry in history %}
-                <tr>
-                    <td nowrap="nowrap">{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
-                    <td>{{ entry["date"]|localtime|dateformat("LT")}}</td>
-                    <td>{{ entry["duration"] }}</td>
-                    <td>{{ entry["direction"] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% endif %}
-
-    {% if number %}
-    <div class="content-wrapper debug">
-        <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> SPARQL queries</a>
-        <div class="toggle-target hidden">
-            {% for query in sparql %}
-            <p><a href="{{ query|snorql }}" rel="noreferrer" target="_blank">view</a></p>
-            <pre>{{ query|unindent|escape }}</pre>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
-
-    {% endif %}
-</main>
-
+    </main>
 {% endblock %}

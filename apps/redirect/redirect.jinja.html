@@ -2,29 +2,28 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block page_meta %}
-{# Referer policy, see http://caniuse.com/#feat=referrer-policy #}
-<meta name="referrer" content="same-origin" />
+    {# Referer policy, see http://caniuse.com/#feat=referrer-policy #}
+    <meta name="referrer" content="same-origin" />
 {% endblock %}
 
 {% block page_body %}
+    <main>
+        <div class="content-wrapper align-center">
+            {% if not dest %}
 
-<main>
-    <div class="content-wrapper align-center">
-        {% if not dest %}
+                <p>Cannot redirect because a destination was not specified.</p>
 
-        <p>Cannot redirect because a destination was not specified.</p>
+            {% endif %}
 
-        {% endif %}
+            {% if dest %}
+                <p>Redirecting to {{ dest }}...</p>
 
-        {% if dest %}
-        <p>Redirecting to {{ dest }}...</p>
-
-        <script>
-            setTimeout(function () {
-                window.location.replace('{{ dest|escapejs }}' + window.location.hash);
-            });
-        </script>
-        {% endif %}
-    </div>
-</main>
+                <script>
+                    setTimeout(function () {
+                        window.location.replace('{{ dest|escapejs }}' + window.location.hash);
+                    });
+                </script>
+            {% endif %}
+        </div>
+    </main>
 {% endblock %}

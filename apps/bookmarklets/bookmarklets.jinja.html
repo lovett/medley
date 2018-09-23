@@ -2,16 +2,16 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% macro bookmarklet_url(url, label) -%}
-{% if not url.startswith("http") %}
-{% set url = app_url + "/static/js/" + url %}
-{% endif %}
-<div class="bookmarklet-container">
-    <a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">{{ macros.bookmarkletIcon }}️ {{ label }}</a>
-</div>
+    {% if not url.startswith("http") %}
+        {% set url = app_url + "/static/js/" + url %}
+    {% endif %}
+    <div class="bookmarklet-container">
+        <a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">{{ macros.bookmarkletIcon }}️ {{ label }}</a>
+    </div>
 {%- endmacro %}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('bookmarklets', 'css/bookmarklets.css') }}
+    {{ macros.cacheBustedStylesheet('bookmarklets', 'css/bookmarklets.css') }}
 {% endblock %}
 
 {% block scripts %}
@@ -20,22 +20,22 @@
 
 {% block page_body %}
 
-<main>
-    <div class="content-wrapper">
-        <dl>
-            <dt>{{ bookmarklet_url("validate.js", "validate") }}</dt>
-            <dd>Submit the current page to the W3C HTML validator</dd>
+    <main>
+        <div class="content-wrapper">
+            <dl>
+                <dt>{{ bookmarklet_url("validate.js", "validate") }}</dt>
+                <dd>Submit the current page to the W3C HTML validator</dd>
 
-            <dt>{{ bookmarklet_url("restate.js", "restate") }}</dt>
-            <dd>Site-specific browser automation</dd>
+                <dt>{{ bookmarklet_url("restate.js", "restate") }}</dt>
+                <dd>Site-specific browser automation</dd>
 
-            <dt>{{ bookmarklet_url("restyle.js", "restyle") }}</dt>
-            <dd>Reload stylesheets without doing a full page refresh.</dd>
+                <dt>{{ bookmarklet_url("restyle.js", "restyle") }}</dt>
+                <dd>Reload stylesheets without doing a full page refresh.</dd>
 
-            <dt>{{ bookmarklet_url("hnhiring.js", "hnhiring") }}</dt>
-            <dd>Filter posts on the monthly Who Is Hiring post on Hacker News</dd>
+                <dt>{{ bookmarklet_url("hnhiring.js", "hnhiring") }}</dt>
+                <dd>Filter posts on the monthly Who Is Hiring post on Hacker News</dd>
 
-        </dl>
-    </div>
-</main>
+            </dl>
+        </div>
+    </main>
 {% endblock %}

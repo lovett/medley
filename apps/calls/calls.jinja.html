@@ -1,66 +1,66 @@
 {% extends "base.jinja.html" %}
 
 {% block page_body %}
-<main>
-    <div class="content-wrapper">
-        {% if not calls %}
-        <p>No calls.</p>
-        {% else %}
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th width="25%">Date</th>
-                        <th width="25%">From</th>
-                        <th width="25%">Destination</th>
-                        <th width="25%">Duration</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for call in calls %}
-                    <tr>
-                        <td nowrap="nowrap">
-                            {{ call["date"]|localtime|dateformat("YYYY-MM-DD") }}
-                            <div class="smaller">{{ call["date"]|localtime|dateformat("LT")}}</div>
-                        </td>
-                        <td>
-                            {{ call["clid"]|sane_callerid() }}
-                            <div class="smaller">{{ call["src"]|phonenumber(as_link=True) }}</div>
-                        </td>
-                        <td>
-                            {% if call["dst"]|length < 3 or "NOANSWER" in call["dst"] %}
-                            {{ call["dst"]|phonenumber }}
-                            {% else %}
-                            {{ call["dst"]|phonenumber(as_link=True) }}
-                            {% endif %}
-                        </td>
-                        <td nowrap="nowrap">
-                            {{ call["duration"] }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <main>
+        <div class="content-wrapper">
+            {% if not calls %}
+                <p>No calls.</p>
+            {% else %}
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th width="25%">Date</th>
+                                <th width="25%">From</th>
+                                <th width="25%">Destination</th>
+                                <th width="25%">Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for call in calls %}
+                                <tr>
+                                    <td nowrap="nowrap">
+                                        {{ call["date"]|localtime|dateformat("YYYY-MM-DD") }}
+                                        <div class="smaller">{{ call["date"]|localtime|dateformat("LT")}}</div>
+                                    </td>
+                                    <td>
+                                        {{ call["clid"]|sane_callerid() }}
+                                        <div class="smaller">{{ call["src"]|phonenumber(as_link=True) }}</div>
+                                    </td>
+                                    <td>
+                                        {% if call["dst"]|length < 3 or "NOANSWER" in call["dst"] %}
+                                            {{ call["dst"]|phonenumber }}
+                                        {% else %}
+                                            {{ call["dst"]|phonenumber(as_link=True) }}
+                                        {% endif %}
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        {{ call["duration"] }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-            <div class="pagination">
-                {% if newer_offset >= 0 %}
-                <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
-                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                    Newer
-                </a>
-                {% endif %}
-                {% if older_offset > 0 %}
-                <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
-                    Older
-                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                </a>
-                {% endif %}
-            </div>
+                    <div class="pagination">
+                        {% if newer_offset >= 0 %}
+                            <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
+                                <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                                Newer
+                            </a>
+                        {% endif %}
+                        {% if older_offset > 0 %}
+                            <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
+                                Older
+                                <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+            {% endif %}
+
         </div>
-
-        {% endif %}
-
-    </div>
-</main>
+    </main>
 
 {% endblock %}

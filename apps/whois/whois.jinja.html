@@ -2,109 +2,112 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block scripts %}
-{% if ip_address %}
-<script src="https://www.google.com/jsapi"></script>
-{{ macros.cacheBustedScript('shared', 'js/maps.js') }}
-{% endif %}
+    {% if ip_address %}
+        <script src="https://www.google.com/jsapi"></script>
+        {{ macros.cacheBustedScript('shared', 'js/maps.js') }}
+    {% endif %}
 {% endblock %}
 
 {% block svg_defs %}
-<symbol id="icon-binoculars" viewBox="0 0 1024 1024">
-    <title>binoculars</title>
-    <path class="path1" d="M64 0h384v64h-384zM576 0h384v64h-384zM952 320h-56v-256h-256v256h-256v-256h-256v256h-56c-39.6 0-72 32.4-72 72v560c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-376h128v376c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-560c0-39.6-32.4-72-72-72zM348 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32zM544 512h-64c-17.6 0-32-14.4-32-32s14.4-32 32-32h64c17.6 0 32 14.4 32 32s-14.4 32-32 32zM924 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32z"></path>
+    <symbol id="icon-binoculars" viewBox="0 0 1024 1024">
+        <title>binoculars</title>
+        <path class="path1" d="M64 0h384v64h-384zM576 0h384v64h-384zM952 320h-56v-256h-256v256h-256v-256h-256v256h-56c-39.6 0-72 32.4-72 72v560c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-376h128v376c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-560c0-39.6-32.4-72-72-72zM348 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32zM544 512h-64c-17.6 0-32-14.4-32-32s14.4-32 32-32h64c17.6 0 32 14.4 32 32s-14.4 32-32 32zM924 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32z"></path>
     </symbol>
 {% endblock %}
 
 {% block page_body %}
+    <main>
+        {% if error %}
+            <div class="content-wrapper centered">
+                <p>{{ error }}</p>
+            </div>
+        {% endif %}
 
-<main>
+        <form class="content-wrapper" method="get" action="/whois">
+            <div class="field">
+                <label for="address">IP or host</label>
+                <input type="text" id="address" name="address" value="{{ address }}"/>
+            </div>
+            <div class="field">
+                <button class="ui button">Search</button>
+            </div>
+        </form>
 
-    {% if error %}
-    <div class="content-wrapper centered">
-        <p>{{ error }}</p>
-    </div>
-    {% endif %}
+        {% if address %}
+            <div class="content-wrapper">
+                <div class="half-column">
 
-    <form class="content-wrapper" method="get" action="/whois">
-        <div class="field">
-            <label for="address">IP or host</label>
-            <input type="text" id="address" name="address" value="{{ address }}"/>
-        </div>
-        <div class="field">
-            <button class="ui button">Search</button>
-        </div>
-    </form>
+                    <div class="module">
+                        <dl>
+                            {% if "customerRef" in whois.net %}
+                                <dt>Owned By</dt>
+                                <dd>{{ whois.net.customerRef["@name"] }}</dd>
+                            {% endif %}
 
-    {% if address %}
-    <div class="content-wrapper">
-        <div class="half-column">
-
-            <div class="module">
-                <dl>
-                    {% if "customerRef" in whois.net %}
-                    <dt>Owned By</dt>
-                    <dd>{{ whois.net.customerRef["@name"] }}</dd>
-                    {% endif %}
-
-                    {% if "orgRef" in whois.net %}
-                    <dt>Organization</dt>
-                    <dd>{{ whois.net.orgRef["@name"] }}</dd>
-                    {% endif %}
+                            {% if "orgRef" in whois.net %}
+                                <dt>Organization</dt>
+                                <dd>{{ whois.net.orgRef["@name"] }}</dd>
+                            {% endif %}
 
 
-                    {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
-                    <dt>City</dt>
-                    <dd>{{ ip_facts.geo.city}}, {{ip_facts.geo.region_code }}</dd>
-                    {% elif ip_facts.geo.city and ip_facts.geo.country_name %}
-                    <dt>City</dt>
-                    <dd>{{ ip_facts.geo.city }}, {{ ip_facts.geo.country_name }}</dd>
-                    {% elif ip_facts.geo.country_name %}
-                    <dt>Country</dt>
-                    <dd>{{ ip_facts.geo.country_name }}</dd>
-                    {% else %}
-                    <dt>Country</dt>
-                    <dd>Unknown</dd>
-                    {% endif %}
+                            {% if ip_facts.geo.country_name == "United States" and ip_facts.geo.city and ip_facts.geo.region_code %}
+                                <dt>City</dt>
+                                <dd>{{ ip_facts.geo.city}}, {{ip_facts.geo.region_code }}</dd>
+                            {% elif ip_facts.geo.city and ip_facts.geo.country_name %}
+                                <dt>City</dt>
+                                <dd>{{ ip_facts.geo.city }}, {{ ip_facts.geo.country_name }}</dd>
+                            {% elif ip_facts.geo.country_name %}
+                                <dt>Country</dt>
+                                <dd>{{ ip_facts.geo.country_name }}</dd>
+                            {% else %}
+                                <dt>Country</dt>
+                                <dd>Unknown</dd>
+                            {% endif %}
 
-                    {% if ip_facts.reverse_host %}
-                    <dt>Reverse Host</dt>
-                    <dd>{{ ip_facts.reverse_host }}</dd>
-                    {% endif %}
+                            {% if ip_facts.reverse_host %}
+                                <dt>Reverse Host</dt>
+                                <dd>{{ ip_facts.reverse_host }}</dd>
+                            {% endif %}
 
-                    <dt>
-                        <dt>IP</dt>
-                        <dd>{{ ip_address }}</dd>
-                    </dt>
-                </dl>
+                            <dt>
+                                <dt>IP</dt>
+                                <dd>{{ ip_address }}</dd>
+                            </dt>
+                        </dl>
 
-                {% if ip_facts.geo.area_code%}
-                <dt>Area Code</dt>
-                <dd>{{ ip_facts.geo.area_code }}</dd>
-                {% endif %}
+                        {% if ip_facts.geo.area_code%}
+                            <dt>Area Code</dt>
+                            <dd>{{ ip_facts.geo.area_code }}</dd>
+                        {% endif %}
 
-                {% if ip_facts.geo.metro_code %}
-                <dt>Metro</dt>
-                <dd>{{ ip_facts.geo.metro_code }}</dd>
-                {% endif %}
+                        {% if ip_facts.geo.metro_code %}
+                            <dt>Metro</dt>
+                            <dd>{{ ip_facts.geo.metro_code }}</dd>
+                        {% endif %}
 
-                <dt>Activity</dt>
-                <dd>
-                    <a href="{{ visitors_ip_url }}" rel="noreferrer">
-                        <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
-                        find visits
-                    </a>
-                </dd>
-            </dl>
-        </div>
-    </div>
+                        <dt>Activity</dt>
+                        <dd>
+                            <a href="{{ visitors_ip_url }}" rel="noreferrer">
+                                <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
+                                find visits
+                            </a>
+                        </dd>
+                        </dl>
+                    </div>
+                </div>
 
-    <div class="half-column">
-        <div class="module">
-            {% if ip_facts.geo.map_region %}
-            <div class="map" data-latitude="{{ ip_facts.geo.latitude }}" data-longitude="{{ ip_facts.geo.longitude }}" data-region="{{ ip_facts.geo.map_region }}"></div>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
-</main>
+                <div class="half-column">
+                    <div class="module">
+                        {% if ip_facts.geo.map_region %}
+                            <div class="map"
+                                 data-latitude="{{ ip_facts.geo.latitude }}"
+                                 data-longitude="{{ ip_facts.geo.longitude }}"
+                                 data-region="{{ ip_facts.geo.map_region }}"
+                            ></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </main>
 {% endblock %}

@@ -1,19 +1,18 @@
 {% extends "base.jinja.html" %}
 
 {% block page_body %}
-
-<main>
-    <div class="content-wrapper">
-        <div class="table-wrapper">
-            <table class="key-value">
-                {% for key, value in headers %}
-                <tr>
-                    <th>{{ key }}</th>
-                    <td>{{ value }}</td>
-                </tr>
-                {% endfor %}
-            </table>
+    <main>
+        <div class="content-wrapper">
+            <div class="table-wrapper">
+                <table class="key-value">
+                    {% for key, value in headers %}
+                        <tr>
+                            <th>{{ key }}</th>
+                            <td>{{ value }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 {% endblock %}

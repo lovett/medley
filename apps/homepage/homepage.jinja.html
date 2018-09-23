@@ -2,45 +2,43 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('homepage', 'homepage.css') }}
+    {{ macros.cacheBustedStylesheet('homepage', 'homepage.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
-{{ macros.cacheBustedScript('homepage', 'homepage.js') }}
+    {{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.cacheBustedScript('homepage', 'homepage.js') }}
 {% endblock %}
 
 {% block page_body %}
+    <main>
+        <div class="module-grid">
+            {% for name, description, user_facing in apps %}
 
-<main>
-    <div class="module-grid">
-        {% for name, description, user_facing in apps %}
+                {% if user_facing %}
+                    <a class="module" href="/{{ name }}">
+                        <h2>{{ name }}</h2>
+                        <p>{{ description }}</p>
+                    </a>
+                {% endif %}
 
-        {% if user_facing %}
-        <a class="module" href="/{{ name }}">
-            <h2>{{ name }}</h2>
-            <p>{{ description }}</p>
-        </a>
-        {% endif %}
-
-        {% endfor %}
-    </div>
-
-
-    <h1 class="module-grid-title">Services</h1>
-    <div class="module-grid">
-        {% for name, description, user_facing in apps %}
-
-        {% if not user_facing %}
-        <div class="module">
-            <h2>{{ name}}</h2>
-            <p>{{ description }}</p>
+            {% endfor %}
         </div>
-        {% endif %}
 
-        {% endfor %}
-    </div>
 
-</main>
+        <h1 class="module-grid-title">Services</h1>
+        <div class="module-grid">
+            {% for name, description, user_facing in apps %}
 
+                {% if not user_facing %}
+                    <div class="module">
+                        <h2>{{ name}}</h2>
+                        <p>{{ description }}</p>
+                    </div>
+                {% endif %}
+
+            {% endfor %}
+        </div>
+
+    </main>
 {% endblock %}

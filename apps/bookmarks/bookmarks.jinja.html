@@ -2,65 +2,65 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('bookmarks', 'bookmarks.css') }}
+    {{ macros.cacheBustedStylesheet('bookmarks', 'bookmarks.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'wayback-link')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'wayback-link')) }}
 {% endblock %}
 
 {% block page_body %}
 
-<main>
-    {{ macros.svgSymbols("delete") }}
+    <main>
+        {{ macros.svgSymbols("delete") }}
 
-    <form class="content-wrapper" method="get" action="{{ app_url }}">
-        <div class="field">
-            <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
-        </div>
-        <div class="field-group">
+        <form class="content-wrapper" method="get" action="{{ app_url }}">
             <div class="field">
-                <button>Search</button>
+                <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
             </div>
-            <div class="field align-right">
-                <a href="{{ app_url }}">Reset</a>
-            </div>
-        </div>
-    </form>
-
-    <div class="content-wrapper">
-        <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
-
-        {% for bookmark in bookmarks %}
-
-        <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
-            <div class="bookmark" v-bind:style="styles">
-                <div class="actions">
-                    <discard-button tooltip="Delete this bookmark" />
+            <div class="field-group">
+                <div class="field">
+                    <button>Search</button>
                 </div>
-
-                <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
-
-                <p class="meta">
-                    <span><time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time></span>
-                    <span class="domain">{{ bookmark.domain }}</span>
-                    {% if bookmark.tags %}
-                        <span>Tags: {{ bookmark.tags }}</span>
-                    {% endif %}
-                    <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
-                </p>
-
-
-                {% if bookmark.comments %}
-                <p class="comments">
-                    {{ bookmark.comments }}
-                </p>
-                {% endif %}
+                <div class="field align-right">
+                    <a href="{{ app_url }}">Reset</a>
+                </div>
             </div>
-        </discardable-record>
+        </form>
 
-        {% endfor %}
-    </div>
-</main>
+        <div class="content-wrapper">
+            <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
+
+            {% for bookmark in bookmarks %}
+
+                <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
+                    <div class="bookmark" v-bind:style="styles">
+                        <div class="actions">
+                            <discard-button tooltip="Delete this bookmark" />
+                        </div>
+
+                        <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
+
+                        <p class="meta">
+                            <span><time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time></span>
+                            <span class="domain">{{ bookmark.domain }}</span>
+                            {% if bookmark.tags %}
+                                <span>Tags: {{ bookmark.tags }}</span>
+                            {% endif %}
+                            <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                        </p>
+
+
+                        {% if bookmark.comments %}
+                            <p class="comments">
+                                {{ bookmark.comments }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </discardable-record>
+
+            {% endfor %}
+        </div>
+    </main>
 
 {% endblock %}

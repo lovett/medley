@@ -2,52 +2,51 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('headlines', 'headlines.css') }}
+    {{ macros.cacheBustedStylesheet('headlines', 'headlines.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('headlines', 'headlines.js') }}
+    {{ macros.cacheBustedScript('headlines', 'headlines.js') }}
 {% endblock %}
 
 {% block page_body %}
+    <main>
+        <header class="content-wrapper align-center">
+            <p>
+                <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
+            </p>
+            <button data-limit="{{ limit }}" data-offset="{{ offset }}">Walk Headlines </button>
+            <p class="smaller">
+                From {{ offset }} to {{ offset + limit - 1}}
+            </p>
+        </header>
 
-<main>
-    <header class="content-wrapper align-center">
-        <p>
-            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
-        </p>
-        <button data-limit="{{ limit }}" data-offset="{{ offset }}">Walk Headlines </button>
-        <p class="smaller">
-            From {{ offset }} to {{ offset + limit - 1}}
-        </p>
-    </header>
+        <div id="headlines" class="content-wrapper">
 
-    <div id="headlines" class="content-wrapper">
+            {% for category in headlines %}
+                <div class="group">
+                    <h1>{{ category|capitalize }}</h1>
 
-        {% for category in headlines %}
-            <div class="group">
-                <h1>{{ category|capitalize }}</h1>
+                    <ol>
+                        {% for article in headlines[category] %}
+                            <li>
+                                <a class="title" href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
+                                <footer>
+                                    {{ article["source"]["name"] }}
+                                    <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
+                                       rel="noreferrer" target="_blank">search</a>
+                                </footer>
+                            </li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            {% endfor %}
+        </div>
 
-                <ol>
-                    {% for article in headlines[category] %}
-                        <li>
-                            <a class="title" href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
-                            <footer>
-                                {{ article["source"]["name"] }}
-                                <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
-                                   rel="noreferrer" target="_blank">search</a>
-                            </footer>
-                        </li>
-                    {% endfor %}
-                </ol>
-            </div>
-        {% endfor %}
-    </div>
+        <footer class="content-wrapper align-center">
+            <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
+        </footer>
 
-    <footer class="content-wrapper align-center">
-        <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
-    </footer>
-
-</main>
+    </main>
 
 {% endblock %}

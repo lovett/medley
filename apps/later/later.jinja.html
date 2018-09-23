@@ -2,91 +2,87 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('later', 'later.css') }}
+    {{ macros.cacheBustedStylesheet('later', 'later.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('later', 'later.js') }}
+    {{ macros.cacheBustedScript('later', 'later.js') }}
 {% endblock %}
 
 
 {% block page_body %}
-
-<main>
-    <div class="content-wrapper">
-        <div class="bookmarklet-container">
-            <div class="inner">
-                <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ app_url }}?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))" rel="noreferrer">{{ macros.bookmarkletIcon }} later</a>
-            </div>
-        </div>
-
-        <form id="later-form" method="post" action="/bookmarks">
-
-            <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-            <div class="hidden success message">Success! <a href="{{ bookmarks_url }}">Go to bookmarks</a></div>
-
-            {% if bookmark.rowid %}
-            <div class="notice message">
-                <p>
-                    This URL was bookmarked on
-                    {{ bookmark.added|localtime|dateformat('LL') }}.
-                </p>
-
-                {% if bookmark.updated %}
-                    <p class="smaller">
-                        Last updated
-                        {{ bookmark.updated|localtime|dateformat('LL') }}.
-                    </p>
-                {% endif %}
-
-                <p><a href="{{ bookmarks_url }}">Go to bookmarks</a>
-
-            </div>
-            {% endif %}
-
-            <div class="field">
-                <label for="title">Title:</label>
-                <input type="text" id="title" name="title" value="{{ title|default('', true)|e }}"/>
-            </div>
-
-            <div class="field">
-                <label for="url">URL:</label>
-                <input type="text" id="url" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
-                <div class="shortcuts">
-                    <a class="remove-path hidden" href="#">Remove path</a>
-                    <a class="remove-querystring hidden" href="#">Remove querystring</a>
-                    <a class="remove-hash hidden" href="#">Remove hash</a>
-                    <a class="revert hidden" href="#">Revert</a>
+    <main>
+        <div class="content-wrapper">
+            <div class="bookmarklet-container">
+                <div class="inner">
+                    <a href="javascript:e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('{{ app_url }}?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))" rel="noreferrer">{{ macros.bookmarkletIcon }} later</a>
                 </div>
             </div>
 
-            <div class="field">
-                <label for="url">Tags:</label>
-                <input type="text" id="tags" name="tags" value="{{ tags|default('', true)|e }}"/>
-                <p class="note">Separate multiple tags with commas.</p>
-            </div>
+            <form id="later-form" method="post" action="/bookmarks">
 
-            <div class="field">
-                <label for="comments">Comments:</label>
-                <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
-                <div class="shortcuts">
-                    <a class="trim-sentence-from-start hidden" href="#" rel="noreferrer">Trim sentence from start</a>
-                    <a class="trim-sentence-from-end hidden" href="#" rel="noreferrer">Trim sentence from end</a>
-                    <a class="trim-all hidden" href="#" rel="noreferrer">Clear</a>
-                </div>
-            </div>
+                <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
+                <div class="hidden success message">Success! <a href="{{ bookmarks_url }}">Go to bookmarks</a></div>
 
-            <div class="field">
                 {% if bookmark.rowid %}
-                    <button data-default="Save" data-alt="Please wait">Update</button>
-                {% else %}
-                    <button data-default="Save" data-alt="Please wait">Save</button>
+                    <div class="notice message">
+                        <p>
+                            This URL was bookmarked on
+                            {{ bookmark.added|localtime|dateformat('LL') }}.
+                        </p>
+
+                        {% if bookmark.updated %}
+                            <p class="smaller">
+                                Last updated
+                                {{ bookmark.updated|localtime|dateformat('LL') }}.
+                            </p>
+                        {% endif %}
+
+                        <p><a href="{{ bookmarks_url }}">Go to bookmarks</a>
+
+                    </div>
                 {% endif %}
-            </div>
+
+                <div class="field">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" value="{{ title|default('', true)|e }}"/>
+                </div>
+
+                <div class="field">
+                    <label for="url">URL:</label>
+                    <input type="text" id="url" name="url" data-original-value="{{url|default('', true)}}" value="{{ url|default('', true)|e }}"/>
+                    <div class="shortcuts">
+                        <a class="remove-path hidden" href="#">Remove path</a>
+                        <a class="remove-querystring hidden" href="#">Remove querystring</a>
+                        <a class="remove-hash hidden" href="#">Remove hash</a>
+                        <a class="revert hidden" href="#">Revert</a>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="url">Tags:</label>
+                    <input type="text" id="tags" name="tags" value="{{ tags|default('', true)|e }}"/>
+                    <p class="note">Separate multiple tags with commas.</p>
+                </div>
+
+                <div class="field">
+                    <label for="comments">Comments:</label>
+                    <textarea id="comments" name="comments">{{ comments|default('', true)|e }}</textarea>
+                    <div class="shortcuts">
+                        <a class="trim-sentence-from-start hidden" href="#" rel="noreferrer">Trim sentence from start</a>
+                        <a class="trim-sentence-from-end hidden" href="#" rel="noreferrer">Trim sentence from end</a>
+                        <a class="trim-all hidden" href="#" rel="noreferrer">Clear</a>
+                    </div>
+                </div>
+
+                <div class="field">
+                    {% if bookmark.rowid %}
+                        <button data-default="Save" data-alt="Please wait">Update</button>
+                    {% else %}
+                        <button data-default="Save" data-alt="Please wait">Save</button>
+                    {% endif %}
+                </div>
+            </form>
         </div>
-    </div>
-
-</main>
-
-
+    </main>
 {% endblock %}

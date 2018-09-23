@@ -8,113 +8,113 @@
 
 {% block page_body %}
 
-<main>
-    {{ macros.svgSymbols("delete") }}
-    <div class="content-wrapper">
-        <div class="bookmarklet-container">
-            <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
-        </div>
+    <main>
+        {{ macros.svgSymbols("delete") }}
+        <div class="content-wrapper">
+            <div class="bookmarklet-container">
+                <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
+            </div>
 
 
-        {% if not bounces %}
-            <bounce-form inline-template endpoint="/bounce">
-                <form v-on:submit.prevent="submit" method="post" action="/bounce">
-            {% if bounceless_domain %}
-            <p class="error message">No bounces found for {{ bounceless_domain }}</p>
-            {% else %}
-            <div class="hidden error message"></div>
+            {% if not bounces %}
+                <bounce-form inline-template endpoint="/bounce">
+                    <form v-on:submit.prevent="submit" method="post" action="/bounce">
+                        {% if bounceless_domain %}
+                            <p class="error message">No bounces found for {{ bounceless_domain }}</p>
+                        {% else %}
+                            <div class="hidden error message"></div>
+                        {% endif %}
+
+                        <div class="hidden success message">Success!</div>
+
+                        <div class="field-group">
+                        </div>
+
+                        <div class="field-group">
+                            <div class="field">
+                                <label for="title">Site URL</label>
+                                <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
+                            </div>
+                            <div class="field">
+                                <label for="title">Site Name</label>
+                                <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
+                            </div>
+
+                            <div class="field">
+                                <label for="title">Group</label>
+                                <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <button data-default="Add" data-alt="Please wait">Add</button>
+                        </div>
+                    </form>
+                </bounce-form>
             {% endif %}
 
-            <div class="hidden success message">Success!</div>
+            {% if group and not bounces %}
+                <p class="align-center">There are no sites in the "{{ group }}" group.</p>
+            {% endif %}
 
-            <div class="field-group">
-            </div>
+            {% if all_groups %}
+                <table id="bounces" class="key-value natural-width bordered">
+                    <caption class="one-line">Bounce Groups</caption>
+                    <tbody>
+                        {% for group in all_groups %}
+                            <tr>
+                                <td align="center"><a href="{{ app_url }}/bounce?group={{ group }}">{{ group }}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
 
-            <div class="field-group">
-                <div class="field">
-                    <label for="title">Site URL</label>
-                    <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
-                </div>
-                <div class="field">
-                    <label for="title">Site Name</label>
-                    <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
-                </div>
+            {% if bounces %}
+                <h1 class="align-center">{{ group }} destinations</h1>
+                <table id="bounces" class="key-value natural-width bordered">
+                    {% for id, values in bounces.items() %}
+                        <tbody is="discardable-record" inline-template url="{{ app_url }}?uid={{ id }}">
+                            <tr v-bind:style="styles">
+                                <th>
+                                    {% if values[1] == departing_from %}
+                                        ⬅
+                                    {% endif %}
+                                    {{ values[1] }}
+                                    {% if values[1] != departing_from %}
+                                        ➡
+                                    {% endif %}
+                                </th>
+                                <td>
+                                    <a href="{{ values[0]|anonymize }}" rel="noreferer noopener">{{ values[0]|truncate(100) }}</a>
+                                    {% if values[0].startswith('https:') %}
+                                        <p class="smaller">
+                                            <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
+                                               class="plain"
+                                               rel="noreferer noopener"
+                                            >with HTTP</a>
+                                        </p>
+                                    {% endif %}
 
-                <div class="field">
-                    <label for="title">Group</label>
-                    <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
-                </div>
-            </div>
-
-            <div class="field">
-                <button data-default="Add" data-alt="Please wait">Add</button>
-            </div>
-        </form>
-        </bounce-form>
-        {% endif %}
-
-        {% if group and not bounces %}
-        <p class="align-center">There are no sites in the "{{ group }}" group.</p>
-        {% endif %}
-
-        {% if all_groups %}
-        <table id="bounces" class="key-value natural-width bordered">
-            <caption class="one-line">Bounce Groups</caption>
-            <tbody>
-                {% for group in all_groups %}
-                    <tr>
-                        <td align="center"><a href="{{ app_url }}/bounce?group={{ group }}">{{ group }}</a></td>
-                    </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-
-        {% if bounces %}
-        <h1 class="align-center">{{ group }} destinations</h1>
-        <table id="bounces" class="key-value natural-width bordered">
-             {% for id, values in bounces.items() %}
-             <tbody is="discardable-record" inline-template url="{{ app_url }}?uid={{ id }}">
-                 <tr v-bind:style="styles">
-                    <th>
-                        {% if values[1] == departing_from %}
-                            ⬅
-                        {% endif %}
-                        {{ values[1] }}
-                        {% if values[1] != departing_from %}
-                            ➡
-                        {% endif %}
-                    </th>
-                    <td>
-                        <a href="{{ values[0]|anonymize }}" rel="noreferer noopener">{{ values[0]|truncate(100) }}</a>
-                        {% if values[0].startswith('https:') %}
-                            <p class="smaller">
-                                <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
-                                   class="plain"
-                                   rel="noreferer noopener"
-                                >with HTTP</a>
-                            </p>
-                        {% endif %}
-
-                        {% if values[0].startswith('http:') %}
-                            <p class="smaller">
-                                <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
-                                   class="plain"
-                                   rel="noreferer noopener"
-                                >with HTTPS</a>
-                            </p>
-                        {% endif %}
-                    </td>
-                    <td align="right">
-                        <discard-button tooltip="Delete this entry" />
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-    </div>
-    <div class="content-wrapper">
-    </div>
-</main>
+                                    {% if values[0].startswith('http:') %}
+                                        <p class="smaller">
+                                            <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
+                                               class="plain"
+                                               rel="noreferer noopener"
+                                            >with HTTPS</a>
+                                        </p>
+                                    {% endif %}
+                                </td>
+                                <td align="right">
+                                    <discard-button tooltip="Delete this entry" />
+                                </td>
+                            </tr>
+                    {% endfor %}
+                        </tbody>
+                </table>
+            {% endif %}
+        </div>
+        <div class="content-wrapper">
+        </div>
+    </main>
 {% endblock %}

@@ -2,82 +2,78 @@
 {% import "macros.jinja.html" as macros %}
 
 {% block stylesheets %}
-{{ macros.cacheBustedStylesheet('registry', 'registry.css') }}
+    {{ macros.cacheBustedStylesheet('registry', 'registry.css') }}
 {% endblock %}
 
 {% block scripts %}
-{{ macros.cacheBustedScript('registry', 'registry.js') }}
+    {{ macros.cacheBustedScript('registry', 'registry.js') }}
 
-{{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
 {% endblock %}
 
 
 {% block page_body %}
+    <main>
+        {{ macros.svgSymbols("copy", "delete", "new-item") }}
 
-<main>
-    {{ macros.svgSymbols("copy", "delete", "new-item") }}
-
-    <div class="views content-wrapper">
-        <ul>
-            <li><a href="#search-form" class="{{ "active" if view == "search" }}">Search</a></li>
-            <li><a href="#insert-form" class="{{ "active" if view == "add" }}">Add</a></li>
-        </ul>
-    </div>
-
-    <form id="search-form" class="content-wrapper {{ "hidden" if not view == "search" }}">
-        <div class="field">
-            <label for="q">Key:</label>
-            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+        <div class="views content-wrapper">
+            <ul>
+                <li><a href="#search-form" class="{{ "active" if view == "search" }}">Search</a></li>
+                <li><a href="#insert-form" class="{{ "active" if view == "add" }}">Add</a></li>
+            </ul>
         </div>
-        <div class="field">
-            <button>Search</button>
-        </div>
-    </form>
 
-    <form id="insert-form" class="content-wrapper {{ "hidden" if not view == "add" }}">
-        <div class="hidden error message"></div>
-        <div class="hidden success message">Success!</div>
+        <form id="search-form" class="content-wrapper {{ "hidden" if not view == "search" }}">
+            <div class="field">
+                <label for="q">Key:</label>
+                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <button>Search</button>
+            </div>
+        </form>
 
-        <div class="field">
-            <label for="key">Key:</label>
-            <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
-        </div>
-        <div class="field">
-            <label for="comments">Value:</label>
-            <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
-        </div>
-        <div class="field">
-            <button>Add</button>
-        </div>
-    </form>
+        <form id="insert-form" class="content-wrapper {{ "hidden" if not view == "add" }}">
+            <div class="hidden error message"></div>
+            <div class="hidden success message">Success!</div>
 
-    <div class="content-wrapper">
+            <div class="field">
+                <label for="key">Key:</label>
+                <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+            </div>
+            <div class="field">
+                <label for="comments">Value:</label>
+                <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
+            </div>
+            <div class="field">
+                <button>Add</button>
+            </div>
+        </form>
 
-        {% if (uid or q) and not entries %}
-        <p>No entries found.</p>
-        {% endif %}
+        <div class="content-wrapper">
 
-        {% for entry in entries %}
-            <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
-                <div class="entry" v-bind:style="styles">
-                    <header>
-                        {{ entry.key|e }}
-                        <div class="actions">
-                            <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
-                            <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
-                            <div><discard-button tooltip="Delete this entry" /></div>
+            {% if (uid or q) and not entries %}
+                <p>No entries found.</p>
+            {% endif %}
+
+            {% for entry in entries %}
+                <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
+                    <div class="entry" v-bind:style="styles">
+                        <header>
+                            {{ entry.key|e }}
+                            <div class="actions">
+                                <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
+                                <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
+                                <div><discard-button tooltip="Delete this entry" /></div>
+                            </div>
+                        </header>
+
+                        <div>
+                            <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
                         </div>
-                    </header>
-
-                    <div>
-                        <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
                     </div>
-                </div>
-            </discardable-record>
-        {% endfor %}
-    </div>
-
-</main>
-
-
+                </discardable-record>
+            {% endfor %}
+        </div>
+    </main>
 {% endblock %}
