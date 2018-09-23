@@ -5,6 +5,7 @@ function tick(index, limit) {
 
     if (index > limit) {
         self.postMessage('finish');
+        self.close();
         return;
     }
 
@@ -20,4 +21,8 @@ self.addEventListener('message', function (e) {
         let offset = parseInt(fields[2], 10);
         tick(offset, offset + limit - 1);
     }
+});
+
+self.addEventListener('error', function (e) {
+    e.preventDefault();
 });
