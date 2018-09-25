@@ -1,8 +1,12 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
+{% block stylesheets %}
+    {{ macros.cacheBustedStylesheet('bounce', 'bounce.css') }}
+{% endblock %}
+
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', '/bounce/static/bounce.js')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'shortcut-link', '/bounce/static/bounce.js')) }}
 {% endblock %}
 
 
@@ -86,35 +90,36 @@
                                     {% endif %}
                                 </th>
                                 <td>
-                                    <a href="{{ values[0]|anonymize }}" rel="noreferer noopener">{{ values[0]|truncate(100) }}</a>
+                                    <p>
+                                        <shortcut-link
+                                            v-bind:index="{{ loop.index }}"
+                                            url="{{ values[0]|anonymize }}"
+                                            label="{{ values[0]|truncate(100) }}"
+                                        />
+                                    </p>
+
                                     {% if values[0].startswith('https:') %}
-                                        <p class="smaller">
-                                            <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
-                                               class="plain"
-                                               rel="noreferer noopener"
-                                            >with HTTP</a>
-                                        </p>
+                                        <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
+                                           class="plain destination"
+                                           rel="noreferer noopener"
+                                        >with HTTP</a>
                                     {% endif %}
 
                                     {% if values[0].startswith('http:') %}
-                                        <p class="smaller">
-                                            <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
-                                               class="plain"
-                                               rel="noreferer noopener"
-                                            >with HTTPS</a>
-                                        </p>
+                                        <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
+                                           class="plain destination"
+                                           rel="noreferer noopener"
+                                        >with HTTPS</a>
                                     {% endif %}
                                 </td>
                                 <td align="right">
                                     <discard-button tooltip="Delete this entry" />
                                 </td>
                             </tr>
-                    {% endfor %}
                         </tbody>
+                    {% endfor %}
                 </table>
             {% endif %}
-        </div>
-        <div class="content-wrapper">
         </div>
     </main>
 {% endblock %}

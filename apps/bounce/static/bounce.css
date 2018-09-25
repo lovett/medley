@@ -1,0 +1,19 @@
+.shortcut-link {
+    text-decoration: none;
+}
+
+.shortcut-link span {
+    display: inline-block;
+    background-color: DarkCyan;
+    color: #fff;
+    vertical-align: middle;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 50%;
+    width: 2em;
+    height: 2em;
+    line-height: 2;
+    text-align: center;
+    margin-right: 1em;
+    font-size: .75em;
+}
