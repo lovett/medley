@@ -147,11 +147,15 @@ class Controller:
         if result["name"] in skippable_builds:
             result["send_notification"] = False
 
-        # Don't notify about completed builds. Wait for finalized instead.
+        # Don't notify about queued builds.
+        if result["phase"] == "queued":
+            result["send_notification"] = False
+
+        # Don't notify about completed builds. Wait for finalization instead.
         if result["phase"] == "completed":
             result["send_notification"] = False
 
-        # Build failure overrides takes precedence over everything else.
+        # Always notify about failed builds.
         if result["status"] == "failure":
             result["send_notification"] = True
 
