@@ -5,10 +5,6 @@
     {{ macros.cacheBustedStylesheet('phone', 'phone.css') }}
 {% endblock %}
 
-{% block scripts %}
-    {{ macros.cacheBustedScript('phone', 'phone.js') }}
-{% endblock %}
-
 {% block page_body %}
     <main>
         <form class="content-wrapper" method="get" action="/phone">
