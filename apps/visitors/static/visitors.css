@@ -96,7 +96,7 @@ TR.expandable.expanded {
     margin-bottom: 5em;
 }
 
-.next-actions a {
+.next-actions > * {
     margin-right: 1em;
 }
 

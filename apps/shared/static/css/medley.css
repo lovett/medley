@@ -246,6 +246,10 @@ TABLE.key-value TH {
     padding-right: .5em;
 }
 
+.icon.inactive {
+    fill: #ccc;
+}
+
 .message {
     margin: 1em 0 2em 0;
     padding: 1em;

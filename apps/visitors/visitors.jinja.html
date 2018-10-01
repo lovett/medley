@@ -185,6 +185,8 @@
                                                        title="Search for visits with this cookie"
                                                        rel="noreferrer"
                                                     ><svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg></a>
+                                                {% else %}
+                                                    <span title="No cookie on request"><svg class="icon icon-tag inactive"><use xlink:href="#icon-tag"></use></svg></span>
                                                 {% endif %}
 
                                                 <a href="/whois/{{ result.ip }}"
