@@ -14,38 +14,48 @@ class Controller:
         "stage",
         "staging",
         "local",
+        "test",
     }
 
     @staticmethod
-    def site_url(url):
-        """Reduce a URL to its root: protocol and domain"""
+    def url_to_host(url):
+        """Reduce a URL to its hostname"""
         parsed_url = urlparse(url)
-        return "{}://{}".format(parsed_url.scheme, parsed_url.netloc)
+        return parsed_url.netloc
 
-    def guess_group(self, url):
-        """Reduce a URL to its domain with no suffixes or prefixes"""
+    def host_to_group(self, host):
+        """Reduce a host to a word that describes the project
+        or entity it is related to.
 
-        parsed_url = urlparse(url)
+        """
 
-        segments = parsed_url.hostname.split(".")
+        host_without_port = host.split(":")[0]
 
-        if len(segments) > 1:
-            segments.pop()
+        segments = [host_without_port]
+        if "." in host_without_port:
+            segments = host_without_port.split(".")
 
-        diff = [
+        for index, segment in enumerate(segments):
+            if segment in self.common_names and index > 0:
+                return segments[index - 1]
+
+        filtered_segments = [
             segment for segment in segments
             if segment not in self.common_names
-            and len(segment) > 2
+            and len(segment) > 3
         ]
 
-        return diff[-1]
+        return filtered_segments[-1]
 
-    def guess_name(self, url):
-        """Reduce a URL to a keyword"""
+    def host_to_keyword(self, host):
+        """Reduce a host to a word that distinguishes it from
+        others in the same group."""
 
-        parsed_url = urlparse(url)
+        host_without_port = host.split(":")[0]
 
-        segments = parsed_url.hostname.split(".")
+        segments = [host_without_port]
+        if "." in host_without_port:
+            segments = host_without_port.split(".")
 
         intersect = [
             segment for segment in segments
@@ -55,8 +65,8 @@ class Controller:
         if intersect:
             return intersect[0]
 
-        if len(segments) == 1:
-            return "dev"
+        if len(segments) > 2:
+            return segments[0]
 
         return "live"
 
@@ -84,21 +94,21 @@ class Controller:
     @staticmethod
     def from_registry_value(value):
         """Extract a URL and name from a registry value."""
-        return value.split("\n")
+        return value.replace("\r", "").split("\n")
 
     @cherrypy.tools.negotiable()
     def GET(self, u=None, group=None):  # pylint: disable=invalid-name
         """Display all the URLs in a group."""
 
-        site = False
+        host = None
         bounces = None
         name = None
         all_groups = []
         group = None
 
         if u:
-            site = self.site_url(u)
-            search_value = "{}\n*".format(site)
+            host = self.url_to_host(u)
+            search_value = "{}\n*".format(host)
             group = cherrypy.engine.publish(
                 "registry:first_key",
                 value=search_value,
@@ -107,6 +117,9 @@ class Controller:
 
             if group:
                 group = self.from_registry_key(group)
+            else:
+                group = self.host_to_group(host)
+                name = self.host_to_keyword(host)
 
         if group:
             search_key = self.to_registry_key(group)
@@ -115,10 +128,6 @@ class Controller:
                 search_key, exact=True
             ).pop()
 
-        if site and not group:
-            group = self.guess_group(site)
-            name = self.guess_name(site)
-
         if bounces:
             bounces = {
                 bounce["rowid"]:  self.from_registry_value(bounce["value"])
@@ -126,20 +135,20 @@ class Controller:
             }
 
         departing_from = None
-        if site and bounces:
+        if host and bounces:
             # Match the current URL to a known site.
             for (_, values) in bounces.items():
-                if urlparse(site).netloc == urlparse(values[0]).netloc:
+                if urlparse(values[0]).netloc == host:
                     departing_from = values[1]
                     break
 
             # Re-scope the current URL to each known destination.
             bounces = {
-                k: (u.replace(site, v[0]), v[1])
+                k: (u.replace(host, v[0]), v[1])
                 for (k, v) in bounces.items()
             }
 
-        if not site and not bounces:
+        if not host and not bounces:
             all_groups = cherrypy.engine.publish(
                 "registry:distinct_keys", "bounce:*"
             ).pop()
@@ -149,7 +158,7 @@ class Controller:
         return {
             "html": ("bounce.jinja.html", {
                 "departing_from": departing_from,
-                "site": site,
+                "site": host,
                 "group": group,
                 "all_groups": all_groups,
                 "name": name,
@@ -162,9 +171,9 @@ class Controller:
     def PUT(self, site, name, group):
         """Add a new URL to a group."""
 
-        site_url = self.site_url(site)
+        url_to_host = self.url_to_host(site)
         registry_key = self.to_registry_key(group)
-        registry_value = self.to_registry_value(site_url, name)
+        registry_value = self.to_registry_value(url_to_host, name)
 
         cherrypy.engine.publish(
             "registry:add",

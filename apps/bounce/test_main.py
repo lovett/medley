@@ -26,9 +26,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         helpers.stop_server()
 
     def setUp(self):
-        """Provide a separate controller instance for testing helper methods.
-
-        """
+        """Use a separate controller instance for testing helper methods."""
 
         self.controller = apps.bounce.main.Controller()
 
@@ -38,64 +36,76 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
 
-    def test_site_url(self):
-        """An incoming URL is reduced to its protocol and hostname."""
+    def test_host_reduction(self):
+        """An incoming URL is reduced to its host name."""
 
         candidates = (
-            # path is ignored
+            # Path is ignored.
             ("https://example.com/with/a/path",
-             "https://example.com"),
+             "example.com"),
 
-            # querystring and fragment are ignored
+            # Querystring and fragment are ignored.
             ("http://example.com/path?and=querystring#andfragment",
-             "http://example.com"),
+             "example.com"),
 
-            # port is preserved
+            # Scheme is ignored.
+            ("https://example.com",
+             "example.com"),
+
+            # Port is preserved
             ("http://example.com:12345",
-             "http://example.com:12345"),
+             "example.com:12345"),
+
+            # Subdomains are preserved
+            ("http://a.b.c.example.com",
+             "a.b.c.example.com"),
         )
 
         for pair in candidates:
-            result = self.controller.site_url(pair[0])
+            result = self.controller.url_to_host(pair[0])
             self.assertEqual(result, pair[1])
 
-    def test_guess_group(self):
-        """URLs are grouped by subtracting known keywords from the
-        hostname.
+    def test_group_reduction(self):
+        """Hostnames are associated with one another by subtracting known
+        keywords from the hostname.
 
         """
 
         candidates = (
-            ("http://example.com", "example"),
-            ("http://dev.example.com", "example"),
-            ("http://stage.example.com", "example"),
-            ("http://staging.example.com", "example"),
-            ("http://somethingelse.example.com", "example"),
-            ("http://sub1.sub2.sub3.example.co.uk", "example"),
-            ("http://example.local", "example"),
-            ("http://example", "example"),
+            ("example.com", "example"),
+            ("dev.example.com", "example"),
+            ("stage.example.com", "example"),
+            ("staging.example.com", "example"),
+            ("somethingelse.example.com", "example"),
+            ("sub1.sub2.sub3.example.co.uk", "example"),
+            ("example.local", "example"),
+            ("example", "example"),
+            ("example.dev.something.invalid:12345", "example"),
         )
 
         for pair in candidates:
-            result = self.controller.guess_group(pair[0])
+            result = self.controller.host_to_group(pair[0])
             self.assertEqual(result, pair[1])
 
-    def test_guess_name(self):
-        """URLs are named by looking for known keywords in the hostname."""
+    def test_keyword_redution(self):
+        """Site environment keywords are identified by isolating common names.
+
+        """
 
         candidates = (
-            ("http://example.co.uk", "live"),
-            ("http://dev.example.com", "dev"),
-            ("http://stage.example.com", "stage"),
-            ("http://staging.example.com", "staging"),
-            ("http://somethingelse.example.com", "live"),
-            ("http://sub1.sub2.sub3.example.co.uk", "live"),
-            ("http://example.local", "local"),
-            ("http://example", "dev"),
+            ("example.com", "live"),
+            ("dev.example.com", "dev"),
+            ("stage.example.com", "stage"),
+            ("staging.example.com", "staging"),
+            ("somethingelse.example.com", "somethingelse"),
+            ("sub1.sub2.sub3.example.co.uk", "sub1"),
+            ("example.local", "local"),
+            ("example", "live"),
+            ("example.dev.something.invalid:12345", "dev"),
         )
 
         for pair in candidates:
-            result = self.controller.guess_name(pair[0])
+            result = self.controller.host_to_keyword(pair[0])
             self.assertEqual(result, pair[1])
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
@@ -116,12 +126,12 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                     {
                         "rowid": 1,
                         "key": "bounce:example",
-                        "value": "http://stage.example.com\nstage",
+                        "value": "stage.example.com\nstage",
                     },
                     {
                         "rowid": 2,
                         "key": "bounce:example",
-                        "value": "http://othersite.example.com\nothersite"
+                        "value": "othersite.example.com\nothersite"
                     }
                 ]]
 
@@ -192,7 +202,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             helpers.html_var(render_mock, "name"),
-            "live"
+            "unrecognized"
         )
 
         self.assertIsNone(
