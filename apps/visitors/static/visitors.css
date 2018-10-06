@@ -16,7 +16,11 @@
 }
 
 .code-301 TD {
-    background-color: #ccc;
+    background-color: GhostWhite;
+}
+
+.code-302 TD {
+    background-color: LightCyan;
 }
 
 TD {
