@@ -20,6 +20,15 @@ PLUGIN_MODULES := $(basename $(PLUGIN_PATHS))
 PLUGIN_MODULES := $(notdir $(PLUGIN_MODULES))
 PLUGIN_MODULES := $(addprefix plugins., $(PLUGIN_MODULES))
 
+PARSER_DIR := $(CURDIR)/parsers
+PARSER_PATHS := $(wildcard $(PARSER_DIR)/[a-z]*.py)
+PARSER_PATHS := $(filter-out $(PARSER_DIR)/test_%,$(PARSER_PATHS))
+PARSER_PATHS := $(notdir $(PARSER_PATHS))
+PARSER_PATHS := $(addprefix parsers/,$(PARSER_PATHS))
+PARSER_MODULES := $(basename $(PARSER_PATHS))
+PARSER_MODULES := $(notdir $(PARSER_MODULES))
+PARSER_MODULES := $(addprefix parsers., $(PARSER_MODULES))
+
 REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
 REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
@@ -157,7 +166,7 @@ $(REQUIREMENTS_FILES): dummy
 # The unified report is built indirectly from the .cov files in the
 # coverage directory.
 #
-coverage: $(addprefix .coverage., $(APP_NAMES) $(PLUGIN_MODULES))
+coverage: $(addprefix .coverage., $(APP_NAMES) $(PLUGIN_MODULES) $(PARSER_MODULES))
 	coverage combine $(COVERAGE_DIR)
 	coverage report
 	coverage html
@@ -215,10 +224,24 @@ $(APP_NAMES): $(COVERAGE_DIR)
 # This target can be invoked directly.
 #
 $(PLUGIN_PATHS): $(COVERAGE_DIR)
-	$(eval MODULE=$(addprefix plugins.,$(notdir $(basename $@))))
+	$(eval PLUGIN=$(notdir $(basename $@)))
+	$(eval MODULE=$(addprefix plugins.,$(PLUGIN)))
 	COVERAGE_FILE=$(COVERAGE_DIR)/$(MODULE).cov \
-	python -m pytest --cov=$(MODULE) --cov-branch  $@
+	python -m pytest --cov=$(MODULE) --cov-branch  plugins/test_$(PLUGIN).py
 
+# Test a single parser
+#
+# Example: make parsers/myparser.py
+#
+# Same setup and rational as for plugin testing.
+#
+# This target can be invoked directly.
+#
+$(PARSER_PATHS): $(COVERAGE_DIR) dummy
+	$(eval PARSER=$(notdir $(basename $@)))
+	$(eval MODULE=$(addprefix parsers.,$(PARSER)))
+	COVERAGE_FILE=$(COVERAGE_DIR)/$(MODULE).cov \
+	python -m pytest --cov=$(MODULE) --cov-branch  parsers/test_$(PARSER).py
 
 # Run lint checks across the project
 #
