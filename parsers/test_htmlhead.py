@@ -10,20 +10,25 @@ class TestHtmlHeadParser(unittest.TestCase):
     parser = None
 
     @classmethod
-    def setUpClass(cls):
+    def setUp(cls):
         """Create the parser instance."""
         cls.parser = parsers.htmlhead.Parser()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDown(cls):
         """Destroy the parser."""
         cls.parser = None
 
     def test_simple_parse(self):
-        """A simplistic document is parsed successfully."""
+        """A reasonably-structured document is parsed successfully."""
 
         initial = """
-        <html><head><title id="test">Hello world</title></head></html>
+        <html>
+        <head>
+            <title id="test">Hello world</title>
+            <meta name="keyword" content="whatever" />
+        </head>
+        </html>
         """
         final = self.parser.parse(initial)
 
@@ -32,6 +37,43 @@ class TestHtmlHeadParser(unittest.TestCase):
         self.assertEqual(final[0][1][0][1], "test")
         self.assertEqual(final[0][2], "Hello world")
         self.assertEqual(len(final[0]), 3)
+        self.assertEqual(len(final), 2)
+
+    def test_no_head(self):
+        """A document with no head is parsed successfully."""
+
+        initial = """
+        <html>this is weird</html>
+        """
+        final = self.parser.parse(initial)
+
+        self.assertEqual(len(final), 0)
+
+    def test_entity(self):
+        """Entities are converted during parsing."""
+
+        initial = """
+        <html><head><title>hello &gt; world</title></head></html>
+        """
+        final = self.parser.parse(initial)
+
+        self.assertEqual(final[0][2], "hello > world")
+
+    def test_only_head(self):
+        """Tags outside the head are ignored."""
+
+        initial = """
+        <html>
+        <head>
+            <title>hello world</title>
+        </head>
+        <body>this is ignored</body>
+        </html>
+        """
+        final = self.parser.parse(initial)
+
+        print(final)
+        self.assertEqual(len(final), 1)
 
 
 if __name__ == "__main__":

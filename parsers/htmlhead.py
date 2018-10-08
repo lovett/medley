@@ -1,7 +1,6 @@
 """Extract the tags in the head section of an HTML document."""
 
 from html.parser import HTMLParser
-from html.entities import name2codepoint
 from collections import deque
 
 
@@ -20,7 +19,18 @@ class Parser(HTMLParser):
     def __init__(self):
         super().__init__()
 
+    def reset(self):
+        """Reset the parser instance."""
+        super().reset()
+        self.in_head = False
+        self.finished = False
+        self.stack.clear()
+
     def error(self, message):
+        """Do-nothing override of default error handler.
+
+        This is pointless, but having it appeases pylint.
+        """
         pass
 
     def parse(self, markup):
@@ -28,6 +38,8 @@ class Parser(HTMLParser):
         self.result = []
 
         self.feed(markup)
+
+        self.reset()
 
         return self.result
 
@@ -68,6 +80,3 @@ class Parser(HTMLParser):
             tag, attrs, text = self.stack.pop()
             text = "{} {}".format(text, data.strip()).strip()
             self.stack.append((tag, attrs, text))
-
-    def handle_entityref(self, name):
-        self.result.append(chr(name2codepoint[name]))
