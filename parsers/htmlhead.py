@@ -4,8 +4,13 @@ from html.parser import HTMLParser
 from collections import deque
 
 
-class Parser(HTMLParser):
+class Parser(HTMLParser):  # pylint: disable=abstract-method
     """Convert an HTML document's head section to a dict.
+
+    The abstract-method pylint check is disabled because it insists on
+    having the error() method of ParserBase overridden, but that isn't
+    otherwise helpful here.
+
     """
 
     stack = deque([], 50)
@@ -25,13 +30,6 @@ class Parser(HTMLParser):
         self.in_head = False
         self.finished = False
         self.stack.clear()
-
-    def error(self, message):
-        """Do-nothing override of default error handler.
-
-        This is pointless, but having it appeases pylint.
-        """
-        pass
 
     def parse(self, markup):
         """Parse an HTML string."""
@@ -63,6 +61,7 @@ class Parser(HTMLParser):
 
         if tag == "head":
             self.finished = True
+            return
 
         while self.stack and True:
             collected_tag = self.stack.pop()

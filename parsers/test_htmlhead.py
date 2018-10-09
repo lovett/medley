@@ -72,7 +72,21 @@ class TestHtmlHeadParser(unittest.TestCase):
         """
         final = self.parser.parse(initial)
 
-        print(final)
+        self.assertEqual(len(final), 1)
+
+    def test_malformed(self):
+        """A malformed document is parsed successfully."""
+
+        initial = """
+        <html>
+        <head>
+            <invalid>
+            <title>hello world</title>
+        </head>
+        </html>
+        """
+        final = self.parser.parse(initial)
+
         self.assertEqual(len(final), 1)
 
 
