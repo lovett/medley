@@ -18,9 +18,11 @@ class Controller:
     }
 
     @staticmethod
-    def url_to_host(url):
+    def url_to_host(url=None):
         """Reduce a URL to its hostname"""
         parsed_url = urlparse(url)
+        if not parsed_url.netloc:
+            return url
         return parsed_url.netloc
 
     def host_to_group(self, host):
@@ -78,24 +80,6 @@ class Controller:
         """
         return "bounce:{}".format(value)
 
-    @staticmethod
-    def from_registry_key(value):
-        """Remove the application namespace from a registry key."""
-        return value.replace("bounce:", "")
-
-    @staticmethod
-    def to_registry_value(url, name):
-        """Join a URL and name into a value that can be stored in the
-        registry.
-
-        """
-        return "{}\n{}".format(url, name)
-
-    @staticmethod
-    def from_registry_value(value):
-        """Extract a URL and name from a registry value."""
-        return value.replace("\r", "").split("\n")
-
     @cherrypy.tools.negotiable()
     def GET(self, u=None, group=None):  # pylint: disable=invalid-name
         """Display all the URLs in a group."""
@@ -103,55 +87,45 @@ class Controller:
         host = None
         bounces = None
         name = None
-        all_groups = []
         group = None
 
         if u:
             host = self.url_to_host(u)
-            search_value = "{}\n*".format(host)
-            group = cherrypy.engine.publish(
+            record = cherrypy.engine.publish(
                 "registry:first_key",
-                value=search_value,
+                value=host,
                 key_prefix="bounce*"
             ).pop()
 
-            if group:
-                group = self.from_registry_key(group)
-            else:
+            try:
+                _, group, name = record.split(":")
+            except (AttributeError, ValueError):
                 group = self.host_to_group(host)
                 name = self.host_to_keyword(host)
 
         if group:
-            search_key = self.to_registry_key(group)
+            search_key = "bounce:{}".format(group)
             bounces = cherrypy.engine.publish(
                 "registry:search",
-                search_key, exact=True
+                search_key,
             ).pop()
-
-        if bounces:
-            bounces = {
-                bounce["rowid"]:  self.from_registry_value(bounce["value"])
-                for bounce in bounces
-            }
 
         departing_from = None
         if host and bounces:
             # Match the current URL to a known site.
-            for (_, values) in bounces.items():
-                if urlparse(values[0]).netloc == host:
-                    departing_from = values[1]
+            for bounce in bounces:
+                if urlparse(bounce["value"]).netloc == host:
+                    departing_from = bounce["key"].split(":").pop()
                     break
 
             # Re-scope the current URL to each known destination.
             bounces = {
-                k: (u.replace(host, v[0]), v[1])
-                for (k, v) in bounces.items()
+                bounce["rowid"]: (
+                    u.replace(host, bounce["value"]),
+                    bounce["key"].split(":").pop()
+                )
+                for bounce in bounces
             }
-
-        if not host and not bounces:
-            all_groups = cherrypy.engine.publish(
-                "registry:distinct_keys", "bounce:*"
-            ).pop()
 
         app_url = cherrypy.engine.publish("url:internal").pop()
 
@@ -160,7 +134,6 @@ class Controller:
                 "departing_from": departing_from,
                 "site": host,
                 "group": group,
-                "all_groups": all_groups,
                 "name": name,
                 "app_url": app_url,
                 "bounces": bounces,
@@ -171,15 +144,15 @@ class Controller:
     def PUT(self, site, name, group):
         """Add a new URL to a group."""
 
-        url_to_host = self.url_to_host(site)
-        registry_key = self.to_registry_key(group)
-        registry_value = self.to_registry_value(url_to_host, name)
+        host = self.url_to_host(site)
+
+        key = "bounce:{}:{}".format(group, name)
 
         cherrypy.engine.publish(
             "registry:add",
-            registry_key,
-            [registry_value],
-            replace=False
+            key,
+            [host],
+            replace=True
         )
 
         cherrypy.response.status = 204

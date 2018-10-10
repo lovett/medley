@@ -21,7 +21,13 @@
 
 
             {% if not bounces %}
-                <bounce-form inline-template endpoint="/bounce">
+                <bounce-form
+                    inline-template
+                    endpoint="/bounce"
+                    site="{{ site|default('', true)|e }}"
+                    group="{{ group|default('', true)|e }}"
+                    name="{{ name|default('', true)|e }}"
+                >
                     <form v-on:submit.prevent="submit" method="post" action="/bounce">
                         {% if bounceless_domain %}
                             <p class="error message">No bounces found for {{ bounceless_domain }}</p>
@@ -36,17 +42,16 @@
 
                         <div class="field-group">
                             <div class="field">
-                                <label for="title">Site URL</label>
-                                <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
+                                <label for="title">Group</label>
+                                <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
                             </div>
                             <div class="field">
                                 <label for="title">Site Name</label>
                                 <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
                             </div>
-
                             <div class="field">
-                                <label for="title">Group</label>
-                                <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
+                                <label for="title">Site</label>
+                                <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
                             </div>
                         </div>
 
@@ -59,19 +64,6 @@
 
             {% if group and not bounces %}
                 <p class="align-center">There are no sites in the "{{ group }}" group.</p>
-            {% endif %}
-
-            {% if all_groups %}
-                <table id="bounces" class="key-value natural-width bordered">
-                    <caption class="one-line">Bounce Groups</caption>
-                    <tbody>
-                        {% for group in all_groups %}
-                            <tr>
-                                <td align="center"><a href="{{ app_url }}/bounce?group={{ group }}">{{ group }}</a></td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             {% endif %}
 
             {% if bounces %}

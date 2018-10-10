@@ -3,6 +3,15 @@ Vue.component('bounce-form', {
         endpoint: {
             type: String,
             required: true,
+        },
+        site: {
+            type: String
+        },
+        name: {
+            type: String
+        },
+        group: {
+            type: String
         }
     },
 

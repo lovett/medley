@@ -125,13 +125,13 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [[
                     {
                         "rowid": 1,
-                        "key": "bounce:example",
-                        "value": "stage.example.com\nstage",
+                        "key": "bounce:example:stage",
+                        "value": "stage.example.com",
                     },
                     {
                         "rowid": 2,
-                        "key": "bounce:example",
-                        "value": "othersite.example.com\nothersite"
+                        "key": "bounce:example:othersite",
+                        "value": "othersite.example.com"
                     }
                 ]]
 
@@ -146,7 +146,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             "example"
         )
 
-        self.assertIsNone(
+        self.assertEqual(
+            "dev",
             helpers.html_var(render_mock, "name")
         )
 
@@ -209,11 +210,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "bounces")
         )
 
-        self.assertEqual(
-            helpers.html_var(render_mock, "all_groups"),
-            []
-        )
-
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
     def test_bookmarklet_url_https(self, publish_mock, render_mock):
@@ -249,7 +245,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """A new site can be added to a group"""
 
         def side_effect(*args, **_):
-            """Side effects local function"""
+            """Side effects local function."""
             if args[0] == "registry:add":
                 return [{"uid": 1, "group": "example"}]
             return mock.DEFAULT
