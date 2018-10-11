@@ -59,6 +59,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             # Subdomains are preserved
             ("http://a.b.c.example.com",
              "a.b.c.example.com"),
+
+            # Bare hostname is left intact
+            ("site1.example.com", "site1.example.com")
         )
 
         for pair in candidates:
@@ -187,9 +190,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 return [None]
 
-            if args[0] == "registry:distinct_keys":
-                return [None]
-
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -223,9 +223,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 return [None]
 
-            if args[0] == "registry:distinct_keys":
-                return [None]
-
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -238,6 +235,47 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertTrue(
             helpers.html_var(render_mock, "app_url").startswith("https")
+        )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_departing_site(self, publish_mock, render_mock):
+        """If the given URL matches a record in the registry, it is considered
+         the departing site.
+
+        """
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:first_key":
+                return ["example"]
+
+            if args[0] == "registry:search":
+                return [[
+                    {
+                        "rowid": 1,
+                        "key": "bounce:example:stage",
+                        "value": "stage.example.com",
+                    },
+                    {
+                        "rowid": 2,
+                        "key": "bounce:example:othersite",
+                        "value": "othersite.example.com"
+                    }
+                ]]
+
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request(
+            "/",
+            u="http://othersite.example.com"
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "departing_from"),
+            "othersite"
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -258,6 +296,26 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             site="http://dev.example.com",
             group="example",
             name="dev",
+        )
+
+        self.assertEqual(response.code, 204)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_delete_site(self, publish_mock):
+        """A new site can be added to a group"""
+
+        def side_effect(*args, **_):
+            """Side effects local function."""
+            if args[0] == "registry:remove_id":
+                return [True]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request(
+            "/",
+            method="DELETE",
+            uid="1"
         )
 
         self.assertEqual(response.code, 204)

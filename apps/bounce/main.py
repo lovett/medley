@@ -72,14 +72,6 @@ class Controller:
 
         return "live"
 
-    @staticmethod
-    def to_registry_key(value):
-        """Convert a value to a registry key using the application
-        namespace.
-
-        """
-        return "bounce:{}".format(value)
-
     @cherrypy.tools.negotiable()
     def GET(self, u=None, group=None):  # pylint: disable=invalid-name
         """Display all the URLs in a group."""
@@ -114,7 +106,7 @@ class Controller:
         if host and bounces:
             # Match the current URL to a known site.
             for bounce in bounces:
-                if urlparse(bounce["value"]).netloc == host:
+                if bounce["value"] == host:
                     departing_from = bounce["key"].split(":").pop()
                     break
 
