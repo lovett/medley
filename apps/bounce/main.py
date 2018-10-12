@@ -124,6 +124,7 @@ class Controller:
         return {
             "html": ("bounce.jinja.html", {
                 "departing_from": departing_from,
+                "departing_url": u,
                 "site": host,
                 "group": group,
                 "name": name,

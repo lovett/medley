@@ -19,26 +19,18 @@
                 <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
             </div>
 
-
             {% if not bounces %}
                 <bounce-form
                     inline-template
                     endpoint="/bounce"
+                    url="{{ departing_url|default('', true)|e }}"
                     site="{{ site|default('', true)|e }}"
                     group="{{ group|default('', true)|e }}"
                     name="{{ name|default('', true)|e }}"
                 >
                     <form v-on:submit.prevent="submit" method="post" action="/bounce">
-                        {% if bounceless_domain %}
-                            <p class="error message">No bounces found for {{ bounceless_domain }}</p>
-                        {% else %}
-                            <div class="hidden error message"></div>
-                        {% endif %}
-
-                        <div class="hidden success message">Success!</div>
-
-                        <div class="field-group">
-                        </div>
+                        <div v-if="errorMessage" v-text="errorMessage" class="error message"></div>
+                        <div v-if="successMessage" v-text="successMessage" class="success message"></div>
 
                         <div class="field-group">
                             <div class="field">
@@ -60,10 +52,6 @@
                         </div>
                     </form>
                 </bounce-form>
-            {% endif %}
-
-            {% if group and not bounces %}
-                <p class="align-center">There are no sites in the "{{ group }}" group.</p>
             {% endif %}
 
             {% if bounces %}
