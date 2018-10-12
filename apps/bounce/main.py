@@ -99,7 +99,7 @@ class Controller:
             search_key = "bounce:{}".format(group)
             bounces = cherrypy.engine.publish(
                 "registry:search",
-                search_key,
+                search_key
             ).pop()
 
         departing_from = None
@@ -109,6 +109,11 @@ class Controller:
                 if bounce["value"] == host:
                     departing_from = bounce["key"].split(":").pop()
                     break
+
+            # If the departing site can't be determined, the
+            # list of bounces isn't viable.
+            if not departing_from:
+                bounces = []
 
             # Re-scope the current URL to each known destination.
             bounces = {

@@ -135,7 +135,13 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                         "rowid": 2,
                         "key": "bounce:example:othersite",
                         "value": "othersite.example.com"
+                    },
+                    {
+                        "rowid": 3,
+                        "key": "bounce:example:dev",
+                        "value": "dev.example.com"
                     }
+
                 ]]
 
             return mock.DEFAULT
@@ -154,27 +160,65 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "name")
         )
 
-        bounce_var = helpers.html_var(render_mock, "bounces")
+        bounces = helpers.html_var(render_mock, "bounces")
 
         self.assertEqual(
-            bounce_var[1][0],
+            bounces[1][0],
             "http://stage.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounce_var[1][1],
+            bounces[1][1],
             "stage"
         )
 
         self.assertEqual(
-            bounce_var[2][0],
+            bounces[2][0],
             "http://othersite.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounce_var[2][1],
+            bounces[2][1],
             "othersite"
         )
+
+    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.engine.publish")
+    def test_site_not_in_group(self, publish_mock, render_mock):
+        """A request with a URL that belongs to known group but does not match
+        an existing record does not offer a list of bounces.
+
+        """
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "registry:first_key":
+                return ["example"]
+
+            if args[0] == "registry:search":
+                return [[
+                    {
+                        "rowid": 1,
+                        "key": "bounce:example:stage",
+                        "value": "stage.example.com",
+                    },
+                    {
+                        "rowid": 2,
+                        "key": "bounce:example:othersite",
+                        "value": "othersite.example.com"
+                    }
+                ]]
+
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/", u="http://dev.example.com/with/subpath")
+
+        bounces = helpers.html_var(render_mock, "bounces")
+
+        self.assertEqual(len(bounces), 0)
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")
     @mock.patch("cherrypy.engine.publish")
