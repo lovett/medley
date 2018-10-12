@@ -345,6 +345,50 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
+    def test_add_site_invalid_group(self, publish_mock):
+        """A PUT is rejected if the provided group is non-alphanumeric."""
+
+        def side_effect(*args, **_):
+            """Side effects local function."""
+            if args[0] == "formatting:string_sanitize":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request(
+            "/",
+            method="PUT",
+            site="http://dev.example.com",
+            group="",
+            name="dev",
+        )
+
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_add_site_invalid_name(self, publish_mock):
+        """A PUT is rejected if the provided name is non-alphanumeric."""
+
+        def side_effect(*args, **_):
+            """Side effects local function."""
+            if args[0] == "formatting:string_sanitize" and args[1] == "???":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request(
+            "/",
+            method="PUT",
+            site="http://dev.example.com",
+            group="example",
+            name="???",
+        )
+
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("cherrypy.engine.publish")
     def test_delete_site(self, publish_mock):
         """A new site can be added to a group"""
 

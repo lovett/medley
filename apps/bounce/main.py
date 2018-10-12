@@ -144,6 +144,24 @@ class Controller:
 
         host = self.url_to_host(site)
 
+        group = cherrypy.engine.publish(
+            "formatting:string_sanitize",
+            group
+        ).pop()
+
+        print(group)
+
+        if not group:
+            raise cherrypy.HTTPError(400, "Invalid group")
+
+        name = cherrypy.engine.publish(
+            "formatting:string_sanitize",
+            name
+        ).pop()
+
+        if not name:
+            raise cherrypy.HTTPError(400, "Invalid name")
+
         key = "bounce:{}:{}".format(group, name)
 
         cherrypy.engine.publish(
