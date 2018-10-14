@@ -82,7 +82,29 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
             True
         )
 
-    @mock.patch("cherrypy.engine.publish")
+    def test_name_reduction(self):
+        """Verbose country names are replaced with more readable
+        alternatives."""
+
+        controller = apps.countries.main.Controller()
+
+        pairs = (
+            ("Russian Federation", "Russia"),
+            ("Republic of Korea", "Korea"),
+            ("United Kingdom of Lorem Ipsum Dolor", "UK"),
+            ("United States of America", "USA")
+        )
+
+        for long_name, short_name in pairs:
+            result, _ = controller.name_and_abbrev({
+                "official_name_en": long_name
+            })
+
+            self.assertEqual(result, short_name)
+
+    @mock.patch(
+
+        "cherrypy.engine.publish")
     def test_skip_record_without_name(self, publish_mock):
         """A record without a name field is skipped."""
 
