@@ -72,8 +72,7 @@ class Controller:
 
             facts.update(reverse_ip)
 
-            if facts:
-                cherrypy.engine.publish("cache:set", facts_cache_key, facts)
+            cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
         visitors_ip_url = cherrypy.engine.publish(
             "url:internal",

@@ -56,7 +56,9 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] in ("cache:get", "ip:facts", "urlfetch:get"):
+            if args[0] == "ip:facts":
+                return [{}]
+            if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
             return mock.DEFAULT
 
@@ -116,7 +118,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "cache:get":
                 return [None]
             if args[0] == "ip:facts":
-                return ["test"]
+                return [{"hello": "world"}]
             if args[0] == "urlfetch:get":
                 return [{"foo": "bar"}]
             return mock.DEFAULT
@@ -125,7 +127,11 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", address="127.0.0.1")
 
-        self.assertEqual(helpers.html_var(render_mock, "ip_facts"), "test")
+        print(render_mock.calls)
+        self.assertEqual(
+            helpers.html_var(render_mock, "ip_facts"),
+            {"hello": "world"}
+        )
 
 
 if __name__ == "__main__":

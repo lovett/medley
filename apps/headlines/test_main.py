@@ -31,11 +31,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    def test_sanitizes_count(self):
-        """Non-numeric values for count parameter are rejected"""
-        response = self.request("/", count="test")
-        self.assertEqual(response.code, 400)
-
     @mock.patch("cherrypy.engine.publish")
     def test_cache_miss_triggers_fetch(self, publish_mock):
         """A urlfetch occurs when a cached value is not present"""
@@ -54,7 +49,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", count=8)
+        self.request("/")
 
         publish_calls = [args[0][0] for args in publish_mock.call_args_list]
 
@@ -90,7 +85,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_cache_header(self, publish_mock):
         """The response sends a Cache-Control header."""
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
@@ -98,7 +93,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", count=8)
+        response = self.request("/")
         self.assertIsNotNone(response.headers.get("Cache-Control"))
 
 

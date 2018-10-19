@@ -36,7 +36,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_lowercase_html(self):
         """Input is converted to lowercase and returned as HTML"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 transform="lower",
                                 value="TEST")
@@ -45,7 +45,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_lowercase_json(self):
         """Input is converted to lowercase and returned as JSON"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_json=True,
                                 transform="lower",
@@ -55,7 +55,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_lowercase_text(self):
         """Input is coverted to lowercase and returned as plain text"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="lower",
@@ -65,7 +65,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_uppercase(self):
         """Input is converted to uppercase"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="upper",
@@ -74,16 +74,17 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_urlencode(self):
         """Input is url-encoded"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="urlencode",
                                 value="this is a test")
+        print(response.body)
         self.assertEqual(response.body, "this+is+a+test")
 
     def test_urldecode(self):
         """Input is url-encoded"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="urldecode",
@@ -92,7 +93,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_capitalize(self):
         """Input is capitalized"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="capitalize",
@@ -101,7 +102,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_title(self):
         """Input is converted to titlecase"""
-        response = self.request(path="/",
+        response = self.request("/",
                                 method="POST",
                                 as_text=True,
                                 transform="title",
@@ -116,7 +117,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
         val = "test"
         response = self.request(
-            path="/",
+            "/",
             method="POST",
             as_text=True,
             transform="example",
@@ -129,7 +130,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         """Transform and value parameters are required"""
 
         response = self.request(
-            path="/",
+            "/",
             method="POST",
             as_text=True
         )
