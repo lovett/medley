@@ -35,7 +35,7 @@ class Plugin(plugins.SimplePlugin):
         params = kwargs.get("params")
 
         request_headers = {
-            "User-Agent": "python",
+            "User-Agent": "Mozilla/5.0 (compatible; python)",
         }
 
         if as_json:
