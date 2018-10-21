@@ -34,14 +34,14 @@
                                         {% if attributes %}
                                             <dl>
                                                 {% for key, value in attributes %}
-                                                    <dt>{{ key }}</dt>
-                                                    <dd>{{ value }}</dd>
+                                                    <dt>{{ key|e }}</dt>
+                                                    <dd>{{ value|e }}</dd>
                                                 {% endfor %}
                                             </dl>
                                         {% endif %}
 
                                         {% if text %}
-                                            <div class="text">{{ text }}</div>
+                                            <div class="text">{{ text|e }}</div>
                                         {% endif %}
                                     </td>
                                 </tr>

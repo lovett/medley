@@ -333,6 +333,7 @@ TABLE.key-value TH {
 
 .table-wrapper {
     border: 1px solid #ccc;
+    margin-bottom: 2em;
 }
 
 TABLE.bordered {
