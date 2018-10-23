@@ -102,6 +102,7 @@ setup: system-packages assets
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
 
+serve: export BETTER_EXCEPTIONS=1
 serve: dummy
 	python medley.py
 
