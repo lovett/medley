@@ -36,8 +36,8 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             self._execute("vacuum")
             self._execute("analyze")
 
-    @decorators.log_runtime
     @staticmethod
+    @decorators.log_runtime
     def fs_maintenance():
         """Execute filesystem maintenance tasks."""
 
