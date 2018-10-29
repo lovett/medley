@@ -1,6 +1,8 @@
 """Perform maintenance tasks."""
 
 import glob
+import os
+import time
 import cherrypy
 from cherrypy.process import plugins
 from . import mixins
@@ -32,9 +34,30 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         file_names = glob.glob(pattern, recursive=False)
 
         for file_name in file_names:
+            # Skip databases that haven't been changed in the past 24 hours.
+            stat = os.stat(file_name)
+            age = time.time() - stat.st_mtime
+            if age > 86400:
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "maintenance",
+                    "db",
+                    "Skipped {}".format(file_name)
+                )
+
+                continue
+
             self.db_path = file_name
             self._execute("vacuum")
             self._execute("analyze")
+            cherrypy.engine.publish(
+                "applog:add",
+                "maintenance",
+                "db",
+                "Vacuumed and analyzed {}".format(
+                    self.db_path
+                )
+            )
 
     @staticmethod
     @decorators.log_runtime
