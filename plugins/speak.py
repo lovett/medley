@@ -1,6 +1,7 @@
 """Perform text-to-speech synthesis via Microsoft Cognitive Services
 
-see https://docs.microsoft.com/en-us/azure/cognitive-services/speech/
+See:
+https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-text-to-speech
 
 """
 
@@ -15,13 +16,6 @@ import cherrypy
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for text-to-speech."""
-
-    token_request_url = (
-        "https://api.cognitive.microsoft.com"
-        "/sts/v1.0/issueToken"
-    )
-
-    synthesize_url = "https://speech.platform.bing.com/synthesize"
 
     voice_fonts = {
         ("ar-EG", "Female"): "Hoda",
@@ -224,6 +218,33 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         config = self.get_config()
 
         if "azure_key" not in config:
+            config = {}
+            cherrypy.engine.publish(
+                "applog:add",
+                "speechmanager",
+                "config",
+                "Missing azure_key"
+            )
+
+        if "synthesize_url" not in config:
+            config = {}
+            cherrypy.engine.publish(
+                "applog:add",
+                "speechmanager",
+                "config",
+                "Missing synthesize_url"
+            )
+
+        if "token_request_url" not in config:
+            config = {}
+            cherrypy.engine.publish(
+                "applog:add",
+                "speechmanager",
+                "config",
+                "Missing token_request_url"
+            )
+
+        if not config:
             return False
 
         ssml_string = self.ssml(statement, locale, gender)
@@ -244,9 +265,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         auth_response = cherrypy.engine.publish(
             "urlfetch:post",
-            self.token_request_url,
+            config.get("token_request_url"),
             None,
-            headers={"Ocp-Apim-Subscription-Key": config["azure_key"]}
+            headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")}
         ).pop()
 
         if not auth_response:
@@ -261,7 +282,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         audio_bytes = cherrypy.engine.publish(
             "urlfetch:post",
-            self.synthesize_url,
+            config.get("synthesize_url"),
             ssml_string,
             as_bytes=True,
             headers={
