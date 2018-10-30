@@ -17,6 +17,10 @@
                 </div>
             </form>
 
+            {% if status_code and status_code != 200 %}
+                <p>The URL returned a {{ status_code }}.
+            {% endif %}
+
             {% if tags %}
 
                 <div class="table-wrapper">

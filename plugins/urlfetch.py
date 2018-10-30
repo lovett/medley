@@ -27,7 +27,7 @@ class Plugin(plugins.SimplePlugin):
         cherrypy.engine.publish("urlfetch:ready")
 
     @staticmethod
-    def get(url, as_json=False, **kwargs):
+    def get(url, as_json=False, as_object=False, **kwargs):
         """Send a GET request"""
 
         auth = kwargs.get("auth")
@@ -62,6 +62,9 @@ class Plugin(plugins.SimplePlugin):
 
             req.raise_for_status()
 
+            if as_object:
+                return req
+
             if req.status_code == 204:
                 return True
 
@@ -77,6 +80,9 @@ class Plugin(plugins.SimplePlugin):
                 "get",
                 exception
             )
+
+            if as_object:
+                return req
 
             return None
 

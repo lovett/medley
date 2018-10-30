@@ -16,17 +16,23 @@ class Controller:
         app_url = cherrypy.engine.publish("url:internal").pop()
 
         head_tags = []
+        status_code = None
         if url:
-            page = cherrypy.engine.publish(
+            response = cherrypy.engine.publish(
                 "urlfetch:get",
-                url
+                url,
+                as_object=True
             ).pop()
 
-            parser = parsers.htmlhead.Parser()
-            head_tags = parser.parse(page)
+            status_code = response.status_code
+
+            if response.status_code == 200:
+                parser = parsers.htmlhead.Parser()
+                head_tags = parser.parse(response.text)
 
         return {
             "html": ("htmlhead.jinja.html", {
+                "status_code": status_code,
                 "url": url,
                 "app_url": app_url,
                 "app_name": self.name,
