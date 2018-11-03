@@ -69,7 +69,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0].startswith("markup:"):
-                return ["abc456"]
+                return ["This is sentence 1. this is sentence 2"]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -78,7 +78,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             helpers.html_var(render_mock, "comments"),
-            "Abc456."
+            "This is sentence 1. This is sentence 2."
         )
 
     @mock.patch("cherrypy.tools.negotiable._renderHtml")

@@ -44,7 +44,11 @@ class Controller:
             ).pop()
             comments = re.sub(r"\s+", " ", comments).strip()
             comments = re.sub(r",(\w)", ", \\1", comments)
-            comments = comments.capitalize()
+            comments = comments.split(". ")
+            comments = ". ".join([
+                sentence[0].capitalize() + sentence[1:]
+                for sentence in comments
+            ])
 
         if comments and not comments.endswith("."):
             comments += "."
