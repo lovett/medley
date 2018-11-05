@@ -160,6 +160,13 @@
                                                    rel="noreferrer"
                                                 >{{ result.ip|truncate(20, True)  }}</a>
                                             </p>
+
+
+                                            {% if durations[result.ip] %}
+                                                <p class="smaller">{{ durations[result.ip] }}</p>
+                                            {% endif %}
+
+
                                             {% if reverse_domain %}
                                                 <p class="smaller">
                                                     <a href="/visitors?query=reverse_domain+{{ reverse_domain }}"
@@ -219,7 +226,6 @@
                                             Δ <span class="value">{{ deltas[loop.index0] }}</span>
                                             <span class="label"></span>
                                         </p>
-
                                     </td>
                                     <td nowrap="nowrap">
                                         <p>

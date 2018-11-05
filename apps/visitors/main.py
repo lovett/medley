@@ -1,7 +1,7 @@
 """Search website access logs"""
 
 import re
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 import cherrypy
 import pendulum
 
@@ -41,6 +41,7 @@ class Controller:
 
         reversed_ips = None
         deltas = None
+        durations = {}
         country_names = None
         annotations = None
         cookies = {}
@@ -52,6 +53,7 @@ class Controller:
             ).pop() or {}
 
             deltas = self.get_deltas(log_records)
+            durations = self.get_durations(log_records)
 
             country_names = cherrypy.engine.publish(
                 "geography:country_by_abbreviation",
@@ -83,6 +85,7 @@ class Controller:
                 "results": log_records,
                 "country_names": country_names,
                 "deltas": deltas,
+                "durations": durations,
                 "site_domains": site_domains,
                 "saved_queries": saved_queries,
                 "app_name": self.name,
@@ -118,6 +121,36 @@ class Controller:
             queries.append(SavedQuery(record_id, key, value, active))
 
         return queries
+
+    @staticmethod
+    def get_durations(log_records):
+        """Calculate visit duration per IP"""
+
+        maximums = defaultdict(int)
+        minimums = defaultdict(int)
+
+        for row in log_records:
+            address = row["ip"]
+            timestamp = row["unix_timestamp"]
+
+            if address not in maximums or timestamp > maximums[address]:
+                maximums[address] = row["unix_timestamp"]
+                continue
+
+            if address not in minimums or timestamp < minimums[address]:
+                minimums[address] = row["unix_timestamp"]
+
+        durations = {
+            address: pendulum.duration(
+                seconds=(maximums[address] - minimums[address])
+            ).in_words()
+            for address in maximums
+            if minimums[address] > 0
+        }
+
+        print(durations)
+
+        return durations
 
     @staticmethod
     def get_deltas(log_records):
