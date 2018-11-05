@@ -6,13 +6,13 @@
         {% set url = app_url + "/static/js/" + url %}
     {% endif %}
     <div class="bookmarklet-container">
-        <a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">{{ macros.bookmarkletIcon }}️ {{ label }}</a>
+        <a href="javascript:d=new Date();s=document.createElement('script');s.setAttribute('src','{{ url }}?d=' + d.getTime());document.body.appendChild(s);void(s)">{{ label }}</a>
     </div>
 {%- endmacro %}
 
 {% macro inline_bookmarklet(js, label) -%}
     <div class="bookmarklet-container">
-        <a href="javascript:{{ js|e }}">{{ macros.bookmarkletIcon }} {{ label }}</a>
+        <a href="javascript:{{ js|e }}">{{ label }}</a>
     </div>
 {%- endmacro %}
 
