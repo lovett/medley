@@ -9,8 +9,8 @@ import datetime
 import hashlib
 import os
 import os.path
+import re
 import time
-import xml.dom.minidom
 import cherrypy
 
 
@@ -98,15 +98,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def get_config():
         """Query the registry for configuration settings."""
 
-        rows = cherrypy.engine.publish(
+        return cherrypy.engine.publish(
             "registry:search",
-            "speak:*"
+            "speak:*",
+            as_dict=True,
+            key_slice=1
         ).pop()
-
-        return {
-            row["key"].split(":")[1]: row["value"]
-            for row in rows
-        }
 
     @staticmethod
     def get_cache_path(hash_digest=None):
@@ -143,34 +140,69 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cache_path
         )
 
+    @staticmethod
+    def adjust_pronunciation(statement, config):
+        """Replace words that are prone to mispronunciation with
+        better-sounding equivalents.
+
+        The MS Speech Service documentation alludes to this
+        capability, but lacks details on how to make use of it. This
+        is a local approach that achieves similar ends and allows for
+        custom SSML markup.
+        """
+
+        adjustments = config.get("adjustment", "").replace("\r", "")
+        adjustment_pairs = [
+            tuple(item.strip() for item in line.split(","))
+            for line in
+            adjustments.split("\n")
+        ]
+
+        replaced_statement = statement
+        for search, replace in adjustment_pairs:
+            replaced_statement = re.sub(
+                r"\b{}\b".format(search),
+                replace,
+                replaced_statement
+            )
+
+        return replaced_statement
+
     def ssml(self, statement, locale, gender):
         """Build an SSML document representing the text to be spoken.
 
-        SSML is XML-based.
+        SSML is XML-based, but the document is assembled as a string
+        to make it easier for the statement to include self-closing
+        tags and ad-hoc markup that would otherwise be annoying to
+        work with as nodes.
 
         """
 
-        doc = xml.dom.minidom.Document()
-        root = doc.createElement("speak")
-        doc.appendChild(root)
-        root.setAttribute("version", "1.0")
-        root.setAttribute("xml:lang", locale.lower())
-        voice = doc.createElement("voice")
-        root.appendChild(voice)
-        voice.setAttribute("xml:lang", locale.lower())
-        voice.setAttribute("xml:gender", gender)
-
-        voice_name = self.voice_fonts[(locale, gender)]
-        voice.setAttribute(
-            "name",
-            "Microsoft Server Speech Text to Speech Voice ({}, {})".format(
-                locale, voice_name
-            )
+        voice_name = "{prefix} ({locale}, {name})".format(
+            prefix="Microsoft Server Speech Text to Speech Voice",
+            locale=locale,
+            name=self.voice_fonts[(locale, gender)]
         )
 
-        text = doc.createTextNode(statement)
-        voice.appendChild(text)
-        return doc.toxml().encode('utf-8')
+        template = """
+        <?xml version="1.0" ?>
+        <speak version="1.0" xml:lang="{locale}">
+          <voice
+            name="{voice_name}"
+            xml:gender="{gender}"
+            xml:lang="{locale}"
+          >{statement}</voice>
+        </speak>
+        """
+
+        document = template.format(
+            locale=locale,
+            gender=gender,
+            voice_name=voice_name,
+            statement=statement
+        )
+
+        return document.strip().encode("utf-8")
 
     def can_speak(self):
         """Determine whether the application has been muted."""
@@ -247,7 +279,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not config:
             return False
 
-        ssml_string = self.ssml(statement, locale, gender)
+        adjusted_statement = self.adjust_pronunciation(statement, config)
+
+        ssml_string = self.ssml(adjusted_statement, locale, gender)
 
         request_hash = hashlib.sha1()
         request_hash.update(ssml_string)
