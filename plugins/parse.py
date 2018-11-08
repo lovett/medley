@@ -435,6 +435,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if val.count('"') % 2 > 0:
             val = '{}"'.format(val)
 
+        # Sanity check to avoid problems with an empty double-quoted
+        # string for the referrer field.
+        val = val.replace(' "" "', ' - "')
+
         try:
             fields = self.appengine_grammar.parseString(val).asDict()
         except pp.ParseException as exception:
