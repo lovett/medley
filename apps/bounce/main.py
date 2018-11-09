@@ -96,7 +96,7 @@ class Controller:
                 name = self.host_to_keyword(host)
 
         if group:
-            search_key = "bounce:{}".format(group)
+            search_key = "bounce:{}:".format(group)
             bounces = cherrypy.engine.publish(
                 "registry:search",
                 search_key
