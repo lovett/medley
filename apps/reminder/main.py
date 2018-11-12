@@ -32,7 +32,7 @@ class Controller:
             for row in registry_rows
         }
 
-        for id, template in templates.items():
+        for template_id, template in templates.items():
             template["duration_in_words"] = cherrypy.engine.publish(
                 "formatting:time_duration",
                 minutes=int(template["minutes"])
@@ -41,7 +41,7 @@ class Controller:
             template["delete_url"] = cherrypy.engine.publish(
                 "url:internal",
                 "/registry",
-                {"uid": id}
+                {"uid": template_id}
             ).pop()
 
         upcoming = cherrypy.engine.publish(
@@ -60,6 +60,7 @@ class Controller:
             }),
         }
 
+    # pylint: disable=too-many-arguments
     def POST(self, message, minutes=None, hours=None, comments=None,
              notification_id=None, url=None, remember=None):
         """Queue a new reminder for delivery."""
@@ -81,23 +82,41 @@ class Controller:
         except (ValueError, TypeError):
             remember = 0
 
-        notification = {
-            "group": "medley",
-            "body": comments,
-            "title": message
+        # Send a notification immediately to confirm creation of the
+        # reminder and make the time remaining visible.
+        start_notification = {
+            "group": "timer",
+            "title": "Timer started",
+            "body": message,
+            "expiresAt": "{} minutes".format(total_minutes)
         }
 
         if notification_id:
-            notification["localId"] = notification_id
+            start_notification["localId"] = notification_id
+
+        cherrypy.engine.publish(
+            "notifier:send",
+            start_notification
+        )
+
+        # Send a second notification in the future.
+        finish_notification = {
+            "group": "timer",
+            "title": message,
+            "body": comments
+        }
+
+        if notification_id:
+            finish_notification["localId"] = notification_id
 
         if url:
-            notification["url"] = url
+            finish_notification["url"] = url
 
         cherrypy.engine.publish(
             self.add_command,
             total_minutes * 60,
             "notifier:send",
-            notification
+            finish_notification
         )
 
         if remember == 1:
