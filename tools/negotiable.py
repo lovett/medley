@@ -1,5 +1,8 @@
+"""Decide on the content type of a response."""
+
 import json
 import cherrypy
+
 
 class Tool(cherrypy.Tool):
     """Decide on a suitable format for the response
@@ -14,9 +17,9 @@ class Tool(cherrypy.Tool):
     controller method."""
 
     renderers = {
-        "application/json": "_renderJson",
-        "text/html": "_renderHtml",
-        "text/plain": "_renderText",
+        "application/json": "render_json",
+        "text/html": "render_html",
+        "text/plain": "render_text",
     }
 
     charset = "utf-8"
@@ -43,8 +46,10 @@ class Tool(cherrypy.Tool):
     def _negotiate(self):
         """Decide on a response format"""
 
+        accept = cherrypy.request.headers.get("Accept", "*/*")
+
         # If any format is acceptable, send text/html
-        if cherrypy.request.headers.get("Accept") == "*/*":
+        if accept == "*/*":
             self.response_format = "text/html"
             return
 
@@ -52,7 +57,10 @@ class Tool(cherrypy.Tool):
         self.response_format = cherrypy.tools.accept.callable(candidates)
 
     def _finalize(self):
-        """Transform the response body provided by the controller to its final form."""
+        """Transform the response body provided by the controller to its final
+        form.
+
+        """
 
         if not isinstance(cherrypy.response.body, dict):
             return
@@ -60,7 +68,9 @@ class Tool(cherrypy.Tool):
         # If the body only provides one format, use it instead of
         # the negotiated format.
         if len(cherrypy.response.body) == 1:
-            renderer = "_render" + next(iter(cherrypy.response.body)).capitalize()
+            renderer = "render_" + next(
+                iter(cherrypy.response.body)
+            ).lower()
         else:
             renderer = self.renderers.get(self.response_format)
 
@@ -71,29 +81,39 @@ class Tool(cherrypy.Tool):
             cherrypy.response.body = None
             return
 
-        # Requests made on the command line using curl tend to collide with the shell prompt.
-        # Add some trailing newlines to prevent this.
+        # Requests made on the command line using curl tend to collide
+        # with the shell prompt.  Add some trailing newlines to
+        # prevent this.
         body_format = "{}"
 
         if "curl" in cherrypy.request.headers.get("User-Agent", ""):
             body_format += "\n\n"
 
-        cherrypy.response.body = body_format.format(final_body).encode(self.charset)
+        cherrypy.response.body = body_format.format(
+            final_body
+        ).encode(self.charset)
 
-    def _renderJson(self, body):
+    @staticmethod
+    def render_json(body):
+        """Render a response as JSON"""
         part = body.get("json")
 
         cherrypy.response.headers["Content-Type"] = "application/json"
 
         return json.JSONEncoder().encode(part) if part else None
 
-    def _renderManifest(self, body):
+    @staticmethod
+    def render_manifest(body):
+        """Render a response as an appcache manifest"""
         template_file, values = body.get("manifest", (None, None))
 
         if not template_file:
             return None
 
-        template = cherrypy.engine.publish("lookup-template", template_file).pop()
+        template = cherrypy.engine.publish(
+            "lookup-template",
+            template_file
+        ).pop()
 
         if not template:
             return None
@@ -102,39 +122,50 @@ class Tool(cherrypy.Tool):
 
         return template.render(**values)
 
-    def _renderText(self, body):
+    def render_text(self, body):
+        """Render a response as plain text"""
         part = body.get("text")
 
         if isinstance(part, str):
             part = [part]
 
-        cherrypy.response.headers["Content-Type"] = "text/plain;charset={}".format(self.charset)
+        content_type = "text/plain;charset={}".format(self.charset)
+        cherrypy.response.headers["Content-Type"] = content_type
 
         return "\n".join([str(line) for line in part]) if part else None
 
-    def _renderHtml(self, body):
+    def render_html(self, body):
+        """Render a response as HTML"""
         template_file, values = body.get("html", (None, None))
 
         if not template_file:
             return None
 
-        template = cherrypy.engine.publish("lookup-template", template_file).pop()
+        template = cherrypy.engine.publish(
+            "lookup-template",
+            template_file
+        ).pop()
 
         if not template:
             return None
 
-        cherrypy.response.headers["Content-Type"] = "text/html;charset={}".format(self.charset)
+        content_type = "text/html;charset={}".format(self.charset)
+        cherrypy.response.headers["Content-Type"] = content_type
 
         html = template.render(**values)
 
         if body.get("etag_key"):
-            hash = cherrypy.engine.publish("hasher:md5", html).pop()
+            content_hash = cherrypy.engine.publish("hasher:md5", html).pop()
 
             key = body.get("etag_key")
 
-            cherrypy.engine.publish("memorize:etag", key, hash)
+            cherrypy.engine.publish(
+                "memorize:etag",
+                key,
+                content_hash
+            )
 
-            cherrypy.response.headers["ETag"] = hash
+            cherrypy.response.headers["ETag"] = content_hash
 
         max_age = body.get("max_age")
         if max_age:
