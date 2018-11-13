@@ -128,3 +128,12 @@
     - medley-db-maintenance.timer
     - medley-fs-maintenance.timer
     - medley-headlines.timer
+
+- name: Check server availability
+  uri:
+    url: "http://localhost:8085/"
+    status_code: 200
+  register: this
+  until: this.status == 200
+  retries: 6
+  delay: 10
