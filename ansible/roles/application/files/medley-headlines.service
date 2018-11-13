@@ -1,0 +1,6 @@
+[Unit]
+Description=Medley headlines precache
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/curl --user-agent medley-headlines.service --silent --show-error "http://127.0.0.1:8085/headlines"

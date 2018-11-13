@@ -1,0 +1,9 @@
+[Unit]
+Description=Timer for Medley headlines precache
+
+[Timer]
+# Daily at 7:00 AM
+OnCalendar=07:00
+
+[Install]
+WantedBy=timers.target

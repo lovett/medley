@@ -103,6 +103,8 @@
     - files/medley-db-maintenance.timer
     - files/medley-fs-maintenance.service
     - files/medley-fs-maintenance.timer
+    - files/medley-headlines.service
+    - files/medley-headlines.timer
 
 - name: Enable medley systemd service
   become: true
@@ -125,3 +127,4 @@
     - medley-geodb.timer
     - medley-db-maintenance.timer
     - medley-fs-maintenance.timer
+    - medley-headlines.timer
