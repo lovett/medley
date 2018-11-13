@@ -7,13 +7,13 @@ After=network.target
 StartLimitIntervalSec=0
 
 [Service]
+User=medley
+Group=medley
 WorkingDirectory=/srv/medley
 
 ExecStart=/srv/medley/venv/bin/python medley.py
 
-Type=forking
-
-PIDFile=/var/run/medley.pid
+Type=simple
 
 # Try to restart automatically in case of trouble.
 Restart=on-abnormal

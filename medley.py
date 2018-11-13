@@ -143,17 +143,6 @@ def main():
             app_config
         )
 
-    # Attempt to drop privileges if daemonized
-    if cherrypy.config.get("server.daemonize"):
-        cherrypy.process.plugins.Daemonizer(cherrypy.engine).subscribe()
-
-        pid_file = cherrypy.config.get("server.pid")
-        if pid_file:
-            cherrypy.process.plugins.PIDFile(
-                cherrypy.engine,
-                pid_file
-            ).subscribe()
-
     # Plugins
     plugins.applog.Plugin(cherrypy.engine).subscribe()
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
