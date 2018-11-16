@@ -49,7 +49,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Add one or more values for the given key, optionally deleting any
         existing values.
 
+        CRLF newlines will be converted to Unix-style LF to make
+        things easier for apps that use multi-line values.
+
         """
+
+        clean_values = [
+            value.replace("\r", "")
+            for value in values
+        ]
 
         cherrypy.engine.publish("memorize:clear", key)
         if replace:
@@ -57,7 +65,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
-            [(key, value) for value in values]
+            [(key, value) for value in clean_values]
         )
 
     # pylint: disable=too-many-arguments
