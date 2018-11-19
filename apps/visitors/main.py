@@ -69,8 +69,6 @@ class Controller:
                 and record["ip"] not in cookies
             }
 
-            print(cookies)
-
         app_url = cherrypy.engine.publish("url:internal").pop()
 
         active_date = self.get_active_date(log_records, query)
@@ -124,28 +122,36 @@ class Controller:
 
     @staticmethod
     def get_durations(log_records):
-        """Calculate visit duration per IP"""
+        """Calculate visit duration per day per IP"""
+
+        timezone = cherrypy.engine.publish(
+            "registry:local_timezone"
+        ).pop()
 
         maximums = defaultdict(int)
         minimums = defaultdict(int)
 
         for row in log_records:
-            address = row["ip"]
             timestamp = row["unix_timestamp"]
+            formatted_timestamp = pendulum.from_timestamp(
+                timestamp
+            ).in_timezone(timezone).format('YYYY-MM-DD')
 
-            if address not in maximums or timestamp > maximums[address]:
-                maximums[address] = row["unix_timestamp"]
+            lookup_key = (row["ip"], formatted_timestamp)
+
+            if lookup_key not in maximums or timestamp > maximums[lookup_key]:
+                maximums[lookup_key] = timestamp
                 continue
 
-            if address not in minimums or timestamp < minimums[address]:
-                minimums[address] = row["unix_timestamp"]
+            if lookup_key not in minimums or timestamp < minimums[lookup_key]:
+                minimums[lookup_key] = timestamp
 
         durations = {
-            address: pendulum.duration(
-                seconds=(maximums[address] - minimums[address])
-            ).in_words()
-            for address in maximums
-            if minimums[address] > 0
+            lookup_key: pendulum.duration(
+                seconds=(maximums[lookup_key] - minimums[lookup_key])
+            )
+            for lookup_key in maximums
+            if minimums[lookup_key] > 0
         }
 
         print(durations)

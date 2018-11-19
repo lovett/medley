@@ -127,11 +127,17 @@
                             {% for result in results %}
 
                                 {% set new_ip = loop.changed(result.ip) %}
+                                {% set year_month_day = result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') %}
+                                {% set new_day = False %}
+                                {% if loop.previtem is defined %}
+                                    {% set prev_year_month_day = loop.previtem.unix_timestamp|localtime|dateformat("YYYY-MM-DD") %}
+                                    {% set new_day = year_month_day != prev_year_month_day %}
+                                {% endif %}
+
                                 {% set reverse_domain = reversed_ips.get(result.ip) %}
-
-
+                                {% set duration = durations.get((result.ip, result.unix_timestamp|localtime|dateformat("YYYY-MM-DD"))) %}
                                 <tr class="result code-{{ result.statusCode }}">
-                                    {% if new_ip %}
+                                    {% if new_ip or new_day%}
                                         <td>
                                             {% if result.country not in flagless_countries %}
                                                 <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
@@ -162,8 +168,18 @@
                                             </p>
 
 
-                                            {% if durations[result.ip] %}
-                                                <p class="smaller">{{ durations[result.ip] }}</p>
+                                            {% if duration  %}
+                                                <p class="smaller">Active
+                                                    {% if duration.in_hours() > 1 %}
+                                                        {{ duration.in_hours() }} hours
+                                                    {% elif duration.in_minutes() > 1 %}
+                                                        {{ duration.in_minutes() }} minutes
+                                                    {% elif duration.in_seconds() > 1 %}
+                                                        {{ duration.in_seconds() }} seconds
+                                                    {% else %}
+                                                        {{ duration.in_seconds() }} second
+                                                    {% endif %}
+                                                </p>
                                             {% endif %}
 
 
@@ -217,7 +233,7 @@
                                             <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
                                                 <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
                                             </a>
-                                            {{ result.unix_timestamp|localtime|dateformat("YYYY-MM-DD") }}
+                                            {{ yearm_month_day }}
                                             at
                                             {{ result.unix_timestamp|localtime|dateformat("LTS") }}
                                         </p>
@@ -229,7 +245,7 @@
                                     </td>
                                     <td nowrap="nowrap">
                                         <p>
-                                            <a href="/visitors?query=date+{{ result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                            <a href="/visitors?query=date+{{ year_month_day }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                                 {{ result.method }} {{ result.uri|truncate(30, True) }}
                                             </a>
                                         </p>
@@ -244,7 +260,7 @@
 
                                         {% if result.referrer_domain and result.referrer_domain not in site_domains %}
                                             <p>
-                                                Referrer: <a href="/visitors?query=date+{{ result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                                Referrer: <a href="/visitors?query=date+{{ year_month_day }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                                             </p>
                                         {% endif %}
                                     </td>

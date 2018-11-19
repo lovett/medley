@@ -99,7 +99,7 @@ class Plugin(plugins.SimplePlugin):
             return ""
 
         if not timezone:
-            zone = cherrypy.engine.publish(
+            timezone = cherrypy.engine.publish(
                 "registry:local_timezone"
             ).pop()
 
@@ -108,7 +108,7 @@ class Plugin(plugins.SimplePlugin):
         else:
             value = pendulum.instance(value)
 
-        return value.in_timezone(zone)
+        return value.in_timezone(timezone)
 
     @staticmethod
     def dateformat_filter(value, format_string):
