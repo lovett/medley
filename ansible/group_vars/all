@@ -5,6 +5,7 @@ project_hostname: "{{ project_name }}.local"
 project_group: "{{ project_name }}"
 project_root: /srv/{{ project_name }}
 project_backup: "/srv/{{ project_name }}.bak"
+project_newinstall_tmp: "/srv/{{ project_name }}.new"
 openssl_self_signed:
   - name: "{{ project_name }}"
     domains: ["{{ project_hostname }}"]
