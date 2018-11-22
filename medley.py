@@ -31,21 +31,33 @@ def main():
     server_root = os.path.dirname(os.path.abspath(__file__))
     app_root = os.path.join(server_root, "apps")
 
+    # Configuration - default values
     cherrypy.config.update({
+        "cache_dir": "./cache",
+        "database_dir": "./db",
+        "engine.autoreload.on": True,
+        "local_maintenance": True,
+        "log.screen": True,
+        "log_dir": "./logs",
+        "memorize_checksums": True,
+        "request.show_tracebacks": True,
+        "server.daemonize": False,
+        "server.socket_host": "0.0.0.0",
+        "server.socket_port": 8085,
         "server_root": server_root,
+        "tools.conditional_auth.on": False,
 
         # Jinja templating won't work unless tools.encode is off
         "tools.encode.on": False,
 
         # Gzipping locally avoids Etag complexity. If a reverse
         # proxy handles it, the Etag could be dropped.
-        "tools.gzip.on": True
+        "tools.gzip.on": True,
     })
 
-    # Configuration
-    #
-    # Application configuration is loaded from /etc/medley.conf or
-    # medley.conf in the application root, whichever is found first.
+    # Overrides to the default configuration are sourced from
+    # /etc/medley.conf or medley.conf in the application root,
+    # whichever is found first.
     config_candidates = (
         "/etc/medley.conf",
         os.path.join(server_root, "medley.conf")
@@ -56,13 +68,10 @@ def main():
             (candidate for candidate in config_candidates
              if os.path.isfile(candidate)),
         )
+        cherrypy.config.update(config)
     except StopIteration:
-        raise SystemExit("No configuration file")
+        pass
 
-    cherrypy.config.update(config)
-
-    # Derived configuration
-    #
     # Some configuration values are set automatically.
     cherrypy.config.update({
         "app_root": app_root
