@@ -91,6 +91,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the speak prefix.
         """
         self.bus.subscribe("speak:can_speak", self.can_speak)
+        self.bus.subscribe("speak:mute", self.mute)
+        self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak:prune", self.prune)
         self.bus.subscribe("speak", self.speak)
 
@@ -211,6 +213,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         today = datetime.date.today()
         tomorrow = today + datetime.timedelta(1)
         now = datetime.datetime.now()
+
+        if "mute:temporary" in config:
+            return False
 
         schedule = [
             line.rstrip()
@@ -387,4 +392,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 dirs_pruned,
                 "directory" if dirs_pruned == 1 else "directories"
             )
+        )
+
+    def mute(self):
+        """Disable text-to-speech by creating a 24-hour muting
+        schedule.
+
+        """
+
+        cherrypy.engine.publish(
+            "registry:add",
+            "speak:mute:temporary",
+            ["12:00 AM\n11:59 PM"],
+            False
+        )
+
+    def unmute(self):
+        """Re-enable text-to-speech."""
+
+        cherrypy.engine.publish(
+            "registry:remove",
+            "speak:mute:temporary"
         )

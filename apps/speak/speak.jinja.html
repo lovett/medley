@@ -1,0 +1,22 @@
+{% extends "base.jinja.html" %}
+
+{% block page_body %}
+    <main>
+        <div class="content-wrapper">
+
+            {% if can_speak %}
+                <p>Not currently muted.</p>
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="mute" />
+                    <button>Mute now</button>
+                </form>
+            {% else %}
+                <p>Muted</p>
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button>Unmute</button>
+                </form>
+            {% endif %}
+        </div>
+    </main>
+{% endblock %}
