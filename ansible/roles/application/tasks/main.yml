@@ -31,7 +31,7 @@
 
 - name: Salvage virtualenv from previous installation
   become: true
-  command: cp -r {{ project_backup }}/venv {{ project_newinstall_tmp }}/venv
+  command: cp -r {{ project_root }}/venv {{ project_newinstall_tmp }}/venv
   when: install_check.stat.isdir is defined and install_check.stat.isdir
 
 - name: Stat venv
