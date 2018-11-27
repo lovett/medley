@@ -33,10 +33,16 @@ class Sqlite:
         )
 
     def _create(self, sql):
-        """Issue create table statements when a new database is created."""
+        """Establish a schema by executing a series of SQL statements.
 
-        if os.path.isfile(self.db_path):
-            return
+        The statements should be re-runnable so that new objects will
+        be created automatically. This can be accomplished with "IF
+        NOT EXISTS" statements when creating tables and triggers.
+
+        This approach is geared toward new objects. It won't account
+        for modifications to existing objects such as ALTER TABLE.
+
+        """
 
         con = self._open()
         con.cursor().executescript(sql)
@@ -44,6 +50,7 @@ class Sqlite:
         con.close()
 
     def _execute(self, query, params=()):
+
         """Execute a single query with no parameters."""
 
         con = self._open()

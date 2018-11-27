@@ -91,6 +91,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         UPDATE reverse_ip SET updated=CURRENT_TIMESTAMP WHERE ip=new.ip;
         END;
 
+        CREATE TRIGGER IF NOT EXISTS backfill_region_after_insert
+        AFTER INSERT ON logs
+        FOR EACH ROW WHEN IFNULL(new.region, '') = ''
+        BEGIN
+        UPDATE logs SET region=(
+            SELECT region FROM logs WHERE ip=new.ip AND region <> '' LIMIT 1
+        ) WHERE rowid=new.rowid;
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS backfill_city_after_insert
+        AFTER INSERT ON logs
+        FOR EACH ROW WHEN IFNULL(new.city, '') = ''
+        BEGIN
+        UPDATE logs SET city=(
+            SELECT city FROM logs WHERE ip=new.ip AND city <> '' LIMIT 1
+        ) WHERE rowid=new.rowid;
+        END;
+
         CREATE INDEX IF NOT EXISTS index_reverse_domain
             ON reverse_ip(reverse_domain);
         """)
@@ -107,50 +125,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
-
-        self.verify()
-
-    @decorators.log_runtime
-    def verify(self):
-        """Look for and repair instances of wrongly-parsed log lines."""
-
-        # Rows where region is an empty string but the value is known.
-        rows = self._select(
-            """SELECT distinct ip, region
-            FROM logs
-            WHERE ip IN (
-                SELECT ip
-                FROM logs
-                WHERE region=''
-            )
-            AND region <> ''
-            """
-        )
-
-        if rows:
-            self._update(
-                "UPDATE logs SET region=? WHERE ip=? and region=''",
-                [(row["region"], row["ip"]) for row in rows]
-            )
-
-        # Rows where city is an empty string but the value is known.
-        rows = self._select(
-            """SELECT distinct ip, city
-            FROM logs
-            WHERE ip IN (
-                SELECT ip
-                FROM logs
-                WHERE city=''
-            )
-            AND city <> ''
-            """
-        )
-
-        if rows:
-            self._update(
-                "UPDATE logs SET city=? WHERE ip=? and city=''",
-                [(row["city"], row["ip"]) for row in rows]
-            )
 
     @staticmethod
     def get_root():
