@@ -34,18 +34,6 @@ REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
-# Identify a suitable package manager.
-#
-# This has to consider the OS because apt may exist on macOS as a
-# symlink to a Java utility within /System/Library/Frameworks.
-UNAME := $(shell uname -s)
-ifeq ($(UNAME),Linux)
-	USE_APT := $(shell command -v apt 2> /dev/null)
-endif
-ifeq ($(UNAME),Darwin)
-	USE_PKGIN := $(shell command -v pkgin 2> /dev/null)
-endif
-
 SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
 
 # Debugging tool to print the value of a variable.
@@ -78,13 +66,6 @@ venv: dummy
 	@echo "After that, run: make setup"
 	@echo "Also consider running: make hooks"
 
-# Install OS packages.
-#
-system-packages: dummy
-ifdef USE_APT
-	sudo apt install libasound2-dev rsync
-endif
-
 # Filter the list of outdated Python packages to direct dependencies
 #
 # By default, pip returns a list of all outdated packages. It can be
@@ -97,7 +78,7 @@ endif
 outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
 
-setup: system-packages assets
+setup: assets
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
