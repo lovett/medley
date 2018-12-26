@@ -81,9 +81,6 @@ class Plugin(plugins.SimplePlugin):
                 exception
             )
 
-            if as_object:
-                return req
-
             return None
 
     @staticmethod

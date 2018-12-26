@@ -32,7 +32,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_default(self, publish_mock, render_mock):
         """The default view is a form to enter a URL."""
@@ -61,7 +61,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(response.code, 200)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
     def test_with_url(self, publish_mock, render_mock):
@@ -95,7 +95,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             [('title', [], 'Hello world')]
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
     def test_404(self, publish_mock, render_mock):

@@ -7,6 +7,14 @@
 {% block page_body %}
     <main>
         <div class="content-wrapper">
+            {% if request_failed %}
+            <div class="error message">The URL could not be retrieved.</div>
+            {% endif %}
+
+            {% if status_code and status_code != 200 %}
+            <div class="error message">The URL returned a {{ status_code }}.</div>
+            {% endif %}
+
             <form method="get" action="{{ app_url }}">
                 <div class="field">
                     <label for="url">URL:</label>
@@ -16,10 +24,6 @@
                     <button>Fetch</button>
                 </div>
             </form>
-
-            {% if status_code and status_code != 200 %}
-                <p>The URL returned a {{ status_code }}.
-            {% endif %}
 
             {% if tags %}
 

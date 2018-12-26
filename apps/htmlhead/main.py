@@ -17,6 +17,7 @@ class Controller:
 
         head_tags = []
         status_code = None
+        request_failed = False
         if url:
             response = cherrypy.engine.publish(
                 "urlfetch:get",
@@ -24,14 +25,18 @@ class Controller:
                 as_object=True
             ).pop()
 
-            status_code = response.status_code
+            try:
+                status_code = response.status_code
+            except AttributeError:
+                request_failed = True
 
-            if response.status_code == 200:
-                parser = parsers.htmlhead.Parser()
-                head_tags = parser.parse(response.text)
+        if status_code == 200:
+            parser = parsers.htmlhead.Parser()
+            head_tags = parser.parse(response.text)
 
         return {
             "html": ("htmlhead.jinja.html", {
+                "request_failed": request_failed,
                 "status_code": status_code,
                 "url": url,
                 "app_url": app_url,
