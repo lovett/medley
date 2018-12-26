@@ -11,4 +11,3 @@ tools.conditional_auth.on: False
 tools.conditional_auth.whitelist: "192.168.0"
 users: {"medley":"medley"}
 request.show_tracebacks: True
-memorize_checksums: True

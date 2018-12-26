@@ -39,7 +39,7 @@ def main():
         "local_maintenance": True,
         "log.screen": True,
         "log_dir": "./logs",
-        "memorize_checksums": True,
+        "memorize_checksums": False,
         "request.show_tracebacks": True,
         "server.daemonize": False,
         "server.socket_host": "0.0.0.0",
