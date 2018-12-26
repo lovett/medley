@@ -71,6 +71,7 @@
                         <div>
                             <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
                         </div>
+                        <footer>Created on {{ entry.created|localtime|dateformat('YYYY-MM-DD \\a\\t h:mm A') }}</footer>
                     </div>
                 </discardable-record>
             {% endfor %}

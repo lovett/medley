@@ -23,3 +23,8 @@
     overflow-wrap: break-word;
     flex-grow: 1;
 }
+
+.entry footer {
+    font-size: .75em;
+    justify-content: flex-end;
+}
