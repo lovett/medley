@@ -15,7 +15,6 @@ cd medley
 make venv
 source venv/bin/activate
 make setup
-cp medley.conf.example medley.conf
 make serve
 #+end_src
 
