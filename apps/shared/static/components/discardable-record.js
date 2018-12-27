@@ -17,6 +17,7 @@ Vue.component('discardable-record', {
             }).then(res => {
                 if (res.ok) {
                     this.styles = {'display': 'none'};
+                    this.$parent.$emit('discarded');
                 }
             });
         }
