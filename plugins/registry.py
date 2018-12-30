@@ -31,6 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:first_key", self.first_key)
         self.bus.subscribe("registry:first_value", self.first_value)
         self.bus.subscribe("registry:distinct_keys", self.distinct_keys)
+        self.bus.subscribe("registry:list_keys", self.list_keys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:local_timezone", self.local_timezone)
@@ -243,3 +244,37 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             timezone = pendulum.now().timezone.name
 
         return timezone
+
+    def list_keys(self, depth=1):
+        """List known keys filtered by the number of segments."""
+
+        sql = """
+        WITH RECURSIVE cte(val, rest, depth) AS (
+          SELECT '', key, 0 FROM registry
+          UNION ALL
+          SELECT
+            CASE
+              WHEN instr(rest, ':') > 0
+                THEN val || substr(rest, 1, instr(rest, ':'))
+              ELSE
+                val || rest
+            END,
+            CASE
+              WHEN instr(rest, ':') > 0
+                THEN substr(rest, instr(rest, ':') + 1)
+              ELSE
+                NULL
+            END,
+            depth + 1
+          FROM cte
+          WHERE rest is not null
+        )
+        SELECT DISTINCT rtrim(val, ':') AS val
+        FROM cte
+        WHERE depth=?
+        ORDER BY val
+        """
+
+        result = self._select(sql, [depth])
+
+        return [row["val"] for row in result]

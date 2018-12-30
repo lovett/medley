@@ -56,6 +56,15 @@
                 <p>No entries found.</p>
             {% endif %}
 
+            {% if glossary %}
+                <h2>Key glossary</h2>
+                <ul class="glossary">
+                    {% for key in glossary %}
+                        <li><a href="{{ app_url}}?q={{key}}">{{ key }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
             {% for entry in entries %}
                 <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
                     <div class="entry" v-bind:style="styles">

@@ -13,6 +13,7 @@ class Controller:
         """Display a UI to search for entries and add new ones."""
 
         entries = ()
+        glossary = None
 
         if uid:
             entries = cherrypy.engine.publish(
@@ -23,6 +24,10 @@ class Controller:
             entries = cherrypy.engine.publish(
                 "registry:search",
                 key=q
+            ).pop()
+        else:
+            glossary = cherrypy.engine.publish(
+                "registry:list_keys",
             ).pop()
 
         app_url = cherrypy.engine.publish("url:internal").pop()
@@ -39,7 +44,8 @@ class Controller:
                 "entries": entries,
                 "app_name": self.name,
                 "view": view,
-                "key": key
+                "key": key,
+                "glossary": glossary,
             })
         }
 

@@ -28,3 +28,32 @@
     font-size: .75em;
     justify-content: flex-end;
 }
+
+.glossary {
+    padding-left: 0;
+    list-style-type: none;
+    column-count: 2;
+    width: 90vw;
+    margin: auto;
+}
+
+.glossary li {
+    line-height: 3;
+}
+
+@media only screen and (min-width: 600px) {
+    .glossary {
+        column-count: 4;
+    }
+
+    .glossary li {
+        line-height: 2;
+    }
+}
+
+@media only screen and (min-width: 800px) {
+    .glossary {
+        column-count: 5;
+        width: 100%;
+    }
+}
