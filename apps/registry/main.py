@@ -8,7 +8,6 @@ class Controller:
 
     name = "Registry"
 
-    # pylint: disable=invalid-name
     @cherrypy.tools.negotiable()
     def GET(self, q=None, uid=None, key=None, view="search"):
         """Display a UI to search for entries and add new ones."""
