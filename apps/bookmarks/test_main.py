@@ -30,7 +30,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "POST", "DELETE"))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_recent(self, publish_mock, render_mock):
         """If the database is empty, a no-records message is returned"""
@@ -60,6 +60,8 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "scheduler:add":
                 return [True]
             return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request("/", url="http://example.com", method="POST")
 

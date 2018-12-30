@@ -30,7 +30,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_no_number(self, publish_mock, render_mock):
         """An HTML request with no number displays the search form"""
@@ -45,7 +45,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
         self.assertFalse(helpers.html_var(render_mock, "error"))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_invalid_number_as_html(self, publish_mock, render_mock):
         """An HTML request with an invalid number redirects with a message"""
@@ -101,7 +101,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
             apps.phone.main.Controller.messages["invalid"]
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_valid_number(self, publish_mock, render_mock):
         """A valid number lookup performs a state abbreviation lookup"""
@@ -128,7 +128,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
             "XY"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_valid_number_cached(self, publish_mock, render_mock):
         """Successful number lookups are cached"""

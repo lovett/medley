@@ -39,7 +39,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             response = self.request("/", title=sample[0])
             self.assertTrue(sample[1] in response.body)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_populates_tags(self, publish_mock, render_mock):
         """The tags field is prepopulated if provided via querystring"""
@@ -59,7 +59,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             "abc123"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_populates_comments(self, publish_mock, render_mock):
         """The comments field is prepopulated if provided via querystring
@@ -81,7 +81,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             "This is sentence 1. This is sentence 2."
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_ignores_reddit_comment(self, publish_mock, render_mock):
         """The comments field of a reddit.com URL is discarded if it came from
@@ -109,7 +109,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertIsNone(helpers.html_var(render_mock, "comments"))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_url_lookup(self, publish_mock, render_mock):
         """An existing bookmark is fetched by url, overwriting querystring

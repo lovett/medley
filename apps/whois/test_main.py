@@ -49,7 +49,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", address="invalid")
         self.assertEqual(response.code, 303)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_valid_address_as_hostname(self, publish_mock, render_mock):
         """Request lookup of a valid hostname"""
@@ -86,7 +86,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", address="333.333.333.333")
         self.assertEqual(response.code, 303)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_address_as_ip(self, publish_mock, render_mock):
         """Request lookup of a cached IP address"""
@@ -108,7 +108,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(helpers.html_var(render_mock, "whois"), cache_fake)
         self.assertEqual(helpers.html_var(render_mock, "ip_facts"), cache_fake)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_address_as_ip_nocache(self, publish_mock, render_mock):
         """Request lookup of an uncached IP address"""

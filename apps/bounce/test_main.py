@@ -111,7 +111,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             result = self.controller.host_to_keyword(pair[0])
             self.assertEqual(result, pair[1])
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_site_in_group(self, publish_mock, render_mock):
         """A request with a URL that belongs to known group returns
@@ -182,7 +182,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             "othersite"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_site_not_in_group(self, publish_mock, render_mock):
         """A request with a URL that belongs to known group but does not match
@@ -220,7 +220,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(len(bounces), 0)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_unrecognized_site(self, publish_mock, render_mock):
         """A  URL that does not belong to known group returns a form."""
@@ -254,7 +254,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "bounces")
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_bookmarklet_url_https(self, publish_mock, render_mock):
         """The bookmarklet URL respects HTTPS."""
@@ -281,7 +281,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "app_url").startswith("https")
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_departing_site(self, publish_mock, render_mock):
         """If the given URL matches a record in the registry, it is considered

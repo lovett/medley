@@ -28,7 +28,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_returns_html(self, publish_mock, render_mock):
         """GET returns text/html by default"""
@@ -54,7 +54,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
             "127.0.0.1"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderJson")
+    @mock.patch("cherrypy.tools.negotiable.render_json")
     @mock.patch("cherrypy.engine.publish")
     def test_returns_json(self, publish_mock, render_mock):
         """GET returns application/json if requested"""
@@ -76,7 +76,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
             "1.1.1.1"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderText")
+    @mock.patch("cherrypy.tools.negotiable.render_text")
     @mock.patch("cherrypy.engine.publish")
     def test_returns_text(self, publish_mock, render_mock):
         """GET returns text/plain if requested"""
@@ -94,7 +94,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertTrue("external_ip=1.1.1.1" in helpers.text_var(render_mock))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_honors_xreal_ip(self, publish_mock, render_mock):
         """The X-Real-IP header takes precedence over Remote-Addr"""

@@ -30,7 +30,7 @@ class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     def test_no_destination(self, render_mock):
         """If no URL is provided, no redirect occurs."""
         self.request("/")
@@ -44,7 +44,7 @@ class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "dest")
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     def test_encoded_destination(self, render_mock):
         """Encoded URLs are decoded."""
 
@@ -60,7 +60,7 @@ class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
             "http://example.com"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     def test_unencoded_destination(self, render_mock):
         """Unencoded URLs are used as-is."""
 
@@ -76,7 +76,7 @@ class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
             "http://example.net"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     def test_encoded_querystring(self, render_mock):
         """URL decoding preserves querystring values."""
 

@@ -29,7 +29,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_month_layout(self, publish_mock, render_mock):
         """The first two columns of a template with layout=month are Date and
@@ -51,7 +51,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             ['Date', 'Day', 'Column 1', 'Column 2', 'Column 3']
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_month_layout_invalid_start(self, publish_mock, render_mock):
         """An invalid start date for a monthly layout is handled gracefully"""
@@ -74,7 +74,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             first_of_current_month.strftime("%b %-d, %Y")
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_plain_layout(self, publish_mock, render_mock):
         """No additional columns are added to a plain-layout template"""
@@ -94,7 +94,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             ['Column A', 'Column B']
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_default_view(self, publish_mock, render_mock):
         """The default view of the app is a list of available templates"""

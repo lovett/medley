@@ -30,7 +30,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_get_by_uid_success(self, publish_mock, render_mock):
         """Searching for a valid uid returns a list of the one record"""
@@ -48,7 +48,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         entries = helpers.html_var(render_mock, "entries")
         self.assertEqual(entries[0]["rowid"], "test")
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_get_by_uid_fail(self, publish_mock, render_mock):
         """Searching for an invalid uid returns an empty list of entries"""
@@ -66,7 +66,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         entries = helpers.html_var(render_mock, "entries")
         self.assertEqual(len(entries), 0)
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_get_by_search(self, publish_mock, render_mock):
         """Entries can be searched by key"""
@@ -87,7 +87,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             "abc456"
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_default_view(self, publish_mock, render_mock):
         """An invalid view returns the search view"""

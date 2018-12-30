@@ -63,7 +63,7 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
             offset=0
         )
 
-    @mock.patch("cherrypy.tools.negotiable._renderHtml")
+    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_pagination(self, publish_mock, render_mock):
         """The call list supports pagination"""
