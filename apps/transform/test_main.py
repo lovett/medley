@@ -41,7 +41,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("""<div id="result">test</div>""" in response.body)
+        self.assertTrue("test" in response.body)
 
     def test_lowercase_json(self):
         """Input is converted to lowercase and returned as JSON"""

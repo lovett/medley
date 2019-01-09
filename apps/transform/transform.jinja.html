@@ -41,7 +41,7 @@
                 <p>
                     <clipboard-button target-id="result" label="Copy to clipboard" />
                 </p>
-                <div id="result">{{ result|escape()|nl2br() }}</div>
+                <div id="result" style="white-space: pre-line">{{ result|escape() }}</div>
             </div>
         {% endif %}
         </form>
