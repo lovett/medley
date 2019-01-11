@@ -246,7 +246,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return timezone
 
     def list_keys(self, depth=1):
-        """List known keys filtered by the number of segments."""
+        """List known keys filtered by the number of segments.
+
+        Returns a generator that yields key names.
+        """
 
         sql = """
         WITH RECURSIVE cte(val, rest, depth) AS (
@@ -277,4 +280,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         result = self._select(sql, [depth])
 
-        return [row["val"] for row in result]
+        return (row["val"] for row in result)
