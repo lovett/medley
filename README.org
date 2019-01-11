@@ -1,29 +1,45 @@
 * Medley
 
-A collection of lightweight, single-purpose web applications that are too
-small or trivial to bother making standalone.
+A collection of small, single-purpose web applications that live under
+one roof so that each one doesn't have to reinvent all the wheels.
 
-Medley is written in Python 3 and uses the CherryPy framework.
+It's for all the situations when you think to yourself, "I should
+write a script/app/webpage that does X" but then get waylaid by
+setting up Y, Z, and all the other things that need to be established
+before X is even on the table.
+
+It's also driven by whatever I have a need for, so unless you're me
+the roster of what's available will seem random. Because it is.
+
+There currently around two dozen applications and services. Some of
+the more interesting ones include:
+
+  - a bookmark manager
+  - a text-to-speech service that uses Microsoft's Speech API
+  - a URL bouncer for jumping between dev, stage, and production
+    versions of a given URL
+  - a webserver log file parser, archiver, and viewer
+  - an alarm and reminder service
+
+Medley is written in Python 3 and uses the CherryPy framework with
+SQLite.
 
 * Setup
 
-You'll need at least Python 3.4. Then:
+You'll need at least Python 3.5. The rest should just be standard
+Python application ceremony:
 
 #+begin_src shell
-git clone git@github.com:lovett/medley.git
-cd medley
+# Set up a virtual environment
 make venv
 source venv/bin/activate
+
+# Install third-party libraries
 make setup
+
+# Optional: install one additional library for audio playback.
+make setup-audio
+
+# Start the server
 make serve
 #+end_src
-
-* Testing
-
-~make test~ will run through all tests for all apps.
-
-~make [appname]~ will run through the tests for a specific app.
-
-~make htmlcov~ will generate a coverage report in HTML
-
-~make coverage~ will print a coverage report to the console.
