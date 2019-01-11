@@ -258,7 +258,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speechmanager",
+                "speak",
                 "config",
                 "Missing azure_key"
             )
@@ -267,7 +267,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speechmanager",
+                "speak",
                 "config",
                 "Missing synthesize_url"
             )
@@ -276,7 +276,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speechmanager",
+                "speak",
                 "config",
                 "Missing token_request_url"
             )
@@ -314,7 +314,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cherrypy.engine.publish(
             "applog:add",
-            "speechmanager",
+            "speak",
             "ssml",
             ssml_string
         )
@@ -394,7 +394,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
         )
 
-    def mute(self):
+    @staticmethod
+    def mute():
         """Disable text-to-speech by creating a 24-hour muting
         schedule.
 
@@ -407,7 +408,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             False
         )
 
-    def unmute(self):
+    @staticmethod
+    def unmute():
         """Re-enable text-to-speech."""
 
         cherrypy.engine.publish(
