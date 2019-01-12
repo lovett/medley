@@ -84,11 +84,16 @@
     path="/etc/medley.conf"
   register: global_config_check
 
-- name: Install medley systemd service files
+- name: Install primary systemd service
+  become: true
+  template:
+    src: "templates/medley.service.j2"
+    dest: "/etc/systemd/system/medley.service"
+
+- name: Install supplemental systemd services
   become: true
   copy: src={{ item }} dest=/etc/systemd/system/
   with_items:
-    - files/medley.service
     - files/medley-geodb.service
     - files/medley-geodb.timer
     - files/medley-db-maintenance.service

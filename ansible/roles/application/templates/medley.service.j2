@@ -1,0 +1,13 @@
+[Unit]
+Description=Medley
+After=network.target
+
+[Service]
+User=medley
+Group=medley
+WorkingDirectory={{ project_root }}
+ExecStart={{ project_root }}/venv/bin/python medley.py
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
