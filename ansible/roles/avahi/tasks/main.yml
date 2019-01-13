@@ -1,4 +1,0 @@
----
-- name: Install avahi package
-  become: true
-  apt: name=avahi-utils state=present

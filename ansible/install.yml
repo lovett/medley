@@ -4,4 +4,3 @@
   roles:
     - system
     - application
-    - avahi
