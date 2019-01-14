@@ -194,7 +194,7 @@ TABLE.key-value TH {
     padding-right: 2em;
 }
 
-.field INPUT[type=text], .field TEXTAREA {
+.field INPUT[type=text], .field INPUT[type=password], .field TEXTAREA {
     box-sizing: border-box;
     border: 1px solid #ccc;
     padding: .5em;

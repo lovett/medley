@@ -7,18 +7,31 @@
 {% block page_body %}
     <main>
         <div class="content-wrapper">
-            {% if request_failed %}
-            <div class="error message">The URL could not be retrieved.</div>
+            {% if failure_message %}
+            <div class="error message">{{ failure_message }}</div>
             {% endif %}
 
             {% if status_code and status_code != 200 %}
             <div class="error message">The URL returned a {{ status_code }}.</div>
             {% endif %}
 
-            <form method="get" action="{{ app_url }}">
+            <form method="post" action="{{ app_url }}">
                 <div class="field">
                     <label for="url">URL:</label>
-                    <input type="text" id="url" name="url" value="{{ url|default('', true) }}"/>
+                    <input type="text" id="url" name="url" value="{{ url|default('', true) }}" autofocus/>
+                </div>
+
+                <div class="third-column">
+                    <div class="field">
+                        <label for="url">Username:</label>
+                        <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
+                    </div>
+                </div>
+                <div class="third-column">
+                    <div class="field">
+                        <label for="url">Password:</label>
+                        <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
+                    </div>
                 </div>
                 <div class="field">
                     <button>Fetch</button>

@@ -30,7 +30,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assertAllowedMethods(response, ("GET", "POST"))
 
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
@@ -50,11 +50,6 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(
             helpers.html_var(render_mock, "app_url"),
             "/"
-        )
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "tags"),
-            []
         )
 
         self.assertIsNone(helpers.html_var(render_mock, "url"))
@@ -88,7 +83,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", url="http://example.com")
+        self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
             helpers.html_var(render_mock, "tags"),
@@ -118,7 +113,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", url="http://example.com")
+        self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
             helpers.html_var(render_mock, "status_code"),

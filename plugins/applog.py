@@ -28,7 +28,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the applog prefix.
         """
         self.bus.subscribe("applog:add", self.add)
+        self.bus.subscribe("applog:get_newest", self.get_newest)
         self.bus.subscribe("applog:prune", self.prune)
+
+    def get_newest(self, source, key):
+        """Retrieve messages by key."""
+
+        return self._selectFirst(
+            """SELECT value FROM applog
+            WHERE source=? AND key=? ORDER BY rowid DESC LIMIT 1""",
+            (source, key)
+        )
 
     def add(self, caller, key, value):
         """Accept a log message for storage."""
