@@ -75,6 +75,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["logline_with_links"] = self.logline_with_links_filter
         self.env.filters["slug"] = self.slug_filter
         self.env.filters["sane_callerid"] = self.sane_callerid_filter
+        self.env.filters["autolink"] = self.autolink_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -361,3 +362,15 @@ class Plugin(plugins.SimplePlugin):
             return default
 
         return value
+
+    def autolink_filter(self, value):
+        """Convert a bare URL to a hyperlink"""
+
+        if not value.startswith("http"):
+            return value
+
+        return """<a href="{}" {}>{}</a>""".format(
+            self.anonymize_filter(value),
+            'target="_blank" rel="noreferrer"',
+            value
+        )

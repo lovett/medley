@@ -56,7 +56,7 @@
                                             <dl>
                                                 {% for key, value in attributes %}
                                                     <dt>{{ key|e }}</dt>
-                                                    <dd>{{ value|e }}</dd>
+                                                    <dd>{{ value|autolink }}</dd>
                                                 {% endfor %}
                                             </dl>
                                         {% endif %}
