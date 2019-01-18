@@ -22,6 +22,13 @@ class Tool(cherrypy.Tool):
         "text/plain": "render_text",
     }
 
+    acceptable_extensions = {
+        ".json": "application/json",
+        ".txt": "text/plain",
+        ".css": "text/css",
+        ".js": "application/javascript",
+    }
+
     charset = "utf-8"
 
     response_format = None
@@ -44,7 +51,29 @@ class Tool(cherrypy.Tool):
         )
 
     def _negotiate(self):
-        """Decide on a response format"""
+        """Decide on a response format.
+
+        The default strategy is to base this decision on the Accept
+        header, falling back to text/html as a last resort.
+
+        If the request path contains a known file extension, give
+        that precedence and let it override the Accept header.
+
+        """
+
+        if "." in cherrypy.request.path_info:
+            extension = next(
+                (key for key in self.acceptable_extensions
+                 if cherrypy.request.path_info.endswith(key)
+                 and key in self.acceptable_extensions),
+                None
+            )
+
+            if not extension:
+                raise cherrypy.HTTPError(404, "Not Found")
+
+            self.response_format = self.acceptable_extensions[extension]
+            return
 
         accept = cherrypy.request.headers.get("Accept", "*/*")
 
