@@ -92,6 +92,9 @@ class Controller:
             trailing_slash=(page_name is None)
         ).pop()
 
+        # This URL differs from the physical location of the file so
+        # that the worker's scope applies to the whole application,
+        # not just the static directory.
         worker_url = cherrypy.engine.publish(
             "url:internal",
             "worker.js"
