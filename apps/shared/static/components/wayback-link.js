@@ -33,7 +33,11 @@ Vue.component('wayback-link', {
                     }
 
                     this.label = 'not available';
+                })
+                .catch(error => {
+                    this.label = error.message;
                 });
+
         }
     },
     template: `<a class="wayback" href="#" v-on:click.prevent="click">{{ label }}</a>`
