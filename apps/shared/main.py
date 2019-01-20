@@ -9,6 +9,6 @@ class Controller:
     user_facing = False
 
     @staticmethod
-    def GET():
+    def GET(*_args, **_kwargs):
         """Redirect requests for non-static assets"""
         raise cherrypy.HTTPRedirect("/")

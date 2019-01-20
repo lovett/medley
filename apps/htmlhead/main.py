@@ -10,7 +10,7 @@ class Controller:
     name = "HTML Head"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Present a form for specifying a URL to fetch."""
 
         app_url = cherrypy.engine.publish("url:internal").pop()

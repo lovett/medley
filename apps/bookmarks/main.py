@@ -24,11 +24,15 @@ class Controller:
         return closest_snapshot
 
     @cherrypy.tools.negotiable()
-    def GET(self, query=None, wayback=None):
+    def GET(self, *_args, **kwargs):
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.
 
         """
+
+        query = kwargs.get('query')
+        wayback = kwargs.get('wayback')
+
         if wayback:
             return {
                 "json": self.check_wayback_availability(wayback)

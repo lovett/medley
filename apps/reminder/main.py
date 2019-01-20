@@ -18,7 +18,7 @@ class Controller:
     remove_command = "scheduler:remove"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Display scheduled reminders, and a form to create new ones."""
 
         registry_rows = cherrypy.engine.publish(

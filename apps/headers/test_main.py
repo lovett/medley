@@ -46,11 +46,6 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 200)
         self.assertText(response)
 
-    def test_noquery(self):
-        """GET takes no querystring arguments"""
-        response = self.request("/?test_noquery=abc123")
-        self.assertEqual(response.code, 404)
-
     def test_custom_header(self):
         """GET recognizes custom headers"""
         response = self.request(

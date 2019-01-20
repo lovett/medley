@@ -9,7 +9,7 @@ class Controller:
     name = "Speak"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Present an interface for on-demand and scheduled muting of the
         application.
 

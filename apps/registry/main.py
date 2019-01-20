@@ -9,11 +9,15 @@ class Controller:
     name = "Registry"
 
     @cherrypy.tools.negotiable()
-    def GET(self, q=None, uid=None, key=None, view="search"):
+    def GET(self, *_args, **kwargs):
         """Display a UI to search for entries and add new ones."""
 
         entries = ()
         glossary = None
+        q = kwargs.get('q')
+        uid = kwargs.get('uid')
+        key = kwargs.get('key')
+        view = kwargs.get('view')
 
         if uid:
             entries = cherrypy.engine.publish(

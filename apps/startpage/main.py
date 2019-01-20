@@ -131,8 +131,11 @@ class Controller:
         )
 
     @cherrypy.tools.negotiable()
-    def GET(self, page_name=None, action="view"):
+    def GET(self, *_args, **kwargs):
         """Render a page or present the edit form."""
+
+        page_name = kwargs.get('page_name')
+        action = kwargs.get('action')
 
         # Require a trailing slash for the default page.
         #

@@ -14,11 +14,14 @@ class Controller:
     }
 
     @cherrypy.tools.negotiable()
-    def GET(self, number=None):
+    def GET(self, *_args, **kwargs):
         """
         Display information about the specified number, or a search form to
         look up a number
         """
+
+        number = kwargs.get('number')
+
         sanitized_number = cherrypy.engine.publish(
             "formatting:phone_sanitize",
             number=number

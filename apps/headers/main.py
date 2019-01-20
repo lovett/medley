@@ -9,8 +9,9 @@ class Controller:
     name = "Headers"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Display the headers of the current request"""
+
         headers = sorted(
             cherrypy.request.headers.items(),
             key=lambda pair: pair[0]

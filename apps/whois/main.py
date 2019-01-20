@@ -13,8 +13,10 @@ class Controller:
     name = "Whois"
 
     @cherrypy.tools.negotiable()
-    def GET(self, address=None):
+    def GET(self, *_args, **kwargs):
         """Display a search form and lookup results."""
+
+        address = kwargs.get('address')
 
         if not address:
             return {

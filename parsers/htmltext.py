@@ -5,7 +5,7 @@ from html.entities import name2codepoint
 from collections import deque
 
 
-class Parser(HTMLParser):
+class Parser(HTMLParser):  # pylint: disable=abstract-method
     """Convert an HTML document to plain text.
 
     Can selectively ignore certain tags if the source domain of the

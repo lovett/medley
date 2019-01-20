@@ -17,8 +17,10 @@ class Controller:
     name = "Visitors"
 
     @cherrypy.tools.negotiable()
-    def GET(self, query=None):
+    def GET(self, *_args, **kwargs):
         """Display a search interface, and the results of the default query"""
+
+        query = kwargs.get('query')
 
         site_domains = cherrypy.engine.publish(
             "registry:search",
@@ -69,17 +71,13 @@ class Controller:
                 and record["ip"] not in cookies
             }
 
-        app_url = cherrypy.engine.publish("url:internal").pop()
-
-        active_date = self.get_active_date(log_records, query)
-
         return {
             "html": ("visitors.jinja.html", {
                 "flagless_countries": ("AP", None),
                 "query": query,
                 "query_plan": query_plan,
                 "reversed_ips": reversed_ips,
-                "active_date": active_date,
+                "active_date": self.get_active_date(log_records, query),
                 "results": log_records,
                 "country_names": country_names,
                 "deltas": deltas,
@@ -88,7 +86,7 @@ class Controller:
                 "saved_queries": saved_queries,
                 "app_name": self.name,
                 "annotations": annotations,
-                "app_url": app_url,
+                "app_url": cherrypy.engine.publish("url:internal").pop(),
                 "cookies": cookies
             })
         }

@@ -11,7 +11,7 @@ class Controller:
     cache_key = "ip:external"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Display the client's local IP, and the server's external IP"""
 
         client_ip = cherrypy.request.headers.get("Remote-Addr")

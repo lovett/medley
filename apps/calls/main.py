@@ -9,9 +9,10 @@ class Controller:
     name = "Calls"
 
     @cherrypy.tools.negotiable()
-    def GET(self, offset=0):
+    def GET(self, *_args, **kwargs):
         """Display a list of recent calls"""
-        offset = int(offset)
+
+        offset = int(kwargs.get('offset', 0))
 
         exclusions = cherrypy.engine.publish(
             "registry:search",

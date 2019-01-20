@@ -10,18 +10,20 @@ class Controller:
     name = "Redirect"
 
     @cherrypy.tools.negotiable()
-    def GET(self, u=None):  # pylint: disable=invalid-name
+    def GET(self, *_args, **kwargs):
         """Perform a client-side redirect to the URL specified in the
         querystring.
 
         """
 
-        if u is not None:
-            u = unquote_plus(u)
+        url = kwargs.get('u')
+
+        if url is not None:
+            url = unquote_plus(url)
 
         return {
             "html": ("redirect.jinja.html", {
                 "app_name": self.name,
-                "dest": u
+                "dest": url
             })
         }

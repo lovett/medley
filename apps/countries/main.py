@@ -41,7 +41,7 @@ class Controller:
 
         return (name, abbrev)
 
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Request the country code list and populate the registry"""
 
         country_codes = cherrypy.engine.publish(

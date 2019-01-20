@@ -73,16 +73,17 @@ class Controller:
         return "live"
 
     @cherrypy.tools.negotiable()
-    def GET(self, u=None, group=None):  # pylint: disable=invalid-name
+    def GET(self, *_args, **kwargs):
         """Display all the URLs in a group."""
 
         host = None
         bounces = None
         name = None
-        group = None
+        group = kwargs.get('group')
+        url = kwargs.get('u')
 
-        if u:
-            host = self.url_to_host(u)
+        if url:
+            host = self.url_to_host(url)
             record = cherrypy.engine.publish(
                 "registry:first_key",
                 value=host,
@@ -118,7 +119,7 @@ class Controller:
             # Re-scope the current URL to each known destination.
             bounces = {
                 bounce["rowid"]: (
-                    u.replace(host, bounce["value"]),
+                    url.replace(host, bounce["value"]),
                     bounce["key"].split(":").pop()
                 )
                 for bounce in bounces
@@ -129,7 +130,7 @@ class Controller:
         return {
             "html": ("bounce.jinja.html", {
                 "departing_from": departing_from,
-                "departing_url": u,
+                "departing_url": url,
                 "site": host,
                 "group": group,
                 "name": name,

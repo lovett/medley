@@ -9,11 +9,13 @@ class Controller:
     name = "Captures"
 
     @cherrypy.tools.negotiable()
-    def GET(self, path=None, cid=None, offset=0):
+    def GET(self, *_args, **kwargs):
         """Display a list of recent captures, or captures matching a URI path.
         """
 
-        offset = int(offset)
+        path = kwargs.get('path')
+        cid = kwargs.get('cid')
+        offset = int(kwargs.get('offset', 0))
 
         if cid:
             captures = cherrypy.engine.publish(

@@ -20,7 +20,9 @@ class TestHtmlTextParser(unittest.TestCase):
         cls.parser = None
 
     def test_constructor(self):
-        """The constructor optionally overrides the whitelist and sets the blacklist."""
+        """The constructor optionally overrides the whitelist and sets the
+        blacklist."""
+
         self.assertFalse(self.parser.blacklist)
         self.assertTrue(self.parser.whitelist)
 
@@ -40,7 +42,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(initial, final)
 
-    def test_preserve_text_outside_whitelist(self):
+    def test_preserve_text_prepost(self):
         """If there is plain text before or after a whitelisted tag, it is
         preserved.
 
@@ -183,7 +185,6 @@ class TestHtmlTextParser(unittest.TestCase):
         final = custom_parser.parse(initial)
 
         self.assertEqual(final, "")
-
 
 
 if __name__ == "__main__":

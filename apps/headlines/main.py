@@ -12,8 +12,11 @@ class Controller:
     cache_key = "headlines"
 
     @cherrypy.tools.negotiable()
-    def GET(self, limit=None, offset=None):
+    def GET(self, *_args, **kwargs):
         """Display a list of headlines."""
+
+        limit = kwargs.get('limit')
+        offset = kwargs.get('offset')
 
         try:
             limit = int(limit)

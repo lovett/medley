@@ -11,8 +11,11 @@ class Controller:
     name = "Grids"
 
     @cherrypy.tools.negotiable()
-    def GET(self, name="", start=None):
+    def GET(self, *_args, **kwargs):
         """Display the list of available grids, or the current grid"""
+
+        name = kwargs.get('name', '')
+        start = kwargs.get('start')
 
         grids = cherrypy.engine.publish(
             "registry:search",

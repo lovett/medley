@@ -36,7 +36,7 @@ class Controller:
         return catalog
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Display the list of applications"""
 
         template = "homepage.jinja.html"

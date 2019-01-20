@@ -13,7 +13,7 @@ class Controller:
     name = "Weather"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(

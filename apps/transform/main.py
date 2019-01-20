@@ -50,7 +50,7 @@ class Controller:
         return sorted(list(self.transforms.keys()))
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    def GET(self, *_args, **_kwargs):
         """The default view presents the available transformation methods"""
 
         return {

@@ -10,10 +10,14 @@ class Controller:
     name = "Later"
 
     @cherrypy.tools.negotiable()
-    def GET(self, url=None, title=None, tags=None, comments=None):
+    def GET(self, *_args, **kwargs):
         """Display a form for for bookmarking a URL"""
 
         error = None
+        url = kwargs.get('url')
+        title = kwargs.get('title')
+        tags = kwargs.get('tags')
+        comments = kwargs.get('comments')
 
         if title:
             title = cherrypy.engine.publish(
