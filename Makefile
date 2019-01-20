@@ -247,7 +247,7 @@ $(PARSER_PATHS): $(COVERAGE_DIR) dummy
 # are only applied to changed files.
 #
 lint: dummy
-	flake8 $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
+	flake8 --builtins=ModuleNotFoundError $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
 	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
 
 
