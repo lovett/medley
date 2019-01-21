@@ -60,8 +60,7 @@ class Tool(cherrypy.Tool):
         that precedence and let it override the Accept header.
 
         """
-
-        if "." in cherrypy.request.path_info:
+        if cherrypy.request.path_info.startswith('/.'):
             extension = next(
                 (key for key in self.acceptable_extensions
                  if cherrypy.request.path_info.endswith(key)
