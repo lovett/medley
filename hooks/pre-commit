@@ -24,8 +24,8 @@ for CHANGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         TEST_FILE="${PARENT_PATH}/test_${FILE_NAME}.py"
 
 
-        flake8 "$CHANGED_FILE"
-        pylint --rcfile=.pylintrc "$CHANGED_FILE"
+        ./venv/bin/flake8 "$CHANGED_FILE"
+        ./venv/bin/pylint --rcfile=.pylintrc "$CHANGED_FILE"
 
         if [ ! -f "$TEST_FILE" ]; then
             continue

@@ -37,6 +37,8 @@ PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
 TMUX_SESSION_NAME := medley
 
+export PATH := ./venv/bin:$(PATH)
+
 # Debugging tool to print the value of a variable.
 #
 # Example: make print-PLUGIN_DIR
