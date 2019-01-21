@@ -41,8 +41,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ScheduledEvent.cache_prefix
         ).pop()
 
-        print(cached_events)
-
         if not cached_events:
             return
 
