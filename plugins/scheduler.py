@@ -5,18 +5,39 @@ import sched
 import cherrypy
 
 
-class Plugin(cherrypy.process.plugins.SimplePlugin):
-    """A CherryPy plugin for deferring work until a later time."""
+class Plugin(cherrypy.process.plugins.Monitor):
+    """A CherryPy plugin for deferring work until a later time.
+
+    Unlike all the other plugins, this is a subclass of Monitor rather
+    than SimplePlugin. For reasons unknown, the main() method of
+    SimplePlugin wasn't getting called under macOS in spite of working
+    fine under Linux, and in spite of also working fine under macOS in
+    the past.
+
+    The main difference between Monitor and SimplePlugin is the
+    presence of a callback argument in the constructor. This does
+    explicitly what was previously done implicitly with SimplePlugin
+    by having a main() method.
+
+    """
 
     scheduler = None
 
     def __init__(self, bus):
-        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+        cherrypy.process.plugins.Monitor.__init__(
+            self,
+            bus,
+            self.run,
+            1,
+            'Scheduler'
+        )
 
     def start(self):
-        """Define the CherryPy messages to listen for.
+        """Define the CherryPy messages to listen for and start running the
+        scheduler.
 
         This plugin owns the scheduler prefix.
+
         """
 
         self.bus.subscribe("scheduler:add", self.add)
@@ -25,9 +46,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("scheduler:upcoming", self.upcoming)
         self.bus.subscribe("scheduler:revive", self.revive)
         self.scheduler = sched.scheduler(time.time, time.sleep)
+        cherrypy.process.plugins.Monitor.start(self)
 
-    def main(self):
-        """Start the scheduler."""
+    def run(self):
+        """Run scheduled tasks.
+
+        This method is responsible for taking action on scheduled
+        events. The scheduler determines when the task should be
+        executed, and the add() method determines what should happen,
+        but without something to connect the two, nothing would happen.
+
+        """
         self.scheduler.run(False)
 
     def revive(self):
