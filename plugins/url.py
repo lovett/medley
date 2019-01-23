@@ -20,14 +20,31 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     def internal_url(path=None, query=(), trailing_slash=False):
-        """Create an absolute internal URL."""
+        """Create an absolute internal URL.
+
+        The URL hostname is sourced from two places. Most of the time,
+        there will be an incoming request at hand and
+        cherrpy.request.base will hold the desired value.
+
+        If there isn't an incoming request, fall back to a value
+        stored in the registry.
+
+        """
+
+        hostname = cherrypy.request.base
+
+        if not hostname:
+            hostname = cherrypy.engine.publish(
+                "registry:first_value",
+                "app:base_url"
+            ).pop()
 
         # A non-root path is treated as a sub-path of the current app.
         if path and not path.startswith("/"):
             path = "{}/{}".format(cherrypy.request.script_name, path)
 
         url = "{}{}".format(
-            cherrypy.request.base,
+            hostname,
             path or cherrypy.request.script_name
         )
 
