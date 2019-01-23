@@ -121,6 +121,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:reversal', self.reversal)
+        self.bus.subscribe('logindex:alert', self.alert)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
@@ -180,8 +181,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             log_date.strftime("%Y-%m-%d.log")
         )
 
-        print(log_file)
-
         if not os.path.isfile(log_file):
             return False
         return log_file
@@ -216,7 +215,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 "enqueue",
                 "Ignoring a request to queue an already-queued range"
             )
-
             return False
 
         self.queue.append(period)
@@ -235,9 +233,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def process_queue(self):
         """Trigger log file ingestion and parsing.
 
-        The first stage of processing, where queued time periods are
-        matched with the relevant log files on the local
-        filesystem and individual lines are ingested into the database.
+        This is the first stage of processing, where queued time
+        periods are matched with the relevant log files on the local
+        filesystem and individual lines are ingested into the
+        database.
 
         Once ingestion is complete, the next stage is parsing.
 
@@ -374,7 +373,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def parse(self, batch_size=100):
-        """Parse previously-added log lines"""
+        """Parse log lines into fields
+
+        The log line is initially inserted to the database as a single
+        string. This is where the string gets broken into its
+        constituent pieces.
+
+        """
 
         update_sql = """UPDATE logs SET unix_timestamp=?, datestamp=?, ip=?,
         host=?, uri=?, query=?, statusCode=?, method=?, agent=?,
@@ -485,13 +490,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             {(ip,) for ip in ips}
         )
 
-        cherrypy.engine.publish("scheduler:add", 1, "logindex:parse")
+        cherrypy.engine.publish(
+            "scheduler:add",
+            1,
+            "logindex:parse"
+        )
+
+        cherrypy.engine.publish(
+            "scheduler:add",
+            1,
+            "logindex:alert",
+            records[1]["id"],
+            len(records)
+        )
 
     def insert_line(self, records):
         """Write a batch of log lines to the database.
 
         This is the initial insert, where the line is added in its
-        entirety. Parsing next in a later stage of processing."""
+        entirety. Parsing occurs at the next stage of processing."""
 
         if not records:
             return 0
@@ -538,3 +555,60 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._select(sql, tuple(ips))
 
         return {row["ip"]: row["reverse_domain"] for row in result}
+
+    @decorators.log_runtime
+    def alert(self, earliest_id, count):
+        """Send a notification for newly-parsed records that match
+        previously-stored queries.
+
+        """
+
+        alert_queries = cherrypy.engine.publish(
+            "registry:search",
+            "logindex:alert:*",
+            key_slice=2,
+            as_dict=True
+        ).pop()
+
+        for name, query in alert_queries.items():
+            parsed_query = cherrypy.engine.publish(
+                "parse:log_query",
+                query
+            ).pop()
+
+            sql = """SELECT distinct ip
+            FROM logs
+            WHERE {}
+            AND rowid BETWEEN ? AND ?
+            """.format(parsed_query)
+
+            records = self._select(
+                sql,
+                (earliest_id, earliest_id + count)
+            )
+
+            for record in records:
+                url = cherrypy.engine.publish(
+                    "url:internal",
+                    "/visitors",
+                    {"query": "ip {}\n{}".format(record["ip"], query)},
+                    trailing_slash=True
+                ).pop()
+
+                local_id = "logindex-{}-{}".format(
+                    name,
+                    record["ip"]
+                )
+
+                notification = {
+                    "group": "web",
+                    "title": "Logfile indexing alert: {}".format(name),
+                    "body": "IP: {}".format(record["ip"]),
+                    "url": url,
+                    "localId": local_id,
+                }
+
+                cherrypy.engine.publish(
+                    "notifier:send",
+                    notification
+                )
