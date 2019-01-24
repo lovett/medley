@@ -73,32 +73,38 @@
                                 <dt>IP</dt>
                                 <dd>{{ ip_address }}</dd>
                             </dt>
-                        </dl>
 
-                        {% if ip_facts.geo.area_code%}
-                            <dt>Area Code</dt>
-                            <dd>{{ ip_facts.geo.area_code }}</dd>
-                        {% endif %}
+                            {% if ip_facts.geo.area_code%}
+                                <dt>Area Code</dt>
+                                <dd>{{ ip_facts.geo.area_code }}</dd>
+                            {% endif %}
 
-                        {% if ip_facts.geo.metro_code %}
-                            <dt>Metro</dt>
-                            <dd>{{ ip_facts.geo.metro_code }}</dd>
-                        {% endif %}
+                            {% if ip_facts.geo.metro_code %}
+                                <dt>Metro</dt>
+                                <dd>{{ ip_facts.geo.metro_code }}</dd>
+                            {% endif %}
 
-                        <dt>Activity</dt>
-                        {% if visit_days_count == 0 %}
-                            <dd>None</dd>
-                        {% endif %}
+                            <dt>Activity</dt>
+                            {% if visit_days_count == 0 %}
+                                <dd>None</dd>
+                            {% endif %}
 
-                        {% if visit_days_count > 0 %}
-                            <dd>
-                                {{ visit_days_count|pluralize('visit', 'visits') }}
-                                since {{ earliest_visit|localtime|dateformat("LL") }}.
+                            {% if visit_days_count == 1 %}
+                                <dd>
+                                    1 visit on {{ earliest_visit|localtime|dateformat('LL') }}
+                                </dd>
+                            {% endif %}
 
-                                {% if visit_days_count > 1 %}
+                            {% if visit_days_count > 1 %}
+                                <dd>
+                                    {{ visit_days_count|pluralize('visit', 'visits') }}
+                                    since {{ earliest_visit|localtime|dateformat("LL") }}.
+
                                     <p>Last seen {{ latest_visit|localtime|ago }}.
-                                {% endif %}
+                                </dd>
+                            {% endif %}
 
+                            {% if visit_days_count > 0 %}
                                 <p>
                                     <svg class="icon icon-binoculars">
                                         <use xlink:href="#icon-binoculars"></use>
@@ -107,8 +113,7 @@
                                         view
                                     </a>
                                 </p>
-                        </dd>
-                        {% endif %}
+                            {% endif %}
                         </dl>
                     </div>
                 </div>
