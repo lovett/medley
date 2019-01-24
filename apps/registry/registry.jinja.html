@@ -30,6 +30,11 @@
             </div>
             <div class="field">
                 <button>Search</button>
+
+                {% if q %}
+                    <a href="{{ app_url }}">Cancel</a>
+                {% endif %}
+
             </div>
         </form>
 

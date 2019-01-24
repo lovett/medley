@@ -126,6 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
+        self.bus.subscribe('logindex:count_visit_days', self.count_visit_days)
 
     @staticmethod
     def get_root():
@@ -612,3 +613,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                     "notifier:send",
                     notification
                 )
+
+    @decorators.log_runtime
+    def count_visit_days(self, ip_address):
+        """Count the number of days an IP appears in the logs."""
+
+        record = self._selectOne(
+            """SELECT count(DISTINCT substr(datestamp, 0, 11)) as count,
+            min(datestamp) as 'earliest [date_with_hour]',
+            max(datestamp) as 'latest [date_with_hour]'
+            FROM logs
+            WHERE ip=?""",
+            (ip_address,)
+        )
+
+        return dict(record)

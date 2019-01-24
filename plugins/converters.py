@@ -23,6 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self):
         """Register converters."""
         sqlite3.register_converter("datetime", self.datetime)
+        sqlite3.register_converter("date_with_hour", self.date_with_hour)
         sqlite3.register_converter("binary", self.binary)
         sqlite3.register_converter("calldate_to_utc", self.calldate_to_utc)
         sqlite3.register_converter("duration", self.duration)
@@ -41,6 +42,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             last_colon_index = value.rindex(":")
             date = value[:last_colon_index] + value[last_colon_index + 1:]
             utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
+
+        return utc_date
+
+    @staticmethod
+    def date_with_hour(value):
+        """Convert a date-and-hour string to a Pendulum instance."""
+
+        value = value.decode("utf-8")
+
+        try:
+            utc_date = pendulum.from_format(value, "YYYY-MM-DD-HH")
+        except ValueError:
+            utc_date = None
 
         return utc_date
 

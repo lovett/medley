@@ -78,7 +78,12 @@ class Controller:
 
             cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
-        visitors_ip_url = cherrypy.engine.publish(
+        visit_days = cherrypy.engine.publish(
+            "logindex:count_visit_days",
+            ip_address
+        ).pop()
+
+        visitors_url = cherrypy.engine.publish(
             "url:internal",
             "/visitors",
             {"query": "ip {}".format(ip_address)}
@@ -91,6 +96,9 @@ class Controller:
                 "whois": whois,
                 "ip_facts": facts,
                 "app_name": self.name,
-                "visitors_ip_url": visitors_ip_url
+                "visitors_url": visitors_url,
+                "earliest_visit": visit_days.get("earliest"),
+                "latest_visit": visit_days.get("latest"),
+                "visit_days_count": visit_days.get("count", 0)
             })
         }

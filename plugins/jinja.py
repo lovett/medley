@@ -186,13 +186,17 @@ class Plugin(plugins.SimplePlugin):
         return urllib.parse.quote(value)
 
     @staticmethod
-    def ago_filter(unix_timestamp):
-        """Calculate a human-readable time delta between a timestamp and
-        now.
+    def ago_filter(value):
+        """Calculate a human-readable time delta between a date in the past
+        and now.
+
+        If the date provided as an integer, it is treated as a unix timestamp.
 
         """
 
-        date = pendulum.from_timestamp(unix_timestamp)
+        date = value
+        if isinstance(value, int):
+            date = pendulum.from_timestamp(value)
 
         zone = cherrypy.engine.publish(
             "registry:local_timezone"

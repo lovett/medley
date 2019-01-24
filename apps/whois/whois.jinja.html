@@ -86,12 +86,29 @@
                         {% endif %}
 
                         <dt>Activity</dt>
-                        <dd>
-                            <a href="{{ visitors_ip_url }}" rel="noreferrer">
-                                <svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg>
-                                find visits
-                            </a>
+                        {% if visit_days_count == 0 %}
+                            <dd>None</dd>
+                        {% endif %}
+
+                        {% if visit_days_count > 0 %}
+                            <dd>
+                                {{ visit_days_count|pluralize('visit', 'visits') }}
+                                since {{ earliest_visit|localtime|dateformat("LL") }}.
+
+                                {% if visit_days_count > 1 %}
+                                    <p>Last seen {{ latest_visit|localtime|ago }}.
+                                {% endif %}
+
+                                <p>
+                                    <svg class="icon icon-binoculars">
+                                        <use xlink:href="#icon-binoculars"></use>
+                                    </svg>
+                                    <a href="{{ visitors_url }}" rel="noreferrer">
+                                        view
+                                    </a>
+                                </p>
                         </dd>
+                        {% endif %}
                         </dl>
                     </div>
                 </div>
