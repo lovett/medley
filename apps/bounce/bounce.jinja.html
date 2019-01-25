@@ -16,7 +16,7 @@
         {{ macros.svgSymbols("delete") }}
         <div class="content-wrapper">
             <div class="bookmarklet-container">
-                <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u=' + e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
+                <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u='+e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
             </div>
 
             {% if not bounces %}
