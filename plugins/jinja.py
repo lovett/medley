@@ -308,6 +308,9 @@ class Plugin(plugins.SimplePlugin):
 
         """
 
+        val = val.replace('\n', '%0A')
+        val = re.sub(r'\s', ' ', val)
+
         return str(val).translate({
             ord('\\'): '\\u005C',
             ord('\''): '\\u0027',

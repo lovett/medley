@@ -16,7 +16,7 @@
             {% endif %}
 
             {% if dest %}
-                <p>Redirecting to {{ dest }}...</p>
+                <p>Redirecting to {{ dest|escapejs }}...</p>
 
                 <script>
                     setTimeout(function () {
