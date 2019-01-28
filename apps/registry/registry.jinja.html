@@ -70,6 +70,10 @@
                 </ul>
             {% endif %}
 
+            {% if q %}
+                <p><a href="{{ app_url }}/.json?q={{ q }}">Export</a></p>
+            {% endif %}
+
             {% for entry in entries %}
                 <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
                     <div class="entry" v-bind:style="styles">

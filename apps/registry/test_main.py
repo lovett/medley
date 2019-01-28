@@ -38,7 +38,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
 
             if args[0] == "registry:find_id":
-                return [{"rowid": "test", "key": "mykey"}]
+                return [{"rowid": "test", "key": "mykey", "value": "test"}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -74,7 +74,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [[{"key": "abc456"}]]
+                return [[{"key": "abc456", "value": "test"}]]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -95,7 +95,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [[{"key": "abc789"}]]
+                return [[{"key": "abc789", "value": "test"}]]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

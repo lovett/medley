@@ -50,7 +50,11 @@ class Controller:
                 "view": view,
                 "key": key,
                 "glossary": glossary,
-            })
+            }),
+            "json": [
+                (entry["key"], entry["value"])
+                for entry in entries
+            ]
         }
 
     @staticmethod
