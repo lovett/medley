@@ -24,7 +24,7 @@ class Plugin(plugins.SimplePlugin):
 
         The URL hostname is sourced from two places. Most of the time,
         there will be an incoming request at hand and
-        cherrpy.request.base will hold the desired value.
+        cherrypy.request.base will hold the desired value.
 
         If there isn't an incoming request, fall back to a value
         stored in the registry.
