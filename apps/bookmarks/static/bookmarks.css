@@ -10,29 +10,42 @@
     line-height: 1.5;
 }
 
+.bookmark H2 {
+    margin: 0;
+    padding: 0;
+    font-size: 1.1em;
+}
+
+.bookmark .cache {
+    font-size: .75em;
+    padding-bottom: 1em;
+}
+
+.bookmark .summary {
+    font-size: .85em;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.bookmark .summary > div:nth-of-type(1) {
+    min-width: 15em;
+    box-sizing: border-box;
+    background-color: #f2e6ed;
+    padding: 1em;
+    margin-right: 1em;
+}
+
+.bookmark .tag {
+    color: currentColor;
+    display: inline-block;
+}
+
 .bookmark A {
     text-decoration: none;
 }
 
-.bookmark TIME {
-    display: inline;
-}
-
-.bookmark .meta {
-    font-size: .75em;
-}
-.bookmark .meta > * {
-    border: 1px solid #ccc;
-    background-color: #efefef;
-    display: inline-block;
-    padding: 0 .5em;
-    margin-right: 1em;
-}
-
-.bookmark H2 {
-    margin: 0;
-    padding: 0;
-    font-size: 1.2em;
+.bookmark A:hover {
+    text-decoration: underline;
 }
 
 .bookmark P {
@@ -42,12 +55,4 @@
 
 .bookmark .actions {
     float: right;
-}
-
-.date-group {
-    padding-bottom: 1em;
-}
-
-.date-group H1 {
-    font-size: 1.25em;
 }

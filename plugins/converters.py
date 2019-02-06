@@ -29,6 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         sqlite3.register_converter("duration", self.duration)
         sqlite3.register_converter("clid", self.callerid)
         sqlite3.register_converter("querystring", self.querystring)
+        sqlite3.register_converter("comma_delimited", self.comma_delimited)
 
     @staticmethod
     def datetime(value):
@@ -139,3 +140,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             value.decode("utf-8"),
             keep_blank_values=True
         )
+
+    @staticmethod
+    def comma_delimited(value):
+        """Parse a comma-delimited string into a list."""
+
+        return value.decode("utf-8").split(',')

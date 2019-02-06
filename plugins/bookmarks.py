@@ -222,6 +222,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._fts_search(
             """SELECT url, domain, title, rank,
+            comments, tags as 'tags [comma_delimited]',
             added as 'added [datetime]',
             updated as 'updated [datetime]'
             FROM bookmarks JOIN (
@@ -243,7 +244,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         added as 'added [datetime]',
         updated as 'updated [datetime]',
         retrieved 'retrieved [datetime]',
-        tags, comments
+        comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
         ORDER BY rowid DESC
         LIMIT ?"""

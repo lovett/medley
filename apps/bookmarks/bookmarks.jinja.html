@@ -12,7 +12,7 @@
 {% block page_body %}
 
     <main>
-        {{ macros.svgSymbols("delete") }}
+        {{ macros.svgSymbols("delete", "icon-tag") }}
 
         <form class="content-wrapper" method="get" action="{{ app_url }}">
             <div class="field">
@@ -39,23 +39,38 @@
                             <discard-button tooltip="Delete this bookmark" />
                         </div>
 
-                        <h2><a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">{{ bookmark.title }}</a></h2>
+                        <h2>
+                            <a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
+                                {{ bookmark.title }}
+                            </a>
+                        </h2>
 
-                        <p class="meta">
-                            <span><time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time></span>
-                            <span class="domain">{{ bookmark.domain }}</span>
-                            {% if bookmark.tags %}
-                                <span>Tags: {{ bookmark.tags }}</span>
-                            {% endif %}
+                        <p class="cache">
                             <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
                         </p>
 
+                        <div class="summary">
+                            <div>
+                                <p>{{ bookmark.domain }}</p>
+                                <p>
+                                    <time>
+                                        {{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}
+                                    </time>
+                                </p>
+                                <p>
+                                </p>
 
-                        {% if bookmark.comments %}
-                            <p class="comments">
+                                {% for tag in bookmark.tags or [] %}
+                                    <a class="tag" href="{{ app_url }}?query=tag:{{ tag|urlencode }}">
+                                        <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                                        {{ tag }}
+                                    </a>
+                                {% endfor %}
+                            </div>
+                            <div>
                                 {{ bookmark.comments }}
-                            </p>
-                        {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </discardable-record>
 
