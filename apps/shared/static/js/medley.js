@@ -31,26 +31,15 @@ var MEDLEY = (function () {
     };
 
     var shortcuts = function (e) {
-        var href;
-
         if (e.target.nodeName === 'INPUT' || e.target.nodeName === 'TEXTAREA') {
             return;
         }
 
-        if (e.shiftKey && e.which === 191) { // ?
-            jQuery('#shortcuts').modal('show');
-            return;
-        }
-
         if (e.shiftKey && e.which === 72) { // H
-            href = jQuery('HEADER .home:first').attr('href');
-            if (href) {
-                window.location.href = href;
-            }
+            window.location.href = jQuery('HEADER a[rel=home]').attr('href');
             return;
         }
     };
-
 
     function getMasterToggleForTable(table) {
         var toggleId;
