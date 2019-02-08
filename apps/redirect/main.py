@@ -23,7 +23,6 @@ class Controller:
 
         return {
             "html": ("redirect.jinja.html", {
-                "app_name": self.name,
                 "dest": url
             })
         }

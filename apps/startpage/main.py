@@ -48,7 +48,6 @@ class Controller:
 
         return {
             "html": ("edit.jinja.html", {
-                "app_name": self.name,
                 "button_label": button_label,
                 "cancel_url": cancel_url,
                 "page_name": page_name or "",
@@ -103,7 +102,6 @@ class Controller:
         return {
             "etag_key": page_name,
             "html": ("startpage.jinja.html", {
-                "app_name": self.name,
                 "created": page_record["created"],
                 "anonymizer_url": anonymizer_url,
                 "edit_url": edit_url,
@@ -175,7 +173,6 @@ class Controller:
 
             return {
                 "html": ("postedit.jinja.html", {
-                    "app_name": self.name,
                     "page_url": page_url
                 })
             }

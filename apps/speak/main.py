@@ -14,16 +14,10 @@ class Controller:
         application.
 
         """
-        app_url = cherrypy.engine.publish(
-            "url:internal"
-        ).pop()
-
         can_speak = cherrypy.engine.publish("speak:can_speak").pop()
 
         return {
             "html": ("speak.jinja.html", {
-                "app_name": self.name,
-                "app_url": app_url,
                 "can_speak": can_speak
             })
         }

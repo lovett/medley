@@ -96,6 +96,5 @@ class Controller:
                 "comment": state_lookup[2],
                 "state_name": state_name_lookup[1],
                 "sparql": sparql,
-                "app_name": self.name
             })
         }

@@ -9,10 +9,9 @@ class Controller:
     name = "Bookmarklets"
 
     @cherrypy.tools.negotiable()
-    def GET(self):
+    @staticmethod
+    def GET():
         """Present a static list of bookmarklets"""
-
-        app_url = cherrypy.engine.publish("url:internal").pop()
 
         anonymizer = cherrypy.engine.publish(
             "registry:first_value",
@@ -27,8 +26,6 @@ class Controller:
 
         return {
             "html": ("bookmarklets.jinja.html", {
-                "app_name": self.name,
-                "app_url": app_url,
                 "anonymizer": anonymizer,
                 "ubounce": ubounce
             })

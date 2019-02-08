@@ -49,14 +49,10 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        app_url = cherrypy.engine.publish("url:internal").pop()
-
         return {
             "html": ("reminder.jinja.html", {
-                "app_name": self.name,
                 "templates": templates,
                 "upcoming": upcoming,
-                "app_url": app_url,
             }),
         }
 

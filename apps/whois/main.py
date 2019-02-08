@@ -22,9 +22,7 @@ class Controller:
 
         if not address:
             return {
-                "html": ("whois.jinja.html", {
-                    "app_name": self.name
-                })
+                "html": ("whois.jinja.html", {})
             }
 
         address_unquoted = urllib.parse.unquote_plus(address).lower()
@@ -95,7 +93,6 @@ class Controller:
                 "ip_address": ip_address,
                 "whois": whois,
                 "ip_facts": facts,
-                "app_name": self.name,
                 "visitors_url": visitors_url,
                 "earliest_visit": visit_days.get("earliest"),
                 "latest_visit": visit_days.get("latest"),

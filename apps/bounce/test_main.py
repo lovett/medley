@@ -254,9 +254,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             helpers.html_var(render_mock, "bounces")
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_bookmarklet_url_https(self, publish_mock, render_mock):
+    def test_bookmarklet_url_https(self, publish_mock):
         """The bookmarklet URL respects HTTPS."""
 
         def side_effect(*args, **_):
@@ -275,10 +274,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             "/",
             headers={"X-HTTPS": "On"},
             u="http://unrecognized.example.com"
-        )
-
-        self.assertTrue(
-            helpers.html_var(render_mock, "app_url").startswith("https")
         )
 
     @mock.patch("cherrypy.tools.negotiable.render_html")

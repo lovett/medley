@@ -57,7 +57,6 @@ class Controller:
             "json": {"transforms": self.list_of_transforms()},
             "text": "\n".join(self.list_of_transforms()),
             "html": ("transform.jinja.html", {
-                "app_name": self.name,
                 "transforms": self.list_of_transforms()
             })
         }
@@ -74,7 +73,6 @@ class Controller:
             "json": {"result": result},
             "text": result,
             "html": ("transform.jinja.html", {
-                "app_name": self.name,
                 "result": result,
                 "current_transform": transform,
                 "transforms": self.list_of_transforms(),

@@ -84,9 +84,7 @@ class Controller:
                 "durations": durations,
                 "site_domains": site_domains,
                 "saved_queries": saved_queries,
-                "app_name": self.name,
                 "annotations": annotations,
-                "app_url": cherrypy.engine.publish("url:internal").pop(),
                 "cookies": cookies
             })
         }

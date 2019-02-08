@@ -69,10 +69,6 @@ class Controller:
             tags = bookmark["tags"]
             comments = bookmark["comments"]
 
-        app_url = cherrypy.engine.publish(
-            "url:internal"
-        ).pop()
-
         bookmarks_url = cherrypy.engine.publish(
             "url:internal",
             "/bookmarks"
@@ -81,13 +77,11 @@ class Controller:
         return {
             "html": ("later.jinja.html", {
                 "bookmarks_url": bookmarks_url,
-                "app_url": app_url,
                 "error": error,
                 "bookmark": bookmark,
                 "title": title,
                 "url": url,
                 "tags": tags,
                 "comments": comments,
-                "app_name": self.name
             })
         }

@@ -65,7 +65,6 @@ class Controller:
 
         return {
             "html": ("grids.jinja.html", {
-                "app_name": self.name,
                 "headers": headers,
                 "name": name,
                 "names": [key.split(":")[1] for key in grids.keys()],

@@ -125,8 +125,6 @@ class Controller:
                 for bounce in bounces
             }
 
-        app_url = cherrypy.engine.publish("url:internal").pop()
-
         return {
             "html": ("bounce.jinja.html", {
                 "departing_from": departing_from,
@@ -134,9 +132,7 @@ class Controller:
                 "site": host,
                 "group": group,
                 "name": name,
-                "app_url": app_url,
                 "bounces": bounces,
-                "app_name": self.name
             })
         }
 

@@ -77,7 +77,6 @@ class Controller:
                 "headlines": headlines,
                 "limit": limit,
                 "offset": offset,
-                "app_name": self.name
             }),
             "json": headlines,
         }

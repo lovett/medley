@@ -13,13 +13,8 @@ class Controller:
     def GET(self, *_args, **_kwargs):
         """Present a form for specifying a URL to fetch."""
 
-        app_url = cherrypy.engine.publish("url:internal").pop()
-
         return {
-            "html": ("htmlhead.jinja.html", {
-                "app_url": app_url,
-                "app_name": self.name,
-            })
+            "html": ("htmlhead.jinja.html", {})
         }
 
     @cherrypy.tools.negotiable()
@@ -27,8 +22,6 @@ class Controller:
         """Request an HTML page and display its the contents of its head
         section.
         """
-
-        app_url = cherrypy.engine.publish("url:internal").pop()
 
         status_code = None
         request_failed = False
@@ -70,8 +63,6 @@ class Controller:
                 "failure_message": failure_message,
                 "status_code": status_code,
                 "url": url,
-                "app_url": app_url,
-                "app_name": self.name,
                 "tags": head_tags,
                 "username": username,
                 "password": password

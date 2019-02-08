@@ -22,6 +22,5 @@ class Controller:
             "text": ["{}: {}".format(*header) for header in headers],
             "html": ("headers.jinja.html", {
                 "headers": headers,
-                "app_name": self.name,
             })
         }

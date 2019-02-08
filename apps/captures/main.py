@@ -46,6 +46,5 @@ class Controller:
                 "captures": captures,
                 "newer_offset": newer_offset,
                 "older_offset": older_offset,
-                "app_name": self.name
             })
         }

@@ -55,7 +55,6 @@ class Controller:
         return {
             "etag_key": template,
             "html": (template, {
-                "app_name": self.name,
                 "apps": apps
             })
         }
