@@ -183,7 +183,6 @@ def main():
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
     cherrypy.tools.response_time = tools.response_time.Tool()
     cherrypy.tools.negotiable = tools.negotiable.Tool()
-    cherrypy.tools.template = tools.template.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
 
     # Logging
