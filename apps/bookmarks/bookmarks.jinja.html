@@ -61,7 +61,7 @@
                                 </p>
 
                                 {% for tag in bookmark.tags or [] %}
-                                    <a class="tag" href="{{ app_url }}?query=tag:{{ tag|urlencode }}">
+                                    <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
                                         <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                         {{ tag }}
                                     </a>

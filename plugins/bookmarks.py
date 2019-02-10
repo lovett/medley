@@ -220,6 +220,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         weight_string = ",".join(map(repr, weights))
 
+        if "tag:" in query:
+            query = query.replace("tag:", "tags:")
+
+        if "comment:" in query:
+            query = query.replace("comment:", "comments:")
+
         return self._fts_search(
             """SELECT url, domain, title, rank,
             comments, tags as 'tags [comma_delimited]',
