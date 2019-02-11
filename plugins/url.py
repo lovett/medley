@@ -36,7 +36,7 @@ class Plugin(plugins.SimplePlugin):
         if not hostname:
             hostname = cherrypy.engine.publish(
                 "registry:first_value",
-                "app:base_url"
+                "config:base_url"
             ).pop()
 
         # A non-root path is treated as a sub-path of the current app.
