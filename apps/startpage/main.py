@@ -17,6 +17,21 @@ class Controller:
         """Format the name of a page as a registry key."""
         return "startpage:{}".format(page_name)
 
+    @staticmethod
+    def new_page_template():
+        """The default page content for new pages demonstrating sample
+        syntax.
+
+        """
+
+        return "\n".join((
+            "[section1]",
+            "http://example.com = Example",
+            "http://example.net = +Continuation"
+            "\n",
+            "[section2]"
+        ))
+
     def edit_page(self, page_name, page_content=None):
         """Present a form for editing the contents of a page."""
 
@@ -51,12 +66,13 @@ class Controller:
                 "button_label": button_label,
                 "cancel_url": cancel_url,
                 "page_name": page_name or "",
-                "page_content": page_content,
+                "page_content": page_content or self.new_page_template(),
                 "post_url": post_url,
             })
         }
 
-    def render_page(self, page_name, page_record):
+    @staticmethod
+    def render_page(page_name, page_record):
         """Render INI page content to HTML."""
 
         etag_match = cherrypy.engine.publish(
@@ -196,7 +212,7 @@ class Controller:
         ).pop()
 
         # Redirect to the edit form when a non-existent page is requested.
-        if action == "view" and not record:
+        if not action == "edit" and not record:
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
                 page_name,
