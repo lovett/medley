@@ -54,7 +54,13 @@ class Plugin(plugins.SimplePlugin):
         if query:
             url = "{}?{}".format(url, urlencode(query))
 
-        if cherrypy.request.headers.get("X-Https", "") == "On":
+        request_headers = cherrypy.request.headers
+        use_https = request_headers.get("X-Https", "") == "On"
+
+        if not use_https:
+            use_https = request_headers.get("X-Forwarded-Proto", "") == "https"
+
+        if use_https:
             url = "https:{}".format(url.split(":", 1).pop())
 
         return url
