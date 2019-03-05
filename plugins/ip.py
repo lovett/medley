@@ -43,10 +43,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "GeoLite2-City.mmdb"
         )
 
-        reader = geoip2.database.Reader(geodb_path)
-
         try:
+            reader = geoip2.database.Reader(geodb_path)
             result = reader.city(ip_address)
+        except FileNotFoundError:
+            result = {}
         except geoip2.errors.AddressNotFoundError:
             result = {}
 
