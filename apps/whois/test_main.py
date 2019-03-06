@@ -28,10 +28,18 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    def test_default(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_default(self, publish_mock):
         """Make a request with no arguments"""
-        response = self.request("/")
+        def side_effect(*args, **_):
+            """Side effects local function"""
 
+            if args[0] == "url:internal":
+                return ["/"]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+        response = self.request("/")
         self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
