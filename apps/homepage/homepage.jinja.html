@@ -13,10 +13,10 @@
 {% block page_body %}
     <main>
         <div class="module-grid">
-            {% for name, description, user_facing in apps %}
+            {% for name, url, description, user_facing in apps %}
 
                 {% if user_facing %}
-                    <a class="module" href="/{{ name }}">
+                    <a class="module" href="{{ url }}">
                         <h2>{{ name }}</h2>
                         <p>{{ description }}</p>
                     </a>
@@ -28,7 +28,7 @@
 
         <h1 class="module-grid-title">Services</h1>
         <div class="module-grid">
-            {% for name, description, user_facing in apps %}
+            {% for name, _, description, user_facing in apps %}
 
                 {% if not user_facing %}
                     <div class="module">

@@ -29,7 +29,22 @@ class Controller:
 
             user_facing = getattr(controller.root, "user_facing", False)
 
-            catalog.append((mount_path.lstrip("/"), summary, user_facing))
+            name = mount_path.lstrip("/")
+
+            try:
+                url = cherrypy.engine.publish(
+                    "url:internal",
+                    name
+                ).pop()
+            except IndexError:
+                url = mount_path
+
+            catalog.append((
+                name,
+                url,
+                summary,
+                user_facing
+            ))
 
         catalog.sort(key=lambda tup: tup[0])
 

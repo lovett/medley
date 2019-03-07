@@ -155,7 +155,7 @@ class Controller:
         if args:
             page_name = args[0]
 
-        action = kwargs.get('action')
+        action = kwargs.get('action', 'view')
 
         # Require a trailing slash for the default page.
         #
