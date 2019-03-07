@@ -6,17 +6,25 @@
 {% block stylesheets %}
     {{ macros.cacheBustedStylesheet('startpage', 'startpage.css') }}
 
+    {% if anonymizer_url %}
     <style type="text/css">
         A[href^="{{anonymizer_url}}"] {
             color: #369;
             font-style: normal;
         }
     </style>
+    {% else %}
+    <!-- Anonymizer inline style omitted -->
+    {% endif %}
 
 {% endblock %}
 
 {% block page_meta %}
-    <meta name="anonymizer" content="{{ anonymizer_url }}"/>
+    {% if anonymizer_url %}
+        <meta name="anonymizer" content="{{ anonymizer_url }}"/>
+        {% else %}
+        <!-- Anonymizer meta tag omitted -->
+    {% endif %}
 {% endblock %}
 
 

@@ -25,7 +25,7 @@ for (i=0; i < meta.length; i++) {
 
 // Activate or deactivate the anonymizer URL
 var anonymize = document.getElementById('anonymize');
-if (anonymizer_url) {
+if (anonymize && anonymizer_url) {
     var links = document.getElementsByTagName('A');
     anonymize.removeAttribute('disabled');
     anonymize.setAttribute('checked', true);
@@ -95,7 +95,7 @@ for (i=0; i < lis.length; i++) {
     }
 }
 
-if (anonymize.attachEvent) {
+if (anonymize && anonymize.attachEvent) {
     document.getElementsByTagName('MAIN')[0].attachEvent('click', openGroup);
 } else {
     document.getElementsByTagName('MAIN')[0].addEventListener('click', openGroup);
