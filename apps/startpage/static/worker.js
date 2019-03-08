@@ -40,6 +40,8 @@ function cacheCheck(request) {
 
 /**
  * Fetch a resource from the network and cache it.
+ *
+ * Fetch errors while offline are suppressed to reduce console noise.
  */
 function fetchAndCache(request) {
     return fetch(request).then(response => {
@@ -48,5 +50,9 @@ function fetchAndCache(request) {
                 return response;
             });
         });
+    }).catch(error => {
+        if (navigator.onLine === true) {
+            console.error(error);
+        }
     });
 }
