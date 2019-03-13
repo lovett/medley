@@ -39,6 +39,9 @@ class Controller:
             if name == "United States of America":
                 name = "USA"
 
+            if "Special Administrative Region" in name:
+                name = "China"
+
         return (name, abbrev)
 
     def GET(self, *_args, **_kwargs):
