@@ -45,32 +45,38 @@
                             </a>
                         </h2>
 
-                        <p class="cache">
-                            <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
-                        </p>
+                        <div class="details">
+                            <p>
+                                <time>
+                                    {{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}
+                                </time>
+                            </p>
 
-                        <div class="summary">
-                            <div>
-                                <p>{{ bookmark.domain }}</p>
+                            {% for tag in bookmark.tags or [] %}
                                 <p>
-                                    <time>
-                                        {{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}
-                                    </time>
-                                </p>
-                                <p>
-                                </p>
-
-                                {% for tag in bookmark.tags or [] %}
                                     <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
                                         <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                         {{ tag }}
                                     </a>
-                                {% endfor %}
-                            </div>
-                            <div>
-                                {{ bookmark.comments }}
-                            </div>
+                                </p>
+                            {% endfor %}
+
                         </div>
+
+                        {% if bookmark.comments %}
+                            <p class="comments">
+                                {{ bookmark.comments }}
+                            </p>
+                        {% endif %}
+
+                        <footer class="details">
+                            <p>{{ bookmark.domain }}</p>
+
+                            <p>
+                                <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                            </p>
+                        </footer>
+
                     </div>
                 </discardable-record>
 
