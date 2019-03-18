@@ -9,7 +9,7 @@
     {{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.min.css') }}
     {{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.theme.min.css') }}
     {{ macros.cacheBustedStylesheet('visitors', 'visitors.css') }}
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" />
+    {{ macros.cacheBustedStylesheet('visitors', 'flag-icon-css/css/flag-icon.min.css') }}
 {% endblock %}
 
 {% block scripts %}

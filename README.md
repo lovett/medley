@@ -108,3 +108,12 @@ space-separated string of IP addresses or fragments that are allowed
 to bypass authorization. Default: `None`
 
 **tools.gzip.on**: Whether to enable gzip compression. Default: `True`
+
+## Acknowledgements
+
+This project gratefully makes use of other open-source projects,
+including but not limited to:
+
+* [CherryPy](https://cherrypy.org/)
+* [flag-icon-css](http://flag-icon-css.lip.is/)
+* [Vue.js](https://vuejs.org/)
