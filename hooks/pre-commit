@@ -5,38 +5,36 @@ set -eu
 ROOT=$(mktemp -d)
 
 cleanup() {
-    rm -rf $ROOT
+    rm -rf "$ROOT"
 }
 
 echo "Runing pre-commit hook..."
 
-mkdir -p $ROOT
-git checkout-index --prefix=$ROOT/ -af
+git checkout-index --prefix="$ROOT/" -af
 
-# Exclude deleted, copied, and renamed files.
+# Excludes deleted, copied, and renamed files.
 for CHANGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
-    FILE_EXTENSION="${CHANGED_FILE##*.}"
-    FILE_NAME=$(basename "${CHANGED_FILE%.*}")
-    PARENT_PATH=$(dirname "$CHANGED_FILE")
+    ALT_CHANGED_FILE="$ROOT/$CHANGED_FILE"
+    FILE_EXTENSION="${ALT_CHANGED_FILE##*.}"
+    FILE_NAME=$(basename "${ALT_CHANGED_FILE%.*}")
+    PARENT_PATH=$(dirname "$ALT_CHANGED_FILE")
     PARENT_DIR=$(basename "$PARENT_PATH")
+    GRANDPARENT_PATH=$(dirname "$PARENT_PATH")
+    GRANDPARENT_DIR=$(basename "$GRANDPARENT_PATH")
 
-    if [[ "$FILE_EXTENSION"  == "py" ]]; then
-        TEST_FILE="${PARENT_PATH}/test_${FILE_NAME}.py"
+    if [[ "$FILE_EXTENSION"  != "py" ]]; then
+        continue
+    fi
 
+    ./venv/bin/flake8 "$ALT_CHANGED_FILE"
+    ./venv/bin/pylint --rcfile=.pylintrc "$ALT_CHANGED_FILE"
 
-        ./venv/bin/flake8 "$CHANGED_FILE"
-        ./venv/bin/pylint --rcfile=.pylintrc "$CHANGED_FILE"
-
-        if [ ! -f "$TEST_FILE" ]; then
-            continue
-        fi
-
-        if [ "$PARENT_DIR" == "parsers" ] || [ "$PARENT_DIR" == "plugins" ]; then
-            make "${PARENT_DIR}/${FILE_NAME}.py"
-            continue
-        fi
-
+    if [ "$GRANDPARENT_DIR" = "apps" ]; then
         make "$PARENT_DIR"
+    fi
+
+    if [ "$PARENT_DIR" == "parsers" ] || [ "$PARENT_DIR" == "plugins" ]; then
+        make "${PARENT_DIR}/${FILE_NAME}.${FILE_EXTENSION}"
     fi
 done
 
