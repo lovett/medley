@@ -3,6 +3,7 @@ Test suite for the transform app
 """
 
 import unittest
+import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -27,21 +28,31 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "POST"))
 
-    def test_returns_html(self):
-        """HTML is returned by default"""
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("<form" in response.body)
-
-    def test_lowercase_html(self):
+    @mock.patch("cherrypy.tools.negotiable.render_html")
+    @mock.patch("cherrypy.engine.publish")
+    def test_lowercase_html(self, publish_mock, render_mock):
         """Input is converted to lowercase and returned as HTML"""
-        response = self.request("/",
-                                method="POST",
-                                transform="lower",
-                                value="TEST")
-        self.assertTrue(helpers.response_is_html(response))
-        self.assertTrue("test" in response.body)
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "url:internal":
+                return ["/"]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request(
+            "/",
+            method="POST",
+            transform="lower",
+            value="TEST"
+        )
+
+        self.assertEqual(
+            helpers.html_var(render_mock, "result"),
+            "test"
+        )
 
     def test_lowercase_json(self):
         """Input is converted to lowercase and returned as JSON"""
