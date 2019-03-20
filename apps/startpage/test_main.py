@@ -9,7 +9,7 @@ from testing.cptestcase import BaseCherryPyTestCase
 import apps.startpage.main
 
 
-class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
+class TestStartpage(BaseCherryPyTestCase, ResponseAssertions):
     """Unit tests for the template app"""
 
     @classmethod

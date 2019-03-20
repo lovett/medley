@@ -10,7 +10,7 @@ from testing.cptestcase import BaseCherryPyTestCase
 import apps.redirect.main
 
 
-class TestTemplate(BaseCherryPyTestCase, ResponseAssertions):
+class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
     """
     Tests for the redirect application controller
     """
