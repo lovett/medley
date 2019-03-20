@@ -12,13 +12,15 @@ Vue.component('discardable-record', {
 
     methods: {
         discard: function () {
+            this.$el.hidden = true;
             fetch(this.url, {
                 method: this.method
             }).then(res => {
                 if (res.ok) {
-                    this.styles = {'display': 'none'};
                     this.$parent.$emit('discarded');
                 }
+            }).catch(err => {
+                this.$el.hidden = false;
             });
         }
     },
