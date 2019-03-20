@@ -8,8 +8,8 @@ class Controller:
 
     name = "Bookmarklets"
 
-    @cherrypy.tools.negotiable()
     @staticmethod
+    @cherrypy.tools.negotiable()
     def GET():
         """Present a static list of bookmarklets"""
 
