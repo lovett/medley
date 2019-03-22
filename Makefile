@@ -81,7 +81,7 @@ venv: dummy
 outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
 
-setup: assets
+setup: dummy
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
@@ -276,9 +276,27 @@ logindex-reset: dummy
 # with Node.js, npm, and the like. This application doesn't need any
 # of that.
 #
-assets: dummy
+assets: assets-vue assets-flags
+
+
+# Asset download of Vue.js
+#
+assets-vue: dummy
 	curl --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
 	curl --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
+
+
+# Asset download of flag-icon-css library used in visitors app
+#
+assets-flags: dummy
+	rm -fr master.zip apps/visitors/static/flag-icon-css/flags/4x3
+	curl --silent -L -O 'https://github.com/lipis/flag-icon-css/archive/master.zip'
+	unzip master.zip
+	mv flag-icon-css-master/flags/4x3 apps/visitors/static/flag-icon-css/flags/
+	mv flag-icon-css-master/css/flag-icon.min.css apps/visitors/static/flag-icon-css/css/
+	mv flag-icon-css-master/LICENSE apps/visitors/static/flag-icon-css/LICENSE
+	rm -rf master.zip flag-icon-css-master
+
 
 # Build the application
 #
