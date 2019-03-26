@@ -39,12 +39,13 @@ TMUX_SESSION_NAME := medley
 
 export PATH := ./venv/bin:$(PATH)
 
-# Debugging tool to print the value of a variable.
+# Make utility to print the value of a variable for debugging
 #
 # Example: make print-PLUGIN_DIR
 #
 print-%:
 	@echo $* = $($*)
+
 
 # Set up a virtualenv
 #
@@ -69,6 +70,7 @@ venv: dummy
 	@echo "After that, run: make setup"
 	@echo "Also consider running: make hooks"
 
+
 # Filter the list of outdated Python packages to direct dependencies
 #
 # By default, pip returns a list of all outdated packages. It can be
@@ -81,10 +83,14 @@ venv: dummy
 outdated: .pip-outdated $(REQUIREMENTS_FILES)
 	rm $(PIP_OUTDATED_TEMP)
 
+
+# Install third-party Python libraries
+#
 setup: dummy
 	pip install --upgrade pip setuptools
 	pip install -r requirements.txt
 	pip install -r requirements-dev.txt
+
 
 # Install simpleaudio, an additional library for wav file playback
 #
@@ -93,9 +99,12 @@ setup: dummy
 # libasound2-dev package installed.
 #
 # The non-audio parts of medley work fine without this library.
+#
 setup-audio:
 	pip install -r requirements-audio.txt
 
+# Run a local development webserver
+#
 serve: export BETTER_EXCEPTIONS=1
 serve: dummy
 	python medley.py
@@ -107,6 +116,7 @@ serve: dummy
 #
 $(COVERAGE_DIR):
 	mkdir $(COVERAGE_DIR)
+
 
 # Filter the list of outdated packages based on the contents of a requirements file
 #
@@ -127,6 +137,7 @@ $(REQUIREMENTS_FILES): dummy
 	@-grep -f $(REQUIREMENTS_TEMP) $(PIP_OUTDATED_TEMP)
 	@echo ""
 	@rm $(REQUIREMENTS_TEMP)
+
 
 # Create a coverage file for each app
 #
@@ -224,6 +235,7 @@ $(PLUGIN_PATHS): $(COVERAGE_DIR)
 	COVERAGE_FILE=$(COVERAGE_DIR)/$(MODULE).cov \
 	python -m pytest --cov=$(MODULE) --cov-branch  plugins/test_$(PLUGIN).py
 
+
 # Test a single parser
 #
 # Example: make parsers/myparser.py
@@ -237,6 +249,7 @@ $(PARSER_PATHS): $(COVERAGE_DIR) dummy
 	$(eval MODULE=$(addprefix parsers.,$(PARSER)))
 	COVERAGE_FILE=$(COVERAGE_DIR)/$(MODULE).cov \
 	python -m pytest --cov=$(MODULE) --cov-branch  parsers/test_$(PARSER).py
+
 
 # Run lint checks across the project
 #
@@ -270,16 +283,17 @@ logindex-reset: dummy
 	rm db/logindex.sqlite
 	touch medley.py
 
+
 # Download third-party front-end assets.
-#
-# This is deliberately simplistic in order to avoid having to bother
-# with Node.js, npm, and the like. This application doesn't need any
-# of that.
 #
 assets: assets-vue assets-flags
 
 
-# Asset download of Vue.js
+# Asset download of Vue.js without using npm
+#
+# This is deliberately simplistic in order to avoid dependency on
+# Node, which would otherwise be overkill for this application's
+# needs.
 #
 assets-vue: dummy
 	curl --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
@@ -287,6 +301,10 @@ assets-vue: dummy
 
 
 # Asset download of flag-icon-css library used in visitors app
+#
+# Similar to how Vue is handled, this is a direct-download approach
+# rather than an npm-based approach. The files used by the visitors
+# app are a subset of what the project provides.
 #
 assets-flags: dummy
 	rm -fr master.zip apps/visitors/static/flag-icon-css/flags/4x3
@@ -310,25 +328,25 @@ assets-flags: dummy
 build: dummy
 	mv $(SHARED_JS_DIR)/vue.min.js $(SHARED_JS_DIR)/vue.js
 
-#
+
 # Create a package upgrade commit.
-#
-# "puc" stands for Package Upgrade Commit
 #
 puc: dummy
 	git checkout master
 	git add requirements.txt requirements-dev.txt
 	git commit -m "Upgrade third-party libraries"
 
+
 # Set up git hooks
 #
-# This is kept away from other targets like venv and setup so that it
+# This is independent of other targets like venv and setup so that it
 # doesn't interfere with CI. The suggestion printed by the venv target
 # is enough of a reminder, given how infrequently this target is
 # needed.
 #
 hooks: dummy
 	ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+
 
 # Automation for merging changes from the master branch into the
 # production branch.
@@ -341,6 +359,9 @@ master-to-production: dummy
 	git push
 	git checkout master
 
+
+# Automation for setting up a tmux session
+#
 workspace:
 # 0: Editor
 	tmux new-session -d -s "$(TMUX_SESSION_NAME)" bash
