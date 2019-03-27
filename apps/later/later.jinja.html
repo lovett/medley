@@ -24,7 +24,15 @@
                 <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
                 <div class="hidden success message">Success! <a href="{{ bookmarks_url }}">Go to bookmarks</a></div>
 
-                {% if bookmark.rowid %}
+                {% if bookmark.deleted %}
+                    <div class="error message">
+                        <p>
+                            This URL was marked for removal at {{ bookmark.deleted|localtime|dateformat('LT') }}
+                        </p>
+                    </div>
+                {% endif %}
+
+                {% if bookmark.rowid and not bookmark.deleted  %}
                     <div class="notice message">
                         <p>
                             This URL was bookmarked on

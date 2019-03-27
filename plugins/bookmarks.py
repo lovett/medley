@@ -16,22 +16,62 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("bookmarks.sqlite")
 
         self._create("""
-        CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks USING fts4 (
+        PRAGMA journal_mode=WAL;
+
+        CREATE TABLE IF NOT EXISTS bookmarks (
             url,
             domain,
             added,
-            updated,
-            retrieved,
+            updated DEFAULT NULL,
+            retrieved DEFAULT NULL,
+            deleted DEFAULT NULL,
+            title DEFAULT NULL,
+            tags DEFAULT NULL,
+            comments DEFAULT NULL,
+            fulltext DEFAULT NULL,
+            UNIQUE(url)
+        );
+
+        CREATE VIRTUAL TABLE IF NOT EXISTS bookmarks_fts USING fts5(
             title,
             tags,
             comments,
             fulltext,
-            tokenize=porter,
-            notindexed=added,
-            notindexed=updated,
-            notindexed=retrieved,
-            order=desc
+            content=bookmarks,
+            tokenize=porter
         );
+
+        CREATE INDEX IF NOT EXISTS bookmarks_domain
+            ON bookmarks (domain);
+
+        CREATE TRIGGER IF NOT EXISTS bookmarks_after_insert
+        AFTER INSERT ON bookmarks
+        BEGIN
+        INSERT INTO bookmarks_fts (rowid, title, tags, comments, fulltext)
+        VALUES (new.rowid, new.title, new.tags, new.comments, new.fulltext);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS bookmarks_after_update
+        AFTER UPDATE OF fulltext ON bookmarks
+        BEGIN
+        INSERT INTO bookmarks_fts (bookmarks_fts, rowid, title, tags, comments,
+            fulltext)
+            VALUES ('delete', old.rowid, old.title, old.tags, old.comments,
+            old.fulltext);
+        INSERT INTO bookmarks_fts(rowid, title, tags, comments, fulltext)
+            VALUES (new.rowid, new.title, new.tags, new.comments,
+            new.fulltext);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS bookmarks_after_delete
+        AFTER DELETE ON bookmarks
+        BEGIN
+        INSERT INTO bookmarks_fts(bookmarks_fts, rowid, title, tags, comments,
+            fulltext)
+            VALUES ('delete', old.rowid, old.title, old.tags, old.comments,
+            old.fulltext);
+        END;
+
         """)
 
     def start(self):
@@ -48,8 +88,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:remove", self.remove)
 
-    def find(self, uid=None, url=None):
+    @staticmethod
+    def domain_and_url(url):
+        """Parse the domain from a normalized URL."""
 
+        parsed_url = urlparse(
+            url.split('#', 1)[0],
+            scheme='http',
+            allow_fragments=False
+        )
+
+        return (
+            parsed_url.netloc.lower(),
+            parsed_url.geturl()
+        )
+
+    def find(self, uid=None, url=None):
         """Locate a bookmark by ID or URL."""
 
         where_clause = None
@@ -59,8 +113,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             values = (uid,)
 
         if url:
-            where_clause = "url MATCH ?"
-            values = (url,)
+            where_clause = "domain=? AND url=?"
+            values = self.domain_and_url(url)
 
         if not where_clause:
             return False
@@ -69,6 +123,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT rowid, url, domain, title,
             added as 'added [datetime]',
             updated as 'updated [datetime]',
+            deleted as 'deleted [datetime]',
             tags, comments
             FROM bookmarks WHERE 1=1 AND {}""".format(where_clause),
             values
@@ -78,38 +133,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def add(self, url=None, title=None, comments=None, tags=None, added=None):
         """Store a bookmarked URL and its metadata."""
 
-        parsed_url = urlparse(
-            url.split('#', 1)[0],
-            scheme='http',
-            allow_fragments=False
-        )
+        bookmark = self.find(url=url)
 
-        if not parsed_url.netloc:
-            return False
-
-        bookmark_id = self._selectFirst(
-            "SELECT rowid FROM bookmarks WHERE url MATCH ?",
-            (parsed_url.geturl(),)
-        )
-
-        if bookmark_id:
-            sql = """UPDATE bookmarks
-            SET title=?, tags=?, comments=?, updated=CURRENT_TIMESTAMP
-            WHERE rowid=?"""
+        if bookmark:
+            sql = """UPDATE bookmarks SET title=?, tags=?, comments=?,
+            updated=CURRENT_TIMESTAMP, deleted=NULL WHERE rowid=?"""
 
             values = (
                 title,
                 tags,
                 comments,
-                bookmark_id
+                bookmark["rowid"]
             )
 
             self._update(sql, [values])
             return True
 
         sql = """INSERT INTO bookmarks
-        (url, domain, added, title, tags, comments)
+        (domain, url, added, title, tags, comments)
         VALUES (?, ?, ?, ?, ?, ?)"""
+
+        domain_and_url = self.domain_and_url(url)
 
         if added and added.isnumeric():
             numeric_timestamp = int(added)
@@ -118,8 +162,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             add_date = pendulum.now()
 
         values = (
-            parsed_url.geturl(),
-            parsed_url.netloc.lower(),
+            domain_and_url[0],
+            domain_and_url[1],
             add_date.format('YYYY-MM-DD HH:mm:ss'),
             title,
             tags,
@@ -192,7 +236,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Discard a previously bookmarked URL."""
 
         return self._delete(
-            "DELETE FROM bookmarks WHERE url=?",
+            "UPDATE bookmarks SET deleted=CURRENT_TIMESTAMP WHERE url=?",
             (url,)
         )
 
@@ -200,25 +244,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search(self, query, limit=20, offset=0):
         """Locate bookmarks via fulltext search.
 
-        Ranking is based on term frequency.
+        Ranking is based on the built-in hidden rank column provided
+        by Sqlite FTS5, which the Sqlite documentation indicates is
+        faster than using the bm25() function and specifying custom
+        weights for each column.
+
+        In testing, there wasn't a huge difference between the two.
+
         """
-
-        # How much value to give matches from each column of the
-        # virtual table, in the order they appear in the create table
-        # statement. Includes non-indexed fields.
-        weights = (
-            0.00,   # url
-            0.25,   # domain
-            -1.00,  # added (not indexed)
-            -1.00,  # updated (not indexed)
-            -1.00,  # retrieved (not indexed)
-            0.75,   # title
-            0.80,   # tags
-            0.50,   # comments
-            0.60    # fulltext
-        )
-
-        weight_string = ",".join(map(repr, weights))
 
         if "tag:" in query:
             query = query.replace("tag:", "tags:")
@@ -227,18 +260,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query = query.replace("comment:", "comments:")
 
         return self._fts_search(
-            """SELECT url, domain, title, rank,
-            comments, tags as 'tags [comma_delimited]',
+            """SELECT b.url, b.domain, b.title,
+            b.comments, b.tags as 'tags [comma_delimited]',
             added as 'added [datetime]',
             updated as 'updated [datetime]'
-            FROM bookmarks JOIN (
-                SELECT docid, rank(matchinfo(bookmarks, 'pcx'), {}) as rank
-                FROM bookmarks
-                WHERE bookmarks MATCH ?
-                ORDER BY rank DESC
-                LIMIT ? OFFSET ?
-            ) as ranktable USING(docid)
-            ORDER BY ranktable.rank DESC""".format(weight_string),
+            FROM bookmarks_fts, bookmarks b
+            WHERE bookmarks_fts.rowid=b.rowid
+            AND bookmarks_fts MATCH ?
+            AND b.deleted IS NULL
+            ORDER BY bookmarks_fts.rank
+            LIMIT ? OFFSET ?""",
             (query, limit, offset)
         )
 
@@ -252,7 +283,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         retrieved 'retrieved [datetime]',
         comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
-        ORDER BY rowid DESC
+        WHERE deleted IS NULL
+        ORDER BY added DESC
         LIMIT ?"""
 
         return self._select(sql, (limit,))
+
+    def prune(self):
+        """Delete rows that have been marked for removal.
+
+        This is normally invoked from the maintenance plugin.
+
+        """
+
+        deletion_count = self._delete(
+            "DELETE FROM bookmarks WHERE deleted IS NOT NULL"
+        )
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "bookmarks",
+            "prune",
+            "pruned {} records".format(deletion_count)
+        )
