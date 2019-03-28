@@ -32,6 +32,9 @@ class Controller:
 
         query = kwargs.get('query')
         wayback = kwargs.get('wayback')
+        page = int(kwargs.get('page', 1))
+        per_page = 20
+        offset = (page - 1) * per_page
 
         if wayback:
             return {
@@ -40,18 +43,42 @@ class Controller:
 
         if query:
             (bookmarks, count) = cherrypy.engine.publish(
-                "bookmarks:search", query
+                "bookmarks:search",
+                query,
+                limit=per_page,
+                offset=offset
             ).pop()
         else:
             (bookmarks, count) = cherrypy.engine.publish(
-                "bookmarks:recent"
+                "bookmarks:recent",
+                limit=per_page,
+                offset=offset
             ).pop()
+
+        start_index = offset + 1
+        end_index = offset + len(bookmarks)
+
+        total_pages = count // per_page + 1
+
+        next_page = page + 1
+        if next_page > total_pages:
+            next_page = None
+
+        previous_page = page - 1
+        if previous_page < 1:
+            previous_page = None
 
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
                 "count": count,
-                "query": query
+                "query": query,
+                "next_page": next_page,
+                "previous_page": previous_page,
+                "total_pages": total_pages,
+                "page": page,
+                "start_index": start_index,
+                "end_index": end_index
             })
         }
 

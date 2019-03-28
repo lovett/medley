@@ -301,7 +301,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def recent(self, limit=20):
+    def recent(self, limit=20, offset=0):
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT url, domain, title,
@@ -312,10 +312,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM bookmarks
         WHERE deleted IS NULL
         ORDER BY added DESC
-        LIMIT ?"""
+        LIMIT ? OFFSET ?"""
 
         return (
-            self._select(sql, (limit,)),
+            self._select(sql, (limit, offset)),
             self._count(sql)
         )
 

@@ -76,6 +76,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["slug"] = self.slug_filter
         self.env.filters["sane_callerid"] = self.sane_callerid_filter
         self.env.filters["autolink"] = self.autolink_filter
+        self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -151,6 +152,8 @@ class Plugin(plugins.SimplePlugin):
 
         value = singular if count == 1 else plural
 
+        # Avoiding use of literal string interpolation for Python 3.5
+        # compatibility.
         return (number_format + " {} {}").format(
             count,
             value,
@@ -385,4 +388,15 @@ class Plugin(plugins.SimplePlugin):
             self.anonymize_filter(value),
             'target="_blank" rel="noreferrer"',
             value
+        )
+
+    def optional_qs_param_filter(self, value, key):
+        """Return a URL querystring key-value pair if the value exists."""
+
+        if not value:
+            return ''
+
+        return "&{}={}".format(
+            key,
+            self.urlencode_filter(value)
         )

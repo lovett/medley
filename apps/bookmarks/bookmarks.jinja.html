@@ -33,7 +33,7 @@
 
 
             {% if count %}
-                <p>{{ count|pluralize('bookmark', 'bookmarks') }} available</p>
+                <p>{{ start_index }} to {{ end_index }} of {{ count|pluralize('bookmark', 'bookmarks') }} available</p>
             {% endif %}
 
 
@@ -92,6 +92,38 @@
 
             {% endfor %}
         </div>
+
+        <div class="pagination">
+            <p>Page {{ page }} of {{ total_pages }}</p>
+
+            {% if page > 1 %}
+                <a href="{{ app_url }}?page=1{{ query|optional_qs_param("query") }}" class="next">
+                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                    First
+                </a>
+            {% endif %}
+
+            {% if previous_page %}
+                <a href="{{ app_url }}?page={{ previous_page }}{{ query|optional_qs_param("query") }}" class="next">
+                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                    Previous
+                </a>
+            {% endif %}
+            {% if next_page %}
+                <a href="{{ app_url }}?page={{ next_page }}{{ query|optional_qs_param("query") }}" class="previous">
+                    Next
+                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                </a>
+            {% endif %}
+
+            {% if page < total_pages %}
+                <a href="{{ app_url }}?page={{ total_pages }}{{ query|optional_qs_param("query") }}" class="previous">
+                    Last
+                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                </a>
+            {% endif %}
+        </div>
+
     </main>
 
 {% endblock %}
