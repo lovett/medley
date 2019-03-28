@@ -88,6 +88,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:remove", self.remove)
+        self.bus.subscribe("bookmarks:repair", self.repair)
 
     @staticmethod
     def domain_and_url(url):
@@ -329,3 +330,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "prune",
             "pruned {} records".format(deletion_count)
         )
+
+    @decorators.log_runtime
+    def repair(self):
+        """Correct wrong or missing values."""
+
+        rows_without_domain = self._select_generator(
+            "SELECT rowid, url FROM bookmarks WHERE domain IS NULL"
+        )
+
+        for row in rows_without_domain:
+            (domain, _) = self.domain_and_url(row["url"])
+            self._update(
+                "UPDATE bookmarks SET domain=? WHERE rowid=?",
+                [(domain, row["rowid"])]
+            )
