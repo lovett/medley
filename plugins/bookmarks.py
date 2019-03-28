@@ -295,7 +295,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         placeholder_values += (limit, offset)
 
-        return self._select(sql, placeholder_values)
+        return (
+            self._select(sql, placeholder_values),
+            self._count(sql, placeholder_values)
+        )
 
     @decorators.log_runtime
     def recent(self, limit=20):
@@ -311,7 +314,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY added DESC
         LIMIT ?"""
 
-        return self._select(sql, (limit,))
+        return (
+            self._select(sql, (limit,)),
+            self._count(sql)
+        )
 
     def prune(self):
         """Delete rows that have been marked for removal.

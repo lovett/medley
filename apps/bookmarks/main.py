@@ -39,17 +39,18 @@ class Controller:
             }
 
         if query:
-            bookmarks = cherrypy.engine.publish(
+            (bookmarks, count) = cherrypy.engine.publish(
                 "bookmarks:search", query
             ).pop()
         else:
-            bookmarks = cherrypy.engine.publish(
+            (bookmarks, count) = cherrypy.engine.publish(
                 "bookmarks:recent"
             ).pop()
 
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
+                "count": count,
                 "query": query
             })
         }

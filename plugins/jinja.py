@@ -143,14 +143,19 @@ class Plugin(plugins.SimplePlugin):
         return value.replace("\n", "<br/>")
 
     @staticmethod
-    def pluralize_filter(count, singular, plural=None, suffix=''):
+    def pluralize_filter(count, singular, plural=None, suffix='', number_format='{:,d}'):
         """Label a value with the singular or plural form of a word."""
 
         if not plural:
             plural = singular + "s"
 
         value = singular if count == 1 else plural
-        return "{} {} {}".format(count, value, suffix)
+
+        return (number_format + " {} {}").format(
+            count,
+            value,
+            suffix
+        )
 
     @staticmethod
     def anonymize_filter(url):

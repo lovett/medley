@@ -31,6 +31,12 @@
         <div class="content-wrapper">
             <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
 
+
+            {% if count %}
+                <p>{{ count|pluralize('bookmark', 'bookmarks') }} available</p>
+            {% endif %}
+
+
             {% for bookmark in bookmarks %}
 
                 <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">

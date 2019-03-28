@@ -38,7 +38,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "bookmarks:recent":
-                return [[]]
+                return [[[], 0]]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

@@ -2,6 +2,7 @@
 
 import os.path
 import sqlite3
+import re
 import cherrypy
 
 
@@ -93,6 +94,28 @@ class Sqlite:
             row_count = con.execute(query, values).rowcount
         con.close()
         return row_count
+
+    def _count(self, query, values=()):
+        """Convert a select query to a count query and execute it."""
+
+        count_query = re.sub(
+            r"SELECT.*?(FROM.*)ORDER BY.*",
+            r"SELECT count(*) \g<1>",
+            query,
+            flags=re.MULTILINE | re.DOTALL | re.IGNORECASE
+        )
+
+
+        placeholder_count = count_query.count('?')
+        placeholder_values = values[0:placeholder_count]
+        print(count_query)
+        print(values)
+        print(placeholder_values)
+
+        return self._selectFirst(
+            count_query,
+            placeholder_values
+        )
 
     def _select(self, query, values=()):
         """Issue a select query."""
