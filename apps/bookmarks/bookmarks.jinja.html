@@ -70,7 +70,11 @@
                         {% endif %}
 
                         <footer class="details">
-                            <p>{{ bookmark.domain }}</p>
+                            {% if bookmark.domain %}
+                                <p>
+                                    <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                </p>
+                            {% endif %}
 
                             <p>
                                 <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />

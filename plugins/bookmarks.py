@@ -1,5 +1,6 @@
 """Storage and search for bookmarked URLs."""
 
+import re
 from urllib.parse import urlparse
 import cherrypy
 import pendulum
@@ -253,25 +254,47 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
+        from_sql = "bookmarks b"
+        where_sql = "b.deleted IS NULL"
+        order_sql = "b.added DESC"
+        placeholder_values = ()
+
         if "tag:" in query:
             query = query.replace("tag:", "tags:")
 
         if "comment:" in query:
             query = query.replace("comment:", "comments:")
 
-        return self._select(
-            """SELECT b.url, b.domain, b.title,
-            b.comments, b.tags as 'tags [comma_delimited]',
-            added as 'added [datetime]',
-            updated as 'updated [datetime]'
-            FROM bookmarks_fts, bookmarks b
-            WHERE bookmarks_fts.rowid=b.rowid
-            AND bookmarks_fts MATCH ?
-            AND b.deleted IS NULL
-            ORDER BY bookmarks_fts.rank
-            LIMIT ? OFFSET ?""",
-            (query, limit, offset)
+        if "domain:" in query:
+            match = re.search(r"domain:\s*(\S+)", query)
+            if match:
+                where_sql += " AND b.domain=?"
+                placeholder_values += (match.group(1),)
+                query = query.replace(match.group(0), "")
+
+        if query:
+            from_sql = "bookmarks_fts, bookmarks b"
+            where_sql += """ AND bookmarks_fts.rowid=b.rowid
+            AND bookmarks_fts MATCH ?"""
+            order_sql = "bookmarks_fts.rank"
+            placeholder_values += (query,)
+
+        sql = """SELECT b.url, b.domain, b.title,
+        b.comments, b.tags as 'tags [comma_delimited]',
+        added as 'added [datetime]',
+        updated as 'updated [datetime]'
+        FROM {}
+        WHERE {}
+        ORDER BY {}
+        LIMIT ? OFFSET ?""".format(
+            from_sql,
+            where_sql,
+            order_sql
         )
+
+        placeholder_values += (limit, offset)
+
+        return self._select(sql, placeholder_values)
 
     @decorators.log_runtime
     def recent(self, limit=20):
