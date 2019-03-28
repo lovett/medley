@@ -104,6 +104,26 @@ class Sqlite:
             cur.execute(query, values)
             return cur.fetchall() or []
 
+    def _select_generator(self, query, values=(), arraysize=1):
+        """Issue a select query and return results as a generator.
+
+        Nearly the same as _select(), but standalone so that _select()
+        can remain a regular function.
+
+        """
+
+        con = self._open()
+        con.row_factory = sqlite3.Row
+
+        with con:
+            cur = con.cursor()
+            cur.execute(query, values)
+            while True:
+                result = cur.fetchmany(size=arraysize)
+                if not result:
+                    break
+                yield from result
+
     def _explain(self, query, values=()):
         """Get the query plan for a query."""
 
