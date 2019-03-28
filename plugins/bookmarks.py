@@ -259,7 +259,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if "comment:" in query:
             query = query.replace("comment:", "comments:")
 
-        return self._fts_search(
+        return self._select(
             """SELECT b.url, b.domain, b.title,
             b.comments, b.tags as 'tags [comma_delimited]',
             added as 'added [datetime]',
