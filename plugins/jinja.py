@@ -144,7 +144,8 @@ class Plugin(plugins.SimplePlugin):
         return value.replace("\n", "<br/>")
 
     @staticmethod
-    def pluralize_filter(count, singular, plural=None, suffix='', number_format='{:,d}'):
+    def pluralize_filter(count, singular, plural=None, suffix='',
+                         number_format='{:,d}'):
         """Label a value with the singular or plural form of a word."""
 
         if not plural:
@@ -162,30 +163,21 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     def anonymize_filter(url):
-        """Prepend a URL with the URL of an anonymizer to increase referrer
-        privacy.
+        """Prepend an HTTP URL with the URL of the redirect app increase
+        referrer privacy.
 
         """
-        anonymizer = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:url_anonymizer",
-            memorize=True
-        ).pop()
-
-        if not anonymizer:
-            return url
 
         parsed_url = urlparse(url)
 
-        if not parsed_url.scheme:
-            url = "http://" + url
-            parsed_url = urlparse(url)
-
-        # Only consider HTTP and HTTPS.
         if parsed_url.scheme not in ('http', 'https'):
             return url
 
-        return anonymizer + quote(url)
+        return cherrypy.engine.publish(
+            "url:internal",
+            "/redirect",
+            {"u": quote(url)}
+        ).pop()
 
     @staticmethod
     def urlencode_filter(value):

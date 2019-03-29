@@ -19,7 +19,7 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe("url:internal", self.internal_url)
 
     @staticmethod
-    def internal_url(path=None, query=(), trailing_slash=False):
+    def internal_url(path=None, query={}, trailing_slash=False):
         """Create an absolute internal URL.
 
         The URL hostname is sourced from two places. Most of the time,

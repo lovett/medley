@@ -91,9 +91,8 @@ class Controller:
         ).pop()
 
         anonymizer_url = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:url_anonymizer",
-            memorize=True
+            "url:internal",
+            "/redirect/?u="
         ).pop()
 
         parser = Parser(anonymizer_url, local_domains)
