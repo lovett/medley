@@ -1,5 +1,6 @@
 """Work out an app URL from a controller instance."""
 
+import ipaddress
 from urllib.parse import urlencode
 import cherrypy
 from cherrypy.process import plugins
@@ -19,7 +20,7 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe("url:internal", self.internal_url)
 
     @staticmethod
-    def internal_url(path=None, query={}, trailing_slash=False):
+    def internal_url(path=None, query=(), trailing_slash=False):
         """Create an absolute internal URL.
 
         The URL hostname is sourced from two places. Most of the time,
@@ -32,6 +33,12 @@ class Plugin(plugins.SimplePlugin):
         """
 
         hostname = cherrypy.request.base
+
+        try:
+            if ipaddress.ip_address(hostname).is_loopback:
+                hostname = None
+        except ValueError:
+            pass
 
         if not hostname:
             hostname = cherrypy.engine.publish(
