@@ -278,6 +278,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 query = query.replace(match.group(0), "")
 
         if query:
+            # The query is sanitized to prevent FTS5 syntax errors
+            query = re.sub(r"[^\w:]", "_", query)
+
             from_sql = "bookmarks_fts, bookmarks b"
             where_sql += """ AND bookmarks_fts.rowid=b.rowid
             AND bookmarks_fts MATCH ?"""
