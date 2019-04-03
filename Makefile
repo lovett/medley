@@ -105,7 +105,6 @@ setup-audio:
 
 # Run a local development webserver
 #
-serve: export BETTER_EXCEPTIONS=1
 serve: dummy
 	python medley.py
 
