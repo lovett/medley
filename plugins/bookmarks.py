@@ -279,13 +279,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if query:
             # The query is sanitized to prevent FTS5 syntax errors
-            query = re.sub(r"[^\w:]", "_", query)
+            query = re.sub(r"[^\w ]", "_", query)
+
+            # Semicolons are allowed after column names
+            query = re.sub(r"\b(tags|comments|domain)_\s*", r"\g<1>:", query)
 
             from_sql = "bookmarks_fts, bookmarks b"
             where_sql += """ AND bookmarks_fts.rowid=b.rowid
             AND bookmarks_fts MATCH ?"""
             order_sql = "bookmarks_fts.rank"
             placeholder_values += (query,)
+
+            print(query)
 
         sql = """SELECT b.url, b.domain, b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
