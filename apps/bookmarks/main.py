@@ -30,6 +30,7 @@ class Controller:
 
         """
 
+        order = kwargs.get('order', 'rank')
         query = kwargs.get('query')
         wayback = kwargs.get('wayback')
         page = int(kwargs.get('page', 1))
@@ -45,8 +46,9 @@ class Controller:
             (bookmarks, count) = cherrypy.engine.publish(
                 "bookmarks:search",
                 query,
+                order=order,
                 limit=per_page,
-                offset=offset
+                offset=offset,
             ).pop()
         else:
             (bookmarks, count) = cherrypy.engine.publish(
@@ -73,6 +75,7 @@ class Controller:
                 "bookmarks": bookmarks,
                 "count": count,
                 "query": query,
+                "order": order,
                 "next_page": next_page,
                 "previous_page": previous_page,
                 "total_pages": total_pages,

@@ -22,10 +22,43 @@
                 <div class="field">
                     <button>Search</button>
                 </div>
-                <div class="field align-right">
-                    <a href="{{ app_url }}">Reset</a>
+                <div class="field">
+                    <div class="field-group">
+                        <label for="order-rank">
+                            <input type="radio"
+                                   id="order-rank"
+                                   name="order"
+                                   value="rank"
+                                   {% if order == "rank" %}checked="checked"{% endif %}
+                            />
+                            By rank
+                        </label>
+                        <label for="order-date-desc">
+                            <input type="radio"
+                                   id="order-date-desc"
+                                   name="order"
+                                   value="date-desc"
+                                   {% if order == "date-desc" %}checked="checked"{% endif %}
+                            />
+                            Newest first
+                        </label>
+                        <label for="order-date-asc">
+                            <input type="radio"
+                                   id="order-date-asc"
+                                   name="order"
+                                   value="date-asc"
+                                   {% if order == "date-asc" %}checked="checked"{% endif %}
+                            />
+                            Oldest first
+                        </label>
+                    </div>
                 </div>
             </div>
+            {% if query %}
+            <div class="field align-right">
+                <a href="{{ app_url }}">Reset</a>
+            </div>
+            {% endif %}
         </form>
 
         <div class="content-wrapper">

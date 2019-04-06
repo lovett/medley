@@ -247,7 +247,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(self, query, limit=20, offset=0):
+    def search(self, query, order="date-desc", limit=20, offset=0):
         """Locate bookmarks via fulltext search.
 
         Ranking is based on the built-in hidden rank column provided
@@ -261,8 +261,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         from_sql = "bookmarks b"
         where_sql = "b.deleted IS NULL"
-        order_sql = "b.added DESC"
         placeholder_values = ()
+        order_sql = "b.added DESC"
 
         if "tag:" in query:
             query = query.replace("tag:", "tags:")
@@ -287,10 +287,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             from_sql = "bookmarks_fts, bookmarks b"
             where_sql += """ AND bookmarks_fts.rowid=b.rowid
             AND bookmarks_fts MATCH ?"""
-            order_sql = "bookmarks_fts.rank"
-            placeholder_values += (query,)
 
-            print(query)
+            if order == "rank":
+                order_sql = "bookmarks_fts.rank"
+            if order == "date-asc":
+                order_sql = "b.added ASC"
+
+            placeholder_values += (query,)
 
         sql = """SELECT b.url, b.domain, b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
