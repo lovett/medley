@@ -370,4 +370,4 @@ workspace:
 
 # Install the application on the production host via Ansible
 install:
-	ansible-playbook --list-hosts ansible/install.yml
+	ansible-playbook ansible/install.yml
