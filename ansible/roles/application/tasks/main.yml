@@ -56,19 +56,25 @@
   become: true
   become_user: "{{ project_user }}"
   pip:
-    name: "{{ item }}"
+    name:
+      - pip
+      - setuptools
     extra_args: --upgrade
     virtualenv: "{{ project_newinstall_tmp }}/venv"
-  with_items:
-    - pip
-    - setuptools
 
 - name: Install python3 application packages
   become: true
   become_user: "{{ project_user }}"
   pip:
-    requirements={{ project_newinstall_tmp }}/requirements.txt
-    virtualenv={{ project_newinstall_tmp }}/venv
+    requirements: "{{ project_newinstall_tmp }}/requirements.txt"
+    virtualenv: "{{ project_newinstall_tmp }}/venv"
+
+- name: Install python3 audio packages
+  become: true
+  become_user: "{{ project_user }}"
+  pip:
+    requirements: "{{ project_newinstall_tmp }}/requirements-audio.txt"
+    virtualenv: "{{ project_newinstall_tmp }}/venv"
 
 - name: Back up current installation
   become: true
