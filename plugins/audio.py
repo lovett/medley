@@ -19,7 +19,7 @@ from cherrypy.process import plugins
 # Failure to import simpleaudio is allowed.
 try:
     import simpleaudio as SIMPLE_AUDIO  # pylint: disable=import-error
-except ModuleNotFoundError:
+except Exception:   # pylint: disable=broad-except
     SIMPLE_AUDIO = None
 
 
