@@ -265,14 +265,6 @@ lint: dummy
 	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
 
 
-vagrant-install: dummy
-	vagrant box update
-	vagrant up
-
-vagrant-provision: dummy
-	vagrant provision
-
-
 # Empty the logindex database and re-index
 #
 # For use when changes to the logindex or visitors apps require a
@@ -375,3 +367,7 @@ workspace:
 
 	tmux select-window -t "$(TMUX_SESSION_NAME)":0
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
+
+# Install the application on the production host via Ansible
+install:
+	ansible-playbook --list-hosts ansible/install.yml

@@ -1,6 +1,12 @@
 ---
-- hosts: all
+- hosts: medley
   vars:
+    project_name: medley
+    project_user: "{{ project_name }}"
+    project_group: "{{ project_name }}"
+    project_root: /srv/{{ project_name }}
+    project_backup: "/srv/{{ project_name }}.bak"
+    project_newinstall_tmp: "/srv/{{ project_name }}.new"
   roles:
-    - system
-    - application
+      - system
+      - application
