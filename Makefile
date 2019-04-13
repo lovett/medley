@@ -53,9 +53,13 @@ print-%:
 # venv without pip. Instead, system packages are enabled
 # after-the-fact by editing the pyvenv.cfg file.
 #
-# This results in the best of both worlds: a local copy
-# of pip with a predictable name (no confusion about pip vs pip3) and
-# access to site packages for faster builds.
+# This results in the best of both worlds: a local copy of pip with a
+# predictable name (no confusion about pip vs pip3) and access to site
+# packages for faster builds.
+#
+# Although the documentation for Python 3.5 says that pip is installed
+# by default, this doesn't appear to be the case at the moment on
+# Raspbian Stretch. Fiddling with pyenv.cfg is a workaround.
 #
 venv: dummy
 	@echo -n "Creating a new virtual environment..."
