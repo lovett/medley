@@ -31,7 +31,6 @@
     group="{{ project_group }}"
     mode=0775
   with_items:
-    - /var/log/{{ project_name }}
     - /var/cache/{{ project_name }}
     - /var/cache/{{ project_name }}/speak
 

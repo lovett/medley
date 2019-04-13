@@ -11,7 +11,6 @@ helps each application stay relatively small.
 
 import importlib
 import logging
-import logging.config
 import os
 import os.path
 import cherrypy
@@ -31,21 +30,27 @@ def main():
     server_root = os.path.dirname(os.path.abspath(__file__))
     app_root = os.path.join(server_root, "apps")
 
-    # Configuration - default values
+    # Configuration defaults
+    #
+    # These are reasonable values for a production environment.
     cherrypy.config.update({
         "cache_dir": "./cache",
         "database_dir": "./db",
-        "engine.autoreload.on": True,
+        "engine.autoreload.on": False,
         "local_maintenance": True,
         "log.screen": True,
-        "log_dir": "./logs",
-        "memorize_checksums": False,
-        "request.show_tracebacks": True,
+        "log.screen_access": False,
+        "log.access_file": "",
+        "log.error_file": "",
+        "memorize_checksums": True,
+        "request.show_tracebacks": False,
         "server.daemonize": False,
-        "server.socket_host": "0.0.0.0",
+        "server.socket_host": "127.0.0.1",
         "server.socket_port": 8085,
         "server_root": server_root,
         "tools.conditional_auth.on": False,
+        "users": {},
+        "tools.conditional_auth.whitelist": "",
 
         # Jinja templating won't work unless tools.encode is off
         "tools.encode.on": False,
@@ -69,6 +74,11 @@ def main():
              if os.path.isfile(candidate)),
         )
         cherrypy.config.update(config)
+
+        cherrypy.log("Configuration overrides loaded from {}".format(
+            config
+        ))
+
     except StopIteration:
         pass
 
@@ -79,8 +89,9 @@ def main():
 
     # Directory creation
     #
-    # Filesystem paths declared by the config are expected to exist.
-    for key in ("database_dir", "cache_dir", "log_dir"):
+    # Filesystem paths specified in the configuration are expected to
+    # already exist. Try to create them if they don't.
+    for key in ("database_dir", "cache_dir"):
         value = cherrypy.config.get(key)
 
         try:
@@ -184,40 +195,18 @@ def main():
     cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
 
-    # Logging
-    error_log_handler = logging.handlers.TimedRotatingFileHandler(
-        os.path.join(
-            cherrypy.config.get("log_dir"),
-            "error.log"
-        ),
-        when="D",
-        interval=1,
-        backupCount=14,
-        encoding="utf8"
-    )
-    error_log_handler.setLevel(logging.INFO)
-
-    # pylint: disable=protected-access
-    error_log_handler.setFormatter(cherrypy._cplogging.logfmt)
-
-    cherrypy.log.error_log.addHandler(error_log_handler)
-
-    access_log_handler = logging.handlers.TimedRotatingFileHandler(
-        os.path.join(
-            cherrypy.config.get("log_dir"),
-            "access.log"
-        ),
-        when="D",
-        interval=1,
-        backupCount=14,
-        encoding="utf8"
-    )
-    access_log_handler.setLevel(logging.INFO)
-
-    # pylint: disable=protected-access
-    access_log_handler.setFormatter(cherrypy._cplogging.logfmt)
-
-    cherrypy.log.access_log.addHandler(access_log_handler)
+    # Disable access logging to the console
+    #
+    # This changes CherryPy's default behavior, which is to send
+    # access and error logs to the screen when screen logging is
+    # enabled. Turning off one but not the other only works when
+    # logging to files.
+    #
+    # The log.screen_access config key is unique to this project.
+    if not cherrypy.config.get("log.screen_access"):
+        for handler in cherrypy.log.access_log.handlers:
+            if isinstance(handler, logging.StreamHandler):
+                cherrypy.log.access_log.handlers.remove(handler)
 
     cherrypy.engine.start()
     cherrypy.engine.publish("scheduler:revive")

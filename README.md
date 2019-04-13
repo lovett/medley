@@ -67,7 +67,7 @@ Sqlite databases. Default: `./db`
 
 **engine.autoreload.on**: Whether the CherryPy webserver should watch
 for changes to application files and restart itself. Only useful in
-development. Default: `True`
+development. Default: `False`
 
 **local_maintenance**: Whether the server should allow requests
 from localhost that perform cleanup and maintenance operations. These
@@ -77,22 +77,22 @@ when the application is otherwise dormant. Default: `True`
 **log.screen**: Whether requests should be written to the stdout of the
 tty running the server process. Default: `True`
 
-**log_dir**: The path to the directory that should be used for access
-logs. Default: `./logs`
+**log.screen_access**: Whether access logs should be written to stdout
+when screen logging is enabled. Default: `False`
 
 **memorize_checksums**: Whether the server should keep static asset file
 hashes in memory for use with HTTP cache control. Useful in production
-but counterproductive in development. Default: `False`
+but counterproductive in development. Default: `True`
 
 **request.show_tracebacks**: Whether CherryPy should display Python
-trackebacks when errors occur. Default: `True`
+trackebacks when errors occur. Default: `False`
 
 **server.daemonize**: Whether the CherryPy server should run as a
 daemon. Not meaningful in production unless systemd is not being
 used. Default: `False`
 
 **server.socket_host**: The IP the server should listen on. Default:
-`0.0.0.0`
+`127.0.0.1`
 
 **server.socket_port**: The port the server should listen on. Default:
 `8085`
@@ -101,7 +101,7 @@ used. Default: `False`
 authorization. Default: `False`
 
 **users**: If using conditional auth, a Python dictionary of usernames
-and passwords for Basic Auth. Default: `None`
+and passwords for Basic Auth. Default: `{}`
 
 **tools.conditional_auth.whitelist**: If using conditional auth, a
 space-separated string of IP addresses or fragments that are allowed
