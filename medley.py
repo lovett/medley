@@ -34,6 +34,7 @@ def main():
     #
     # These are reasonable values for a production environment.
     cherrypy.config.update({
+        "app_root": app_root,
         "cache_dir": "./cache",
         "database_dir": "./db",
         "engine.autoreload.on": False,
@@ -61,31 +62,18 @@ def main():
     })
 
     # Overrides to the default configuration are sourced from
-    # /etc/medley.conf or medley.conf in the application root,
-    # whichever is found first.
+    # one or more external files.
     config_candidates = (
         "/etc/medley.conf",
         os.path.join(server_root, "medley.conf")
     )
 
-    try:
-        config = next(
-            (candidate for candidate in config_candidates
-             if os.path.isfile(candidate)),
-        )
-        cherrypy.config.update(config)
-
-        cherrypy.log("Configuration overrides loaded from {}".format(
-            config
-        ))
-
-    except StopIteration:
-        pass
-
-    # Some configuration values are set automatically.
-    cherrypy.config.update({
-        "app_root": app_root
-    })
+    for path in config_candidates:
+        if os.path.isfile(path):
+            cherrypy.config.update(path)
+            cherrypy.log("Configuration overrides loaded from {}".format(
+                path
+            ))
 
     # Directory creation
     #
