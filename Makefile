@@ -165,7 +165,7 @@ $(REQUIREMENTS_FILES): dummy
 # Don't invoke directly.
 #
 .pip-outdated: dummy
-	pip list --format=columns --not-required --outdated > $(PIP_OUTDATED_TEMP)
+	pip list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report
