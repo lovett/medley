@@ -1,7 +1,7 @@
 """Work out an app URL from a controller instance."""
 
 import ipaddress
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 import cherrypy
 from cherrypy.process import plugins
 
@@ -28,11 +28,18 @@ class Plugin(plugins.SimplePlugin):
         cherrypy.request.base will hold the desired value.
 
         If there isn't an incoming request, fall back to a value
-        stored in the registry.
+        stored in the registry. If that's not available, fall back to
+        a domain-relative URL.
 
         """
 
-        hostname = cherrypy.request.base
+        parsed_url = urlparse(
+            cherrypy.request.base,
+            scheme='http'
+        )
+
+        hostname = parsed_url.hostname
+        scheme = parsed_url.scheme + "://"
 
         try:
             if ipaddress.ip_address(hostname).is_loopback:
@@ -46,11 +53,16 @@ class Plugin(plugins.SimplePlugin):
                 "config:base_url"
             ).pop()
 
+        if not hostname:
+            hostname = ""
+            scheme = ""
+
         # A non-root path is treated as a sub-path of the current app.
         if path and not path.startswith("/"):
             path = "{}/{}".format(cherrypy.request.script_name, path)
 
-        url = "{}{}".format(
+        url = "{}{}{}".format(
+            scheme,
             hostname,
             path or cherrypy.request.script_name
         )

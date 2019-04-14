@@ -162,7 +162,8 @@ class Plugin(plugins.SimplePlugin):
         )
 
     @staticmethod
-    def anonymize_filter(url):
+    @jinja2.contextfilter
+    def anonymize_filter(_, url):
         """Prepend an HTTP URL with the URL of the redirect app increase
         referrer privacy.
 
@@ -377,7 +378,7 @@ class Plugin(plugins.SimplePlugin):
             return value
 
         return """<a href="{}" {}>{}</a>""".format(
-            self.anonymize_filter(value),
+            self.anonymize_filter(None, value),
             'target="_blank" rel="noreferrer"',
             value
         )
