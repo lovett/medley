@@ -3,11 +3,13 @@ Description=Medley
 After=network.target
 
 [Service]
+Type=notify
+NotifyAccess=all
 User=medley
 Group=medley
+Environment=MEDLEY_NOTIFY_STARTUP=1
 WorkingDirectory={{ project_root }}
 ExecStart={{ project_root }}/venv/bin/python medley.py
-Type=simple
 
 [Install]
 WantedBy=multi-user.target

@@ -13,6 +13,7 @@ import importlib
 import logging
 import os
 import os.path
+import subprocess
 import cherrypy
 import plugins
 import tools
@@ -200,6 +201,9 @@ def main():
     cherrypy.engine.publish("scheduler:revive")
     cherrypy.engine.publish("logindex:parse")
     cherrypy.engine.publish("bookmarks:add:fulltext")
+
+    if os.environ.get("MEDLEY_NOTIFY_STARTUP"):
+        subprocess.run(["/bin/systemd-notify", "--ready"])
 
     cherrypy.engine.block()
 
