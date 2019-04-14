@@ -39,6 +39,10 @@
     path={{ project_newinstall_tmp }}/venv
   register: venv_check
 
+# The shell module is used to create the virtualenv for simplicity.
+# The pip module could do it, but needs a virtualenv executable which
+# the python3-virtualenv package somehow doesn't provide. All of which
+# is a lot of fuss for what could otherwise be a one-liner.
 - name: Create python3 virtualenv
   shell: "python3 -m venv {{ project_newinstall_tmp }}/venv"
   become: true
@@ -62,14 +66,14 @@
     extra_args: --upgrade
     virtualenv: "{{ project_newinstall_tmp }}/venv"
 
-- name: Install python3 application packages
+- name: Install python application packages
   become: true
   become_user: "{{ project_user }}"
   pip:
     requirements: "{{ project_newinstall_tmp }}/requirements.txt"
     virtualenv: "{{ project_newinstall_tmp }}/venv"
 
-- name: Install python3 audio packages
+- name: Install python audio packages
   become: true
   become_user: "{{ project_user }}"
   pip:
@@ -85,10 +89,13 @@
   become: true
   command: mv {{ project_newinstall_tmp }} {{ project_root }}
 
-- name: Stat global config
-  stat:
-    path="/etc/medley.conf"
-  register: global_config_check
+- name: Install global config
+  become: true
+  copy:
+    src: "files/medley.conf"
+    dest: "/etc/medley.conf"
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
 
 - name: Install primary systemd service
   become: true
