@@ -90,6 +90,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
         self.bus.subscribe("bookmarks:search", self.search)
+        self.bus.subscribe("bookmarks:generalize_query", self.generalize_query)
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
@@ -108,6 +109,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             parsed_url.netloc.lower(),
             parsed_url.geturl()
         )
+
+    @staticmethod
+    def generalize_query(query):
+        """Convert a search query to a more generic form suitable for use with
+        external search engines.
+
+        """
+
+        general_query = re.sub(r"(tag|comment)s?:", "", query)
+        general_query = general_query.replace("domain:", "site:")
+        return general_query
 
     def find(self, uid=None, url=None):
         """Locate a bookmark by ID or URL."""

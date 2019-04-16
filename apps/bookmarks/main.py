@@ -70,11 +70,19 @@ class Controller:
         if previous_page < 1:
             previous_page = None
 
+        general_query = None
+        if query:
+            general_query = cherrypy.engine.publish(
+                "bookmarks:generalize_query",
+                query
+            ).pop()
+
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
                 "count": count,
                 "query": query,
+                "general_query": general_query,
                 "order": order,
                 "next_page": next_page,
                 "previous_page": previous_page,

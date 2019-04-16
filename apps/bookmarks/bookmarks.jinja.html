@@ -62,13 +62,24 @@
         </form>
 
         <div class="content-wrapper">
-            <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found</p>
+            <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found.</p>
 
 
             {% if count %}
-                <p>{{ start_index }} to {{ end_index }} of {{ count|pluralize('bookmark', 'bookmarks') }} available</p>
+                <p>
+                    {{ start_index }} to {{ end_index }}
+                    of {{ count|pluralize('bookmark', 'bookmarks') }}
+                    available.
+                </p>
             {% endif %}
 
+            {% if general_query %}
+                <p>
+                    Try this search on
+                    {{ general_query|websearch("google") }} or
+                    {{ general_query|websearch("bing") }}.
+                </p>
+            {% endif %}
 
             {% for bookmark in bookmarks %}
 
