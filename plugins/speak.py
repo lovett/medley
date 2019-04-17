@@ -312,13 +312,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not auth_response:
             return False
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak",
-            "ssml",
-            ssml_string
-        )
-
         audio_bytes = cherrypy.engine.publish(
             "urlfetch:post",
             config.get("synthesize_url"),
