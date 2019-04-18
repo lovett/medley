@@ -33,29 +33,41 @@ class Plugin(plugins.SimplePlugin):
 
         """
 
+        hostname = ''
+        scheme = ''
+
         parsed_url = urlparse(
-            cherrypy.request.base,
-            scheme='http'
+            cherrypy.request.base
         )
 
-        hostname = parsed_url.hostname
-        scheme = parsed_url.scheme + "://"
+        if parsed_url.hostname:
+            hostname = parsed_url.hostname
+
+        if parsed_url.scheme:
+            scheme = parsed_url.scheme
 
         try:
             if ipaddress.ip_address(hostname).is_loopback:
-                hostname = None
+                hostname = ''
+                scheme = ''
         except ValueError:
             pass
 
         if not hostname:
-            hostname = cherrypy.engine.publish(
+            config_url = cherrypy.engine.publish(
                 "registry:first_value",
                 "config:base_url"
             ).pop()
 
-        if not hostname:
-            hostname = ""
-            scheme = ""
+            parsed_url = urlparse(
+                config_url
+            )
+
+            hostname = parsed_url.hostname
+            scheme = parsed_url.scheme
+
+        if scheme:
+            scheme = "{}://".format(scheme)
 
         # A non-root path is treated as a sub-path of the current app.
         if path and not path.startswith("/"):
