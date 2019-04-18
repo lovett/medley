@@ -10,7 +10,7 @@
 - /coverage
 - /.coverage
 - /testing
-- test_main.py
+- test_*.py
 - /workspace.sh
 - /.rsync-filter
 - medley.conf
@@ -20,7 +20,7 @@
 - /.gitignore
 - /venv
 - *.pyc
-- /requirements-dev.txt
+- /requirements*.txt
 - /node_modules
 - /Jenkinsfile
 - package.json
@@ -30,3 +30,5 @@
 - /hooks
 - /.ackrc
 - /.pylintrc
+- /pytest.ini
+- /.pytest_cache

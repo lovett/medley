@@ -1,93 +1,73 @@
 ---
-- name: Start from a clean slate
-  become: true
-  file:
-    path={{ item }}
-    state=absent
-  with_items:
-    - "{{ project_backup }}"
-    - "{{ project_newinstall_tmp }}"
-
-- name: Stat current installation
-  stat:
-    path={{ project_root  }}
-  register: install_check
-
-- name: Create temporary application root for new install
-  become: true
-  file:
-    path={{ project_newinstall_tmp }}
-    state=directory
-
-- name: Rsync application files to temporary application root
+# The relative path used in the src parameter is the distance from
+# this file to the application root.
+#
+# The rsync_opts parameter is specified to give special treatment to
+# files that would otherwise be subject to unwanted removal due to use
+# of the delete paramter. Although most exclusions are specifed in
+# .rsync-filter at the application root, the requirements files and
+# the virtualenv need to be handled as "exclude without delete"
+# instead of "exlude and delete" like everything else.
+- name: Rsync application files
   become: true
   synchronize:
     src: "../../../../"
-    dest: "{{ project_newinstall_tmp }}"
+    dest: "{{ project_root }}"
     delete: true
     recursive: true
     rsync_opts:
-      - "--cvs-exclude"
-
-- name: Salvage virtualenv from previous installation
-  become: true
-  command: cp -r {{ project_root }}/venv {{ project_newinstall_tmp }}/venv
-  when: install_check.stat.isdir is defined and install_check.stat.isdir
-
-- name: Stat venv
-  stat:
-    path={{ project_newinstall_tmp }}/venv
-  register: venv_check
+      - "--exclude=venv"
+      - "--exclude=requirements.txt"
+      - "--exclude=requirements-audio.txt"
 
 # The shell module is used to create the virtualenv for simplicity.
 # The pip module could do it, but needs a virtualenv executable which
-# the python3-virtualenv package somehow doesn't provide. All of which
-# is a lot of fuss for what could otherwise be a one-liner.
+# the Debian python3-virtualenv package somehow doesn't provide. All
+# of which is a lot of fuss for what could otherwise be a one-liner.
 - name: Create python3 virtualenv
-  shell: "python3 -m venv {{ project_newinstall_tmp }}/venv"
+  shell: "python3 -m venv {{ project_root }}/venv"
+  args:
+    creates: "{{ project_root }}/venv"
   become: true
-  when: venv_check.stat.isdir is not defined
+  register: venv
 
-- name: Set permissions on new temporary application root
+- name: Install main requirements file
   become: true
-  file:
-    path: "{{ project_newinstall_tmp }}"
-    recurse: yes
-    owner: "{{ project_user }}"
-    group: "{{ project_group }}"
+  copy:
+    src: "../../../../requirements.txt"
+    dest: "{{ project_root }}/requirements.txt"
+  register: requirements
 
-- name: Upgrade pip and setuptools
+- name: Install audio requirements file
   become: true
-  become_user: "{{ project_user }}"
-  pip:
-    name:
-      - pip
-      - setuptools
-    extra_args: --upgrade
-    virtualenv: "{{ project_newinstall_tmp }}/venv"
+  copy:
+    src: "../../../../requirements-audio.txt"
+    dest: "{{ project_root }}/requirements-audio.txt"
+  register: requirements_audio
 
 - name: Install python application packages
   become: true
   become_user: "{{ project_user }}"
   pip:
-    requirements: "{{ project_newinstall_tmp }}/requirements.txt"
-    virtualenv: "{{ project_newinstall_tmp }}/venv"
+    requirements: "{{ project_root }}/requirements.txt"
+    virtualenv: "{{ project_root }}/venv"
+  when: requirements.changed
 
 - name: Install python audio packages
   become: true
   become_user: "{{ project_user }}"
   pip:
-    requirements: "{{ project_newinstall_tmp }}/requirements-audio.txt"
-    virtualenv: "{{ project_newinstall_tmp }}/venv"
+    requirements: "{{ project_root }}/requirements-audio.txt"
+    virtualenv: "{{ project_root }}/venv"
+  when: requirements_audio.changed
 
-- name: Back up current installation
+- name: Set permissions on application root
   become: true
-  when: install_check.stat.exists
-  command: mv {{ project_root }} {{ project_backup }}
-
-- name: Activate new installation
-  become: true
-  command: mv {{ project_newinstall_tmp }} {{ project_root }}
+  file:
+    path: "{{ project_root }}"
+    recurse: yes
+    owner: "{{ project_user }}"
+    group: "{{ project_group }}"
 
 - name: Install global config
   become: true
@@ -115,6 +95,7 @@
     - files/medley-fs-maintenance.timer
     - files/medley-headlines.service
     - files/medley-headlines.timer
+  register: services
 
 - name: Enable medley systemd service
   become: true
@@ -138,6 +119,7 @@
     - medley-db-maintenance.timer
     - medley-fs-maintenance.timer
     - medley-headlines.timer
+  when: services.changed
 
 - name: Check server availability
   uri:
