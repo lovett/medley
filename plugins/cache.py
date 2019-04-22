@@ -14,12 +14,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("cache.sqlite")
 
-        self._create("""CREATE TABLE IF NOT EXISTS cache (
+        self._create("""
+        PRAGMA journal_mode=WAL;
+
+        CREATE TABLE IF NOT EXISTS cache (
             key UNIQUE NOT NULL,
             value TEXT,
             expires REAL,
             created DEFAULT CURRENT_TIMESTAMP
-            )""")
+        );
+
+        """)
 
     def start(self):
         """Define the CherryPy messages to listen for.

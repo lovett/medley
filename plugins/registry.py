@@ -14,10 +14,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("registry.sqlite")
 
-        self._create("""CREATE TABLE IF NOT EXISTS registry (
+        self._create("""
+        PRAGMA journal_mode=WAL;
+
+        CREATE TABLE IF NOT EXISTS registry (
             key VARCHAR(255) NOT NULL,
             value VARCHAR(255),
-            created DEFAULT CURRENT_TIMESTAMP)""")
+            created DEFAULT CURRENT_TIMESTAMP
+        );
+
+        """)
 
     def start(self):
         """Define the CherryPy messages to listen for.

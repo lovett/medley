@@ -111,6 +111,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE INDEX IF NOT EXISTS index_reverse_domain
             ON reverse_ip(reverse_domain);
+
         """)
 
     def start(self):

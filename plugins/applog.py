@@ -13,13 +13,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("applog.sqlite")
 
         self._create("""
+        PRAGMA journal_mode=WAL;
+
         CREATE TABLE IF NOT EXISTS applog (
             created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             source VARCHAR(255) NOT NULL,
             key VARCHAR(255) NOT NULL,
             value VARCHAR(255) NOT NULL
         );
-        CREATE INDEX IF NOT EXISTS index_source ON applog(source);
+
+        CREATE INDEX IF NOT EXISTS index_source
+            ON applog(source);
+
         """)
 
     def start(self):

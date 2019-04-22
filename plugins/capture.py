@@ -15,13 +15,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("captures.sqlite")
 
         self._create("""
+        PRAGMA journal_mode=WAL;
+
         CREATE TABLE IF NOT EXISTS captures (
             request_uri, request_line, request, response,
             created DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE INDEX IF NOT EXISTS index_request_uri
-            on captures(request_uri);
+            ON captures(request_uri);
+
         """)
 
     def start(self):
