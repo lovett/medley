@@ -5,8 +5,8 @@
         {% if result %}
             <p>{{ result }}</p>
         {% else %}
-            <p>The external address is <a href="/whois?address={{ external_ip }}">{{ external_ip }}</a></p>
-            <p>The client address is <a href="/whois?address={{ client_ip }}">{{ client_ip }}</a></p>
+            <p>The external address is <a href="/whois/{{ external_ip }}">{{ external_ip }}</a></p>
+            <p>The client address is <a href="/whois/{{ client_ip }}">{{ client_ip }}</a></p>
         {% endif %}
     </main>
 {% endblock %}
