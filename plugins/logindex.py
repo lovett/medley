@@ -578,7 +578,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 query
             ).pop()
 
-            sql = """SELECT distinct ip
+            sql = """SELECT distinct ip, uri
             FROM logs
             WHERE {}
             AND rowid BETWEEN ? AND ?
@@ -604,8 +604,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
                 notification = {
                     "group": "web",
-                    "title": "Logfile indexing alert: {}".format(name),
-                    "body": "IP: {}".format(record["ip"]),
+                    "title": "Logfile hit",
+                    "body": "{} viewed {}".format(
+                        record["ip"],
+                        record["uri"]
+                    ),
                     "url": url,
                     "localId": local_id,
                 }
