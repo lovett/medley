@@ -17,6 +17,7 @@
     recursive: true
     rsync_opts:
       - "--exclude=venv"
+      - "--exclude=.cache"
       - "--exclude=requirements.txt"
       - "--exclude=requirements-audio.txt"
 

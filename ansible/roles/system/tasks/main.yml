@@ -10,7 +10,8 @@
   user:
     state=present
     name="{{ project_user }}"
-    createhome=yes
+    home="{{ project_root }}"
+    createhome=no
     system=yes
     append=yes
     groups="{{ project_user }},audio"

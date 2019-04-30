@@ -18,6 +18,7 @@ logs
 .vagrant
 ansible/*.hosts
 ansible/host_vars
+ansible/install.retry
 venv
 cache
 node_modules
