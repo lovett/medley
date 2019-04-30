@@ -53,6 +53,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON logs (datestamp desc);
         CREATE INDEX IF NOT EXISTS index_ip
             ON logs(ip);
+        CREATE INDEX IF NOT EXISTS index_ip_datestamp
+            ON logs (ip, datestamp);
         CREATE INDEX IF NOT EXISTS index_host
             ON logs(host);
         CREATE INDEX IF NOT EXISTS index_uri
