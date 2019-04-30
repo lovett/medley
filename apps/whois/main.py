@@ -14,20 +14,15 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *args, **kwargs):
+    def GET(*_, **kwargs):
         """Display a search form and lookup results."""
 
-        if kwargs:
-            redirect_url = cherrypy.engine.publish("url:internal").pop()
-            raise cherrypy.HTTPRedirect(redirect_url)
+        address = kwargs.get('address')
 
-        if not args:
+        if not address:
             return {
                 "html": ("whois.jinja.html", {})
             }
-
-        if args:
-            address = args[-1]
 
         address_unquoted = urllib.parse.unquote_plus(address).lower()
 
