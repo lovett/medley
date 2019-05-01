@@ -13,8 +13,8 @@ import importlib
 import logging
 import os
 import os.path
-import subprocess
 import cherrypy
+import sdnotify
 import plugins
 import tools
 
@@ -203,7 +203,8 @@ def main():
     cherrypy.engine.publish("bookmarks:add:fulltext")
 
     if os.environ.get("MEDLEY_NOTIFY_STARTUP"):
-        subprocess.run(["/bin/systemd-notify", "--ready"])
+        systemd_notifier = sdnotify.SystemdNotifier()
+        systemd_notifier.notify("READY=1")
 
     cherrypy.engine.block()
 
