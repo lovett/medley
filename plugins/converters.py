@@ -1,9 +1,8 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
-import pickle
 import re
 import urllib
-import sqlite3
+from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
 import msgpack
 import pendulum
@@ -22,14 +21,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self):
         """Register converters."""
-        sqlite3.register_converter("datetime", self.datetime)
-        sqlite3.register_converter("date_with_hour", self.date_with_hour)
-        sqlite3.register_converter("binary", self.binary)
-        sqlite3.register_converter("calldate_to_utc", self.calldate_to_utc)
-        sqlite3.register_converter("duration", self.duration)
-        sqlite3.register_converter("clid", self.callerid)
-        sqlite3.register_converter("querystring", self.querystring)
-        sqlite3.register_converter("comma_delimited", self.comma_delimited)
+        register_converter("datetime", self.datetime)
+        register_converter("date_with_hour", self.date_with_hour)
+        register_converter("binary", self.binary)
+        register_converter("calldate_to_utc", self.calldate_to_utc)
+        register_converter("duration", self.duration)
+        register_converter("clid", self.callerid)
+        register_converter("querystring", self.querystring)
+        register_converter("comma_delimited", self.comma_delimited)
 
     @staticmethod
     def datetime(value):
@@ -122,15 +121,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Unpack a binary value stored in a blob field.
 
         MessagePack is the only serialization format used by the
-        application, but fall back to pickle since that was the format
-        used before MessagePack was implemented.
+        application.
 
         """
 
         try:
             return msgpack.unpackb(blob, encoding='utf-8')
         except msgpack.exceptions.ExtraData:
-            return pickle.loads(blob)
+            return None
 
     @staticmethod
     def querystring(value):
