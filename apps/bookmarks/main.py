@@ -43,7 +43,8 @@ class Controller:
             }
 
         if query:
-            (bookmarks, count) = cherrypy.engine.publish(
+            max_days = None
+            (bookmarks, count, query_plan) = cherrypy.engine.publish(
                 "bookmarks:search",
                 query,
                 order=order,
@@ -51,10 +52,12 @@ class Controller:
                 offset=offset,
             ).pop()
         else:
-            (bookmarks, count) = cherrypy.engine.publish(
+            max_days = 180
+            (bookmarks, count, query_plan) = cherrypy.engine.publish(
                 "bookmarks:recent",
                 limit=per_page,
-                offset=offset
+                offset=offset,
+                max_days=max_days
             ).pop()
 
         start_index = offset + 1
@@ -80,9 +83,11 @@ class Controller:
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
+                "max_days": max_days,
                 "count": count,
                 "query": query,
                 "general_query": general_query,
+                "query_plan": query_plan,
                 "order": order,
                 "next_page": next_page,
                 "previous_page": previous_page,

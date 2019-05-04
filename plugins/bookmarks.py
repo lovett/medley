@@ -23,6 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url,
             domain,
             added,
+            added_date,
             updated DEFAULT NULL,
             retrieved DEFAULT NULL,
             deleted DEFAULT NULL,
@@ -41,6 +42,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             content=bookmarks,
             tokenize=porter
         );
+
+        CREATE INDEX IF NOT EXISTS bookmarks_added_date
+            ON bookmarks (added_date);
 
         CREATE INDEX IF NOT EXISTS bookmarks_domain
             ON bookmarks (domain);
@@ -168,8 +172,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return True
 
         sql = """INSERT INTO bookmarks
-        (domain, url, added, title, tags, comments)
-        VALUES (?, ?, ?, ?, ?, ?)"""
+        (domain, url, added, added_date, title, tags, comments)
+        VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
         domain_and_url = self.domain_and_url(url)
 
@@ -183,6 +187,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             domain_and_url[0],
             domain_and_url[1],
             add_date.format('YYYY-MM-DD HH:mm:ss'),
+            add_date.to_date_string(),
             title,
             tags,
             comments
@@ -324,11 +329,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (
             self._select(sql, placeholder_values),
-            self._count(sql, placeholder_values)
+            self._count(sql, placeholder_values),
+            self._explain(sql, placeholder_values)
         )
 
     @decorators.log_runtime
-    def recent(self, limit=20, offset=0):
+    def recent(self, limit=20, offset=0, max_days=180):
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT url, domain, title,
@@ -337,13 +343,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         retrieved 'retrieved [datetime]',
         comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
-        WHERE deleted IS NULL
+        WHERE added_date >= ?
+        AND deleted IS NULL
         ORDER BY added DESC
         LIMIT ? OFFSET ?"""
 
+        cutoff_date = pendulum.now().subtract(
+            days=max_days
+        ).to_date_string()
+
         return (
-            self._select(sql, (limit, offset)),
-            self._count(sql)
+            self._select(sql, (cutoff_date, limit, offset)),
+            self._count(sql, (cutoff_date,)),
+            self._explain(sql, (cutoff_date, limit, offset))
         )
 
     def prune(self):

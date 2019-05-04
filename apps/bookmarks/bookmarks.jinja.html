@@ -67,12 +67,15 @@
 
             {% if count %}
                 <p>
-                    {{ start_index }} to {{ end_index }}
+                    Showing {{ start_index }} – {{ end_index }}
                     of {{ count|pluralize('bookmark', 'bookmarks') }}
-                    available.
+                    {%- if max_days %}
+                        added in the past {{ max_days // 30 }} months.
+                    {%- else -%}
+                        .
+                    {% endif %}
                 </p>
             {% endif %}
-
             {% if general_query %}
                 <p>
                     Try this search on
@@ -80,6 +83,7 @@
                     {{ general_query|websearch("bing") }}.
                 </p>
             {% endif %}
+
 
             {% for bookmark in bookmarks %}
 
@@ -168,6 +172,7 @@
             {% endif %}
         </div>
 
+        {{ macros.queryPlan(query_plan) }}
     </main>
 
 {% endblock %}

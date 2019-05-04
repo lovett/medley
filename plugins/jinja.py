@@ -153,9 +153,12 @@ class Plugin(plugins.SimplePlugin):
 
         value = singular if count == 1 else plural
 
+        if suffix:
+            suffix = ' ' + suffix
+
         # Avoiding use of literal string interpolation for Python 3.5
         # compatibility.
-        return (number_format + " {} {}").format(
+        return (number_format + " {}{}").format(
             count,
             value,
             suffix
