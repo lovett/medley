@@ -2,10 +2,8 @@ HEAD http://127.0.0.1:8085/geodb
 
 #
 
-GET http://127.0.0.1:8085/geodb
-
-#
-
 POST http://127.0.0.1:8085/geodb
+Content-Type: application/x-www-form-urlencoded
 
+action=update
 #

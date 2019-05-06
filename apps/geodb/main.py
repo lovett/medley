@@ -21,6 +21,12 @@ class Controller:
             "geodb:url"
         ).pop()
 
+        if not download_url:
+            raise cherrypy.HTTPError(
+                500,
+                "Download URL has not been configured"
+            )
+
         destination = cherrypy.config.get("database_dir")
 
         cherrypy.engine.publish(
@@ -29,12 +35,7 @@ class Controller:
             "urlfetch:get_file",
             download_url,
             destination,
-            unpack_command=(
-                "tar", "-C", destination,
-                "--strip-components=1",
-                "-o", "-p", "-x", "-z", "-f"
-            )
-
+            files_to_extract=('GeoLite2-City.mmdb',)
         )
 
         cherrypy.response.status = 204

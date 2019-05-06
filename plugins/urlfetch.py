@@ -3,7 +3,7 @@
 import json
 import os.path
 import shutil
-import subprocess
+import tarfile
 import requests
 import cherrypy
 from cherrypy.process import plugins
@@ -85,12 +85,13 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     def get_file(url, destination, as_json=False, **kwargs):
-        """Send a GET request and save the response the local filesystem."""
+        """Send a GET request and save the response to the local filesystem.
+        """
 
         auth = kwargs.get("auth")
         headers = kwargs.get("headers")
         params = kwargs.get("params")
-        unpack_command = kwargs.get("unpack_command")
+        files_to_extract = kwargs.get("files_to_extract")
 
         request_headers = {
             "User-Agent": "python",
@@ -106,15 +107,14 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "get_file",
-            "Downloading {} to {}".format(
-                url,
-                destination
+            "Downloading {}".format(
+                url
             )
         )
 
-        local_path = os.path.join(
+        download_path = os.path.join(
             destination,
-            url.rsplit('/', 1).pop()
+            os.path.basename(url)
         )
 
         req = requests.get(
@@ -127,41 +127,31 @@ class Plugin(plugins.SimplePlugin):
 
         req.raise_for_status()
 
-        with open(local_path, "wb") as db_file:
-            shutil.copyfileobj(req.raw, db_file)
+        with open(download_path, "wb") as downloaded_file:
+            shutil.copyfileobj(req.raw, downloaded_file)
 
-        if not unpack_command:
-            # Default commands for unpacking. They should contain
-            # everything but the file path to be unpacked.
-            if local_path.endswith(".tar.gz"):
-                unpack_command = (
-                    "tar", "-C", destination,
-                    "-x", "-z", "-f"
-                )
-            elif local_path.endswith(".gz"):
-                unpack_command = ("gunzip", "-f")
+        if files_to_extract and tarfile.is_tarfile(download_path):
+            with tarfile.open(download_path) as downloaded_file:
+                file_names = [
+                    name for name in downloaded_file.getnames()
+                    if os.path.basename(name) in files_to_extract
+                ]
 
-        if unpack_command:
-            # Add the target file to the unpack command.
-            unpack_command_with_local_path = unpack_command + (local_path,)
+                for file_name in file_names:
+                    buffered_reader = downloaded_file.extractfile(file_name)
 
-            try:
-                subprocess.check_call(unpack_command_with_local_path)
-                cherrypy.engine.publish(
-                    "applog:add",
-                    "urlfetch",
-                    "get_file",
-                    "Download complete"
-                )
-            except subprocess.CalledProcessError:
-                cherrypy.engine.publish(
-                    "applog:add",
-                    "urlfetch",
-                    "get_file",
-                    "Failed to gunzip"
-                )
-            finally:
-                os.unlink(local_path)
+                    extract_path = os.path.join(
+                        destination,
+                        os.path.basename(file_name)
+                    )
+
+                    with open(extract_path, "wb") as extracted_file:
+                        shutil.copyfileobj(
+                            buffered_reader,
+                            extracted_file
+                        )
+
+            os.unlink(download_path)
 
     @staticmethod
     def post(url, data, as_json=False, as_bytes=False, **kwargs):
