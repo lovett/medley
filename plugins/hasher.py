@@ -17,15 +17,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         self.bus.subscribe("hasher:md5", self.md5_hash)
+        self.bus.subscribe("hasher:sha256", self.sha256_hash)
+
+    def md5_hash(self, value, hex_digest=True):
+        """Calculate the MD5 digest of a value."""
+        return self._hash('md5', value, hex_digest)
+
+    def sha256_hash(self, value, hex_digest=True):
+        """Calculate the SHA256 digest of a value."""
+        return self._hash('sha256', value, hex_digest)
 
     @staticmethod
-    def md5_hash(val, hex_digest=True):
-        """Calculate the MD5 digest of a value."""
+    def _hash(algorithm, value, hex_digest=True):
+        """Calculate the digest of a value using the specified algorithm."""
 
-        md5_hasher = hashlib.md5()
-        md5_hasher.update(val.encode())
+        hasher = hashlib.new(algorithm)
+
+        if isinstance(value, bytes):
+            hasher.update(value)
+        else:
+            hasher.update(value.encode())
 
         if hex_digest:
-            return md5_hasher.hexdigest()
+            return hasher.hexdigest()
 
-        return md5_hasher.digest()
+        return hasher.digest()

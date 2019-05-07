@@ -6,7 +6,6 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-
 """
 
 import datetime
-import hashlib
 import os
 import os.path
 import re
@@ -288,9 +287,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         ssml_string = self.ssml(adjusted_statement, locale, gender)
 
-        request_hash = hashlib.sha1()
-        request_hash.update(ssml_string)
-        hash_digest = request_hash.hexdigest()
+        hash_digest = cherrypy.engine.publish(
+            "hasher:sha256",
+            ssml_string
+        ).pop()
 
         cache_path = self.get_cache_path(hash_digest)
 
