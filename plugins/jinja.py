@@ -50,6 +50,7 @@ class Plugin(plugins.SimplePlugin):
 
         self.env = jinja2.Environment(
             loader=loader,
+            autoescape=True,
             auto_reload=cherrypy.config.get("engine.autoreload.on"),
             bytecode_cache=cache
         )

@@ -25,7 +25,12 @@ class Plugin(plugins.SimplePlugin):
         """Render an email template and send via SMTP"""
 
         loader = jinja2.FileSystemLoader(message_data["template_dir"])
-        env = jinja2.Environment(loader=loader)
+
+        env = jinja2.Environment(
+            loader=loader,
+            autoescape=True
+        )
+
         template = env.get_template(message_data["template"])
 
         rendered_template = template.render(template_data)
