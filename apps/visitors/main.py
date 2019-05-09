@@ -150,8 +150,6 @@ class Controller:
             if minimums[lookup_key] > 0
         }
 
-        print(durations)
-
         return durations
 
     @staticmethod

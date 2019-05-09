@@ -220,7 +220,9 @@ class Plugin(plugins.SimplePlugin):
         return json.dumps(value, sort_keys=True, indent=2)
 
     @staticmethod
-    def websearch_filter(value, engine, url_only=False, target="_blank"):
+    @jinja2.evalcontextfilter
+    def websearch_filter(eval_ctx, value, engine=None, url_only=False,
+                         target="_blank"):
         """Construct an offsite search URL for a term."""
 
         if engine == "google":
@@ -238,9 +240,14 @@ class Plugin(plugins.SimplePlugin):
             return url
 
         template = '<a href="{}" target="{}" rel="noopener noreferer">{}</a>'
-        return template.format(
+        result = template.format(
             url, target, engine.capitalize()
         )
+
+        if eval_ctx.autoescape:
+            return jinja2.Markup(result)
+
+        return result
 
     @staticmethod
     def phonenumber_filter(value, as_link=False):
@@ -340,7 +347,8 @@ class Plugin(plugins.SimplePlugin):
         return ".".join(segment_slice[::-1])
 
     @staticmethod
-    def logline_with_links_filter(record):
+    @jinja2.evalcontextfilter
+    def logline_with_links_filter(eval_ctx, record):
         """Add hyperlinks to a log entry."""
 
         result = record["logline"]
@@ -351,6 +359,9 @@ class Plugin(plugins.SimplePlugin):
         rel="noreferrer">{0}</a>""".format(record["ip"])
 
         result = result.replace(record["ip"], link)
+
+        if eval_ctx.autoescape:
+            return jinja2.Markup(result)
 
         return result
 
