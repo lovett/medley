@@ -336,8 +336,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 SELECT rowid, ip
                 FROM reverse_ip
                 WHERE updated IS NULL
-                LIMIT {}
-            )""".format(batch_size)
+                LIMIT ?
+            )""",
+            (batch_size,)
         )
 
         batch = []
@@ -391,15 +392,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         latitude=?, longitude=?, cookie=?, referrer=?,
         referrer_domain=?  WHERE rowid=?"""
 
-        records = self._select("""
-        SELECT 0 as id, count(*) as value
-        FROM logs
-        WHERE ip IS NULL
-        UNION
-        SELECT rowid as id, logline as value
-        FROM logs
-        WHERE ip IS NULL
-        LIMIT {}""".format(batch_size))
+        records = self._select(
+            """SELECT 0 as id, count(*) as value
+            FROM logs
+            WHERE ip IS NULL
+            UNION
+            SELECT rowid as id, logline as value
+            FROM logs
+            WHERE ip IS NULL
+            LIMIT ?""",
+            (batch_size,)
+        )
 
         cherrypy.engine.publish(
             "applog:add",
@@ -540,7 +543,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM logs
         WHERE {}
         ORDER BY unix_timestamp DESC
-        """.format(parsed_query)
+        """.format(parsed_query)  # nosec
 
         query_plan = self._explain(sql, ())
         result = self._select(sql, ())
@@ -554,7 +557,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT ip, reverse_domain
         FROM reverse_ip
-        WHERE ip IN ({})""".format(placeholders[:-2])
+        WHERE ip IN ({})""".format(placeholders[:-2])  # nosec
 
         result = self._select(sql, tuple(ips))
 
@@ -584,7 +587,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             FROM logs
             WHERE {}
             AND rowid BETWEEN ? AND ?
-            """.format(parsed_query)
+            """.format(parsed_query)  # nosec
 
             records = self._select(
                 sql,

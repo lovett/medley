@@ -377,7 +377,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             sql = """logs.ip IN (
                 SELECT ip
                 FROM reverse_ip
-                WHERE reverse_domain IN ({}))""".format(
+                WHERE reverse_domain IN ({}))""".format(  # nosec
                     ",".join(values)
                 )
 

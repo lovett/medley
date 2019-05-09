@@ -147,7 +147,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             updated as 'updated [datetime]',
             deleted as 'deleted [datetime]',
             tags, comments
-            FROM bookmarks WHERE 1=1 AND {}""".format(where_clause),
+            FROM bookmarks WHERE {}""".format(where_clause),  # nosec
             values
         )
 
@@ -319,7 +319,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM {}
         WHERE {}
         ORDER BY {}
-        LIMIT ? OFFSET ?""".format(
+        LIMIT ? OFFSET ?""".format(  # nosec
             from_sql,
             where_sql,
             order_sql

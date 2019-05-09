@@ -92,7 +92,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM captures
         WHERE 1=1 {search_clause}
         ORDER BY rowid DESC
-        LIMIT ? OFFSET ?""".format(search_clause=search_clause)
+        LIMIT ? OFFSET ?""".format(search_clause=search_clause)  # nosec
 
         result = self._select(sql, placeholders)
 
