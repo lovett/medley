@@ -74,12 +74,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        cutoff_months = int(cutoff_months) * -1
-
         deletion_count = self._delete(
             """DELETE FROM applog
-            WHERE strftime('%s', created) < strftime('%s', 'now', '{} month')
-            """.format(cutoff_months)
+            WHERE strftime('%s', created) < strftime('%s', 'now', ?)
+            """,
+            ("-{} month".format(cutoff_months),)
         )
 
         cherrypy.engine.publish(
