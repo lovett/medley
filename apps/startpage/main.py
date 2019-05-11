@@ -2,7 +2,7 @@
 
 import os
 import cherrypy
-from apps.startpage.parser import Parser
+from parsers.startpage import Parser
 
 
 class Controller:

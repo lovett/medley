@@ -1,7 +1,7 @@
 """Test suite for the startpage parser."""
 
 import unittest
-from apps.startpage.parser import Parser
+import parsers.startpage
 
 
 class TestStartpageParser(unittest.TestCase):
@@ -11,8 +11,8 @@ class TestStartpageParser(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.parser = Parser()
-        cls.anonParser = Parser(
+        cls.parser = parsers.startpage.Parser()
+        cls.anonParser = parsers.startpage.Parser(
             cls.anonymizer_url,
             ["localhost"]
         )
