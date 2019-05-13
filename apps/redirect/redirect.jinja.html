@@ -2,28 +2,26 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block page_meta %}
-    {# Referer policy, see http://caniuse.com/#feat=referrer-policy #}
+    {# Referrer policy, see http://caniuse.com/#feat=referrer-policy #}
     <meta name="referrer" content="same-origin" />
 {% endblock %}
 
 {% block page_body %}
     <main>
         <div class="content-wrapper align-center">
-            {% if not dest %}
-
-                <p>Cannot redirect because a destination was not specified.</p>
-
-            {% endif %}
-
-            {% if dest %}
-                <p>Redirecting to {{ dest|escapejs }}...</p>
-
-                <script>
-                    setTimeout(function () {
-                        window.location.replace('{{ dest|escapejs }}' + window.location.hash);
-                    });
-                </script>
-            {% endif %}
+            <p id="redirection-status">Redirect in progress.</p>
         </div>
+
+        <script defer>
+            const parsedUrl = new URL(window.location);
+            const destination = parsedUrl.searchParams.get('u') || '';
+            const status = document.getElementById('redirection-status');
+
+            if (destination.startsWith('http') === false) {
+                status.innerHTML = 'Cannot redirect. No URL given. Destination unknown.';
+            } else {
+                window.location.replace(destination + window.location.hash);
+            }
+        </script>
     </main>
 {% endblock %}
