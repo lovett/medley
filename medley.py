@@ -119,7 +119,7 @@ def main():
 
         # The homepage app is unique. Its app name is not its url, and
         # its static path is not under its app path. It also has additional
-        # configuration for serving the favicon.
+        # configuration for serving the favicon and service worker.
         app_path = "/{}".format(app)
         static_url = "/static"
         if app == "homepage":
@@ -130,6 +130,13 @@ def main():
                 "tools.staticfile.on": True,
                 "tools.staticfile.filename": os.path.realpath(
                     "./apps/shared/static/favicon/favicon.ico"
+                ),
+            }
+
+            app_config["/worker.js"] = {
+                "tools.staticfile.on": True,
+                "tools.staticfile.filename": os.path.realpath(
+                    "./apps/shared/static/js/worker.js"
                 ),
             }
 

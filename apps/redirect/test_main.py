@@ -35,11 +35,6 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         """If no URL is provided, no redirect occurs."""
         self.request("/")
 
-        self.assertEqual(
-            helpers.html_var(render_mock, "app_name"),
-            apps.redirect.main.Controller.name
-        )
-
         self.assertIsNone(
             helpers.html_var(render_mock, "dest")
         )
@@ -49,11 +44,6 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         """Encoded URLs are decoded."""
 
         self.request("/", u="http%3A%2F%2Fexample.com")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "app_name"),
-            apps.redirect.main.Controller.name
-        )
 
         self.assertEqual(
             helpers.html_var(render_mock, "dest"),
@@ -67,11 +57,6 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", u="http://example.net")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "app_name"),
-            apps.redirect.main.Controller.name
-        )
-
-        self.assertEqual(
             helpers.html_var(render_mock, "dest"),
             "http://example.net"
         )
@@ -83,11 +68,6 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         self.request(
             "/",
             u="http%3A%2F%2Fexample.com%3Fhello%3Dworld"
-        )
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "app_name"),
-            apps.redirect.main.Controller.name
         )
 
         self.assertEqual(

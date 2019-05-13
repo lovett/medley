@@ -62,6 +62,18 @@
         {{ macros.cacheBustedScript('shared', 'js/jquery-3.2.1.min.js') }}
         {{ macros.cacheBustedScript('shared', 'js/medley.js') }}
 
+
+        <script>
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/worker.js').then(registration => {
+                    console.info(`Service worker registered with scope ${registration.scope}`);
+                }).catch(error => console.error(error));
+            } else {
+                console.info('Service workers are not supported here.');
+            }
+        </script>
+
         {% block scripts %}{% endblock %}
+
     </body>
 </html>
