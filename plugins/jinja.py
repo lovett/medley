@@ -7,7 +7,7 @@ import http.client
 import os
 import os.path
 import urllib
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 import json
 import re
 from cherrypy.process import plugins
@@ -181,7 +181,7 @@ class Plugin(plugins.SimplePlugin):
         return cherrypy.engine.publish(
             "url:internal",
             "/redirect",
-            {"u": quote(url)}
+            {"u": url}
         ).pop()
 
     @staticmethod
