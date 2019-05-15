@@ -3,7 +3,6 @@ Test suite for the redirect app
 """
 
 import unittest
-import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -30,50 +29,11 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    def test_no_destination(self, render_mock):
+    def test_no_destination(self):
         """If no URL is provided, no redirect occurs."""
-        self.request("/")
+        response = self.request("/")
 
-        self.assertIsNone(
-            helpers.html_var(render_mock, "dest")
-        )
-
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    def test_encoded_destination(self, render_mock):
-        """Encoded URLs are decoded."""
-
-        self.request("/", u="http%3A%2F%2Fexample.com")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "dest"),
-            "http://example.com"
-        )
-
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    def test_unencoded_destination(self, render_mock):
-        """Unencoded URLs are used as-is."""
-
-        self.request("/", u="http://example.net")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "dest"),
-            "http://example.net"
-        )
-
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    def test_encoded_querystring(self, render_mock):
-        """URL decoding preserves querystring values."""
-
-        self.request(
-            "/",
-            u="http%3A%2F%2Fexample.com%3Fhello%3Dworld"
-        )
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "dest"),
-            "http://example.com?hello=world"
-        )
+        self.assertEqual(response.code, 200)
 
 
 if __name__ == "__main__":

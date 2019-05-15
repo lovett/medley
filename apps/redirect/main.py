@@ -1,6 +1,5 @@
 """URL redirection for referrer privacy."""
 
-from urllib.parse import unquote_plus
 import cherrypy
 
 
@@ -9,20 +8,13 @@ class Controller:
 
     name = "Redirect"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **_kwargs):
         """Perform a client-side redirect to the URL specified in the
         querystring.
 
         """
-
-        url = kwargs.get('u')
-
-        if url is not None:
-            url = unquote_plus(url)
-
         return {
-            "html": ("redirect.jinja.html", {
-                "dest": url
-            })
+            "html": ("redirect.jinja.html", None)
         }

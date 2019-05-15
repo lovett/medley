@@ -169,9 +169,6 @@ class Tool(cherrypy.Tool):
         if not template_file:
             return None
 
-        values["app_name"] = cherrypy.request.app.root.name
-        values["app_url"] = cherrypy.engine.publish("url:internal").pop()
-
         template = cherrypy.engine.publish(
             "lookup-template",
             template_file
@@ -179,6 +176,18 @@ class Tool(cherrypy.Tool):
 
         if not template:
             return None
+
+        if not values:
+            values = {}
+
+        values["app_name"] = cherrypy.request.app.root.name
+
+        values["app_url"] = cherrypy.engine.publish(
+            "url:internal"
+        )
+
+        if values["app_url"]:
+            values["app_url"] = values["app_url"].pop()
 
         content_type = "text/html;charset={}".format(self.charset)
         cherrypy.response.headers["Content-Type"] = content_type
