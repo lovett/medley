@@ -2,11 +2,11 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('headlines', 'headlines.css') }}
+    {{ macros.staticAsset('headlines', 'headlines.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.cacheBustedScript('headlines', 'headlines.js') }}
+    {{ macros.staticAsset('headlines', 'headlines.js') }}
 {% endblock %}
 
 {% block page_body %}

@@ -2,12 +2,12 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('homepage', 'homepage.css') }}
+    {{ macros.staticAsset('homepage', 'homepage.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
-    {{ macros.cacheBustedScript('homepage', 'homepage.js') }}
+    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.staticAsset('homepage', 'homepage.js') }}
 {% endblock %}
 
 {% block page_body %}

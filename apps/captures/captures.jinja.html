@@ -2,7 +2,7 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('captures', 'captures.css') }}
+    {{ macros.staticAsset('captures', 'captures.css') }}
 {% endblock %}
 
 {% block scripts %}

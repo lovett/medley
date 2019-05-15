@@ -4,7 +4,7 @@
 {% set body_id = 'startpage-display' %}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('startpage', 'startpage.css') }}
+    {{ macros.staticAsset('startpage', 'startpage.css') }}
 
     {% if anonymizer_url %}
     <style type="text/css">
@@ -104,6 +104,6 @@
             console.info('Service workers are not supported here.');
         }
     </script>
-    {{ macros.cacheBustedScript('shared', 'js/focus-as-you-type.js') }}
-    {{ macros.cacheBustedScript('startpage', 'startpage.js') }}
+    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.staticAsset('startpage', 'startpage.js') }}
 {% endblock %}

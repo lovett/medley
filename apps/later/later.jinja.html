@@ -2,11 +2,11 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('later', 'later.css') }}
+    {{ macros.staticAsset('later', 'later.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.cacheBustedScript('later', 'later.js') }}
+    {{ macros.staticAsset('later', 'later.js') }}
 {% endblock %}
 
 

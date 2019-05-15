@@ -6,15 +6,15 @@
 {% endblock %}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.min.css') }}
-    {{ macros.cacheBustedStylesheet('visitors', 'jquery-ui.theme.min.css') }}
-    {{ macros.cacheBustedStylesheet('visitors', 'visitors.css') }}
-    {{ macros.cacheBustedStylesheet('visitors', 'flag-icon-css/css/flag-icon.min.css') }}
+    {{ macros.staticAsset('visitors', 'jquery-ui.min.css') }}
+    {{ macros.staticAsset('visitors', 'jquery-ui.theme.min.css') }}
+    {{ macros.staticAsset('visitors', 'visitors.css') }}
+    {{ macros.staticAsset('visitors', 'flag-icon-css/css/flag-icon.min.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.cacheBustedScript('visitors', 'jquery-ui.min.js') }}
-    {{ macros.cacheBustedScript('visitors', 'visitors.js') }}
+    {{ macros.staticAsset('visitors', 'jquery-ui.min.js') }}
+    {{ macros.staticAsset('visitors', 'visitors.js') }}
 {% endblock %}
 
 {% block svg_defs %}

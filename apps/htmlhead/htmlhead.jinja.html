@@ -1,7 +1,7 @@
 {% extends "base.jinja.html" %}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('htmlhead', 'htmlhead.css') }}
+    {{ macros.staticAsset('htmlhead', 'htmlhead.css') }}
 {% endblock %}
 
 {% block page_body %}

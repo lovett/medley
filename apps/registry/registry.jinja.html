@@ -2,11 +2,11 @@
 {% import "macros.jinja.html" as macros %}
 
 {% block stylesheets %}
-    {{ macros.cacheBustedStylesheet('registry', 'registry.css') }}
+    {{ macros.staticAsset('registry', 'registry.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.cacheBustedScript('registry', 'registry.js') }}
+    {{ macros.staticAsset('registry', 'registry.js') }}
 
     {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
 {% endblock %}

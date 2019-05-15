@@ -61,12 +61,20 @@ in the argument list are returned.  #}
 {% endmacro %}
 
 
-{% macro cacheBustedStylesheet(app, file_name) %}
-<link rel="stylesheet" type="text/css" href="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}" />
-{% endmacro %}
+{% macro staticAsset(app, file_name, cache_bust=True) %}
+    {% if cache_bust %}
+        {% set url_path = "/{}/static/{}".format(app, file_name)|cache_bust %}
+    {% else %}
+        {% set url_path = "/{}/static/{}".format(app, file_name) %}
+    {% endif %}
 
-{% macro cacheBustedScript(app, file_name) %}
-<script src="{{ '/{}/static/{}'.format(app, file_name)|cache_bust }}"></script>
+    {% if file_name.endswith("css") %}
+        <link rel="stylesheet" type="text/css" href="{{ url_path }}" />
+    {% endif %}
+
+    {% if file_name.endswith("js") %}
+        <script src="{{ url_path }}"></script>
+    {% endif %}
 {% endmacro %}
 
 {%- macro link(text, url, separator="") -%}

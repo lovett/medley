@@ -4,7 +4,7 @@
 {% block scripts %}
     {% if ip_address %}
         <script src="https://www.google.com/jsapi"></script>
-        {{ macros.cacheBustedScript('shared', 'js/maps.js') }}
+        {{ macros.staticAsset('shared', 'js/maps.js') }}
     {% endif %}
 {% endblock %}
 

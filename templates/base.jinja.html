@@ -6,8 +6,8 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
 
-        {{ macros.cacheBustedStylesheet('shared', 'css/normalize.css') }}
-        {{ macros.cacheBustedStylesheet('shared', 'css/medley.css') }}
+        {{ macros.staticAsset('shared', 'css/normalize.css') }}
+        {{ macros.staticAsset('shared', 'css/medley.css') }}
 
         {% block stylesheets %}{% endblock %}
 
@@ -59,8 +59,8 @@
 
         {% block page_body %}{% endblock %}
 
-        {{ macros.cacheBustedScript('shared', 'js/jquery-3.2.1.min.js') }}
-        {{ macros.cacheBustedScript('shared', 'js/medley.js') }}
+        {{ macros.staticAsset('shared', 'js/jquery-3.2.1.min.js') }}
+        {{ macros.staticAsset('shared', 'js/medley.js') }}
 
 
         <script>
