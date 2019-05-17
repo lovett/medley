@@ -7,5 +7,5 @@ pendulum==2.0.4
 pyparsing==2.4.0
 pytz==2019.1
 pytzdata==2019.1
-requests==2.21.0
+requests==2.22.0
 sdnotify==0.3.2
