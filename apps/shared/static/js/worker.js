@@ -1,8 +1,20 @@
 const CACHE_NAME = 'medley';
 const PRECACHEABLES = [
     '/redirect',
+    '/startpage/',
     '/favicon.ico'
 ];
+
+self.addEventListener('message', (event) => {
+    if (event.data.command === 'delete') {
+        console.info(`Removing ${event.data.key} from the cache`);
+        const removal = caches.open(CACHE_NAME)
+              .then(cache => cache.delete(event.data.key))
+              .catch(err => console.error(err));
+
+        event.waitUntil(removal);
+    }
+});
 
 /**
  * Precache selected paths at install time.
@@ -25,6 +37,11 @@ self.addEventListener('fetch', (event) => {
 
     // Only consider GET requests.
     if (req.method !== 'GET') {
+        return;
+    }
+
+    // Don't cache alternate views.
+    if (event.request.url.match(/action=/)) {
         return;
     }
 

@@ -1,9 +1,6 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
-{% block stylesheets %}
-{% endblock %}
-
 {% block page_body %}
     <main>
         <div class="content-wrapper">
@@ -14,10 +11,9 @@
 
 {% block scripts %}
     <script>
-        // Delete the newly-stale cached version of the page.
-        caches.open('{{ app_name|lower() }}').then(cache => {
+        caches.open('medley').then(cache => {
             cache.delete('{{ page_url }}').then(result => {
-                window.location.replace('{{ page_url }}');
+                window.location.replace('{{ page_url }}')
             });
         });
     </script>

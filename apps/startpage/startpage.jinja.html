@@ -92,18 +92,3 @@
         </div>
     </main>
 {% endblock %}
-
-{% block scripts %}
-    {# NOTE: URL path to worker.js is deliberately different than filesystem path. #}
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('{{ worker_url }}').then(registration => {
-                console.info(`Service worker registered with scope ${registration.scope}`);
-            }).catch(error => console.error(error));
-        } else {
-            console.info('Service workers are not supported here.');
-        }
-    </script>
-    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
-    {{ macros.staticAsset('startpage', 'startpage.js') }}
-{% endblock %}
