@@ -151,9 +151,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 # url
                 (
-                    pp.Literal("uri") +
+                    pp.oneOf("""
+                    uri
+                    ip
+                    """) +
                     optional_not +
-                    pp.OneOrMore(pp.Word(pp.alphanums + "%/-."))
+                    pp.OneOrMore(pp.Word(pp.alphanums + "%/-.:"))
                 ).setParseAction(self.log_query_wildcard),
 
                 # string fields
@@ -180,14 +183,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     """) +
                     pp.OneOrMore(pp.Word(pp.alphanums + ".-"))
                 ).setParseAction(self.log_query_subquery),
-
-
-                # ip
-                (
-                    pp.Literal("ip") +
-                    optional_not +
-                    pp.OneOrMore(ipv4 | ipv6)
-                ).setParseAction(self.log_query_exact_string)
             ]),
             "|"
         )
