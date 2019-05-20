@@ -55,12 +55,14 @@ class Controller:
 
         packet = b''
 
+        # pylint: disable=no-member
         for octet in octets:
             packet += struct.pack('B', int(octet, 16))
 
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            s.sendto(packet, ('<broadcast>', 9))
+        # pylint: disable=no-member
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_socket:
+            udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            udp_socket.sendto(packet, ('<broadcast>', 9))
 
         if as_text:
             content_type = "text/plain;charset=utf-8"
