@@ -1,6 +1,6 @@
 """Key-value storage for app configuration and data."""
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import cherrypy
 import pendulum
 from . import mixins
@@ -80,7 +80,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     # pylint: disable=too-many-branches
     def search(self, key=None, keys=(), value=None, limit=100, exact=False,
                as_dict=False, as_value_list=False, as_multivalue_dict=False,
-               key_slice=0):
+               key_slice=0, sorted_by_key=False):
         """Search for records by key or value."""
 
         params = []
@@ -121,17 +121,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             params.append(value)
 
-        sql += " ORDER BY rowid DESC"
+        if sorted_by_key:
+            sql += "ORDER BY key"
+        else:
+            sql += " ORDER BY rowid DESC"
+
         sql += " LIMIT {}".format(limit)
 
         result = self._select(sql, params)
 
         if as_dict:
-            result = {
+            result = OrderedDict({
                 row["key"].split(":", key_slice).pop():
                 row["value"]
                 for row in result
-            }
+            })
 
         if as_multivalue_dict:
             multi_dict = defaultdict(list)
