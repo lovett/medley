@@ -1,0 +1,23 @@
+{% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
+
+{% block stylesheets %}
+    {{ macros.staticAsset('wakeup', 'wakeup.css') }}
+{% endblock %}
+
+{% block page_body %}
+    <main>
+        <div class="content-wrapper">
+            <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
+            <div class="hosts">
+                {% for host, mac_address in hosts.items() %}
+                    <form class="host" method="POST" action="{{ app_url }}">
+                        <input type="hidden" name="host" value="{{ host }}" />
+                        <button>{{ host }}</button>
+                        <p><small>{{ mac_address }}</small></p>
+                    </form>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+{% endblock %}

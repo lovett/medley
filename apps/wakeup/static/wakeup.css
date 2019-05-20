@@ -1,0 +1,17 @@
+.hosts {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.host {
+    width: 10em;
+    height: 10em;
+    margin: .5em;
+    text-align: center;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ccc;
+}
