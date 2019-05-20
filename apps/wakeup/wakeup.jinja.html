@@ -9,6 +9,11 @@
     <main>
         <div class="content-wrapper">
             <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
+
+            <div class="add-host">
+                <a href="{{ registry_url }}">Add host</a>
+            </div>
+
             <div class="hosts">
                 {% for host, mac_address in hosts.items() %}
                     <form class="host" method="POST" action="{{ app_url }}">

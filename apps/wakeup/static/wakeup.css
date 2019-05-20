@@ -1,22 +1,26 @@
 .hosts {
     display: flex;
-    align-items: center;
     justify-content: center;
+    flex-flow: row wrap;
 }
 
 .host {
-    width: 10em;
-    height: 10em;
-    margin: .5em;
+    display: inline-block;
+    padding: 1em;
     text-align: center;
     display: flex;
     flex-flow: row wrap;
     align-items: center;
     justify-content: center;
-    border: 1px solid #ccc;
 }
 
 .host p {
     width: 100%;
     text-align: center;
+    margin: .5em 0 0;
+}
+
+.add-host {
+    text-align: right;
+    margin-bottom: 1.5em;
 }

@@ -25,9 +25,15 @@ class Controller:
             sorted_by_key=True
         ).pop()
 
+        registry_url = cherrypy.engine.publish(
+            "url:internal",
+            "/registry"
+        ).pop()
+
         return {
             "html": ("wakeup.jinja.html", {
                 "hosts": hosts,
+                "registry_url": registry_url,
                 "sent": sent
             })
         }
