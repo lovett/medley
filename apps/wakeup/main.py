@@ -37,6 +37,8 @@ class Controller:
 
         host = kwargs.get('host')
 
+        as_text = cherrypy.request.headers.get("Accept") == "text/plain"
+
         if not host:
             raise cherrypy.HTTPError(400, "No host specified")
 
@@ -59,6 +61,11 @@ class Controller:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             s.sendto(packet, ('<broadcast>', 9))
+
+        if as_text:
+            content_type = "text/plain;charset=utf-8"
+            cherrypy.response.headers["Content-Type"] = content_type
+            return "WoL packet sent.".encode("utf-8")
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
