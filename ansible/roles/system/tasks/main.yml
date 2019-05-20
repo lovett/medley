@@ -35,12 +35,6 @@
     - /var/cache/{{ project_name }}
     - /var/cache/{{ project_name }}/speak
 
-- name: Clear template cache (application will recreate)
-  become: true
-  file:
-    path="/var/cache/{{ project_name }}/jinja"
-    state="absent"
-
 - name: Install python3 system packages
   become: true
   apt:
