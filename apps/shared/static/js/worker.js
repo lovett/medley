@@ -41,7 +41,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     // Don't cache alternate views.
-    if (event.request.url.match(/action=/)) {
+    if (req.url.match(/action=/)) {
         return;
     }
 
@@ -58,20 +58,13 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    const fetchToCache = fetch(req).then(response => {
-        if (response.status !== 200) {
-            return;
-        }
+    const fetchToCache = caches.open(CACHE_NAME).then(cache => {
+        cache.delete(req, {ignoreSearch: true});
+        return cache;
+    }).then(cache => {
+        return cache.add(req);
+    }).catch(err => console.error(err));
 
-        if (response.headers.get('content-type').startsWith('text/html')) {
-            return;
-        }
-
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.put(req, response.clone())
-                .then(() => response);
-        });
-    });
 
     event.waitUntil(fetchToCache);
 });
