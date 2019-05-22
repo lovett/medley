@@ -40,8 +40,8 @@ class Plugin(plugins.SimplePlugin):
             cherrypy.request.base
         )
 
-        if parsed_url.hostname:
-            hostname = parsed_url.hostname
+        if parsed_url.netloc:
+            hostname = parsed_url.netloc
 
         if parsed_url.scheme:
             scheme = parsed_url.scheme
@@ -63,7 +63,7 @@ class Plugin(plugins.SimplePlugin):
                 config_url
             )
 
-            hostname = parsed_url.hostname
+            hostname = parsed_url.netloc
             scheme = parsed_url.scheme
 
         if scheme:
