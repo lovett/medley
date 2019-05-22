@@ -131,11 +131,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._select(sql, params)
 
         if as_dict:
-            result = OrderedDict({
+            result = {
                 row["key"].split(":", key_slice).pop():
                 row["value"]
                 for row in result
-            })
+            }
+
+            # Go the extra mile for Python 3.5.
+            result = OrderedDict(sorted(
+                result.items(),
+                key=lambda t: t[0]
+            ))
 
         if as_multivalue_dict:
             multi_dict = defaultdict(list)
