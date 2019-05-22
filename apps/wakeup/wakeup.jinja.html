@@ -15,6 +15,10 @@
             </div>
 
             <div class="hosts">
+                {% if not hosts %}
+                    <p>No hosts found.</p>
+                {% endif %}
+
                 {% for host, mac_address in hosts.items() %}
                     <form class="host" method="POST" action="{{ app_url }}">
                         <input type="hidden" name="host" value="{{ host }}" />

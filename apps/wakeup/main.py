@@ -8,7 +8,7 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Wakup"
+    name = "Wakeup"
 
     @staticmethod
     @cherrypy.tools.negotiable()
