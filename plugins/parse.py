@@ -276,6 +276,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         dates = tokens[1:]
+        date_interval = 'day'
 
         timezone = cherrypy.engine.publish(
             "registry:first_value",
@@ -287,9 +288,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             timezone = pendulum.now().timezone.name
 
         sql = []
+
         for date in dates:
             ints = tuple(map(int, date))
             if len(date) == 2:
+                date_interval = 'month'
                 year, month = ints
                 day = 1
 
@@ -299,10 +302,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             reference_date = pendulum.datetime(year, month, day, tz=timezone)
 
             sql.append("datestamp BETWEEN '{}' AND '{}'""".format(
-                reference_date.start_of('day').in_timezone('utc').format(
+                reference_date.start_of(
+                    date_interval
+                ).in_timezone(
+                    'utc'
+                ).format(
                     'YYYY-MM-DD-HH'
                 ),
-                reference_date.end_of('day').in_timezone('utc').format(
+
+                reference_date.end_of(
+                    date_interval
+                ).in_timezone(
+                    'utc'
+                ).format(
                     'YYYY-MM-DD-HH'
                 )
             ))
