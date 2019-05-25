@@ -92,3 +92,8 @@
         </div>
     </main>
 {% endblock %}
+
+{% block scripts %}
+    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.staticAsset('startpage', 'startpage.js') }}
+{% endblock %}
