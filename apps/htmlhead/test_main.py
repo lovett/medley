@@ -12,7 +12,7 @@ from testing.cptestcase import BaseCherryPyTestCase
 import apps.htmlhead.main
 
 
-class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
+class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     """
     Tests for the htmlhead application controller
     """
@@ -32,27 +32,10 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET", "POST"))
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    @mock.patch("cherrypy.engine.publish")
-    def test_default(self, publish_mock, render_mock):
+    def test_default(self):
         """The default view is a form to enter a URL."""
 
-        def side_effect(*args, **_):
-            """Side effects local function"""
-
-            if args[0] == "url:internal":
-                return ["/"]
-            return mock.DEFAULT
-        publish_mock.side_effect = side_effect
-
         response = self.request("/")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "app_url"),
-            "/"
-        )
-
-        self.assertIsNone(helpers.html_var(render_mock, "url"))
 
         self.assertEqual(response.code, 200)
 
@@ -65,8 +48,6 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "url:internal":
-                return ["/"]
             if args[0] == "urlfetch:get":
                 responses.add(
                     responses.GET,
@@ -99,8 +80,6 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "url:internal":
-                return ["/"]
             if args[0] == "urlfetch:get":
                 responses.add(
                     responses.GET,
