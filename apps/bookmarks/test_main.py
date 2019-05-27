@@ -32,13 +32,13 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_recent(self, publish_mock, render_mock):
+    def test_empty(self, publish_mock, render_mock):
         """If the database is empty, a no-records message is returned"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "bookmarks:recent":
-                return [[[], 0]]
+                return [[[], 0, _]]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
