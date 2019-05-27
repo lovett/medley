@@ -201,7 +201,7 @@ test: $(APP_NAMES)
 # allows the ".cov" suffix to be omitted, while at the same time
 # making it possible to use a single rule for all apps.
 $(APP_NAMES): $(COVERAGE_DIR)
-	$(MAKE) $@.cov
+	@$(MAKE) --no-print-directory $@.cov
 
 
 # Test a single plugin
