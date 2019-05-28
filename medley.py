@@ -161,8 +161,6 @@ def main():
 
     # Plugins
     plugins.applog.Plugin(cherrypy.engine).subscribe()
-    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
-
     plugins.audio.Plugin(cherrypy.engine).subscribe()
     plugins.bookmarks.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
@@ -178,13 +176,14 @@ def main():
     plugins.logindex.Plugin(cherrypy.engine).subscribe()
     plugins.maintenance.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()
+    plugins.memorize.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.parse.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
+    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
-    plugins.memorize.Plugin(cherrypy.engine).subscribe()
-    plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
     plugins.url.Plugin(cherrypy.engine).subscribe()
+    plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
     # Tools
     cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
@@ -205,9 +204,7 @@ def main():
                 cherrypy.log.access_log.handlers.remove(handler)
 
     cherrypy.engine.start()
-    cherrypy.engine.publish("scheduler:revive")
-    cherrypy.engine.publish("logindex:parse")
-    cherrypy.engine.publish("bookmarks:add:fulltext")
+    cherrypy.engine.publish("server:ready")
 
     if os.environ.get("MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP"):
         systemd_notifier = sdnotify.SystemdNotifier()

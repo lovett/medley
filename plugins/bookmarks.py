@@ -90,6 +90,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         It depends on the urlfetch plugin for URL retrieval.
         """
+
+        self.bus.subscribe("server:ready", self.add_full_text)
         self.bus.subscribe("bookmarks:find", self.find)
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)

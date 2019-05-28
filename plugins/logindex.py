@@ -122,6 +122,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the logindex prefix.
         """
 
+        self.bus.subscribe("server:ready", self.parse)
         self.bus.subscribe('logindex:parse', self.parse)
         self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:alert', self.alert)
