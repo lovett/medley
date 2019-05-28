@@ -7,7 +7,7 @@ Type=notify
 NotifyAccess=all
 User=medley
 Group=medley
-Environment=MEDLEY_NOTIFY_STARTUP=1
+Environment=MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP=1
 WorkingDirectory={{ project_root }}
 ExecStart={{ project_root }}/venv/bin/python medley.py
 

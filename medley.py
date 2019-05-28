@@ -209,7 +209,7 @@ def main():
     cherrypy.engine.publish("logindex:parse")
     cherrypy.engine.publish("bookmarks:add:fulltext")
 
-    if os.environ.get("MEDLEY_NOTIFY_STARTUP"):
+    if os.environ.get("MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP"):
         systemd_notifier = sdnotify.SystemdNotifier()
         systemd_notifier.notify("READY=1")
 
