@@ -2,40 +2,49 @@
 
 set -eu
 
-ROOT=$(mktemp -d)
+WORK_DIR=$(mktemp -d)
 
 cleanup() {
-    rm -rf "$ROOT"
+    rm -rf "$WORK_DIR"
 }
 
 echo "Runing pre-commit hook..."
 
-git checkout-index --prefix="$ROOT/" -af
+git checkout-index --prefix="$WORK_DIR/" -af
 
-# Excludes deleted, copied, and renamed files.
-for CHANGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
-    ALT_CHANGED_FILE="$ROOT/$CHANGED_FILE"
-    FILE_EXTENSION="${ALT_CHANGED_FILE##*.}"
-    FILE_NAME=$(basename "${ALT_CHANGED_FILE%.*}")
-    PARENT_PATH=$(dirname "$ALT_CHANGED_FILE")
-    PARENT_DIR=$(basename "$PARENT_PATH")
-    GRANDPARENT_PATH=$(dirname "$PARENT_PATH")
-    GRANDPARENT_DIR=$(basename "$GRANDPARENT_PATH")
+TESTS_TO_RUN=""
 
-    if [[ "$FILE_EXTENSION"  != "py" ]]; then
-        continue
+# Copy staged files to the work directory.
+#
+# This ensures the files being checked are the files being
+# committed. If the unstaged versions were used, there could be a
+# false positive or false negative.
+#
+# The filter argument excludes deleted, copied, and renamed files.
+for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
+    FILE_EXTENSION="${STAGED_FILE##*.}"
+
+    PATH_PARTS=(${STAGED_FILE//\// })
+
+    if [[ "${PATH_PARTS[0]}" == "apps" ]]; then
+        TESTS_TO_RUN="$TESTS_TO_RUN apps.${PATH_PARTS[1]}"
     fi
 
-    ./venv/bin/flake8 "$ALT_CHANGED_FILE"
-    ./venv/bin/pylint --rcfile=.pylintrc "$ALT_CHANGED_FILE"
+    if [[ "$FILE_EXTENSION" == "py" ]]; then
+        echo "Linting $STAGED_FILE with flake8..."
+        ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
 
-    if [ "$GRANDPARENT_DIR" = "apps" ]; then
-        make "$PARENT_DIR"
-    fi
-
-    if [ "$PARENT_DIR" == "parsers" ] || [ "$PARENT_DIR" == "plugins" ]; then
-        make "${PARENT_DIR}/${FILE_NAME}.${FILE_EXTENSION}"
+        echo "Linting $STAGED_FILE with pylint..."
+        ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"
     fi
 done
+
+# Run the relevant test suites after stripping duplicates.
+#
+# Duplicates can occur when a test target and a test suite are being
+# checked in at the same time.
+if [[ ! -z "$TESTS_TO_RUN" ]]; then
+    make $(echo "$TESTS_TO_RUN" | tr " " "\n" | sort -u | tr "\n" " ")
+fi
 
 trap "cleanup" EXIT
