@@ -15,7 +15,7 @@ class Controller:
     def GET(*_args, **kwargs):
         """Display the list of hosts eligible for wakeup."""
 
-        sent = kwargs.get('sent')
+        sent = kwargs.get('sent', False)
 
         hosts = cherrypy.engine.publish(
             "registry:search",
