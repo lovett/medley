@@ -96,17 +96,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak", self.speak)
 
     @staticmethod
-    def get_config():
-        """Query the registry for configuration settings."""
-
-        return cherrypy.engine.publish(
-            "registry:search",
-            "speak:*",
-            as_dict=True,
-            key_slice=1
-        ).pop()
-
-    @staticmethod
     def get_cache_path(hash_digest=None):
         """The filesystem path of an audio file.
 
@@ -142,7 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def adjust_pronunciation(statement, config):
+    def adjust_pronunciation(statement):
         """Replace words that are prone to mispronunciation with
         better-sounding equivalents.
 
@@ -152,11 +141,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         custom SSML markup.
         """
 
-        adjustments = config.get("adjustment", "").replace("\r", "")
+        adjustments = cherrypy.engine.publish(
+            "registry:search",
+            "speak:adjustment",
+            as_value_list=True
+        ).pop()
+
         adjustment_pairs = [
-            tuple(item.strip() for item in line.split(","))
-            for line in
-            adjustments.split("\n")
+            tuple(value.strip() for value in adjustment.split(","))
+            for adjustment in adjustments
         ]
 
         replaced_statement = statement
@@ -205,10 +198,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return document.strip().encode("utf-8")
 
-    def can_speak(self):
+    @staticmethod
+    def can_speak():
         """Determine whether the application has been muted."""
 
-        config = self.get_config()
+        config = cherrypy.engine.publish(
+            "registry:search",
+            keys=("speak:mute", "speak:mute:temporary"),
+            as_dict=True,
+            key_slice=1
+        ).pop()
+
         today = datetime.date.today()
         tomorrow = today + datetime.timedelta(1)
         now = datetime.datetime.now()
@@ -251,7 +251,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             locale = "en-GB"
             gender = "Male"
 
-        config = self.get_config()
+        config = cherrypy.engine.publish(
+            "registry:search",
+            keys=(
+                "speak:azure_key",
+                "speak:synthesize_url",
+                "speak:token_request_url"
+            ),
+            as_dict=True,
+            key_slice=1
+        ).pop()
 
         if "azure_key" not in config:
             config = {}
@@ -283,7 +292,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not config:
             return False
 
-        adjusted_statement = self.adjust_pronunciation(statement, config)
+        adjusted_statement = self.adjust_pronunciation(statement)
 
         ssml_string = self.ssml(adjusted_statement, locale, gender)
 
