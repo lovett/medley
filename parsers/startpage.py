@@ -1,4 +1,8 @@
-"""Parse URL/name pairs in INI format.
+"""Parse URL/name pairs in a quasi-INI format.
+
+The format used by the startpage is based on the standard INI format,
+but with some added relaxation of normal INI rules to allow URLs to be
+used as keys.
 
 """
 

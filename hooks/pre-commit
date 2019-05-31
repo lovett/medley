@@ -30,6 +30,13 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         TESTS_TO_RUN="$TESTS_TO_RUN apps.${PATH_PARTS[1]}"
     fi
 
+    if [[ "${PATH_PARTS[0]}" == "parsers" ]] || [[ "${PATH_PARTS[0]}" == "plugins" ]]; then
+        TYPE="${PATH_PARTS[0]}"
+        NAME=${PATH_PARTS[1]%.*} # remove file extension
+        NAME=${NAME/test_/} # remove test prefix
+        TESTS_TO_RUN="$TESTS_TO_RUN $TYPE.$NAME"
+    fi
+
     if [[ "$FILE_EXTENSION" == "py" ]]; then
         echo "Linting $STAGED_FILE with flake8..."
         ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
@@ -44,6 +51,7 @@ done
 # Duplicates can occur when a test target and a test suite are being
 # checked in at the same time.
 if [[ ! -z "$TESTS_TO_RUN" ]]; then
+    echo "$TESTS_TO_RUN"
     make $(echo "$TESTS_TO_RUN" | tr " " "\n" | sort -u | tr "\n" " ")
 fi
 
