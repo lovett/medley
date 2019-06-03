@@ -9,7 +9,8 @@ medley.conf
 !ansible/***/medley.conf
 *.pyc
 .coverage
-coverage
+/coverage
+/apps/coverage/static
 htmlcov
 logfetch.ini
 db

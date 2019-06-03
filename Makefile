@@ -153,14 +153,14 @@ $(REQUIREMENTS_FILES): dummy
 # into a master .coverage file at the project root.
 #
 # Two reports are generated: a plain-text version for the command line
-# and an HTML version stored in the htmlcov directory.
+# and an HTML version stored in the static directory of the coverage app.
 #
 # The merging process will remove the intermediate .coverage files,
 # making this rule ineligible for skipping.
 coverage: $(addprefix .coverage., $(APPS) $(PLUGINS) $(PARSERS))
 	coverage combine $(COVERAGE_DIR)
 	coverage report
-	coverage html
+	coverage html -d apps/coverage/static
 
 
 # Run the tests for everything.

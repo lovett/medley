@@ -32,3 +32,4 @@
 - /.pylintrc
 - /pytest.ini
 - /.pytest_cache
+- /apps/coverage
