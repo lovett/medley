@@ -13,17 +13,17 @@ APPS := $(filter-out __%,$(APPS))
 APPS := $(addprefix apps., $(APPS))
 
 # A list of parsers with test suites in the form "parsers.[name of parser]".
-PARSERS := $(wildcard parsers/test_*.py)
+PARSERS := $(wildcard parsers/*_test.py)
 PARSERS := $(notdir $(PARSERS))
 PARSERS := $(basename $(PARSERS))
-PARSERS := $(subst test_,,$(PARSERS))
+PARSERS := $(subst _test,,$(PARSERS))
 PARSERS := $(addprefix parsers., $(PARSERS))
 
 # A list of plugins with test suites in the form "plugins.[name of plugin]".
-PLUGINS := $(wildcard plugins/test_*.py)
+PLUGINS := $(wildcard plugins/*_test.py)
 PLUGINS := $(notdir $(PLUGINS))
 PLUGINS := $(basename $(PLUGINS))
-PLUGINS := $(subst test_,,$(PLUGINS))
+PLUGINS := $(subst _test,,$(PLUGINS))
 PLUGINS := $(addprefix plugins., $(PLUGINS))
 
 REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
@@ -177,7 +177,7 @@ test: $(APPS) $(PARSERS) $(PLUGINS) coverage
 # Customizing the name of the coverage file allows Make to skip the
 # tests if nothing has changed. This is also why the coverage file is
 # deleted if the tests fail.
-apps.%.cov: apps/%/main.py apps/%/test_main.py
+apps.%.cov: apps/%/main.py apps/%/main_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
 	python -m pytest --cov=apps.$* --cov-branch apps/$* \
@@ -194,10 +194,10 @@ apps.%.cov: apps/%/main.py apps/%/test_main.py
 # Customizing the name of the coverage file allows Make to skip the
 # tests if nothing has changed. This is also why the coverage file is
 # deleted if the tests fail.
-parsers.%.cov: parsers/%.py parsers/test_%.py
+parsers.%.cov: parsers/%.py parsers/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
-	python -m pytest --cov=parsers.$* --cov-branch parsers/test_$*.py \
+	python -m pytest --cov=parsers.$* --cov-branch parsers/$*_test.py \
 	|| rm $(COVERAGE_DIR)/$@
 
 
@@ -212,10 +212,10 @@ parsers.%.cov: parsers/%.py parsers/test_%.py
 # Customizing the name of the coverage file allows Make to skip the
 # tests if nothing has changed. This is also why the coverage file is
 # deleted if the tests fail.
-plugins.%.cov: plugins/%.py plugins/test_%.py
+plugins.%.cov: plugins/%.py plugins/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
-	python -m pytest --cov=plugins.$* --cov-branch plugins/test_$*.py \
+	python -m pytest --cov=plugins.$* --cov-branch plugins/$*_test.py \
 	|| rm $(COVERAGE_DIR)/$@
 
 

@@ -10,7 +10,7 @@
 - /coverage
 - /.coverage
 - /testing
-- test_*.py
+- *_test.py
 - /workspace.sh
 - /.rsync-filter
 - medley.conf
