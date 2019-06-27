@@ -32,14 +32,14 @@ class Controller:
 
         order = kwargs.get('order', 'rank')
         query = kwargs.get('query')
-        wayback = kwargs.get('wayback')
         page = int(kwargs.get('page', 1))
         per_page = 20
         offset = (page - 1) * per_page
+        recent_tags = ()
 
-        if wayback:
+        if kwargs.get('wayback'):
             return {
-                "json": self.check_wayback_availability(wayback)
+                "json": self.check_wayback_availability(kwargs.get('wayback'))
             }
 
         if query:
@@ -57,6 +57,11 @@ class Controller:
                 "bookmarks:recent",
                 limit=per_page,
                 offset=offset,
+                max_days=max_days
+            ).pop()
+
+            recent_tags = cherrypy.engine.publish(
+                "bookmarks:recent_tags",
                 max_days=max_days
             ).pop()
 
@@ -83,6 +88,7 @@ class Controller:
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
+                "recent_tags": recent_tags,
                 "max_days": max_days,
                 "count": count,
                 "query": query,

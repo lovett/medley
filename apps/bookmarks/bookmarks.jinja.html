@@ -64,7 +64,6 @@
         <div class="content-wrapper">
             <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found.</p>
 
-
             {% if count %}
                 <p>
                     Showing {{ start_index }} – {{ end_index }}
@@ -76,6 +75,18 @@
                     {% endif %}
                 </p>
             {% endif %}
+
+            {% if recent_tags %}
+                <ul class="tag-list">
+                    {% for tag in recent_tags|sort %}
+                        <li>
+                            <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                            <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
             {% if general_query %}
                 <p>
                     Try this search on

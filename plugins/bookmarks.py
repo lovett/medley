@@ -98,6 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:generalize_query", self.generalize_query)
         self.bus.subscribe("bookmarks:recent", self.recent)
+        self.bus.subscribe("bookmarks:recent_tags", self.recent_tags)
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
 
@@ -359,6 +360,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._count(sql, (cutoff_date,)),
             self._explain(sql, (cutoff_date, limit, offset))
         )
+
+    @decorators.log_runtime
+    def recent_tags(self, limit=50, max_days=180):
+        """Get a list of tags used on recently-added bookmarks."""
+
+        sql = """SELECT tags as 'tags [comma_delimited]'
+        FROM bookmarks
+        WHERE added_date >= ?
+        AND tags IS NOT NULL
+        AND tags <> ''
+        LIMIT ?"""
+
+        cutoff_date = pendulum.now().subtract(
+            days=max_days
+        ).to_date_string()
+
+        generator = self._select_generator(sql, (cutoff_date, limit))
+
+        tag_set = set()
+        for row in generator:
+            tag_set.update(row["tags"])
+        return tag_set
 
     def prune(self):
         """Delete rows that have been marked for removal.

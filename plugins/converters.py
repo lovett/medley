@@ -143,4 +143,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def comma_delimited(value):
         """Parse a comma-delimited string into a list."""
 
-        return value.decode("utf-8").split(',')
+        return [
+            word.strip()
+            for word in value.decode("utf-8").split(',')
+        ]
