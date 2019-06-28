@@ -24,7 +24,7 @@ class Controller:
         return closest_snapshot
 
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(self, *args, **kwargs):
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.
 
@@ -36,6 +36,9 @@ class Controller:
         per_page = 20
         offset = (page - 1) * per_page
         recent_tags = ()
+
+        if args == ('taglist',):
+            return self.taglist()
 
         if kwargs.get('wayback'):
             return {
@@ -61,7 +64,7 @@ class Controller:
             ).pop()
 
             recent_tags = cherrypy.engine.publish(
-                "bookmarks:recent_tags",
+                "bookmarks:tags:recent",
                 max_days=max_days
             ).pop()
 
@@ -137,3 +140,20 @@ class Controller:
             raise cherrypy.HTTPError(404, "Invalid url")
 
         cherrypy.response.status = 204
+
+    @staticmethod
+    def taglist():
+        """Render a list of all known bookmark tags using a dedicated
+        template.
+
+        """
+
+        tags = cherrypy.engine.publish(
+            "bookmarks:tags:all"
+        ).pop()
+
+        return {
+            "html": ("bookmarks-taglist.jinja.html", {
+                "tags": tags,
+            })
+        }

@@ -56,3 +56,32 @@
     font-size: .85em;
     white-space: nowrap;
 }
+
+
+#all-tags {
+    padding: 0 2em;
+    column-count: 1;
+    line-height: 1.5;
+}
+
+#all-tags LI {
+    display: block;
+}
+
+@media (min-width: 600px) {
+    #all-tags {
+        column-count: 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    #all-tags {
+        column-count: 3;
+    }
+}
+
+@media (min-width: 1100px) {
+    #all-tags {
+        column-count: 4;
+    }
+}

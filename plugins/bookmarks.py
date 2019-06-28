@@ -98,7 +98,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:generalize_query", self.generalize_query)
         self.bus.subscribe("bookmarks:recent", self.recent)
-        self.bus.subscribe("bookmarks:recent_tags", self.recent_tags)
+        self.bus.subscribe("bookmarks:tags:recent", self.recent_tags)
+        self.bus.subscribe("bookmarks:tags:all", self.all_tags)
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
 
@@ -198,10 +199,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._insert(sql, [values])
 
+        if tags:
+            cherrypy.engine.publish(
+                "cache:clear",
+                "bookmarks:all_tags"
+            )
+
         cherrypy.engine.publish(
             "scheduler:add",
             2,
             "bookmarks:add:fulltext"
+        )
+
+        cherrypy.engine.publish(
+            "scheduler:add",
+            5,
+            "bookmarks:tags:all",
+            for_precache=True
         )
 
         return True
@@ -383,6 +397,45 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             tag_set.update(row["tags"])
         return tag_set
 
+    @decorators.log_runtime
+    def all_tags(self, for_precache=False):
+        """Get the full list of all known tags."""
+
+        cache_key = "bookmarks:all_tags"
+
+        tag_set = cherrypy.engine.publish(
+            "cache:get",
+            cache_key
+        ).pop()
+
+        if tag_set:
+            return tag_set
+
+        sql = """SELECT distinct tags as 'tags [comma_delimited]'
+        FROM bookmarks
+        WHERE tags IS NOT NULL
+        AND tags <> ''
+        """
+
+        generator = self._select_generator(sql)
+
+        tag_set = set()
+        for row in generator:
+            tag_set.update(row["tags"])
+
+        sorted_tags = sorted(tag_set)
+
+        cherrypy.engine.publish(
+            "cache:set",
+            cache_key,
+            sorted_tags
+        )
+
+        if not for_precache:
+            return sorted_tags
+
+        return None
+
     def prune(self):
         """Delete rows that have been marked for removal.
 
@@ -400,6 +453,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "prune",
             "pruned {} records".format(deletion_count)
         )
+
+        if deletion_count > 0:
+            cherrypy.engine.publish(
+                "cache:clear",
+                "bookmarks:all_tags"
+            )
 
     @decorators.log_runtime
     def repair(self):
