@@ -41,6 +41,17 @@
     line-height: 3;
 }
 
+.glossary a {
+    outline: 0;
+    padding: .25em;
+    text-decoration: none;
+}
+
+.glossary a:focus {
+    background-color: #369;
+    color: white;
+}
+
 @media only screen and (min-width: 600px) {
     .glossary {
         column-count: 4;

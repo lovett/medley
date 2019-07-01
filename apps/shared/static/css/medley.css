@@ -227,6 +227,11 @@ TABLE.key-value TH {
     margin-top: .5em;
 }
 
+.focus-candidate {
+    background-color: orange;
+    color: white;
+}
+
 .half-column {
     box-sizing: border-box;
     display: inline-block;

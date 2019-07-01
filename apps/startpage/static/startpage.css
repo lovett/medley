@@ -120,11 +120,6 @@ li.group:hover .all {
     height: 70vh;
 }
 
-.focus-candidate {
-    background-color: orange;
-    color: white;
-}
-
 @media (min-width: 360px) {
     #startpage-display .content-wrapper {
         column-count: 2;

@@ -55,6 +55,10 @@ MEDLEY.registry = (function () {
         init: function () {
             jQuery('#insert-form').on('submit', submitRecord);
             jQuery('.views').on('click', 'A', switchView);
+
+            if ($().focusAsYouType) {
+                jQuery('.glossary a').focusAsYouType();
+            }
         }
     };
 })();

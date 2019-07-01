@@ -6,6 +6,10 @@
 {% endblock %}
 
 {% block scripts %}
+    {% if glossary %}
+        {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
+    {% endif %}
+
     {{ macros.staticAsset('registry', 'registry.js') }}
 
     {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
