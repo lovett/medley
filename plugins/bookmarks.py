@@ -276,10 +276,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def remove(self, url):
         """Discard a previously bookmarked URL."""
 
-        return self._delete(
-            "UPDATE bookmarks SET deleted=CURRENT_TIMESTAMP WHERE url=?",
-            (url,)
-        )
+        bookmark = self.find(url=url)
+
+        deletions = 0
+
+        if bookmark:
+            deletions = self._delete(
+                "UPDATE bookmarks SET deleted=CURRENT_TIMESTAMP WHERE rowid=?",
+                (bookmark["rowid"],)
+            )
+
+            if bookmark["tags"]:
+                cherrypy.engine.publish("cache:clear", "bookmarks:all_tags")
+
+        return deletions
 
     @decorators.log_runtime
     def search(self, query, order="date-desc", limit=20, offset=0):
@@ -415,6 +425,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = """SELECT distinct tags as 'tags [comma_delimited]'
         FROM bookmarks
         WHERE tags IS NOT NULL
+        AND deleted IS NULL
         AND tags <> ''
         """
 
