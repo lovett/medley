@@ -97,6 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:generalize_query", self.generalize_query)
+        self.bus.subscribe("bookmarks:prune", self.prune)
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:tags:recent", self.recent_tags)
         self.bus.subscribe("bookmarks:tags:all", self.all_tags)
@@ -436,6 +437,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return None
 
+    @decorators.log_runtime
     def prune(self):
         """Delete rows that have been marked for removal.
 
