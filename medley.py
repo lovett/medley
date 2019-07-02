@@ -37,6 +37,7 @@ def main():
     cherrypy.config.update({
         "app_root": app_root,
         "cache_dir": "./cache",
+        "cache_static_assets": True,
         "database_dir": "./db",
         "engine.autoreload.on": False,
         "local_maintenance": True,
@@ -52,6 +53,7 @@ def main():
         "server_root": server_root,
         "tools.conditional_auth.on": False,
         "users": {},
+        "use_service_workers": True,
         "tools.conditional_auth.whitelist": "",
 
         # Jinja templating won't work unless tools.encode is off
@@ -149,9 +151,13 @@ def main():
                 "tools.gzip.mime_types": ["text/*", "application/*"],
                 "tools.staticdir.on": True,
                 "tools.staticdir.dir": os.path.realpath(static_path),
-                "tools.expires.on": True,
-                "tools.expires.secs": 86400 * 7
             }
+
+            if cherrypy.config.get("cache_static_assets"):
+                app_config[static_url].update({
+                    "tools.expires.on": True,
+                    "tools.expires.secs": 86400 * 7
+                })
 
         cherrypy.tree.mount(
             app_module.Controller(),

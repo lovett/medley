@@ -189,6 +189,8 @@ class Tool(cherrypy.Tool):
         if values["app_url"]:
             values["app_url"] = values["app_url"].pop()
 
+        values["use_service_workers"] = cherrypy.config.get("service_workers")
+
         content_type = "text/html;charset={}".format(self.charset)
         cherrypy.response.headers["Content-Type"] = content_type
 
