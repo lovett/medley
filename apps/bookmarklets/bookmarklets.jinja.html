@@ -25,16 +25,11 @@
 
 
 {% block page_body %}
-
     <main>
-        <div class="content-wrapper">
-            <dl>
-                <dt>{{ inline_bookmarklet("location='https://www.google.com/#' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}</dt>
-                <dd>Retry a web search on Google</dd>
+        {{ inline_bookmarklet("location='https://www.google.com/#' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}
+        <p>Retry a web search on Google</p>
 
-                <dt>{{ bookmarklet_url("validate.js", "validate") }}</dt>
-                <dd>Submit the current page to the W3C HTML validator</dd>
-            </dl>
-        </div>
+        {{ bookmarklet_url("validate.js", "validate") }}
+        <p>Submit the current page to the W3C HTML validator</p>
     </main>
 {% endblock %}

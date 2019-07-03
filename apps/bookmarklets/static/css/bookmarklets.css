@@ -1,28 +1,8 @@
-.content-wrapper {
-    max-width: 30em;
-    background-color: #fff;
-    padding: 1em;
-}
-
-dd {
-    margin-bottom: 2em;
-}
-
-dt {
-    padding-bottom: .5em;
-}
-
-dt a {
-    text-decoration: none;
-}
-
-.bookmarklet-container {
-    text-align: left;
-}
-
-.bookmarklet-container a {
-    min-width: 8em;
-    text-align: center;
+main {
+    flex: 0;
+    display: grid;
+    grid-gap: .5em;
+    align-items: center;
 }
 
 /* Small devices */
@@ -35,6 +15,14 @@ dt a {
 
 /* Large devices */
 @media (min-width: 992px) {
+    main {
+        grid-template-columns: 6em 1fr;
+        grid-gap: 1em;
+    }
+
+    .bookmarklet-container A {
+        display: block;
+    }
 }
 
 /* Extra large devices */

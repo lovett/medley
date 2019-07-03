@@ -29,7 +29,7 @@ MAIN {
     padding: .5em 1em;
 }
 
-.item:hover, .item:focus {
+.item:focus {
     outline: 0;
     background-color: var(--focus-bg-color);
 }
