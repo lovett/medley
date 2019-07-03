@@ -6,19 +6,8 @@
     margin-bottom: 0;
 }
 
-.grid {
-    border: 1px solid black;
-    border-collapse: collapse;
-}
-
 .grid THEAD TH {
-    background-color: #000;
-    color: #fff;
     min-width: 6em;
-}
-
-.grid TBODY TD {
-    border: 1px solid #000;
 }
 
 /* Small devices */
@@ -39,12 +28,13 @@
 
 /* Print layout */
 @media print {
-    .grid-list {
+    .grid-select {
         display: none;
     }
 
     .grid {
         font-size: 12px;
+        margin-bottom: 0;
     }
 
     .grid TD, .grid TH {

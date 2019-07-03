@@ -78,10 +78,10 @@ MAIN {
 
 TABLE {
     min-width: 100%;
-    margin: auto;
-    background-color: white;
+    margin: 0 auto 2em 0;
     font-size: .85em;
     border-collapse: collapse;
+    border: 1px solid #333;
 }
 
 TABLE CAPTION {
@@ -91,7 +91,7 @@ TABLE CAPTION {
 }
 
 TABLE TR {
-    border-bottom: 1px solid rgba(0, 0, 0, .03);
+    border-bottom: 1px solid #333;
 }
 
 TABLE TR:last-child {
@@ -99,20 +99,21 @@ TABLE TR:last-child {
 }
 
 TABLE TH {
+    background-color: #333;
     font-weight: bold;
     padding: .75em;
     white-space: nowrap;
     text-align: left;
-    background-color: rgba(0, 0, 0, .03);
+    color: #fff;
+    vertical-align: top;
 }
 
 TABLE TD {
     padding: .75em;
     background-color: #fff;
-}
-
-TABLE.key-value TH {
-    text-align: right;
+    word-break: break-word;
+    vertical-align: top;
+    border: 1px solid #000;
 }
 
 #page-header {
@@ -123,6 +124,7 @@ TABLE.key-value TH {
     display: flex;
     justify-content: space-between;
     box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.75);
+    margin-bottom: 1em;
 }
 
 #page-header a {
