@@ -6,7 +6,7 @@
 }
 
 A {
-    color: currentColor;
+    color: #084887;
     text-decoration: none;
 }
 
@@ -123,6 +123,10 @@ TABLE.key-value TH {
     display: flex;
     justify-content: space-between;
     box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.75);
+}
+
+#page-header a {
+    color: inherit;
 }
 
 #page-header h1 {
@@ -344,6 +348,11 @@ TABLE.key-value TH {
     display: none;
 }
 
+.table-sleeve {
+    width: 100%;
+    overflow: auto;
+}
+
 .table-wrapper {
     border: 1px solid #ccc;
     margin-bottom: 2em;
@@ -449,6 +458,23 @@ TABLE.natural-width {
     }
 }
 
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}
+
+/* Print layout */
 @media print {
     BODY {
         background-color: #fff;

@@ -1,52 +1,24 @@
-.setup {
-    background-color: #fff;
-    padding: 1em;
-    margin-bottom: 2em;
-    border: 1px solid #ccc;
+.grid-select {
+    padding: 0 0 2em;
 }
 
-.setup SECTION {
-    margin-bottom: 1em;
-}
-
-.setup SECTION:last-of-type {
+.grid-select p {
     margin-bottom: 0;
 }
-
-
-.table-wrapper {
-    border: 0;
-}
-
 
 .grid {
     border: 1px solid black;
     border-collapse: collapse;
-    table-layout: fixed;
-    width: 100%;
 }
 
 .grid THEAD TH {
     background-color: #000;
     color: #fff;
+    min-width: 6em;
 }
 
 .grid TBODY TD {
     border: 1px solid #000;
-}
-
-@media print {
-    .setup {
-        display: none;
-    }
-
-    .grid {
-        font-size: 12px;
-    }
-
-    .grid TD, .grid TH {
-        padding: .6em;
-    }
 }
 
 /* Small devices */
@@ -63,4 +35,19 @@
 
 /* Extra large devices */
 @media (min-width: 1200px) {
+}
+
+/* Print layout */
+@media print {
+    .grid-list {
+        display: none;
+    }
+
+    .grid {
+        font-size: 12px;
+    }
+
+    .grid TD, .grid TH {
+        padding: .6em;
+    }
 }

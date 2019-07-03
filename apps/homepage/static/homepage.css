@@ -24,6 +24,7 @@ MAIN {
 }
 
 .item {
+    color: inherit;
     font-weight: bold;
     padding: .5em 1em;
 }
