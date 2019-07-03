@@ -2,7 +2,7 @@ MEDLEY.index = (function () {
     'use strict'
     return {
         init: function () {
-            jQuery('MAIN A').focusAsYouType();
+            jQuery('A.item').focusAsYouType();
         }
     };
 })();

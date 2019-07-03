@@ -1,50 +1,58 @@
-.module-grid {
+MAIN {
     display: flex;
-    flex-flow: row wrap;
-    justify-content: center;
-    margin-bottom: 3em;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.module-grid-title {
-    font-size: 1.5em;
-    font-weight: normal;
-    text-align: center;
-}
-
-.module-grid .module {
-    border: 1px solid #ccc;
-    padding: 1em;
-    border-radius: .5em;
-    margin: 1em;
-    width: 40%;
-    text-decoration: none;
-    color: inherit;
+.description {
     font-size: .85em;
-    background-color: #fff;
+    font-weight: normal;
+    display: block;
 }
 
-.module-grid .module:focus {
-    background-color: #56904e;
-    color: white;
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
+    grid-gap: 1em;
+    margin: 0 -1em;
+    padding: 1em 0;
 }
 
-.module-grid .focus-candidate {
-    background-color: #e8f7cc;
+.inverse {
+    background-color: var(--secondary-bg-color);
+    color: #fff;
 }
 
-.module-grid H2 {
+.item {
+    font-weight: bold;
+    padding: .5em 1em;
+}
+
+.item:hover, .item:focus {
+    outline: 0;
+    background-color: var(--focus-bg-color);
+}
+
+.title {
+    align-self: flex-end;
     font-size: 1.25em;
-    padding: 0;
-    margin: 0;
+    margin: .5em 0 0 1em;
+    grid-column: 1 / -1;
+    font-style: italic;
 }
 
-.module-grid P {
-    margin: 0;
+/* Small devices */
+@media (min-width: 576px) {
 }
 
-@media only screen and (max-width: 600px) {
-    .module-grid .module {
-        width: 100%;
-        margin: .5em;
-    }
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
 }

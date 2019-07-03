@@ -1,4 +1,4 @@
-{% extends "base.jinja.html" %}
+{% extends "base.jinja.html" %}1
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
@@ -12,33 +12,27 @@
 
 {% block page_body %}
     <main>
-        <div class="module-grid">
+        <section class="grid">
             {% for name, url, description, user_facing in apps %}
-
                 {% if user_facing %}
-                    <a class="module" href="{{ url }}">
-                        <h2>{{ name }}</h2>
-                        <p>{{ description }}</p>
+                    <a class="item" href="{{ url }}">
+                        {{ name }}
+                        <span class="description">{{ description }}</span>
                     </a>
                 {% endif %}
-
             {% endfor %}
-        </div>
+        </section>
 
-
-        <h1 class="module-grid-title">Services</h1>
-        <div class="module-grid">
+        <section class="grid inverse">
+            <h2 class="title">Services</h2>
             {% for name, _, description, user_facing in apps %}
-
                 {% if not user_facing %}
-                    <div class="module">
-                        <h2>{{ name}}</h2>
-                        <p>{{ description }}</p>
+                    <div class="item">
+                        {{ name}}
+                        <span class="description">{{ description }}</span>
                     </div>
                 {% endif %}
-
             {% endfor %}
-        </div>
-
+        </section>
     </main>
 {% endblock %}
