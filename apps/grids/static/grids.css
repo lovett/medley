@@ -1,8 +1,4 @@
-.grid-select {
-    padding: 0 0 2em;
-}
-
-.grid-select p {
+.app-nav p {
     margin-bottom: 0;
 }
 
@@ -28,7 +24,7 @@
 
 /* Print layout */
 @media print {
-    .grid-select {
+    .app-nav {
         display: none;
     }
 

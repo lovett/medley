@@ -1,28 +1,17 @@
-.hosts {
-    display: flex;
-    justify-content: center;
-    flex-flow: row wrap;
-}
-
-.host {
-    display: inline-block;
-    padding: 1em;
-    text-align: center;
-    display: flex;
-    flex-flow: row wrap;
-    align-items: center;
-    justify-content: center;
-}
-
-.host p {
+BUTTON {
     width: 100%;
-    text-align: center;
-    margin: .5em 0 0;
+    font-size: .75em;
 }
 
-.add-host {
-    text-align: right;
-    margin-bottom: 1.5em;
+.hosts {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-gap: 1.5em;
+    align-items: center;
+}
+
+.mac-address {
+    font-family: monospace;
 }
 
 /* Small devices */
@@ -31,6 +20,9 @@
 
 /* Medium devices */
 @media (min-width: 768px) {
+    BUTTON {
+        font-size: 1em;
+    }
 }
 
 /* Large devices */

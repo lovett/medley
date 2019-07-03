@@ -25,13 +25,11 @@ BUTTON {
     font-family: inherit;
     border-radius: .25em;
     border: 0;
-    color: #fff;
-    background-color: green;
-    padding: .5em 1em;
+    background-color: #87D68D;
+    padding: .5em 1.5em;
 }
 
 BUTTON:hover {
-    background-color: forestGreen;
     cursor: pointer;
 }
 
@@ -149,6 +147,11 @@ TABLE TD {
     text-align: right;
 }
 
+.app-nav {
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
 .bookmarklet-container A {
     background-color: #4C699A;
     color: #fff;
@@ -258,7 +261,7 @@ TABLE TD {
 }
 
 .message {
-    margin: 1em 0 2em 0;
+    margin: -1em -1em 1em -1em;
     padding: 1em;
 }
 
@@ -330,8 +333,7 @@ TABLE TD {
 }
 
 .success {
-    background-color: #90EE90;
-    padding: .5em;
+    background-color: #87D68D;
 }
 
 .svg-defs {

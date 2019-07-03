@@ -7,26 +7,23 @@
 
 {% block page_body %}
     <main>
-        <div class="content-wrapper">
-            <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
+        <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
+        <header class="app-nav">
+            <a href="{{ registry_url }}">Add host</a>
+        </header>
 
-            <div class="add-host">
-                <a href="{{ registry_url }}">Add host</a>
-            </div>
+        <div class="hosts">
+            {% if not hosts %}
+                <p>No hosts found.</p>
+            {% endif %}
 
-            <div class="hosts">
-                {% if not hosts %}
-                    <p>No hosts found.</p>
-                {% endif %}
-
-                {% for host, mac_address in hosts.items() %}
-                    <form class="host" method="POST" action="{{ app_url }}">
-                        <input type="hidden" name="host" value="{{ host }}" />
-                        <button>{{ host }}</button>
-                        <p><small>{{ mac_address }}</small></p>
-                    </form>
-                {% endfor %}
-            </div>
+            {% for host, mac_address in hosts.items() %}
+                <form class="host" method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="host" value="{{ host }}" />
+                    <button>{{ host }}</button>
+                </form>
+                <span class="mac-address">{{ mac_address }}</span>
+            {% endfor %}
         </div>
     </main>
 {% endblock %}
