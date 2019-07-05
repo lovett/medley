@@ -3,9 +3,9 @@ Jinja2==2.10.1
 geoip2==2.9.0
 httplib2==0.13.0
 msgpack-python==0.5.6
-pendulum==2.0.4
+pendulum==2.0.5
 pyparsing==2.4.0
 pytz==2019.1
-pytzdata==2019.1
+pytzdata==2019.2
 requests==2.22.0
 sdnotify==0.3.2
