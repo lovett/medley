@@ -1,6 +1,7 @@
 """Printable pages for data entry."""
 
 from collections import defaultdict
+from itertools import islice
 import pendulum
 import cherrypy
 
@@ -10,9 +11,8 @@ class Controller:
 
     name = "Grids"
 
-    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(*_args, **kwargs):
+    def GET(self, *_args, **kwargs):
         """Display the list of available grids, or the current grid"""
 
         name = kwargs.get('name', '')
@@ -39,6 +39,9 @@ class Controller:
 
         except StopIteration:
             headers = []
+
+        if grids and not name:
+            return self.redirect_to_first_grid(grids)
 
         rows = []
         if options["layout"] == "month":
@@ -74,3 +77,23 @@ class Controller:
                 "rows": rows,
             })
         }
+
+    @staticmethod
+    def redirect_to_first_grid(grids):
+        """Identify the first item in the grid collection and redirect to
+        it.
+
+        """
+
+        first_grid_name = next(islice(grids.items(), 1))[0]
+
+        print(first_grid_name)
+
+        redirect_url = cherrypy.engine.publish(
+            "url:internal",
+            query={
+                "name": first_grid_name
+            }
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(redirect_url)

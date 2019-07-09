@@ -3,6 +3,7 @@ Test suite for the grids app
 """
 
 import unittest
+import cherrypy
 import mock
 import pendulum
 from testing.assertions import ResponseAssertions
@@ -94,10 +95,9 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             ['Column A', 'Column B']
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_default_view(self, publish_mock, render_mock):
-        """The default view of the app is a list of available templates"""
+    def test_default_view(self, publish_mock):
+        """The default view of the app redirects to the first known template"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
@@ -107,14 +107,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/")
-
-        self.assertFalse(helpers.html_var(render_mock, "rows"))
-        self.assertFalse(helpers.html_var(render_mock, "headers"))
-        self.assertEqual(
-            helpers.html_var(render_mock, "names"),
-            ["test1"]
-        )
+        self.assertRaises(cherrypy.HTTPRedirect)
 
 
 if __name__ == "__main__":
