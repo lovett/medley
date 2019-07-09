@@ -10,8 +10,9 @@ class Controller:
 
     name = "Grids"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display the list of available grids, or the current grid"""
 
         name = kwargs.get('name', '')
@@ -20,6 +21,7 @@ class Controller:
         grids = cherrypy.engine.publish(
             "registry:search",
             "grids:*",
+            key_slice=1,
             as_dict=True
         ).pop()
 
@@ -28,7 +30,7 @@ class Controller:
         try:
             config = next(
                 value.split("\n")
-                for key, value in grids.items() if key.endswith(":" + name)
+                for key, value in grids.items() if key == name
             )
 
             headers = [value.strip() for value in config[0].split(",")]
@@ -67,7 +69,7 @@ class Controller:
             "html": ("grids.jinja.html", {
                 "headers": headers,
                 "name": name,
-                "names": [key.split(":")[1] for key in grids.keys()],
+                "names": [key for key in grids.keys()],
                 "options": options,
                 "rows": rows,
             })

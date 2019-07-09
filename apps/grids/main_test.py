@@ -39,7 +39,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:search":
                 value = "Column 1, Column 2, Column 3\nlayout=month"
-                return [{"grids:test1": value}]
+                return [{"test1": value}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -62,7 +62,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:search":
                 value = "Column 4, Column 5, Column 6\nlayout=month"
-                return [{"grids:test1": value}]
+                return [{"test1": value}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -82,7 +82,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [{"grids:test1": "Column A, Column B"}]
+                return [{"test1": "Column A, Column B"}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -102,7 +102,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [{"grids:test1": "Column A"}]
+                return [{"test1": "Column A"}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
