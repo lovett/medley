@@ -7,7 +7,7 @@ MEDLEY.topics = (function () {
         var target = links[index];
 
         childWindow.location = target.getAttribute('href');
-        target.classList.add('strikeout');
+        target.classList.add('clicked');
     }
 
     return {

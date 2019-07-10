@@ -1,76 +1,26 @@
-main header, main footer {
-    padding: 1em 0;
-}
-
 #headlines {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: stretch;
-    justify-content: space-between;
-    font-size: 15px;
+    display: grid;
+    grid-gap: 2em;
 }
 
-#headlines a {
-    text-decoration: none;
+ol {
+    margin-top: 0;
+    padding-left: 0;
+    list-style-position: inside;
 }
 
-#headlines .group {
-    padding-top: 1em;
-}
-
-#headlines h1 {
-    font-size: 1.5em;
-    border-bottom: 1px solid black;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-}
-
-#headlines ol {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-}
-
-#headlines .title {
-    display: block;
-    overflow: hidden;
-}
-
-#headlines li {
+li {
     margin: 0;
     padding: .75em 0;
-    border-bottom: 1px solid #ccc;
 }
 
-#headlines ol p {
-    margin: .5em 0 1em;
+.clicked {
+    text-decoration: line-through;
 }
 
-#headlines footer {
-    display: flex;
-    flex-wrap: row nowrap;
-    justify-content: space-between;
-    font-size: .75em;
-    padding-top: 1em;
-}
-
-/* Tablet and up */
-@media (min-width: 768px) {
-    #headlines .group {
-        width: 16em;
-    }
-
-    #headlines .title {
-        height: 2.25em;
-    }
-}
-
-
-@media (min-width: 1200px) {
-    #headlines .group {
-        width: 20em;
-    }
+.item-nav {
+    font-size: .85em;
+    padding-top: .5em;
 }
 
 /* Small devices */
@@ -79,10 +29,16 @@ main header, main footer {
 
 /* Medium devices */
 @media (min-width: 768px) {
+    #headlines {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
+    #headlines {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* Extra large devices */

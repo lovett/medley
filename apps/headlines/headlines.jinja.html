@@ -11,28 +11,29 @@
 
 {% block page_body %}
     <main>
-        <header class="content-wrapper align-center">
+        <header class="app-nav">
+            <button
+                data-limit="{{ limit }}"
+                data-offset="{{ offset }}"
+            >Walk Headlines</button>
+            <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
             <p>
                 <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
             </p>
-            <button data-limit="{{ limit }}" data-offset="{{ offset }}">Walk Headlines </button>
-            <p class="smaller">
-                From {{ offset }} to {{ offset + limit - 1}}
-            </p>
         </header>
 
-        <div id="headlines" class="content-wrapper">
-
+        <div id="headlines">
+            {% set ns = namespace(loop_count=1) %}
             {% for category in headlines %}
                 <div class="group">
-                    <h1>{{ category|capitalize }}</h1>
+                    <h2>{{ category|capitalize }}</h2>
 
-                    <ol>
+                    <ol start="{{ ns.loop_count }}">
                         {% for article in headlines[category] %}
+                            {% set ns.loop_count = ns.loop_count + 1 %}
                             <li>
                                 <a class="title" href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
-                                <footer>
-                                    {{ article["source"]["name"] }}
+                                <div class="item-nav">
                                     <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
                                        rel="noreferrer" target="_blank">search</a>
                                 </footer>
@@ -43,7 +44,7 @@
             {% endfor %}
         </div>
 
-        <footer class="content-wrapper align-center">
+        <footer class="align-center">
             <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>
         </footer>
 

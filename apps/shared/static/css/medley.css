@@ -39,6 +39,12 @@ BUTTON[disabled] {
     color: #efefef;
 }
 
+BUTTON + .label {
+    padding-left: 1em;
+}
+
+
+
 BUTTON.small {
     font-size: .85em;
     padding: .5em;
