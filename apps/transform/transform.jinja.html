@@ -1,6 +1,10 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
+{% block stylesheets %}
+    {{ macros.staticAsset('transform', 'transform.css') }}
+{% endblock %}
+
 {% block scripts %}
     {{ macros.vueApp('main', ('clipboard-button',)) }}
 {% endblock %}
@@ -8,25 +12,27 @@
 {% block page_body %}
     {{ macros.svgSymbols("copy") }}
     <main>
-        <form class="content-wrapper" method="post" action="/transform">
+        <form method="post" action="/transform">
             <div class="field">
-                <label for="value">Input:</label>
+                <label for="value">Input</label>
                 <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
             </div>
             <div class="field">
-                <label for="transform">Convert to:</label>
+                <p>Transformation</p>
 
-                <div class="field">
+                <div id="transformations" class="field">
                     {% for transform in transforms %}
-                        <input
-                            id="transform-{{ transform }}"
-                            type="radio"
-                            class="inline"
-                            name="transform"
-                            value="{{ transform }}"
-                            {% if transform == current_transform %}checked{% endif %}
-                        />
-                        <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
+                        <div class="transform">
+                            <input
+                                id="transform-{{ transform }}"
+                                type="radio"
+                                class="inline"
+                                name="transform"
+                                value="{{ transform }}"
+                                {% if transform == current_transform %}checked{% endif %}
+                            />
+                            <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -37,13 +43,15 @@
         </form>
 
         {% if result %}
-            <div class="content-wrapper">
-                <p>
-                    <clipboard-button target-id="result" label="Copy to clipboard" />
-                </p>
-                <div id="result" style="white-space: pre-line">{{ result|escape() }}</div>
+            <div id="transform-result">
+                <header class="app-nav">
+                    <div class="actions">
+                        <div><clipboard-button target-id="copy-target" label="Copy" /></div>
+                    </div>
+                </header>
+                <div id="copy-target">{{ result|escape() }}</div>
             </div>
+        </div>
         {% endif %}
-        </form>
     </main>
 {% endblock %}

@@ -1,0 +1,43 @@
+MAIN {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#transform-result {
+    flex-grow: 1;
+    background-color: var(--secondary-bg-color);
+    color: #fff;
+    margin: 1em -1em 0;
+    padding: 1em;
+}
+
+#copy-target {
+    white-space: pre-line;
+}
+
+#transformations {
+    column-count: 2;
+};
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    #transformations {
+        column-count: 4;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    #transformations {
+        column-count: 6;
+    }
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}
