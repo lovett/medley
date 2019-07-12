@@ -13,13 +13,13 @@ class Controller:
     def GET():
         """Present a static list of bookmarklets"""
 
-        anonymizer = cherrypy.engine.publish(
+        later_url = cherrypy.engine.publish(
             "url:internal",
-            "/redirect/?u="
+            "/later"
         ).pop()
 
         return {
             "html": ("bookmarklets.jinja.html", {
-                "anonymizer": anonymizer,
+                "later_url": later_url
             })
         }

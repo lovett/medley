@@ -165,6 +165,7 @@ TABLE TD {
     border-radius: .25em;
     font-size: .75em;
     text-transform: uppercase;
+    text-align: center;
 }
 
 .content-wrapper {
