@@ -1,0 +1,40 @@
+#ip-report > *:nth-child(1) {
+    order: 2;
+}
+
+#ip-report > *:nth-child(2) {
+    order: 1;
+}
+
+#ip-report {
+    display: grid;
+    grid-gap: 1.5em;
+    align-items: start;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    #ip-report > *:nth-child(1) {
+        order: 1;
+    }
+
+    #ip-report > *:nth-child(2) {
+        order: 2;
+    }
+
+    #ip-report {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}
