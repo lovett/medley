@@ -7,14 +7,14 @@
     {{ macros.staticAsset('startpage', 'startpage.css') }}
 
     {% if anonymizer_url %}
-    <style type="text/css">
-        A[href^="{{anonymizer_url}}"] {
-            color: #369;
-            font-style: normal;
-        }
-    </style>
+        <style type="text/css">
+            A[href^="{{anonymizer_url}}"] {
+                color: #369;
+                font-style: normal;
+            }
+        </style>
     {% else %}
-    <!-- Anonymizer inline style omitted -->
+        <!-- Anonymizer inline style omitted -->
     {% endif %}
 
 {% endblock %}
@@ -22,73 +22,67 @@
 {% block page_meta %}
     {% if anonymizer_url %}
         <meta name="anonymizer" content="{{ anonymizer_url }}"/>
-        {% else %}
+    {% else %}
         <!-- Anonymizer meta tag omitted -->
     {% endif %}
 {% endblock %}
 
 
-{% block page_header %}
-    {# This view does not display the standard header. #}
-{% endblock %}
-
 {% block page_body %}
     <main>
-        <div class="content-wrapper">
-            {% for section in page.sections() if not section.startswith("-") %}
-                <section id="{{ section|slug }}">
-                    <h1>
-                        <a href="#{{ section|slug }}" title="#{{ section|slug }}">{{ section }}</a>
-                    </h1>
-                    <ul>
-                        {% for url, title in page.items(section): -%}
-
-                            {%- if loop.first -%}
-                                <li>
-                            {%- endif -%}
-
-                            {%- if not title.startswith("+") and not loop.first -%}
-                                </li>
-                                <li>
-                            {% endif %}
-
-                            {%- if title.startswith("+") -%}
-                                {{ macros.link(title[1:], url, ",") }}
-                            {%- else -%}
-                                {{ macros.link(title, url) }}
-                            {%- endif -%}
-
-                            {% if loop.last -%}
-                                </li>
-                            {% endif -%}
-
-                        {% endfor %}
-                    </ul>
-                </section>
-            {% endfor %}
-
-            <section>
+        {% for section in page.sections() if not section.startswith("-") %}
+            <section id="{{ section|slug }}">
+                <h1>
+                    <a href="#{{ section|slug }}" title="#{{ section|slug }}">{{ section }}</a>
+                </h1>
                 <ul>
-                    <li>
-                        <time id="modified" datetime="{{ created|localtime }}"></time>
-                    </li>
-                    {% if anonymizer_url %}
-                        <li>
-                            <label>
-                                <input type="checkbox" id="anonymize" value="1" disabled="disabled" checked="false"/>
-                                Anonymize links
-                            </label>
-                        </li>
-                    {% endif %}
-                    <li class="online-only">
-                        <a href="{{ edit_url }}">Edit this page</a>
-                    </li>
+                    {% for url, title in page.items(section): -%}
 
-                    <li class="offline-only hidden">Editing is disabled. You are offline.</li>
+                        {%- if loop.first -%}
+                            <li>
+                        {%- endif -%}
 
+                        {%- if not title.startswith("+") and not loop.first -%}
+                            </li>
+                            <li>
+                        {% endif %}
+
+                        {%- if title.startswith("+") -%}
+                            {{ macros.link(title[1:], url, ",") }}
+                        {%- else -%}
+                            {{ macros.link(title, url) }}
+                        {%- endif -%}
+
+                        {% if loop.last -%}
+                            </li>
+                        {% endif -%}
+
+                    {% endfor %}
                 </ul>
             </section>
-        </div>
+        {% endfor %}
+
+        <section>
+            <ul>
+                <li>
+                    <time id="modified" datetime="{{ created|localtime }}"></time>
+                </li>
+                {% if anonymizer_url %}
+                    <li>
+                        <label>
+                            <input type="checkbox" id="anonymize" value="1" disabled="disabled" checked="false"/>
+                            Anonymize links
+                        </label>
+                    </li>
+                {% endif %}
+                <li class="online-only">
+                    <a href="{{ edit_url }}">Edit this page</a>
+                </li>
+
+                <li class="offline-only hidden">Editing is disabled. You are offline.</li>
+
+            </ul>
+        </section>
     </main>
 {% endblock %}
 

@@ -1,11 +1,13 @@
 section {
     column-break-inside: avoid;
+    page-break-inside: avoid;
     break-inside: avoid;
     display: inline-block;
     width: 100%;
     overflow: hidden;
-    page-break-inside: avoid;
     margin: .5em 0;
+    padding: .5em;
+    box-sizing: border-box;
 }
 
 section:last-of-type {
@@ -33,17 +35,12 @@ section.active h1 {
 
 section a {
     color: #FF4500;
-    text-decoration: none;
 }
 
 section a:focus {
     outline: 0;
     background-color: #369;
     color: white;
-}
-
-section a:hover {
-    text-decoration: underline;
 }
 
 section h1 {
@@ -56,12 +53,7 @@ section h1 {
 }
 
 section h1 a {
-    color: inherit;
-    font-style: inherit;
-}
-
-section h1 a:hover {
-    text-decoration: inherit;
+    color: currentColor;
 }
 
 ul {
@@ -86,16 +78,7 @@ li.group .all {
 
 li.group:hover .all {
     visibility: visible;
-    color: green;
-}
-
-#startpage-display {
-    background-color: #fff;
-}
-
-#startpage-display .content-wrapper {
-    padding: 0 1em;
-    width: auto;
+    color: orange;
 }
 
 #startpage-edit FIELDSET {
@@ -104,12 +87,10 @@ li.group:hover .all {
     margin: 0;
 }
 
-#startpage-edit #toolbar {
-    padding: 1em 0;
-    text-align: center;
+#startpage-edit .app-nav {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 #startpage-edit TEXTAREA {
@@ -120,39 +101,35 @@ li.group:hover .all {
     height: 70vh;
 }
 
-@media (min-width: 360px) {
-    #startpage-display .content-wrapper {
+/* Small devices */
+@media (min-width: 576px) {
+    #startpage-display main {
+        column-gap: 1em;
         column-count: 2;
     }
 }
 
-@media (min-width: 600px) {
-    #startpage-display .content-wrapper {
-        column-gap: 2em;
-        column-width: 12em;
-        column-count: auto;
-        display: block;
+/* Medium devices */
+@media (min-width: 768px) {
+    #startpage-display main {
+        column-count: 3;
     }
 }
 
-@media (min-width: 1100px) {
+/* Large devices */
+@media (min-width: 992px) {
+    #startpage-display main {
+        column-count: 4;
+    }
+
     section {
         font-size: .875rem;
     }
 }
 
-/* Small devices */
-@media (min-width: 576px) {
-}
-
-/* Medium devices */
-@media (min-width: 768px) {
-}
-
-/* Large devices */
-@media (min-width: 992px) {
-}
-
 /* Extra large devices */
 @media (min-width: 1200px) {
+    #startpage-display main {
+        column-count: 5;
+    }
 }

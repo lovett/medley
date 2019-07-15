@@ -44,18 +44,16 @@
             </defs>
         </svg>
 
-        {% block page_header %}
-            <header id="page-header">
-                <h1>
-                    <a rel="home" href="/">Medley</a>
-                    {% if app_url %}
-                        : <a href="{{ app_url }}">{{ app_name }}</a>
-                    {% endif %}
-                </h1>
+        <header id="page-header">
+            <h1>
+                <a rel="home" href="/">Medley</a>
+                {% if app_url %}
+                    : <a href="{{ app_url }}">{{ app_name }}</a>
+                {% endif %}
+            </h1>
 
-                <span class="focus-buffer-display"></span>
+            <span class="focus-buffer-display"></span>
         </header>
-        {% endblock %}
 
         {% block page_body %}{% endblock %}
 
