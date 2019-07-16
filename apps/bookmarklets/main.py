@@ -18,8 +18,14 @@ class Controller:
             "/later"
         ).pop()
 
+        bounce_url = cherrypy.engine.publish(
+            "url:internal",
+            "/bounce"
+        ).pop()
+
         return {
             "html": ("bookmarklets.jinja.html", {
+                "bounce_url": bounce_url,
                 "later_url": later_url
             })
         }

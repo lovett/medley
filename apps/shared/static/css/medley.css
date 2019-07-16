@@ -458,6 +458,13 @@ TABLE.natural-width {
     grid-template-columns: 1fr auto;
     grid-gap: 1em;
     align-items: stretch;
+    justify-items: stretch;
+    align-content: stretch;
+}
+
+.search-form button {
+    text-align: center;
+    padding: 0;
 }
 
 /* Small devices */

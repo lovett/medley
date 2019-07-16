@@ -6,100 +6,57 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'shortcut-link', '/bounce/static/bounce.js')) }}
+    {{ macros.vueApp('main', ('shortcut-link', '/bounce/static/bounce.js')) }}
 {% endblock %}
-
 
 {% block page_body %}
 
     <main>
-        {{ macros.svgSymbols("delete") }}
-        <div class="content-wrapper">
-            <div class="bookmarklet-container">
-                <a href="javascript:e=encodeURIComponent;void(open('{{ app_url }}?u='+e(location.href)))" rel="noreferrer">{{ macros.bookmarkletIcon }} bounce</a>
-            </div>
+        {% if not bounces %}
+            <bounce-form
+                inline-template
+                endpoint="/bounce"
+                url="{{ departing_url|default('', true)|e }}"
+                site="{{ site|default('', true)|e }}"
+                group="{{ group|default('', true)|e }}"
+                name="{{ name|default('', true)|e }}"
+            >
+                <form v-on:submit.prevent="submit" method="post" action="/bounce">
+                    <div v-if="errorMessage" v-text="errorMessage" class="error message"></div>
+                    <div v-if="successMessage" v-text="successMessage" class="success message"></div>
 
-            {% if not bounces %}
-                <bounce-form
-                    inline-template
-                    endpoint="/bounce"
-                    url="{{ departing_url|default('', true)|e }}"
-                    site="{{ site|default('', true)|e }}"
-                    group="{{ group|default('', true)|e }}"
-                    name="{{ name|default('', true)|e }}"
-                >
-                    <form v-on:submit.prevent="submit" method="post" action="/bounce">
-                        <div v-if="errorMessage" v-text="errorMessage" class="error message"></div>
-                        <div v-if="successMessage" v-text="successMessage" class="success message"></div>
-
-                        <div class="field-group">
-                            <div class="field">
-                                <label for="title">Group</label>
-                                <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
-                            </div>
-                            <div class="field">
-                                <label for="title">Site Name</label>
-                                <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
-                            </div>
-                            <div class="field">
-                                <label for="title">Site</label>
-                                <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
-                            </div>
-                        </div>
-
+                    <div class="field-group">
                         <div class="field">
-                            <button data-default="Add" data-alt="Please wait">Add</button>
+                            <label for="title">Group</label>
+                            <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
                         </div>
-                    </form>
-                </bounce-form>
-            {% endif %}
+                        <div class="field">
+                            <label for="title">Site Name</label>
+                            <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
+                        </div>
+                        <div class="field">
+                            <label for="title">Site</label>
+                            <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
+                        </div>
+                    </div>
 
-            {% if bounces %}
-                <h1 class="align-center">{{ group }} destinations</h1>
-                <table id="bounces" class="key-value natural-width bordered">
-                    {% for id, values in bounces.items() %}
-                        <tbody is="discardable-record" inline-template url="{{ app_url }}?uid={{ id }}">
-                            <tr v-bind:style="styles">
-                                <th>
-                                    {% if values[1] == departing_from %}
-                                        ⬅
-                                    {% endif %}
-                                    {{ values[1] }}
-                                    {% if values[1] != departing_from %}
-                                        ➡
-                                    {% endif %}
-                                </th>
-                                <td>
-                                    <p>
-                                        <shortcut-link
-                                            v-bind:index="{{ loop.index }}"
-                                            url="{{ values[0]|anonymize }}"
-                                            label="{{ values[0]|truncate(100) }}"
-                                        />
-                                    </p>
+                    <div class="field">
+                        <button data-default="Add" data-alt="Please wait">Add</button>
+                    </div>
+                </form>
+            </bounce-form>
+        {% endif %}
 
-                                    {% if values[0].startswith('https:') %}
-                                        <a href="{{ values[0].replace('https://', 'http://')|anonymize }}"
-                                           class="plain destination"
-                                           rel="noreferer noopener"
-                                        >with HTTP</a>
-                                    {% endif %}
-
-                                    {% if values[0].startswith('http:') %}
-                                        <a href="{{ values[0].replace('http://', 'https://')|anonymize }}"
-                                           class="plain destination"
-                                           rel="noreferer noopener"
-                                        >with HTTPS</a>
-                                    {% endif %}
-                                </td>
-                                <td align="right">
-                                    <discard-button tooltip="Delete this entry" />
-                                </td>
-                            </tr>
-                        </tbody>
-                    {% endfor %}
-                </table>
-            {% endif %}
-        </div>
+        {% if bounces %}
+            {% for id, values in bounces.items() %}
+                <p class="destination">
+                    <shortcut-link
+                        v-bind:index="{{ loop.index }}"
+                        url="{{ values[0]|anonymize }}"
+                        label="{{ values[0]|truncate(100) }}"
+                    />
+                </p>
+            {% endfor %}
+        {% endif %}
     </main>
 {% endblock %}

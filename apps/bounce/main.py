@@ -114,7 +114,7 @@ class Controller:
             # If the departing site can't be determined, the
             # list of bounces isn't viable.
             if not departing_from:
-                bounces = []
+                bounces = ()
 
             # Re-scope the current URL to each known destination.
             bounces = {
@@ -168,10 +168,4 @@ class Controller:
             replace=True
         )
 
-        cherrypy.response.status = 204
-
-    @staticmethod
-    def DELETE(uid):
-        """Remove a site from a group by its ID."""
-        cherrypy.engine.publish("registry:remove_id", uid)
         cherrypy.response.status = 204

@@ -34,7 +34,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """Verify the controller's supported HTTP methods"""
 
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET", "PUT", "DELETE"))
+        self.assertAllowedMethods(response, ("GET", "PUT"))
 
     def test_host_reduction(self):
         """An incoming URL is reduced to its host name."""
@@ -382,26 +382,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(response.code, 400)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_delete_site(self, publish_mock):
-        """A new site can be added to a group"""
-
-        def side_effect(*args, **_):
-            """Side effects local function."""
-            if args[0] == "registry:remove_id":
-                return [True]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        response = self.request(
-            "/",
-            method="DELETE",
-            uid="1"
-        )
-
-        self.assertEqual(response.code, 204)
 
 
 if __name__ == "__main__":
