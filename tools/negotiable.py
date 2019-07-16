@@ -1,6 +1,7 @@
 """Decide on the content type of a response."""
 
 import json
+import os.path
 import cherrypy
 
 
@@ -60,28 +61,30 @@ class Tool(cherrypy.Tool):
         that precedence and let it override the Accept header.
 
         """
-        if cherrypy.request.path_info.startswith('/.'):
-            extension = next(
-                (key for key in self.acceptable_extensions
-                 if cherrypy.request.path_info.endswith(key)
-                 and key in self.acceptable_extensions),
-                None
-            )
 
-            if not extension:
-                raise cherrypy.HTTPError(404, "Not Found")
+        request_path = cherrypy.request.path_info
 
+        # Help os.path.splitext recognize bare extensions.
+        if request_path.startswith("/."):
+            request_path = "/index{}".format(request_path[1:])
+
+        _, extension = os.path.splitext(request_path)
+
+        if extension in self.acceptable_extensions:
             self.response_format = self.acceptable_extensions[extension]
             return
 
+        if extension:
+            raise cherrypy.HTTPError(404, "Not Found")
+
         accept = cherrypy.request.headers.get("Accept", "*/*")
 
-        # If any format is acceptable, send text/html
         if accept == "*/*":
             self.response_format = "text/html"
             return
 
         candidates = list(self.renderers.keys())
+
         self.response_format = cherrypy.tools.accept.callable(candidates)
 
     def _finalize(self):
@@ -93,14 +96,7 @@ class Tool(cherrypy.Tool):
         if not isinstance(cherrypy.response.body, dict):
             return
 
-        # If the body only provides one format, use it instead of
-        # the negotiated format.
-        if len(cherrypy.response.body) == 1:
-            renderer = "render_" + next(
-                iter(cherrypy.response.body)
-            ).lower()
-        else:
-            renderer = self.renderers.get(self.response_format)
+        renderer = self.renderers.get(self.response_format)
 
         final_body = getattr(self, renderer)(cherrypy.response.body)
 
