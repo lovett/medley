@@ -78,7 +78,6 @@ li.group .all {
 
 li.group:hover .all {
     visibility: visible;
-    color: orange;
 }
 
 #startpage-edit FIELDSET {
