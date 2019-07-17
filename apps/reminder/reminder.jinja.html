@@ -13,77 +13,78 @@
 {% block page_body %}
     {{ macros.svgSymbols("delete") }}
     <main>
+        <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
+
         {% if upcoming %}
-            <div class="band">
-                <div id="scheduled-reminders" class="content-wrapper">
-
-                    <h1>Upcoming Reminders</h1>
-
-                    {% for event in upcoming %}
-                        <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
-                            <div class="upcoming-reminder" v-bind:style="styles">
-                                <div><discard-button tooltip="Delete this reminder" /></div>
-                                <div class="summary">
-                                    <time datetime="{{ event.time * 1000 }}">
-                                        {{ event.time|localtime|dateformat("LT") }}
-                                    </time>
-                                    {{ event.argument[1].title }}
-                                    <div class="remaining smaller">
-                                        <countdown v-bind:expiration-seconds="{{ event.time }}" />
-                                    </div>
+            <header class="app-nav">
+                <p>Upcoming</p>
+                <div id="upcoming">
+                {% for event in upcoming %}
+                    <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
+                        <div class="upcoming-reminder" v-bind:style="styles">
+                            <div><discard-button tooltip="Delete this reminder" /></div>
+                            <div class="summary">
+                                <time datetime="{{ event.time * 1000 }}">
+                                    {{ event.time|localtime|dateformat("LT") }}
+                                </time>
+                                {{ event.argument[1].title }}
+                                <div class="remaining smaller">
+                                    <countdown v-bind:expiration-seconds="{{ event.time }}" />
                                 </div>
                             </div>
-                        </discardable-record>
-
-                    {% endfor %}
-
+                        </div>
+                    </discardable-record>
+                {% endfor %}
                 </div>
-            </div>
+            </header>
         {% endif %}
 
-        <div class="content-wrapper">
-
-            <reminder-form inline-template>
-                <form ref="reminderForm" id="reminder-form" method="post" action="{{ app_url }}">
-                    <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-
-                    {% if templates %}
-                        <h1>Templates</h1>
-                        <div class="template-container">
-                            {% for id, template in templates.items() %}
-                                <reminder-template
-                                    inline-template
-                                    uid="{{ id }}"
-                                    message="{{ template.message }}"
-                                    v-bind:minutes="{{ template.minutes }}"
-                                    comments="{{ template.comments }}"
-                                    notification-id="{{ template.notification_id }}"
-                                    url="{{ template.url }}"
-                                >
-                                    <div v-if="visible" class="template">
-                                        <a v-on:click="apply" id="{{ template.notification_id }}" class="summary" href="#">
-                                            {{ template.message }}
-                                            <br/>
-                                            <span class="smaller">
-                                                {{ template.duration_in_words }}
-                                                {%- if template.notification_id %}
-                                                    / #{{ template.notification_id }}
-                                                {%- endif -%}
-                                            </span>
-                                        </a>
-                                        <discardable-record inline-template url="{{ template.delete_url }}">
-                                            <div><discard-button tooltip="Delete this template" /></div>
-                                        </discardable-record>
-                                    </div>
-                                </reminder-template>
-                                {% endfor %}
-                            </div>
+        <reminder-form inline-template>
+            <form ref="reminderForm" id="reminder-form" method="post" action="{{ app_url }}">
+                <div id="template">
+                    {% if not templates %}
+                        <p>No templates.</p>
                     {% endif %}
+                    <p>Templates</p>
+                    {% for id, template in templates.items() %}
+                        <reminder-template
+                            inline-template
+                            uid="{{ id }}"
+                            message="{{ template.message }}"
+                            v-bind:minutes="{{ template.minutes }}"
+                            comments="{{ template.comments }}"
+                            notification-id="{{ template.notification_id }}"
+                            url="{{ template.url }}"
+                        >
+                            <div v-if="visible" class="template">
+                                <discardable-record inline-template url="{{ template.delete_url }}">
+                                    <div><discard-button tooltip="Delete this template" /></div>
+                                    </discardable-record>
+                                    <a v-on:click="apply" id="{{ template.notification_id }}" class="summary" href="#">
+                                        {{ template.message }}
+                                        <br/>
+                                        <span class="smaller">
+                                            {{ template.duration_in_words }}
+                                            {%- if template.notification_id %}
+                                                / #{{ template.notification_id }}
+                                            {%- endif -%}
+                                        </span>
+                                    </a>
+                            </div>
+                        </reminder-template>
+                    {% endfor %}
+                </div>
+                <div>
+                    <p>New Reminder</p>
 
-                    <h1>New Reminder</h1>
                     <div class="field">
-                        <label for="hours">Send in</label>
+                        <label for="message">Message</label>
+                        <input v-model="message" type="text" id="message" name="message" />
+                    </div>
 
+
+                    <div class="field">
+                        <label for="message">Timeframe</label>
                         <span class="inline-container">
                             <input v-model="hours" type="text" class="inline numeric" id="hours" name="hours" />
                             hours
@@ -94,11 +95,6 @@
                             minutes
                         </span>
                     </div>
-                    <div class="field">
-                        <label for="message">Message</label>
-                        <input v-model="message" type="text" id="message" name="message" />
-                    </div>
-
                     <div class="field">
                         <label for="comments">Comments</label>
                         <textarea v-model="comments" id="comments" name="comments"></textarea>
@@ -125,8 +121,8 @@
                     <div class="field">
                         <button data-default="Save" data-alt="Please wait">Save</button>
                     </div>
-                </form>
-            </reminder-form>
+            </form>
+        </reminder-form>
         </div>
     </main>
 {% endblock %}

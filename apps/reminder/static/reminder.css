@@ -1,116 +1,56 @@
-.content-wrapper {
-    margin: auto;
-    padding: 1em 0;
-    max-width: 500px;
+#upcoming {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    align-items: start;
 }
 
-.field {
-    padding-bottom: 2em;
-}
-
-INPUT[type=checkbox] {
-    padding-right: 1em;
-}
-
-.content-wrapper H1 {
-    font-size: 1.4em;
-    font-weight: normal;
-}
-
-.upcoming-reminder {
+#upcoming > div {
     display: flex;
-    margin-bottom: 2em;
     align-items: center;
 }
 
-.upcoming-reminder .summary {
-    padding-left: 1em;
+#upcoming .summary {
+    padding: .5em;
 }
 
-.upcoming-reminder:last-of-type {
-    margin-bottom: 1em;
-}
-
-.upcoming-reminder p {
+#upcoming p {
     margin: 0;
     padding: .25em 0 0 0;
 }
 
-.upcoming-reminder time {
+#upcoming time {
     font-weight: bold;
 }
 
-#minutes {
-    width: 3em;
-    margin: 0 .5em;
-}
-
-#reminder-form select {
-    margin-bottom: .5em;
+#reminder-form {
+    display: grid;
+    grid-column-gap: 5em;
 }
 
 #reminder-form .numeric {
     width: 3em;
 }
 
-#reminder-form .inline-container {
-    margin-right: 1em;
-}
-
-#template-options {
-    padding-left: 1em;
-}
-
-#page-header {
-    margin-bottom: 0;
-}
-
-.band {
-    background-color: lightskyblue;
-}
-
-.template-container {
-    padding-bottom: 1em;
-}
-
 .template {
     display: flex;
-    flex-flow: row nowrap;
     align-items: center;
-    margin-bottom: .5em;
 }
 
-.template A {
-    padding: 1em;
-    background-color: #c3d4f0;
-    border: 1px solid #c3d4f0;
-    border-radius: .25em;
+.template .summary {
+    padding: .5em;
+    flex-grow: 1;
 }
 
-.template A:focus {
+.template .summary:focus {
     background-color: #56904e;
     color: white;
 }
 
-.template A:hover {
-    border-color: #000;
-    background-color: #fff;
-    color: #000;
-}
-
-.template:hover .action-button a:hover {
-    fill: var(--discard-bg-color);
-}
-
-.template .summary {
-    flex-grow: 1;
-    margin-right: 1em;
-    text-decoration: none;
-    display: inline-block
-}
-
 /* Small devices */
 @media (min-width: 576px) {
+    #reminder-form {
+        grid-template-columns: auto 1fr;
+    }
 }
 
 /* Medium devices */
