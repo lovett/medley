@@ -4,7 +4,7 @@
     align-items: start;
 }
 
-#upcoming > div {
+#upcoming > div:not([hidden]) {
     display: flex;
     align-items: center;
 }
