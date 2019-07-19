@@ -30,6 +30,28 @@ in the argument list are returned.  #}
 {% macro svgSymbols() %}
     <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
+            {% if "link" in varargs %}
+            <symbol id="icon-link" viewBox="0 0 32 32">
+                <title>link</title>
+                <path d="M13.757 19.868c-0.416 0-0.832-0.159-1.149-0.476-2.973-2.973-2.973-7.81 0-10.783l6-6c1.44-1.44 3.355-2.233 5.392-2.233s3.951 0.793 5.392 2.233c2.973 2.973 2.973 7.81 0 10.783l-2.743 2.743c-0.635 0.635-1.663 0.635-2.298 0s-0.635-1.663 0-2.298l2.743-2.743c1.706-1.706 1.706-4.481 0-6.187-0.826-0.826-1.925-1.281-3.094-1.281s-2.267 0.455-3.094 1.281l-6 6c-1.706 1.706-1.706 4.481 0 6.187 0.635 0.635 0.635 1.663 0 2.298-0.317 0.317-0.733 0.476-1.149 0.476z"></path>
+                <path d="M8 31.625c-2.037 0-3.952-0.793-5.392-2.233-2.973-2.973-2.973-7.81 0-10.783l2.743-2.743c0.635-0.635 1.664-0.635 2.298 0s0.635 1.663 0 2.298l-2.743 2.743c-1.706 1.706-1.706 4.481 0 6.187 0.826 0.826 1.925 1.281 3.094 1.281s2.267-0.455 3.094-1.281l6-6c1.706-1.706 1.706-4.481 0-6.187-0.635-0.635-0.635-1.663 0-2.298s1.663-0.635 2.298 0c2.973 2.973 2.973 7.81 0 10.783l-6 6c-1.44 1.44-3.355 2.233-5.392 2.233z"></path>
+            </symbol>
+            {% endif %}
+
+            {% if "arrow-right" in varargs %}
+            <symbol id="icon-arrow-right" viewBox="0 0 1024 1024">
+                <title>arrow-right</title>
+                <path class="path1" d="M992 512l-480-480v288h-512v384h512v288z"></path>
+            </symbol>
+            {% endif %}
+
+            {% if "arrow-left" in varargs %}
+            <symbol id="icon-arrow-left" viewBox="0 0 1024 1024">
+                <title>arrow-left</title>
+                <path class="path1" d="M32 512l480 480v-288h512v-384h-512v-288z"></path>
+            </symbol>
+            {% endif %}
+
             {% if "delete" in varargs %}
                 <symbol id="delete" viewBox="0 0 1024 1024">
                     <title>Delete</title>
@@ -37,18 +59,21 @@ in the argument list are returned.  #}
                     <path class="path2" d="M848 128h-208v-80c0-26.4-21.6-48-48-48h-224c-26.4 0-48 21.6-48 48v80h-208c-26.4 0-48 21.6-48 48v80h832v-80c0-26.4-21.6-48-48-48zM576 128h-192v-63.198h192v63.198z"></path>
                 </symbol>
             {% endif %}
+
             {% if "copy" in varargs %}
                 <symbol id="copy" viewBox="0 0 32 32">
                     <title>Copy</title>
                     <path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"></path>
                 </symbol>
             {% endif %}
+
             {% if "new-item" in varargs %}
                 <symbol id="new-item" viewBox="0 0 32 32">
                     <title>New item</title>
                     <path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
                 </symbol>
             {% endif %}
+
             {% if "icon-tag" in varargs %}
                 <symbol id="icon-tag" viewBox="0 0 32 32">
                     <title>tag</title>
@@ -69,6 +94,45 @@ in the argument list are returned.  #}
                     <path d="M12.9 14.32c-1.34 1.049-3.050 1.682-4.908 1.682-4.418 0-8-3.582-8-8s3.582-8 8-8c4.418 0 8 3.582 8 8 0 1.858-0.633 3.567-1.695 4.925l0.013-0.018 5.35 5.33-1.42 1.42-5.33-5.34zM8 14c3.314 0 6-2.686 6-6s-2.686-6-6-6v0c-3.314 0-6 2.686-6 6s2.686 6 6 6v0z"></path>
                 </symbol>
             {% endif %}
+
+            {% if "database" in varargs %}
+                <symbol id="icon-database" viewBox="0 0 32 32">
+                    <title>database</title>
+                    <path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+                    <path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+                    <path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+                    </symbol>
+            {% endif %}
+
+            {% if "flag" in varargs %}
+                <symbol id="icon-flag" viewBox="0 0 1024 1024">
+                    <title>flag</title>
+                    <path class="path1" d="M614 256h240v426h-300l-16-84h-240v298h-84v-726h384z"></path>
+                </symbol>
+            {% endif %}
+
+            {% if "clock" in varargs %}
+            <symbol id="icon-clock" viewBox="0 0 1024 1024">
+                <title>clock</title>
+                <path class="path1" d="M658.744 749.256l-210.744-210.746v-282.51h128v229.49l173.256 173.254zM512 0c-282.77 0-512 229.23-512 512s229.23 512 512 512 512-229.23 512-512-229.23-512-512-512zM512 896c-212.078 0-384-171.922-384-384s171.922-384 384-384c212.078 0 384 171.922 384 384s-171.922 384-384 384z"></path>
+            </symbol>
+            {% endif %}
+
+
+            {% if "bookmark" in varargs %}
+            <symbol id="icon-bookmark" viewBox="0 0 1024 1024">
+                <title>bookmark</title>
+                <path class="path1" d="M192 0v1024l320-320 320 320v-1024z"></path>
+            </symbol>
+            {% endif %}
+
+            {% if "tag" in varargs %}
+            <symbol id="icon-tag" viewBox="0 0 32 32">
+                <title>tag</title>
+                <path d="M30.5 0h-12c-0.825 0-1.977 0.477-2.561 1.061l-14.879 14.879c-0.583 0.583-0.583 1.538 0 2.121l12.879 12.879c0.583 0.583 1.538 0.583 2.121 0l14.879-14.879c0.583-0.583 1.061-1.736 1.061-2.561v-12c0-0.825-0.675-1.5-1.5-1.5zM23 12c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path>
+            </symbol>
+            {% endif %}
+
         </defs>
     </svg>
 {% endmacro %}
@@ -91,12 +155,12 @@ in the argument list are returned.  #}
 {% endmacro %}
 
 {%- macro link(text, url, separator="") -%}
-{{separator}} <a href="{{url}}" rel="noreferrer">{{text}}</a>
+    {{separator}} <a href="{{url}}" rel="noreferrer">{{text}}</a>
 {%- endmacro -%}
 
 {% macro queryPlan(rows) -%}
     {% if rows|count > 0 %}
-        <div class="content-wrapper debug">
+        <div class="debug">
             <a href="#" class="toggle-trigger" rel="noreferrer"><span>Show</span> query details</a>
             <div class="toggle-target hidden" style="padding-top: 1em">
                 <table>

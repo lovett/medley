@@ -17,84 +17,44 @@
     {{ macros.staticAsset('visitors', 'visitors.js') }}
 {% endblock %}
 
-{% block svg_defs %}
-    <symbol id="icon-database" viewBox="0 0 32 32">
-        <title>database</title>
-        <path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
-        <path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-        <path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
-    </symbol>
-
-    <symbol id="icon-flag" viewBox="0 0 1024 1024">
-        <title>flag</title>
-        <path class="path1" d="M614 256h240v426h-300l-16-84h-240v298h-84v-726h384z"></path>
-    </symbol>
-
-    <symbol id="icon-clock" viewBox="0 0 1024 1024">
-        <title>clock</title>
-        <path class="path1" d="M658.744 749.256l-210.744-210.746v-282.51h128v229.49l173.256 173.254zM512 0c-282.77 0-512 229.23-512 512s229.23 512 512 512 512-229.23 512-512-229.23-512-512-512zM512 896c-212.078 0-384-171.922-384-384s171.922-384 384-384c212.078 0 384 171.922 384 384s-171.922 384-384 384z"></path>
-    </symbol>
-
-    <symbol id="icon-binoculars" viewBox="0 0 1024 1024">
-        <title>binoculars</title>
-        <path class="path1" d="M64 0h384v64h-384zM576 0h384v64h-384zM952 320h-56v-256h-256v256h-256v-256h-256v256h-56c-39.6 0-72 32.4-72 72v560c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-376h128v376c0 39.6 32.4 72 72 72h304c39.6 0 72-32.4 72-72v-560c0-39.6-32.4-72-72-72zM348 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32zM544 512h-64c-17.6 0-32-14.4-32-32s14.4-32 32-32h64c17.6 0 32 14.4 32 32s-14.4 32-32 32zM924 960h-248c-19.8 0-36-14.4-36-32s16.2-32 36-32h248c19.8 0 36 14.4 36 32s-16.2 32-36 32z"></path>
-    </symbol>
-
-    <symbol id="icon-bookmark" viewBox="0 0 1024 1024">
-        <title>bookmark</title>
-        <path class="path1" d="M192 0v1024l320-320 320 320v-1024z"></path>
-    </symbol>
-
-    <symbol id="icon-tag" viewBox="0 0 32 32">
-        <title>tag</title>
-        <path d="M30.5 0h-12c-0.825 0-1.977 0.477-2.561 1.061l-14.879 14.879c-0.583 0.583-0.583 1.538 0 2.121l12.879 12.879c0.583 0.583 1.538 0.583 2.121 0l14.879-14.879c0.583-0.583 1.061-1.736 1.061-2.561v-12c0-0.825-0.675-1.5-1.5-1.5zM23 12c-1.657 0-3-1.343-3-3s1.343-3 3-3 3 1.343 3 3-1.343 3-3 3z"></path>
-    </symbol>
-
-
-{% endblock %}
-
-
 {% block page_body %}
-
     <main>
-        <div class="content-wrapper">
-            <form method="get" action="{{ app_url }}">
-                <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
-                    <label for="saved">Saved Queries</label>
-                    <select id="saved">
-                        <option value=""></option>
-                        {% for query in saved_queries %}
-                            <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
-                        {% endfor %}
-                    </select>
+        {{ macros.svgSymbols("delete", "database", "flag", "clock", "binoculars", "bookmark", "tag") }}
 
-                    <a href="#" class="delete hidden">
-                        <svg class="icon icon-bin"><use xlink:href="#icon-bin"></use></svg>
-                    </a>
-
+        <form method="get" action="{{ app_url }}">
+            <header class="app-nav">
+                <div class="field">
+                    <label>Date</label>
+                    <div id="datepicker"></div>
                 </div>
 
-                <div class="two-third-column">
+                <div>
+                    <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
+                        <label for="saved">Saved Searches</label>
+                        <select id="saved">
+                            <option value=""></option>
+                            {% for query in saved_queries %}
+                                <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <a href="#" class="delete hidden">
+                            <svg class="icon"><use xlink:href="#delete"></use></svg>
+                        </a>
+                    </div>
+
                     <div class="field">
-                        <label for="query">Query:</label>
+                        <label for="query">Search</label>
                         <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
                     </div>
-                </div>
-                <div class="third-column">
-                    <div class="field">
-                        <label>Date:</label>
-                        <div id="datepicker"></div>
+
+                    <div class="field actions">
+                        <button id="submit">Run query</button>
+                        <a id="save" href="#save">Save query</a>
                     </div>
                 </div>
-
-                <div class="field actions">
-                    <button id="submit">Run query</button>
-                    <a id="save" href="#save">Save query</a>
-                </div>
-
-        </div>
-            </form>
-        </div>
+            </header>
+        </form>
 
         {% if results|count == 0 %}
             <div class="content-wrapper centered">
@@ -102,204 +62,206 @@
             </div>
         {% endif %}
 
-
         {% if results|count > 0 %}
-            <div class="content-wrapper">
-                <div class="table-top">
-                    <div class="right">
-                        <a id="matches-master-toggle" class="master-toggle" href="#" rel="noreferrer"><span class="label">expand</a> all</a>
-                    </div>
-                </div>
+            <header class="table-top">
+                <a id="matches-master-toggle"
+                   class="master-toggle"
+                   href="#"
+                   rel="noreferrer"
+                >
+                    <span class="label">expand</span>
+                    all
+                </a>
+            </header>
 
-                <div class="sleeve">
-                    <table id="matches">
-                        <thead>
-                            <tr>
-                                <th width="20%">Location</th>
-                                <th width="20%">Source</th>
-                                <th width="25%">Date</th>
-                                <th widtt="25%">Request</th>
-                                <th width="5%">Code</th>
-                                <th width="5%"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in results %}
+            <div class="table-sleeve">
+                <table id="matches">
+                    <thead>
+                        <tr>
+                            <th width="20%">Location</th>
+                            <th width="20%">Source</th>
+                            <th width="25%">Date</th>
+                            <th widtt="25%">Request</th>
+                            <th width="5%">Code</th>
+                            <th width="5%"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
 
-                                {% set new_ip = loop.changed(result.ip) %}
-                                {% set year_month_day = result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') %}
-                                {% set new_day = False %}
-                                {% if loop.previtem is defined %}
-                                    {% set prev_year_month_day = loop.previtem.unix_timestamp|localtime|dateformat("YYYY-MM-DD") %}
-                                    {% set new_day = year_month_day != prev_year_month_day %}
+                            {% set new_ip = loop.changed(result.ip) %}
+                            {% set year_month_day = result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') %}
+                            {% set new_day = False %}
+                            {% if loop.previtem is defined %}
+                                {% set prev_year_month_day = loop.previtem.unix_timestamp|localtime|dateformat("YYYY-MM-DD") %}
+                                {% set new_day = year_month_day != prev_year_month_day %}
+                            {% endif %}
+
+                            {% set reverse_domain = reversed_ips.get(result.ip) %}
+                            {% set duration = durations.get((result.ip, result.unix_timestamp|localtime|dateformat("YYYY-MM-DD"))) %}
+                            <tr class="result code-{{ result.statusCode }}">
+                                {% if new_ip or new_day %}
+                                    <td>
+                                        {% if result.country not in flagless_countries %}
+                                            <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
+                                        {% endif %}
+
+                                        <p>
+                                            {% if result.city %}
+                                                {{ result.city }}<br/>
+                                                <span class="smaller">
+                                                    {% if result.country == "US" %}
+                                                        {{ result.region|default("", true) }}
+                                                    {% else %}
+                                                        {{ country_names.get(result.country, 'Unknown') }}
+                                                    {% endif %}
+                                                </span>
+                                            {% else %}
+                                                {{ country_names.get(result.country, 'Unknown') }}
+                                            {% endif %}
+                                        </p>
+                                    </td>
+
+                                    <td>
+                                        <p>
+                                            <a href="/visitors?query=ip+{{ result.ip }}"
+                                               title="Search for visits from this address"
+                                               rel="noreferrer"
+                                            >{{ result.ip|truncate(20, True)  }}</a>
+                                        </p>
+
+
+                                        {% if duration  %}
+                                            <p class="smaller">Active
+                                                {% if duration.in_hours() > 1 %}
+                                                    {{ duration.in_hours() }} hours
+                                                {% elif duration.in_minutes() > 1 %}
+                                                    {{ duration.in_minutes() }} minutes
+                                                {% elif duration.in_seconds() > 1 %}
+                                                    {{ duration.in_seconds() }} seconds
+                                                {% else %}
+                                                    {{ duration.in_seconds() }} second
+                                                {% endif %}
+                                            </p>
+                                        {% endif %}
+
+
+                                        {% if reverse_domain %}
+                                            <p class="smaller">
+                                                <a href="/visitors?query=reverse_domain+{{ reverse_domain }}"
+                                                   title="Search for visits from this network"
+                                                   rel="noreferrer"
+                                                >{{ reverse_domain|hostname_truncate(3) }}</a>
+                                            </p>
+                                        {% endif %}
+
+                                        {% if result.organization %}
+                                            <p>{{ result.organization }}</p>
+                                        {% endif %}
+
+                                        <div class="annotations">
+                                            {% for annotation in annotations.get(result.ip, ()) %}
+                                                <p>{{ annotation }}</p>
+                                            {% endfor %}
+                                        </div>
+
+                                        <div class="next-actions">
+                                            {% if result.ip in cookies %}
+                                                <a href="/visitors?query=cookie+{{ cookies.get(result.ip) }}"
+                                                   title="Search for visits with this cookie"
+                                                   rel="noreferrer"
+                                                ><svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg></a>
+                                            {% else %}
+                                                <span title="No cookie on request"><svg class="icon icon-tag inactive"><use xlink:href="#icon-tag"></use></svg></span>
+                                            {% endif %}
+
+                                            <a href="/whois?address={{ result.ip }}"
+                                               target="_blank"
+                                               title="View whois details for this address"
+                                               rel="noreferrer"
+                                            ><svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg></a>
+
+                                            <a href="#annotate" data-ip="{{ result.ip }}"
+                                               class="annotate-ip"
+                                               title="Annotate this ip"
+                                            ><svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg></a>
+                                        </div>
+                                    </td>
+                                {% else %}
+                                    <td colspan="2"></td>
                                 {% endif %}
 
-                                {% set reverse_domain = reversed_ips.get(result.ip) %}
-                                {% set duration = durations.get((result.ip, result.unix_timestamp|localtime|dateformat("YYYY-MM-DD"))) %}
-                                <tr class="result code-{{ result.statusCode }}">
-                                    {% if new_ip or new_day %}
-                                        <td>
-                                            {% if result.country not in flagless_countries %}
-                                                <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
-                                            {% endif %}
+                                <td nowrap="nowrap">
+                                    <p>
+                                        <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
+                                            <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
+                                        </a>
+                                        {{ year_month_day }}
+                                        at
+                                        {{ result.unix_timestamp|localtime|dateformat("LTS") }}
+                                    </p>
 
-                                            <p>
-                                                {% if result.city %}
-                                                    {{ result.city }}<br/>
-                                                    <span class="smaller">
-                                                        {% if result.country == "US" %}
-                                                            {{ result.region|default("", true) }}
-                                                        {% else %}
-                                                            {{ country_names.get(result.country, 'Unknown') }}
-                                                        {% endif %}
-                                                    </span>
-                                                {% else %}
-                                                    {{ country_names.get(result.country, 'Unknown') }}
-                                                {% endif %}
-                                            </p>
-                                        </td>
+                                    <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
+                                        Δ <span class="value">{{ deltas[loop.index0] }}</span>
+                                        <span class="label"></span>
+                                    </p>
+                                </td>
+                                <td nowrap="nowrap">
+                                    <p>
+                                        <a href="/visitors?query=date+{{ year_month_day }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                            {{ result.method }} {{ result.uri|truncate(30, True) }}
+                                        </a>
+                                    </p>
 
-                                        <td>
-                                            <p>
-                                                <a href="/visitors?query=ip+{{ result.ip }}"
-                                                   title="Search for visits from this address"
-                                                   rel="noreferrer"
-                                                >{{ result.ip|truncate(20, True)  }}</a>
-                                            </p>
-
-
-                                            {% if duration  %}
-                                                <p class="smaller">Active
-                                                    {% if duration.in_hours() > 1 %}
-                                                        {{ duration.in_hours() }} hours
-                                                    {% elif duration.in_minutes() > 1 %}
-                                                        {{ duration.in_minutes() }} minutes
-                                                    {% elif duration.in_seconds() > 1 %}
-                                                        {{ duration.in_seconds() }} seconds
-                                                    {% else %}
-                                                        {{ duration.in_seconds() }} second
-                                                    {% endif %}
-                                                </p>
-                                            {% endif %}
-
-
-                                            {% if reverse_domain %}
-                                                <p class="smaller">
-                                                    <a href="/visitors?query=reverse_domain+{{ reverse_domain }}"
-                                                       title="Search for visits from this network"
-                                                       rel="noreferrer"
-                                                    >{{ reverse_domain|hostname_truncate(3) }}</a>
-                                                </p>
-                                            {% endif %}
-
-                                            {% if result.organization %}
-                                                <p>{{ result.organization }}</p>
-                                            {% endif %}
-
-                                            <div class="annotations">
-                                                {% for annotation in annotations.get(result.ip, ()) %}
-                                                    <p>{{ annotation }}</p>
-                                                {% endfor %}
-                                            </div>
-
-                                            <div class="next-actions">
-                                                {% if result.ip in cookies %}
-                                                    <a href="/visitors?query=cookie+{{ cookies.get(result.ip) }}"
-                                                       title="Search for visits with this cookie"
-                                                       rel="noreferrer"
-                                                    ><svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg></a>
-                                                {% else %}
-                                                    <span title="No cookie on request"><svg class="icon icon-tag inactive"><use xlink:href="#icon-tag"></use></svg></span>
-                                                {% endif %}
-
-                                                <a href="/whois?address={{ result.ip }}"
-                                                   target="_blank"
-                                                   title="View whois details for this address"
-                                                   rel="noreferrer"
-                                                ><svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg></a>
-
-                                                <a href="#annotate" data-ip="{{ result.ip }}"
-                                                   class="annotate-ip"
-                                                   title="Annotate this ip"
-                                                ><svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg></a>
-                                            </div>
-                                        </td>
-                                    {% else %}
-                                        <td colspan="2"></td>
+                                    {% if result.query %}
+                                        <ul class="querystring smaller">
+                                            {% for item in result.query|dictsort %}
+                                                <li>{{ item.0|truncate(50, True) }}: {{ item.1|join(',')|truncate(50, True) }}</li>
+                                            {% endfor %}
+                                        </ul>
                                     {% endif %}
 
-                                    <td nowrap="nowrap">
+                                    {% if result.referrer_domain and result.referrer_domain not in site_domains %}
                                         <p>
-                                            <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
-                                                <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
-                                            </a>
-                                            {{ year_month_day }}
-                                            at
-                                            {{ result.unix_timestamp|localtime|dateformat("LTS") }}
+                                            Referrer: <a href="/visitors?query=date+{{ year_month_day }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                                         </p>
-
-                                        <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
-                                            Δ <span class="value">{{ deltas[loop.index0] }}</span>
-                                            <span class="label"></span>
-                                        </p>
-                                    </td>
-                                    <td nowrap="nowrap">
-                                        <p>
-                                            <a href="/visitors?query=date+{{ year_month_day }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
-                                                {{ result.method }} {{ result.uri|truncate(30, True) }}
-                                            </a>
-                                        </p>
-
-                                        {% if result.query %}
-                                            <ul class="querystring smaller">
-                                                {% for item in result.query|dictsort %}
-                                                    <li>{{ item.0|truncate(50, True) }}: {{ item.1|join(',')|truncate(50, True) }}</li>
-                                                {% endfor %}
-                                            </ul>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <p class="help" title="{{ result.statusCode|status_message()}}">
+                                        {{ result.statusCode }}
+                                    </p>
+                                </td>
+                                <td>
+                                    <p>
+                                        <a href="#" class="toggle toggle-next-row" rel="noreferrer">
+                                            <span class="label">more</span>
+                                        </a>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr class="expandable">
+                                <td colspan="6">
+                                    <p class="meta">
+                                        <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
+                                        {{ result.unix_timestamp|ago() }}
+                                        {% if result.time_zone %}
+                                            at {{ result.unix_timestamp|localtime(result.time_zone)|dateformat('LTS') }} local time
                                         {% endif %}
+                                    </p>
 
-                                        {% if result.referrer_domain and result.referrer_domain not in site_domains %}
-                                            <p>
-                                                Referrer: <a href="/visitors?query=date+{{ year_month_day }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
-                                            </p>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <p class="help" title="{{ result.statusCode|status_message()}}">
-                                            {{ result.statusCode }}
-                                        </p>
-                                    </td>
-                                    <td>
-                                        <p>
-                                            <a href="#" class="toggle toggle-next-row" rel="noreferrer">
-                                                <span class="label">more</span>
-                                            </a>
-                                        </p>
-                                    </td>
-                                </tr>
-                                <tr class="expandable">
-                                    <td colspan="6">
-                                        <p class="meta">
-                                            <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
-                                            {{ result.unix_timestamp|ago() }}
-                                            {% if result.time_zone %}
-                                                at {{ result.unix_timestamp|localtime(result.time_zone)|dateformat('LTS') }} local time
-                                            {% endif %}
-                                        </p>
-
-                                        <p class="meta">
-                                            <svg class="icon"><use xlink:href="#icon-database"></use></svg>
-                                            {{ result.host }}
-                                        </p>
-                                        <p>
-                                            <code>{{ result|logline_with_links() }}</code>
-                                        </p>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                    <p class="meta">
+                                        <svg class="icon"><use xlink:href="#icon-database"></use></svg>
+                                        {{ result.host }}
+                                    </p>
+                                    <p>
+                                        <code>{{ result|logline_with_links() }}</code>
+                                    </p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         {% endif %}
         {{ macros.queryPlan(query_plan) }}
