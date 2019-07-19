@@ -28,6 +28,7 @@ class Tool(cherrypy.Tool):
         ".txt": "text/plain",
         ".css": "text/css",
         ".js": "application/javascript",
+        ".svg": "image/svg+xml"
     }
 
     charset = "utf-8"
