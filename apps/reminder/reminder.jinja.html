@@ -11,8 +11,9 @@
 
 
 {% block page_body %}
-    {{ macros.svgSymbols("delete") }}
     <main>
+        {{ macros.svgSymbols("delete") }}
+
         <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
 
         {% if upcoming %}
@@ -121,8 +122,8 @@
                     <div class="field">
                         <button data-default="Save" data-alt="Please wait">Save</button>
                     </div>
+                </div>
             </form>
         </reminder-form>
-        </div>
     </main>
 {% endblock %}

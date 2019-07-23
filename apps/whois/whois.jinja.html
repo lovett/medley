@@ -13,8 +13,9 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("binoculars", "search") }}
     <main>
+        {{ macros.svgSymbols("binoculars", "search") }}
+
         <form class="search-form" method="get" action="/whois">
             <div class="field">
                 <input placeholder="IP or host" type="text" id="address" name="address" value="{{ address }}"/>

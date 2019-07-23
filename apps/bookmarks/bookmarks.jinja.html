@@ -10,9 +10,9 @@
 {% endblock %}
 
 {% block page_body %}
-
     <main>
-        {{ macros.svgSymbols("delete", "icon-tag") }}
+
+        {{ macros.svgSymbols("delete", "icon-tag", "arrow-right", "arrow-left") }}
 
         <form class="content-wrapper" method="get" action="{{ app_url }}">
             <div class="field">
@@ -186,5 +186,4 @@
 
         {{ macros.queryPlan(query_plan) }}
     </main>
-
 {% endblock %}

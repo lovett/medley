@@ -2,6 +2,8 @@
 
 {% block page_body %}
     <main>
+        {{ macros.svgSymbols("arrow-right", "arrow-left") }}
+
         <div class="content-wrapper">
             {% if not calls %}
                 <p>No calls.</p>

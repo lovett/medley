@@ -6,9 +6,9 @@
 {% endblock %}
 
 {% block page_body %}
-
     <main>
         {{ macros.svgSymbols("icon-tag") }}
+
         {% if not tags %}
             <p align="center">No tags found.</p>
         {% endif %}
@@ -24,5 +24,4 @@
             </ul>
         {% endif %}
     </main>
-
 {% endblock %}

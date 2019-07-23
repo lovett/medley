@@ -10,9 +10,8 @@
 {% endblock %}
 
 {% block page_body %}
-
     <main>
-        {{ macros.svgSymbols("copy", "delete") }}
+        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left") }}
 
         <form class="content-wrapper" method="get" action="/captures">
             <div class="field">
@@ -105,9 +104,6 @@
                     {% endif %}
                 </div>
             {% endif %}
-
         </div>
-
     </main>
-
 {% endblock %}

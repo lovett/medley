@@ -10,8 +10,9 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("copy") }}
     <main>
+        {{ macros.svgSymbols("copy") }}
+
         <form method="post" action="/transform">
             <div class="field">
                 <label for="value">Input</label>
