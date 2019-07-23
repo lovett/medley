@@ -348,7 +348,7 @@ TABLE TD {
 }
 
 .table-sleeve {
-    width: 100%;
+    max-width: 100%;
     overflow: auto;
 }
 
@@ -367,10 +367,6 @@ TABLE.natural-width {
 
 .natural-width TABLE {
     min-width: inherit;
-}
-
-.one-line {
-    white-space: nowrap;
 }
 
 .third-column {

@@ -101,7 +101,7 @@
                             {% set duration = durations.get((result.ip, result.unix_timestamp|localtime|dateformat("YYYY-MM-DD"))) %}
                             <tr class="result code-{{ result.statusCode }}">
                                 {% if new_ip or new_day %}
-                                    <td>
+                                    <td nowrap>
                                         {% if result.country not in flagless_countries %}
                                             <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
                                         {% endif %}
@@ -122,7 +122,7 @@
                                         </p>
                                     </td>
 
-                                    <td>
+                                    <td nowrap>
                                         <p>
                                             <a href="/visitors?query=ip+{{ result.ip }}"
                                                title="Search for visits from this address"
@@ -232,7 +232,7 @@
                                         {{ result.statusCode }}
                                     </p>
                                 </td>
-                                <td>
+                                <td nowrap>
                                     <p>
                                         <a href="#" class="toggle toggle-next-row" rel="noreferrer">
                                             <span class="label">more</span>
