@@ -1,9 +1,8 @@
-.smaller {
-    font-weight: normal;
-}
-
-TABLE.key-value TH {
-    text-align: left;
+.app-nav form {
+    display: grid;
+    grid-template-columns: auto;
+    align-items: end;
+    grid-column-gap: 1em;
 }
 
 TABLE.key-value TD {
@@ -20,7 +19,6 @@ TABLE.key-value CAPTION {
 DL {
     margin: 0;
     padding: 1em;
-    background-color: #D2F1E4;
 }
 
 DT {
@@ -42,6 +40,9 @@ DD {
 
 /* Medium devices */
 @media (min-width: 768px) {
+    .app-nav form {
+        grid-template-columns: 3fr 1fr 1fr 1fr;
+    }
 }
 
 /* Large devices */
