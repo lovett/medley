@@ -138,7 +138,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_put_redirect_to_add_view(self, publish_mock):
+    def test_redirect_after_put(self, publish_mock):
         """A non-Ajax request to add a new record returns a redirect"""
 
         def side_effect(*args, **_):
@@ -157,7 +157,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(response.code, 303)
-        self.assertTrue("view=add" in response.body)
+        self.assertTrue("q=put_key" in response.body)
 
 
 if __name__ == "__main__":

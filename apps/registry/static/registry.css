@@ -1,6 +1,6 @@
 .entry {
-    margin-bottom: 2em;
-    background-color: #fff;
+    margin-bottom: 1em;
+    border: 1px solid #768EBE;
 }
 
 .entry > * {
@@ -24,12 +24,7 @@
     flex-grow: 1;
 }
 
-.entry footer {
-    font-size: .75em;
-    justify-content: flex-end;
-}
-
-.glossary {
+.roots {
     padding-left: 0;
     list-style-type: none;
     column-count: 2;
@@ -37,48 +32,46 @@
     margin: auto;
 }
 
-.glossary li {
+.roots li {
     line-height: 3;
 }
 
-.glossary a {
+.roots a {
     outline: 0;
     padding: .25em;
     text-decoration: none;
 }
 
-.glossary a:focus {
+.roots a:focus {
     background-color: #369;
     color: white;
 }
 
-@media only screen and (min-width: 600px) {
-    .glossary {
+/* Small devices */
+@media (min-width: 576px) {
+    .roots {
         column-count: 4;
     }
 
-    .glossary li {
+    .roots li {
         line-height: 2;
     }
 }
 
-@media only screen and (min-width: 800px) {
-    .glossary {
+/* Medium devices */
+@media (min-width: 768px) {
+    .roots {
         column-count: 5;
         width: 100%;
     }
 }
 
-/* Small devices */
-@media (min-width: 576px) {
-}
-
-/* Medium devices */
-@media (min-width: 768px) {
-}
-
 /* Large devices */
 @media (min-width: 992px) {
+    .roots {
+        column-count: 8;
+        width: 100%;
+    }
 }
 
 /* Extra large devices */

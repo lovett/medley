@@ -10,6 +10,14 @@ A {
     text-decoration: none;
 }
 
+A.with-icon {
+    display: inline-grid;
+    grid-template-columns: 1fr auto;
+    grid-column-gap: .5em;
+    align-items: center;
+    justify-content: end;
+}
+
 HTML {
     height: 100%;
 }
@@ -39,11 +47,9 @@ BUTTON[disabled] {
     color: #efefef;
 }
 
-BUTTON + .label {
+BUTTON + .label, BUTTON + .secondary-action {
     padding-left: 1em;
 }
-
-
 
 BUTTON.small {
     font-size: .85em;
@@ -314,6 +320,18 @@ TABLE TD {
     display: inline-block;
     vertical-align: top;
     width: 25%;
+}
+
+.secondary-nav {
+    display: flex;
+    padding: .5em;
+    justify-content: flex-end;
+    margin-bottom: 1em;
+}
+
+.secondary-nav a {
+    margin-left: 1em;
+    color: currentColor;
 }
 
 .shortcuts A {

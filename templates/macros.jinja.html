@@ -30,6 +30,13 @@ in the argument list are returned.  #}
 {% macro svgSymbols() %}
     <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
+            {% if "download" in varargs %}
+                <symbol id="icon-download" viewBox="0 0 20 20">
+                    <title>download</title>
+                    <path d="M13 8v-6h-6v6h-5l8 8 8-8h-5zM0 18h20v2h-20v-2z"></path>
+                </symbol>
+            {% endif %}
+
             {% if "link" in varargs %}
             <symbol id="icon-link" viewBox="0 0 32 32">
                 <title>link</title>
@@ -64,6 +71,13 @@ in the argument list are returned.  #}
                 <symbol id="copy" viewBox="0 0 32 32">
                     <title>Copy</title>
                     <path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"></path>
+                </symbol>
+            {% endif %}
+
+            {% if "add-item" in varargs %}
+                <symbol id="add-item" viewBox="0 0 20 20">
+                    <title>add-solid</title>
+                    <path d="M11 9v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM10 20c-5.523 0-10-4.477-10-10s4.477-10 10-10v0c5.523 0 10 4.477 10 10s-4.477 10-10 10v0z"></path>
                 </symbol>
             {% endif %}
 

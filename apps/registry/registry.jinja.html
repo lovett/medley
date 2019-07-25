@@ -18,85 +18,95 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("copy", "delete", "new-item") }}
+        {{ macros.svgSymbols("copy", "delete", "download", "new-item", "add-item") }}
 
-        <div class="views content-wrapper">
-            <ul>
-                <li><a href="#search-form" class="{{ "active" if view == "search" }}">Search</a></li>
-                <li><a href="#insert-form" class="{{ "active" if view == "add" }}">Add</a></li>
-            </ul>
-        </div>
-
-        <form id="search-form" class="content-wrapper {{ "hidden" if not view == "search" }}">
-            <div class="field">
-                <label for="q">Key:</label>
-                <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
-            </div>
-            <div class="field">
-                <button>Search</button>
-
-                {% if q %}
-                    <a href="{{ app_url }}">Cancel</a>
-                {% endif %}
-
-            </div>
-        </form>
-
-        <form id="insert-form" class="content-wrapper {{ "hidden" if not view == "add" }}">
-            <div class="hidden error message"></div>
-            <div class="hidden success message">Success!</div>
-
-            <div class="field">
-                <label for="key">Key:</label>
-                <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
-            </div>
-            <div class="field">
-                <label for="comments">Value:</label>
-                <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
-            </div>
-            <div class="field">
-                <button>Add</button>
-            </div>
-        </form>
-
-        <div class="content-wrapper">
-
-            {% if (uid or q) and not entries %}
-                <p>No entries found.</p>
-            {% endif %}
-
-            {% if glossary %}
-                <h2>Key glossary</h2>
-                <ul class="glossary">
-                    {% for key in glossary %}
-                        <li><a href="{{ app_url}}?q={{key}}">{{ key }}</a></li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-
-            {% if q %}
-                <p><a href="{{ app_url }}/.json?q={{ q }}">Export</a></p>
-            {% endif %}
-
-            {% for entry in entries %}
-                <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
-                    <div class="entry" v-bind:style="styles">
-                        <header>
-                            {{ entry.key|e }}
-                            <div class="actions">
-                                <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
-                                <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
-                                <div><discard-button tooltip="Delete this entry" /></div>
-                            </div>
-                        </header>
-
-                        <div>
-                            <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
+        <header class="app-nav">
+            {% if view == "search" %}
+                <form id="search-form">
+                    <div class="field-group">
+                        <div class="field">
+                            <label for="q">Search by key</label>
+                            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
                         </div>
-                        <footer>Created on {{ entry.created|localtime|dateformat('YYYY-MM-DD \\a\\t h:mm A') }}</footer>
                     </div>
-                </discardable-record>
-            {% endfor %}
-        </div>
+                    <div class="field">
+                        <button>Search</button>
+                        {% if q %}
+                            <a class="secondary-action" href="{{ app_url }}">Cancel</a>
+                        {% endif %}
+                    </div>
+                </form>
+            {% endif %}
+
+            {% if view == "add" %}
+                <form id="insert-form" class="{{ "hidden" if not view == "add" }}">
+                    <div class="hidden error message"></div>
+                    <div class="hidden success message">Success!</div>
+
+                    <div class="field">
+                        <label for="key">Key:</label>
+                        <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+                    </div>
+                    <div class="field">
+                        <label for="comments">Value:</label>
+                        <textarea id="value" name="value" {% if key and not value %}autofocus="autofocus"{% endif %}>{{ value|default('', true) }}</textarea>
+                    </div>
+                    <div class="field">
+                        <button>Add</button>
+                        <a class="secondary-action" href="{{ app_url }}">Cancel</a>
+                    </div>
+                </form>
+            {% endif %}
+        </header>
+
+        <nav class="secondary-nav">
+            {% if view != "add" %}
+                <a class="with-icon" href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
+                    Add
+                    <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                </a>
+            {% endif %}
+
+            {% if q and entries %}
+                <a class="with-icon" href="{{ app_url }}/.json?q={{ q }}">
+                    Export
+                    <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+                </a>
+            {% endif %}
+        </nav>
+
+
+        {% if (uid or q) and not entries %}
+            <p>No entries found.</p>
+        {% endif %}
+
+        {% if roots %}
+            <p>Key groups</p>
+            <ul class="roots">
+                {% for root in roots %}
+                    <li><a href="{{ app_url}}?q={{root}}">{{ root }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+
+        {% for entry in entries %}
+            <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
+                <div class="entry" v-bind:style="styles">
+                    <header>
+                        {{ entry.key|e }}
+                        <div class="actions">
+                            <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
+                            <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
+                            <div><discard-button tooltip="Delete this entry" /></div>
+                        </div>
+                    </header>
+
+                    <div>
+                        <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
+                    </div>
+                </div>
+            </discardable-record>
+        {% endfor %}
     </main>
 {% endblock %}

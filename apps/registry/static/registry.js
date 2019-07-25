@@ -34,7 +34,6 @@ MEDLEY.registry = (function () {
         }).done(function (data) {
             var href = window.location.pathname;
             href += '?q=' + jQuery('#key').val();
-            href += '&view=add';
             window.location.href = href;
         }).fail(function (data) {
             jQuery('.error.message').removeClass('hidden').text('Invalid values');
@@ -42,19 +41,9 @@ MEDLEY.registry = (function () {
         });
     }
 
-    function switchView(e) {
-        e.preventDefault();
-        var trigger = jQuery(e.target);
-        trigger.closest('UL').find('A').removeClass('active');
-        trigger.addClass('active');
-        jQuery('MAIN FORM').addClass('hidden');
-        jQuery(trigger.attr('href')).removeClass('hidden');
-    }
-
     return {
         init: function () {
             jQuery('#insert-form').on('submit', submitRecord);
-            jQuery('.views').on('click', 'A', switchView);
 
             if ($().focusAsYouType) {
                 jQuery('.glossary a').focusAsYouType();

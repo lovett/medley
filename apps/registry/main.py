@@ -8,16 +8,20 @@ class Controller:
 
     name = "Registry"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display a UI to search for entries and add new ones."""
 
         entries = ()
-        glossary = None
-        q = kwargs.get('q')
-        uid = kwargs.get('uid')
-        key = kwargs.get('key')
-        view = kwargs.get('view')
+        roots = None
+        q = kwargs.get("q")
+        uid = kwargs.get("uid")
+        key = kwargs.get("key")
+        view = kwargs.get("view")
+
+        if view not in ("add", "search"):
+            view = "search"
 
         if uid:
             entries = cherrypy.engine.publish(
@@ -30,13 +34,9 @@ class Controller:
                 key=q
             ).pop()
         else:
-            glossary = cherrypy.engine.publish(
+            roots = cherrypy.engine.publish(
                 "registry:list_keys",
             ).pop()
-
-        view = "search"
-        if key:
-            view = "add"
 
         return {
             "html": ("registry.jinja.html", {
@@ -45,7 +45,7 @@ class Controller:
                 "entries": entries,
                 "view": view,
                 "key": key,
-                "glossary": glossary,
+                "roots": roots,
             }),
             "json": [
                 (entry["key"], entry["value"])
@@ -67,7 +67,7 @@ class Controller:
         requested_with = cherrypy.request.headers.get("X-Requested-With")
 
         if requested_with != "XMLHttpRequest":
-            raise cherrypy.HTTPRedirect("/registry?q={}&view=add".format(key))
+            raise cherrypy.HTTPRedirect("/registry?q={}".format(key))
 
         cherrypy.response.status = 204
 
