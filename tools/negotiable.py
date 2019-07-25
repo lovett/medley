@@ -127,26 +127,6 @@ class Tool(cherrypy.Tool):
 
         return json.JSONEncoder().encode(part) if part else None
 
-    @staticmethod
-    def render_manifest(body):
-        """Render a response as an appcache manifest"""
-        template_file, values = body.get("manifest", (None, None))
-
-        if not template_file:
-            return None
-
-        template = cherrypy.engine.publish(
-            "lookup-template",
-            template_file
-        ).pop()
-
-        if not template:
-            return None
-
-        cherrypy.response.headers["Content-Type"] = "text/cache-manifest"
-
-        return template.render(**values)
-
     def render_text(self, body):
         """Render a response as plain text"""
         part = body.get("text")
