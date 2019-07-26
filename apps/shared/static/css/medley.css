@@ -31,8 +31,7 @@ BODY {
 
 BUTTON {
     font-family: inherit;
-    border-radius: .25em;
-    border: 0;
+    border: 1px solid #87D68D;
     background-color: #87D68D;
     padding: .5em 1.5em;
 }
@@ -164,6 +163,13 @@ TABLE TD {
     margin-bottom: 2em;
 }
 
+.app-nav > form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-column-gap: 1em;
+    align-items: end;
+}
+
 .bookmarklet-container A {
     background-color: #4C699A;
     color: #fff;
@@ -271,6 +277,15 @@ TABLE TD {
 
 .icon.inactive {
     fill: #ccc;
+}
+
+.inverted {
+    background-color: #000;
+    color: #fff;
+}
+
+.inverted svg {
+    fill: #fff;
 }
 
 .message {

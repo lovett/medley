@@ -1,46 +1,47 @@
+.action-button a {
+    border: 1px solid currentColor;
+}
+
 .capture {
-    background-color: #fff;
-    margin-bottom: 2em;
+    padding-bottom: 1em;
+    margin-bottom: 1em;
+    display: grid;
+    grid-row-gap: 1em;
+    grid-template-areas: "header"
+                         "reqheader"
+                         "reqresponse"
+                         "reqbody";
 }
 
-.capture header {
-    background-color: #000;
-    color: #fff;
-    padding: .5em 1em;
+.capture > header {
+    grid-area: header;
+    padding: .5em;
+    display: flex;
+    justify-content: space-between;
 }
 
-.capture header A {
-    float: right;
-}
-
-.capture header svg {
-    fill: #fff;
-}
-
-.capture .action-button a {
-    border: 1px solid #333;
-}
-
-
-.capture .half-column {
-    padding: 1em 1em 0 1em;
-}
-
-.capture SECTION {
-    margin-bottom: 2em;
-}
-
-.capture H2 {
-    font-size: 1em;
-    font-weight: normal;
+.capture section header {
+    position: relative;
     font-style: italic;
     text-transform: uppercase;
-    border-bottom: 1px solid #ccc;
-
+    border-bottom: 1px solid currentColor;
+    margin-bottom: 1.5em;
 }
 
-.options {
+.capture .options {
     float: right;
+}
+
+.capture .reqheader {
+    grid-area: reqheader;
+}
+
+.capture .reqresponse {
+    grid-area: reqresponse;
+}
+
+.capture .reqbody {
+    grid-area: reqbody;
 }
 
 /* Small devices */
@@ -53,6 +54,15 @@
 
 /* Large devices */
 @media (min-width: 992px) {
+    .capture {
+        grid-template-columns: 1fr 1fr;
+        grid-column-gap: 2em;
+        grid-row-gap: 2em;
+        grid-template-areas: "header header"
+                             "reqheader reqresponse"
+                             "reqbody reqbody";
+
+    }
 }
 
 /* Extra large devices */

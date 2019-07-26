@@ -8,12 +8,13 @@ class Controller:
 
     name = "Captures"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display a list of recent captures, or captures matching a URI path.
         """
 
-        path = kwargs.get('path')
+        path = kwargs.get('path', '')
         cid = kwargs.get('cid')
         offset = int(kwargs.get('offset', 0))
 

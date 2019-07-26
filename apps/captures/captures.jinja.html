@@ -11,99 +11,107 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left") }}
+        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link") }}
 
-        <form class="content-wrapper" method="get" action="/captures">
+        <header class="app-nav">
+            <form method="get" action="{{ app_url }}">
+                <div class="field">
+                    <label for="number">Request URI</label>
+                    <input type="text" id="path" name="path" value="{{ path }}"/>
+                </div>
+                <div class="field">
+                    <button>Search</button>
+                </div>
+            </form>
             <div class="field">
-                <label for="number">Request URI</label>
-                <input type="text" id="path" name="path" value="{{ path|default('', true) }}"/>
+                {% if path %}
+                    <a href="{{ app_url }}">Cancel</a>
+                {% endif %}
             </div>
-            <div class="field">
-                <button>Search</button>
-            </div>
-        </form>
+        </header>
 
-        <div class="content-wrapper">
-            {% if not captures %}
-                <p>No captures found.</p>
-            {% endif %}
+        {% if not captures %}
+            <p>No captures found.</p>
+        {% endif %}
 
-            {% for capture in captures %}
-                <div class="capture">
-                    <header>
-                        <a href="/captures?cid={{ capture.rowid }}">
-                            <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
-                        </a>
+        {% for capture in captures %}
+            <div class="capture">
+                <header class="inverted">
+                    <div>
+                        #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
+                    </div>
 
-                        <div>
-                            #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
+                    <a href="{{ app_url }}?cid={{ capture.rowid }}">
+                        <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
+                    </a>
+                </header>
+
+                <section>
+                    <header class="reqhead">
+                        Request Headers
+                        <div class="options">
+                            <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" tooltip="Copy headers" />
                         </div>
-
                     </header>
 
-                    <div class="half-column">
-                        <section>
+                    <code id="reqhead-{{ loop.index }}">
+{#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
+{{- capture.request_line }}
+{%  for key, value in capture.request.headers.items() -%}
+{{ key }}: {{ value }}
+{% endfor -%}
+                    </code>
+                </section>
+
+                <section>
+                    <header class="reqresponse">
+                        Response
+                    </header>
+
+                    <p>{{ capture.response.status }}</p>
+                </section>
+
+                {% if capture.request.params %}
+                    <section class="reqbody">
+                        <header>
+                            Request Body
                             <div class="options">
-                                <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" tooltip="Copy headers" />
+                                <clipboard-button target-id="{{ "reqbodyparam-" ~ loop.index }}" tooltip="Copy body" />
+                        </header>
+                        <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
+                    </section>
+                {% endif %}
+
+                {% if capture.request.json %}
+                    <section class="reqbody">
+                        <header>
+                            Request JSON
+                            <div class="options">
+                                <clipboard-button target-id="{{ "reqbodyjson-" ~ loop.index }}" tooltip="Copy JSON" />
                             </div>
-                            <h2>Request Headers</h2>
+                        </header>
 
-                            <code id="reqhead-{{ loop.index }}">
-                                {#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
-                                {{- capture.request_line }}
-                                {%  for key, value in capture.request.headers.items() -%}
-                                    {{ key }}: {{ value }}
-                                {% endfor -%}
-                            </code>
-                        </section>
+                        <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
+                    </section>
+                {% endif %}
+            </div>
+        {% endfor %}
 
-                        {% if capture.request.params %}
-                            <section>
-                                <div class="options">
-                                    <clipboard-button target-id="{{ "reqbodyparam-" ~ loop.index }}" tooltip="Copy body" />
-                                </div>
-                                <h2>Request Body</h2>
-                                <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
-                            </section>
-                        {% endif %}
-
-                        {% if capture.request.json %}
-                            <section>
-                                <div class="options">
-                                    <clipboard-button target-id="{{ "reqbodyjson-" ~ loop.index }}" tooltip="Copy JSON" />
-                                </div>
-                                <h2>Request JSON</h2>
-
-                                <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
-                            </section>
-                        {% endif %}
-                    </div>
-
-                    <div class="half-column">
-                        <section>
-                            <h2>Response</h2>
-                            <p>{{ capture.response.status }}</p>
-                        </section>
-                    </div>
-                </div>
-            {% endfor %}
-
-            {% if captures %}
-                <div class="pagination">
-                    {% if newer_offset %}
-                        <a href="/captures?offset={{ newer_offset }}&path={{ path }}" rel="noreferrer" class="next">
-                            <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                            Newer
-                        </a>
-                    {% endif %}
-                    {% if older_offset %}
-                        <a href="/captures?offset={{ older_offset }}&path={{ path }}" rel="noreferrer" class="previous">
-                            Older
-                            <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                        </a>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
+        {% if captures %}
+            <div class="pagination">
+                {% if newer_offset %}
+                    <a href="{{ app_url }}?offset={{ newer_offset }}&path={{ path }}" rel="noreferrer" class="next">
+                        <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                        Newer
+                    </a>
+                {% endif %}
+                {% if older_offset %}
+                    <a href="{{ app_url }}?offset={{ older_offset }}&path={{ path }}" rel="noreferrer" class="previous">
+                        Older
+                        <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
     </main>
 {% endblock %}
