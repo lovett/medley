@@ -16,16 +16,25 @@
     <main>
         {{ macros.svgSymbols("binoculars", "search") }}
 
-        <form class="search-form" method="get" action="/whois">
+        <header class="app-nav">
+            <form class="search-form" method="get" action="/whois">
+                <div class="field">
+                    <label for="address">IP or host</label>
+                    <input type="text" id="address" name="address" value="{{ address }}"/>
+                </div>
+                <div class="field">
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    </button>
+                </div>
+            </form>
             <div class="field">
-                <input placeholder="IP or host" type="text" id="address" name="address" value="{{ address }}"/>
+                {% if address %}
+                    <a href="{{ app_url }}">Cancel</a>
+                {% endif %}
             </div>
-            <div class="field">
-                <button>
-                    <svg class="icon icon-search"><use xlink:href="#icon-search"></use></svg>
-                </button>
-            </div>
-        </form>
+
+        </header>
 
         {% if address %}
             <div id="ip-report">

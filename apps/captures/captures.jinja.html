@@ -11,7 +11,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link") }}
+        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search") }}
 
         <header class="app-nav">
             <form method="get" action="{{ app_url }}">
@@ -20,7 +20,9 @@
                     <input type="text" id="path" name="path" value="{{ path }}"/>
                 </div>
                 <div class="field">
-                    <button>Search</button>
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    </button>
                 </div>
             </form>
             <div class="field">

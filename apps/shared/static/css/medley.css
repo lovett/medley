@@ -34,6 +34,11 @@ BUTTON {
     border: 1px solid #87D68D;
     background-color: #87D68D;
     padding: .5em 1.5em;
+    height: 2.25em;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 BUTTON:hover {
@@ -44,6 +49,12 @@ BUTTON[disabled] {
     background-color: #ccc;
     border: #efefef;
     color: #efefef;
+}
+
+BUTTON .icon {
+    fill: #fff;
+    margin: 0 1em;
+
 }
 
 BUTTON + .label, BUTTON + .secondary-action {

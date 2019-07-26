@@ -2,20 +2,18 @@
 
 {% block page_body %}
     <main>
-        <header class="app-nav">
-            {% if can_speak %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="mute" />
-                    <button>Mute now</button>
-                    <span class="label">Not currently muted.</span>
-                </form>
-            {% else %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="unmute" />
-                    <button>Unmute</button>
-                    <span class="label">Currently muted.</span>
-                </form>
-            {% endif %}
-        </header>
+        {% if can_speak %}
+            <form method="POST" action="{{ app_url }}">
+                <input type="hidden" name="action" value="mute" />
+                <button>Mute now</button>
+                <span class="label">Not currently muted.</span>
+            </form>
+        {% else %}
+            <form method="POST" action="{{ app_url }}">
+                <input type="hidden" name="action" value="unmute" />
+                <button>Unmute</button>
+                <span class="label">Currently muted.</span>
+            </form>
+        {% endif %}
     </main>
 {% endblock %}
