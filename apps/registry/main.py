@@ -64,16 +64,16 @@ class Controller:
             replace
         ).pop()
 
-        requested_with = cherrypy.request.headers.get("X-Requested-With")
-
-        if requested_with != "XMLHttpRequest":
-            raise cherrypy.HTTPRedirect("/registry?q={}".format(key))
-
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(uid):
-        """Remove an existing entry by its ID"""
+    def DELETE(uid=None, key=None):
+        """Remove an existing entry by its key or ID"""
 
-        cherrypy.engine.publish("registry:remove_id", uid)
+        if uid:
+            cherrypy.engine.publish("registry:remove_id", uid)
+
+        if key:
+            cherrypy.engine.publish("registry:remove", key)
+
         cherrypy.response.status = 204

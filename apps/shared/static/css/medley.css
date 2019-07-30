@@ -33,7 +33,7 @@ BUTTON {
     font-family: inherit;
     border: 1px solid #87D68D;
     background-color: #87D68D;
-    padding: .5em 1.5em;
+    padding: .5em 1em;
     height: 2.25em;
     box-sizing: border-box;
     display: flex;
@@ -136,12 +136,27 @@ TABLE TD {
     border: 1px solid #000;
 }
 
+#app-message {
+    margin: -1em 0 1em;
+    padding: 1em;
+}
+
+#app-message p {
+    margin: 0 0 1em 0;
+}
+
+#app-message p:last-of-type {
+    margin-bottom: 0;
+}
+
+
 #page-header {
     background: #4B88A2;
     background: linear-gradient(45deg, #4B88A2 0%, var(--secondary-bg-color) 100%);
     color: #fff;
     padding: .5em 1em;
     display: flex;
+    flex-flow: row;
     justify-content: space-between;
     box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.75);
     margin-bottom: 1em;
@@ -297,19 +312,6 @@ TABLE TD {
 
 .inverted svg {
     fill: #fff;
-}
-
-.message {
-    margin: -1em -1em 1em -1em;
-    padding: 1em;
-}
-
-.message p {
-    margin: 0 0 1em 0;
-}
-
-.message p:last-of-type {
-    margin-bottom: 0;
 }
 
 .middle-column {
@@ -540,7 +542,7 @@ TABLE.natural-width {
 
 .actions {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
 }
 
@@ -622,4 +624,23 @@ TABLE.natural-width {
 .discard-button a:hover {
     background-color: var(--discard-bg-color);
     fill: #fff;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    .table-sleeve {
+        overflow: inherit;
+    }
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
 }

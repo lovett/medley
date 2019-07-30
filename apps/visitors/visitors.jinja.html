@@ -6,31 +6,23 @@
 {% endblock %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('visitors', 'jquery-ui.min.css') }}
-    {{ macros.staticAsset('visitors', 'jquery-ui.theme.min.css') }}
     {{ macros.staticAsset('visitors', 'visitors.css') }}
     {{ macros.staticAsset('visitors', 'flag-icon-css/css/flag-icon.min.css') }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.staticAsset('visitors', 'jquery-ui.min.js') }}
     {{ macros.staticAsset('visitors', 'visitors.js') }}
 {% endblock %}
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("delete", "database", "flag", "clock", "binoculars", "bookmark", "tag") }}
+        {{ macros.svgSymbols("delete", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
 
-        <form method="get" action="{{ app_url }}">
-            <header class="app-nav">
-                <div class="field">
-                    <label>Date</label>
-                    <div id="datepicker"></div>
-                </div>
-
+        <header class="app-nav">
+            <form id="visitors-form" method="get" action="{{ app_url }}">
                 <div>
                     <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
-                        <label for="saved">Saved Searches</label>
+                        <label for="saved">Saved queries</label>
                         <select id="saved">
                             <option value=""></option>
                             {% for query in saved_queries %}
@@ -38,28 +30,32 @@
                             {% endfor %}
                         </select>
 
-                        <a href="#" class="delete hidden">
+                        <a id="delete-saved-query" href="#" hidden>
                             <svg class="icon"><use xlink:href="#delete"></use></svg>
                         </a>
                     </div>
 
                     <div class="field">
-                        <label for="query">Search</label>
+                        <label for="query">Query</label>
                         <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
                     </div>
 
-                    <div class="field actions">
-                        <button id="submit">Run query</button>
-                        <a id="save" href="#save">Save query</a>
+                    <div class="actions">
+                        <div class="field">
+                            <label for="date-slider">Date adjust</label>
+                            <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
+                        </div>
+                        <button id="submit">
+                            <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                        </button>
+                        <a id="save" href="#save">Save</a>
                     </div>
                 </div>
-            </header>
-        </form>
+            </form>
+        </header>
 
         {% if results|count == 0 %}
-            <div class="content-wrapper centered">
-                <p>No results found.</p>
-            </div>
+            <p>No results found.</p>
         {% endif %}
 
         {% if results|count > 0 %}
@@ -201,7 +197,10 @@
                                         {{ result.unix_timestamp|localtime|dateformat("LTS") }}
                                     </p>
 
-                                    <p class="delta {% if loop.last %}hidden{% endif %} smaller" data-default="{{ deltas[loop.index]}}">
+                                    <p class="delta smaller"
+                                       {% if loop.last %}hidden{% endif %}
+                                       data-default-delta="{{ deltas[loop.index]}}"
+                                    >
                                         Δ <span class="value">{{ deltas[loop.index0] }}</span>
                                         <span class="label"></span>
                                     </p>

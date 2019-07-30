@@ -1,213 +1,280 @@
 MEDLEY.visitors = (function () {
     'use strict';
 
-    var calculateDelta, queryToMultiline, saveQuery, resetQueryMenu, annotateIP;
+    /**
+     * Change the date keyword of the current query.
+     */
+    function adjustQueryDate(e) {
+        const queryField = document.getElementById('query');
+        const days = parseInt(e.target.value, 10);
 
-    calculateDelta = function (e) {
-        var referenceTimestamp, tbody, trigger;
+        let dateString = 'today'
+
+        if (days === -1) {
+            dateString = 'yesterday'
+        }
+
+        if (days < -1) {
+            const newDate = new Date(Date.now() + 86400000 * days);
+            dateString = newDate.toISOString().replace(/T.*/, '')
+        }
+
+        let query = queryField.value.trim();
+
+        query = query.replace(/^\s*date.*\s*/g, '');
+        query = 'date ' + dateString + '\n' + query;
+        queryField.value = query;
+    }
+
+    /**
+     * Store a query in the registry.
+     */
+    async function saveQuery (e) {
+        e.preventDefault();
+
+        const menu = document.getElementById('saved');
+        const queryField = document.getElementById('query');
+        const submit = document.getElementById('submit');
+
+        const queryName = prompt("Name this query:");
+
+        if (!queryName) {
+            console.log('nope');
+            return;
+        }
+
+        let payload = new FormData()
+        payload.set('key', `visitors:${queryName.toLowerCase()}`);
+        payload.set('value', queryField.value);
+        payload.set('replace', 1)
+
+        const response = await fetch('/registry', {
+            method: 'PUT',
+            mode: 'same-origin',
+            body: payload
+        })
+
+        if (response.ok) {
+            MEDLEY.setSuccessMessage('Query saved.');
+        } else {
+            MEDLEY.setErrorMessage('The query could not be saved.');
+        }
+    };
+
+    /**
+     * Discard a previosly-saved query.
+     */
+    async function deleteSavedQuery(e) {
+        e.preventDefault();
+
+        const menu = document.getElementById('saved');
+        const id = menu.selectedOptions[0].dataset.id;
+        const endpoint = `/registry/?uid=${id}`;
+
+        const response = await fetch(endpoint, {
+            method: 'DELETE',
+            mode: 'same-origin',
+        });
+
+        if (response.ok) {
+            MEDLEY.setSuccessMessage('Query deleted.');
+        } else {
+            MEDLEY.setErrorMessage('The query could not be deleted.');
+        }
+    }
+
+    /**
+     * Show or hide the delete icon next to the saved queries dropdown.
+     */
+    function toggleQueryDelete(e) {
+        console.log('ok');
+        const menu = document.getElementById('saved');
+        const deleteTrigger = document.getElementById('delete-saved-query');
+
+        if (menu.value === '') {
+            deleteTrigger.setAttribute('hidden', true)
+        } else {
+            deleteTrigger.removeAttribute('hidden');
+        }
+    }
+
+    /**
+     * Present a saved query.
+     */
+    function displaySavedQuery(e) {
+        const query = e.target.value;
+        const multilineQuery = query.split(',').reduce((accumulator, segment) => {
+            return accumulator + '\n' + segment.trim();
+        });
+        document.getElementById('query').value = multilineQuery;
+    }
+
+    /**
+     * Blank the saved query dropdown if the query is edited.
+     */
+    function resetQueryMenu(e) {
+        document.getElementById('saved').value = '';
+    }
+
+    /**
+     * Associate an IP address with a label.
+     */
+    async function annotateIp(e) {
+        const annotateIcon = e.target.closest('.annotate-ip')
+
+        if (!annotateIcon) {
+            return;
+        }
 
         e.preventDefault();
-        trigger = jQuery(this);
-        tbody = trigger.closest('TBODY');
-        referenceTimestamp = parseFloat(trigger.attr('data-timestamp-unix'));
 
-        trigger.toggleClass('active');
-        tbody.find('.calc-delta').not(trigger).removeClass('active');
+        const endpoint = '/registry';
+        const label = prompt('Enter a label for this IP');
+        const td = annotateIcon.closest('td');
 
-        if (!trigger.hasClass('active')) {
-            tbody.find('.delta .value').html(function () {
-                return jQuery(this).closest('.delta').removeClass('hidden').attr('data-default');
+        if (label.trim() === '') {
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                mode: 'same-origin',
+            });
+
+            if (response.ok) {
+                td.querySelector('.annotations').innerHTML = '<p></p>';
+            } else {
+                MEDLEY.setErrorMessage('Unable to clear the annotation.');
+            }
+
+            return;
+        }
+
+        let payload = new FormData()
+        payload.set('key', `ip:${annotateIcon.dataset.ip}`);
+        payload.set('value', label.trim());
+        payload.set('replace', true);
+
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            mode: 'same-origin',
+            body: payload
+        })
+
+        if (response.ok) {
+            td.querySelector('.annotations').innerHTML = `<p>${label}</p>`;
+        } else {
+            MEDLEY.setErrorMessage('The annotation not be saved.');
+        }
+    }
+
+    function calculateDelta (e) {
+        const trigger = e.target.closest('.calc-delta')
+
+        if (!trigger) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const tbody = e.target.closest('tbody');
+        const referenceTimestamp = parseFloat(trigger.dataset.timestampUnix);
+
+        trigger.classList.toggle('active');
+
+        tbody.querySelectorAll('.calc-delta').forEach(el => {
+            if (el !== trigger) {
+                el.classList.remove('active')
+            }
+        });
+
+        if (trigger.classList.contains('active') === false) {
+            Array.from(tbody.querySelectorAll('.delta')).forEach(el => {
+                el.removeAttribute('hidden');
+                el.querySelector('.value').innerHTML = el.dataset.defaultDelta;
             });
             return;
-        } else {
-            tbody.find('.delta').removeClass('hidden');
-            trigger.parent().find('.delta').addClass('hidden');
         }
 
-        function doubleDigitString(num) {
-            if (num < 10) {
-                return '0' + num.toString();
-            } else {
-                return num.toString();
-            }
-        }
+        Array.from(tbody.querySelectorAll('.delta')).forEach(el => {
+            el.removeAttribute('hidden');
+        });
 
-        tbody.find('.calc-delta').html(function () {
-            var el, timestamp, delta, label, deltaString, units, result;
+        trigger.closest('td').querySelector('.delta').setAttribute('hidden', true);
 
-            el = jQuery(this);
+        Array.from(tbody.querySelectorAll('.calc-delta')).forEach(el => {
+            const timestamp = parseFloat(el.dataset.timestampUnix);
 
-            timestamp = parseFloat(el.attr('data-timestamp-unix'));
-
-            delta = timestamp - referenceTimestamp;
-            label = (delta < 0)? 'earlier':'later';
+            let delta = timestamp - referenceTimestamp;
+            const label = (delta < 0)? 'earlier' : 'later';
             delta = Math.abs(delta);
 
-            units = [3600, 60, 1].reduce(function (acc, unit, index, arr) {
+            let units = [3600, 60, 1].reduce((acc, unit, index, arr) => {
                 var div;
                 if (index === arr.length - 1) {
                     acc.push(delta);
                 } else if (delta > unit) {
                     div = Math.floor(delta / unit);
                     delta -= unit * div;
-                    acc.push(div);
                 }
                 return acc;
             }, []);
 
-            units = units.map(doubleDigitString);
+            units = units.map(val => String(val).padStart(2, '0'));
 
+            let result = '';
             if (units.length == 1) {
                 result = '0:' + units[0];
             } else {
                 result = units.join(':').replace(/^0/, '');
             }
-            el.closest('TR').find('.delta .value').html(result);
-            el.closest('TR').find('.delta .label').html(label);
+
+            el.closest('TD').querySelector('.delta .value').innerHTML = result;
+            el.closest('TD').querySelector('.delta .label').innerHTML = label;
         });
-    };
 
-    queryToMultiline = function (query) {
-        return query.split(',').reduce(function (accumulator, segment) {
-            return accumulator + '\n' + segment.trim();
-        });
-    };
-
-    resetQueryMenu = function (e) {
-        jQuery('#saved').val('');
-        jQuery('.delete').addClass('hidden');
-    };
-
-    saveQuery = function (e) {
-        var activeName, name;
-
-        e.preventDefault();
-        activeName = jQuery('#saved OPTION:selected').text();
-        if (activeName.indexOf(':') > -1) {
-            activeName = activeName.split(':', 2).pop();
-        }
-
-        name = prompt("Provide a name for this query:", activeName);
-
-        if (name === false) {
-            return;
-        }
-
-        jQuery.ajax({
-            type: 'PUT',
-            dataType: 'json',
-            url: '/registry',
-            data: {
-                'key': 'visitors:' + name.toLowerCase(),
-                'value': jQuery('#query').val(),
-                'replace': true
-            }
-        }).done(function () {
-            jQuery('#submit').trigger('click');
-        });
-    };
-
-    function applySelectedDateToQuery(dateText) {
-        var query;
-        query = jQuery('#query').val();
-
-        query = query.trim().replace(/^\s*date.*\s*/g, '');
-        query = 'date ' + dateText + '\n' + query;
-        jQuery('#query').val(query);
-        jQuery('#submit').trigger('click');
-    }
-
-    function deleteSavedQuery(e) {
-        e.preventDefault();
-
-        var selectedOption = jQuery('#saved OPTION:selected');
-
-        console.log(selectedOption);
-
-        jQuery.ajax({
-            type: 'DELETE',
-            url: '/registry/' + selectedOption.attr('data-id')
-        }).done(function (data) {
-            jQuery('#query').val('');
-            jQuery('#submit').trigger('click');
-        });
-    }
-
-    function annotateIP(e) {
-        var existingValue, newValue, message, node;
-
-        e.preventDefault();
-
-        message = 'Enter a label for this IP';
-
-        node = jQuery(e.target).closest('TD').find('.annotations P').first();
-
-        if (node.length === 0) {
-            node = jQuery('<p></p>');
-            jQuery(e.target).closest('TD').find('.annotations').append(node);
-        }
-
-        existingValue = jQuery.trim(node.text());
-
-        newValue = jQuery.trim(prompt('Enter a label for this IP', existingValue));
-
-        if (newValue === '' || newValue === existingValue) {
-            return;
-        }
-
-        jQuery.ajax({
-            type: 'PUT',
-            dataType: 'json',
-            url: '/registry',
-            data: {
-                'key': 'ip:' + jQuery(this).attr('data-ip'),
-                'value': newValue,
-                'replace': true
-            }
-        }).done(function (data) {
-            node.text(newValue);
-        });
     }
 
     return {
         init: function () {
-            jQuery('#save').on('click', saveQuery);
+            document.getElementById('date-slider').addEventListener(
+                'input',
+                adjustQueryDate
+            );
 
-            jQuery('#query').on('keyup', resetQueryMenu);
+            document.getElementById('save').addEventListener(
+                'click',
+                saveQuery
+            );
 
-            jQuery('.annotate-ip').on('click', annotateIP);
+            document.getElementById('delete-saved-query').addEventListener(
+                'click',
+                deleteSavedQuery
+            );
 
-            jQuery('#saved').on('change', function (e) {
-                var query, multiline;
-                query = jQuery(this).val();
-                multiline = queryToMultiline(query);
-                jQuery('#query').val(multiline);
-                jQuery('#submit').trigger('click');
+            document.getElementById('saved').addEventListener(
+                'change',
+                toggleQueryDelete
+            );
 
-                jQuery('.delete').removeClass('hidden');
-            });
+            document.getElementById('saved').addEventListener(
+                'change',
+                displaySavedQuery
+            );
 
-            jQuery('.delete').on('click', deleteSavedQuery);
+            document.getElementById('query').addEventListener(
+                'keyup',
+                resetQueryMenu
+            );
 
-            jQuery('#matches').on('click', 'A.calc-delta', calculateDelta);
+            document.addEventListener(
+                'click',
+                annotateIp
+            );
 
-            if (jQuery('#saved').val() !== '' && jQuery('#saved option:selected').text() !== 'default') {
-                jQuery('.delete').removeClass('hidden');
-            }
-
-
-            jQuery('#datepicker').datepicker({
-                'dateFormat': 'yy-mm-dd',
-                'defaultDate': jQuery('META[name=active_date]').attr('content'),
-                'onSelect': applySelectedDateToQuery,
-                'showButtonPanel': true,
-                'changeMonth': true,
-                'changeYear': true,
-                'maxDate': 0
-            });
-
+            document.addEventListener(
+                'click',
+                calculateDelta
+            );
         }
-    };
-})();
+    }
+}());
 
-jQuery(document).ready(MEDLEY.visitors.init);
+window.addEventListener('DOMContentLoaded',  MEDLEY.visitors.init);

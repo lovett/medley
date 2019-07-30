@@ -1,12 +1,23 @@
-.app-nav {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-column-gap: 2em;
+#delete-saved-query {
+    margin-left: 1em;
+}
+
+input[type=range] {
+    width: 100%;
 }
 
 .app-nav .actions {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-column-gap: 1em;
+}
+
+.app-nav .actions > * {
+    margin: 0;
+}
+
+.app-nav .actions .field:first-of-type {
+    grid-column: 1 / span 2;
 }
 
 .code-204 td {
@@ -32,10 +43,6 @@
 
 .code-302 td {
     background-color: LightCyan;
-}
-
-textarea[name=q] {
-    height: 10em;
 }
 
 .calc-delta.active .icon {
@@ -74,6 +81,10 @@ textarea[name=q] {
     display: flex;
     justify-content: flex-end;
     padding-bottom: 1em;
+}
+
+#matches {
+    border: 0;
 }
 
 #matches p {
@@ -116,14 +127,17 @@ ul.querystring {
 
 /* Medium devices */
 @media (min-width: 768px) {
+    input[type=range] {
+        width: 20em;
+    }
+
+    .app-nav .actions {
+        grid-template-columns: repeat(4, auto);
+    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
-    .app-nav {
-        grid-template-columns: auto 1fr;
-        grid-column-gap: 2em;
-    }
 }
 
 /* Extra large devices */

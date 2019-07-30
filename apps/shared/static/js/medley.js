@@ -54,6 +54,21 @@ var MEDLEY = (function () {
     }
 
     return {
+        setSuccessMessage: function (message) {
+            const el = document.getElementById('app-message');
+            el.removeAttribute('hidden');
+            el.classList.remove('error')
+            el.classList.add('success')
+            el.innerHTML = `<p>${message}</p>`;
+        },
+
+        setErrorMessage: function (message) {
+            el.removeAttribute('hidden');
+            el.classList.remove('success')
+            el.classList.add('error')
+            el.innerHTML = `<p>${message}</p>`;
+        },
+
         init: function () {
 
             jQuery('.toggle-trigger').on('click', toggle);
