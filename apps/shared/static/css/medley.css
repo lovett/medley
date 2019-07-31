@@ -196,6 +196,19 @@ TABLE TD {
     align-items: end;
 }
 
+.app-nav .cancel {
+    text-align: center;
+}
+
+.app-nav .options {
+    display: flex;
+    align-items: center;
+}
+
+.app-nav .options .field {
+    margin-right: 1em;
+}
+
 .bookmarklet-container A {
     background-color: #4C699A;
     color: #fff;

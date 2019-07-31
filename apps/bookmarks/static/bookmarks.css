@@ -1,10 +1,5 @@
-.content-wrapper {
-    max-width: 800px;
-}
-
 .bookmark {
-    background-color: #fff;
-    padding: .75em;
+    padding: .75em 0;
     margin-bottom: 1.5em;
 }
 
@@ -57,7 +52,6 @@
     white-space: nowrap;
 }
 
-
 #all-tags {
     padding: 0 2em;
     column-count: 1;
@@ -68,26 +62,11 @@
     display: block;
 }
 
-@media (min-width: 600px) {
+/* Small devices */
+@media (min-width: 576px) {
     #all-tags {
         column-count: 2;
     }
-}
-
-@media (min-width: 1024px) {
-    #all-tags {
-        column-count: 3;
-    }
-}
-
-@media (min-width: 1100px) {
-    #all-tags {
-        column-count: 4;
-    }
-}
-
-/* Small devices */
-@media (min-width: 576px) {
 }
 
 /* Medium devices */
@@ -96,8 +75,14 @@
 
 /* Large devices */
 @media (min-width: 992px) {
+    #all-tags {
+        column-count: 3;
+    }
 }
 
 /* Extra large devices */
 @media (min-width: 1200px) {
+    #all-tags {
+        column-count: 4;
+    }
 }
