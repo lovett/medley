@@ -2,9 +2,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ app_name or "Medley" }}</title>
+        {% if app_name == "Homepage" %}
+            <title>Medley</title>
+        {% else %}
+            <title>{{ app_name or "Medley" }}</title>
+        {% endif %}
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
 
         {{ macros.staticAsset('shared', 'css/normalize.css') }}
         {{ macros.staticAsset('shared', 'css/medley.css') }}
@@ -12,13 +19,10 @@
         {% block stylesheets %}{% endblock %}
 
         <link rel="apple-touch-icon" sizes="76x76" href="/shared/static/favicon/favicon-76.png"/>
-        <link rel="apple-touch-icon" sizes="120x120" href="/shared/static/favicon/app-icon-120.png"/>
-        <link rel="apple-touch-icon" sizes="144x144" href="/shared/static/favicon/app-icon-120.png"/>
-        <link rel="apple-touch-icon" sizes="152x152" href="/shared/static/favicon/app-icon-152.png"/>
         <link rel="apple-touch-icon" sizes="180x180" href="/shared/static/favicon/app-icon-180.png"/>
         <link rel="mask-icon" href="/shared/static/favicon/app-icon.svg" color="black">
 
-        <meta name="msapplication-TileColor" content="#272e6a" />
+        <meta name="msapplication-TileColor" content="#4B88A2" />
         <meta name="msapplication-TileImage" content="/shared/static/favicon/app-icon-144.png" />
 
         {% block page_meta %}{% endblock %}
