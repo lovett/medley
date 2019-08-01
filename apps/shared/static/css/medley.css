@@ -71,6 +71,10 @@ CODE {
     white-space: pre-line;
 }
 
+DETAILS SUMMARY {
+    margin-bottom: 1em;
+}
+
 DT {
     font-weight: bold;
     margin-left: 0;
