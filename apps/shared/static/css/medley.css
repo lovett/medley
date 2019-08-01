@@ -331,6 +331,10 @@ TABLE TD {
     padding: 0 1em;
 }
 
+.page-section {
+    margin-bottom: 2em;
+}
+
 .pagination .next {
     padding: 0 1em;
 }
