@@ -1,21 +1,19 @@
 .bookmark {
-    padding: .75em 0;
-    margin-bottom: 1.5em;
+    padding: 1em 0;
 }
 
-.bookmark H2 {
-    margin: 0;
-    padding: 0;
+.bookmark .title {
     font-size: 1.1em;
+    font-weight: bold;
 }
 
 .bookmark .details {
     font-size: .75em;
 }
 
-.bookmark .details p {
+.bookmark .details > * {
     display: inline-block;
-    margin: .5em 1em 0 0;
+    margin: 0 1em 0 0;
 }
 
 .bookmark .tag {
@@ -23,20 +21,13 @@
     display: inline-block;
 }
 
-.bookmark A {
-    text-decoration: none;
-}
-
-.bookmark A:hover {
-    text-decoration: underline;
-}
-
 .bookmark .actions {
     float: right;
 }
 
 .bookmark .comments {
-    line-height: 1.4;
+    line-height: 1.2;
+    margin-bottom: 0;
 }
 
 .tag-list {
@@ -53,7 +44,6 @@
 }
 
 #all-tags {
-    padding: 0 2em;
     column-count: 1;
     line-height: 1.5;
 }
@@ -75,6 +65,7 @@
 
 /* Large devices */
 @media (min-width: 992px) {
+
     #all-tags {
         column-count: 3;
     }

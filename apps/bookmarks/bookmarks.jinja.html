@@ -35,7 +35,7 @@
                                    value="rank"
                                    {% if order == "rank" %}checked="checked"{% endif %}
                             />
-                            By rank
+                            Ranked
                         </label>
                     </div>
                     <div class="field">
@@ -46,7 +46,7 @@
                                    value="date-desc"
                                    {% if order == "date-desc" %}checked="checked"{% endif %}
                             />
-                            Newest first
+                            Newest
                         </label>
                     </div>
                     <div class="field">
@@ -57,15 +57,16 @@
                                    value="date-asc"
                                    {% if order == "date-asc" %}checked="checked"{% endif %}
                             />
-                                Oldest first
+                            Oldest
                         </label>
                     </div>
                 </div>
                 <div class="field cancel">
                     {% if query %}
-                        <a href="{{ app_url }}">Cancel</a>
+                        <a class="cancel" href="{{ app_url }}">Cancel</a>
                     {% endif %}
                 </div>
+
             </form>
         </header>
 
@@ -79,20 +80,22 @@
                     added in the past {{ max_days // 30 }} months.
                 {%- else -%}
                     .
-                    {% endif %}
+                {% endif %}
             </p>
         {% endif %}
 
         {% if recent_tags %}
-            <ul class="tag-list">
-                {% for tag in recent_tags|sort %}
-                    <li>
-                        <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
-                        <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
-                    </li>
-                {% endfor %}
-                <li><a href="{{ app_url }}/taglist">view all</a></li>
-            </ul>
+            <section class="page-section">
+                <ul class="tag-list">
+                    {% for tag in recent_tags|sort %}
+                        <li>
+                            <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                            <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
+                        </li>
+                    {% endfor %}
+                    <li><a href="{{ app_url }}/taglist">view all</a></li>
+                </ul>
+            </section>
         {% endif %}
 
         {% if general_query %}
@@ -104,60 +107,51 @@
         {% endif %}
 
 
-        {% for bookmark in bookmarks %}
+        <div class="bookmarks">
+            {% for bookmark in bookmarks %}
 
-            <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
-                <div class="bookmark" v-bind:style="styles">
-                    <div class="actions">
-                        <discard-button tooltip="Delete this bookmark" />
-                    </div>
-
-                    <h2>
-                        <a href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
+                <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
+                    <div class="bookmark" v-bind:style="styles">
+                        <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
                             {{ bookmark.title }}
                         </a>
-                    </h2>
 
-                    <div class="details">
-                        <p>
+                        <div class="details">
                             <time>
                                 {{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}
                             </time>
-                        </p>
 
-                        {% for tag in bookmark.tags or [] %}
-                            <p>
+                            {% for tag in bookmark.tags or [] %}
                                 <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
                                     <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                     {{ tag }}
                                 </a>
-                            </p>
-                        {% endfor %}
+                            {% endfor %}
 
-                    </div>
+                            {% if bookmark.domain %}
+                                <p>
+                                    <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                </p>
+                            {% endif %}
 
-                    {% if bookmark.comments %}
-                        <p class="comments">
-                            {{ bookmark.comments }}
-                        </p>
-                    {% endif %}
-
-                    <footer class="details">
-                        {% if bookmark.domain %}
                             <p>
-                                <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                            </p>
+
+                            <discard-button tooltip="Delete this bookmark" />
+
+                        </div>
+
+                        {% if bookmark.comments %}
+                            <p class="comments">
+                                {{ bookmark.comments }}
                             </p>
                         {% endif %}
+                    </div>
+                </discardable-record>
 
-                        <p>
-                            <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
-                        </p>
-                    </footer>
-
-                </div>
-            </discardable-record>
-
-        {% endfor %}
+            {% endfor %}
+        </div>
 
         <div class="pagination">
             <p>Page {{ page }} of {{ total_pages }}</p>

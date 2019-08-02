@@ -197,11 +197,17 @@ TABLE TD {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-column-gap: 1em;
+    grid-row-gap: .5em;
     align-items: end;
 }
 
 .app-nav .cancel {
-    text-align: center;
+    text-align: right;
+    align-self: center;
+}
+
+.app-nav .field {
+    padding-bottom: 0;
 }
 
 .app-nav .options {
@@ -210,8 +216,11 @@ TABLE TD {
 }
 
 .app-nav .options .field {
-    margin-right: 1em;
+    margin-right: 1.5em;
+    padding-bottom: 0;
 }
+
+
 
 .bookmarklet-container A {
     background-color: #4C699A;
