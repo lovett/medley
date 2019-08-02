@@ -17,20 +17,6 @@ class Tool(cherrypy.Tool):
     from a single class which makes for fewer decorators per
     controller method."""
 
-    renderers = {
-        "application/json": "render_json",
-        "text/html": "render_html",
-        "text/plain": "render_text",
-    }
-
-    acceptable_extensions = {
-        ".json": "application/json",
-        ".txt": "text/plain",
-        ".css": "text/css",
-        ".js": "application/javascript",
-        ".svg": "image/svg+xml"
-    }
-
     charset = "utf-8"
 
     response_format = None
@@ -56,37 +42,39 @@ class Tool(cherrypy.Tool):
         """Decide on a response format.
 
         The default strategy is to base this decision on the Accept
-        header, falling back to text/html as a last resort.
-
-        If the request path contains a known file extension, give
-        that precedence and let it override the Accept header.
+        header, but if a JSON or TXT file extension is specified it
+        gets priority.
 
         """
 
         request_path = cherrypy.request.path_info
+        accept = cherrypy.request.headers.get("Accept", "*/*")
 
-        # Help os.path.splitext recognize bare extensions.
+        # Help os.path.splitext see bare extensions.
         if request_path.startswith("/."):
             request_path = "/index{}".format(request_path[1:])
 
         _, extension = os.path.splitext(request_path)
 
-        if extension in self.acceptable_extensions:
-            self.response_format = self.acceptable_extensions[extension]
+        if extension == ".json":
+            self.response_format = "application/json"
             return
 
-        if extension:
-            raise cherrypy.HTTPError(404, "Not Found")
+        if extension == ".txt":
+            self.response_format = "text/plain"
+            return
 
-        accept = cherrypy.request.headers.get("Accept", "*/*")
-
-        if accept == "*/*":
+        if "text/html" in accept:
             self.response_format = "text/html"
             return
 
-        candidates = list(self.renderers.keys())
+        if "text/plain" in accept:
+            self.response_format = "text/plain"
+            return
 
-        self.response_format = cherrypy.tools.accept.callable(candidates)
+        if "application/json" in accept:
+            self.response_format = "application/json"
+            return
 
     def _finalize(self):
         """Transform the response body provided by the controller to its final
@@ -94,12 +82,19 @@ class Tool(cherrypy.Tool):
 
         """
 
+        final_body = None
+
         if not isinstance(cherrypy.response.body, dict):
             return
 
-        renderer = self.renderers.get(self.response_format)
+        if self.response_format == "application/json":
+            final_body = self.render_json(cherrypy.response.body)
 
-        final_body = getattr(self, renderer)(cherrypy.response.body)
+        if self.response_format == "text/html":
+            final_body = self.render_html(cherrypy.response.body)
+
+        if self.response_format == "text/plain":
+            final_body = self.render_text(cherrypy.response.body)
 
         if not final_body:
             cherrypy.response.status = 406
@@ -109,14 +104,10 @@ class Tool(cherrypy.Tool):
         # Requests made on the command line using curl tend to collide
         # with the shell prompt.  Add some trailing newlines to
         # prevent this.
-        body_format = "{}"
-
         if "curl" in cherrypy.request.headers.get("User-Agent", ""):
-            body_format += "\n\n"
+            final_body += "\n\n"
 
-        cherrypy.response.body = body_format.format(
-            final_body
-        ).encode(self.charset)
+        cherrypy.response.body = final_body.encode(self.charset)
 
     @staticmethod
     def render_json(body):
