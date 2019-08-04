@@ -2,114 +2,92 @@
 
 {% block page_body %}
     <main>
-        <div class="content-wrapper">
+        {% for label, forecast in forecasts.items() %}
 
-            {% for label, forecast in forecasts.items() %}
-
-                <h1>
-                    {{ label }}
-                    {% if forecast.time %}
-                        at {{ forecast.time|dateformat('LT') }}
-                    {% endif %}
-                </h1>
-
-
-                <h2>Currently</h2>
-                <p>{{ forecast.current_temperature }}° F as of {{ forecast.current_time|dateformat('LT') }}.</p>
-
-                <p>{{ forecast.current_summary }}</p>
-
-
-                <h2>Today</h2>
-
-                <p>{{ forecast.summary }}</p>
-
-                <table class="key-value">
-                    <tr>
-                        <th>Temperature</th>
-                        <td>{{ forecast.current_temperature }}° F</td>
-                    </tr>
-
-                    {% if forecast.high %}
-                        <tr>
-                            <th>High</th>
-                            <td>{{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if forecast.low %}
-                        <tr>
-                            <th>Low</th>
-                            <td>{{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}</td>
-                        </tr>
-                    {% endif %}
-                    <tr>
-                        <th>Precipitation</th>
-                        <td>
-                            {{ forecast.precip_prob|percentage }} chance
-
-                            {% if forecast.precip_type %}
-                                of {{ forecast.precip_type }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Humidity</th>
-                        <td>{{ forecast.humidity|percentage }}</td>
-                    </tr>
-
-                    {% if forecast.sunrise %}
-                        <tr>
-                            <th>Sunrise</th>
-                            <td>{{ forecast.sunrise|dateformat('LT') }}</td>
-                        </tr>
-                    {% endif %}
-
-                    {% if forecast.sunset %}
-                        <tr>
-                            <th>Sunset</th>
-                            <td>{{ forecast.sunset|dateformat('LT') }}</td>
-                        </tr>
-                    {% endif %}
-                </table>
-
-                <h2>Hourly</h2>
-
-                {% if forecast.hourly %}
-                    <table>
-                        {% for record in forecast.hourly %}
-                            <tr>
-                                <th>{{ record.time|dateformat('LT') }}</th>
-                                <td>{{ record.summary }}</td>
-                                <td>
-                                    <p>{{ record.temperature }}° F</p>
-                                    {% if record.temperature != record.apparentTemperature %}
-                                        <p>will feel like {{ record.apparentTemperature }}</p>
-                                    {% endif %}
-                                    {% if record.humidity %}
-                                        <p>{{ record.humidity|percentage }} humidity</p>
-                                    {% endif %}
-                                    {% if record.windSpeed %}
-                                        <p>Wind {{ record.windSpeed }} mph</p>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </table>
+            <h1>
+                {{ label }}
+                {% if forecast.time %}
+                    at {{ forecast.time|dateformat('LT') }}
                 {% endif %}
+            </h1>
 
-
-                {% if "alerts" in forecast %}
-
-                    {{ forecast.alerts }}
-
-                {% endif %}
-
-            {% endfor %}
-
-
-            <p class="smaller align-center">
-                <a href="https://darksky.net/poweredby/" target="_blank" rel="noopener noreferrer">Powered by Dark Sky</a>
+            <p>
+                {{ forecast.current_temperature }}° F
+                as of {{ forecast.current_time|dateformat('LT') }}.
+                {{ forecast.current_summary|capitalize }}.
             </p>
-        </div>
+
+
+            {% if "alerts" in forecast %}
+                {{ forecast.alerts }}
+            {% endif %}
+
+
+            <p>{{ forecast.summary }}</p>
+
+            {% if forecast.precip_prob == 0 %}
+                <p>No chance of rain.</p>
+            {% else %}
+                <p>
+                    {{ forecast.precip_prob|percentage }} chance
+                    of {{ forecast.precip_type or 'rain' }}
+                </p>
+            {% endif %}
+
+
+            {% if forecast.high %}
+                <p>High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.</p>
+            {% endif %}
+
+            {% if forecast.low %}
+                <p>Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.</p>
+            {% endif %}
+
+
+            <p>{{ forecast.humidity|percentage }} humidity.</p>
+
+            {% if forecast.sunrise %}
+                <p>Sunrise at {{ forecast.sunrise|dateformat('LT') }}</p>
+            {% endif %}
+
+            {% if forecast.sunset %}
+                <p>Sunset at {{ forecast.sunset|dateformat('LT') }}</p>
+            {% endif %}
+
+            <h2>Hourly</h2>
+
+            {% if forecast.hourly %}
+                <table>
+                    <colgroup>
+                        <col>
+                        <col width="100%">
+                    </colgroup>
+
+                    {% for record in forecast.hourly %}
+                        <tr>
+                            <th>{{ record.time|dateformat('LT') }}</th>
+                            <td>
+                                {{ record.temperature|round|int }}° F
+                                {{ record.summary }},
+                                {% if record.temperature != record.apparentTemperature %}
+                                    but will feel like {{ record.apparentTemperature }}
+                                {% endif %}
+                                {% if record.humidity %}
+                                    {{ record.humidity|percentage }} humidity.
+                                {% endif %}
+                                {% if record.windSpeed %}
+                                    Wind {{ record.windSpeed }} mph.
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+
+        {% endfor %}
+
+        <p>
+            <a href="https://darksky.net/poweredby/" target="_blank" rel="noopener noreferrer">Powered by Dark Sky</a>
+        </p>
     </main>
 {% endblock %}
