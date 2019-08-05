@@ -17,21 +17,26 @@
         <header class="app-nav">
             <form method="post" action="{{ app_url }}">
                 <div class="field">
-                    <label for="url">URL:</label>
+                    <label for="url">URL</label>
                     <input type="text" id="url" name="url" value="{{ url|default('', true) }}" autofocus/>
                 </div>
 
                 <div class="field">
-                    <label for="url">Username:</label>
-                    <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
-                </div>
-                <div class="field">
-                    <label for="url">Password:</label>
-                    <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
-                </div>
-                <div class="field">
                     <button>Fetch</button>
                 </div>
+
+                <div class="options">
+                    <div class="field">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
+                    </div>
+
+                </div>
+                {{ macros.cancelLink(url) }}
             </form>
         </header>
 

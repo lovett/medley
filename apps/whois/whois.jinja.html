@@ -27,13 +27,10 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
-            </form>
-            <div class="field">
-                {% if address %}
-                    <a href="{{ app_url }}">Cancel</a>
-                {% endif %}
-            </div>
 
+                <div class="options"></div>
+                {{ macros.cancelLink(address) }}
+            </form>
         </header>
 
         {% if address %}

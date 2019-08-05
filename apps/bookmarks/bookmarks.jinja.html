@@ -61,12 +61,8 @@
                         </label>
                     </div>
                 </div>
-                <div class="field cancel">
-                    {% if query %}
-                        <a class="cancel" href="{{ app_url }}">Cancel</a>
-                    {% endif %}
-                </div>
 
+                {{ macros.cancelLink(query) }}
             </form>
         </header>
 

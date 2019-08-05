@@ -31,10 +31,11 @@
                     </div>
                     <div class="field">
                         <button>Search</button>
-                        {% if q %}
-                            <a class="secondary-action" href="{{ app_url }}">Cancel</a>
-                        {% endif %}
                     </div>
+
+                    <div class="options"></div>
+                    {{ macros.cancelLink(q) }}
+
                 </form>
             {% endif %}
 

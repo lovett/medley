@@ -17,12 +17,10 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
+                <div class="options"></div>
+                {{ macros.cancelLink(number) }}
             </form>
-            <div class="field">
-                {% if number %}
-                    <a href="{{ app_url }}">Cancel</a>
-                {% endif %}
-            </div>
+
         </header>
 
         {% if number %}

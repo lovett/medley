@@ -24,12 +24,11 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
+
+                <div class="options"></div>
+                {{ macros.cancelLink(path) }}
+
             </form>
-            <div class="field">
-                {% if path %}
-                    <a href="{{ app_url }}">Cancel</a>
-                {% endif %}
-            </div>
         </header>
 
         {% if not captures %}

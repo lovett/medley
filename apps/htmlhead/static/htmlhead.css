@@ -1,10 +1,3 @@
-.app-nav form {
-    display: grid;
-    grid-template-columns: auto;
-    align-items: end;
-    grid-column-gap: 1em;
-}
-
 TABLE.key-value TD {
     padding: 0;
 }
@@ -40,9 +33,6 @@ DD {
 
 /* Medium devices */
 @media (min-width: 768px) {
-    .app-nav form {
-        grid-template-columns: 3fr 1fr 1fr 1fr;
-    }
 }
 
 /* Large devices */
