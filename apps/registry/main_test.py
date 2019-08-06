@@ -33,7 +33,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_get_by_uid_success(self, publish_mock, render_mock):
-        """Searching for a valid uid returns a list of the one record"""
+        """Searching for a valid uid returns a list"""
         def side_effect(*args, **_):
             """Side effects local function"""
 
@@ -87,25 +87,12 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             "abc456"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    @mock.patch("cherrypy.engine.publish")
-    def test_default_view(self, publish_mock, render_mock):
-        """An invalid view returns the search view"""
+    def test_default_view(self):
+        """An invalid view returns an error"""
 
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "registry:search":
-                return [[{"key": "abc789", "value": "test"}]]
-            return mock.DEFAULT
+        response = self.request("/", q="test", view="invalid")
 
-        publish_mock.side_effect = side_effect
-
-        self.request("/", q="test", view="invalid")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "view"),
-            "search"
-        )
+        self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
     def test_delete(self, publish_mock):
@@ -116,30 +103,8 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_put_no_redirect(self, publish_mock):
-        """An Ajax request to add a new record returns a 204"""
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "registry:add":
-                return [True]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        response = self.request(
-            "/",
-            method="PUT",
-            key="put_key",
-            value="put_value",
-            as_json=True,
-            headers={"X-Requested-With": "XMLHttpRequest"}
-        )
-
-        self.assertEqual(response.code, 204)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_redirect_after_put(self, publish_mock):
-        """A non-Ajax request to add a new record returns a redirect"""
+    def test_no_redirect_after_put(self, publish_mock):
+        """A request to add a new record returns a 204"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
@@ -156,8 +121,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             value="put_value"
         )
 
-        self.assertEqual(response.code, 303)
-        self.assertTrue("q=put_key" in response.body)
+        self.assertEqual(response.code, 204)
 
 
 if __name__ == "__main__":

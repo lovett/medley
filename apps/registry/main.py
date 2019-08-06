@@ -18,10 +18,10 @@ class Controller:
         q = kwargs.get("q")
         uid = kwargs.get("uid")
         key = kwargs.get("key")
-        view = kwargs.get("view")
+        view = kwargs.get("view", "search")
 
         if view not in ("add", "search"):
-            view = "search"
+            raise cherrypy.HTTPError(400, "Invalid view")
 
         if uid:
             entries = cherrypy.engine.publish(
