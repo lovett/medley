@@ -187,10 +187,10 @@ in the argument list are returned.  #}
 {%- endmacro -%}
 
 
-{% macro cancelLink(trigger) -%}
+{% macro cancelLink(trigger, url) -%}
     <div class="field cancel">
         {% if trigger %}
-            <a class="cancel" href="{{ app_url }}">Cancel</a>
+            <a class="cancel" href="{{ url }}">Cancel</a>
         {% endif %}
     </div>
 {%- endmacro -%}

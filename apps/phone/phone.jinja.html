@@ -1,5 +1,5 @@
 {% extends "base.jinja.html" %}
-{% import "macros.jinja.html" as macros -%}
+{% import "macros.jinja.html" as macros with context -%}
 
 {% block page_body %}
     <main>
@@ -18,7 +18,7 @@
                     </button>
                 </div>
                 <div class="options"></div>
-                {{ macros.cancelLink(number) }}
+                {{ macros.cancelLink(number, app_url) }}
             </form>
 
         </header>
