@@ -19,7 +19,7 @@ for item in os.listdir(MODULE_DIR):
     if item.startswith("decorators"):
         continue
 
-    if item.startswith("test_"):
+    if item.endswith("_test.py"):
         continue
 
     if not item.endswith(".py"):
