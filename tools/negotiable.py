@@ -104,10 +104,14 @@ class Tool(cherrypy.Tool):
         # Requests made on the command line using curl tend to collide
         # with the shell prompt.  Add some trailing newlines to
         # prevent this.
-        if "curl" in cherrypy.request.headers.get("User-Agent", ""):
-            final_body += "\n\n"
+        body_format = "{}"
 
-        cherrypy.response.body = final_body.encode(self.charset)
+        if "curl" in cherrypy.request.headers.get("User-Agent", ""):
+            body_format += "\n\n"
+
+        cherrypy.response.body = body_format.format(
+            final_body
+        ).encode(self.charset)
 
     @staticmethod
     def render_json(body):
