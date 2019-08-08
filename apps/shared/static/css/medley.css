@@ -1,21 +1,19 @@
 :root {
+    --black: #00171F;
+    --white: #e8e8e8;
+    --bg-color-primary: #00A7E1;
+    --bg-color-secondary: #003459;
+    --link: #007EA7;
+    --icon-active: #73CFEE;
+    --grey: #D1D1D1;
     --discard-bg-color: FireBrick;
     --highlight-bg-color: #f0cca5;
     --focus-bg-color: #f9ab55;
-    --secondary-bg-color: #333;
 }
 
 A {
-    color: #084887;
+    color: var(--link);
     text-decoration: none;
-}
-
-A.with-icon {
-    display: inline-grid;
-    grid-template-columns: 1fr auto;
-    grid-column-gap: .5em;
-    align-items: center;
-    justify-content: end;
 }
 
 HTML {
@@ -31,8 +29,8 @@ BODY {
 
 BUTTON {
     font-family: inherit;
-    border: 1px solid #87D68D;
-    background-color: #87D68D;
+    border: 1px solid var(--bg-color-primary);
+    background-color: var(--bg-color-primary);
     padding: .5em 1em;
     height: 2.25em;
     box-sizing: border-box;
@@ -57,8 +55,9 @@ BUTTON .icon {
 
 }
 
-BUTTON + .label, BUTTON + .secondary-action {
-    padding-left: 1em;
+BUTTON + .label, BUTTON + .secondary-action, BUTTON + .cancel {
+    display: inline-block;
+    margin-left: 2em;
 }
 
 BUTTON.small {
@@ -100,6 +99,31 @@ MAIN {
     padding: 0 1em;
 }
 
+NAV.secondary {
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 1em;
+}
+
+NAV.secondary A {
+    display: flex;
+    align-items: center;
+    margin-right: 2em;
+}
+
+NAV.secondary A:last-of-type {
+    margin-right: 0;
+}
+
+NAV.secondary .icon {
+    fill: currentColor;
+}
+
+NAV.secondary A:hover .icon {
+    fill: var(--icon-active);
+}
+
+
 TABLE {
     min-width: 100%;
     margin: 0 auto 2em 0;
@@ -137,7 +161,7 @@ TABLE TD {
     background-color: #fff;
     word-break: break-word;
     vertical-align: top;
-    border: 1px solid #000;
+    border: 1px solid var(--black);
 }
 
 #app-message {
@@ -155,8 +179,8 @@ TABLE TD {
 
 
 #page-header {
-    background: #4B88A2;
-    background: linear-gradient(45deg, #4B88A2 0%, var(--secondary-bg-color) 100%);
+    background: var(--bg-color-primary);
+    background: linear-gradient(45deg, var(--bg-color-primary) 0%, var(--black) 100%);
     color: #fff;
     padding: .5em 1em;
     display: flex;
@@ -189,8 +213,7 @@ TABLE TD {
 }
 
 .app-nav {
-    margin-top: 1em;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
 }
 
 .app-nav > form {
@@ -311,7 +334,7 @@ TABLE TD {
 
 .focus-candidate {
     background-color: var(--highlight-bg-color);
-    color: #000;
+    color: var(--black);
 }
 
 .half-column {
@@ -342,7 +365,7 @@ TABLE TD {
 }
 
 .inverted {
-    background-color: #000;
+    background-color: var(--black);
     color: #fff;
 }
 
@@ -390,21 +413,9 @@ TABLE TD {
     width: 25%;
 }
 
-.secondary-nav {
-    display: flex;
-    padding: .5em;
-    justify-content: flex-end;
-    margin-bottom: 1em;
-}
-
-.secondary-nav a {
-    margin-left: 1em;
-    color: currentColor;
-}
-
 .shortcuts A {
     display: inline-block;
-    margin-left: 1em;
+    margin-right: 1em;
     padding: .5em 0;
 }
 
@@ -580,25 +591,6 @@ TABLE.natural-width {
     }
 }
 
-.actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-}
-
-.actions > * {
-    margin: 0 .5em;
-}
-
-.actions > *:first-child {
-    margin-left: 0;
-}
-
-.actions > *:last-child {
-    margin-right: 0;
-}
-
-
 .action-button {
     display: flex;
     flex-flow: column;
@@ -665,6 +657,27 @@ TABLE.natural-width {
     background-color: var(--discard-bg-color);
     fill: #fff;
 }
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.toolbar > * {
+    margin: 0 .5em;
+}
+
+.toolbar > *:first-child {
+    margin-left: 0;
+}
+
+.toolbar > *:last-child {
+    margin-right: 0;
+}
+
+
+
 
 /* Small devices */
 @media (min-width: 576px) {

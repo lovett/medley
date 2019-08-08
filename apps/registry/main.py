@@ -33,7 +33,7 @@ class Controller:
                 "registry:search",
                 key=q
             ).pop()
-        else:
+        elif view != "add":
             roots = cherrypy.engine.publish(
                 "registry:list_keys",
             ).pop()

@@ -1,6 +1,7 @@
 .entry {
     margin-bottom: 1em;
-    border: 1px solid #768EBE;
+    border: 1px solid var(--bg-color-secondary);
+    border-left-width: 1em;
 }
 
 .entry > * {
@@ -12,8 +13,6 @@
 
 .entry header {
     display: flex;
-    background-color: #768EBE;
-    color: #fff;
 }
 
 .entry .value {
