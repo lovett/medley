@@ -8,6 +8,8 @@ class Controller:
 
     name = "Redirect"
 
+    user_facing = False
+
     @staticmethod
     @cherrypy.tools.negotiable()
     def GET(*_args, **_kwargs):
