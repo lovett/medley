@@ -16,21 +16,9 @@
             {% for name, url, description, user_facing in apps %}
                 {% if user_facing %}
                     <a class="item" href="{{ url }}">
-                        {{ name }}
+                        <span class="name">{{ name }}</span>
                         <span class="description">{{ description }}</span>
                     </a>
-                {% endif %}
-            {% endfor %}
-        </section>
-
-        <section class="grid inverse">
-            <h2 class="title">Services</h2>
-            {% for name, _, description, user_facing in apps %}
-                {% if not user_facing %}
-                    <div class="item">
-                        {{ name}}
-                        <span class="description">{{ description }}</span>
-                    </div>
                 {% endif %}
             {% endfor %}
         </section>
