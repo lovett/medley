@@ -76,6 +76,7 @@
                 {% else %}
                     <button data-default="Save" data-alt="Please wait">Save</button>
                 {% endif %}
+                {{ macros.cancelLink(True, bookmarks_url, False) }}
             </div>
         </form>
     </main>

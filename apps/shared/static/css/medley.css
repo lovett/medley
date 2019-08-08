@@ -1,6 +1,6 @@
 :root {
     --black: #00171F;
-    --white: #e8e8e8;
+    --white: #fff;
     --bg-color-primary: #00A7E1;
     --bg-color-secondary: #003459;
     --link: #007EA7;
@@ -31,6 +31,7 @@ BUTTON {
     font-family: inherit;
     border: 1px solid var(--bg-color-primary);
     background-color: var(--bg-color-primary);
+    color: var(--white);
     padding: .5em 1em;
     height: 2.25em;
     box-sizing: border-box;
@@ -50,7 +51,7 @@ BUTTON[disabled] {
 }
 
 BUTTON .icon {
-    fill: #fff;
+    fill: var(--white);
     margin: 0 1em;
 
 }
@@ -152,13 +153,13 @@ TABLE TH {
     padding: .75em;
     white-space: nowrap;
     text-align: left;
-    color: #fff;
+    color: var(--white);
     vertical-align: top;
 }
 
 TABLE TD {
     padding: .75em;
-    background-color: #fff;
+    background-color: var(--white);
     word-break: break-word;
     vertical-align: top;
     border: 1px solid var(--black);
@@ -181,7 +182,7 @@ TABLE TD {
 #page-header {
     background: var(--bg-color-primary);
     background: linear-gradient(45deg, var(--bg-color-primary) 0%, var(--black) 100%);
-    color: #fff;
+    color: var(--white);
     padding: .5em 1em;
     display: flex;
     flex-flow: row;
@@ -257,7 +258,7 @@ TABLE TD {
 
 .bookmarklet-container A {
     background-color: #4C699A;
-    color: #fff;
+    color: var(--white);
     padding: .5em 1.5em;
     border-radius: .25em;
     font-size: .75em;
@@ -276,7 +277,7 @@ TABLE TD {
 }
 
 .notice {
-    background-color: #ffffcc;
+    background-color: var(--white)fcc;
 }
 
 .field-group {
@@ -366,11 +367,11 @@ TABLE TD {
 
 .inverted {
     background-color: var(--black);
-    color: #fff;
+    color: var(--white);
 }
 
 .inverted svg {
-    fill: #fff;
+    fill: var(--white);
 }
 
 .middle-column {
@@ -579,7 +580,7 @@ TABLE.natural-width {
 /* Print layout */
 @media print {
     BODY {
-        background-color: #fff;
+        background-color: var(--white);
     }
 
     .content-wrapper {
@@ -614,7 +615,7 @@ TABLE.natural-width {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #fff;
+    background-color: var(--white);
     transition: all .25s;
 }
 
@@ -655,7 +656,7 @@ TABLE.natural-width {
 
 .discard-button a:hover {
     background-color: var(--discard-bg-color);
-    fill: #fff;
+    fill: var(--white);
 }
 
 .toolbar {
