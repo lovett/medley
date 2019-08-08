@@ -56,7 +56,7 @@
 
 
         {% if view == "add" %}
-            <form id="insert-form" class="{{ "hidden" if not view == "add" }}">
+            <form id="insert-form" class="page-section {{ "hidden" if not view == "add" }}">
                 <div class="hidden error message"></div>
                 <div class="hidden success message">Success!</div>
 
@@ -87,23 +87,25 @@
         {% endif %}
 
 
-        {% for entry in entries %}
-            <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
-                <div class="entry" v-bind:style="styles">
-                    <header>
-                        {{ entry.key|e }}
-                        <div class="toolbar">
-                            <div><new-item-button target-url="{{ app_url}}?key={{ entry.key|e}}" tooltip="New record with this key" /></div>
-                            <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
-                            <div><discard-button tooltip="Delete this entry" /></div>
-                        </div>
-                    </header>
+        <section class="page-section">
+            {% for entry in entries %}
+                <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
+                    <div class="entry" v-bind:style="styles">
+                        <header>
+                            {{ entry.key|e }}
+                            <div class="toolbar">
+                                <div><new-item-button target-url="{{ app_url}}?view=add&key={{ entry.key|e}}" tooltip="New record with this key" /></div>
+                                <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
+                                <div><discard-button tooltip="Delete this entry" /></div>
+                            </div>
+                        </header>
 
-                    <div>
-                        <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
+                        <div>
+                            <div id="value-{{ loop.index }}" class="value">{{ entry.value|e }}</div>
+                        </div>
                     </div>
-                </div>
-            </discardable-record>
-        {% endfor %}
+                </discardable-record>
+            {% endfor %}
+        </section>
     </main>
 {% endblock %}

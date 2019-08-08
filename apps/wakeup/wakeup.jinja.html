@@ -7,12 +7,14 @@
 
 {% block page_body %}
     <main>
+        {{ macros.svgSymbols("add-item") }}
         <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
         <header class="app-nav">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
             <a href="{{ registry_url }}">Add host</a>
         </header>
 
-        <div class="hosts">
+        <section class="hosts">
             {% if not hosts %}
                 <p>No hosts found.</p>
             {% endif %}
@@ -24,6 +26,6 @@
                 </form>
                 <span class="mac-address">{{ mac_address }}</span>
             {% endfor %}
-        </div>
+        </section>
     </main>
 {% endblock %}

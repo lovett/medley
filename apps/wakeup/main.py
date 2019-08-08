@@ -27,7 +27,8 @@ class Controller:
 
         registry_url = cherrypy.engine.publish(
             "url:internal",
-            "/registry"
+            "/registry",
+            {"key": "wakeup", "view": "add", "q": "wakeup"}
         ).pop()
 
         return {
