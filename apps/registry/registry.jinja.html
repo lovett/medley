@@ -25,7 +25,7 @@
                     <div class="field-group">
                         <div class="field">
                             <label for="q">Key</label>
-                            <input autofocus type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
+                            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
                         </div>
                     </div>
                     <div class="field">
@@ -62,11 +62,11 @@
 
                 <div class="field">
                     <label for="key">Key:</label>
-                    <input {% if not value %}autofocus{% endif %} type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
+                    <input type="text" id="key" name="key" value="{{ key|default('', true) }}"/>
                 </div>
                 <div class="field">
                     <label for="comments">Value:</label>
-                    <textarea id="value" name="value" {% if key and not value %}autofocus{% endif %}>{{ value|default('', true) }}</textarea>
+                    <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
                 </div>
 
                 <button>Add</button>
