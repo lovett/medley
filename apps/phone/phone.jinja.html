@@ -3,7 +3,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("search") }}
+        {{ macros.svgSymbols("search", "close") }}
 
         <header class="app-nav">
             <form method="get" action="/phone">
@@ -17,11 +17,12 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
-                <div class="options"></div>
-                {{ macros.cancelLink(number, app_url) }}
             </form>
-
         </header>
+
+        <nav class="secondary">
+            {{ macros.cancelLink(number, app_url) }}
+        </nav>
 
         {% if number %}
             <section class="page-section">

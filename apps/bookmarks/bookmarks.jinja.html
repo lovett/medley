@@ -12,7 +12,7 @@
 {% block page_body %}
     <main>
 
-        {{ macros.svgSymbols("search", "delete", "icon-tag", "arrow-right", "arrow-left") }}
+        {{ macros.svgSymbols("search", "delete", "icon-tag", "arrow-right", "arrow-left", "close", "globe") }}
 
         <header class="app-nav">
             <form method="get" action="{{ app_url }}">
@@ -62,9 +62,18 @@
                     </div>
                 </div>
 
-                {{ macros.cancelLink(query, app_url) }}
             </form>
         </header>
+
+        <nav class="secondary">
+            {{ macros.cancelLink(query, app_url) }}
+
+            {% if general_query %}
+                {{ general_query|websearch("google") }}
+                {{ general_query|websearch("bing") }}
+            {% endif %}
+        </nav>
+
 
         <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found.</p>
 
@@ -93,15 +102,6 @@
                 </ul>
             </section>
         {% endif %}
-
-        {% if general_query %}
-            <p>
-                Try this search on
-                {{ general_query|websearch("google") }} or
-                {{ general_query|websearch("bing") }}.
-            </p>
-        {% endif %}
-
 
         <div class="bookmarks">
             {% for bookmark in bookmarks %}

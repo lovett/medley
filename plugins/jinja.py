@@ -222,7 +222,7 @@ class Plugin(plugins.SimplePlugin):
     @staticmethod
     @jinja2.evalcontextfilter
     def websearch_filter(eval_ctx, value, engine=None, url_only=False,
-                         target="_blank"):
+                         target="_blank", with_icon=True):
         """Construct an offsite search URL for a term."""
 
         if engine == "google":
@@ -239,9 +239,18 @@ class Plugin(plugins.SimplePlugin):
         if url_only:
             return url
 
-        template = '<a href="{}" target="{}" rel="noopener noreferer">{}</a>'
+        icon = ""
+        if with_icon:
+            icon = """<svg class="icon icon-globe">
+            <use xlink:href="#icon-globe"></use>
+            </svg>"""
+
+        template = """<a href="{}"
+        target="{}" rel="noopener noreferer"
+        >{} {}</a>"""
+
         result = template.format(
-            url, target, engine.capitalize()
+            url, target, icon, engine.capitalize()
         )
 
         if eval_ctx.autoescape:

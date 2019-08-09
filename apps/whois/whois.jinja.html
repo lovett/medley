@@ -14,7 +14,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("binoculars", "search") }}
+        {{ macros.svgSymbols("binoculars", "search", "close") }}
 
         <header class="app-nav">
             <form class="search-form" method="get" action="/whois">
@@ -27,11 +27,12 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
-
-                <div class="options"></div>
-                {{ macros.cancelLink(address, app_url) }}
             </form>
         </header>
+
+        <nav class="secondary">
+            {{ macros.cancelLink(address, app_url) }}
+        </nav>
 
         {% if address %}
             <div id="ip-report">

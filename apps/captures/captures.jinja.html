@@ -11,7 +11,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search") }}
+        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search", "close") }}
 
         <header class="app-nav">
             <form method="get" action="{{ app_url }}">
@@ -24,12 +24,12 @@
                         <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                     </button>
                 </div>
-
-                <div class="options"></div>
-                {{ macros.cancelLink(path, app_url) }}
-
             </form>
         </header>
+
+        <nav class="secondary">
+            {{ macros.cancelLink(path, app_url) }}
+        </nav>
 
         {% if not captures %}
             <p>No captures found.</p>

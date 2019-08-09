@@ -16,6 +16,11 @@ A {
     text-decoration: none;
 }
 
+A:hover .icon {
+    fill: var(--icon-active);
+}
+
+
 HTML {
     height: 100%;
 }
@@ -116,15 +121,6 @@ NAV.secondary A:last-of-type {
     margin-right: 0;
 }
 
-NAV.secondary .icon {
-    fill: currentColor;
-}
-
-NAV.secondary A:hover .icon {
-    fill: var(--icon-active);
-}
-
-
 TABLE {
     min-width: 100%;
     margin: 0 auto 2em 0;
@@ -221,13 +217,8 @@ TABLE TD {
     display: grid;
     grid-template-columns: 1fr auto;
     grid-column-gap: 1em;
-    grid-row-gap: .5em;
+    grid-row-gap: 1em;
     align-items: end;
-}
-
-.app-nav .cancel {
-    text-align: right;
-    align-self: center;
 }
 
 .app-nav .field {
@@ -253,8 +244,6 @@ TABLE TD {
     display: inline-block;
     padding-right: .5em;
 }
-
-
 
 .bookmarklet-container A {
     background-color: #4C699A;
@@ -356,7 +345,7 @@ TABLE TD {
 .icon {
     width: 1em;
     height: 1em;
-    fill: #333;
+    fill: currentColor;
     vertical-align: middle;
     padding-right: .5em;
 }

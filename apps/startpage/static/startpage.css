@@ -80,18 +80,6 @@ li.group:hover .all {
     visibility: visible;
 }
 
-#startpage-edit FIELDSET {
-    padding: 0;
-    border: 0;
-    margin: 0;
-}
-
-#startpage-edit .app-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
 #startpage-edit TEXTAREA {
     box-sizing: border-box;
     padding: .5em;

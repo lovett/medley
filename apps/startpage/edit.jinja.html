@@ -11,13 +11,14 @@
     <main>
         <form method="post" action="{{ post_url }}">
             <input type="hidden" name="page_name" value="{{ page_name }}" />
-            <fieldset>
-                <header class="app-nav">
-                    <button>{{ button_label }}</button>
-                    <a href="{{ cancel_url }}">cancel</a>
-                </header>
+
+            <div class="field">
                 <textarea name="page_content">{{ page_content }}</textarea>
-            </fieldset>
+            </div>
+            <div class="field">
+                <button>{{ button_label }}</button>
+                {{ macros.cancelLink(True, cancel_url, False) }}
+            </div>
         </form>
     </main>
 {% endblock %}

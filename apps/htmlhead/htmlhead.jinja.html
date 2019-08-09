@@ -6,6 +6,8 @@
 
 {% block page_body %}
     <main>
+        {{ macros.svgSymbols("search", "close", "globe") }}
+
         {% if failure_message %}
             <div class="error message">{{ failure_message }}</div>
         {% endif %}
@@ -22,7 +24,9 @@
                 </div>
 
                 <div class="field">
-                    <button>Fetch</button>
+                    <button>
+                        <svg class="icon icon-globe"><use xlink:href="#icon-globe"></use></svg>
+                    </button>
                 </div>
 
                 <div class="options">
@@ -36,9 +40,12 @@
                     </div>
 
                 </div>
-                {{ macros.cancelLink(url, app_url) }}
             </form>
         </header>
+
+        <nav class="secondary">
+            {{ macros.cancelLink(url, app_url) }}
+        </nav>
 
         {% if tags %}
 
