@@ -1,15 +1,15 @@
-.description {
-    font-size: .85em;
-    font-weight: normal;
-    display: block;
-}
-
-.grid {
+SECTION {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
     grid-gap: 1em;
     margin: 0 -1em;
     padding: 0 0 1em 0;
+}
+
+.description {
+    font-size: .85em;
+    font-weight: normal;
+    display: block;
 }
 
 .item {

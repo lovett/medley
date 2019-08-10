@@ -121,6 +121,10 @@ NAV.secondary A:last-of-type {
     margin-right: 0;
 }
 
+SECTION {
+    margin-bottom: 2em;
+}
+
 TABLE {
     min-width: 100%;
     margin: 0 auto 2em 0;
@@ -365,10 +369,6 @@ TABLE TD {
 
 .middle-column {
     padding: 0 1em;
-}
-
-.page-section {
-    margin-bottom: 2em;
 }
 
 .pagination .next {

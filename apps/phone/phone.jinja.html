@@ -3,7 +3,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("search", "close") }}
+        {{ macros.svgSymbols("search", "close", "globe") }}
 
         <header class="app-nav">
             <form method="get" action="/phone">
@@ -22,20 +22,20 @@
 
         <nav class="secondary">
             {{ macros.cancelLink(number, app_url) }}
+            {{ number|websearch("google") }}
+            {{ number|websearch("bing") }}
         </nav>
 
         {% if number %}
-            <section class="page-section">
+            <section>
                 <h2>{{ number|phonenumber }}</h2>
 
                 {% if comment %}
                     <p>{{ comment }}</p>
                 {% endif %}
-
-                <p>Search on {{ number|websearch("google") }}, {{ number|websearch("bing") }}</p>
             </section>
 
-            <section class="page-section">
+            <section>
 
                 {% if history %}
                     <h2>History</h2>
@@ -64,7 +64,7 @@
                 {% endif %}
 
                 {% if number %}
-                    <section class="page-section">
+                    <section>
                         <details>
                             <summary>SPARQL</summary>
                             {% for query in sparql %}

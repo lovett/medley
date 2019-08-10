@@ -3,7 +3,7 @@ BUTTON {
     font-size: .75em;
 }
 
-.hosts {
+SECTION {
     display: grid;
     grid-template-columns: auto 1fr;
     grid-gap: 1.5em;

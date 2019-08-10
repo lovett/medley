@@ -8,13 +8,17 @@
 {% block page_body %}
     <main>
         {{ macros.svgSymbols("add-item") }}
+
         <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
+
         <header class="app-nav">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
-            <a href="{{ registry_url }}">Add host</a>
+            <a href="{{ registry_url }}">
+                <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                Add host
+            </a>
         </header>
 
-        <section class="hosts">
+        <section>
             {% if not hosts %}
                 <p>No hosts found.</p>
             {% endif %}

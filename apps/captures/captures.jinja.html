@@ -36,66 +36,71 @@
         {% endif %}
 
         {% for capture in captures %}
-            <div class="capture">
-                <header class="inverted">
-                    <div>
-                        #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
-                    </div>
-
-                    <a href="{{ app_url }}?cid={{ capture.rowid }}">
-                        <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
-                    </a>
-                </header>
-
-                <section>
-                    <header class="reqhead">
-                        Request Headers
-                        <div class="options">
-                            <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" tooltip="Copy headers" />
+            <section>
+                <div class="capture">
+                    <header class="inverted">
+                        <div>
+                            #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
                         </div>
+
+                        <a href="{{ app_url }}?cid={{ capture.rowid }}">
+                            <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
+                        </a>
                     </header>
 
-                    <code id="reqhead-{{ loop.index }}">
-{#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
-{{- capture.request_line }}
-{%  for key, value in capture.request.headers.items() -%}
-{{ key }}: {{ value }}
-{% endfor -%}
-                    </code>
-                </section>
-
-                <section>
-                    <header class="reqresponse">
-                        Response
-                    </header>
-
-                    <p>{{ capture.response.status }}</p>
-                </section>
-
-                {% if capture.request.params %}
-                    <section class="reqbody">
-                        <header>
-                            Request Body
+                    <div class="reqhead">
+                        <header>Request Headers
                             <div class="options">
-                                <clipboard-button target-id="{{ "reqbodyparam-" ~ loop.index }}" tooltip="Copy body" />
-                        </header>
-                        <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
-                    </section>
-                {% endif %}
-
-                {% if capture.request.json %}
-                    <section class="reqbody">
-                        <header>
-                            Request JSON
-                            <div class="options">
-                                <clipboard-button target-id="{{ "reqbodyjson-" ~ loop.index }}" tooltip="Copy JSON" />
+                                <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" tooltip="Copy headers" />
                             </div>
                         </header>
 
-                        <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
-                    </section>
-                {% endif %}
-            </div>
+                        <code id="reqhead-{{ loop.index }}">
+                            {#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
+{{- capture.request_line }}
+{%  for key, value in capture.request.headers.items() -%}
+    {{ key }}: {{ value }}
+{% endfor -%}
+                        </code>
+                    </div>
+
+                    <div class="reqresponse">
+                        <header>Response</header>
+                        <p>{{ capture.response.status }}</p>
+                    </div>
+
+                    {% if capture.request.params %}
+                        <div class="reqbody">
+                            <header>
+                                Request Body
+                                <div class="options">
+                                    <clipboard-button
+                                        target-id="{{ "reqbodyparam-" ~ loop.index }}"
+                                        tooltip="Copy body"
+                                    />
+                                </div>
+                            </header>
+                            <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
+                        </div>
+                    {% endif %}
+
+                    {% if capture.request.json %}
+                        <div class="reqbody">
+                            <header>
+                                Request JSON
+                                <div class="options">
+                                    <clipboard-button
+                                        target-id="{{ "reqbodyjson-" ~ loop.index }}"
+                                        tooltip="Copy JSON"
+                                    />
+                                </div>
+                            </header>
+
+                            <pre id="reqbodyjson-{{ loop.index }}">{{ capture.request.json|json }}</pre>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
         {% endfor %}
 
         {% if captures %}

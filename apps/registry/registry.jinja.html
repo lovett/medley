@@ -53,10 +53,8 @@
             </nav>
         {% endif %}
 
-
-
         {% if view == "add" %}
-            <form id="insert-form" class="page-section {{ "hidden" if not view == "add" }}">
+            <form id="insert-form">
                 <div class="hidden error message"></div>
                 <div class="hidden success message">Success!</div>
 
@@ -75,19 +73,22 @@
         {% endif %}
 
         {% if (uid or q) and not entries %}
-            <p>No entries found.</p>
+            <section>
+                <p>No entries found.</p>
+            </section>
         {% endif %}
 
         {% if roots %}
-            <ul class="roots">
-                {% for root in roots %}
-                    <li><a href="{{ app_url}}?q={{root}}">{{ root }}</a></li>
-                {% endfor %}
-            </ul>
+            <section>
+                <ul class="roots">
+                    {% for root in roots %}
+                        <li><a href="{{ app_url}}?q={{root}}">{{ root }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
         {% endif %}
 
-
-        <section class="page-section">
+        <section>
             {% for entry in entries %}
                 <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
                     <div class="entry" v-bind:style="styles">
