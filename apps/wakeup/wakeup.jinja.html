@@ -5,11 +5,17 @@
     {{ macros.staticAsset('wakeup', 'wakeup.css') }}
 {% endblock %}
 
+{% block app_message %}
+    {% if sent %}
+        <section id="app-message" class="success">Ping sent!</section>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
 {% block page_body %}
     <main>
         {{ macros.svgSymbols("add-item") }}
-
-        <div class="{% if not sent %}hidden{% endif %} success message">Ping sent!</div>
 
         <header class="app-nav">
             <a href="{{ registry_url }}">

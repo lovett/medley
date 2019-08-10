@@ -4,17 +4,20 @@
     {{ macros.staticAsset('htmlhead', 'htmlhead.css') }}
 {% endblock %}
 
+{% block app_message %}
+    {% if failure_message %}
+        <section id="app-message" class="error">{{ failure_message }}</section>
+    {% elif status_code and status_code != 200 %}
+        <section id="app-message" class="error">The URL returned a {{ status_code }}</section>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
+
 {% block page_body %}
     <main>
         {{ macros.svgSymbols("search", "close", "globe") }}
-
-        {% if failure_message %}
-            <div class="error message">{{ failure_message }}</div>
-        {% endif %}
-
-        {% if status_code and status_code != 200 %}
-            <div class="error message">The URL returned a {{ status_code }}.</div>
-        {% endif %}
 
         <header class="app-nav">
             <form method="post" action="{{ app_url }}">

@@ -1,13 +1,20 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros with context -%}
 
+{% block app_message %}
+    {% if error %}
+        <section id="app-message" class="error">{{ error }}</section>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
 {% block page_body %}
     <main>
         {{ macros.svgSymbols("search", "close", "globe") }}
 
         <header class="app-nav">
             <form method="get" action="/phone">
-                <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
                 <div class="field">
                     <label for="number">Number</label>
                     <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>

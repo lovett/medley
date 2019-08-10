@@ -39,7 +39,10 @@
 
             <span class="focus-buffer-display"></span>
         </header>
-        <div id="app-message" hidden></div>
+
+        {% block app_message %}
+            <section id="app-message" hidden></section>
+        {% endblock %}
 
         {% block page_body %}{% endblock %}
 

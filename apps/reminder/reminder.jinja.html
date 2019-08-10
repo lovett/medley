@@ -9,12 +9,18 @@
     {{ macros.vueApp('main', ('countdown', 'discardable-record', 'discard-button', '/reminder/static/reminder-form.js', '/reminder/static/reminder-template.js')) }}
 {% endblock %}
 
+{% block app_message %}
+    {% if error %}
+        <section id="app-message" class="error">{{ error }}</section>
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
 
 {% block page_body %}
     <main>
         {{ macros.svgSymbols("delete") }}
-
-        <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
 
         {% if upcoming %}
             <header class="app-nav">
