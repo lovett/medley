@@ -181,7 +181,7 @@ apps.%.cov: apps/%/main.py apps/%/main_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
 	python -m pytest --cov=apps.$* --cov-branch apps/$* \
-	|| rm $(COVERAGE_DIR)/$@
+	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 # Generate test coverage for a single parser.
 #
@@ -198,8 +198,7 @@ parsers.%.cov: parsers/%.py parsers/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
 	python -m pytest --cov=parsers.$* --cov-branch parsers/$*_test.py \
-	|| rm $(COVERAGE_DIR)/$@
-
+	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 # Generate test coverage for a single plugin.
 #
@@ -216,7 +215,7 @@ plugins.%.cov: plugins/%.py plugins/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
 	python -m pytest --cov=plugins.$* --cov-branch plugins/$*_test.py \
-	|| rm $(COVERAGE_DIR)/$@
+	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 
 # Test a single app.
