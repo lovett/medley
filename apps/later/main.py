@@ -9,8 +9,9 @@ class Controller:
 
     name = "Later"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display a form for for bookmarking a URL"""
 
         error = None
@@ -71,7 +72,8 @@ class Controller:
 
         bookmarks_url = cherrypy.engine.publish(
             "url:internal",
-            "/bookmarks"
+            "/bookmarks",
+            {"query": title, "order": "date-desc"}
         ).pop()
 
         return {

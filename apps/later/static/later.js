@@ -1,122 +1,163 @@
 MEDLEY.later = (function () {
     'use strict';
 
-    function submitForm(e) {
-        var button, form, field, errorMessage;
+    /**
+     * Post the form to the bookmarks app.
+     */
+    async function submitBookmark(e) {
         e.preventDefault();
 
-        form = jQuery(this);
-        button = form.find('BUTTON').last();
+        const button = e.target.querySelector('BUTTON')
+        button.setAttribute('disabled', true);
+        button.innerText = button.dataset.progressLabel;
 
-        field = jQuery('#url', form);
+        let payload = new FormData()
+        payload.set('title', document.getElementById('title').value.trim());
+        payload.set('url', document.getElementById('url').value.trim());
+        payload.set('tags', document.getElementById('tags').value.trim());
+        payload.set('comments', document.getElementById('comments').value.trim());
 
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a URL';
+        const response = await fetch(e.target.getAttribute('action'), {
+            method: 'POST',
+            mode: 'same-origin',
+            body: payload
+        })
+
+        if (response.ok) {
+            MEDLEY.setSuccessMessage('Bookmark saved.');
+
+        } else {
+            MEDLEY.setErrorMessage('The bookmarks could not be saved.');
         }
 
-        if (errorMessage) {
-            jQuery('.error.message').removeClass('hidden').text(errorMessage);
-            jQuery('.success.messsage').addClass('hidden');
+        button.removeAttribute('disabled')
+        button.innerText = button.dataset.defaultLabel;
+    }
+
+    /**
+     * Auto populate tags based on the URL's domain.
+     */
+    function automaticTags() {
+        const tags = document.getElementById('tags');
+        const url = document.getElementById('url');
+
+        let matches = /reddit.com\/(r\/(.*?))\//.exec(url.value);
+
+        if (matches && tags.value.indexOf('r/') === -1) {
+            tags.value += ' ' + matches[1];
+        }
+    }
+
+    /**
+     * Remove unwanted boilerplate from the comments field.
+     */
+    function cleanupComments() {
+        const comments = document.getElementById('comments');
+        if (comments.value.toLowerCase().indexOf('reddit: the front page') > -1) {
+            comments.value = '';
+        }
+    }
+
+    /**
+     * Perform cleanup tasks on a field's value.
+     */
+    function applyShortcut(e) {
+        const target = e.target.closest('.field').querySelector('INPUT, TEXTAREA');
+
+        if (e.target.classList.contains('remove-querystring')) {
+            const node = document.createElement('a');
+            node.href = target.value.trim()
+            node.search = '';
+            target.value = node.href;
+            target.focus();
             return;
         }
 
-        button.attr('disabled', 'true').text(button.attr('data-alt'));
-
-        jQuery.ajax({
-            type: form.attr('method'),
-            url: form.attr('action'),
-            data: $('INPUT, TEXTAREA', form).serialize()
-        }).done(function (data) {
-            jQuery('.error.message').addClass('hidden');
-            jQuery('.success.message').removeClass('hidden');
-            button.attr('disabled', false).text(button.attr('data-default'));
-        }).fail(function (data) {
-            jQuery('.error.message').removeClass('hidden').text(data.statusText);
-            jQuery('.success.message').addClass('hidden');
-            button.attr('disabled', false).text(button.attr('data-default'));
-        });
-    }
-
-    function automaticTags() {
-        var url, tagsField, tags, matches;
-        tagsField = $('#tags');
-        tags = tagsField.val();
-        url = $('#url').val();
-
-        matches = /reddit.com\/(r\/(.*?))\//.exec(url);
-
-        if (matches) {
-            tags += ' ' + matches[1];
-        }
-
-        tagsField.val(tags);
-    }
-
-    function cleanupComments() {
-        if ($('#comments').val().indexOf('reddit: the front page') > -1) {
-            $('#comments').val('');
-        }
-    }
-
-    function applyShortcut(e) {
-        var trigger = jQuery(e.target);
-        var target = trigger.closest('.field').find('INPUT,TEXTAREA').first();
-        var node = document.createElement('a');
-        node.href = target.val();
-
-        if (trigger.hasClass('remove-querystring')) {
-            node.search = '';
-            target.val(node.href);
-            target.focus();
-        } else if (trigger.hasClass('remove-path')) {
+        if (e.target.classList.contains('remove-path')) {
+            const node = document.createElement('a');
+            node.href = target.value.trim()
             node.pathname = '';
-            target.val(node.href);
+            target.value = node.href;
             target.focus();
-        } else if (trigger.hasClass('remove-hash')) {
-            node.hash = '';
-            target.val(node.href);
-            target.focus();
-        } else if (trigger.hasClass('revert')) {
-            node.href = target.attr('data-original-value');
-            target.val(node.href);
-            target.focus();
-        } else if (trigger.hasClass('trim-sentence-from-start')) {
-            target.val(target.val().replace(/^(.*?\.) ([A-Z].*)/m, '$2'));
-            target.focus();
-        } else if (trigger.hasClass('trim-sentence-from-end')) {
-            target.val(target.val().replace(/^(.*\.) ([A-Z].*)/m, '$1'));
-            target.focus();
-        } else if (trigger.hasClass('trim-all')) {
-            target.val('');
-            target.focus();
+            return;
         }
 
+        if (e.target.classList.contains('remove-hash')) {
+            const node = document.createElement('a');
+            node.href = target.value.trim()
+            node.hash = '';
+            target.value = node.href;
+            target.focus();
+            return;
+        }
 
+        if (e.target.classList.contains('revert')) {
+            target.value = target.dataset.originalValue;
+            target.focus();
+            return;
+        }
+
+        if (e.target.classList.contains('trim-sentence-from-start')) {
+            target.value = target.value.replace(/^(.*?\.) ([A-Z].*)/m, '$2');
+            target.focus();
+            return;
+        }
+
+        if (e.target.classList.contains('trim-sentence-from-end')) {
+            target.value = target.value.replace(/^(.*\.) ([A-Z].*)/m, '$1');
+            target.focus();
+            return;
+        }
+
+        if (e.target.classList.contains('trim-all')) {
+            target.value = '';
+            target.focus();
+        }
     }
 
+    /**
+     * Show or hide shortcuts if the related field has a value.
+     */
     function toggleShortcuts(e) {
-        var shortcuts, target, val;
-        target = jQuery(this);
-        shortcuts = target.closest('.field').find('.shortcuts');
-        val = jQuery.trim(target.val());
-        if (val === '') {
-            shortcuts.addClass('hidden');
-        } else {
-            shortcuts.removeClass('hidden');
+        const value = e.target.value.trim();
+        const field = e.target.closest('.field');
+        const shortcuts = field.querySelector('.shortcuts');
+
+        if (value === '' && !shortcuts.hasAttribute('hidden')) {
+            shortcuts.setAttribute('hidden', true);
+        }
+
+        if (value !== '' && shortcuts.hasAttribute('hidden')) {
+            shortcuts.removeAttribute('hidden');
+        }
+    }
+
+    function dispatchClick(e) {
+        if (e.target.classList.contains('shortcut')) {
+            applyShortcut(e);
+            return;
+        }
+    }
+
+    function dispatchSubmit(e) {
+        if (e.target.id === 'later-form') {
+            submitBookmark(e);
+            return;
+        }
+    }
+
+    function dispatchInput(e) {
+        if (['url', 'comments'].indexOf(e.target.id) > -1) {
+            toggleShortcuts(e);
+            return;
         }
     }
 
     return {
         init: function () {
-            jQuery('#later-form').on('submit', submitForm);
-
-            jQuery('.shortcuts').on('click', 'A', applyShortcut);
-
-            jQuery('#url, #comments').on('input', toggleShortcuts);
-
-            toggleShortcuts.apply('#url');
-            toggleShortcuts.apply('#comments');
-
+            document.addEventListener('submit', dispatchSubmit);
+            document.addEventListener('click', dispatchClick);
+            document.addEventListener('input', dispatchInput);
             automaticTags();
             cleanupComments();
         }
@@ -124,5 +165,4 @@ MEDLEY.later = (function () {
     };
 })();
 
-
-jQuery(document).ready(MEDLEY.later.init);
+window.addEventListener('DOMContentLoaded',  MEDLEY.later.init);
