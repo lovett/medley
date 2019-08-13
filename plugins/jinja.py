@@ -3,6 +3,7 @@
 Based on sample code from https://bitbucket.org/Lawouach/cherrypy-recipes.
 """
 
+import html
 import http.client
 import os
 import os.path
@@ -234,7 +235,7 @@ class Plugin(plugins.SimplePlugin):
         if not url:
             raise jinja2.TemplateError("Unrecognized search engine")
 
-        url = url.format(value)
+        url = url.format(html.escape(value))
 
         if url_only:
             return url
