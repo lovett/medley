@@ -53,10 +53,14 @@
                     <shortcut-link
                         v-bind:index="{{ loop.index }}"
                         url="{{ values[0]|anonymize }}"
-                        label="{{ values[0]|truncate(100) }}"
+                        label="{{ values[1] }} @ {{ values[0]|truncate(100) }}"
                     />
                 </p>
             {% endfor %}
+
+            {% if registry_url %}
+                <p><a href="{{ registry_url }}" target="_blank">Edit</a></p>
+            {% endif %}
         {% endif %}
     </main>
 {% endblock %}

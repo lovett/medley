@@ -81,6 +81,7 @@ class Controller:
         name = None
         group = kwargs.get('group')
         url = kwargs.get('u')
+        registry_url = None
 
         if url:
             host = self.url_to_host(url)
@@ -101,6 +102,12 @@ class Controller:
             bounces = cherrypy.engine.publish(
                 "registry:search",
                 search_key
+            ).pop()
+
+            registry_url = cherrypy.engine.publish(
+                "url:internal",
+                "/registry",
+                {"q": "bounce:{}".format(group)}
             ).pop()
 
         departing_from = None
@@ -133,6 +140,7 @@ class Controller:
                 "group": group,
                 "name": name,
                 "bounces": bounces,
+                "registry_url": registry_url
             })
         }
 
