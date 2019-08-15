@@ -1,56 +1,40 @@
 MEDLEY.registry = (function () {
     'use strict';
 
-    function submitRecord (e) {
-        var field, form, errorMessage;
-
+    async function submitRecord (e) {
         e.preventDefault();
 
-        form = jQuery(e.target);
+        const keyField = document.getElementById('key');
+        const valueField = document.getElementById('value');
+        const endpoint = e.target.getAttribute('action');
 
-        field = jQuery('#key', form);
+        let payload = new FormData()
+        payload.set('key', keyField.value);
+        payload.set('value', valueField.value);
 
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Key field';
-        }
+        const response = await fetch(endpoint, {
+            method: 'PUT',
+            mode: 'same-origin',
+            body: payload
+        })
 
-        field = jQuery('#value', form);
-
-        if (jQuery.trim(field.val()) === '') {
-            errorMessage = 'Please provide a value for the Value field';
-        }
-
-        if (errorMessage) {
-            jQuery('.error.message').removeClass('hidden').text(errorMessage);
-            jQuery('.success.messsage').addClass('hidden');
-            return;
-        }
-
-        jQuery.ajax({
-            type: 'PUT',
-            dataType: 'json',
-            url: '/registry',
-            data: $('INPUT, TEXTAREA', form).serialize()
-        }).done(function (data) {
-            var href = window.location.pathname;
-            href += '?q=' + jQuery('#key').val();
+        if (response.ok) {
+            let href = window.location.pathname;
+            href += '?q=' + keyField.value + '*';
             window.location.href = href;
-        }).fail(function (data) {
-            jQuery('.error.message').removeClass('hidden').text('Invalid values');
-            jQuery('.success.message').addClass('hidden');
-        });
+        } else {
+            MEDLEY.setErrorMessage('The entry could not be saved.');
+        }
     }
 
     return {
         init: function () {
-            jQuery('#insert-form').on('submit', submitRecord);
-
-            if ($().focusAsYouType) {
-                jQuery('.glossary a').focusAsYouType();
-            }
+            document.getElementById('insert-form').addEventListener(
+                'submit',
+                submitRecord
+            );
         }
     };
 })();
 
-
-jQuery(document).ready(MEDLEY.registry.init);
+window.addEventListener('DOMContentLoaded',  MEDLEY.registry.init);
