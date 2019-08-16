@@ -51,22 +51,13 @@
         </header>
 
         {% if results|count == 0 %}
-            <p>No results found.</p>
+            <section>
+                <p>No results found.</p>
+            </section>
         {% endif %}
 
         {% if results|count > 0 %}
-            <header class="table-top">
-                <a id="matches-master-toggle"
-                   class="master-toggle"
-                   href="#"
-                   rel="noreferrer"
-                >
-                    <span class="label">expand</span>
-                    all
-                </a>
-            </header>
-
-            <div class="table-sleeve">
+            <section class="table-sleeve">
                 <table id="matches">
                     <thead>
                         <tr>
@@ -229,8 +220,8 @@
                                 </td>
                                 <td nowrap>
                                     <p>
-                                        <a href="#" class="toggle toggle-next-row" rel="noreferrer">
-                                            <span class="label">more</span>
+                                        <a href="#" class="toggle toggle-next-row" rel="noreferrer" data-default-label="more" data-expanded-label="less">
+                                            more
                                         </a>
                                     </p>
                                 </td>
@@ -257,7 +248,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </div>
+            </section>
         {% endif %}
         {{ macros.queryPlan(query_plan) }}
     </main>

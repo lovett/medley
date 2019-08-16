@@ -84,6 +84,32 @@ MEDLEY.visitors = (function () {
     }
 
     /**
+     * Show or hide a table row containing the full log line.
+     */
+    function toggleNextRowVisibility(e) {
+        if (e.target.classList.contains('toggle-next-row') === false) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const nextRow = e.target.closest('TR').nextElementSibling;
+
+        if (!nextRow) {
+            return;
+        }
+
+        nextRow.classList.toggle('expanded');
+
+        if (nextRow.classList.contains('expanded')) {
+            e.target.innerText = e.target.dataset.expandedLabel;
+            return;
+        }
+
+        e.target.innerText = e.target.dataset.defaultLabel;
+    }
+
+    /**
      * Show or hide the delete icon next to the saved queries dropdown.
      */
     function toggleQueryDelete(e) {
@@ -272,6 +298,11 @@ MEDLEY.visitors = (function () {
             document.addEventListener(
                 'click',
                 calculateDelta
+            );
+
+            document.addEventListener(
+                'click',
+                toggleNextRowVisibility
             );
         }
     }
