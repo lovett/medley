@@ -78,6 +78,7 @@ li.group .all {
 
 li.group:hover .all {
     visibility: visible;
+    color: green;
 }
 
 #startpage-edit TEXTAREA {

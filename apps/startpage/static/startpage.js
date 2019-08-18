@@ -1,141 +1,170 @@
-// Display the last modified time of the data file
-var el = document.getElementById('modified');
+MEDLEY.startpage = (function () {
+    'use strict';
 
-if (el) {
-    var dt_string;
-    var dt = new Date(Date.parse(el.getAttribute('datetime')));
-    dt_string = dt.toLocaleString();
+    let anonymizerUrl = null;
+    let pageLinks = [];
+    let offlineOnly = [];
+    let onlineOnly = []
 
-    // remove seconds, timezone, and year
-    dt_string = dt_string.replace(/(\d\d):\d\d ([AP]M).*/, "$1 $2");
-    dt_string = dt_string.replace(', ' + (new Date().getYear() + 1900), '');
-    el.innerHTML = 'Updated ' + dt_string;
-}
+    /**
+     * Show the last-modified time of the data file as a date-and-time
+     * string.
+     */
+    function displayLastModified() {
+        const node = document.getElementById('modified');
 
-// Determine the anonymizer URL
-var meta = document.getElementsByTagName('META');
-var anonymizer_url;
-var i;
-for (i=0; i < meta.length; i++) {
-    if (meta[i].getAttribute('name') === 'anonymizer') {
-        anonymizer_url = meta[i].getAttribute('content');
-        break;
-    }
-}
+        if (!node) {
+            return;
+        }
 
-// Activate or deactivate the anonymizer URL
-var anonymize = document.getElementById('anonymize');
-if (anonymize && anonymizer_url) {
-    var links = document.getElementsByTagName('A');
-    anonymize.removeAttribute('disabled');
-    anonymize.setAttribute('checked', true);
+        const modifiedDate = Date.parse(node.getAttribute('datetime'));
 
-    // Links that are not initially anonymized should always remain so
-    for (i=0; i < links.length; i++) {
-        href = links[i].getAttribute('href');
-        links[i].setAttribute('data-anonable', href.indexOf(anonymizer_url));
+        const dateString = new Intl.DateTimeFormat(
+            undefined,
+            {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                hour12: true
+            }
+        ).format(modifiedDate);
+
+        node.innerHTML = `Updated ${dateString}`;
     }
 
-    function clickListener () {
-        for (i=0; i < links.length; i++) {
-            if (parseInt(links[i].getAttribute('data-anonable'), 10) === -1) {
+    /**
+     * Open multiple links at once.
+     */
+    function openLinkGroup(e) {
+        if (e.target.className !== 'all') {
+            return;
+        }
+
+        e.preventDefault();
+
+        const links = e.target.parentNode.getElementsByTagName('A');
+
+        for (let i=1; i < links.length; i++) {
+            if (links[i] === e.target) {
+                continue;
+            }
+            window.open(links[i].getAttribute('href'));
+        }
+
+        window.location.href = links[0].getAttribute('href');
+    }
+
+    /**
+     * Prefix or unprefix the anonymizer URL from eligible links.
+     */
+    function toggleAnonymizer (e) {
+        for (let i=0; i < this.links.length; i++) {
+            if (parseInt(links[i].dataset.anonable, 10) === -1) {
                 continue;
             }
 
-            href = decodeURIComponent(links[i].getAttribute('href'));
+            let href = decodeURIComponent(links[i].getAttribute('href'));
             href = href.replace(anonymizer_url, '');
-            if (this.checked) {
+
+            if (e.target.checked) {
                 href = anonymizer_url + encodeURIComponent(href);
             }
+
             links[i].setAttribute('href', href);
         }
     }
 
-    if (anonymize.attachEvent) {
-        anonymize.attachEvent('onclick', clickListener);
-    } else {
-        anonymize.addEventListener('click', clickListener);
-    }
-}
+    /**
+     * Toggle element visibility when the page goes to the offline state.
+     */
+    function whenOffline() {
+        for (let i=0; i < this.onlineOnly.length; i++) {
+            this.onlineOnly[i].classList.add('hidden');
+        }
 
-// Open all links in a group
-function openGroup(e) {
-    var container, i, href, links, newWindow;
-
-    if (!e.target) {
-        return;
+        for (let i=0; i < this.offlineOnly.length; i++) {
+            this.offlineOnly[i].classList.remove('hidden');
+        }
     }
 
-    if (e.target.className !== 'all') {
-        return;
+    /**
+     * Toggle element visibility when the page goes to the online stage.
+     */
+    function whenOnline() {
+        for (let i=0; i < onlineOnly.length; i++) {
+            this.onlineOnly[i].classList.remove('hidden');
+        }
+
+        for (let i=0; i < offlineOnly.length; i++) {
+            this.offlineOnly[i].classList.add('hidden');
+        }
     }
 
-    e.preventDefault();
+    return {
+        init: function () {
+            displayLastModified();
 
-    links = e.target.parentNode.getElementsByTagName('A');
-    for (i=1; i < links.length; i++) {
-        if (links[i] === e.target) continue;
-        href = links[i].getAttribute('href');
-        window.open(href);
+            this.pageLinks = document.getElementsByTagName('A');
+
+            // Determine the anonymizer URL
+            const nodes = document.getElementsByTagName('META');
+            for (let i=0; i < nodes.length; i++) {
+                if (nodes[i].getAttribute('name') === 'anonymizer') {
+                    this.anonymizer_url = nodes[i].getAttribute('content');
+                    break;
+                }
+            }
+
+            if (this.anonymizer_url) {
+                const anonymizeCheckbox = document.getElementById('anonymize');
+                anonymizeCheckbox.removeAttribute('disabled');
+                anonymizeCheckbox.setAttribute('checked', true);
+
+                // Links that are not initially anonymized should always remain so
+                for (let i=0; i < this.pageLinks.length; i++) {
+                    const href = this.pageLinks[i].getAttribute('href');
+                    this.pageLinks[i].dataset.anonable = href.indexOf(this.anonymizer_url);
+                }
+
+                anonymizeCheckbox.addEventListener('click', toggleAnonymizer);
+            }
+
+            // Tag link groups
+            const lis = document.getElementsByTagName('LI');
+            const groupTrigger = document.createElement('A');
+            groupTrigger.setAttribute('href', '#all');
+            groupTrigger.setAttribute('class', 'all');
+            groupTrigger.innerText = '[all]';
+
+            for (let i=0; i < lis.length; i++) {
+                if (lis[i].getElementsByTagName('A').length > 1) {
+                    lis[i].setAttribute('class', 'group');
+                    lis[i].appendChild(groupTrigger.cloneNode(true));
+                }
+            }
+
+
+            // Highlight the active section
+            var fragment = window.location.hash.replace('#', '');
+            if (fragment.length > 0) {
+                document.getElementById(fragment).classList.add('active');
+            }
+
+            // Hide the edit link when offline
+            this.onlineOnly = document.querySelectorAll('.online-only');
+            this.offlineOnly = document.querySelectorAll('.offline-only');
+            if (navigator.onLine === false) {
+                whenOffline();
+            }
+
+            document.addEventListener('click', openLinkGroup);
+            window.addEventListener('offline', whenOffline);
+            window.addEventListener('online', whenOnline);
+
+            jQuery('SECTION A, SECTION H1').focusAsYouType();
+        }
     }
-    window.location.href = links[0].getAttribute('href');
-}
+})();
 
-// Tag link groups
-var lis = document.getElementsByTagName('LI');
-var groupTrigger = document.createElement('A');
-groupTrigger.setAttribute('href', '#all');
-groupTrigger.setAttribute('class', 'all');
-groupTrigger.innerText = '[all]';
-
-for (i=0; i < lis.length; i++) {
-    if (lis[i].getElementsByTagName('A').length > 1) {
-        lis[i].setAttribute('class', 'group');
-        lis[i].appendChild(groupTrigger.cloneNode(true));
-    }
-}
-
-if (anonymize && anonymize.attachEvent) {
-    document.getElementsByTagName('MAIN')[0].attachEvent('click', openGroup);
-} else {
-    document.getElementsByTagName('MAIN')[0].addEventListener('click', openGroup);
-}
-
-// Highlight the active section
-var fragment = window.location.hash.replace('#', '');
-if (fragment.length > 0) {
-    document.getElementById(fragment).classList.add('active');
-}
-
-jQuery('SECTION A, SECTION H1').focusAsYouType();
-
-// Hide the edit link when offline
-var onlineOnly = document.querySelectorAll('.online-only');
-var offlineOnly = document.querySelectorAll('.offline-only');
-
-var whenOffline = function () {
-    for (i=0; i < onlineOnly.length; i++) {
-        onlineOnly[i].classList.add('hidden');
-    }
-
-    for (i=0; i < offlineOnly.length; i++) {
-        offlineOnly[i].classList.remove('hidden');
-    }
-}
-
-var whenOnline = function () {
-    for (i=0; i < onlineOnly.length; i++) {
-        onlineOnly[i].classList.remove('hidden');
-    }
-
-    for (i=0; i < offlineOnly.length; i++) {
-        offlineOnly[i].classList.add('hidden');
-    }
-}
-
-window.addEventListener('offline', whenOffline);
-window.addEventListener('online', whenOnline);
-
-if (navigator.onLine === false) {
-    whenOffline();
-}
+window.addEventListener('DOMContentLoaded',  MEDLEY.startpage.init);
