@@ -74,7 +74,7 @@ class Controller:
                 "name": name,
                 "names": [key for key in grids.keys()],
                 "options": options,
-                "rows": rows,
+                "rows": rows
             })
         }
 

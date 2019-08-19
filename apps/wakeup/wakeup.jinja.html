@@ -24,11 +24,13 @@
             </a>
         </header>
 
-        <section>
-            {% if not hosts %}
-                <p>No hosts found.</p>
-            {% endif %}
+        {% if not hosts %}
+            <nav class="secondary">
+                <div class="warning">No hosts found.</p>
+            </nav>
+        {% endif %}
 
+        <section>
             {% for host, mac_address in hosts.items() %}
                 <form class="host" method="POST" action="{{ app_url }}">
                     <input type="hidden" name="host" value="{{ host }}" />

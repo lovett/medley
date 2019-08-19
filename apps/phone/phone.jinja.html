@@ -27,13 +27,14 @@
             </form>
         </header>
 
-        <nav class="secondary">
-            {{ macros.cancelLink(number, app_url) }}
-            {{ number|websearch("google") }}
-            {{ number|websearch("bing") }}
-        </nav>
 
         {% if number %}
+            <nav class="secondary">
+                <div>{{ macros.cancelLink(number, app_url) }}</div>
+                <div>{{ number|websearch("google") }}</div>
+                <div>{{ number|websearch("bing") }}</div>
+            </nav>
+
             <section>
                 <h2>{{ number|phonenumber }}</h2>
 

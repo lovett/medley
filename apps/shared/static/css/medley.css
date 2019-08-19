@@ -111,14 +111,18 @@ NAV.secondary {
     padding-bottom: 1em;
 }
 
-NAV.secondary A {
+NAV.secondary > DIV  {
     display: flex;
     align-items: center;
     margin-right: 2em;
 }
 
-NAV.secondary A:last-of-type {
+NAV.secondary DIV:last-of-type {
     margin-right: 0;
+}
+
+NAV.secondary .warning {
+    color: red;
 }
 
 SECTION {

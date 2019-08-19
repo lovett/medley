@@ -66,27 +66,31 @@
         </header>
 
         <nav class="secondary">
-            {{ macros.cancelLink(query, app_url) }}
+            {% if count %}
+                <div>
+                    Showing {{ start_index }} – {{ end_index }}
+                    of {{ count|pluralize('bookmark', 'bookmarks') }}
+                    {%- if max_days %}
+                        added in the past {{ max_days // 30 }} months.
+                    {%- else -%}
+                        .
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if not bookmarks %}
+                <div class="warning">Nothing found.</div>
+            {% endif %}
+
+            <div>{{ macros.cancelLink(query, app_url) }}</div>
 
             {% if general_query %}
-                {{ general_query|websearch("google") }}
-                {{ general_query|websearch("bing") }}
+                <div>{{ general_query|websearch("google") }}</div>
+                <div>{{ general_query|websearch("bing") }}</div>
             {% endif %}
         </nav>
 
-        <p {% if bookmarks %}class="hidden nothing-message"{% endif %}>Nothing found.</p>
 
-        {% if count %}
-            <p>
-                Showing {{ start_index }} – {{ end_index }}
-                of {{ count|pluralize('bookmark', 'bookmarks') }}
-                {%- if max_days %}
-                    added in the past {{ max_days // 30 }} months.
-                {%- else -%}
-                    .
-                {% endif %}
-            </p>
-        {% endif %}
 
         {% if recent_tags %}
             <section>
@@ -149,7 +153,9 @@
         </div>
 
         <div class="pagination">
-            <p>Page {{ page }} of {{ total_pages }}</p>
+            {% if bookmarks %}
+                <p>Page {{ page }} of {{ total_pages }}</p>
+            {% endif %}
 
             {% if page > 1 %}
                 <a href="{{ app_url }}?page=1{{ query|optional_qs_param("query") }}" class="next">

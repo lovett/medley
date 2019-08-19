@@ -17,10 +17,13 @@
                 data-offset="{{ offset }}"
             >Walk Headlines</button>
             <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
-            <p>
-                <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
-            </p>
         </header>
+
+        <nav class="secondary">
+            <div>
+                <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
+            </div>
+        </nav>
 
         <div id="headlines">
             {% set ns = namespace(loop_count=1) %}

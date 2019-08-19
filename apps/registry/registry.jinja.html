@@ -37,18 +37,25 @@
             </header>
 
             <nav class="secondary">
-                {{ macros.cancelLink(q or view == "add", app_url) }}
+                {% if q %}
+                    <div>{{ macros.cancelLink(q or view == "add", app_url) }}</div>
+                {% endif %}
 
-                <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
-                    <svg class="icon"><use xlink:href="#add-item"></use></svg>
-                    Add
-                </a>
+                <div>
+                    <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
+                        <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                        Add
+                    </a>
+                </div>
+
 
                 {% if q and entries %}
-                    <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
-                        <svg class="icon"><use xlink:href="#icon-download"></use></svg>
-                        Export
-                    </a>
+                    <div>
+                        <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
+                            <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+                            Export
+                        </a>
+                    </div>
                 {% endif %}
             </nav>
         {% endif %}

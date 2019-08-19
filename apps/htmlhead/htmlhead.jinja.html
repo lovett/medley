@@ -47,12 +47,14 @@
         </header>
 
         <nav class="secondary">
-            {{ macros.cancelLink(url, app_url) }}
+            {% if tags %}
+                <div>Found {{ tags|length }} tags.</div>
+            {% endif %}
+
+            <div>{{ macros.cancelLink(url, app_url) }}</div>
         </nav>
 
         {% if tags %}
-
-            <p>Found {{ tags|length }} tags.</p>
             <div class="table-sleeve">
                 <table class="key-value">
                     <tbody>

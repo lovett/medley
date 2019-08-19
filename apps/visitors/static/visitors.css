@@ -1,23 +1,13 @@
+.app-nav form {
+    grid-template-columns: auto;
+}
+
 #delete-saved-query {
     margin-left: 1em;
 }
 
 input[type=range] {
     width: 100%;
-}
-
-.app-nav .actions {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-column-gap: 1em;
-}
-
-.app-nav .actions > * {
-    margin: 0;
-}
-
-.app-nav .actions .field:first-of-type {
-    grid-column: 1 / span 2;
 }
 
 .code-204 td {
@@ -127,13 +117,6 @@ ul.querystring {
 
 /* Medium devices */
 @media (min-width: 768px) {
-    input[type=range] {
-        width: 20em;
-    }
-
-    .app-nav .actions {
-        grid-template-columns: repeat(4, auto);
-    }
 }
 
 /* Large devices */

@@ -22,6 +22,10 @@ DD {
     font-family: monospace;
 }
 
+.options .field, .options INPUT {
+    font-size: .85em;
+}
+
 .text {
     padding: 1em;
     font-family: monospace;

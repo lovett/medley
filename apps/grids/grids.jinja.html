@@ -14,15 +14,27 @@
                     <li><a href="?name={{ name }}">{{ name }}</a></li>
                 {% endfor %}
             </ul>
-            {% if name and options["layout"] == "month" %}
-                <p>Starting:</p>
-                <ul class="inline-list">
-                    <li><a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">previous month</a></li>
-                    <li><a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">this month</a></li>
-                    <li><a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">next month</a></li>
-                </ul>
-            {% endif %}
         </header>
+
+        {% if name and options["layout"] == "month" %}
+            <nav class="secondary">
+                <div>
+                    <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
+                        Previous month
+                    </a>
+                </div>
+                <div>
+                    <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
+                        Next month
+                    </a>
+                </div>
+                <div>
+                    <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
+                        Now
+                    </a>
+                </div>
+            </nav>
+        {% endif %}
 
         {% if rows %}
             <div class="table-sleeve">

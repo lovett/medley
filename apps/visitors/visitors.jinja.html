@@ -16,8 +16,8 @@
 
         <header class="app-nav">
             <form id="visitors-form" method="get" action="{{ app_url }}">
-                <div>
-                    <div id="saved-queries" class="field {% if saved_queries|count == 0 %}hidden{% endif %}">
+                {% if saved_queries|count > 0 %}
+                    <div id="saved-queries" class="field">
                         <label for="saved">Saved queries</label>
                         <select id="saved">
                             <option value=""></option>
@@ -30,30 +30,31 @@
                             <svg class="icon"><use xlink:href="#delete"></use></svg>
                         </a>
                     </div>
+                {% endif %}
 
-                    <div class="field">
-                        <label for="query">Query</label>
-                        <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
-                    </div>
+                <div class="field">
+                    <label for="query">Query</label>
+                    <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
+                </div>
 
-                    <div class="actions">
-                        <div class="field">
-                            <label for="date-slider">Date adjust</label>
-                            <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
-                        </div>
-                        <button id="submit">
-                            <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                        </button>
-                        <a id="save" href="#save">Save</a>
-                    </div>
+                <div class="field">
+                    <label for="date-slider">Date adjust</label>
+                    <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
+                </div>
+
+                <div class="field">
+                    <button id="submit">
+                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    </button>
+                    <a id="save" class="secondary-action" href="#save">Save</a>
                 </div>
             </form>
         </header>
 
         {% if results|count == 0 %}
-            <section>
-                <p>No results found.</p>
-            </section>
+            <nav class="secondary">
+                <div class="warning">No results found.</div>
+            </nav>
         {% endif %}
 
         {% if results|count > 0 %}

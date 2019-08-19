@@ -28,12 +28,13 @@
         </header>
 
         <nav class="secondary">
-            {{ macros.cancelLink(path, app_url) }}
+            {% if not captures %}
+                <div class="warning">No captures found.</div>
+            {% endif %}
+
+            <div>{{ macros.cancelLink(path, app_url) }}</div>
         </nav>
 
-        {% if not captures %}
-            <p>No captures found.</p>
-        {% endif %}
 
         {% for capture in captures %}
             <section>
