@@ -162,7 +162,7 @@ MEDLEY.startpage = (function () {
             window.addEventListener('offline', whenOffline);
             window.addEventListener('online', whenOnline);
 
-            jQuery('SECTION A, SECTION H1').focusAsYouType();
+            MEDLEY.focusAsYouType('SECTION A, SECTION H1');
         }
     }
 })();

@@ -1,10 +1,11 @@
-MEDLEY.index = (function () {
+MEDLEY.homepage = (function () {
     'use strict'
+
     return {
         init: function () {
-            jQuery('A.item').focusAsYouType();
+            MEDLEY.focusAsYouType('A.item');
         }
     };
 })();
 
-jQuery(document).ready(MEDLEY.index.init);
+window.addEventListener('DOMContentLoaded',  MEDLEY.homepage.init);

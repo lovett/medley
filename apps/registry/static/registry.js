@@ -29,10 +29,17 @@ MEDLEY.registry = (function () {
 
     return {
         init: function () {
-            document.getElementById('insert-form').addEventListener(
-                'submit',
-                submitRecord
-            );
+            const insertForm = document.getElementById('insert-form');
+            if (insertForm) {
+                insertForm.addEventListener(
+                    'submit',
+                    submitRecord
+                );
+            }
+
+            if (MEDLEY.focusAsYouType) {
+                MEDLEY.focusAsYouType('.roots A');
+            }
         }
     };
 })();
