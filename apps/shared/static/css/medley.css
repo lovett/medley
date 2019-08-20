@@ -61,7 +61,11 @@ BUTTON .icon {
 
 }
 
-BUTTON + .label, BUTTON + .secondary-action, BUTTON + .cancel {
+BUTTON + .label {
+    margin-left: 1em;
+}
+
+BUTTON + .secondary-action, BUTTON + .cancel {
     display: inline-block;
     margin-left: 2em;
 }

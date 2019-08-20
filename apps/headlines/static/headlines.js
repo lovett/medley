@@ -1,25 +1,36 @@
-MEDLEY.topics = (function () {
+MEDLEY.headlines = (function () {
     'use strict';
 
-    var childWindow, links, worker;
+    let childWindow = null;
+    let links = [];
+    let worker = null;
 
-    function visitLink(index) {
-        var target = links[index];
+    function onClick(e) {
+        if (e.target.nodeName !== 'BUTTON') {
+            return;
+        }
 
-        childWindow.location = target.getAttribute('href');
-        target.classList.add('clicked');
+        const limit = parseInt(e.target.dataset.limit, 10);
+        const offset = parseInt(e.target.dataset.offset, 10);
+
+        childWindow = window.open('about:blank');
+        worker.postMessage(`start:${limit}:${offset}`);
     }
 
     return {
         init: function () {
-            links = jQuery('#headlines A.search');
+            links = Array.from(document.querySelectorAll('#headlines A.title'));
 
             worker = new Worker('/headlines/static/headlines-worker.js');
 
             worker.addEventListener('message', function (e) {
-                var fields = e.data.split(':');
+                const fields = e.data.split(':');
                 if (fields[0] === 'visit') {
-                    visitLink(parseInt(fields[1], 10));
+                    const linkIndex = parseInt(fields[1], 10);
+                    const link = links[linkIndex];
+
+                    childWindow.location = link.dataset.searchHref;
+                    link.classList.add('clicked');
                 }
 
                 if (fields[0] === 'finish') {
@@ -27,15 +38,9 @@ MEDLEY.topics = (function () {
                 }
             });
 
-            jQuery('BUTTON').on('click', function () {
-                var message = 'start'
-                message += ':' + parseInt(jQuery(this).attr('data-limit'), 10);
-                message += ':' + parseInt(jQuery(this).attr('data-offset'), 10);
-
-                childWindow = window.open('about:blank');
-                worker.postMessage(message);
-            });
+            document.addEventListener('click', onClick);
         }
     };
 }());
-jQuery(document).ready(MEDLEY.topics.init);
+
+window.addEventListener('DOMContentLoaded',  MEDLEY.headlines.init);

@@ -18,9 +18,9 @@ li {
     text-decoration: line-through;
 }
 
-.item-nav {
-    font-size: .85em;
-    padding-top: .5em;
+.search {
+    font-size: .5em;
+    float: right;
 }
 
 /* Small devices */

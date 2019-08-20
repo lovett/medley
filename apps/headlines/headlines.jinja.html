@@ -15,7 +15,7 @@
             <button
                 data-limit="{{ limit }}"
                 data-offset="{{ offset }}"
-            >Walk Headlines</button>
+            >Walk</button>
             <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
         </header>
 
@@ -35,11 +35,11 @@
                         {% for article in headlines[category] %}
                             {% set ns.loop_count = ns.loop_count + 1 %}
                             <li>
-                                <a class="title" href="{{ article["url"]|anonymize }}" rel="noreferrer">{{ article["title"] }}</a>
-                                <div class="item-nav">
-                                    <a class="search" href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
-                                       rel="noreferrer" target="_blank">search</a>
-                                </footer>
+                                <a class="title"
+                                   href="{{ article["url"]|anonymize }}"
+                                   rel="noreferrer"
+                                   data-search-href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
+                                >{{ article["title"] }}</a>
                             </li>
                         {% endfor %}
                     </ol>

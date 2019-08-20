@@ -1,7 +1,6 @@
-function tick(index, limit) {
-    var delay, message;
-
-    delay = 4000;
+function visit(index, limit) {
+    const minDelay = 4000;
+    const maxDelay = 8000;
 
     if (index > limit) {
         self.postMessage('finish');
@@ -10,19 +9,22 @@ function tick(index, limit) {
     }
 
     self.postMessage('visit:' + index);
-    setTimeout(tick, Math.floor(Math.random() * delay) + delay, index + 1, limit);
+
+    setTimeout(
+        visit,
+        Math.random() * (maxDelay - minDelay) + minDelay,
+        Math.floor(Math.random() * delay) + delay,
+        index + 1,
+        limit
+    );
 }
 
 self.addEventListener('message', function (e) {
-    let fields = e.data.split(':');
+    const fields = e.data.split(':');
 
     if (fields[0] === 'start') {
-        let limit = parseInt(fields[1], 10);
-        let offset = parseInt(fields[2], 10);
-        tick(offset, offset + limit - 1);
+        const limit = parseInt(fields[1], 10);
+        const offset = parseInt(fields[2], 10);
+        visit(offset, offset + limit - 1);
     }
-});
-
-self.addEventListener('error', function (e) {
-    e.preventDefault();
 });
