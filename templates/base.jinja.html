@@ -46,9 +46,7 @@
 
         {% block page_body %}{% endblock %}
 
-        {{ macros.staticAsset('shared', 'js/jquery-3.2.1.min.js') }}
         {{ macros.staticAsset('shared', 'js/medley.js') }}
-
 
         {% if use_service_workers %}
         <script>
@@ -63,6 +61,5 @@
         {% endif %}
 
         {% block scripts %}{% endblock %}
-
     </body>
 </html>
