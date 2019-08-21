@@ -43,14 +43,12 @@
   copy:
     src: "../../../../requirements.txt"
     dest: "{{ project_root }}/requirements.txt"
-  register: requirements
 
 - name: Install audio requirements file
   become: true
   copy:
     src: "../../../../requirements-audio.txt"
     dest: "{{ project_root }}/requirements-audio.txt"
-  register: requirements_audio
 
 - name: Install python application packages
   become: true
@@ -58,7 +56,6 @@
   pip:
     requirements: "{{ project_root }}/requirements.txt"
     virtualenv: "{{ project_root }}/venv"
-  when: requirements.changed
 
 - name: Install python audio packages
   become: true
@@ -66,7 +63,6 @@
   pip:
     requirements: "{{ project_root }}/requirements-audio.txt"
     virtualenv: "{{ project_root }}/venv"
-  when: requirements_audio.changed
 
 - name: Set permissions on application root
   become: true
