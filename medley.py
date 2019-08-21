@@ -20,7 +20,8 @@ import tools
 
 
 # pylint: disable=too-many-statements
-def main():
+@plugins.decorators.log_runtime
+def setup():
     """Configure and start the application server
 
     The application server is the backbone that individual
@@ -210,14 +211,13 @@ def main():
                 cherrypy.log.access_log.handlers.remove(handler)
 
     cherrypy.engine.start()
-    cherrypy.engine.publish("server:ready")
-
-    if os.environ.get("MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP"):
-        systemd_notifier = sdnotify.SystemdNotifier()
-        systemd_notifier.notify("READY=1")
-
-    cherrypy.engine.block()
 
 
 if __name__ == '__main__':
-    main()
+    setup()
+
+    if os.environ.get("MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP"):
+        sdnotify.SystemdNotifier().notify("READY=1")
+
+    cherrypy.engine.publish("server:ready")
+    cherrypy.engine.block()
