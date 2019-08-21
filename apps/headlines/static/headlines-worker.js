@@ -13,7 +13,6 @@ function visit(index, limit) {
     setTimeout(
         visit,
         Math.random() * (maxDelay - minDelay) + minDelay,
-        Math.floor(Math.random() * delay) + delay,
         index + 1,
         limit
     );
