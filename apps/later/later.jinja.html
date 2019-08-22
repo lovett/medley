@@ -12,9 +12,7 @@
                 This URL was marked for removal at {{ bookmark.deleted|localtime|dateformat('LT') }}
             </p>
         </section>
-    {% endif %}
-
-    {% if bookmark.rowid and not bookmark.deleted  %}
+    {% elif bookmark.rowid and not bookmark.deleted  %}
         <section id="app-message" class="notice">
             <p>
                 {% if bookmark.updated %}
@@ -28,6 +26,8 @@
                 <a href="{{ bookmarks_url }}">Switch to bookmarks</a>.
             </p>
         </section>
+    {% else %}
+        {{ super() }}
     {% endif %}
 
 {% endblock %}
