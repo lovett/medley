@@ -47,11 +47,11 @@ MEDLEY.focusAsYouType = (function () {
         })
 
         if (score == 1) {
-            $(elements[matches.indexOf(1)]).focus();
+            elements[matches.indexOf(1)].focus();
         } else {
             matches.forEach(function (match, index) {
                 if (match === 1) {
-                    $(elements[index]).addClass(options.candidateClass);
+                    elements[index].classList.add(options.candidateClass);
                 }
             });
         }
