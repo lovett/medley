@@ -7,6 +7,7 @@
 
 {% block scripts %}
     {{ macros.vueApp('main', ('countdown', 'discardable-record', 'discard-button', '/reminder/static/reminder-form.js', '/reminder/static/reminder-template.js')) }}
+    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
 {% endblock %}
 
 {% block app_message %}
@@ -116,7 +117,7 @@
                         <label for="url">URL</label>
                         <input v-model="url" type="text" id="url" name="url" />
                         <div class="shortcuts">
-                            <a href="#" class="set-url" data-url="{{ app_url }}">this page</a>
+                            <a href="#" data-field="url" data-shortcut="set-value" data-value="{{ app_url }}">this page</a>
                         </div>
                     </div>
 
