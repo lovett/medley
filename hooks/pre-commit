@@ -34,7 +34,10 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         TYPE="${PATH_PARTS[0]}"
         NAME=${PATH_PARTS[1]%.*} # remove file extension
         NAME=${NAME/_test/} # remove test prefix
-        TESTS_TO_RUN="$TESTS_TO_RUN $TYPE.$NAME"
+
+        if [[ "$NAME" != "__init__" ]]; then
+            TESTS_TO_RUN="$TESTS_TO_RUN $TYPE.$NAME"
+        fi
     fi
 
     if [[ "$FILE_EXTENSION" == "py" ]]; then
