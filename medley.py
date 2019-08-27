@@ -15,9 +15,36 @@ import os
 import os.path
 import cherrypy
 import sdnotify
-import plugins
-import tools
-
+import plugins.applog
+import plugins.audio
+import plugins.bookmarks
+import plugins.cache
+import plugins.capture
+import plugins.cdr
+import plugins.checksum
+import plugins.converters
+import plugins.decorators
+import plugins.formatting
+import plugins.geography
+import plugins.hasher
+import plugins.ip
+import plugins.jinja
+import plugins.logindex
+import plugins.mail
+import plugins.maintenance
+import plugins.markup
+import plugins.memorize
+import plugins.mixins
+import plugins.notifier
+import plugins.parse
+import plugins.registry
+import plugins.scheduler
+import plugins.speak
+import plugins.urlfetch
+import plugins.url
+import tools.capture
+import tools.conditional_auth
+import tools.negotiable
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
