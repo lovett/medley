@@ -36,11 +36,7 @@
 
 {% block page_body %}
     <main>
-        <div class="{% if not error %}hidden{% endif %} error message">{{ error }}</div>
-        <div class="hidden success message">Success! <a href="{{ bookmarks_url }}">Go to bookmarks</a></div>
-
         <form id="later-form" method="post" action="/bookmarks">
-
             <div class="field">
                 <label for="title">Title:</label>
                 <input
