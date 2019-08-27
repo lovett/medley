@@ -3,6 +3,7 @@
 
 {% block scripts %}
     {{ macros.staticAsset('later', 'later.js') }}
+    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
 {% endblock %}
 
 {% block app_message %}
@@ -63,10 +64,9 @@
                 />
 
                 <div class="shortcuts" {% if not url %}hidden{% endif %}>
-                    <a class="shortcut remove-path" href="#">Remove path</a>
-                    <a class="shortcut remove-querystring" href="#">Remove querystring</a>
-                    <a class="shortcut remove-hash" href="#">Remove hash</a>
-                    <a class="shortcut revert" href="#">Revert</a>
+                    <a href="#" data-field="url" data-shortcut="url-remove-path">Remove path</a>
+                    <a href="#" data-field="url" data-shortcut="url-remove-query">Remove querystring</a>
+                    <a href="#" data-field="url" data-shortcut="url-remove-hash">Remove hash</a>
                 </div>
             </div>
 
@@ -89,9 +89,9 @@
                 >{{ comments|default('', true)|e }}</textarea>
 
                 <div class="shortcuts" {% if not comments %}hidden{% endif %}>
-                    <a class="shortcut trim-sentence-from-start" href="#" rel="noreferrer">Trim sentence from start</a>
-                    <a class="shortcut trim-sentence-from-end" href="#" rel="noreferrer">Trim sentence from end</a>
-                    <a class="shortcut trim-all" href="#" rel="noreferrer">Clear</a>
+                    <a href="#" data-field="comments" data-shortcut="sentence-trim-start">Trim sentence from start</a>
+                    <a href="#" data-field="comments" data-shortcut="sentence-trim-end">Trim sentence from end</a>
+                    <a href="#" data-field="comments" data-shortcut="set-value" data-value="">Clear</a>
                 </div>
             </div>
 

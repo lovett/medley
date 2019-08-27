@@ -59,63 +59,6 @@ MEDLEY.later = (function () {
     }
 
     /**
-     * Perform cleanup tasks on a field's value.
-     */
-    function applyShortcut(e) {
-        const target = e.target.closest('.field').querySelector('INPUT, TEXTAREA');
-
-        if (e.target.classList.contains('remove-querystring')) {
-            const node = document.createElement('a');
-            node.href = target.value.trim()
-            node.search = '';
-            target.value = node.href;
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('remove-path')) {
-            const node = document.createElement('a');
-            node.href = target.value.trim()
-            node.pathname = '';
-            target.value = node.href;
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('remove-hash')) {
-            const node = document.createElement('a');
-            node.href = target.value.trim()
-            node.hash = '';
-            target.value = node.href;
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('revert')) {
-            target.value = target.dataset.originalValue;
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('trim-sentence-from-start')) {
-            target.value = target.value.replace(/^(.*?\.) ([A-Z].*)/m, '$2');
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('trim-sentence-from-end')) {
-            target.value = target.value.replace(/^(.*\.) ([A-Z].*)/m, '$1');
-            target.focus();
-            return;
-        }
-
-        if (e.target.classList.contains('trim-all')) {
-            target.value = '';
-            target.focus();
-        }
-    }
-
-    /**
      * Show or hide shortcuts if the related field has a value.
      */
     function toggleShortcuts(e) {
@@ -129,13 +72,6 @@ MEDLEY.later = (function () {
 
         if (value !== '' && shortcuts.hasAttribute('hidden')) {
             shortcuts.removeAttribute('hidden');
-        }
-    }
-
-    function dispatchClick(e) {
-        if (e.target.classList.contains('shortcut')) {
-            applyShortcut(e);
-            return;
         }
     }
 
@@ -156,12 +92,10 @@ MEDLEY.later = (function () {
     return {
         init: function () {
             document.addEventListener('submit', dispatchSubmit);
-            document.addEventListener('click', dispatchClick);
             document.addEventListener('input', dispatchInput);
             automaticTags();
             cleanupComments();
         }
-
     };
 })();
 
