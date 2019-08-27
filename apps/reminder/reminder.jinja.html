@@ -20,13 +20,12 @@
 
 
 {% block page_body %}
-    <main>
-        {{ macros.svgSymbols("delete") }}
+    {{ macros.svgSymbols("delete") }}
 
-        {% if upcoming %}
-            <header class="app-nav">
-                <p>Upcoming</p>
-                <div id="upcoming">
+    {% if upcoming %}
+        <header class="app-nav">
+            <p>Upcoming</p>
+            <div id="upcoming">
                 {% for event in upcoming %}
                     <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
                         <div class="upcoming-reminder" v-bind:style="styles">
@@ -43,10 +42,11 @@
                         </div>
                     </discardable-record>
                 {% endfor %}
-                </div>
-            </header>
-        {% endif %}
+            </div>
+        </header>
+    {% endif %}
 
+    <main>
         <reminder-form inline-template>
             <form ref="reminderForm" id="reminder-form" method="post" action="{{ app_url }}">
                 <div id="template">

@@ -11,52 +11,52 @@
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("delete", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
+
+    <header class="app-nav">
+        <form id="visitors-form" method="get" action="{{ app_url }}">
+            {% if saved_queries|count > 0 %}
+                <div id="saved-queries" class="field">
+                    <label for="saved">Saved queries</label>
+                    <select id="saved">
+                        <option value=""></option>
+                        {% for query in saved_queries %}
+                            <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <a id="delete-saved-query" href="#" hidden>
+                        <svg class="icon"><use xlink:href="#delete"></use></svg>
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="field">
+                <label for="query">Query</label>
+                <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
+            </div>
+
+            <div class="field">
+                <label for="date-slider">Date adjust</label>
+                <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
+            </div>
+
+            <div class="field">
+                <button id="submit">
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                </button>
+                <a id="save" class="secondary-action" href="#save">Save</a>
+            </div>
+        </form>
+    </header>
+
+    {% if results|count == 0 %}
+        <nav class="secondary">
+            <div class="warning">No results found.</div>
+        </nav>
+    {% endif %}
+
     <main>
-        {{ macros.svgSymbols("delete", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
-
-        <header class="app-nav">
-            <form id="visitors-form" method="get" action="{{ app_url }}">
-                {% if saved_queries|count > 0 %}
-                    <div id="saved-queries" class="field">
-                        <label for="saved">Saved queries</label>
-                        <select id="saved">
-                            <option value=""></option>
-                            {% for query in saved_queries %}
-                                <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
-                            {% endfor %}
-                        </select>
-
-                        <a id="delete-saved-query" href="#" hidden>
-                            <svg class="icon"><use xlink:href="#delete"></use></svg>
-                        </a>
-                    </div>
-                {% endif %}
-
-                <div class="field">
-                    <label for="query">Query</label>
-                    <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
-                </div>
-
-                <div class="field">
-                    <label for="date-slider">Date adjust</label>
-                    <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
-                </div>
-
-                <div class="field">
-                    <button id="submit">
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
-                    <a id="save" class="secondary-action" href="#save">Save</a>
-                </div>
-            </form>
-        </header>
-
-        {% if results|count == 0 %}
-            <nav class="secondary">
-                <div class="warning">No results found.</div>
-            </nav>
-        {% endif %}
-
         {% if results|count > 0 %}
             <section class="table-sleeve">
                 <table id="matches">

@@ -10,22 +10,22 @@
 {% endblock %}
 
 {% block page_body %}
+    <header class="app-nav">
+        <button
+            data-limit="{{ limit }}"
+            data-offset="{{ offset }}"
+        >Walk</button>
+        <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
+    </header>
+
+    <nav class="secondary">
+        <div>
+            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
+        </div>
+    </nav>
+
     <main>
-        <header class="app-nav">
-            <button
-                data-limit="{{ limit }}"
-                data-offset="{{ offset }}"
-            >Walk</button>
-            <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
-        </header>
-
-        <nav class="secondary">
-            <div>
-                <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
-            </div>
-        </nav>
-
-        <div id="headlines">
+        <section id="headlines">
             {% set ns = namespace(loop_count=1) %}
             {% for category in headlines %}
                 <div class="group">
@@ -45,7 +45,7 @@
                     </ol>
                 </div>
             {% endfor %}
-        </div>
+        </section>
 
         <footer class="align-center">
             <p class="align-center">Powered by <a href="https://newsapi.org">News API</a></p>

@@ -10,103 +10,100 @@
 {% endblock %}
 
 {% block page_body %}
-    <main>
+    {{ macros.svgSymbols("search", "delete", "icon-tag", "arrow-right", "arrow-left", "close", "globe") }}
 
-        {{ macros.svgSymbols("search", "delete", "icon-tag", "arrow-right", "arrow-left", "close", "globe") }}
+    <header class="app-nav">
+        <form method="get" action="{{ app_url }}">
+            <div class="field">
+                <label for="address">Keyword</label>
+                <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
+            </div>
+            <div class="field">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                </button>
+            </div>
 
-        <header class="app-nav">
-            <form method="get" action="{{ app_url }}">
+            <div class="options">
                 <div class="field">
-                    <label for="address">Keyword</label>
-                    <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
+                    <label for="order-rank">
+                        <input type="radio"
+                               id="order-rank"
+                               name="order"
+                               value="rank"
+                               {% if order == "rank" %}checked="checked"{% endif %}
+                        />
+                        Ranked
+                    </label>
                 </div>
                 <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
+                    <label for="order-date-desc">
+                        <input type="radio"
+                               id="order-date-desc"
+                               name="order"
+                               value="date-desc"
+                               {% if order == "date-desc" %}checked="checked"{% endif %}
+                        />
+                        Newest
+                    </label>
                 </div>
-
-                <div class="options">
-                    <div class="field">
-                        <label for="order-rank">
-                            <input type="radio"
-                                   id="order-rank"
-                                   name="order"
-                                   value="rank"
-                                   {% if order == "rank" %}checked="checked"{% endif %}
-                            />
-                            Ranked
-                        </label>
-                    </div>
-                    <div class="field">
-                        <label for="order-date-desc">
-                            <input type="radio"
-                                   id="order-date-desc"
-                                   name="order"
-                                   value="date-desc"
-                                   {% if order == "date-desc" %}checked="checked"{% endif %}
-                            />
-                            Newest
-                        </label>
-                    </div>
-                    <div class="field">
-                        <label for="order-date-asc">
-                            <input type="radio"
-                                   id="order-date-asc"
-                                   name="order"
-                                   value="date-asc"
-                                   {% if order == "date-asc" %}checked="checked"{% endif %}
-                            />
-                            Oldest
-                        </label>
-                    </div>
+                <div class="field">
+                    <label for="order-date-asc">
+                        <input type="radio"
+                               id="order-date-asc"
+                               name="order"
+                               value="date-asc"
+                               {% if order == "date-asc" %}checked="checked"{% endif %}
+                        />
+                        Oldest
+                    </label>
                 </div>
+            </div>
 
-            </form>
-        </header>
+        </form>
+    </header>
 
-        <nav class="secondary">
-            {% if count %}
-                <div>
-                    Showing {{ start_index }} – {{ end_index }}
-                    of {{ count|pluralize('bookmark', 'bookmarks') }}
-                    {%- if max_days %}
-                        added in the past {{ max_days // 30 }} months.
-                    {%- else -%}
-                        .
-                    {% endif %}
-                </div>
-            {% endif %}
-
-            {% if not bookmarks %}
-                <div class="warning">Nothing found.</div>
-            {% endif %}
-
-            <div>{{ macros.cancelLink(query, app_url) }}</div>
-
-            {% if general_query %}
-                <div>{{ general_query|websearch("google") }}</div>
-                <div>{{ general_query|websearch("bing") }}</div>
-            {% endif %}
-        </nav>
-
-
-
-        {% if recent_tags %}
-            <section>
-                <ul class="tag-list">
-                    {% for tag in recent_tags|sort %}
-                        <li>
-                            <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
-                            <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
-                        </li>
-                    {% endfor %}
-                    <li><a href="{{ app_url }}/taglist">view all</a></li>
-                </ul>
-            </section>
+    <nav class="secondary">
+        {% if count %}
+            <div>
+                Showing {{ start_index }} – {{ end_index }}
+                of {{ count|pluralize('bookmark', 'bookmarks') }}
+                {%- if max_days %}
+                    added in the past {{ max_days // 30 }} months.
+                {%- else -%}
+                    .
+                {% endif %}
+            </div>
         {% endif %}
 
-        <div class="bookmarks">
+        {% if not bookmarks %}
+            <div class="warning">Nothing found.</div>
+        {% endif %}
+
+        <div>{{ macros.cancelLink(query, app_url) }}</div>
+
+        {% if general_query %}
+            <div>{{ general_query|websearch("google") }}</div>
+            <div>{{ general_query|websearch("bing") }}</div>
+        {% endif %}
+    </nav>
+
+    {% if recent_tags %}
+        <nav class="secondary">
+            <ul class="tag-list">
+                {% for tag in recent_tags|sort %}
+                    <li>
+                        <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                        <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
+                    </li>
+                {% endfor %}
+                <li><a href="{{ app_url }}/taglist">view all</a></li>
+            </ul>
+        </nav>
+    {% endif %}
+
+    <main>
+        <section class="bookmarks">
             {% for bookmark in bookmarks %}
 
                 <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
@@ -150,9 +147,9 @@
                 </discardable-record>
 
             {% endfor %}
-        </div>
+        </section>
 
-        <div class="pagination">
+        <section class="pagination">
             {% if bookmarks %}
                 <p>Page {{ page }} of {{ total_pages }}</p>
             {% endif %}
@@ -183,7 +180,7 @@
                     <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
                 </a>
             {% endif %}
-        </div>
+        </section>
 
         {{ macros.queryPlan(query_plan) }}
     </main>

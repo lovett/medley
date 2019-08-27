@@ -13,29 +13,29 @@
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("binoculars", "search", "close") }}
+
+    <header class="app-nav">
+        <form class="search-form" method="get" action="/whois">
+            <div class="field">
+                <label for="address">IP or host</label>
+                <input type="text" id="address" name="address" value="{{ address }}"/>
+            </div>
+            <div class="field">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                </button>
+            </div>
+        </form>
+    </header>
+
+    <nav class="secondary">
+        <div>{{ macros.cancelLink(address, app_url) }}</div>
+    </nav>
+
     <main>
-        {{ macros.svgSymbols("binoculars", "search", "close") }}
-
-        <header class="app-nav">
-            <form class="search-form" method="get" action="/whois">
-                <div class="field">
-                    <label for="address">IP or host</label>
-                    <input type="text" id="address" name="address" value="{{ address }}"/>
-                </div>
-                <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
-                </div>
-            </form>
-        </header>
-
-        <nav class="secondary">
-            <div>{{ macros.cancelLink(address, app_url) }}</div>
-        </nav>
-
         {% if address %}
-            <div id="ip-report">
+            <section id="ip-report">
                 <dl>
                     {% if "customerRef" in whois.net %}
                         <dt>Owned By</dt>
@@ -121,7 +121,7 @@
                          data-region="{{ ip_facts.geo.map_region }}"
                     ></div>
                 {% endif %}
-            </div>
+            </section>
         {% endif %}
     </main>
 {% endblock %}

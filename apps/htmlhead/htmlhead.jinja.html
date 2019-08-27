@@ -16,44 +16,44 @@
 
 
 {% block page_body %}
+    {{ macros.svgSymbols("search", "close", "globe") }}
+
+    <header class="app-nav">
+        <form method="post" action="{{ app_url }}">
+            <div class="field">
+                <label for="url">URL</label>
+                <input type="text" id="url" name="url" value="{{ url|default('', true) }}" />
+            </div>
+
+            <div class="field">
+                <button>
+                    <svg class="icon icon-globe"><use xlink:href="#icon-globe"></use></svg>
+                </button>
+            </div>
+
+            <div class="options">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
+                </div>
+
+            </div>
+        </form>
+    </header>
+
+    <nav class="secondary">
+        {% if tags %}
+            <div>Found {{ tags|length }} tags.</div>
+        {% endif %}
+
+        <div>{{ macros.cancelLink(url, app_url) }}</div>
+    </nav>
+
     <main>
-        {{ macros.svgSymbols("search", "close", "globe") }}
-
-        <header class="app-nav">
-            <form method="post" action="{{ app_url }}">
-                <div class="field">
-                    <label for="url">URL</label>
-                    <input type="text" id="url" name="url" value="{{ url|default('', true) }}" />
-                </div>
-
-                <div class="field">
-                    <button>
-                        <svg class="icon icon-globe"><use xlink:href="#icon-globe"></use></svg>
-                    </button>
-                </div>
-
-                <div class="options">
-                    <div class="field">
-                        <label for="username">Username</label>
-                        <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
-                    </div>
-                    <div class="field">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
-                    </div>
-
-                </div>
-            </form>
-        </header>
-
-        <nav class="secondary">
-            {% if tags %}
-                <div>Found {{ tags|length }} tags.</div>
-            {% endif %}
-
-            <div>{{ macros.cancelLink(url, app_url) }}</div>
-        </nav>
-
         {% if tags %}
             <div class="table-sleeve">
                 <table class="key-value">

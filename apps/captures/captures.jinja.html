@@ -10,32 +10,31 @@
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search", "close") }}
+
+    <header class="app-nav">
+        <form method="get" action="{{ app_url }}">
+            <div class="field">
+                <label for="number">Request URI</label>
+                <input type="text" id="path" name="path" value="{{ path }}"/>
+            </div>
+            <div class="field">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                </button>
+            </div>
+        </form>
+    </header>
+
+    <nav class="secondary">
+        {% if not captures %}
+            <div class="warning">No captures found.</div>
+        {% endif %}
+
+        <div>{{ macros.cancelLink(path, app_url) }}</div>
+    </nav>
+
     <main>
-        {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search", "close") }}
-
-        <header class="app-nav">
-            <form method="get" action="{{ app_url }}">
-                <div class="field">
-                    <label for="number">Request URI</label>
-                    <input type="text" id="path" name="path" value="{{ path }}"/>
-                </div>
-                <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
-                </div>
-            </form>
-        </header>
-
-        <nav class="secondary">
-            {% if not captures %}
-                <div class="warning">No captures found.</div>
-            {% endif %}
-
-            <div>{{ macros.cancelLink(path, app_url) }}</div>
-        </nav>
-
-
         {% for capture in captures %}
             <section>
                 <div class="capture">
@@ -105,7 +104,7 @@
         {% endfor %}
 
         {% if captures %}
-            <div class="pagination">
+            <section class="pagination">
                 {% if newer_offset %}
                     <a href="{{ app_url }}?offset={{ newer_offset }}&path={{ path }}" rel="noreferrer" class="next">
                         <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
@@ -118,7 +117,7 @@
                         <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
                     </a>
                 {% endif %}
-            </div>
+            </section>
         {% endif %}
     </main>
 {% endblock %}

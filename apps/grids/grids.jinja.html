@@ -6,36 +6,36 @@
 {% endblock %}
 
 {% block page_body %}
+    <header class="app-nav">
+        <p>Available grids:</p>
+        <ul class="inline-list">
+            {% for name in names %}
+                <li><a href="?name={{ name }}">{{ name }}</a></li>
+            {% endfor %}
+        </ul>
+    </header>
+
+    {% if name and options["layout"] == "month" %}
+        <nav class="secondary">
+            <div>
+                <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
+                    Previous month
+                </a>
+            </div>
+            <div>
+                <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
+                    Next month
+                </a>
+            </div>
+            <div>
+                <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
+                    Now
+                </a>
+            </div>
+        </nav>
+    {% endif %}
+
     <main>
-        <header class="app-nav">
-            <p>Available grids:</p>
-            <ul class="inline-list">
-                {% for name in names %}
-                    <li><a href="?name={{ name }}">{{ name }}</a></li>
-                {% endfor %}
-            </ul>
-        </header>
-
-        {% if name and options["layout"] == "month" %}
-            <nav class="secondary">
-                <div>
-                    <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
-                        Previous month
-                    </a>
-                </div>
-                <div>
-                    <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
-                        Next month
-                    </a>
-                </div>
-                <div>
-                    <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
-                        Now
-                    </a>
-                </div>
-            </nav>
-        {% endif %}
-
         {% if rows %}
             <div class="table-sleeve">
                 <table class="grid">

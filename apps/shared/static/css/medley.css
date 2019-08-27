@@ -112,7 +112,7 @@ MAIN {
 NAV.secondary {
     display: flex;
     justify-content: flex-start;
-    padding-bottom: 1em;
+    padding: 0 1em 1em 1em;
 }
 
 NAV.secondary > DIV  {
@@ -223,6 +223,7 @@ TABLE TD {
 
 .app-nav {
     margin-bottom: 1em;
+    padding: 0 1em;
 }
 
 .app-nav > form {

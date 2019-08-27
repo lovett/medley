@@ -16,50 +16,49 @@
 {% endblock %}
 
 {% block page_body %}
-    <main>
-        {{ macros.svgSymbols("copy", "delete", "download", "new-item", "add-item", "close", "search") }}
-
-        {% if view == "search" %}
-            <header class="app-nav">
-                <form id="search-form">
-                    <div class="field-group">
-                        <div class="field">
-                            <label for="q">Key</label>
-                            <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
-                        </div>
-                    </div>
+    {{ macros.svgSymbols("copy", "delete", "download", "new-item", "add-item", "close", "search") }}
+    {% if view == "search" %}
+        <header class="app-nav">
+            <form id="search-form">
+                <div class="field-group">
                     <div class="field">
-                        <button>
-                            <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                        </button>
+                        <label for="q">Key</label>
+                        <input type="text" id="q" name="q" value="{{ q|default('', true) }}"/>
                     </div>
-                </form>
-            </header>
+                </div>
+                <div class="field">
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    </button>
+                </div>
+            </form>
+        </header>
 
-            <nav class="secondary">
-                {% if q %}
-                    <div>{{ macros.cancelLink(q or view == "add", app_url) }}</div>
-                {% endif %}
+        <nav class="secondary">
+            {% if q %}
+                <div>{{ macros.cancelLink(q or view == "add", app_url) }}</div>
+            {% endif %}
 
+            <div>
+                <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
+                    <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                    Add
+                </a>
+            </div>
+
+
+            {% if q and entries %}
                 <div>
-                    <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
-                        <svg class="icon"><use xlink:href="#add-item"></use></svg>
-                        Add
+                    <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
+                        <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+                        Export
                     </a>
                 </div>
+            {% endif %}
+        </nav>
+    {% endif %}
 
-
-                {% if q and entries %}
-                    <div>
-                        <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
-                            <svg class="icon"><use xlink:href="#icon-download"></use></svg>
-                            Export
-                        </a>
-                    </div>
-                {% endif %}
-            </nav>
-        {% endif %}
-
+    <main>
         {% if view == "add" %}
             <form id="insert-form" action="{{ app_url }}">
                 <div class="field">
