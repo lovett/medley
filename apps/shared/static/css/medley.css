@@ -412,15 +412,19 @@ TABLE TD {
     width: 25%;
 }
 
+.shortcuts {
+    font-size: .85em;
+    text-align: right;
+}
+
 .shortcuts A {
     display: inline-block;
     margin-right: 1em;
     padding: .5em 0;
 }
 
-.shortcuts {
-    font-size: .85em;
-    text-align: right;
+.shortcuts A:last-of-type {
+    margin-right: 0;
 }
 
 .smaller {

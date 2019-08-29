@@ -260,11 +260,6 @@ MEDLEY.visitors = (function () {
 
     return {
         init: function () {
-            document.getElementById('date-slider').addEventListener(
-                'input',
-                adjustQueryDate
-            );
-
             document.getElementById('save').addEventListener(
                 'click',
                 saveQuery

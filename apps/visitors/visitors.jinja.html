@@ -8,6 +8,7 @@
 
 {% block scripts %}
     {{ macros.staticAsset('visitors', 'visitors.js') }}
+    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
 {% endblock %}
 
 {% block page_body %}
@@ -34,11 +35,17 @@
             <div class="field">
                 <label for="query">Query</label>
                 <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
-            </div>
+                <div class="shortcuts">
+                    <a href="#"
+                       data-field="query"
+                       data-shortcut="query-date-backward"
+                    >Day before</a>
 
-            <div class="field">
-                <label for="date-slider">Date adjust</label>
-                <input id="date-slider" type="range" step="1" min="-30" max="0" value="0"/>
+                    <a href="#"
+                       data-field="query"
+                       data-shortcut="query-date-forward"
+                    >Day after</a>
+                </div>
             </div>
 
             <div class="field">
