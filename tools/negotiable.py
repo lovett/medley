@@ -64,16 +64,16 @@ class Tool(cherrypy.Tool):
             self.response_format = "text/plain"
             return
 
-        if "text/html" in accept:
-            self.response_format = "text/html"
-            return
-
         if "text/plain" in accept:
             self.response_format = "text/plain"
             return
 
         if "application/json" in accept:
             self.response_format = "application/json"
+            return
+
+        if "text/html" in accept or accept == "*/*":
+            self.response_format = "text/html"
             return
 
     def _finalize(self):
