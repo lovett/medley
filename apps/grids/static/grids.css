@@ -24,7 +24,7 @@
 
 /* Print layout */
 @media print {
-    .app-nav {
+    HEADER.app-nav, NAV.secondary {
         display: none;
     }
 
