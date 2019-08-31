@@ -87,8 +87,6 @@ class Controller:
 
         first_grid_name = next(islice(grids.items(), 1))[0]
 
-        print(first_grid_name)
-
         redirect_url = cherrypy.engine.publish(
             "url:internal",
             query={
