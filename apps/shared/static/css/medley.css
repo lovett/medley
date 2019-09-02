@@ -111,6 +111,7 @@ MAIN {
 
 NAV.secondary {
     display: flex;
+    flex-flow: row wrap;
     justify-content: flex-start;
     padding: 0 1em 1em 1em;
 }
@@ -239,7 +240,9 @@ TABLE TD {
 }
 
 .app-nav .options {
+    grid-column: span 2;
     display: flex;
+    flex-flow: row wrap;
     align-items: center;
 }
 
@@ -252,6 +255,11 @@ TABLE TD {
     margin-right: 1.5em;
     padding-bottom: 0;
 }
+
+.app-nav .options .field:last-of-type {
+    margin-right: 0;
+}
+
 
 .app-nav .options label {
     display: inline-block;

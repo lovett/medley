@@ -97,8 +97,8 @@
                         <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
                     </li>
                 {% endfor %}
-                <li><a href="{{ app_url }}/taglist">view all</a></li>
             </ul>
+            <a href="{{ app_url }}/taglist">view all</a>
         </nav>
     {% endif %}
 
@@ -112,30 +112,33 @@
                             {{ bookmark.title }}
                         </a>
 
-                        <div class="details">
-                            <time>
-                                {{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}
-                            </time>
-
-                            {% for tag in bookmark.tags or [] %}
+                        {% if bookmark.tags %}
+                        <div class="tags">
+                            {% for tag in bookmark.tags %}
                                 <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
                                     <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                     {{ tag }}
                                 </a>
                             {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="details">
+                            <div><discard-button tooltip="Delete this bookmark" /></div>
+
+                            <div>
+                                <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                            </div>
 
                             {% if bookmark.domain %}
-                                <p>
+                                <div>
                                     <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
-                                </p>
+                                </div>
                             {% endif %}
 
-                            <p>
+                            <div>
                                 <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
-                            </p>
-
-                            <discard-button tooltip="Delete this bookmark" />
-
+                            </div>
                         </div>
 
                         {% if bookmark.comments %}
