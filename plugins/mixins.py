@@ -20,7 +20,7 @@ class Sqlite:
         """
 
         return os.path.join(
-            cherrypy.config.get("database_dir"),
+            cherrypy.config.get("database_dir", "db"),
             name
         )
 
@@ -147,7 +147,7 @@ class Sqlite:
         """Get the query plan for a query."""
 
         return self._select(
-            "EXPLAIN QUERY PLAN {}".format(query),
+            f"EXPLAIN QUERY PLAN {query}",
             values
         )
 
@@ -159,7 +159,7 @@ class Sqlite:
         """
 
         checksum = cherrypy.engine.publish("checksum:string", query).pop()
-        return "cache_{}".format(checksum)
+        return f"cache_{checksum}"
 
     def _tableNames(self):
         """Get a list of tables in the database."""
@@ -172,7 +172,7 @@ class Sqlite:
     def _dropCacheTables(self):
         """Remove all existing cache tables"""
         delete_queries = [
-            ("DROP TABLE {}".format(table), ())
+            (f"DROP TABLE {table}", ())
             for table in self._tableNames()
             if table.startswith("cache_")
         ]
@@ -192,10 +192,10 @@ class Sqlite:
 
             # This delete is redundant with _dropCacheTables(), but it allows
             # a single cache to be cleaned up, instead of all of them.
-            cur.execute("DROP TABLE IF EXISTS {}".format(cache_table))
+            cur.execute(f"DROP TABLE IF EXISTS {cache_table}")
 
             cur.execute(
-                "CREATE TABLE {} AS {}".format(cache_table, query),
+                "CREATE TABLE {cache_table} AS {query}",
                 values
             )
 

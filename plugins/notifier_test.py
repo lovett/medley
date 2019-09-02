@@ -7,13 +7,13 @@ import cherrypy
 import plugins.notifier
 
 
-class TestUrl(unittest.TestCase):
+class TestNotifier(unittest.TestCase):
     """
     Tests for the notifier plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.notifier.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

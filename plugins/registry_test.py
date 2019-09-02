@@ -7,13 +7,13 @@ import cherrypy
 import plugins.registry
 
 
-class TestUrl(unittest.TestCase):
+class TestRegistry(unittest.TestCase):
     """
     Tests for the registry plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.registry.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

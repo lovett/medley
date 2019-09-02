@@ -7,13 +7,13 @@ import cherrypy
 import plugins.geography
 
 
-class TestUrl(unittest.TestCase):
+class TestGeography(unittest.TestCase):
     """
     Tests for the geography plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.geography.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

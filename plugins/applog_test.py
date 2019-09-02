@@ -7,13 +7,13 @@ import cherrypy
 import plugins.applog
 
 
-class TestUrl(unittest.TestCase):
+class TestApplog(unittest.TestCase):
     """
     Tests for the applog plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.applog.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

@@ -7,13 +7,13 @@ import cherrypy
 import plugins.bookmarks
 
 
-class TestUrl(unittest.TestCase):
+class TestBookmarks(unittest.TestCase):
     """
     Tests for the bookmarks plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.bookmarks.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

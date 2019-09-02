@@ -7,13 +7,13 @@ import cherrypy
 import plugins.maintenance
 
 
-class TestUrl(unittest.TestCase):
+class TestMaintenance(unittest.TestCase):
     """
     Tests for the maintenance plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.maintenance.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

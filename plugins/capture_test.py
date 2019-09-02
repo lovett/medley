@@ -7,13 +7,13 @@ import cherrypy
 import plugins.capture
 
 
-class TestUrl(unittest.TestCase):
+class TestCapture(unittest.TestCase):
     """
     Tests for the capture plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.capture.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

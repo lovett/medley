@@ -7,13 +7,13 @@ import cherrypy
 import plugins.audio
 
 
-class TestUrl(unittest.TestCase):
+class TestAudio(unittest.TestCase):
     """
     Tests for the audio plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.audio.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

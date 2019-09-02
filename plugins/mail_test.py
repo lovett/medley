@@ -7,13 +7,13 @@ import cherrypy
 import plugins.mail
 
 
-class TestUrl(unittest.TestCase):
+class TestMail(unittest.TestCase):
     """
     Tests for the mail plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.mail.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

@@ -7,13 +7,13 @@ import cherrypy
 import plugins.cdr
 
 
-class TestUrl(unittest.TestCase):
+class TestCdr(unittest.TestCase):
     """
     Tests for the cdr plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.cdr.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

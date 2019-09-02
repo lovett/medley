@@ -7,13 +7,13 @@ import cherrypy
 import plugins.urlfetch
 
 
-class TestUrl(unittest.TestCase):
+class TestUrlfetch(unittest.TestCase):
     """
     Tests for the urlfetch plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.urlfetch.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

@@ -7,13 +7,13 @@ import cherrypy
 import plugins.checksum
 
 
-class TestUrl(unittest.TestCase):
+class TestChecksum(unittest.TestCase):
     """
     Tests for the checksum plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.checksum.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

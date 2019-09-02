@@ -7,13 +7,13 @@ import cherrypy
 import plugins.jinja
 
 
-class TestUrl(unittest.TestCase):
+class TestJinja(unittest.TestCase):
     """
     Tests for the jinja plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.jinja.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

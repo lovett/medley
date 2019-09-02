@@ -3,17 +3,15 @@ Test suite for the mixins plugin
 """
 
 import unittest
-import cherrypy
-import plugins.mixins
 
 
-class TestUrl(unittest.TestCase):
+class TestMixins(unittest.TestCase):
     """
     Tests for the mixins plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        pass
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

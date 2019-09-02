@@ -7,13 +7,13 @@ import cherrypy
 import plugins.speak
 
 
-class TestUrl(unittest.TestCase):
+class TestSpeak(unittest.TestCase):
     """
     Tests for the speak plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.speak.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

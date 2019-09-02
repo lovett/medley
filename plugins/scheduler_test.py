@@ -7,13 +7,13 @@ import cherrypy
 import plugins.scheduler
 
 
-class TestUrl(unittest.TestCase):
+class TestScheduler(unittest.TestCase):
     """
     Tests for the scheduler plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.scheduler.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

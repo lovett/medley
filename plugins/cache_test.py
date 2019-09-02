@@ -7,13 +7,13 @@ import cherrypy
 import plugins.cache
 
 
-class TestUrl(unittest.TestCase):
+class TestCache(unittest.TestCase):
     """
     Tests for the cache plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.cache.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

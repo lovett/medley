@@ -7,13 +7,13 @@ import cherrypy
 import plugins.memorize
 
 
-class TestUrl(unittest.TestCase):
+class TestMemorize(unittest.TestCase):
     """
     Tests for the memorize plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.memorize.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""

@@ -7,13 +7,13 @@ import cherrypy
 import plugins.formatting
 
 
-class TestUrl(unittest.TestCase):
+class TestFormatting(unittest.TestCase):
     """
     Tests for the formatting plugin
     """
 
     def setUp(self):
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.formatting.Plugin(cherrypy.engine)
 
     def test_placeholder(self):
         """Placeholder to force pytest to generate a coverage file."""
