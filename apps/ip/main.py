@@ -43,10 +43,7 @@ class Controller:
                 "client_ip": client_ip,
                 "external_ip": external_ip,
             },
-            "text": "client_ip={}\nexternal_ip={}".format(
-                client_ip,
-                external_ip
-            ),
+            "text": f"client_ip={client_ip}\nexternal_ip={external_ip}",
             "html": ("ip.jinja.html", {
                 "client_ip": client_ip,
                 "external_ip": external_ip,

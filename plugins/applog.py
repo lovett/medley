@@ -59,10 +59,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         # Mirror the log message on the cherrypy log for convenience.
-        cherrypy.log("{}: {}".format(
-            source,
-            value
-        ))
+        cherrypy.log(f"{source}: {value}")
 
     def prune(self, cutoff_months=6):
         """Delete old records.
@@ -78,12 +75,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """DELETE FROM applog
             WHERE strftime('%s', created) < strftime('%s', 'now', ?)
             """,
-            ("-{} month".format(cutoff_months),)
+            (f"-{cutoff_months} month",)
         )
 
         cherrypy.engine.publish(
             "applog:add",
             "applog",
             "prune",
-            "pruned {} records".format(deletion_count)
+            f"pruned {deletion_count} records"
         )

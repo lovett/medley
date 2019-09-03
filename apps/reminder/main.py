@@ -84,7 +84,7 @@ class Controller:
             "group": "timer",
             "title": "Timer started",
             "body": message,
-            "expiresAt": "{} minutes".format(total_minutes)
+            "expiresAt": f"{total_minutes} minutes"
         }
 
         if notification_id:

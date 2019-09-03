@@ -39,9 +39,9 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         temp_file = tempfile.mkstemp(dir=self.temp_dir)
         self.temp_file = temp_file[1]
         self.empty_temp_dir = tempfile.mkdtemp(prefix="geodb-test")
-        self.download_url = "http://example.com/{}.gz".format(
-            os.path.basename(self.temp_file)
-        )
+
+        basename = os.path.basename(self.temp_file)
+        self.download_url = f"http://example.com/{basename}.gz"
         cherrypy.config["database_dir"] = self.temp_dir
 
     def tearDown(self):

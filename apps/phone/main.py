@@ -50,7 +50,7 @@ class Controller:
 
         location = cherrypy.engine.publish(
             "cache:get",
-            "phone:{}".format(area_code)
+            f"phone:{area_code}"
         ).pop()
 
         if location:
@@ -69,7 +69,7 @@ class Controller:
 
             cherrypy.engine.publish(
                 "cache:set",
-                "phone:{}".format(area_code),
+                f"phone:{area_code}",
                 {
                     "state_lookup": state_lookup,
                     "state_name_lookup": state_name_lookup

@@ -26,7 +26,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         title = title or ""
         reduced_title = title
         for char in "»|·—:-":
-            separator = " {} ".format(char)
+            separator = f" {char} "
             if separator in title:
                 segments = title.split(separator)
                 reduced_title = max(segments, key=len)

@@ -1,6 +1,6 @@
 """Key-value storage for app configuration and data."""
 
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 import cherrypy
 import pendulum
 from . import mixins
@@ -101,7 +101,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if fuzzy:
                 key = key.replace("*", "%")
             elif not exact:
-                key = "%{}%".format(key)
+                key = f"%{key}%"
 
             if exact:
                 sql += "AND key = ?"
@@ -126,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         else:
             sql += " ORDER BY rowid DESC"
 
-        sql += " LIMIT {}".format(limit)
+        sql += f" LIMIT {limit}"
 
         result = self._select(sql, params)
 
@@ -136,12 +136,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 row["value"]
                 for row in result
             }
-
-            # Go the extra mile for Python 3.5.
-            result = OrderedDict(sorted(
-                result.items(),
-                key=lambda t: t[0]
-            ))
 
         if as_multivalue_dict:
             multi_dict = defaultdict(list)
@@ -167,7 +161,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "registry",
-            "remove_key:{}".format(key),
+            f"remove_key:{key}",
             deletions
         )
 
@@ -183,7 +177,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "registry",
-            "remove_id:{}".format(rowid),
+            f"remove_id:{rowid}",
             deletions
         )
 

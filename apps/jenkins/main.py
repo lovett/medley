@@ -65,34 +65,33 @@ class Controller:
         group = "sysup"
         url = payload.get("jenkins_url")
         title = None
+        build_number = payload.get("build_number")
+        branch = payload.get("branch")
 
         if phase == "queued":
-            title = "Jenkins has queued {} for {}".format(name, action)
+            title = f"Jenkins has queued {name} for {action}"
 
         if phase == "started":
-            title = "Jenkins is {} {}".format(action, name)
+            title = f"Jenkins is {action} {name}"
 
         # When a job finishes successfully, link to the corresponding
         # site if known and fall back to the Jenkins URL if not.
         if phase == "finalized" and status == "success":
-            title = "Jenkins has finished {} {}".format(action, name)
+            title = f"Jenkins has finished {action} {name}"
             url = payload.get("site_url", url)
 
         # When a job fails, always link back to the Jenkins URL.
         if phase == "finalized" and status == "failure":
             group = "sysdown"
-            title = "Jenkins had trouble {} {}".format(action, name)
+            title = f"Jenkins had trouble {action} {name}"
 
         return {
             "group": group,
             "badge": "jenkins.svg",
             "url": url,
-            "localId": "jenkins.{}".format(payload["name"]),
+            "localId": f"jenkins.{payload['name']}",
             "title": title,
-            "body": "Build #{}, {}".format(
-                payload.get("build_number"),
-                payload.get("branch")
-            ),
+            "body": f"Build #{build_number}, {branch}"
         }
 
     @staticmethod
@@ -127,7 +126,7 @@ class Controller:
 
         result["site_url"] = cherrypy.engine.publish(
             "registry:first_value",
-            "site_url:{}:{}".format(result["name"], result["branch"])
+            f"site_url:{result['name']}:{result['branch']}"
         ).pop()
 
         if "mirror" in build.get("full_url").lower():

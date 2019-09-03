@@ -27,7 +27,7 @@ class Controller:
         except ValueError:
             raise cherrypy.HTTPError(
                 400,
-                "Unable to parse a date from {}".format(filename)
+                f"Unable to parse a date from {filename}"
             )
 
     def POST(self, start, end=None):

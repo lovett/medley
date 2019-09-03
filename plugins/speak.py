@@ -155,7 +155,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         replaced_statement = statement
         for search, replace in adjustment_pairs:
             replaced_statement = re.sub(
-                r"\b{}\b".format(search),
+                rf"\b{search}\b",
                 replace,
                 replaced_statement
             )
@@ -172,13 +172,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        voice_name = "{prefix} ({locale}, {name})".format(
-            prefix="Microsoft Server Speech Text to Speech Voice",
-            locale=locale,
-            name=self.voice_fonts[(locale, gender)]
-        )
+        prefix = "Microsoft Server Speech Text to Speech Voice"
+        name = self.voice_fonts[(locale, gender)]
+        voice_name = f"{prefix} ({locale}, {name})"
 
-        template = """
+        document = f"""
         <?xml version="1.0" ?>
         <speak version="1.0" xml:lang="{locale}">
           <voice
@@ -188,13 +186,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
           >{statement}</voice>
         </speak>
         """
-
-        document = template.format(
-            locale=locale,
-            gender=gender,
-            voice_name=voice_name,
-            statement=statement
-        )
 
         return document.strip().encode("utf-8")
 
@@ -384,16 +375,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     os.rmdir(dir_path)
                     dirs_pruned += 1
 
+        files_label = "file" if files_pruned == 1 else "files"
+        dirs_label = "directory" if dirs_pruned == 1 else "directories"
+
         cherrypy.engine.publish(
             "applog:add",
             "speak",
             "prune",
-            "pruned {} {} and {} {}".format(
-                files_pruned,
-                "file" if files_pruned == 1 else "files",
-                dirs_pruned,
-                "directory" if dirs_pruned == 1 else "directories"
-            )
+            f"pruned {files_pruned} {files_label}, {dirs_pruned} {dirs_label}"
         )
 
     @staticmethod

@@ -35,9 +35,9 @@ class BaseCherryPyTestCase(unittest.TestCase):
     """The parent for all test suites."""
 
     @staticmethod
-    def request(request_path='/', method='GET', app_path='',  # noqa:E501 pylint: disable=too-many-arguments,too-many-locals
+    def request(request_path='/', method='GET', app_path='',  # noqa:E501 pylint: disable=too-many-arguments,too-many-locals,dangerous-default-value
                 scheme='http', proto='HTTP/1.1', data=None,
-                headers=None, as_json=False, as_text=False,
+                headers={}, as_json=False, as_text=False,
                 json_body=None, **kwargs):
         """Send a request to the faux server."""
 
@@ -57,7 +57,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
             default_headers["content-type"] = "application/json"
 
         # Allow default headers to be removed
-        headers = default_headers.update(headers)
+        headers = {**default_headers, **headers}
 
         # If we have a POST/PUT request but no data
         # we urlencode the named arguments in **kwargs
@@ -99,7 +99,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         )
 
         try:
-            header_tuples = [(k, v) for k, v in headers.items()]
+            header_tuples = [(k, v) for k, v in headers.items() if v]
             response = request.run(
                 method,
                 request_path,
@@ -121,7 +121,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
         # may need additional parsing.
         result.body = response.collapse_body().decode("UTF-8")
 
-        if "json" in headers["Accept"]:
+        if "json" in headers.get("Accept"):
             try:
                 result.body = json.loads(result.body)
             except ValueError:

@@ -229,7 +229,7 @@ class Controller:
 
         ips = {record["ip"] for record in log_records}
 
-        keys = tuple("ip:{}".format(ip) for ip in ips)
+        keys = tuple(f"ip:{ip}" for ip in ips)
 
         return cherrypy.engine.publish(
             "registry:search",

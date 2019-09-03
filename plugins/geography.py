@@ -41,7 +41,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        sparql = """
+        sparql = f"""
         PREFIX dbp: <http://dbpedia.org/property/>
         PREFIX dbo: <http://dbpedia.org/ontology/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -49,11 +49,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ?s dbp:this ?o .
         ?s dbo:abstract ?abstract .
         ?s dbp:state ?_state_abbrev
-        FILTER (regex(str(?o), "{0}", "i"))
+        FILTER (regex(str(?o), "{area_code}", "i"))
         FILTER (langMatches(lang(?abstract), "en"))
         BIND( str(?_state_abbrev) as ?state_abbrev )
         }} LIMIT 1
-        """.format(area_code)
+        """
 
         response = cherrypy.engine.publish(
             "urlfetch:get",
@@ -90,16 +90,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        sparql = """
+        sparql = f"""
         PREFIX dbp:  <http://dbpedia.org/property/>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         SELECT ?state_name WHERE {{
             ?x rdfs:label ?state_name .
-            ?x dbp:isocode "US-{0}"^^rdf:langString .
+            ?x dbp:isocode "US-{abbreviation}"^^rdf:langString .
             FILTER (langMatches(lang(?state_name), "en"))
         }}
         LIMIT 1
-        """.format(abbreviation)
+        """
 
         response = cherrypy.engine.publish(
             "urlfetch:get",
@@ -131,7 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         keys = (
-            "country_code:alpha2:{}".format(abbreviation)
+            f"country_code:alpha2:{abbreviation}"
             for abbreviation in abbreviations
         )
 

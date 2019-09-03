@@ -79,9 +79,7 @@ class TestStartpageParser(unittest.TestCase):
         config = self.anonParser.parse(content)
 
         self.assertIn(
-            "{}http%3A//example.com%3Fkey1%3Dvalue1".format(
-                self.anonymizer_url
-            ),
+            f"{self.anonymizer_url}http%3A//example.com%3Fkey1%3Dvalue1",
             list(config["section1"].keys())
         )
 

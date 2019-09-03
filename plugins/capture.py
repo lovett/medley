@@ -83,7 +83,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             search_clause = ""
             placeholders = (limit, offset)
 
-        sql = """SELECT rowid, request_line,
+        sql = f"""SELECT rowid, request_line,
         request as 'request [binary]',
         response as 'response [binary]',
         created as 'created [datetime]',
@@ -92,7 +92,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM captures
         WHERE 1=1 {search_clause}
         ORDER BY rowid DESC
-        LIMIT ? OFFSET ?""".format(search_clause=search_clause)  # nosec
+        LIMIT ? OFFSET ?"""  # nosec
 
         result = self._select(sql, placeholders)
 

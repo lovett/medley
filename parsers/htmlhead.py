@@ -77,5 +77,5 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         if self.in_head and self.stack:
             tag, attrs, text = self.stack.pop()
-            text = "{} {}".format(text, data.strip()).strip()
+            text = f"{text} {data.strip()}".strip()
             self.stack.append((tag, attrs, text))

@@ -17,7 +17,7 @@ class Controller:
     def GET(*_, **kwargs):
         """Display a search form and lookup results."""
 
-        address = kwargs.get('address')
+        address = kwargs.get("address")
 
         if not address:
             return {
@@ -39,27 +39,29 @@ class Controller:
 
         if address_clean and not ip_address:
             try:
-                result = socket.gethostbyname_ex(address_clean)
+                result = socket.gethostbyname_ex(  # pylint: disable=no-member
+                    address_clean
+                )
                 ip_address = result[2][0]
             except OSError:
                 redirect_url = cherrypy.engine.publish("url:internal").pop()
                 raise cherrypy.HTTPRedirect(redirect_url)
 
-        whois_cache_key = "whois:{}".format(ip_address)
+        whois_cache_key = f"whois:{ip_address}"
 
         whois = cherrypy.engine.publish("cache:get", whois_cache_key).pop()
 
         if not whois:
             whois = cherrypy.engine.publish(
                 "urlfetch:get",
-                "http://whois.arin.net/rest/ip/{}".format(ip_address),
+                f"http://whois.arin.net/rest/ip/{ip_address}",
                 as_json=True
             ).pop()
 
             if whois:
                 cherrypy.engine.publish("cache:set", whois_cache_key, whois)
 
-        facts_cache_key = "ipfacts:{}".format(ip_address)
+        facts_cache_key = f"ipfacts:{ip_address}"
 
         facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
 
@@ -71,9 +73,11 @@ class Controller:
                 ip_address
             ).pop()
 
-            facts.update(reverse_ip)
+            if reverse_ip:
+                facts.update(reverse_ip)
 
-            cherrypy.engine.publish("cache:set", facts_cache_key, facts)
+            if facts:
+                cherrypy.engine.publish("cache:set", facts_cache_key, facts)
 
         visit_days = cherrypy.engine.publish(
             "logindex:count_visit_days",
@@ -83,7 +87,7 @@ class Controller:
         visitors_url = cherrypy.engine.publish(
             "url:internal",
             "/visitors",
-            {"query": "ip {}".format(ip_address)}
+            {"query": f"ip {ip_address}"}
         ).pop()
 
         return {

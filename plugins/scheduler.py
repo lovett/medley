@@ -77,7 +77,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
             "applog:add",
             "scheduler",
             "revive",
-            "Reviving {} events from cache".format(len(cached_events))
+            f"Reviving {len(cached_events)} events from cache"
         )
 
         for cached_event in cached_events:
@@ -187,10 +187,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return "{}.{}".format(
-            self.cache_prefix,
-            round(self.event.time, 3)
-        )
+        return "{self.cache_prefix}.{round(self.event.time, 3)}"
 
     @property
     def time_remaining(self):

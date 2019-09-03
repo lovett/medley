@@ -44,18 +44,14 @@ class Plugin(plugins.SimplePlugin):
         """Play a file. So far only WAVE is supported."""
 
         if not SIMPLE_AUDIO:
-            message = "Ignoring request to play {}".format(
-                path
-            )
-
-            cherrypy.log(message)
+            cherrypy.log(f"Ignoring request to play {path}")
             return
 
         cherrypy.engine.publish(
             "applog:add",
             "audio",
             "play",
-            "playing {}".format(path)
+            f"playing {path}"
         )
 
         wave_obj = SIMPLE_AUDIO.WaveObject.from_wave_file(path)

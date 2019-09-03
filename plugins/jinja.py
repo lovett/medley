@@ -22,7 +22,7 @@ class Plugin(plugins.SimplePlugin):
     """A CherryPy plugin for rendering Jinja2 templates."""
 
     def __init__(self, bus):
-        server_root = cherrypy.config.get("server_root")
+        server_root = cherrypy.config.get("server_root", "./")
 
         cache_dir = os.path.join(
             cherrypy.config.get("cache_dir", "cache"),
@@ -32,7 +32,7 @@ class Plugin(plugins.SimplePlugin):
         try:
             os.mkdir(cache_dir)
         except PermissionError:
-            raise SystemExit("Unable to create {} directory".format(cache_dir))
+            raise SystemExit(f"Unable to create {cache_dir} directory")
         except FileExistsError:
             pass
 
@@ -147,7 +147,7 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     def pluralize_filter(count, singular, plural=None, suffix='',
-                         number_format='{:,d}'):
+                         number_format=',d'):
         """Label a value with the singular or plural form of a word."""
 
         if not plural:
@@ -158,13 +158,7 @@ class Plugin(plugins.SimplePlugin):
         if suffix:
             suffix = ' ' + suffix
 
-        # Avoiding use of literal string interpolation for Python 3.5
-        # compatibility.
-        return (number_format + " {}{}").format(
-            count,
-            value,
-            suffix
-        )
+        return f"{count:{number_format}} {value}{suffix}"
 
     @staticmethod
     @jinja2.contextfilter
@@ -226,16 +220,16 @@ class Plugin(plugins.SimplePlugin):
                          target="_blank", with_icon=True):
         """Construct an offsite search URL for a term."""
 
+        escaped_value = html.escape(value)
+
         if engine == "google":
-            url = "https://www.google.com/search?q={}"
+            url = f"https://www.google.com/search?q={escaped_value}"
 
         if engine == "bing":
-            url = "https://www.bing.com/search?q={}"
+            url = f"https://www.bing.com/search?q={escaped_value}"
 
         if not url:
             raise jinja2.TemplateError("Unrecognized search engine")
-
-        url = url.format(html.escape(value))
 
         if url_only:
             return url
@@ -246,13 +240,9 @@ class Plugin(plugins.SimplePlugin):
             <use xlink:href="#icon-globe"></use>
             </svg>"""
 
-        template = """<a href="{}"
-        target="{}" rel="noopener noreferer"
-        >{} {}</a>"""
-
-        result = template.format(
-            url, target, icon, engine.capitalize()
-        )
+        result = f"""<a href="{url}"
+        target="{target}" rel="noopener noreferer"
+        >{icon} {engine.capitalize()}</a>"""
 
         if eval_ctx.autoescape:
             return jinja2.Markup(result)
@@ -264,9 +254,9 @@ class Plugin(plugins.SimplePlugin):
         """Format a US phone number as a human-readable string"""
 
         formats = {
-            7: lambda x: "{}-{}".format(x[:3], x[3:]),
-            10: lambda x: "({}) {}-{}".format(x[:3], x[3:6], x[6:]),
-            11: lambda x: "({}) {}-{}".format(x[1:4], x[4:7], x[7:]),
+            7: lambda x: f"{x[:3]}-{x[3:]}",
+            10: lambda x: f"({x[:3]}) {x[3:6]}-{x[6:]}",
+            11: lambda x: f"({x[:3]}) {x[4:7]}-{x[7:]}"
         }
 
         formatter = formats.get(len(value))
@@ -278,9 +268,9 @@ class Plugin(plugins.SimplePlugin):
         else:
             formatted_value = value
 
+        href = f"/phone?number={value}"
         if as_link and formatted_value != value:
-            template = """<a href="/phone?number={}" rel="noreferrer">{}</a>"""
-            return template.format(value, formatted_value)
+            return f'<a href="{href}" rel="noreferrer">{formatted_value}</a>'
 
         return formatted_value
 
@@ -291,7 +281,7 @@ class Plugin(plugins.SimplePlugin):
 
         encoded_query = self.urlencode_filter(query)
 
-        return "http://dbpedia.org/snorql?query={}".format(encoded_query)
+        return f"http://dbpedia.org/snorql?query={encoded_query}"
 
     @staticmethod
     def percentage_filter(value):
@@ -320,7 +310,7 @@ class Plugin(plugins.SimplePlugin):
             checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
         except IndexError:
             checksum = ""
-        return "{}?{}".format(url, checksum)
+        return f"{url}?{checksum}"
 
     @staticmethod
     @jinja2.contextfilter
@@ -364,9 +354,9 @@ class Plugin(plugins.SimplePlugin):
         result = record["logline"]
 
         # ip
-        link = """<a href="/visitors?query=ip+{0}"
+        link = f"""<a href="/visitors?query=ip+{0}"
         title="Search for visits from this address"
-        rel="noreferrer">{0}</a>""".format(record["ip"])
+        rel="noreferrer">{record['ip']}</a>"""
 
         result = result.replace(record["ip"], link)
 
@@ -402,11 +392,9 @@ class Plugin(plugins.SimplePlugin):
         if not value.startswith("http"):
             return value
 
-        return """<a href="{}" {}>{}</a>""".format(
-            self.anonymize_filter(None, value),
-            'target="_blank" rel="noreferrer"',
-            value
-        )
+        href = self.anonymize_filter(None, value)
+        return f"""<a href="{href}"
+        target="_blank" rel="noreferrer"'>{value}</a>"""
 
     def optional_qs_param_filter(self, value, key):
         """Return a URL querystring key-value pair if the value exists."""
@@ -414,7 +402,5 @@ class Plugin(plugins.SimplePlugin):
         if not value:
             return ''
 
-        return "&{}={}".format(
-            key,
-            self.urlencode_filter(value)
-        )
+        encoded_value = self.urlencode_filter(value)
+        return f"&{key}={encoded_value}"

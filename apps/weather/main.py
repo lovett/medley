@@ -39,7 +39,7 @@ class Controller:
 
         forecasts = {}
         for label, latlong in locations.items():
-            cache_key = "darksky_{}".format(latlong)
+            cache_key = f"darksky_{latlong}"
             answer = cherrypy.engine.publish(
                 "cache:get",
                 cache_key
@@ -50,10 +50,8 @@ class Controller:
                 continue
 
             latitude, longitude = latlong.split(",")
-            endpoint = "https://api.darksky.net/forecast/{}/{},{}".format(
-                api_key, latitude, longitude
-            )
-
+            endpoint = f"https://api.darksky.net/forecast/{api_key}/"
+            endpoint += f"{latitude},{longitude}"
             endpoint += "?lang=en&units=us&exclude=minutely"
 
             api_response = cherrypy.engine.publish(

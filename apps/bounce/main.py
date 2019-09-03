@@ -98,7 +98,7 @@ class Controller:
                 name = self.host_to_keyword(host)
 
         if group:
-            search_key = "bounce:{}:".format(group)
+            search_key = f"bounce:{group}:"
             bounces = cherrypy.engine.publish(
                 "registry:search",
                 search_key
@@ -107,7 +107,7 @@ class Controller:
             registry_url = cherrypy.engine.publish(
                 "url:internal",
                 "/registry",
-                {"q": "bounce:{}".format(group)}
+                {"q": f"bounce:{group}"}
             ).pop()
 
         departing_from = None
@@ -167,7 +167,7 @@ class Controller:
         if not name:
             raise cherrypy.HTTPError(400, "Invalid name")
 
-        key = "bounce:{}:{}".format(group, name)
+        key = f"bounce:{group}:{name}"
 
         cherrypy.engine.publish(
             "registry:add",

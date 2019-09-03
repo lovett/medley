@@ -53,7 +53,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "match",
-            "{} cache matches for {}".format(len(rows), key_prefix)
+            f"{len(rows)} cache matches for {key_prefix}"
         )
 
         return [row["value"] for row in rows]
@@ -74,7 +74,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 "applog:add",
                 "cache",
                 "get",
-                "hit for {}".format(key)
+                f"hit for {key}"
             )
             return row["value"]
 
@@ -82,7 +82,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "get",
-            "miss for {}".format(key)
+            f"miss for {key}"
         )
 
         return False
@@ -105,10 +105,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "set",
-            "cached record for {} for {} seconds".format(
-                key, lifespan_seconds
-            )
+            f"cached record for {key} for {lifespan_seconds} seconds"
         )
+
         return True
 
     def clear(self, key):
@@ -118,10 +117,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "clear",
-            "cleared {} records for {}".format(
-                deletion_count,
-                key
-            )
+            f"cleared {deletion_count} records for {key}"
         )
         return deletion_count
 
@@ -137,5 +133,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "prune",
-            "pruned {} records".format(deletion_count)
+            f"pruned {deletion_count} records"
         )

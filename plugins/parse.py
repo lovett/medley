@@ -250,14 +250,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         elif tokens[1] == "yesterday":
             reference_date = pendulum.yesterday()
 
-        return "datestamp BETWEEN '{}' AND '{}'".format(
-            reference_date.start_of('day').in_timezone('utc').format(
-                'YYYY-MM-DD-HH'
-            ),
-            reference_date.end_of('day').in_timezone('utc').format(
-                'YYYY-MM-DD-HH'
-            )
+        sql_start = reference_date.start_of('day').in_timezone('utc').format(
+            'YYYY-MM-DD-HH'
         )
+
+        sql_end = reference_date.end_of('day').in_timezone('utc').format(
+            'YYYY-MM-DD-HH'
+        )
+
+        return f"datestamp BETWEEN '{sql_start}' AND '{sql_end}'"
 
     @staticmethod
     def log_query_absolute_date(_string, _location, tokens):
@@ -276,7 +277,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         dates = tokens[1:]
-        date_interval = 'day'
+        date_interval = "day"
 
         timezone = cherrypy.engine.publish(
             "registry:first_value",
@@ -292,7 +293,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         for date in dates:
             ints = tuple(map(int, date))
             if len(date) == 2:
-                date_interval = 'month'
+                date_interval = "month"
                 year, month = ints
                 day = 1
 
@@ -301,26 +302,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             reference_date = pendulum.datetime(year, month, day, tz=timezone)
 
-            sql.append("datestamp BETWEEN '{}' AND '{}'""".format(
-                reference_date.start_of(
-                    date_interval
-                ).in_timezone(
-                    'utc'
-                ).format(
-                    'YYYY-MM-DD-HH'
-                ),
+            sql_start = reference_date.start_of(
+                date_interval
+            ).in_timezone("utc").format("YYYY-MM-DD-HH")
 
-                reference_date.end_of(
-                    date_interval
-                ).in_timezone(
-                    'utc'
-                ).format(
-                    'YYYY-MM-DD-HH'
-                )
-            ))
+            sql_end = reference_date.end_of(
+                date_interval
+            ).in_timezone("utc").format("YYYY-MM-DD-HH")
 
-        joined_sql = " OR ".join(sql)
-        return "({})".format(joined_sql)
+            sql.append(f"datestamp BETWEEN '{sql_start}' AND '{sql_end}'")
+
+        sql = " OR ".join(sql)
+        return f"({sql})"
 
     @staticmethod
     def log_query_numeric(_string, _location, tokens):
@@ -330,14 +323,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if tokens[1] == "not":
             values = tokens[2:]
-            sql = ["{} <> {}".format(field, value) for value in values]
+            sql = [f"{field} <> {value}" for value in values]
             joined_sql = " AND ".join(sql)
         else:
             values = tokens[1:]
-            sql = ["{} = {}".format(field, value) for value in values]
+            sql = [f"{field} = {value}" for value in values]
             joined_sql = " OR ".join(sql)
 
-        return "({})".format(joined_sql)
+        return f"({joined_sql})"
 
     @staticmethod
     def log_query_wildcard(_string, _location, tokens):
@@ -358,16 +351,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         sql = []
         for value in values:
             if value.startswith("%") or value.endswith("%"):
-                sql.append("{} {} '{}'".format(
-                    field, wildcard_operator, value
-                ))
+                sql.append(f"{field} {wildcard_operator} '{value}'")
             else:
-                sql.append("{} {} '{}'".format(
-                    field, equality_operator, value
-                ))
+                sql.append(f"{field} {equality_operator} '{value}'")
 
-        joined_sql = boolean_keyword.join(sql)
-        return "({})".format(joined_sql)
+        return f"({boolean_keyword.join(sql)})"
 
     @staticmethod
     def log_query_subquery(_string, _location, tokens):
@@ -380,13 +368,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         sql = ""
         if field == "reverse_domain":
-            values = ["'{}'".format(value) for value in tokens[1:]]
-            sql = """logs.ip IN (
+            values = [f"'{value}'" for value in tokens[1:]]
+            sql = f"""logs.ip IN (
                 SELECT ip
                 FROM reverse_ip
-                WHERE reverse_domain IN ({}))""".format(  # nosec
-                    ",".join(values)
-                )
+                WHERE reverse_domain
+                IN ({','.join(values)}))"""  # nosec
 
         return sql
 
@@ -404,14 +391,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if tokens[1] == "not":
             values = tokens[2:]
-            sql = ["{} <> '{}'".format(field, value) for value in values]
+            sql = [f"{field} <> '{value}'" for value in values]
             joined_sql = " AND ".join(sql)
         else:
             values = tokens[1:]
-            sql = ["{} = '{}'".format(field, value) for value in values]
+            sql = [f"{field} = '{value}'" for value in values]
             joined_sql = " OR ".join(sql)
 
-        return "({})".format(joined_sql)
+        return f"({joined_sql})"
 
     @staticmethod
     def to_dict(_string, _location, tokens):
@@ -440,7 +427,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         # Sanity check to make sure double-quoted fields are balanced.
         val = val.strip()
         if val.count('"') % 2 > 0:
-            val = '{}"'.format(val)
+            val = f'{val}"'
 
         # Sanity check to avoid problems with an empty double-quoted
         # string for the referrer field.
@@ -452,7 +439,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "applog:add",
                 "parse",
-                "fail:column:{}".format(exception.col),
+                f"fail:column:{exception.col}",
                 val
             )
 

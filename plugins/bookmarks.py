@@ -147,12 +147,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return False
 
         return self._selectOne(
-            """SELECT rowid, url, domain, title,
+            f"""SELECT rowid, url, domain, title,
             added as 'added [datetime]',
             updated as 'updated [datetime]',
             deleted as 'deleted [datetime]',
             tags, comments
-            FROM bookmarks WHERE {}""".format(where_clause),  # nosec
+            FROM bookmarks WHERE {where_clause}""",  # nosec
             values
         )
 
@@ -340,18 +340,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             placeholder_values += (query,)
 
-        sql = """SELECT b.url, b.domain, b.title,
+        sql = f"""SELECT b.url, b.domain, b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
         added as 'added [datetime]',
         updated as 'updated [datetime]'
-        FROM {}
-        WHERE {}
-        ORDER BY {}
-        LIMIT ? OFFSET ?""".format(  # nosec
-            from_sql,
-            where_sql,
-            order_sql
-        )
+        FROM {from_sql}
+        WHERE {where_sql}
+        ORDER BY {order_sql}
+        LIMIT ? OFFSET ?"""  # nosec
 
         placeholder_values += (limit, offset)
 
@@ -464,7 +460,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "bookmarks",
             "prune",
-            "pruned {} records".format(deletion_count)
+            f"pruned {deletion_count} records"
         )
 
         if deletion_count > 0:

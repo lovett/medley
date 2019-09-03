@@ -15,7 +15,7 @@ class Controller:
     @staticmethod
     def registry_key(page_name):
         """Format the name of a page as a registry key."""
-        return "startpage:{}".format(page_name)
+        return f"startpage:{page_name}"
 
     @staticmethod
     def new_page_template():

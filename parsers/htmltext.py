@@ -42,9 +42,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         trimmed_markup = markup.strip()
 
         if not trimmed_markup.startswith("<"):
-            trimmed_markup = "<p>{}</p>".format(
-                trimmed_markup
-            )
+            trimmed_markup = f"<p>{trimmed_markup}</p>"
 
         self.feed(trimmed_markup)
         return " ".join(self.result).strip()
@@ -63,9 +61,9 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         tag_name = tag
         if ids:
-            tag_name += "#{}".format(ids[0])
+            tag_name += f"#{ids[0]}"
         elif classes:
-            tag_name += ".{}".format(".".join(classes))
+            tag_name += f".{'.'.join(classes)}"
 
         self.stack.append(tag_name)
 

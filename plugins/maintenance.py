@@ -44,7 +44,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                     "applog:add",
                     "maintenance",
                     "db",
-                    "Skipped {}".format(file_name)
+                    f"Skipped {file_name}"
                 )
 
                 continue
@@ -56,9 +56,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 "applog:add",
                 "maintenance",
                 "db",
-                "Vacuumed and analyzed {}".format(
-                    self.db_path
-                )
+                f"Vacuumed and analyzed {self.db_path}"
             )
 
     @staticmethod

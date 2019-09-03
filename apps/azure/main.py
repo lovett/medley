@@ -22,7 +22,7 @@ class Controller:
         notification = {
             "group": "azure",
             "body": details.get("message", "").split("\n")[0],
-            "title": "Deployment to {}".format(details["siteName"])
+            "title": f"Deployment to {details['siteName']}"
         }
 
         azure_portal_url = cherrypy.engine.publish(

@@ -8,8 +8,9 @@ class Controller:
 
     name = "Headers"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(*_args, **_kwargs):
         """Display the headers of the current request"""
 
         headers = sorted(
@@ -19,7 +20,7 @@ class Controller:
 
         return {
             "json": headers,
-            "text": ["{}: {}".format(*header) for header in headers],
+            "text": [f"{header[0]}: {header[1]}" for header in headers],
             "html": ("headers.jinja.html", {
                 "headers": headers,
             })

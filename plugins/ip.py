@@ -27,7 +27,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         annotations = cherrypy.engine.publish(
             "registry:search",
-            "ip:{}".format(ip_address)
+            f"ip:{ip_address}"
         ).pop()
 
         facts = defaultdict()
@@ -86,10 +86,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         facts["geo"]["map_region"] = facts["geo"]["country_code"]
         if facts["geo"]["country_code"] == "US":
             if facts["geo"]["region_code"]:
-                facts["geo"]["map_region"] = "{}-{}".format(
-                    facts["geo"]["country_code"],
-                    facts["geo"]["region_code"]
-                )
+                country_code = facts["geo"]["country_code"]
+                region_code = facts["geo"]["region_code"]
+                facts["geo"]["map_region"] = f"{country_code}-{region_code}"
 
         return facts
 

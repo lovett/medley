@@ -1,5 +1,6 @@
 """Test suite for the whois app."""
 
+from collections import defaultdict
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -28,17 +29,9 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assertAllowedMethods(response, ("GET",))
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_default(self, publish_mock):
+    def test_default(self):
         """Make a request with no arguments"""
-        def side_effect(*args, **_):
-            """Side effects local function"""
 
-            if args[0] == "url:internal":
-                return ["/"]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
         response = self.request("/")
         self.assertEqual(response.code, 200)
 
@@ -64,10 +57,14 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "ip:facts":
+            if args[0] == "url:internal":
+                return ["/"]
+            if args[0] in ("ip:facts", "logindex:count_visit_days"):
                 return [{}]
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
+            if args[0] == "ip:reverse":
+                return [defaultdict()]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -84,7 +81,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """Request lookup of an invalid IP address"""
 
         def side_effect(*args, **_):
-            """Overrides to be returned by the mock"""
+            """Side effects local function"""
             if args[0] == "url:internal":
                 return ["/"]
             return mock.DEFAULT
@@ -135,7 +132,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", address="127.0.0.1")
 
-        print(render_mock.calls)
         self.assertEqual(
             helpers.html_var(render_mock, "ip_facts"),
             {"hello": "world"}

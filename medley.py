@@ -102,9 +102,7 @@ def setup():
     for path in config_candidates:
         if os.path.isfile(path):
             cherrypy.config.update(path)
-            cherrypy.log("Configuration overrides loaded from {}".format(
-                path
-            ))
+            cherrypy.log(f"Configuration overrides loaded from {path}")
 
     # Directory creation
     #
@@ -119,7 +117,7 @@ def setup():
             pass
         except PermissionError:
             raise SystemExit(
-                "Unable to create {} directory at {}".format(key, value)
+                f"Unable to create {key} directory at {value}"
             )
 
     # Mount the apps
@@ -128,7 +126,7 @@ def setup():
         if not os.path.isfile(os.path.join(app_root, app, "main.py")):
             continue
 
-        app_module = importlib.import_module("apps.{}.main".format(app))
+        app_module = importlib.import_module(f"apps.{app}.main")
 
         # Treat all controllers as exposed by default.
         # This is a Cherrypy-ism.
@@ -150,7 +148,7 @@ def setup():
         # The homepage app is unique. Its app name is not its url, and
         # its static path is not under its app path. It also has additional
         # configuration for serving the favicon and service worker.
-        app_path = "/{}".format(app)
+        app_path = f"/{app}"
         static_url = "/static"
         if app == "homepage":
             app_path = "/"

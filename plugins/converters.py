@@ -97,16 +97,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         result = []
         if hours > 0:
-            result.append("{} {}".format(hours, hours_label))
+            result.append(f"{hours} {hours_label}")
 
         if minutes > 0:
-            result.append("{} {}".format(minutes, minutes_label))
+            result.append(f"{minutes} {minutes_label}")
 
         if seconds > 0:
-            result.append("{} {}".format(seconds, seconds_label))
+            result.append(f"{seconds} {seconds_label}")
 
         if not result:
-            result.append("0 {}".format(seconds_label))
+            result.append(f"0 {seconds_label}")
 
         return ", ".join(result)
 

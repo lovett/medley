@@ -12,19 +12,14 @@ def log_runtime(func):
     def wrapper(*args, **kwargs):
         """Calculate elapsed time and write to the applog."""
 
-        source = '{}.{}.runtime'.format(
-            func.__module__,
-            func.__name__
-        )
         start = perf_counter()
         result = func(*args, **kwargs)
-        duration = perf_counter() - start
 
         cherrypy.engine.publish(
-            'applog:add',
-            source,
-            'runtime',
-            duration
+            "applog:add",
+            f"{func.__module__}.{func.__name__}.runtime",
+            "runtime",
+            perf_counter() - start
         )
 
         return result

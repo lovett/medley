@@ -180,11 +180,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         root = self.get_root()
 
-        log_file = "{}/{}/{}".format(
-            root,
-            log_date.strftime("%Y-%m"),
-            log_date.strftime("%Y-%m-%d.log")
-        )
+        subdir = log_date.strftime('%Y-%m')
+        file = log_date.strftime('%Y-%m-%d.log')
+        log_file = f"{root}/{subdir}/{file}"
 
         if not os.path.isfile(log_file):
             return False
@@ -320,7 +318,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "logindex",
             "ingest_file",
-            "Ingested {}".format(file_path)
+            f"Ingested {file_path}"
         )
 
     @decorators.log_runtime
@@ -350,7 +348,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "logindex",
             "reversal",
-            "{} unreversed ips".format(unreversed_ips)
+            f"{unreversed_ips} unreversed ips"
         )
 
         if unreversed_ips == 0:
@@ -409,7 +407,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "logindex",
             "parse",
-            "{} unparsed rows".format(records[0]["value"])
+            f"{records[0]['value']} unparsed rows"
         )
 
         if records[0]["value"] == 0:
@@ -536,15 +534,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query
         ).pop()
 
-        sql = """SELECT unix_timestamp, logs.ip,
+        sql = f"""SELECT unix_timestamp, logs.ip,
         host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
         region, city, latitude, longitude, cookie,
         referrer, referrer_domain, logline
         FROM logs
-        WHERE {}
-        ORDER BY unix_timestamp DESC
-        """.format(parsed_query)  # nosec
+        WHERE {parsed_query}
+        ORDER BY unix_timestamp DESC"""  # nosec
 
         query_plan = self._explain(sql, ())
         result = self._select(sql, ())
@@ -554,11 +551,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def query_reverse_ip(self, ips=()):
         """Look up the reverse hostname of an IP address."""
 
-        placeholders = "?, " * len(ips)
+        placeholders = ("?, " * len(ips))[:-2]
 
-        sql = """SELECT ip, reverse_domain
+        sql = f"""SELECT ip, reverse_domain
         FROM reverse_ip
-        WHERE ip IN ({})""".format(placeholders[:-2])  # nosec
+        WHERE ip IN ({placeholders})"""  # nosec
 
         result = self._select(sql, tuple(ips))
 
@@ -584,11 +581,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 query
             ).pop()
 
-            sql = """SELECT distinct ip, uri
+            sql = f"""SELECT distinct ip, uri
             FROM logs
-            WHERE {}
-            AND rowid BETWEEN ? AND ?
-            """.format(parsed_query)  # nosec
+            WHERE {parsed_query}
+            AND rowid BETWEEN ? AND ?"""  # nosec
 
             records = self._select(
                 sql,
@@ -599,22 +595,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 url = cherrypy.engine.publish(
                     "url:internal",
                     "/visitors",
-                    {"query": "ip {}\n{}".format(record["ip"], query)},
+                    {"query": f"ip {record['ip']}\n{query}"},
                     trailing_slash=True
                 ).pop()
 
-                local_id = "logindex-{}-{}".format(
-                    name,
-                    record["ip"]
-                )
+                local_id = f"logindex-{name}-{record['ip']}"
 
                 notification = {
                     "group": "web",
                     "title": "Logfile hit",
-                    "body": "{} viewed {}".format(
-                        record["ip"],
-                        record["uri"]
-                    ),
+                    "body": f"{record['ip']} viewed {record['uri']}",
                     "url": url,
                     "localId": local_id,
                 }

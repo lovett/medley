@@ -52,7 +52,7 @@ class Tool(cherrypy.Tool):
 
         # Help os.path.splitext see bare extensions.
         if request_path.startswith("/."):
-            request_path = "/index{}".format(request_path[1:])
+            request_path = f"/index{request_path[1:]}"
 
         _, extension = os.path.splitext(request_path)
 
@@ -104,14 +104,7 @@ class Tool(cherrypy.Tool):
         # Requests made on the command line using curl tend to collide
         # with the shell prompt.  Add some trailing newlines to
         # prevent this.
-        body_format = "{}"
-
-        if "curl" in cherrypy.request.headers.get("User-Agent", ""):
-            body_format += "\n\n"
-
-        cherrypy.response.body = body_format.format(
-            final_body
-        ).encode(self.charset)
+        cherrypy.response.body = f"{final_body}\n\n".encode(self.charset)
 
     @staticmethod
     def render_json(body):
@@ -129,7 +122,7 @@ class Tool(cherrypy.Tool):
         if isinstance(part, str):
             part = [part]
 
-        content_type = "text/plain;charset={}".format(self.charset)
+        content_type = f"text/plain;charset={self.charset}"
         cherrypy.response.headers["Content-Type"] = content_type
 
         return "\n".join([str(line) for line in part]) if part else None
@@ -163,7 +156,7 @@ class Tool(cherrypy.Tool):
 
         values["use_service_workers"] = cherrypy.config.get("service_workers")
 
-        content_type = "text/html;charset={}".format(self.charset)
+        content_type = f"text/html;charset={self.charset}"
         cherrypy.response.headers["Content-Type"] = content_type
 
         html = template.render(**values)
@@ -183,7 +176,7 @@ class Tool(cherrypy.Tool):
 
         max_age = body.get("max_age")
         if max_age:
-            cache_control = "private, max-age={}".format(max_age)
+            cache_control = f"private, max-age={max_age}"
             cherrypy.response.headers["Cache-Control"] = cache_control
 
         return html

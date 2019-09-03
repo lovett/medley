@@ -39,15 +39,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             values.append(src)
 
         if src_exclude:
-            src_filter = "AND src NOT IN ({})".format(
-                ",".join("?" * len(src_exclude))
-            )
+            exclusions = ",".join("?" * len(src_exclude))
+            src_filter = f"AND src NOT IN ({exclusions})"
             values.extend(src_exclude)
 
         if dst_exclude:
-            dst_filter = "AND dst NOT IN ({})".format(
-                ",".join("?" * len(dst_exclude))
-            )
+            exclusions = ",".join("?" * len(dst_exclude))
+            dst_filter = f"AND dst NOT IN ({exclusions})"
             values.extend(dst_exclude)
 
         query_str = query.substitute(
@@ -82,17 +80,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         src_filter = ""
 
         if dst_exclude:
-            dst_filter = "AND dst NOT IN ({})".format(
-                ",".join("?" * len(dst_exclude))
-            )
-
+            exclusions = ",".join("?" * len(dst_exclude))
+            dst_filter = f"AND dst NOT IN ({exclusions})"
             reversed_values.extend(dst_exclude)
 
         if src_exclude:
-            src_filter = "AND src NOT IN ({})".format(
-                ",".join("?" * len(src_exclude))
-            )
-
+            exclusions = ",".join("?" * len(src_exclude))
+            src_filter = f"AND src NOT IN ({exclusions})"
             reversed_values.extend(src_exclude)
 
         query_str = query.substitute(
@@ -122,7 +116,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LIMIT ?
         """
 
-        wildcard_number = "%{}".format(number)
+        wildcard_number = f"%{number}"
 
         return self._select(
             query,

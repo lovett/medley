@@ -67,23 +67,19 @@ class Plugin(plugins.SimplePlugin):
             scheme = parsed_url.scheme
 
         if scheme:
-            scheme = "{}://".format(scheme)
+            scheme = f"{scheme}://"
 
         # A non-root path is treated as a sub-path of the current app.
         if path and not path.startswith("/"):
-            path = "{}/{}".format(cherrypy.request.script_name, path)
+            path = f"{cherrypy.request.script_name}/{path}"
 
-        url = "{}{}{}".format(
-            scheme,
-            hostname,
-            path or cherrypy.request.script_name
-        )
+        url = f"{scheme}{hostname}{path or cherrypy.request.script_name}"
 
         if trailing_slash and not url.endswith("/"):
             url += "/"
 
         if query:
-            url = "{}?{}".format(url, urlencode(query))
+            url = f"{url}?{urlencode(query)}"
 
         request_headers = cherrypy.request.headers
         use_https = request_headers.get("X-Https", "") == "On"
@@ -92,6 +88,6 @@ class Plugin(plugins.SimplePlugin):
             use_https = request_headers.get("X-Forwarded-Proto", "") == "https"
 
         if use_https:
-            url = "https:{}".format(url.split(":", 1).pop())
+            url = f"https:{url.split(':', 1).pop()}"
 
         return url
