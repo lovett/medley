@@ -1,5 +1,7 @@
 """Schedule a notification for future delivery."""
 
+import random
+import string
 from urllib.parse import urlencode, parse_qs
 import cherrypy
 
@@ -78,17 +80,23 @@ class Controller:
         except (ValueError, TypeError):
             remember = 0
 
+        if not notification_id:
+            notification_id = ''.join(
+                random.choices(
+                    string.ascii_uppercase + string.digits,
+                    k=10
+                )
+            )
+
         # Send a notification immediately to confirm creation of the
         # reminder and make the time remaining visible.
         start_notification = {
             "group": "timer",
             "title": "Timer started",
             "body": message,
-            "expiresAt": f"{total_minutes} minutes"
+            "expiresAt": f"{total_minutes} minutes",
+            "localId": notification_id
         }
-
-        if notification_id:
-            start_notification["localId"] = notification_id
 
         cherrypy.engine.publish(
             "notifier:send",
@@ -163,5 +171,20 @@ class Controller:
         if result is False:
             cherrypy.response.status = 500
             return
+
+        deleted_notification = wanted_events[0].argument[1]
+
+        cancel_notification = {
+            "group": "timer",
+            "title": "Timer cancelled",
+            "body": deleted_notification.get("body"),
+            "expiresAt": f"10 seconds",
+            "localId": deleted_notification.get("localId")
+        }
+
+        cherrypy.engine.publish(
+            "notifier:send",
+            cancel_notification
+        )
 
         cherrypy.response.status = 204

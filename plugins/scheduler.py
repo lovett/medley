@@ -187,7 +187,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return "{self.cache_prefix}.{round(self.event.time, 3)}"
+        return f"{self.cache_prefix}.{round(self.event.time, 3)}"
 
     @property
     def time_remaining(self):
