@@ -22,9 +22,9 @@
 {% block page_body %}
     {{ macros.svgSymbols("delete") }}
 
-    {% if upcoming %}
-        <header class="app-nav">
-            <p>Upcoming</p>
+
+    <main>
+        {% if upcoming %}
             <div id="upcoming">
                 {% for event in upcoming %}
                     <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
@@ -35,18 +35,20 @@
                                     {{ event.time|localtime|dateformat("LT") }}
                                 </time>
                                 {{ event.argument[1].title }}
-                                <div class="remaining smaller">
+
+                                {% if event.argument[1].body %}
+                                    <p>{{ event.argument[1].body }}</p>
+                                {% endif %}
+                                <p class="remaining smaller">
                                     <countdown v-bind:expiration-seconds="{{ event.time }}" />
-                                </div>
+                                </p>
                             </div>
                         </div>
                     </discardable-record>
                 {% endfor %}
             </div>
-        </header>
-    {% endif %}
+        {% endif %}
 
-    <main>
         <reminder-form inline-template>
             <form ref="reminderForm" id="reminder-form" method="post" action="{{ app_url }}">
                 <div id="template">

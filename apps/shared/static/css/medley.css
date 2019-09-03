@@ -625,7 +625,6 @@ TABLE.natural-width {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: var(--white);
     transition: all .25s;
 }
 

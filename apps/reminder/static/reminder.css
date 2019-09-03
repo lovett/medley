@@ -1,12 +1,23 @@
 #upcoming {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    align-items: start;
+    background-color: #ccc;
+    margin: 0 -1em;
 }
 
 #upcoming > div:not([hidden]) {
     display: flex;
-    align-items: center;
+}
+
+#upcoming .upcoming-reminder {
+    padding: 0 1em;
+}
+
+#upcoming .upcoming-reminder:first-of-type {
+    margin-top: -1em;
+    padding-top: 2em;
+}
+
+#upcoming .upcoming-reminder:last-of-type {
+    padding-bottom: 2em;
 }
 
 #upcoming .summary {
