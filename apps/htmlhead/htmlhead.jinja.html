@@ -4,6 +4,10 @@
     {{ macros.staticAsset('htmlhead', 'htmlhead.css') }}
 {% endblock %}
 
+{% block scripts %}
+    {{ macros.staticAsset('htmlhead', 'htmlhead.js') }}
+{% endblock %}
+
 {% block app_message %}
     {% if failure_message %}
         <section id="app-message" class="error">{{ failure_message }}</section>
@@ -31,23 +35,32 @@
                 </button>
             </div>
 
-            <div class="options">
-                <div class="field">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
+            {% if not tags %}
+                <div class="options">
+                    <div class="field">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" value="{{ username|default('', true) }}"/>
+                    </div>
+                    <div class="field">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
+                    </div>
                 </div>
-                <div class="field">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" value="{{ password|default('', true) }}"/>
-                </div>
-
-            </div>
+            {% endif %}
         </form>
     </header>
 
     <nav class="secondary">
         {% if tags %}
-            <div>Found {{ tags|length }} tags.</div>
+            <div>
+                <form id="filter">
+                    <fieldset>
+                        <input type="text" name="filter" value="" />
+                        <button>Filter</button>
+                        <input type="reset" value="Reset" />
+                    </fieldset>
+                </form>
+            </div>
         {% endif %}
 
         <div>{{ macros.cancelLink(url, app_url) }}</div>
@@ -56,12 +69,12 @@
     <main>
         {% if tags %}
             <div class="table-sleeve">
-                <table class="key-value">
+                <table id="tags" class="key-value">
                     <tbody>
                         {% for tag, attributes, text in tags %}
-                            <tr>
+                            <tr data-tag-name="{{ tag }}">
                                 <th>
-                                    {{ loop.index }}. {{ tag }}
+                                    {{ tag }}
                                 </th>
                                 <td>
                                     {% if attributes %}
