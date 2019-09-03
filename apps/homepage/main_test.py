@@ -37,7 +37,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
     def test_returns_html(self, publish_mock):
@@ -46,7 +46,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         response = self.request("/")
         self.assertEqual(response.code, 200)
-        self.assertHtml(response)
+        self.assert_html(response)
 
     @mock.patch("cherrypy.engine.publish")
     def test_refuses_json(self, publish_mock):

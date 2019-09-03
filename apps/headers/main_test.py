@@ -27,24 +27,24 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     def test_returns_html(self):
         """GET returns text/html by default"""
         response = self.request("/")
-        self.assertHtml(response, "<table")
+        self.assert_html(response, "<table")
 
     def test_returns_json(self):
         """GET returns application/json if requested"""
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 200)
-        self.assertJson(response)
+        self.assert_json(response)
 
     def test_returns_text(self):
         """GET returns text/plain if requested"""
         response = self.request("/", as_text=True)
         self.assertEqual(response.code, 200)
-        self.assertText(response)
+        self.assert_text(response)
 
     def test_custom_header(self):
         """GET recognizes custom headers"""

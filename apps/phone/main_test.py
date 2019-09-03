@@ -28,7 +28,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
@@ -97,7 +97,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         )
         self.assertTrue(helpers.response_is_text(response))
         self.assertEqual(
-            response.body,
+            response.body.strip(),
             apps.phone.main.Controller.messages["invalid"]
         )
 

@@ -29,7 +29,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """Verify the controller's supported HTTP methods"""
 
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")

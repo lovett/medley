@@ -24,7 +24,7 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("POST",))
+        self.assert_allowed(response, ("POST",))
 
     def test_requires_site_name(self):
         """The request body must specify a site name"""

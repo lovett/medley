@@ -28,7 +28,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Only POST requests are allowed"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("POST",))
+        self.assert_allowed(response, ("POST",))
 
     def test_requires_json(self):
         """Request bodies must be JSON"""

@@ -25,7 +25,7 @@ class TestShared(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     def test_redirect(self):
         """GET redirects to the homepage"""

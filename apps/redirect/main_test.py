@@ -27,7 +27,7 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     def test_no_destination(self):
         """If no URL is provided, no redirect occurs."""

@@ -25,7 +25,7 @@ class TestStartpage(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET", "POST"))
+        self.assert_allowed(response, ("GET", "POST"))
 
 
 if __name__ == "__main__":

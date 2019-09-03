@@ -7,7 +7,7 @@ class ResponseAssertions(unittest.TestCase):
     """A container for additional test assertions."""
 
     @staticmethod
-    def assertType(response, expected_type):  # pylint: disable=invalid-name
+    def assert_type(response, expected_type):
         """The response contains the given content type header."""
         actual_type = response.headers.get("Content-Type")
         if actual_type != expected_type:
@@ -16,32 +16,32 @@ class ResponseAssertions(unittest.TestCase):
             )
 
     @staticmethod
-    def assertValueInBody(response, value):  # pylint: disable=invalid-name
+    def assert_value_in_body(response, value):
         """The given value appears in the response body."""
         if value not in response.body:
             raise AssertionError(
                 f'Did not find expected "{value}" in response body'
             )
 
-    def assertJson(self, response):  # pylint: disable=invalid-name
+    def assert_json(self, response):
         """The response is JSON."""
-        self.assertType(response, "application/json")
+        self.assert_type(response, "application/json")
 
-    def assertHtml(self, response, value=None):  # pylint: disable=invalid-name
+    def assert_html(self, response, value=None):
         """The restponse is HTML."""
-        self.assertType(response, "text/html;charset=utf-8")
+        self.assert_type(response, "text/html;charset=utf-8")
 
         if value:
-            self.assertValueInBody(response, value)
+            self.assert_value_in_body(response, value)
 
-    def assertText(self, response, value=None):  # pylint: disable=invalid-name
+    def assert_text(self, response, value=None):
         """The response is plain text."""
-        self.assertType(response, "text/plain;charset=utf-8")
+        self.assert_type(response, "text/plain;charset=utf-8")
 
         if value:
-            self.assertValueInBody(response, value)
+            self.assert_value_in_body(response, value)
 
-    def assertAllowedMethods(self, response, expected_verbs=()):  # noqa: E501 pylint: disable=invalid-name
+    def assert_allowed(self, response, expected_verbs=()):
         """The Allow header shouldn't contain any unexpected verbs
 
         Support for the HEAD method is provided by the framework.
@@ -59,7 +59,7 @@ class ResponseAssertions(unittest.TestCase):
         self.assertEqual(set(expected_verbs), set(allowed_verbs))
 
     @staticmethod
-    def assertExpiresHeader(response):  # pylint: disable=invalid-name
+    def assert_expires(response):
         """The value of the Expires header should match a standard format."""
 
         value = response.headers.get("Expires")

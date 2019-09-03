@@ -30,7 +30,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET", "POST"))
+        self.assert_allowed(response, ("GET", "POST"))
 
     def test_default(self):
         """The default view is a form to enter a URL."""

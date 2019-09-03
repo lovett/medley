@@ -146,7 +146,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("POST",))
+        self.assert_allowed(response, ("POST",))
 
     def test_rejects_html(self):
         """The request body must contain JSON"""

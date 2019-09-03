@@ -57,7 +57,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET",))
+        self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
     def test_registry_save(self, publish_mock):

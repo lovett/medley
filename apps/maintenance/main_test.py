@@ -2,8 +2,8 @@
 Test suite for the maintenance app
 """
 
-import mock
 import unittest
+import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -28,7 +28,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("POST",))
+        self.assert_allowed(response, ("POST",))
 
     def test_group_required(self):
         """The group parameter must be specified."""

@@ -26,7 +26,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assertAllowedMethods(response, ("GET", "POST"))
+        self.assert_allowed(response, ("GET", "POST"))
 
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
@@ -72,7 +72,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 transform="lower",
                                 value="TEST")
         self.assertTrue(helpers.response_is_text(response))
-        self.assertEqual(response.body, "test")
+        self.assertEqual(response.body.strip(), "test")
 
     def test_uppercase(self):
         """Input is converted to uppercase"""
@@ -81,7 +81,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 as_text=True,
                                 transform="upper",
                                 value="test")
-        self.assertEqual(response.body, "TEST")
+        self.assertEqual(response.body.strip(), "TEST")
 
     def test_urlencode(self):
         """Input is url-encoded"""
@@ -90,8 +90,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 as_text=True,
                                 transform="urlencode",
                                 value="this is a test")
-        print(response.body)
-        self.assertEqual(response.body, "this+is+a+test")
+        self.assertEqual(response.body.strip(), "this+is+a+test")
 
     def test_urldecode(self):
         """Input is url-encoded"""
@@ -100,7 +99,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 as_text=True,
                                 transform="urldecode",
                                 value="this+is+a+test")
-        self.assertEqual(response.body, "this is a test")
+        self.assertEqual(response.body.strip(), "this is a test")
 
     def test_capitalize(self):
         """Input is capitalized"""
@@ -109,7 +108,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 as_text=True,
                                 transform="capitalize",
                                 value="test Case")
-        self.assertEqual(response.body, "Test case")
+        self.assertEqual(response.body.strip(), "Test case")
 
     def test_title(self):
         """Input is converted to titlecase"""
@@ -118,7 +117,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
                                 as_text=True,
                                 transform="title",
                                 value="this iS a TEst 1999")
-        self.assertEqual(response.body, "This Is A Test 1999")
+        self.assertEqual(response.body.strip(), "This Is A Test 1999")
 
     def test_invalid_transform(self):
         """
@@ -135,7 +134,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
             value=val
         )
         self.assertEqual(response.code, 200)
-        self.assertEqual(response.body, val)
+        self.assertEqual(response.body.strip(), val)
 
     def test_params_required(self):
         """Transform and value parameters are required"""
