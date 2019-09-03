@@ -179,26 +179,6 @@ class Sqlite:
 
         self._multi(delete_queries)
 
-    def _selectToCache(self, query, values):
-        """Send the results of a query to a cache table
-
-        This is the sqlite way of doing "select into"
-        """
-        cache_table = self._cacheTable(query)
-
-        con = self._open()
-        with con:
-            cur = con.cursor()
-
-            # This delete is redundant with _dropCacheTables(), but it allows
-            # a single cache to be cleaned up, instead of all of them.
-            cur.execute(f"DROP TABLE IF EXISTS {cache_table}")
-
-            cur.execute(
-                "CREATE TABLE {cache_table} AS {query}",
-                values
-            )
-
     def _selectOne(self, query, values=()):
         """Issue a select query and return the first row."""
         result = self._select(query, values)
