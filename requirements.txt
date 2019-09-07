@@ -1,4 +1,4 @@
-CherryPy==18.1.2
+CherryPy==18.2.0
 Jinja2==2.10.1
 geoip2==2.9.0
 httplib2==0.13.1
