@@ -31,7 +31,7 @@ class Controller:
         elif q:
             entries = cherrypy.engine.publish(
                 "registry:search",
-                key=q
+                key=q.strip()
             ).pop()
         elif view != "add":
             roots = cherrypy.engine.publish(

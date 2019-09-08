@@ -1,7 +1,7 @@
 MEDLEY.registry = (function () {
     'use strict';
 
-    async function submitRecord (e) {
+    async function onInsertSubmit(e) {
         e.preventDefault();
 
         const keyField = document.getElementById('key');
@@ -27,14 +27,27 @@ MEDLEY.registry = (function () {
         }
     }
 
+    function onSearchSubmit(e) {
+        const queryField = document.getElementById('q');
+        queryField.value = queryField.value.trim();
+    }
+
     return {
         init: function () {
             const insertForm = document.getElementById('insert-form');
             if (insertForm) {
                 insertForm.addEventListener(
                     'submit',
-                    submitRecord
+                    onInsertRecord
                 );
+            }
+
+            const searchForm = document.getElementById('search-form');
+            if (searchForm) {
+                searchForm.addEventListener(
+                    'submit',
+                    onSearchSubmit
+                )
             }
 
             if (MEDLEY.focusAsYouType) {
