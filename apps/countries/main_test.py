@@ -25,6 +25,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
     def setUp(self):
         self.fixture = [{
+            "CLDR display name": "US",
             "Capital": "Washington",
             "Continent": "NA",
             "DS": "USA",
@@ -78,33 +79,11 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_called_with(
             "registry:add",
             "country_code:alpha2:US",
-            ("USA",),
+            ("US",),
             True
         )
 
-    def test_name_reduction(self):
-        """Verbose country names are replaced with more readable
-        alternatives."""
-
-        controller = apps.countries.main.Controller()
-
-        pairs = (
-            ("Russian Federation", "Russia"),
-            ("Republic of Korea", "Korea"),
-            ("United Kingdom of Lorem Ipsum Dolor", "UK"),
-            ("United States of America", "USA")
-        )
-
-        for long_name, short_name in pairs:
-            result, _ = controller.name_and_abbrev({
-                "official_name_en": long_name
-            })
-
-            self.assertEqual(result, short_name)
-
-    @mock.patch(
-
-        "cherrypy.engine.publish")
+    @mock.patch("cherrypy.engine.publish")
     def test_skip_record_without_name(self, publish_mock):
         """A record without a name field is skipped."""
 
@@ -157,7 +136,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_any_call(
             "registry:add",
             "country_code:alpha2:US",
-            ("USA",),
+            ("US",),
             True
         )
 

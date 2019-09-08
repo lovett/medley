@@ -16,34 +16,6 @@ class Controller:
                  "/core/country-codes/country-codes_json/data" \
                  "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
 
-    @staticmethod
-    def name_and_abbrev(code):
-        """Extract the name and 2-letter abbreviation from a country code."""
-
-        name = code.get("official_name_en")
-        abbrev = code.get("ISO3166-1-Alpha-2")
-
-        # Shorten long names.
-        if name:
-            name = name.split(" (")[0]
-
-            if name.startswith("Russian Federation"):
-                name = "Russia"
-
-            if name.startswith("Republic of Korea"):
-                name = "Korea"
-
-            if name.startswith("United Kingdom of"):
-                name = "UK"
-
-            if name == "United States of America":
-                name = "USA"
-
-            if "Special Administrative Region" in name:
-                name = "China"
-
-        return (name, abbrev)
-
     def GET(self, *_args, **_kwargs):
         """Request the country code list and populate the registry"""
 
@@ -73,7 +45,9 @@ class Controller:
             )
 
         for code in country_codes:
-            name, abbrev = self.name_and_abbrev(code)
+            name = code.get("CLDR display name")
+            abbrev = code.get("ISO3166-1-Alpha-2")
+
             if name and abbrev:
                 key = self.registry_key.format(abbrev)
                 cherrypy.engine.publish("registry:add", key, (name,), True)
