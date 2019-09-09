@@ -78,9 +78,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    def search(self, key=None, keys=(), value=None, limit=100, exact=False,
+    def search(self, key=None, keys=(), value=None, limit=25, exact=False,
                as_dict=False, as_value_list=False, as_multivalue_dict=False,
-               key_slice=0, sorted_by_key=False):
+               key_slice=0, sorted_by_key=False, include_count=False):
         """Search for records by key or value."""
 
         params = []
@@ -150,6 +150,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if as_value_list:
             result = [row["value"] for row in result]
+
+        if include_count:
+            count = self._count(sql, params)
+            return (count, result)
 
         return result
 

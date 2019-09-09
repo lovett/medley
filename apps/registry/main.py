@@ -15,6 +15,7 @@ class Controller:
 
         entries = ()
         roots = None
+        total_entries = None
         q = kwargs.get("q")
         uid = kwargs.get("uid")
         key = kwargs.get("key")
@@ -29,9 +30,11 @@ class Controller:
                 uid
             )
         elif q:
-            entries = cherrypy.engine.publish(
+            total_entries, entries = cherrypy.engine.publish(
                 "registry:search",
-                key=q.strip()
+                key=q.strip(),
+                include_count=True,
+                sorted_by_key=True
             ).pop()
         elif view != "add":
             roots = cherrypy.engine.publish(
@@ -42,6 +45,7 @@ class Controller:
             "html": ("registry.jinja.html", {
                 "q": q,
                 "uid": uid,
+                "total_entries": total_entries,
                 "entries": entries,
                 "view": view,
                 "key": key,

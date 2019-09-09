@@ -35,6 +35,17 @@
         </header>
 
         <nav class="secondary">
+            {% if q and entries %}
+                <div>
+                    {% if total_entries != entries|length %}
+                        Showing the first {{ entries|length }} of
+                    {% else %}
+                        Found
+                    {% endif %}
+                    {{ total_entries|pluralize('entry', 'entries') }}.
+                </div>
+                {% endif %}
+
             {% if q %}
                 <div>{{ macros.cancelLink(q or view == "add", app_url) }}</div>
             {% endif %}
@@ -45,7 +56,6 @@
                     Add
                 </a>
             </div>
-
 
             {% if q and entries %}
                 <div>

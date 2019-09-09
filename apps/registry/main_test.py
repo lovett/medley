@@ -74,7 +74,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [[{"key": "abc456", "value": "test"}]]
+                return [(1, [{"key": "abc456", "value": "test"}])]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
