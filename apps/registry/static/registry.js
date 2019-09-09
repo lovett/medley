@@ -27,11 +27,6 @@ MEDLEY.registry = (function () {
         }
     }
 
-    function onSearchSubmit(e) {
-        const queryField = document.getElementById('q');
-        queryField.value = queryField.value.trim();
-    }
-
     return {
         init: function () {
             const insertForm = document.getElementById('insert-form');
@@ -40,14 +35,6 @@ MEDLEY.registry = (function () {
                     'submit',
                     onInsertRecord
                 );
-            }
-
-            const searchForm = document.getElementById('search-form');
-            if (searchForm) {
-                searchForm.addEventListener(
-                    'submit',
-                    onSearchSubmit
-                )
             }
 
             if (MEDLEY.focusAsYouType) {

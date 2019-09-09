@@ -12,6 +12,16 @@ var MEDLEY = (function () {
         }
     };
 
+    function preSubmit(e) {
+        const form = e.target;
+        const fields = form.querySelectorAll('input, textarea');
+
+        Array.from(fields).forEach((field) => {
+            field.value = field.value.trim();
+            console.log(field.value);
+        });
+    };
+
     return {
         setSuccessMessage: function (message) {
             const el = document.getElementById('app-message');
@@ -33,6 +43,11 @@ var MEDLEY = (function () {
             document.addEventListener(
                 'keydown',
                 shortcuts
+            );
+
+            document.addEventListener(
+                'submit',
+                preSubmit
             );
         }
     }
