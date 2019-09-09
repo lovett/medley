@@ -33,6 +33,16 @@ class Plugin(plugins.SimplePlugin):
         auth = kwargs.get("auth")
         headers = kwargs.get("headers")
         params = kwargs.get("params")
+        cache_lifespan = kwargs.get("cache_lifespan", 0)
+
+        if cache_lifespan > 0:
+            response = cherrypy.engine.publish(
+                "cache:get",
+                url
+            ).pop()
+
+            if response:
+                return response
 
         request_headers = {
             "User-Agent": "Mozilla/5.0 (compatible; python)",
@@ -48,7 +58,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "get",
-            "Requesting {}".format(url)
+            f"Requesting {url}"
         )
 
         try:
@@ -62,17 +72,6 @@ class Plugin(plugins.SimplePlugin):
 
             req.raise_for_status()
 
-            if as_object:
-                return req
-
-            if req.status_code == 204:
-                return True
-
-            if as_json:
-                return req.json()
-
-            return req.text
-
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
                 "applog:add",
@@ -82,6 +81,24 @@ class Plugin(plugins.SimplePlugin):
             )
 
             return None
+
+        if as_object:
+            return req
+
+        if req.status_code == 204:
+            return True
+
+        if as_json:
+            if cache_lifespan > 0:
+                cherrypy.engine.publish(
+                    "cache:set",
+                    url,
+                    req.json(),
+                    lifespan_seconds=cache_lifespan
+                )
+            return req.json()
+
+        return req.text
 
     @staticmethod
     def get_file(url, destination, as_json=False, **kwargs):
@@ -107,9 +124,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "get_file",
-            "Downloading {}".format(
-                url
-            )
+            f"Downloading {url}"
         )
 
         download_path = os.path.join(
@@ -175,7 +190,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "post",
-            "Posting to {}".format(url)
+            f"Posting to {url}"
         )
 
         try:
