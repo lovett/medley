@@ -20,10 +20,13 @@ class Controller:
         tags = kwargs.get('tags')
         comments = kwargs.get('comments')
 
+        if url:
+            url = url.strip()
+
         if title:
             title = cherrypy.engine.publish(
                 "markup:plaintext",
-                title,
+                title.strip(),
                 url
             ).pop()
 
@@ -34,7 +37,8 @@ class Controller:
 
         if tags:
             tags = cherrypy.engine.publish(
-                "markup:plaintext", tags
+                "markup:plaintext",
+                tags.strip()
             ).pop()
 
         # Discard comment if it came from a meta description tag on Reddit,
@@ -45,7 +49,7 @@ class Controller:
         if comments:
             comments = cherrypy.engine.publish(
                 "markup:plaintext",
-                comments
+                comments.strip()
             ).pop()
             comments = re.sub(r"\s+", " ", comments).strip()
             comments = re.sub(r",(\w)", ", \\1", comments)

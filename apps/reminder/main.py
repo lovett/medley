@@ -125,11 +125,11 @@ class Controller:
 
         if remember == 1:
             registry_value = urlencode({
-                "message": message,
+                "message": message.strip(),
                 "minutes": total_minutes,
-                "comments": comments,
+                "comments": comments.strip(),
                 "notification_id": notification_id,
-                "url": url
+                "url": url.strip()
             })
 
             cherrypy.engine.publish(

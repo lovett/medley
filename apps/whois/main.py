@@ -24,7 +24,7 @@ class Controller:
                 "html": ("whois.jinja.html", {})
             }
 
-        address_unquoted = urllib.parse.unquote_plus(address).lower()
+        address_unquoted = urllib.parse.unquote_plus(address.strip()).lower()
 
         # The address could be an IP or a hostname
         try:

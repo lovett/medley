@@ -9,16 +9,18 @@ class Controller:
 
     name = "HTML Head"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(*_args, **_kwargs):
         """Present a form for specifying a URL to fetch."""
 
         return {
             "html": ("htmlhead.jinja.html", {})
         }
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def POST(self, url=None, username=None, password=None):
+    def POST(url=None, username=None, password=None):
         """Request an HTML page and display its the contents of its head
         section.
         """
@@ -31,6 +33,7 @@ class Controller:
             auth = (username, password)
 
         if url:
+            url = url.strip()
             response = cherrypy.engine.publish(
                 "urlfetch:get",
                 url,

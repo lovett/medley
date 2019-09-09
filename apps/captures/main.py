@@ -18,6 +18,9 @@ class Controller:
         cid = kwargs.get('cid')
         offset = int(kwargs.get('offset', 0))
 
+        if path:
+            path = path.strip()
+
         if cid:
             captures = cherrypy.engine.publish(
                 "capture:get",

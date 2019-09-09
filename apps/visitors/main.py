@@ -22,6 +22,9 @@ class Controller:
 
         query = kwargs.get('query')
 
+        if query:
+            query = query.strip()
+
         site_domains = cherrypy.engine.publish(
             "registry:search",
             "logindex:site_domain",

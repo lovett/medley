@@ -21,6 +21,8 @@ class Controller:
         """
 
         number = kwargs.get('number')
+        if number:
+            number = number.strip()
 
         sanitized_number = cherrypy.engine.publish(
             "formatting:phone_sanitize",

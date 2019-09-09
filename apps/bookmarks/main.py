@@ -37,6 +37,9 @@ class Controller:
         offset = (page - 1) * per_page
         recent_tags = ()
 
+        if query:
+            query = query.strip()
+
         if args == ('taglist',):
             return self.taglist()
 

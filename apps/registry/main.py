@@ -30,9 +30,10 @@ class Controller:
                 uid
             )
         elif q:
+            q = q.strip()
             total_entries, entries = cherrypy.engine.publish(
                 "registry:search",
-                key=q.strip(),
+                key=q,
                 include_count=True,
                 sorted_by_key=True
             ).pop()

@@ -62,12 +62,12 @@ class Controller:
         }
 
     @cherrypy.tools.negotiable()
-    def POST(self, transform, value):
+    def POST(self, transform, value=''):
         """Perform a transformation and display the result"""
 
         transformer = self.transforms.get(transform, lambda x: x)
 
-        result = transformer(value)
+        result = transformer(value.strip())
 
         return {
             "json": {"result": result},
