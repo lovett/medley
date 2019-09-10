@@ -59,19 +59,20 @@ MEDLEY.startpage = (function () {
      * Prefix or unprefix the anonymizer URL from eligible links.
      */
     function toggleAnonymizer (e) {
-        for (let i=0; i < this.links.length; i++) {
-            if (parseInt(links[i].dataset.anonable, 10) === -1) {
+        for (let i=0; i < pageLinks.length; i++) {
+            const link = pageLinks[i];
+            if (parseInt(link.dataset.anonable, 10) === -1) {
                 continue;
             }
 
-            let href = decodeURIComponent(links[i].getAttribute('href'));
-            href = href.replace(anonymizer_url, '');
+            let href = decodeURIComponent(link.getAttribute('href'));
+            href = href.replace(anonymizerUrl, '');
 
             if (e.target.checked) {
-                href = anonymizer_url + encodeURIComponent(href);
+                href = anonymizerUrl + encodeURIComponent(href);
             }
 
-            links[i].setAttribute('href', href);
+            link.setAttribute('href', href);
         }
     }
 
@@ -79,12 +80,12 @@ MEDLEY.startpage = (function () {
      * Toggle element visibility when the page goes to the offline state.
      */
     function whenOffline() {
-        for (let i=0; i < this.onlineOnly.length; i++) {
-            this.onlineOnly[i].classList.add('hidden');
+        for (let i=0; i < onlineOnly.length; i++) {
+            onlineOnly[i].classList.add('hidden');
         }
 
-        for (let i=0; i < this.offlineOnly.length; i++) {
-            this.offlineOnly[i].classList.remove('hidden');
+        for (let i=0; i < offlineOnly.length; i++) {
+            offlineOnly[i].classList.remove('hidden');
         }
     }
 
@@ -93,11 +94,11 @@ MEDLEY.startpage = (function () {
      */
     function whenOnline() {
         for (let i=0; i < onlineOnly.length; i++) {
-            this.onlineOnly[i].classList.remove('hidden');
+            onlineOnly[i].classList.remove('hidden');
         }
 
         for (let i=0; i < offlineOnly.length; i++) {
-            this.offlineOnly[i].classList.add('hidden');
+            offlineOnly[i].classList.add('hidden');
         }
     }
 
@@ -105,26 +106,26 @@ MEDLEY.startpage = (function () {
         init: function () {
             displayLastModified();
 
-            this.pageLinks = document.getElementsByTagName('A');
+            pageLinks = document.getElementsByTagName('A');
 
             // Determine the anonymizer URL
             const nodes = document.getElementsByTagName('META');
             for (let i=0; i < nodes.length; i++) {
                 if (nodes[i].getAttribute('name') === 'anonymizer') {
-                    this.anonymizer_url = nodes[i].getAttribute('content');
+                    anonymizerUrl = nodes[i].getAttribute('content');
                     break;
                 }
             }
 
-            if (this.anonymizer_url) {
+            if (anonymizerUrl) {
                 const anonymizeCheckbox = document.getElementById('anonymize');
                 anonymizeCheckbox.removeAttribute('disabled');
                 anonymizeCheckbox.setAttribute('checked', true);
 
                 // Links that are not initially anonymized should always remain so
-                for (let i=0; i < this.pageLinks.length; i++) {
-                    const href = this.pageLinks[i].getAttribute('href');
-                    this.pageLinks[i].dataset.anonable = href.indexOf(this.anonymizer_url);
+                for (let i=0; i < pageLinks.length; i++) {
+                    const href = pageLinks[i].getAttribute('href');
+                    pageLinks[i].dataset.anonable = href.indexOf(anonymizerUrl);
                 }
 
                 anonymizeCheckbox.addEventListener('click', toggleAnonymizer);
@@ -152,8 +153,8 @@ MEDLEY.startpage = (function () {
             }
 
             // Hide the edit link when offline
-            this.onlineOnly = document.querySelectorAll('.online-only');
-            this.offlineOnly = document.querySelectorAll('.offline-only');
+            onlineOnly = document.querySelectorAll('.online-only');
+            offlineOnly = document.querySelectorAll('.offline-only');
             if (navigator.onLine === false) {
                 whenOffline();
             }
