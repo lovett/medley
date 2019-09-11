@@ -79,6 +79,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["sane_callerid"] = self.sane_callerid_filter
         self.env.filters["autolink"] = self.autolink_filter
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
+        self.env.filters["unescape"] = self.unescape
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -404,3 +405,15 @@ class Plugin(plugins.SimplePlugin):
 
         encoded_value = self.urlencode_filter(value)
         return f"&{key}={encoded_value}"
+
+    @staticmethod
+    @jinja2.evalcontextfilter
+    def unescape(eval_ctx, value):
+        """De-entify HTML"""
+
+        result = html.unescape(value)
+
+        if eval_ctx.autoescape:
+            return jinja2.Markup(result)
+
+        return result
