@@ -17,7 +17,7 @@ class Controller:
         exclude = int(kwargs.get('exclude', 0))
         sources = kwargs.get('sources')
 
-        records, total = cherrypy.engine.publish(
+        (records, total, query_plan) = cherrypy.engine.publish(
             "applog:search",
             offset=offset,
             sources=sources.split(' ') if sources else None,
@@ -57,6 +57,7 @@ class Controller:
                 "newer_offset": newer_offset,
                 "older_offset": older_offset,
                 "newer_url": newer_url,
-                "older_url": older_url
+                "older_url": older_url,
+                "query_plan": query_plan
             })
         }

@@ -2,6 +2,7 @@
 
 import cherrypy
 from . import mixins
+from . import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -62,6 +63,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         # Mirror the log message on the cherrypy log for convenience.
         cherrypy.log(f"{source}: {value}")
 
+    @decorators.log_runtime
     def prune(self, cutoff_months=6):
         """Delete old records.
 
@@ -86,6 +88,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             f"pruned {deletion_count} records"
         )
 
+    @decorators.log_runtime
     def search(self, sources=(), offset=0, limit=20, exclude=0):
         """View records in reverse chronological order."""
 
@@ -105,12 +108,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         created as 'created [datetime]'
         FROM applog
         {where_sql}
-        ORDER BY created DESC
+        ORDER BY rowid DESC
         LIMIT ? OFFSET ?"""
 
         placeholder_values += (limit, offset)
 
         return (
             self._select(sql, placeholder_values),
-            self._count(sql, placeholder_values)
+            self._count(sql, placeholder_values),
+            self._explain(sql, placeholder_values)
         )
