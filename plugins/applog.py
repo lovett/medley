@@ -35,6 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("applog:add", self.add)
         self.bus.subscribe("applog:get_newest", self.get_newest)
         self.bus.subscribe("applog:prune", self.prune)
+        self.bus.subscribe("applog:search", self.search)
 
     def get_newest(self, source, key):
         """Retrieve messages by key."""
@@ -83,4 +84,33 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog",
             "prune",
             f"pruned {deletion_count} records"
+        )
+
+    def search(self, sources=(), offset=0, limit=20, exclude=0):
+        """View records in reverse chronological order."""
+
+        where_sql = "WHERE 1=1"
+        placeholder_values = ()
+
+        if sources:
+            placeholders = ("?, " * len(sources))[:-2]
+            if exclude == 1:
+                where_sql += f" AND source NOT IN ({placeholders})"
+            else:
+                where_sql += f" AND source IN ({placeholders})"
+
+            placeholder_values += tuple(sources)
+
+        sql = f"""SELECT key, value, source,
+        created as 'created [datetime]'
+        FROM applog
+        {where_sql}
+        ORDER BY created DESC
+        LIMIT ? OFFSET ?"""
+
+        placeholder_values += (limit, offset)
+
+        return (
+            self._select(sql, placeholder_values),
+            self._count(sql, placeholder_values)
         )

@@ -1,0 +1,102 @@
+{% extends "base.jinja.html" %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("close", "search", "arrow-right", "arrow-left") }}
+
+    <header class="app-nav">
+        <form method="get" action="{{ app_url }}">
+            <div class="field">
+                <label for="sources">Sources</label>
+                <input type="text" id="sources" name="sources" value="{{ sources|default('', true)|e }}"/>
+            </div>
+            <div class="field">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                </button>
+            </div>
+
+            <div class="options">
+                <div class="field">
+                    <label for="exclude-no">
+                        <input type="radio"
+                               id="exclude-no"
+                               name="exclude"
+                               value="0"
+                               {% if exclude == 0 %}checked="checked"{% endif %}
+                        />
+                        Include
+                    </label>
+                </div>
+                <div class="field">
+                    <label for="exclude-yes">
+                        <input type="radio"
+                               id="exclude-yes"
+                               name="exclude"
+                               value="1"
+                               {% if exclude == 1 %}checked="checked"{% endif %}
+                        />
+                        Exclude
+                    </label>
+                </div>
+
+                <div>{{ macros.cancelLink(sources, app_url) }}</div>
+            </div>
+        </form>
+    </header>
+
+    <main>
+        {% if not records %}
+            <p>No records.</p>
+        {% else %}
+
+            <div class="table-sleeve">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Source</th>
+                            <th>Key</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                            <tr>
+                                <td nowrap>
+                                    {{ record["created"]|localtime|dateformat("YYYY-MM-DD") }}
+                                    <div class="smaller">{{ record["created"]|localtime|dateformat("LT")}}</div>
+                                </td>
+                                <td nowrap>
+                                    {{ record["source"] }}
+                                </td>
+                                <td nowrap>
+                                    {{ record["key"] }}
+                                </td>
+                                <td>
+                                    {{ record["value"] }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    {% if newer_url %}
+                        <a href="{{ newer_url }}" rel="noreferrer" class="next">
+                            <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+                            Newer
+                        </a>
+                    {% endif %}
+                    {% if older_url %}
+                        <a href="{{ older_url }}" rel="noreferrer" class="previous">
+                            Older
+                            <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+        {% endif %}
+    </main>
+
+{% endblock %}
