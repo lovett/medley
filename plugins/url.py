@@ -79,6 +79,11 @@ class Plugin(plugins.SimplePlugin):
             url += "/"
 
         if query:
+            query = {
+                key: value
+                for (key, value) in query.items()
+                if value
+            }
             url = f"{url}?{urlencode(query)}"
 
         request_headers = cherrypy.request.headers
