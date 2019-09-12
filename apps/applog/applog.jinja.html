@@ -67,7 +67,7 @@
                                     <div class="smaller">{{ record["created"]|localtime|dateformat("LT")}}</div>
                                 </td>
                                 <td nowrap>
-                                    {{ record["source"] }}
+                                    <a href="{{ app_url }}?sources={{ record["source"]|urlencode }}">{{ record["source"] }}</a>
                                 </td>
                                 <td nowrap>
                                     {{ record["key"] }}
