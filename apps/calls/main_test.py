@@ -44,6 +44,9 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "cdr:call_count":
                 return [1]
 
+            if args[0] == "url:paginate:newer_older":
+                return [(None, None)]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -59,51 +62,9 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.assert_any_call(
             "cdr:call_log",
             dst_exclude=["test2"],
-            src_exclude=["test"],
-            offset=0
-        )
-
-    @mock.patch("cherrypy.tools.negotiable.render_html")
-    @mock.patch("cherrypy.engine.publish")
-    def test_pagination(self, publish_mock, render_mock):
-        """The call list supports pagination"""
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "registry:search":
-                return [[]]
-
-            if args[0] == "cdr:call_count":
-                return [1]
-
-            if args[0] == "cdr:call_log":
-                return [[]]
-
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/")
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "older_offset"),
-            0
-        )
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "newer_offset"),
-            0
-        )
-
-        self.request("/", offset=10)
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "older_offset"),
-            0
-        )
-
-        self.assertEqual(
-            helpers.html_var(render_mock, "newer_offset"),
-            10
+            limit=50,
+            offset=0,
+            src_exclude=["test"]
         )
 
 

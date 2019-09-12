@@ -16,37 +16,26 @@ class Controller:
         offset = int(kwargs.get('offset', 0))
         exclude = int(kwargs.get('exclude', 0))
         sources = kwargs.get('sources')
+        per_page = 20
 
         (records, total, query_plan) = cherrypy.engine.publish(
             "applog:search",
             offset=offset,
             sources=sources.split(' ') if sources else None,
-            exclude=exclude
+            exclude=exclude,
+            limit=per_page
         ).pop()
 
-        pagination_params = {
-            "sources": sources,
-            "exclude": int(exclude)
-        }
-
-        older_offset = len(records) + offset
-        older_url = None
-
-        if older_offset < total:
-            pagination_params["offset"] = older_offset
-            older_url = cherrypy.engine.publish(
-                "url:internal",
-                query=pagination_params
-            ).pop()
-
-        newer_offset = offset - len(records)
-        newer_url = None
-        if newer_offset > 0:
-            pagination_params["offset"] = newer_offset
-            newer_url = cherrypy.engine.publish(
-                "url:internal",
-                query=pagination_params
-            ).pop()
+        (newer_url, older_url) = cherrypy.engine.publish(
+            "url:paginate:newer_older",
+            params={
+                "sources": sources,
+                "exclude": int(exclude)
+            },
+            per_page=per_page,
+            offset=offset,
+            total=total
+        ).pop()
 
         return {
             "html": ("applog.jinja.html", {
@@ -54,8 +43,6 @@ class Controller:
                 "total": total,
                 "sources": sources,
                 "exclude": exclude,
-                "newer_offset": newer_offset,
-                "older_offset": older_offset,
                 "newer_url": newer_url,
                 "older_url": older_url,
                 "query_plan": query_plan

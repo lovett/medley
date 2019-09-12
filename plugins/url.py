@@ -18,9 +18,13 @@ class Plugin(plugins.SimplePlugin):
         This plugin owns the url prefix.
         """
         self.bus.subscribe("url:internal", self.internal_url)
+        self.bus.subscribe(
+            "url:paginate:newer_older",
+            self.paginate_newer_older
+        )
 
     @staticmethod
-    def internal_url(path=None, query=(), trailing_slash=False):
+    def internal_url(path=None, query=None, trailing_slash=False):
         """Create an absolute internal URL.
 
         The URL hostname is sourced from two places. Most of the time,
@@ -84,6 +88,8 @@ class Plugin(plugins.SimplePlugin):
                 for (key, value) in query.items()
                 if value
             }
+
+        if query:
             url = f"{url}?{urlencode(query)}"
 
         request_headers = cherrypy.request.headers
@@ -96,3 +102,25 @@ class Plugin(plugins.SimplePlugin):
             url = f"https:{url.split(':', 1).pop()}"
 
         return url
+
+    def paginate_newer_older(self, params, per_page=10, offset=0, total=0):
+        """Determine the next-page and previous-page URLs for paginated
+        records presented in reverse chronological order.
+
+        """
+
+        newer_url = None
+        older_url = None
+
+        older_offset = per_page + offset
+        newer_offset = offset - per_page
+
+        if older_offset < total:
+            params["offset"] = older_offset
+            older_url = self.internal_url(query=params)
+
+        if newer_offset >= 0:
+            params["offset"] = newer_offset
+            newer_url = self.internal_url(query=params)
+
+        return (newer_url, older_url)

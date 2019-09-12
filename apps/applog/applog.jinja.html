@@ -81,20 +81,7 @@
                 </table>
             </section>
 
-            <section class="pagination">
-                {% if newer_url %}
-                    <a href="{{ newer_url }}" rel="noreferrer" class="next">
-                        <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                        Newer
-                    </a>
-                {% endif %}
-                {% if older_url %}
-                    <a href="{{ older_url }}" rel="noreferrer" class="previous">
-                        Older
-                        <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                    </a>
-                {% endif %}
-            </section>
+            {{ macros.newerOlderPagination(newer_url, older_url) }}
         {% endif %}
 
         {{ macros.queryPlan(query_plan) }}

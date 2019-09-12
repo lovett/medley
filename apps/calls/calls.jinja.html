@@ -8,7 +8,7 @@
             <p>No calls.</p>
         {% else %}
 
-            <div class="table-sleeve">
+            <section class="table-sleeve">
                 <table>
                     <thead>
                         <tr>
@@ -43,23 +43,8 @@
                         {% endfor %}
                     </tbody>
                 </table>
-
-                <div class="pagination">
-                    {% if newer_offset >= 0 %}
-                        <a href="/calls?offset={{ newer_offset }}" rel="noreferrer" class="next">
-                            <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                            Newer
-                        </a>
-                    {% endif %}
-                    {% if older_offset > 0 %}
-                        <a href="/calls?offset={{ older_offset }}" rel="noreferrer" class="previous">
-                            Older
-                            <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-
+            </section>
+            {{ macros.newerOlderPagination(newer_url, older_url) }}
         {% endif %}
     </main>
 

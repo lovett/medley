@@ -40,6 +40,8 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "capture:search":
                 return [(1, [{}])]
+            if args[0] == "url:paginate:newer_older":
+                return [(None, None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

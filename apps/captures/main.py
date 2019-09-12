@@ -17,6 +17,7 @@ class Controller:
         path = kwargs.get('path', '')
         cid = kwargs.get('cid')
         offset = int(kwargs.get('offset', 0))
+        per_page = 5
 
         if path:
             path = path.strip()
@@ -26,29 +27,29 @@ class Controller:
                 "capture:get",
                 int(cid)
             ).pop()
-            older_offset = None
-            newer_offset = None
+            newer_url = None
+            older_url = None
         else:
             total, captures = cherrypy.engine.publish(
                 "capture:search",
                 path,
-                offset
+                offset,
+                limit=per_page
             ).pop()
 
-            older_offset = len(captures) + offset
-
-            if older_offset >= total:
-                older_offset = None
-
-            newer_offset = offset - len(captures)
-            if newer_offset <= 0:
-                newer_offset = None
+            (newer_url, older_url) = cherrypy.engine.publish(
+                "url:paginate:newer_older",
+                params={"path": path},
+                per_page=per_page,
+                offset=offset,
+                total=total
+            ).pop()
 
         return {
             "html": ("captures.jinja.html", {
                 "path": path,
                 "captures": captures,
-                "newer_offset": newer_offset,
-                "older_offset": older_offset,
+                "newer_url": newer_url,
+                "older_url": older_url,
             })
         }

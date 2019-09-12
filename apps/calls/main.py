@@ -8,11 +8,13 @@ class Controller:
 
     name = "Calls"
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display a list of recent calls"""
 
         offset = int(kwargs.get('offset', 0))
+        per_page = 50
 
         exclusions = cherrypy.engine.publish(
             "registry:search",
@@ -39,20 +41,23 @@ class Controller:
             "cdr:call_log",
             src_exclude=src_exclusions,
             dst_exclude=dst_exclusions,
-            offset=offset
+            offset=offset,
+            limit=per_page
         ).pop()
 
-        older_offset = len(calls) + offset
-        if older_offset > total:
-            older_offset = 0
-
-        newer_offset = offset - len(calls)
+        (newer_url, older_url) = cherrypy.engine.publish(
+            "url:paginate:newer_older",
+            params={},
+            per_page=per_page,
+            offset=offset,
+            total=total
+        ).pop()
 
         return {
             "html": ("calls.jinja.html", {
                 "calls": calls,
                 "total": total,
-                "newer_offset": newer_offset,
-                "older_offset": older_offset,
+                "newer_url": newer_url,
+                "older_url": older_url,
             })
         }
