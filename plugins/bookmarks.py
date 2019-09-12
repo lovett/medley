@@ -53,6 +53,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON bookmarks (fulltext)
             WHERE fulltext IS NULL;
 
+        CREATE INDEX IF NOT EXISTS bookmarks_unretrieved
+            ON bookmarks (retrieved, url)
+            WHERE retrieved IS NULL;
+
         CREATE TRIGGER IF NOT EXISTS bookmarks_after_insert
         AFTER INSERT ON bookmarks
         BEGIN
