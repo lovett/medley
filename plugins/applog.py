@@ -26,7 +26,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_source
             ON applog(source);
 
-        """)
+        """, keep_connection_open=True)
 
     def start(self):
         """Define the CherryPy messages to listen for.

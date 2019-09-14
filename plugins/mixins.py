@@ -12,6 +12,8 @@ class Sqlite:
 
     db_path = None
 
+    _connection = None
+
     @staticmethod
     def _path(name):
         """Get the filesystem path of a database file relative to the
@@ -27,12 +29,17 @@ class Sqlite:
     def _open(self):
         """Open a connection to the current database."""
 
+        if self._connection:
+            return self._connection
+
         return sqlite3.connect(
             self.db_path,
-            detect_types=sqlite3.PARSE_COLNAMES
+            timeout=30,
+            detect_types=sqlite3.PARSE_COLNAMES,
+            check_same_thread=False
         )
 
-    def _create(self, sql):
+    def _create(self, sql, keep_connection_open=False):
         """Establish a schema by executing a series of SQL statements.
 
         The statements should be re-runnable so that new objects will
@@ -47,7 +54,12 @@ class Sqlite:
         con = self._open()
         con.cursor().executescript(sql)
         con.commit()
-        con.close()
+
+        if keep_connection_open:
+            self._connection = con
+
+        if not self._connection:
+            con.close()
 
     def _execute(self, query, params=()):
 
@@ -56,7 +68,9 @@ class Sqlite:
         con = self._open()
         con.execute(query, params)
         con.commit()
-        con.close()
+
+        if not self._connection:
+            con.close()
 
     def _multi(self, queries):
         """Issue several queries."""
@@ -73,7 +87,9 @@ class Sqlite:
         con = self._open()
         with con:
             con.executemany(query, values)
-        con.close()
+
+        if not self._connection:
+            con.close()
 
         # cannot return lastrowid because it is not populated
         # during executemany
@@ -84,7 +100,8 @@ class Sqlite:
         con = self._open()
         with con:
             con.executemany(query, values)
-        con.close()
+        if not self._connection:
+            con.close()
         return True
 
     def _delete(self, query, values=()):
@@ -92,7 +109,8 @@ class Sqlite:
         con = self._open()
         with con:
             row_count = con.execute(query, values).rowcount
-        con.close()
+        if not self._connection:
+            con.close()
         return row_count
 
     def _count(self, query, values=()):
