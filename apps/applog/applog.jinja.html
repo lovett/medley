@@ -54,6 +54,7 @@
                     <thead>
                         <tr>
                             <th>Date</th>
+                            <th>Time</th>
                             <th>Source</th>
                             <th>Key</th>
                             <th>Value</th>
@@ -64,7 +65,9 @@
                             <tr>
                                 <td nowrap>
                                     {{ record["created"]|localtime|dateformat("YYYY-MM-DD") }}
-                                    <div class="smaller">{{ record["created"]|localtime|dateformat("LT")}}</div>
+                                </td>
+                                <td nowrap>
+                                    {{ record["created"]|localtime|dateformat("h:mm:ss A")}}
                                 </td>
                                 <td nowrap>
                                     <a href="{{ app_url }}?sources={{ record["source"]|urlencode }}">{{ record["source"] }}</a>
