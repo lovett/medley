@@ -52,6 +52,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             self.db_path = file_name
             self._execute("vacuum")
             self._execute("analyze")
+            self._execute("PRAGMA wal_checkpoint(TRUNCATE)")
             cherrypy.engine.publish(
                 "applog:add",
                 "maintenance",
