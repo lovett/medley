@@ -26,6 +26,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_source
             ON applog(source);
 
+        CREATE INDEX IF NOT EXISTS index_created_today
+            ON applog(date(created));
+
         """, keep_connection_open=True)
 
     def start(self):
@@ -103,6 +106,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 where_sql += f" AND source IN ({placeholders})"
 
             placeholder_values += tuple(sources)
+
+        if not sources:
+            where_sql += " AND date(created) = date('now')"
 
         sql = f"""SELECT key, value, source,
         created as 'created [datetime]'
