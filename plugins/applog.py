@@ -64,7 +64,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.log(f"{source}: {value}")
 
     @decorators.log_runtime
-    def prune(self, cutoff_months=6):
+    def prune(self, cutoff_months=3):
         """Delete old records.
 
         This is normally invoked from the maintenance plugin, and
