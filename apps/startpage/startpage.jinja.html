@@ -31,9 +31,13 @@
 {% block page_body %}
     <main>
         {% for section in page.sections() if not section.startswith("-") %}
-            <section id="{{ section|slug }}">
+            <section>
                 <h1>
-                    <a href="#{{ section|slug }}" title="#{{ section|slug }}">{{ section }}</a>
+                    <a href="#{{ section|slug }}"
+                       title="#{{ section|slug }}"
+                       class="hash-focus-candidate"
+                       data-hash-focus-id="{{ section|slug }}"
+                    >{{ section }}</a>
                 </h1>
                 <ul>
                     {% for url, title in page.items(section): -%}

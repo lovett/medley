@@ -70,7 +70,11 @@
                                 <discardable-record inline-template url="{{ template.delete_url }}">
                                     <div><discard-button tooltip="Delete this template" /></div>
                                     </discardable-record>
-                                    <a v-on:click="apply" id="{{ template.notification_id }}" class="summary" href="#">
+                                    <a v-on:click="apply"
+                                       class="summary hash-focus-candidate"
+                                       href="#"
+                                       data-hash-focus-id="{{ template.notification_id }}"
+                                    >
                                         {{ template.message }}
                                         <br/>
                                         <span class="smaller">

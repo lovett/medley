@@ -1,6 +1,20 @@
 var MEDLEY = (function () {
     'use strict';
 
+    function focusFromHash() {
+        const focusId = window.location.hash.replace('#', '');
+        if (!focusId) {
+            return;
+        }
+
+        const candidates = document.getElementsByClassName('hash-focus-candidate');
+        Array.from(candidates).forEach((candidate) => {
+            if (candidate.dataset.hashFocusId === focusId) {
+                candidate.focus();
+            }
+        });
+    }
+
     function shortcuts (e) {
         if (e.target.nodeName === 'INPUT' || e.target.nodeName === 'TEXTAREA') {
             return;
@@ -49,6 +63,8 @@ var MEDLEY = (function () {
                 'submit',
                 preSubmit
             );
+
+            focusFromHash()
         }
     }
 })();

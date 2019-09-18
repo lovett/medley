@@ -53,19 +53,19 @@
 }
 
 .template .summary:focus {
-    background-color: #56904e;
-    color: white;
+    background-color: var(--focus-bg-color);
+    color: currentColor;
 }
 
 /* Small devices */
 @media (min-width: 576px) {
-    #reminder-form {
-        grid-template-columns: auto 1fr;
-    }
 }
 
 /* Medium devices */
 @media (min-width: 768px) {
+    #reminder-form {
+        grid-template-columns: auto 1fr;
+    }
 }
 
 /* Large devices */

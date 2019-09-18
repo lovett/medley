@@ -25,35 +25,30 @@ section:last-of-type li:last-of-type {
     padding-bottom: 0;
 }
 
-section.active {
-    background-color: #D1E2F2;
-}
-
-section.active h1 {
-    border-bottom-color: inherit;
-}
-
 section a {
     color: #FF4500;
 }
 
 section a:focus {
     outline: 0;
-    background-color: #369;
+    background-color: var(--focus-bg-color);
     color: white;
+    padding-left: 0.5em;
+    border-bottom-color: transparent;
 }
 
 section h1 {
     font-size: 1em;
     margin: 0;
     padding: 0;
-    border-bottom: 1px solid #cccccc;
     line-height: 2;
     margin-bottom: .5em;
 }
 
 section h1 a {
     color: currentColor;
+    display: block;
+    border-bottom: 1px solid #cccccc;
 }
 
 ul {

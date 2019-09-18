@@ -145,13 +145,6 @@ MEDLEY.startpage = (function () {
                 }
             }
 
-
-            // Highlight the active section
-            var fragment = window.location.hash.replace('#', '');
-            if (fragment.length > 0) {
-                document.getElementById(fragment).classList.add('active');
-            }
-
             // Hide the edit link when offline
             onlineOnly = document.querySelectorAll('.online-only');
             offlineOnly = document.querySelectorAll('.offline-only');
