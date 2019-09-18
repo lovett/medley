@@ -11,11 +11,7 @@ MEDLEY.later = (function () {
         button.setAttribute('disabled', true);
         button.innerText = button.dataset.progressLabel;
 
-        let payload = new FormData()
-        payload.set('title', document.getElementById('title').value.trim());
-        payload.set('url', document.getElementById('url').value.trim());
-        payload.set('tags', document.getElementById('tags').value.trim());
-        payload.set('comments', document.getElementById('comments').value.trim());
+        let payload = new FormData(e.target)
 
         const response = await fetch(e.target.getAttribute('action'), {
             method: 'POST',

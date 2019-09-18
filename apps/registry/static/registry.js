@@ -5,12 +5,9 @@ MEDLEY.registry = (function () {
         e.preventDefault();
 
         const keyField = document.getElementById('key');
-        const valueField = document.getElementById('value');
         const endpoint = e.target.getAttribute('action');
 
-        let payload = new FormData()
-        payload.set('key', keyField.value);
-        payload.set('value', valueField.value);
+        let payload = new FormData(e.target)
 
         const response = await fetch(endpoint, {
             method: 'PUT',
@@ -31,10 +28,7 @@ MEDLEY.registry = (function () {
         init: function () {
             const insertForm = document.getElementById('insert-form');
             if (insertForm) {
-                insertForm.addEventListener(
-                    'submit',
-                    onInsertRecord
-                );
+                insertForm.addEventListener('submit', onInsertSubmit);
             }
 
             if (MEDLEY.focusAsYouType) {
