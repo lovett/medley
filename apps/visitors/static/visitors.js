@@ -34,12 +34,10 @@ MEDLEY.visitors = (function () {
 
         const menu = document.getElementById('saved');
         const queryField = document.getElementById('query');
-        const submit = document.getElementById('submit');
 
         const queryName = prompt("Name this query:");
 
         if (!queryName) {
-            console.log('nope');
             return;
         }
 

@@ -447,12 +447,13 @@ TABLE TD {
 
 .shortcuts A {
     display: inline-block;
-    margin-right: 1em;
+    margin-left: 1em;
     padding: .5em 0;
 }
 
-.shortcuts A:last-of-type {
-    margin-right: 0;
+.shortcuts BUTTON {
+    margin-top: .5em;
+    margin-left: 1em;
 }
 
 .smaller {

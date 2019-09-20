@@ -36,20 +36,20 @@
                 <label for="query">Query</label>
                 <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
                 <div class="shortcuts">
-                    <a href="#"
+                    <button
                        data-field="query"
                        data-shortcut="query-date-backward"
-                    >Day before</a>
+                    >Day before</button>
 
-                    <a href="#"
+                    <button
                        data-field="query"
                        data-shortcut="query-date-forward"
-                    >Day after</a>
+                    >Day after</button>
                 </div>
             </div>
 
             <div class="field">
-                <button id="submit">
+                <button>
                     <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                 </button>
                 <a id="save" class="secondary-action" href="#save">Save</a>

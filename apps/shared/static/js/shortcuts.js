@@ -104,6 +104,13 @@ MEDLEY.shortcuts = (function () {
         if (shortcut === 'query-date-backward') {
             field.value = adjustQueryDate(field.value, -1);
         }
+
+        if (e.target.nodeName === 'BUTTON') {
+            const form = e.target.closest('FORM');
+            if (form) {
+                form.submit();
+            }
+        }
     }
 
     return {
