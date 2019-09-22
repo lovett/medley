@@ -32,7 +32,6 @@ var MEDLEY = (function () {
 
         Array.from(fields).forEach((field) => {
             field.value = field.value.trim();
-            console.log(field.value);
         });
     };
 

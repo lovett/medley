@@ -6,8 +6,9 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('countdown', 'discardable-record', 'discard-button', '/reminder/static/reminder-form.js', '/reminder/static/reminder-template.js')) }}
+    {{ macros.vueApp('main', ('countdown', 'discardable-record', 'discard-button')) }}
     {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
+    {{ macros.staticAsset('reminder', 'reminder.js') }}
 {% endblock %}
 
 {% block app_message %}
@@ -21,7 +22,6 @@
 
 {% block page_body %}
     {{ macros.svgSymbols("delete") }}
-
 
     <main>
         {% if upcoming %}
@@ -49,94 +49,83 @@
             </div>
         {% endif %}
 
-        <reminder-form inline-template>
-            <form ref="reminderForm" id="reminder-form" method="post" action="{{ app_url }}">
-                <div id="template">
-                    {% if not templates %}
-                        <p>No templates.</p>
-                    {% endif %}
-                    <p>Templates</p>
-                    {% for id, template in templates.items() %}
-                        <reminder-template
-                            inline-template
-                            uid="{{ id }}"
-                            message="{{ template.message }}"
-                            v-bind:minutes="{{ template.minutes }}"
-                            comments="{{ template.comments }}"
-                            notification-id="{{ template.notification_id }}"
-                            url="{{ template.url }}"
-                        >
-                            <div v-if="visible" class="template">
-                                <discardable-record inline-template url="{{ template.delete_url }}">
-                                    <div><discard-button tooltip="Delete this template" /></div>
-                                    </discardable-record>
-                                    <a v-on:click="apply"
-                                       class="summary hash-focus-candidate"
-                                       href="#"
-                                       data-hash-focus-id="{{ template.notification_id }}"
-                                    >
-                                        {{ template.message }}
-                                        <br/>
-                                        <span class="smaller">
-                                            {{ template.duration_in_words }}
-                                            {%- if template.notification_id %}
-                                                / #{{ template.notification_id }}
-                                            {%- endif -%}
-                                        </span>
-                                    </a>
-                            </div>
-                        </reminder-template>
-                    {% endfor %}
+        <form id="reminder-form" method="post" action="{{ app_url }}">
+            <div id="template">
+                {% if not templates %}
+                    <p>No templates.</p>
+                {% endif %}
+                <p>Templates</p>
+                {% for id, template in templates.items() %}
+                    <div class="template"
+                         data-message="{{ template.message }}"
+                         data-minutes="{{ template.minutes }}"
+                         data-notification_id="{{ template.notification_id }}"
+                         data-url="{{ template.url }}"
+                    >
+                        <discardable-record inline-template url="{{ template.delete_url }}">
+                            <div><discard-button tooltip="Delete this template" /></div>
+                        </discardable-record>
+
+                        <a href="#"
+                           class="summary hash-focus-candidate"
+                           data-hash-focus-id="{{ template.notification_id }}"
+                            >
+                            {{ template.message }}
+                            <br/>
+                            <span class="smaller">
+                                {{ template.duration_in_words }}
+                                {%- if template.notification_id %}
+                                    / #{{ template.notification_id }}
+                                {%- endif -%}
+                            </span>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+            <div>
+                <p>New Reminder</p>
+
+                <div class="field">
+                    <label for="message">Message</label>
+                    <input type="text" id="message" name="message" required />
                 </div>
-                <div>
-                    <p>New Reminder</p>
-
-                    <div class="field">
-                        <label for="message">Message</label>
-                        <input v-model="message" type="text" id="message" name="message" required />
-                    </div>
 
 
-                    <div class="field">
-                        <label for="message">Timeframe</label>
-                        <span class="inline-container">
-                            <input v-model="hours" type="text" class="inline numeric" id="hours" name="hours" />
-                            hours
-                        </span>
+                <div class="field">
+                    <label for="message">Timeframe</label>
+                    <input type="number" class="inline" id="hours" name="hours" />
+                    hours
 
-                        <span class="inline-container">
-                            <input v-model="minutes" type="text" class="inline numeric" id="minutes" name="minutes"/>
-                            minutes
-                        </span>
-                    </div>
-                    <div class="field">
-                        <label for="comments">Comments</label>
-                        <textarea v-model="comments" id="comments" name="comments"></textarea>
-                    </div>
+                    <input type="number" class="inline" id="minutes" name="minutes"/>
+                    minutes
+                </div>
+                <div class="field">
+                    <label for="comments">Comments</label>
+                    <textarea id="comments" name="comments"></textarea>
+                </div>
 
-                    <div class="field">
-                        <label for="notification_id">Notification ID</label>
-                        <input v-model="notificationId" type="text" id="notification_id" name="notification_id" />
-                    </div>
+                <div class="field">
+                    <label for="notification_id">Notification ID</label>
+                    <input type="text" id="notification_id" name="notification_id" />
+                </div>
 
-                    <div class="field">
-                        <label for="url">URL</label>
-                        <input v-model="url" type="text" id="url" name="url" />
-                        <div class="shortcuts">
-                            <a href="#" data-field="url" data-shortcut="set-value" data-value="{{ app_url }}">this page</a>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <input type="checkbox" id="remember" name="remember" value="1" />
-                        <label for="remember" class="inline">Make this a template</later>
-                    </div>
-
-                    <div class="field">
-                        <button data-default="Save" data-alt="Please wait">Save</button>
+                <div class="field">
+                    <label for="url">URL</label>
+                    <input type="text" id="url" name="url" />
+                    <div class="shortcuts">
+                        <a href="#" data-field="url" data-shortcut="set-value" data-value="{{ app_url }}">this page</a>
                     </div>
                 </div>
-            </form>
-        </reminder-form>
+
+                <div class="field">
+                    <input type="checkbox" id="remember" name="remember" value="1" />
+                    <label for="remember" class="inline">Make this a template</later>
+                </div>
+
+                <div class="field">
+                    <button data-default="Save" data-alt="Please wait">Save</button>
+                </div>
+            </div>
+        </form>
     </main>
 {% endblock %}
