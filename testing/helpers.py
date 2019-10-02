@@ -7,7 +7,7 @@ import apps.shared.main
 from tools import negotiable
 
 def getFixture(path):
-    with open("test/fixtures/" + path) as handle:
+    with open("testing/fixtures/" + path) as handle:
         return handle.read()
 
 def start_server(app):

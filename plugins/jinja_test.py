@@ -15,9 +15,23 @@ class TestJinja(unittest.TestCase):
     def setUp(self):
         self.plugin = plugins.jinja.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
-        """Placeholder to force pytest to generate a coverage file."""
-        pass   # pylint: disable=unnecessary-pass
+    def test_phonenumber_empty(self):
+        """An empty string is returned untouched"""
+        initial = ""
+        final = self.plugin.phonenumber_filter(initial)
+        self.assertEqual(final, "")
+
+    def test_phonenumber_ten(self):
+        """A 10 digit number is formatted correctly"""
+        initial = "1234567890"
+        final = self.plugin.phonenumber_filter(initial)
+        self.assertEqual(final, "(123) 456-7890")
+
+    def test_phonenumber_seven(self):
+        """A 7 digit number is formatted correctly"""
+        initial = "1234567"
+        final = self.plugin.phonenumber_filter(initial)
+        self.assertEqual(final, "123-4567")
 
 
 if __name__ == "__main__":

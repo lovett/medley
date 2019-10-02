@@ -1,96 +1,9 @@
 import util.phone
 import unittest
 import pytest
-import helpers
 import mock
-import requests_mock
 
 class TestUtilPhone(unittest.TestCase):
-
-    def test_sanitizeNumeric(self):
-        """Numeric strings are returned untouched"""
-        initial = "100"
-        final = util.phone.sanitize(initial)
-        self.assertEqual(final, initial)
-
-    def test_sanitizeMixed(self):
-        """Alphanumeric strings are reduced to numbers only"""
-        initial = "This is a test 100"
-        final = util.phone.sanitize(initial)
-        self.assertEqual(final, "100")
-
-    def test_sanitizeEmpty(self):
-        """An empty string is returned untouched"""
-        initial = ""
-        final = util.phone.sanitize(initial)
-        self.assertEqual(final, "")
-
-    def test_formatEmpty(self):
-        """An empty string is returned untouched"""
-        initial = ""
-        final = util.phone.format(initial)
-        self.assertEqual(final, "")
-
-    def test_formatTen(self):
-        """A 10 digit number is formatted correctly"""
-        initial = "1234567890"
-        final = util.phone.format(initial)
-        self.assertEqual(final, "(123) 456-7890")
-
-    def test_formatSeven(self):
-        """A 7 digit number is formatted correctly"""
-        initial = "1234567"
-        final = util.phone.format(initial)
-        self.assertEqual(final, "123-4567")
-
-    @requests_mock.Mocker()
-    def test_stateNameInvalid(self, requestsMock):
-        """An invalid state abbreviation returns Unknown for the state name"""
-        fixture = helpers.getFixture("dbpedia-state-fail.json")
-        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
-        result = util.phone.stateName("x")
-        self.assertTrue("sparql" in result)
-        self.assertTrue("url" in result)
-        self.assertTrue(result["name"] is None)
-
-    @requests_mock.Mocker()
-    def test_stateNameValid(self, requestsMock):
-        """A valid state abbreviation returns the correct state name"""
-
-        fixture = helpers.getFixture("dbpedia-state-success.json")
-        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", text=fixture)
-        result = util.phone.stateName("NY")
-        self.assertTrue("sparql" in result)
-        self.assertTrue("url" in result)
-        self.assertEqual(result["name"], "New York")
-
-    @requests_mock.Mocker()
-    def test_stateNameError(self, requestsMock):
-        """An exception is thrown if the dbpedia query fails"""
-
-        requestsMock.register_uri("GET", "http://dbpedia.org/sparql", status_code=500)
-        with pytest.raises(util.phone.PhoneException) as err:
-            location = util.phone.stateName("NY")
-
-    @requests_mock.Mocker()
-    def test_stateNameTimeout(self, requestsMock):
-        """An exception is thrown if the dbpedia query times out"""
-
-        requestsMock.register_uri("GET", "http://dbpedia.org/sparql")
-        with pytest.raises(util.phone.PhoneException) as err:
-            location = util.phone.stateName("NY", 0.001)
-
-    def test_areaCodeEmpty(self):
-        """An empty area code throws an exception"""
-        with pytest.raises(AssertionError) as err:
-            location = util.phone.findAreaCode("")
-        self.assertEqual(str(err.value), "Wrong length area code")
-
-    def test_areaCodeNotNumeric(self):
-        """A non-numeric area code throws an exception"""
-        with pytest.raises(AssertionError) as err:
-            location = util.phone.findAreaCode("abc")
-        self.assertEqual(str(err.value), "Non-numeric area code")
 
     @requests_mock.Mocker()
     def test_areaCodeValid(self, requestsMock):

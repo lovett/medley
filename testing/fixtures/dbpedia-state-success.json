@@ -1,4 +1,4 @@
 
 { "head": { "link": [], "vars": ["name"] },
   "results": { "distinct": false, "ordered": true, "bindings": [
-    { "name": { "type": "literal", "xml:lang": "en", "value": "New York" }} ] } }
+    { "state_name": { "type": "literal", "xml:lang": "en", "value": "New York" }} ] } }
