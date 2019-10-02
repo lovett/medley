@@ -15,10 +15,10 @@
         <section>
             {% for name, url, description, user_facing in apps %}
                 {% if user_facing %}
-                    <a class="item" href="{{ url }}">
-                        <span class="name">{{ name }}</span>
+                    <p class="item">
+                        <a class="name" href="{{ url }}">{{ name }}</a>
                         <span class="description">{{ description }}</span>
-                    </a>
+                    </p>
                 {% endif %}
             {% endfor %}
         </section>

@@ -6,6 +6,10 @@ SECTION {
     padding: 0 0 1em 0;
 }
 
+DD {
+    margin-left: 0;
+}
+
 .description {
     font-size: .85em;
     font-weight: normal;
@@ -13,11 +17,17 @@ SECTION {
 }
 
 .item {
-    color: inherit;
+    margin: 0;
     padding: .5em 1em;
 }
 
-.item:focus {
+.item A {
+    padding: .25em 0;
+    display: block;
+}
+
+.item A:focus {
+    color: inherit;
     outline: 0;
     background-color: var(--focus-bg-color);
 }
