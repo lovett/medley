@@ -1,3 +1,2 @@
-
-{ "head": { "link": [], "vars": ["state_abbrev", "comment"] },
+{ "head": { "link": [], "vars": ["state_abbrev", "abstract"] },
   "results": { "distinct": false, "ordered": true, "bindings": [ ] } }
