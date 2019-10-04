@@ -1,5 +1,7 @@
 [Unit]
 Description=Medley headlines precache
+After=medley
+Requires=medley
 
 [Service]
 Type=simple

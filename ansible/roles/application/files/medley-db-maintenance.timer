@@ -5,5 +5,8 @@ Description=Timer for Medley database maintenance
 # Daily at 6:03 AM
 OnCalendar=06:03
 
+# Don't catch up on missed runs
+Persistent=false
+
 [Install]
 WantedBy=timers.target

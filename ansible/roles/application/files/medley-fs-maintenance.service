@@ -1,5 +1,7 @@
 [Unit]
 Description=Medley filesystem maintenance
+After=medley
+Requires=medley
 
 [Service]
 Type=simple

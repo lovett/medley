@@ -1,5 +1,7 @@
 [Unit]
 Description=Medley Geodb Database Download
+After=medley
+Requires=medley
 
 [Service]
 Type=simple
