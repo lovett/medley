@@ -27,7 +27,7 @@ class TestGeography(unittest.TestCase):
 
             if args[0] == "urlfetch:get":
                 fixture = json.loads(
-                    helpers.getFixture("dbpedia-area-success.json")
+                    helpers.get_fixture("dbpedia-area-success.json")
                 )
                 return [fixture]
             return mock.DEFAULT
@@ -48,7 +48,7 @@ class TestGeography(unittest.TestCase):
 
             if args[0] == "urlfetch:get":
                 fixture = json.loads(
-                    helpers.getFixture("dbpedia-area-fail.json")
+                    helpers.get_fixture("dbpedia-area-fail.json")
                 )
                 return [fixture]
             return mock.DEFAULT
@@ -70,7 +70,7 @@ class TestGeography(unittest.TestCase):
 
             if args[0] == "urlfetch:get":
                 fixture = json.loads(
-                    helpers.getFixture("dbpedia-state-fail.json")
+                    helpers.get_fixture("dbpedia-state-fail.json")
                 )
                 return [fixture]
             return mock.DEFAULT
@@ -90,7 +90,7 @@ class TestGeography(unittest.TestCase):
 
             if args[0] == "urlfetch:get":
                 fixture = json.loads(
-                    helpers.getFixture("dbpedia-state-success.json")
+                    helpers.get_fixture("dbpedia-state-success.json")
                 )
                 return [fixture]
             return mock.DEFAULT
