@@ -7,7 +7,8 @@
     --icon-active: #73CFEE;
     --grey: #D1D1D1;
     --discard-bg-color: FireBrick;
-    --highlight-bg-color: #f0cca5;
+    --highlight-bg-color: #2F4858;
+    --highlight-fg-color: white;
     --focus-bg-color: #f9ab55;
 }
 
@@ -369,7 +370,7 @@ TABLE TD {
 
 .focus-candidate {
     background-color: var(--highlight-bg-color);
-    color: var(--black);
+    color: var(--highlight-fg-color) !important;
 }
 
 .half-column {
