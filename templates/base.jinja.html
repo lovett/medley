@@ -13,7 +13,6 @@
             content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
 
-        {{ macros.staticAsset('shared', 'css/normalize.css') }}
         {{ macros.staticAsset('shared', 'css/medley.css') }}
 
         {% block stylesheets %}{% endblock %}
@@ -41,7 +40,7 @@
         </header>
 
         {% block app_message %}
-            <section id="app-message" hidden></section>
+            <div id="app-message" hidden></div>
         {% endblock %}
 
         {% block page_body %}{% endblock %}
