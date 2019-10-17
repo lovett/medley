@@ -32,10 +32,12 @@ BODY {
     display: flex;
     flex-direction: column;
     margin: 0;
+    font-size: 16px;
 }
 
 BUTTON, INPUT[type=reset] {
     font-family: inherit;
+    font-size: 1em;
     border: 1px solid var(--bg-color-primary);
     background-color: var(--bg-color-primary);
     color: var(--white);
@@ -106,6 +108,10 @@ DD.supplemental {
 
 DD.supplemental A {
     text-decoration: none;
+}
+
+INPUT {
+    font-size: 1em;
 }
 
 INPUT[type=reset] {
@@ -196,6 +202,10 @@ TABLE TD {
     word-break: break-word;
     vertical-align: top;
     border: 1px solid var(--black);
+}
+
+TEXTAREA {
+    font-size: 1em;
 }
 
 #app-message {
