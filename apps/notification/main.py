@@ -7,6 +7,7 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     user_facing = False
+    exposed = True
 
     @staticmethod
     @cherrypy.tools.capture()

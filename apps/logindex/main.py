@@ -13,6 +13,8 @@ class Controller:
     @staticmethod
     def parse_log_date(val):
         """Convert a date string in either date or filename format
+exposed = True
+user_facing = True
         to a datetime.
 
         Date format is YYYY-mm-dd. Filename format is the same, but with

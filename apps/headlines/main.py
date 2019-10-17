@@ -8,6 +8,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Headlines"
+    exposed = True
+    user_facing = True
 
     cache_key = "headlines"
 

@@ -9,6 +9,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Startpage"
+    exposed = True
+    user_facing = True
 
     default_page_name = "default"
 

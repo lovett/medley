@@ -9,6 +9,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Wakeup"
+    exposed = True
+    user_facing = True
 
     @staticmethod
     @cherrypy.tools.negotiable()

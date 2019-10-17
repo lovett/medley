@@ -7,8 +7,10 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     user_facing = False
+    exposed = True
 
-    def POST(self, group):
+    @staticmethod
+    def POST(group=None):
         """
         Schedule maintenance operations.
         """

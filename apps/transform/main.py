@@ -9,6 +9,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Transform"
+    exposed = True
+    user_facing = True
 
     transforms = {}
 

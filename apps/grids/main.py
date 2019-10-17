@@ -10,6 +10,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Grids"
+    exposed = True
+    user_facing = True
 
     @cherrypy.tools.negotiable()
     def GET(self, *_args, **kwargs):
@@ -72,7 +74,7 @@ class Controller:
             "html": ("grids.jinja.html", {
                 "headers": headers,
                 "name": name,
-                "names": [key for key in grids.keys()],
+                "names": grids.keys(),
                 "options": options,
                 "rows": rows
             })

@@ -48,7 +48,7 @@ import tools.negotiable
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
-def setup():
+def setup() -> None:
     """Configure and start the application server
 
     The application server is the backbone that individual
@@ -128,17 +128,6 @@ def setup():
 
         app_module = importlib.import_module(f"apps.{app}.main")
 
-        # Treat all controllers as exposed by default.
-        # This is a Cherrypy-ism.
-        if not hasattr(app_module.Controller, "exposed"):
-            app_module.Controller.exposed = True
-
-        # Treat all controllers as user-facing by default. This is a
-        # Medley-ism. Service apps should override this attribute
-        # locally.
-        if not hasattr(app_module.Controller, "user_facing"):
-            app_module.Controller.user_facing = True
-
         app_config = {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher()
@@ -186,7 +175,7 @@ def setup():
                 })
 
         cherrypy.tree.mount(
-            app_module.Controller(),
+            app_module.Controller(),  # type: ignore
             app_path,
             app_config
         )

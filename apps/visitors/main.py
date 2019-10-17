@@ -15,6 +15,8 @@ class Controller:
     """
 
     name = "Visitors"
+    exposed = True
+    user_facing = True
 
     @cherrypy.tools.negotiable()
     def GET(self, *_args, **kwargs):

@@ -9,6 +9,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Homepage"
+    exposed = True
+    user_facing = True
 
     @decorators.log_runtime
     def catalog_apps(self, apps):

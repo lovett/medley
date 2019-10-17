@@ -7,6 +7,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "App Log"
+    exposed = True
+    user_facing = True
 
     @staticmethod
     @cherrypy.tools.negotiable()

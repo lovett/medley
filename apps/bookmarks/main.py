@@ -7,6 +7,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Bookmarks"
+    exposed = True
+    user_facing = True
 
     @staticmethod
     def check_wayback_availability(url):

@@ -36,7 +36,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             "/",
             method="POST"
         )
-        self.assertEqual(response.code, 404)
+        self.assertEqual(response.code, 400)
 
     def test_group_valid(self):
         """The group parameter must be valid."""

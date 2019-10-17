@@ -7,6 +7,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "IP"
+    exposed = True
+    user_facing = True
 
     cache_key = "ip:external"
 

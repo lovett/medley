@@ -7,7 +7,7 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Redirect"
-
+    exposed = True
     user_facing = False
 
     @staticmethod

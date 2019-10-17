@@ -7,6 +7,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Phone"
+    exposed = True
+    user_facing = True
 
     messages = {
         "invalid": "The number provided was invalid",

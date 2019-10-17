@@ -7,9 +7,12 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Speak"
+    exposed = True
+    user_facing = True
 
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(*_args, **_kwargs):
         """Present an interface for on-demand and scheduled muting of the
         application.
 

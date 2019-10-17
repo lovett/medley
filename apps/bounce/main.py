@@ -8,6 +8,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Bounce"
+    exposed = True
+    user_facing = True
 
     common_names = {
         "dev",

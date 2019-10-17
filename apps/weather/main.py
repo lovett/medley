@@ -11,6 +11,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Weather"
+    exposed = True
+    user_facing = True
 
     @cherrypy.tools.negotiable()
     def GET(self, *_args, **_kwargs):

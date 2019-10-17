@@ -10,6 +10,8 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     name = "Reminder"
+    exposed = True
+    user_facing = True
 
     registry_key = "reminder:template"
 

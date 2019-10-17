@@ -6,6 +6,7 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
+    exposed = True
     user_facing = False
 
     @staticmethod
