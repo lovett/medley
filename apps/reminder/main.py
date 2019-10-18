@@ -94,7 +94,7 @@ class Controller:
         # reminder and make the time remaining visible.
         start_notification = {
             "group": "timer",
-            "title": "Timer started",
+            "title": "Timer in progress",
             "body": message,
             "expiresAt": f"{total_minutes} minutes",
             "localId": notification_id
