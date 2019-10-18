@@ -1,5 +1,6 @@
 """Capture log messages to an Sqlite database."""
 
+from collections import deque
 import cherrypy
 from . import mixins
 from . import decorators
@@ -10,8 +11,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def __init__(self, bus):
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
-
         self.db_path = self._path("applog.sqlite")
+        self.queue = deque()
 
         self._create("""
         PRAGMA journal_mode=WAL;
@@ -29,7 +30,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE INDEX IF NOT EXISTS index_created_today
             ON applog(date(created));
 
-        """, keep_connection_open=True)
+        """)
 
     def start(self):
         """Define the CherryPy messages to listen for.
@@ -37,6 +38,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the applog prefix.
         """
         self.bus.subscribe("applog:add", self.add)
+        self.bus.subscribe("applog:process_queue", self.process_queue)
         self.bus.subscribe("applog:get_newest", self.get_newest)
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
@@ -50,6 +52,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (source, key)
         )
 
+    def process_queue(self):
+        """Transfer messages from the queue to the database."""
+
+        messages = list(self.queue)
+
+        if not messages:
+            return
+
+        # Only remove as many elements as were read in case more
+        # have just been added.
+        for _ in range(len(messages)):
+            self.queue.popleft()
+
+        self._insert(
+            "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
+            messages
+        )
+
     def add(self, caller, key, value):
         """Accept a log message for storage."""
 
@@ -58,10 +78,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         except AttributeError:
             source = caller
 
-        self._insert(
-            "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
-            [(source, key, str(value))]
-        )
+        self.queue.append((caller, key, str(value)))
+
+        cherrypy.engine.publish("scheduler:add", 1, "applog:process_queue")
 
         # Mirror the log message on the cherrypy log for convenience.
         cherrypy.log(f"{source}: {value}")
