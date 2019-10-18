@@ -4,6 +4,7 @@
 --ignore-dir=htmlcov
 --ignore-dir=logs
 --ignore-dir=db
+--ignore-dir=.mypy_cache
 --ignore-dir=__pycache__
 --ignore-file=ext:pyc
 --ignore-file=is:.coverage

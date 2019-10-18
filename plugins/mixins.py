@@ -3,6 +3,7 @@
 import os.path
 import sqlite3
 import re
+from typing import Any, Tuple, Optional
 import cherrypy
 
 
@@ -87,7 +88,7 @@ class Sqlite:
         con.close()
         return True
 
-    def _delete(self, query, values=()):
+    def _delete(self, query: str, values: Tuple[Any] = ()) -> int:
         """Issue a delete query."""
         con = self._open()
         with con:
@@ -143,7 +144,7 @@ class Sqlite:
                     break
                 yield from result
 
-    def _explain(self, query, values=()):
+    def _explain(self, query, values=()) -> sqlite3.Row:
         """Get the query plan for a query."""
 
         return self._select(
@@ -188,7 +189,7 @@ class Sqlite:
         except IndexError:
             return {}
 
-    def _selectFirst(self, query, values=()):
+    def _selectFirst(self, query, values=()) -> Optional[sqlite3.Row]:
         """Issue a select query and return the first value of the first
         row.
 

@@ -1,18 +1,19 @@
 """Send email."""
 
 import smtplib
+from typing import Dict
 from email.mime.text import MIMEText
 import jinja2
-from cherrypy.process import plugins
+from cherrypy.process import plugins, wspbus
 
 
 class Plugin(plugins.SimplePlugin):
     """A CherryPy plugin for sending email."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: wspbus.Bus) -> None:
         plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the mail prefix.
@@ -21,7 +22,8 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe("mail:send", self.send_message)
 
     @staticmethod
-    def send_message(message_data, template_data):
+    def send_message(message_data: Dict[str, str],
+                     template_data: Dict[str, str]) -> None:
         """Render an email template and send via SMTP"""
 
         loader = jinja2.FileSystemLoader(message_data["template_dir"])
@@ -36,25 +38,25 @@ class Plugin(plugins.SimplePlugin):
         rendered_template = template.render(template_data)
 
         message = MIMEText(rendered_template)
-        message["To"] = ", ".join(message_data["smtp"]["recipients"])
+        message["To"] = message_data["recipient"]
         message["Subject"] = message_data["subject"]
-        message["From"] = message_data["smtp"]["sender"]
+        message["From"] = message_data["sender"]
 
         mailserver = smtplib.SMTP(
-            message_data["smtp"]["host"],
-            message_data["smtp"]["port"]
+            message_data["smtp_host"],
+            int(message_data["smtp_port"])
         )
 
         mailserver.ehlo()
         mailserver.starttls()
         mailserver.ehlo()
         mailserver.login(
-            message_data["smtp"]["username"],
-            message_data["smtp"]["password"]
+            message_data["smtp_username"],
+            message_data["smtp_password"]
         )
 
         mailserver.sendmail(
-            message_data["smtp"]["sender"],
-            ", ".join(message_data["smtp"]["recipients"]),
+            message_data["smtp_sender"],
+            message_data["smtp_recipient"],
             message.as_string()
         )

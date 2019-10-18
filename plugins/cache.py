@@ -1,6 +1,8 @@
 """Store arbitrary values in an SQLite database."""
 
+import sqlite3
 import time
+from typing import List, Any
 import cherrypy
 import msgpack
 from . import mixins
@@ -9,7 +11,7 @@ from . import mixins
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for caching arbitrary values to disk."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("cache.sqlite")
@@ -26,7 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the cdr prefix.
@@ -38,7 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cache:clear", self.clear)
         self.bus.subscribe("cache:prune", self.prune)
 
-    def match(self, key_prefix):
+    def match(self, key_prefix: str) -> List[sqlite3.Row]:
         """Retrieve multiple keys based on a common prefix."""
 
         rows = self._select(
@@ -58,7 +60,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return [row["value"] for row in rows]
 
-    def get(self, key):
+    def get(self, key: str) -> Any:
         """Retrieve a value from the store by its key."""
 
         row = self._selectOne(
@@ -87,7 +89,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return False
 
-    def set(self, key, value, lifespan_seconds=604800):
+    def set(self,
+            key: str,
+            value: Any,
+            lifespan_seconds: int = 604800) -> bool:
         """Add a value to the store.
 
         The default lifespan for a cache entry is 1 week."""
@@ -110,7 +115,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
-    def clear(self, key):
+    def clear(self, key: str) -> int:
         """Remove a value from the store by its key."""
         deletion_count = self._delete("DELETE FROM cache WHERE key=?", (key,))
         cherrypy.engine.publish(
@@ -121,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
         return deletion_count
 
-    def prune(self):
+    def prune(self) -> None:
         """Delete expired cache entries."""
 
         deletion_count = self._delete(
