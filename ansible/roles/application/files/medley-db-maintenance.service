@@ -1,7 +1,7 @@
 [Unit]
 Description=Medley database maintenance
-After=medley
-Requires=medley
+After=medley.service
+Requires=medley.service
 OnFailure=medley-failure@%n
 
 [Service]
