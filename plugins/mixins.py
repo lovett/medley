@@ -3,7 +3,7 @@
 import os.path
 import sqlite3
 import re
-from typing import Any, Tuple, Optional
+from typing import Any, List, Tuple, Optional
 import cherrypy
 
 
@@ -114,7 +114,7 @@ class Sqlite:
             placeholder_values
         )
 
-    def _select(self, query, values=()):
+    def _select(self, query, values=()) -> List[sqlite3.Row]:
         """Issue a select query."""
         con = self._open()
         con.row_factory = sqlite3.Row

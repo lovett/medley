@@ -1,15 +1,16 @@
 """Store HTTP requests and responses for later review"""
 
 import sqlite3
-import msgpack
+from typing import Any, List, Optional, Tuple
 import cherrypy
+import msgpack
 from . import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for capturing HTTP requests."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("captures.sqlite")
@@ -27,7 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the capture prefix.
@@ -36,7 +37,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("capture:search", self.search)
         self.bus.subscribe("capture:get", self.get)
 
-    def add(self, request, response):
+    def add(self,
+            request: Any,
+            response: Any) -> bool:
         """Store a single HTTP request and response pair.
 
         This is usually invoked from the capture Cherrypy tool.
@@ -73,12 +76,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
-    def search(self, path=None, offset=0, limit=10):
+    def search(self,
+               path: Optional[str] = None,
+               offset: int = 0,
+               limit: int = 10) -> Tuple[int, List[sqlite3.Row]]:
         """Locate previously stored requests by path."""
 
         if path:
             search_clause = "AND request_uri=?"
-            placeholders = (path, path, limit, offset)
+            path_placeholders = (path, limit, offset)
         else:
             search_clause = ""
             placeholders = (limit, offset)
@@ -94,7 +100,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY rowid DESC
         LIMIT ? OFFSET ?"""  # nosec
 
-        result = self._select(sql, placeholders)
+        if path_placeholders:
+            result = self._select(sql, path_placeholders)
+        else:
+            result = self._select(sql, placeholders)
 
         if result:
             count = result[0]["total"]
@@ -103,7 +112,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (count, result)
 
-    def get(self, capture_id):
+    def get(self, capture_id: int) -> List[sqlite3.Row]:
         """Locate previously stored requests by ID."""
 
         sql = """SELECT rowid, request_line, request as 'request [binary]',
