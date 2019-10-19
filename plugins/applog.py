@@ -1,18 +1,21 @@
 """Capture log messages to an Sqlite database."""
 
 from collections import deque
+import sqlite3
+from typing import List, Optional, Sequence, Tuple, Union
 import cherrypy
+from cherrypy.process import plugins, wspbus
 from . import mixins
 from . import decorators
 
 
-class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for storing application-centric log messages."""
 
-    def __init__(self, bus):
-        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: wspbus.Bus) -> None:
+        plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("applog.sqlite")
-        self.queue = deque()
+        self.queue: deque = deque()
 
         self._create("""
         PRAGMA journal_mode=WAL;
@@ -32,7 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the applog prefix.
@@ -43,7 +46,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
 
-    def get_newest(self, source, key):
+    def get_newest(self, source: str, key: str) -> Optional[sqlite3.Row]:
         """Retrieve messages by key."""
 
         return self._selectFirst(
@@ -52,7 +55,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (source, key)
         )
 
-    def process_queue(self):
+    def process_queue(self) -> None:
         """Transfer messages from the queue to the database."""
 
         messages = list(self.queue)
@@ -70,23 +73,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             messages
         )
 
-    def add(self, caller, key, value):
+    def add(self,
+            caller: str,
+            key: str,
+            value: Union[str, float, int]) -> None:
         """Accept a log message for storage."""
-
-        try:
-            source = caller.__module__
-        except AttributeError:
-            source = caller
 
         self.queue.append((caller, key, str(value)))
 
         cherrypy.engine.publish("scheduler:add", 1, "applog:process_queue")
 
         # Mirror the log message on the cherrypy log for convenience.
-        cherrypy.log(f"{source}: {value}")
+        cherrypy.log(f"{caller}: {value}")
 
     @decorators.log_runtime
-    def prune(self, cutoff_months=3):
+    def prune(self, cutoff_months: int = 3) -> None:
         """Delete old records.
 
         This is normally invoked from the maintenance plugin, and
@@ -111,11 +112,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(self, sources=(), offset=0, limit=20, exclude=0):
+    def search(self,
+               sources: Sequence[str] = (),
+               offset: int = 0,
+               limit: int = 20,
+               exclude: int = 0) -> Tuple[List[sqlite3.Row], int, sqlite3.Row]:
         """View records in reverse chronological order."""
 
         where_sql = "WHERE 1=1"
-        placeholder_values = ()
+        placeholder_values: Tuple[str, ...] = ()
 
         if sources:
             placeholders = ("?, " * len(sources))[:-2]
