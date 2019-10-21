@@ -1,6 +1,8 @@
 """Storage and search for bookmarked URLs."""
 
 import re
+import sqlite3
+import typing
 from urllib.parse import urlparse
 import cherrypy
 import pendulum
@@ -11,7 +13,7 @@ from . import decorators
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for storing bookmarks."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("bookmarks.sqlite")
@@ -87,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the bookmarks prefix.
@@ -109,7 +111,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:repair", self.repair)
 
     @staticmethod
-    def domain_and_url(url):
+    def domain_and_url(url: str) -> typing.Tuple[str, str]:
         """Parse the domain from a normalized URL."""
 
         parsed_url = urlparse(
@@ -124,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @staticmethod
-    def generalize_query(query):
+    def generalize_query(query: str) -> str:
         """Convert a search query to a more generic form suitable for use with
         external search engines.
 
@@ -134,10 +136,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         general_query = general_query.replace("domain:", "site:")
         return general_query
 
-    def find(self, uid=None, url=None):
+    def find(self,
+             uid: str = None,
+             url: str = None) -> typing.Optional[sqlite3.Row]:
         """Locate a bookmark by ID or URL."""
 
         where_clause = None
+
+        values: typing.Union[
+            typing.Tuple[str],
+            typing.Tuple[str, str]
+        ]
 
         if uid:
             where_clause = "rowid=?"
@@ -148,7 +157,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             values = self.domain_and_url(url)
 
         if not where_clause:
-            return False
+            return None
 
         return self._selectOne(
             f"""SELECT rowid, url, domain, title,
@@ -161,7 +170,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def add(self, url=None, title=None, comments=None, tags=None, added=None):
+    def add(self,
+            url: str,
+            title: str = None,
+            comments: str = None,
+            tags: str = None,
+            added: str = None) -> bool:
         """Store a bookmarked URL and its metadata."""
 
         bookmark = self.find(url=url)
@@ -170,21 +184,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             sql = """UPDATE bookmarks SET title=?, tags=?, comments=?,
             updated=CURRENT_TIMESTAMP, deleted=NULL WHERE rowid=?"""
 
-            values = (
+            update_values = (
                 title,
                 tags,
                 comments,
                 bookmark["rowid"]
             )
 
-            self._update(sql, [values])
+            self._update(sql, [update_values])
             return True
 
         sql = """INSERT INTO bookmarks
         (domain, url, added, added_date, title, tags, comments)
         VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
-        domain_and_url = self.domain_and_url(url)
+        (domain, url) = self.domain_and_url(url)
 
         if added and added.isnumeric():
             numeric_timestamp = int(added)
@@ -192,9 +206,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         else:
             add_date = pendulum.now()
 
-        values = (
-            domain_and_url[0],
-            domain_and_url[1],
+        insert_values = (
+            domain,
+            url,
             add_date.format('YYYY-MM-DD HH:mm:ss'),
             add_date.to_date_string(),
             title,
@@ -202,7 +216,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             comments
         )
 
-        self._insert(sql, [values])
+        self._insert(sql, [insert_values])
 
         if tags:
             cherrypy.engine.publish(
@@ -226,7 +240,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return True
 
     @decorators.log_runtime
-    def add_full_text(self):
+    def add_full_text(self) -> None:
         """Store the plain text of a bookmarked URL.
 
         This is only used for searching.
@@ -277,7 +291,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def remove(self, url):
+    def remove(self, url: str) -> int:
         """Discard a previously bookmarked URL."""
 
         bookmark = self.find(url=url)
@@ -296,7 +310,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return deletions
 
     @decorators.log_runtime
-    def search(self, query, order="date-desc", limit=20, offset=0):
+    def search(
+            self,
+            query: str,
+            order: str = "date-desc",
+            limit: int = 20,
+            offset: int = 0
+    ) -> typing.Tuple[typing.List[sqlite3.Row], int, sqlite3.Row]:
         """Locate bookmarks via fulltext search.
 
         Ranking is based on the built-in hidden rank column provided
@@ -310,7 +330,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         from_sql = "bookmarks b"
         where_sql = "b.deleted IS NULL"
-        placeholder_values = ()
+        placeholder_values: typing.Tuple[str, ...] = ()
         order_sql = "b.added DESC"
 
         if "tag:" in query:
@@ -362,7 +382,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def recent(self, limit=20, offset=0, max_days=180):
+    def recent(
+            self,
+            limit: int = 20,
+            offset: int = 0,
+            max_days: int = 180
+    ) -> typing.Tuple[typing.List[sqlite3.Row], int, sqlite3.Row]:
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT url, domain, title,
@@ -387,7 +412,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def recent_tags(self, limit=50, max_days=180):
+    def recent_tags(
+            self,
+            limit: int = 50,
+            max_days: int = 180
+    ) -> typing.Set[str]:
         """Get a list of tags used on recently-added bookmarks."""
 
         sql = """SELECT tags as 'tags [comma_delimited]'
@@ -403,24 +432,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         generator = self._select_generator(sql, (cutoff_date, limit))
 
-        tag_set = set()
+        tag_set: typing.Set[str] = set()
         for row in generator:
             tag_set.update(row["tags"])
         return tag_set
 
     @decorators.log_runtime
-    def all_tags(self, for_precache=False):
+    def all_tags(
+            self,
+            for_precache: bool = False
+    ) -> typing.Union[None, typing.List[str]]:
         """Get the full list of all known tags."""
 
         cache_key = "bookmarks:all_tags"
 
-        tag_set = cherrypy.engine.publish(
+        tags: typing.Set[str] = cherrypy.engine.publish(
             "cache:get",
             cache_key
         ).pop()
 
-        if tag_set:
-            return tag_set
+        if tags:
+            return list(tags)
 
         sql = """SELECT distinct tags as 'tags [comma_delimited]'
         FROM bookmarks
@@ -431,11 +463,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         generator = self._select_generator(sql)
 
-        tag_set = set()
+        tags = set()
         for row in generator:
-            tag_set.update(row["tags"])
+            tags.update(row["tags"])
 
-        sorted_tags = sorted(tag_set)
+        sorted_tags = sorted(tags)
 
         cherrypy.engine.publish(
             "cache:set",
@@ -449,7 +481,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return None
 
     @decorators.log_runtime
-    def prune(self):
+    def prune(self) -> None:
         """Delete rows that have been marked for removal.
 
         This is normally invoked from the maintenance plugin.
@@ -474,7 +506,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             )
 
     @decorators.log_runtime
-    def repair(self):
+    def repair(self) -> None:
         """Correct wrong or missing values."""
 
         rows_without_domain = self._select_generator(
