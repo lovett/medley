@@ -3,7 +3,7 @@
 import os.path
 import sqlite3
 import re
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Tuple, Optional, Union
 import cherrypy
 
 
@@ -96,7 +96,7 @@ class Sqlite:
         con.close()
         return row_count
 
-    def _count(self, query, values=()):
+    def _count(self, query, values=()) -> int:
         """Convert a select query to a count query and execute it."""
 
         count_query = re.sub(
@@ -180,14 +180,14 @@ class Sqlite:
 
         self._multi(delete_queries)
 
-    def _selectOne(self, query, values=()):
+    def _selectOne(self, query, values=()) -> Union[sqlite3.Row, None]:
         """Issue a select query and return the first row."""
         result = self._select(query, values)
 
         try:
             return result.pop()
         except IndexError:
-            return {}
+            return None
 
     def _selectFirst(self, query, values=()) -> Optional[sqlite3.Row]:
         """Issue a select query and return the first value of the first

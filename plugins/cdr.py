@@ -1,19 +1,21 @@
 """Query an Asterisk sqlite3 CDR database."""
 
+import sqlite3
+import typing
 from string import Template
-import cherrypy
+from cherrypy.process import plugins, wspbus
 from . import mixins
 
 
-class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for querying an Asterisk CDR database."""
 
-    def __init__(self, bus):
-        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: wspbus.Bus) -> None:
+        plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("asterisk_cdr.sqlite")
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the cdr prefix.
@@ -22,7 +24,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cdr:call_log", self.call_log)
         self.bus.subscribe("cdr:call_history", self.call_history)
 
-    def call_count(self, src=None, src_exclude=(), dst_exclude=()):
+    def call_count(
+            self,
+            src: str = None,
+            src_exclude: typing.Tuple[str, ...] = (),
+            dst_exclude: typing.Tuple[str, ...] = ()
+    ) -> typing.Optional[int]:
         """Get the number of calls made or received by a number."""
 
         query = Template("""
@@ -55,9 +62,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         row = self._selectOne(query_str, values)
-        return row["count"]
 
-    def call_log(self, src_exclude=(), dst_exclude=(), offset=0, limit=50):
+        if row:
+            return int(row["count"])
+        return None
+
+    def call_log(self,
+                 src_exclude: typing.Tuple[str, ...] = (),
+                 dst_exclude: typing.Tuple[str, ...] = (),
+                 offset: int = 0,
+                 limit: int = 50) -> typing.List[sqlite3.Row]:
         """Get a list of calls in reverse-chronological order."""
 
         query = Template("""
@@ -75,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY calldate DESC
         LIMIT ? OFFSET ?""")
 
-        reversed_values = [offset, limit]
+        reversed_values = [str(offset), str(limit)]
         dst_filter = ""
         src_filter = ""
 
@@ -96,7 +110,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select(query_str, list(reversed(reversed_values)))
 
-    def call_history(self, number, limit=50):
+    def call_history(
+            self,
+            number: str,
+            limit: int = 50) -> typing.List[sqlite3.Row]:
         """An abbreviated version of call_log() for a single number.
 
         Puts more emphasis on whether a call was placed or received.
