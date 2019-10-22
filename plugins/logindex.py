@@ -3,6 +3,8 @@
 import os
 import os.path
 import re
+import sqlite3
+import typing
 from collections import deque
 from collections import defaultdict
 import cherrypy
@@ -14,10 +16,10 @@ from . import decorators
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for searching webserver logs."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
-        self.queue = deque()
+        self.queue: typing.Deque[pendulum.Period] = deque()
 
         self._create("""
         PRAGMA journal_mode=WAL;
@@ -116,7 +118,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the logindex prefix.
@@ -133,19 +135,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:count_visit_days', self.count_visit_days)
 
     @staticmethod
-    def get_root():
+    def get_root() -> str:
         """Look up the root path for indexable log files in the registry"""
 
         key = "logindex:root"
-        memorize_hit, memorize_value = cherrypy.engine.publish(
-            "memorize:get",
-            key
-        ).pop()
+        memorize_hit, memorize_value = typing.cast(
+            typing.Tuple[bool, str],
+            cherrypy.engine.publish(
+                "memorize:get",
+                key
+            ).pop()
+        )
 
         if memorize_hit:
             return memorize_value
 
-        value = cherrypy.engine.publish(
+        value: str = cherrypy.engine.publish(
             "registry:first_value",
             "logindex:root"
         ).pop()
@@ -156,7 +161,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return value
 
     @decorators.log_runtime
-    def last_known_offset(self, path):
+    def last_known_offset(self, path: str) -> int:
         """Figure out the last known position within a log file.
 
         Tracking the byte offset of each line within a file makes it
@@ -173,9 +178,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (source,)
         )
 
-        return row["offset"]
+        if row:
+            return typing.cast(int, row["offset"])
 
-    def file_for_date(self, log_date):
+        return 0
+
+    def file_for_date(self, log_date: pendulum) -> typing.Optional[str]:
         """The filesystem path of the log file for the given date"""
 
         root = self.get_root()
@@ -185,18 +193,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         log_file = f"{root}/{subdir}/{file}"
 
         if not os.path.isfile(log_file):
-            return False
+            return None
         return log_file
 
     @staticmethod
-    def file_path_to_source(path):
+    def file_path_to_source(path: str) -> str:
         """Extract the file name without extension of a file path."""
 
         basename = os.path.basename(path)
         return os.path.splitext(basename)[0]
 
     @decorators.log_runtime
-    def enqueue(self, start_date, end_date):
+    def enqueue(self, start_date: pendulum, end_date: pendulum) -> bool:
         """Schedule logfile processing.
 
         This is the start of the indexing process. The time period
@@ -233,7 +241,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return True
 
     @decorators.log_runtime
-    def process_queue(self):
+    def process_queue(self) -> None:
         """Trigger log file ingestion and parsing.
 
         This is the first stage of processing, where queued time
@@ -274,7 +282,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.process_queue()
 
     @decorators.log_runtime
-    def ingest_file(self, file_path, batch_size=100):
+    def ingest_file(self, file_path: str, batch_size: int = 100) -> None:
         """Read new lines from a log file in batches."""
 
         batch = []
@@ -322,7 +330,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def reversal(self, batch_size=50):
+    def reversal(self, batch_size: int = 50) -> None:
         """Store the reverse hostname of an IP address."""
 
         records = self._select(
@@ -376,7 +384,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("scheduler:add", 5, "logindex:reversal")
 
     @decorators.log_runtime
-    def parse(self, batch_size=100):
+    def parse(self, batch_size: int = 100) -> None:
         """Parse log lines into fields
 
         The log line is initially inserted to the database as a single
@@ -416,7 +424,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         batch = []
         ips = set()
-        cache = {
+        cache: typing.Dict[str, defaultdict] = {
             "ip": defaultdict(),
             "agent": defaultdict()
         }
@@ -510,7 +518,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             len(records)
         )
 
-    def insert_line(self, records):
+    def insert_line(
+            self,
+            records: typing.List[typing.Tuple[str, int, str, str]]
+    ) -> int:
         """Write a batch of log lines to the database.
 
         This is the initial insert, where the line is added in its
@@ -526,7 +537,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return len(records)
 
     @decorators.log_runtime
-    def query(self, query):
+    def query(
+            self,
+            query: str
+    ) -> typing.Tuple[typing.List[sqlite3.Row], sqlite3.Row]:
         """Perform a search against parsed log lines."""
 
         parsed_query = cherrypy.engine.publish(
@@ -548,7 +562,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return (result, query_plan)
 
     @decorators.log_runtime
-    def query_reverse_ip(self, ips=()):
+    def query_reverse_ip(
+            self,
+            ips: typing.Tuple[str, ...] = ()
+    ) -> typing.Dict[str, str]:
         """Look up the reverse hostname of an IP address."""
 
         placeholders = ("?, " * len(ips))[:-2]
@@ -562,7 +579,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return {row["ip"]: row["reverse_domain"] for row in result}
 
     @decorators.log_runtime
-    def alert(self, earliest_id, count):
+    def alert(self, earliest_id: int, count: int) -> None:
         """Send a notification for newly-parsed records that match
         previously-stored queries.
 
@@ -615,16 +632,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 )
 
     @decorators.log_runtime
-    def count_visit_days(self, ip_address):
+    def count_visit_days(
+            self,
+            ip_address: str
+    ) -> typing.Dict[str, typing.Union[int, str]]:
         """Count the number of days an IP appears in the logs."""
 
-        record = self._selectOne(
-            """SELECT count(DISTINCT substr(datestamp, 0, 11)) as count,
-            min(datestamp) as 'earliest [date_with_hour]',
-            max(datestamp) as 'latest [date_with_hour]'
-            FROM logs
-            WHERE ip=?""",
-            (ip_address,)
+        record = typing.cast(
+            typing.Iterable[typing.Tuple[typing.Any, typing.Any]],
+            self._selectOne(
+                """SELECT count(DISTINCT substr(datestamp, 0, 11)) as count,
+                min(datestamp) as 'earliest [date_with_hour]',
+                max(datestamp) as 'latest [date_with_hour]'
+                FROM logs
+                WHERE ip=?""",
+                (ip_address,)
+            )
         )
 
         return dict(record)
