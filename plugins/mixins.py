@@ -2,6 +2,7 @@
 
 import os.path
 import sqlite3
+import typing
 import re
 from typing import Any, List, Tuple, Optional, Union
 import cherrypy
@@ -11,7 +12,7 @@ import cherrypy
 class Sqlite:
     """Query an SQLite database using Python's DB-API."""
 
-    db_path = None
+    db_path: typing.Optional[str] = None
 
     @staticmethod
     def _path(name):

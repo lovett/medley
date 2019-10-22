@@ -3,6 +3,7 @@
 import glob
 import os
 import time
+import typing
 import cherrypy
 from cherrypy.process import plugins
 from . import mixins
@@ -12,10 +13,10 @@ from . import decorators
 class Plugin(plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for executing maintenance tasks."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus):
         plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the maintenance prefix.
@@ -24,7 +25,10 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("maintenance:filesystem", self.fs_maintenance)
 
     @decorators.log_runtime
-    def db_maintenance(self, file_names=None):
+    def db_maintenance(
+            self,
+            file_names: typing.Optional[typing.Sequence[str]]
+    ) -> None:
         """Execute database maintenance tasks."""
 
         cherrypy.engine.publish("cache:prune")
@@ -62,7 +66,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
 
     @staticmethod
     @decorators.log_runtime
-    def fs_maintenance():
+    def fs_maintenance() -> None:
         """Execute filesystem maintenance tasks."""
 
         cherrypy.engine.publish("speak:prune")
