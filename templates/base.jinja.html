@@ -2,15 +2,20 @@
 <!DOCTYPE html>
 <html>
     <head>
-        {% if app_name == "Homepage" %}
+        {% if app_name == "Homepage" -%}
             <title>Medley</title>
-        {% else %}
+        {%- else -%}
             <title>{{ app_name or "Medley" }}</title>
-        {% endif %}
+        {%- endif %}
 
         <meta
             name="viewport"
             content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+        />
+
+        <meta
+            name="theme-color"
+            content="#00A7E1"
         />
 
         {{ macros.staticAsset('shared', 'css/medley.css') }}
@@ -25,29 +30,28 @@
         <meta name="msapplication-TileImage" content="/shared/static/favicon/app-icon-144.png" />
 
         {% block page_meta %}{% endblock %}
-
     </head>
     <body id="{{ body_id }}">
         <header id="page-header">
             <h1>
                 <a rel="home" href="/">Medley</a>
-                {% if app_url %}
+                {% if app_url -%}
                     : <a href="{{ app_url }}">{{ app_name }}</a>
-                {% endif %}
+                {%- endif %}
             </h1>
 
             <span class="focus-buffer-display"></span>
         </header>
 
-        {% block app_message %}
+        {% block app_message -%}
             <div id="app-message" hidden></div>
-        {% endblock %}
+        {%- endblock %}
 
         {% block page_body %}{% endblock %}
 
         {{ macros.staticAsset('shared', 'js/medley.js') }}
 
-        {% if use_service_workers %}
+        {% if use_service_workers -%}
         <script>
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/worker.js').then(registration => {
@@ -57,8 +61,7 @@
                 console.info('Service workers are not supported here.');
             }
         </script>
-        {% endif %}
-
+        {%- endif %}
         {% block scripts %}{% endblock %}
     </body>
 </html>
