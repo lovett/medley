@@ -28,6 +28,14 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST"))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.wakeup.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.wakeup.main.Controller)
+
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_get(self, publish_mock, render_mock):

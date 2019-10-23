@@ -51,10 +51,17 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_allow(self):
         """This app does not support HEAD or GET requests."""
-
         for method in ("HEAD", "GET", "DELETE"):
             response = self.request("/", method=method)
             self.assertEqual(response.code, 405)
+
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.geodb.main.Controller)
+
+    def test_not_user_facing(self):
+        """The application is not displayed in the homepage app."""
+        self.assert_not_user_facing(apps.geodb.main.Controller)
 
     def test_action_required(self):
         """A post request without a valid action fails."""

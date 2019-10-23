@@ -28,6 +28,14 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.later.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.later.main.Controller)
+
     def test_populates_title(self):
         """The title field is prepopulated if provided via querystring"""
 

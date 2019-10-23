@@ -32,6 +32,14 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST"))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.htmlhead.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.htmlhead.main.Controller)
+
     def test_default(self):
         """The default view is a form to enter a URL."""
 

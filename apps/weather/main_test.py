@@ -3,7 +3,6 @@ Test suite for the weather app
 """
 
 import unittest
-import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -25,10 +24,13 @@ class TestWeather(BaseCherryPyTestCase, ResponseAssertions):
         """Shut down the faux server"""
         helpers.stop_server()
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_returns_html(self, publish_mock):
-        """Request should return HTML"""
-        pass
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.weather.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.weather.main.Controller)
 
 
 if __name__ == "__main__":

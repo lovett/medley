@@ -28,6 +28,14 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.headlines.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.headlines.main.Controller)
+
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 

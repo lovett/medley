@@ -26,6 +26,14 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("POST",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.azure.main.Controller)
+
+    def test_not_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_not_user_facing(apps.azure.main.Controller)
+
     def test_requires_site_name(self):
         """The request body must specify a site name"""
         response = self.request("/", method="POST", json_body={

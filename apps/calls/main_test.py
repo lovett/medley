@@ -30,6 +30,14 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.calls.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.calls.main.Controller)
+
     @mock.patch("cherrypy.engine.publish")
     def test_exclusion(self, publish_mock):
         """Source and destination numbers are skipped"""

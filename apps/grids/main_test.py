@@ -30,6 +30,14 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.grids.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.grids.main.Controller)
+
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     def test_month_layout(self, publish_mock, render_mock):

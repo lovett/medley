@@ -27,6 +27,14 @@ class TestVisitors(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.visitors.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.visitors.main.Controller)
+
 
 if __name__ == "__main__":
     unittest.main()

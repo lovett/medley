@@ -27,6 +27,14 @@ class TestStartpage(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST"))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.startpage.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.startpage.main.Controller)
+
 
 if __name__ == "__main__":
     unittest.main()

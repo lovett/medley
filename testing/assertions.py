@@ -75,3 +75,15 @@ class ResponseAssertions(unittest.TestCase):
             raise AssertionError(
                 f"Expires header has unexpected format: {value}"
             )
+
+    def assert_exposed(self, controller):
+        """The application controller's exposed attribute is set."""
+        self.assertTrue(controller.exposed)
+
+    def assert_user_facing(self, controller):
+        """The application is presented on the homepge."""
+        self.assertTrue(controller.user_facing)
+
+    def assert_not_user_facing(self, controller):
+        """The application is not presented on the homepge."""
+        self.assertFalse(controller.user_facing)

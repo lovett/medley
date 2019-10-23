@@ -32,9 +32,16 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
-
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "PUT"))
+
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.bounce.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the bounce app."""
+        self.assert_user_facing(apps.bounce.main.Controller)
 
     def test_host_reduction(self):
         """An incoming URL is reduced to its host name."""

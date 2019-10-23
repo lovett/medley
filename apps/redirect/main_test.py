@@ -29,6 +29,14 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.redirect.main.Controller)
+
+    def test_not_user_facing(self):
+        """The application is not displayed in the homepage app."""
+        self.assert_not_user_facing(apps.redirect.main.Controller)
+
     def test_no_destination(self):
         """If no URL is provided, no redirect occurs."""
         response = self.request("/")

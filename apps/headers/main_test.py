@@ -29,6 +29,14 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+    def test_exposed(self):
+        """The application is publicly available."""
+        self.assert_exposed(apps.headers.main.Controller)
+
+    def test_user_facing(self):
+        """The application is displayed in the homepage app."""
+        self.assert_user_facing(apps.headers.main.Controller)
+
     def test_returns_html(self):
         """GET returns text/html by default"""
         response = self.request("/")
