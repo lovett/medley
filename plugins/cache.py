@@ -71,7 +71,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (key,)
         )
 
-        if "value" in row.keys():
+        if row:
             cherrypy.engine.publish(
                 "applog:add",
                 "cache",
