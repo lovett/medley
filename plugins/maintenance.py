@@ -27,7 +27,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
     @decorators.log_runtime
     def db_maintenance(
             self,
-            file_names: typing.Optional[typing.Sequence[str]]
+            file_names: typing.Optional[typing.Sequence[str]] = ()
     ) -> None:
         """Execute database maintenance tasks."""
 
