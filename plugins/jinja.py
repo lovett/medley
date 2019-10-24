@@ -7,6 +7,8 @@ import html
 import http.client
 import os
 import os.path
+import sqlite3
+import typing
 import urllib
 from urllib.parse import urlparse
 import json
@@ -21,7 +23,7 @@ import pendulum
 class Plugin(plugins.SimplePlugin):
     """A CherryPy plugin for rendering Jinja2 templates."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         server_root = cherrypy.config.get("server_root", "./")
 
         cache_dir = os.path.join(
@@ -38,11 +40,13 @@ class Plugin(plugins.SimplePlugin):
 
         paths = [os.path.join(server_root, "templates")]
 
-        apps = [os.path.join(server_root, "apps", app)
-                for app in os.listdir(os.path.join(server_root, "apps"))]
+        apps = [
+            os.path.join(server_root, "apps", app)
+            for app in os.listdir(os.path.join(server_root, "apps"))
+            if os.path.isdir(os.path.join(server_root, "apps", app))
+            and not app.startswith("__")
+        ]
 
-        apps = filter(os.path.isdir, apps)
-        apps = filter(lambda x: not x.endswith("__"), apps)
         paths.extend(apps)
 
         loader = jinja2.FileSystemLoader(paths)
@@ -83,7 +87,7 @@ class Plugin(plugins.SimplePlugin):
 
         plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the jinja prefix
@@ -91,13 +95,16 @@ class Plugin(plugins.SimplePlugin):
 
         self.bus.subscribe("lookup-template", self.get_template)
 
-    def get_template(self, name):
+    def get_template(self, name: str) -> jinja2.Template:
         """Retrieve a Jinja2 template by name."""
 
         return self.env.get_template(name)
 
     @staticmethod
-    def localtime_filter(value, timezone=None):
+    def localtime_filter(
+            value: pendulum.DateTime,
+            timezone: str = None
+    ) -> pendulum:
         """Switch a datetime to the local timezone, then format it"""
 
         if not value:
@@ -116,13 +123,16 @@ class Plugin(plugins.SimplePlugin):
         return value.in_timezone(timezone)
 
     @staticmethod
-    def dateformat_filter(value, format_string):
+    def dateformat_filter(
+            value: pendulum,
+            format_string: str
+    ) -> str:
         """Format a datetime instance to a string."""
 
-        return value.format(format_string)
+        return typing.cast(str, value.format(format_string))
 
     @staticmethod
-    def unindent_filter(string):
+    def unindent_filter(string: str) -> str:
         """Remove leading whitespace from a multiline string without losing
         indentation
 
@@ -137,18 +147,23 @@ class Plugin(plugins.SimplePlugin):
         return "\n".join(unindented)
 
     @staticmethod
-    def status_message_filter(code):
+    def status_message_filter(code: typing.Union[str, int]) -> str:
         """Returns the standard status code message for the given integer"""
         return http.client.responses.get(int(code), "Unknown")
 
     @staticmethod
-    def nl2br_filter(value):
+    def nl2br_filter(value: str) -> str:
         """Replace newlines with <br/> tags"""
         return value.replace("\n", "<br/>")
 
     @staticmethod
-    def pluralize_filter(count, singular, plural=None, suffix='',
-                         number_format=',d'):
+    def pluralize_filter(
+            count: int,
+            singular: str,
+            plural: str = None,
+            suffix: str = "",
+            number_format: str = ',d'
+    ) -> str:
         """Label a value with the singular or plural form of a word."""
 
         if not plural:
@@ -163,7 +178,10 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.contextfilter
-    def anonymize_filter(_, url):
+    def anonymize_filter(
+            _: typing.Any,
+            url: str
+    ) -> str:
         """Prepend an HTTP URL with the URL of the redirect app increase
         referrer privacy.
 
@@ -174,20 +192,23 @@ class Plugin(plugins.SimplePlugin):
         if parsed_url.scheme not in ('http', 'https'):
             return url
 
-        return cherrypy.engine.publish(
-            "url:internal",
-            "/redirect",
-            {"u": url}
-        ).pop()
+        return typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "url:internal",
+                "/redirect",
+                {"u": url}
+            ).pop()
+        )
 
     @staticmethod
-    def urlencode_filter(value):
+    def urlencode_filter(value: str) -> str:
         """Apply URL encoding to a value."""
 
         return urllib.parse.quote(value)
 
     @staticmethod
-    def ago_filter(value):
+    def ago_filter(value: typing.Union[int, pendulum.DateTime]) -> pendulum:
         """Calculate a human-readable time delta between a date in the past
         and now.
 
@@ -196,6 +217,7 @@ class Plugin(plugins.SimplePlugin):
         """
 
         date = value
+
         if isinstance(value, int):
             date = pendulum.from_timestamp(value)
 
@@ -206,19 +228,25 @@ class Plugin(plugins.SimplePlugin):
         return date.in_timezone(zone).diff_for_humans()
 
     @staticmethod
-    def yearmonth_filter(value):
+    def yearmonth_filter(value: pendulum) -> str:
         """Format a datetime to a year-month string."""
-        return value.strftime("%Y-%m")
+        return typing.cast(str, value.strftime("%Y-%m"))
 
     @staticmethod
-    def json_filter(value):
+    def json_filter(value: object) -> str:
         """Pretty-print a JSON value."""
         return json.dumps(value, sort_keys=True, indent=2)
 
     @staticmethod
     @jinja2.evalcontextfilter
-    def websearch_filter(eval_ctx, value, engine=None, url_only=False,
-                         target="_blank", with_icon=True):
+    def websearch_filter(
+            eval_ctx: jinja2.Environment,
+            value: str,
+            engine: str = "",
+            url_only: bool = False,
+            target: str = "_blank",
+            with_icon: bool = True
+    ) -> str:
         """Construct an offsite search URL for a term."""
 
         escaped_value = html.escape(value)
@@ -251,7 +279,7 @@ class Plugin(plugins.SimplePlugin):
         return result
 
     @staticmethod
-    def phonenumber_filter(value, as_link=False):
+    def phonenumber_filter(value: str, as_link: bool = False) -> str:
         """Format a US phone number as a human-readable string"""
 
         formats = {
@@ -275,7 +303,7 @@ class Plugin(plugins.SimplePlugin):
 
         return formatted_value
 
-    def snorql_filter(self, value):
+    def snorql_filter(self, value: str) -> str:
         """Build a URL to dbpedia.org/snorql with the specified query"""
 
         query = self.unindent_filter(value).strip()
@@ -285,7 +313,7 @@ class Plugin(plugins.SimplePlugin):
         return f"http://dbpedia.org/snorql?query={encoded_query}"
 
     @staticmethod
-    def percentage_filter(value):
+    def percentage_filter(value: float) -> str:
         """Display a value as a percentage."""
 
         if value < 1:
@@ -295,7 +323,7 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.contextfilter
-    def cache_bust_filter(_, url):
+    def cache_bust_filter(_: typing.Any, url: str) -> str:
         """Calculate a cache-aware URL to a static asset.
 
         A cache-aware URL is one that contains a unique identifier in
@@ -315,7 +343,7 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.contextfilter
-    def escapejs_filter(_, val):
+    def escapejs_filter(_: typing.Any, val: str) -> str:
         """Escape special characters in JavaScript when rendered inline with
         markup.
 
@@ -340,7 +368,7 @@ class Plugin(plugins.SimplePlugin):
         })
 
     @staticmethod
-    def hostname_truncate_filter(val, length=4):
+    def hostname_truncate_filter(val: str, length: int = 4) -> str:
         """Slice a hostname by segment, avoiding awkward cutoffs."""
 
         segments = val.split(".")[::-1]
@@ -349,13 +377,16 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.evalcontextfilter
-    def logline_with_links_filter(eval_ctx, record):
+    def logline_with_links_filter(
+            eval_ctx: jinja2.Environment,
+            record: sqlite3.Row
+    ) -> str:
         """Add hyperlinks to a log entry."""
 
-        result = record["logline"]
+        result = typing.cast(str, record["logline"])
 
         # ip
-        link = f"""<a href="/visitors?query=ip+{0}"
+        link = f"""<a href="/visitors?query=ip+{record['ip']}"
         title="Search for visits from this address"
         rel="noreferrer">{record['ip']}</a>"""
 
@@ -367,7 +398,7 @@ class Plugin(plugins.SimplePlugin):
         return result
 
     @staticmethod
-    def slug_filter(value):
+    def slug_filter(value: str) -> str:
         """Reduce a string to a URL-friendly, alphanumeric form."""
 
         slug = value.lower()
@@ -375,7 +406,10 @@ class Plugin(plugins.SimplePlugin):
         return re.sub(r"\s+", "-", slug)
 
     @staticmethod
-    def sane_callerid_filter(value, default="unknown caller"):
+    def sane_callerid_filter(
+            value: str,
+            default: str = "unknown caller"
+    ) -> str:
         """Prevent Google Voice callerid strings from being displayed.
 
         Example: +12223334444@voice.google.com/srvenc-abc123/def456/
@@ -387,7 +421,7 @@ class Plugin(plugins.SimplePlugin):
 
         return value
 
-    def autolink_filter(self, value):
+    def autolink_filter(self, value: str) -> str:
         """Convert a bare URL to a hyperlink"""
 
         if not value.startswith("http"):
@@ -397,7 +431,7 @@ class Plugin(plugins.SimplePlugin):
         return f"""<a href="{href}"
         target="_blank" rel="noreferrer"'>{value}</a>"""
 
-    def optional_qs_param_filter(self, value, key):
+    def optional_qs_param_filter(self, value: str, key: str) -> str:
         """Return a URL querystring key-value pair if the value exists."""
 
         if not value:
@@ -408,7 +442,7 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.evalcontextfilter
-    def unescape(eval_ctx, value):
+    def unescape(eval_ctx: jinja2.Environment, value: str) -> str:
         """De-entify HTML"""
 
         result = html.unescape(value)
