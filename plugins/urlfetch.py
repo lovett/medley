@@ -4,18 +4,19 @@ import json
 import os.path
 import shutil
 import tarfile
+import typing
 import requests
 import cherrypy
-from cherrypy.process import plugins
+from cherrypy.process import plugins, wspbus
 
 
 class Plugin(plugins.SimplePlugin):
     """A CherryPy plugin for making HTTP requests."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: wspbus.Bus) -> None:
         plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the urlfetch prefix.
@@ -27,13 +28,18 @@ class Plugin(plugins.SimplePlugin):
         cherrypy.engine.publish("urlfetch:ready")
 
     @staticmethod
-    def get(url, as_json=False, as_object=False, **kwargs):
+    def get(
+            url: str,
+            as_json: bool = False,
+            as_object: bool = False,
+            **kwargs: typing.Dict[str, typing.Any]
+    ) -> typing.Any:
         """Send a GET request"""
 
         auth = kwargs.get("auth")
         headers = kwargs.get("headers")
         params = kwargs.get("params")
-        cache_lifespan = kwargs.get("cache_lifespan", 0)
+        cache_lifespan = typing.cast(int, kwargs.get("cache_lifespan", 0))
 
         if cache_lifespan > 0:
             response = cherrypy.engine.publish(
@@ -42,7 +48,10 @@ class Plugin(plugins.SimplePlugin):
             ).pop()
 
             if response:
-                return response
+                return typing.cast(
+                    requests.models.Response,
+                    response
+                )
 
         request_headers = {
             "User-Agent": "Mozilla/5.0 (compatible; python)",
@@ -58,7 +67,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "get",
-            f"Requesting {url}"
+            url
         )
 
         try:
@@ -74,9 +83,9 @@ class Plugin(plugins.SimplePlugin):
 
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
-                "applog:add",
+                "applog:addo",
                 "urlfetch",
-                "get",
+                "failure",
                 exception
             )
 
@@ -101,12 +110,19 @@ class Plugin(plugins.SimplePlugin):
         return req.text
 
     @staticmethod
-    def get_file(url, destination, as_json=False, **kwargs):
-        """Send a GET request and save the response to the local filesystem.
-        """
+    def get_file(url: str,
+                 destination: str,
+                 as_json: bool = False,
+                 **kwargs: str) -> None:
+        """Send a GET request and save the response to the local filesystem."""
 
         auth = kwargs.get("auth")
-        headers = kwargs.get("headers")
+
+        headers = typing.cast(
+            typing.Dict[str, str],
+            kwargs.get("headers")
+        )
+
         params = kwargs.get("params")
         files_to_extract = kwargs.get("files_to_extract")
 
@@ -124,7 +140,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "get_file",
-            f"Downloading {url}"
+            url
         )
 
         download_path = os.path.join(
@@ -146,14 +162,16 @@ class Plugin(plugins.SimplePlugin):
             shutil.copyfileobj(req.raw, downloaded_file)
 
         if files_to_extract and tarfile.is_tarfile(download_path):
-            with tarfile.open(download_path) as downloaded_file:
+            with tarfile.open(download_path) as tar_file:
                 file_names = [
-                    name for name in downloaded_file.getnames()
+                    name for name in tar_file.getnames()
                     if os.path.basename(name) in files_to_extract
                 ]
 
                 for file_name in file_names:
-                    buffered_reader = downloaded_file.extractfile(file_name)
+                    buffered_reader: typing.Any = tar_file.extractfile(
+                        file_name
+                    )
 
                     extract_path = os.path.join(
                         destination,
@@ -169,7 +187,13 @@ class Plugin(plugins.SimplePlugin):
             os.unlink(download_path)
 
     @staticmethod
-    def post(url, data, as_json=False, as_bytes=False, **kwargs):
+    def post(
+            url: str,
+            data: typing.Any,
+            as_json: bool = False,
+            as_bytes: bool = False,
+            **kwargs: typing.Any
+    ) -> typing.Any:
         """Send a POST request."""
 
         auth = kwargs.get("auth")
@@ -190,7 +214,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "urlfetch",
             "post",
-            f"Posting to {url}"
+            url
         )
 
         try:
@@ -219,7 +243,7 @@ class Plugin(plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch",
-                "post",
+                "failure",
                 exception
             )
 
