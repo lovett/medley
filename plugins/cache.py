@@ -54,8 +54,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "match",
-            f"{len(rows)} cache matches for {key_prefix}"
+            f"match:{key_prefix}",
+            len(rows)
         )
 
         return [row["value"] for row in rows]
@@ -75,16 +75,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish(
                 "applog:add",
                 "cache",
-                "get",
-                f"hit for {key}"
+                f"get:{key}",
+                "hit"
             )
             return row["value"]
 
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "get",
-            f"miss for {key}"
+            f"get:{key}",
+            "miss"
         )
 
         return False
@@ -109,8 +109,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "set",
-            f"cached record for {key} for {lifespan_seconds} seconds"
+            "set:{key}",
+            lifespan_seconds
         )
 
         return True
@@ -121,8 +121,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "clear",
-            f"cleared {deletion_count} records for {key}"
+            f"clear:{key}",
+            deletion_count
         )
         return deletion_count
 
@@ -138,5 +138,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "cache",
             "prune",
-            f"pruned {deletion_count} records"
+            deletion_count
         )

@@ -51,7 +51,7 @@ class Plugin(plugins.SimplePlugin):
             "applog:add",
             "audio",
             "play",
-            f"playing {path}"
+            path
         )
 
         wave_obj = SIMPLE_AUDIO.WaveObject.from_wave_file(path)

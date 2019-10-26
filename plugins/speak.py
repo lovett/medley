@@ -375,14 +375,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     os.rmdir(dir_path)
                     dirs_pruned += 1
 
-        files_label = "file" if files_pruned == 1 else "files"
-        dirs_label = "directory" if dirs_pruned == 1 else "directories"
+        cherrypy.engine.publish(
+            "applog:add",
+            "speak",
+            "prune:files",
+            files_pruned
+        )
 
         cherrypy.engine.publish(
             "applog:add",
             "speak",
-            "prune",
-            f"pruned {files_pruned} {files_label}, {dirs_pruned} {dirs_label}"
+            "prune:dirs",
+            dirs_pruned
         )
 
     @staticmethod

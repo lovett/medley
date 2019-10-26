@@ -77,7 +77,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
             "applog:add",
             "scheduler",
             "revive",
-            f"Reviving {len(cached_events)} events from cache"
+            len(cached_events)
         )
 
         for cached_event in cached_events:

@@ -223,7 +223,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish(
                 "applog:add",
                 "logindex",
-                "enqueue",
+                "error",
                 "Ignoring a request to queue an already-queued range"
             )
             return False
@@ -326,7 +326,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "logindex",
             "ingest_file",
-            f"Ingested {file_path}"
+            file_path
         )
 
     @decorators.log_runtime
@@ -355,8 +355,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            "reversal",
-            f"{unreversed_ips} unreversed ips"
+            "unreversed_ips",
+            unreversed_ips
         )
 
         if unreversed_ips == 0:
@@ -414,8 +414,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            "parse",
-            f"{records[0]['value']} unparsed rows"
+            "unparsed_rows",
+            records[0]['value']
         )
 
         if records[0]["value"] == 0:

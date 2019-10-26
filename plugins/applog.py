@@ -84,7 +84,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("scheduler:add", 1, "applog:process_queue")
 
         # Mirror the log message on the cherrypy log for convenience.
-        cherrypy.log(f"{caller}: {value}")
+        cherrypy.log(f"[{caller}] {key}: {value}")
 
     @decorators.log_runtime
     def prune(self, cutoff_months: int = 3) -> None:
@@ -108,7 +108,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "applog",
             "prune",
-            f"pruned {deletion_count} records"
+            deletion_count
         )
 
     @decorators.log_runtime

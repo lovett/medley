@@ -162,12 +162,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("memorize:clear", key)
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
-        cherrypy.engine.publish(
-            "applog:add",
-            "registry",
-            f"remove_key:{key}",
-            deletions
-        )
 
         return deletions
 
@@ -177,12 +171,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         deletions = self._delete(
             "DELETE FROM registry WHERE rowid=?",
             (rowid,)
-        )
-        cherrypy.engine.publish(
-            "applog:add",
-            "registry",
-            f"remove_id:{rowid}",
-            deletions
         )
 
         return deletions

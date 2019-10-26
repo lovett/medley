@@ -47,8 +47,8 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
                 cherrypy.engine.publish(
                     "applog:add",
                     "maintenance",
-                    "db",
-                    f"Skipped {file_name}"
+                    "db:skip",
+                    file_name
                 )
 
                 continue
@@ -60,8 +60,8 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish(
                 "applog:add",
                 "maintenance",
-                "db",
-                f"Vacuumed and analyzed {self.db_path}"
+                f"db:{self.db_path}",
+                "ok"
             )
 
     @staticmethod

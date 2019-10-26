@@ -256,7 +256,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 "applog:add",
                 "bookmarks",
                 "add_full_text",
-                "0 unretrieved rows"
+                0
             )
 
             return
@@ -496,7 +496,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "applog:add",
             "bookmarks",
             "prune",
-            f"pruned {deletion_count} records"
+            deletion_count
         )
 
         if deletion_count > 0:
