@@ -1,6 +1,7 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
 import re
+import typing
 import urllib
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
@@ -16,10 +17,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     """
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Register converters."""
         register_converter("datetime", self.datetime)
         register_converter("date_with_hour", self.date_with_hour)
@@ -31,35 +32,39 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("comma_delimited", self.comma_delimited)
 
     @staticmethod
-    def datetime(value):
+    def datetime(value: bytes) -> pendulum.DateTime:
         """Convert a datetime string to a Pendulum instance."""
 
-        value = value.decode("utf-8")
+        decoded_value = value.decode("utf-8")
 
         try:
-            utc_date = pendulum.from_format(value, "YYYY-MM-DD HH:mm:ss")
+            utc_date = pendulum.from_format(
+                decoded_value,
+                "YYYY-MM-DD HH:mm:ss"
+            )
         except ValueError:
-            last_colon_index = value.rindex(":")
-            date = value[:last_colon_index] + value[last_colon_index + 1:]
+            last_colon_index = decoded_value.rindex(":")
+            date = decoded_value[:last_colon_index] + \
+                decoded_value[last_colon_index + 1:]
             utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
 
         return utc_date
 
     @staticmethod
-    def date_with_hour(value):
+    def date_with_hour(value: bytes) -> typing.Optional[pendulum.DateTime]:
         """Convert a date-and-hour string to a Pendulum instance."""
 
-        value = value.decode("utf-8")
+        decoded_value = value.decode("utf-8")
 
         try:
-            utc_date = pendulum.from_format(value, "YYYY-MM-DD-HH")
+            utc_date = pendulum.from_format(decoded_value, "YYYY-MM-DD-HH")
         except ValueError:
             utc_date = None
 
         return utc_date
 
     @staticmethod
-    def calldate_to_utc(value):
+    def calldate_to_utc(value: bytes) -> pendulum.DateTime:
         """Convert a local datetime string to a UTC Pendulum instance."""
 
         local_tz = cherrypy.engine.publish(
@@ -73,7 +78,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).in_timezone('utc')
 
     @staticmethod
-    def duration(value):
+    def duration(value: bytes) -> str:
         """Convert a number of seconds into a human-readable string."""
 
         seconds = int(value)
@@ -111,13 +116,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ", ".join(result)
 
     @staticmethod
-    def callerid(value):
+    def callerid(value: bytes) -> str:
         """De-quote a caller ID string from an Asterisk CDR database."""
 
         return re.sub(r'"(.*?)".*', r"\1", value.decode("utf-8"))
 
     @staticmethod
-    def binary(blob):
+    def binary(blob: bytes) -> typing.Any:
         """Unpack a binary value stored in a blob field.
 
         MessagePack is the only serialization format used by the
@@ -131,7 +136,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return None
 
     @staticmethod
-    def querystring(value):
+    def querystring(value: bytes) -> typing.Dict[str, typing.List[str]]:
         """Parse a URL querystring into a dict."""
 
         return urllib.parse.parse_qs(
@@ -140,7 +145,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def comma_delimited(value):
+    def comma_delimited(value: bytes) -> typing.List[str]:
         """Parse a comma-delimited string into a list."""
 
         return [
