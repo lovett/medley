@@ -216,10 +216,10 @@ class Plugin(plugins.SimplePlugin):
 
         """
 
-        date = value
-
         if isinstance(value, int):
             date = pendulum.from_timestamp(value)
+        else:
+            date = value
 
         zone = cherrypy.engine.publish(
             "registry:local_timezone"
