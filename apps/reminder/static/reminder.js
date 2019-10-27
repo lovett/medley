@@ -17,8 +17,11 @@ MEDLEY.reminder = (function () {
     function onSubmit(e) {
 
         const digitsRegex = /[^0-9]/g;
+        const form = e.target;
         const minutes = document.getElementById('minutes').value.replace(digitsRegex, '');
         const hours = document.getElementById('hours').value.replace(digitsRegex, '');
+
+        MEDLEY.deactivateForm(form);
 
         let timeframe = 0;
         if (minutes) {
@@ -31,7 +34,8 @@ MEDLEY.reminder = (function () {
 
         if (timeframe == 0) {
             e.preventDefault();
-            MEDLEY.setErrorMessage('The reminder timeframe hasn\'t been set.');
+            MEDLEY.setErrorMessage('The timeframe hasn\'t been set.');
+            MEDLEY.reactivateForm(form)
             document.getElementById('minutes').focus();
             return;
         }
@@ -39,7 +43,8 @@ MEDLEY.reminder = (function () {
         const message = document.getElementById('message').value.trim();
         if (message === '') {
             e.preventDefault();
-            MEDLEY.setErrorMessage('The reminder message hasn\'t been set.');
+            MEDLEY.setErrorMessage('The message hasn\'t been set.');
+            MEDLEY.reactivateForm(form)
             document.getElementById('message').focus();
             return;
         }

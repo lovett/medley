@@ -36,6 +36,26 @@ var MEDLEY = (function () {
     };
 
     return {
+        reactivateForm: function (form) {
+            const buttons = form.querySelectorAll('button');
+            Array.from(buttons).forEach((button) => {
+                button.disabled = false;
+                if (button.dataset.default) {
+                    button.innerText = button.dataset.default;
+                }
+            });
+        },
+
+        deactivateForm: function (form) {
+            const buttons = form.querySelectorAll('button');
+            Array.from(buttons).forEach((button) => {
+                button.disabled = true;
+                if (button.dataset.alt) {
+                    button.innerText = button.dataset.alt;
+                }
+            });
+        },
+
         setSuccessMessage: function (message) {
             const el = document.getElementById('app-message');
             el.removeAttribute('hidden');
