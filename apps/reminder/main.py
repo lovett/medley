@@ -82,8 +82,9 @@ class Controller:
         except (ValueError, TypeError):
             remember = 0
 
-        if not notification_id:
-            notification_id = ''.join(
+        local_id = notification_id
+        if not local_id:
+            local_id = ''.join(
                 random.choices(
                     string.ascii_uppercase + string.digits,
                     k=10
@@ -97,7 +98,7 @@ class Controller:
             "title": "Timer in progress",
             "body": message,
             "expiresAt": f"{total_minutes} minutes",
-            "localId": notification_id
+            "localId": local_id
         }
 
         cherrypy.engine.publish(
@@ -109,11 +110,9 @@ class Controller:
         finish_notification = {
             "group": "timer",
             "title": message,
-            "body": comments
+            "body": comments,
+            "localId": local_id
         }
-
-        if notification_id:
-            finish_notification["localId"] = notification_id
 
         if url:
             finish_notification["url"] = url
