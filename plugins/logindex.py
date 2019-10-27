@@ -411,6 +411,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (batch_size,)
         )
 
+        if not records:
+            return
+
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
