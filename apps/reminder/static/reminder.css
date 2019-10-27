@@ -35,7 +35,6 @@
 
 #reminder-form {
     display: grid;
-    grid-column-gap: 5em;
 }
 
 #reminder-form input[type=number] {
@@ -50,6 +49,7 @@
 .template {
     display: flex;
     align-items: center;
+    box-sizing: border-box;
 }
 
 .template .summary {
@@ -70,6 +70,10 @@
 @media (min-width: 768px) {
     #reminder-form {
         grid-template-columns: auto 1fr;
+    }
+
+    .template {
+        margin-right: 5em;
     }
 }
 
