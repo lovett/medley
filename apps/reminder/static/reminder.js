@@ -11,7 +11,11 @@ MEDLEY.reminder = (function () {
 
         e.preventDefault();
         applyTemplate(template);
-        reminderForm.submit();
+
+        MEDLEY.deactivateForm(reminderForm);
+        setTimeout(() => {
+            reminderForm.submit()
+        }, 250);
     }
 
     function onSubmit(e) {
@@ -69,6 +73,9 @@ MEDLEY.reminder = (function () {
         if (hours > 0) {
             document.getElementById('hours').value = hours;
         }
+
+        const remember = document.getElementById('remember');
+        remember.parentNode.hidden = true;
     }
 
     return {
