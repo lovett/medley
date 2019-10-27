@@ -82,12 +82,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                limit: int = 10) -> Tuple[int, List[sqlite3.Row]]:
         """Locate previously stored requests by path."""
 
+        search_clause = ""
         if path:
             search_clause = "AND request_uri=?"
-            path_placeholders = (path, limit, offset)
-        else:
-            search_clause = ""
-            placeholders = (limit, offset)
 
         sql = f"""SELECT rowid, request_line,
         request as 'request [binary]',
@@ -100,15 +97,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY rowid DESC
         LIMIT ? OFFSET ?"""  # nosec
 
-        if path_placeholders:
-            result = self._select(sql, path_placeholders)
+        if path:
+            result = self._select(sql, (path, path, limit, offset))
         else:
-            result = self._select(sql, placeholders)
+            result = self._select(sql, (limit, offset))
 
+        count = 0
         if result:
             count = result[0]["total"]
-        else:
-            count = 0
 
         return (count, result)
 

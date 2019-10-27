@@ -16,7 +16,7 @@ class Controller:
         """Display a list of recent captures, or captures matching a URI path.
         """
 
-        path = kwargs.get('path', '')
+        path = kwargs.get('path')
         cid = kwargs.get('cid')
         offset = int(kwargs.get('offset', 0))
         per_page = 5
