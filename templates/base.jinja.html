@@ -29,12 +29,15 @@
         <meta name="msapplication-TileColor" content="#4B88A2" />
         <meta name="msapplication-TileImage" content="/shared/static/favicon/app-icon-144.png" />
 
+        <meta name="medley-home" content="{{ '/' | internal_url }}" />
+        <meta name="medley-startpage" content="{{ '/startpage' | internal_url }}" />
+
         {% block page_meta %}{% endblock %}
     </head>
     <body id="{{ body_id }}">
         <header id="page-header">
             <h1>
-                <a rel="home" href="/">Medley</a>
+                <a href="{{ '/' | internal_url }}">Medley</a>
                 {% if app_url -%}
                     : <a href="{{ app_url }}">{{ app_name }}</a>
                 {%- endif %}

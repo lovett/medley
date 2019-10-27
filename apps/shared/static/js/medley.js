@@ -15,13 +15,20 @@ var MEDLEY = (function () {
         });
     }
 
-    function shortcuts (e) {
+    function globalShortcuts (e) {
         if (e.target.nodeName === 'INPUT' || e.target.nodeName === 'TEXTAREA') {
             return;
         }
 
-        if (e.shiftKey && e.which === 72) { // H
-            window.location.href = document.querySelector('a[rel=home]').getAttribute('href');
+        if (e.key === 'H') {
+            const tag = document.querySelector('meta[name=medley-home]');
+            window.location.href = tag.getAttribute('content');
+            return;
+        }
+
+        if (e.key === 'S') {
+            const tag = document.querySelector('meta[name=medley-startpage]');
+            window.location.href = tag.getAttribute('content');
             return;
         }
     };
@@ -75,7 +82,7 @@ var MEDLEY = (function () {
         init: function () {
             document.addEventListener(
                 'keydown',
-                shortcuts
+                globalShortcuts
             );
 
             document.addEventListener(

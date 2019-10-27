@@ -83,7 +83,8 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["sane_callerid"] = self.sane_callerid_filter
         self.env.filters["autolink"] = self.autolink_filter
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
-        self.env.filters["unescape"] = self.unescape
+        self.env.filters["unescape"] = self.unescape_filter
+        self.env.filters["internal_url"] = self.internal_url_filter
 
         plugins.SimplePlugin.__init__(self, bus)
 
@@ -442,7 +443,7 @@ class Plugin(plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.evalcontextfilter
-    def unescape(eval_ctx: jinja2.Environment, value: str) -> str:
+    def unescape_filter(eval_ctx: jinja2.Environment, value: str) -> str:
         """De-entify HTML"""
 
         result = html.unescape(value)
@@ -451,3 +452,26 @@ class Plugin(plugins.SimplePlugin):
             return jinja2.Markup(result)
 
         return result
+
+    @staticmethod
+    @jinja2.evalcontextfilter
+    def internal_url_filter(eval_ctx: jinja2.Environment,
+                            value: str,
+                            query: typing.Dict[str, typing.Any] = None,
+                            trailing_slash: bool = False) -> str:
+        """Generate an application URL via the URL plugin."""
+
+        url = typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "url:internal",
+                path=value,
+                query=query,
+                trailing_slash=trailing_slash
+            ).pop()
+        )
+
+        if eval_ctx.autoescape:
+            return jinja2.Markup(url)
+
+        return url
