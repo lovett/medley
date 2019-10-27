@@ -51,10 +51,6 @@
 
         <form id="reminder-form" method="post" action="{{ app_url }}">
             <div id="template">
-                {% if not templates %}
-                    <p>No templates.</p>
-                {% endif %}
-                <p>Templates</p>
                 {% for id, template in templates.items() %}
                     <div class="template"
                          data-message="{{ template.message }}"
@@ -83,8 +79,6 @@
                 {% endfor %}
             </div>
             <div>
-                <p>New Reminder</p>
-
                 <div class="field">
                     <label for="message">Message</label>
                     <input type="text" id="message" name="message" required />
