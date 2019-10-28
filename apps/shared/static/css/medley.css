@@ -12,6 +12,10 @@
     --focus-bg-color: #f9ab55;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 A {
     color: var(--link);
     text-decoration: none;

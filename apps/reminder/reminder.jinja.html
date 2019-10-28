@@ -52,30 +52,29 @@
         <form id="reminder-form" method="post" action="{{ app_url }}">
             <div id="template">
                 {% for id, template in templates.items() %}
-                    <div class="template"
-                         data-message="{{ template.message }}"
-                         data-minutes="{{ template.minutes }}"
-                         data-notification_id="{{ template.notification_id }}"
-                         data-url="{{ template.url }}"
-                    >
-                        <discardable-record inline-template url="{{ template.delete_url }}">
+                    <discardable-record inline-template url="{{ template.delete_url }}">
+                        <div class="template"
+                             data-message="{{ template.message }}"
+                             data-minutes="{{ template.minutes }}"
+                             data-notification_id="{{ template.notification_id }}"
+                             data-url="{{ template.url }}"
+                        >
                             <div><discard-button tooltip="Delete this template" /></div>
-                        </discardable-record>
-
-                        <a href="#"
-                           class="summary hash-focus-candidate"
-                           data-hash-focus-id="{{ template.notification_id }}"
+                            <a href="#"
+                               class="summary hash-focus-candidate"
+                               data-hash-focus-id="{{ template.notification_id }}"
                             >
-                            {{ template.message }}
-                            <br/>
-                            <span class="smaller">
-                                {{ template.duration_in_words }}
-                                {%- if template.notification_id %}
-                                    / #{{ template.notification_id }}
-                                {%- endif -%}
-                            </span>
-                        </a>
-                    </div>
+                                {{ template.message }}
+                                <br/>
+                                <span class="smaller">
+                                    {{ template.duration_in_words }}
+                                    {%- if template.notification_id %}
+                                        / #{{ template.notification_id }}
+                                    {%- endif -%}
+                                </span>
+                            </a>
+                        </div>
+                    </discardable-record>
                 {% endfor %}
             </div>
             <div>
