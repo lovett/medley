@@ -17,8 +17,8 @@ def log_runtime(func):
 
         cherrypy.engine.publish(
             "applog:add",
-            f"{func.__module__}.{func.__name__}",
             "runtime",
+            f"{func.__module__}.{func.__name__}",
             perf_counter() - start
         )
 
