@@ -2,7 +2,7 @@
 
 from collections import deque
 import sqlite3
-from typing import List, Optional, Sequence, Tuple, Union
+import typing
 import cherrypy
 from cherrypy.process import plugins, wspbus
 from . import mixins
@@ -46,13 +46,20 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
 
-    def get_newest(self, source: str, key: str) -> Optional[sqlite3.Row]:
+    def get_newest(
+            self,
+            source: str,
+            key: str
+    ) -> typing.Optional[str]:
         """Retrieve messages by key."""
 
-        return self._selectFirst(
-            """SELECT value FROM applog
-            WHERE source=? AND key=? ORDER BY rowid DESC LIMIT 1""",
-            (source, key)
+        return typing.cast(
+            typing.Optional[str],
+            self._selectFirst(
+                """SELECT value FROM applog
+                WHERE source=? AND key=? ORDER BY rowid DESC LIMIT 1""",
+                (source, key)
+            )
         )
 
     def process_queue(self) -> None:
@@ -76,7 +83,7 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
     def add(self,
             caller: str,
             key: str,
-            value: Union[str, float, int]) -> None:
+            value: typing.Union[str, float, int]) -> None:
         """Accept a log message for storage."""
 
         self.queue.append((caller, key, str(value)))
@@ -112,15 +119,19 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(self,
-               sources: Sequence[str] = (),
-               offset: int = 0,
-               limit: int = 20,
-               exclude: int = 0) -> Tuple[List[sqlite3.Row], int, sqlite3.Row]:
+    def search(
+            self,
+            sources: typing.Sequence[str] = (),
+            offset: int = 0,
+            limit: int = 20,
+            exclude: int = 0
+    ) -> typing.Tuple[
+        typing.List[sqlite3.Row], int, typing.List[str]
+    ]:
         """View records in reverse chronological order."""
 
         where_sql = "WHERE 1=1"
-        placeholder_values: Tuple[str, ...] = ()
+        placeholder_values: typing.Tuple[str, ...] = ()
 
         if sources:
             placeholders = ("?, " * len(sources))[:-2]

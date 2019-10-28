@@ -4,7 +4,6 @@ import os.path
 import sqlite3
 import typing
 import re
-from typing import Any, List, Tuple, Optional, Union
 import cherrypy
 
 
@@ -12,10 +11,10 @@ import cherrypy
 class Sqlite:
     """Query an SQLite database using Python's DB-API."""
 
-    db_path: typing.Optional[str] = None
+    db_path: str
 
     @staticmethod
-    def _path(name):
+    def _path(name: str) -> str:
         """Get the filesystem path of a database file relative to the
         application database directory.
 
@@ -34,7 +33,7 @@ class Sqlite:
             detect_types=sqlite3.PARSE_COLNAMES
         )
 
-    def _create(self, sql) -> bool:
+    def _create(self, sql: str) -> bool:
         """Establish a schema by executing a series of SQL statements.
 
         The statements should be re-runnable so that new objects will
@@ -60,7 +59,11 @@ class Sqlite:
 
         return result
 
-    def _execute(self, query, params=()) -> bool:
+    def _execute(
+            self,
+            query: str,
+            params: typing.Sequence[typing.Any] = ()
+    ) -> bool:
         """Execute a single query with no parameters."""
 
         result = True
@@ -77,7 +80,7 @@ class Sqlite:
 
         return result
 
-    def _multi(self, queries) -> bool:
+    def _multi(self, queries: typing.List[str]) -> bool:
         """Issue several queries."""
 
         result = True
@@ -95,7 +98,11 @@ class Sqlite:
 
         return result
 
-    def _insert(self, query, values) -> bool:
+    def _insert(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any]
+    ) -> bool:
         """Issue an insert query to create one or more records.
 
         Cannot return lastrowid because it is not populated
@@ -116,7 +123,11 @@ class Sqlite:
 
         return result
 
-    def _update(self, query, values) -> bool:
+    def _update(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any]
+    ) -> bool:
         """Issue an update query."""
 
         result = True
@@ -133,7 +144,11 @@ class Sqlite:
 
         return result
 
-    def _delete(self, query: str, values: Tuple[Any] = ()) -> int:
+    def _delete(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> int:
         """Issue a delete query."""
 
         result = 0
@@ -150,7 +165,11 @@ class Sqlite:
 
         return result
 
-    def _count(self, query, values=()) -> int:
+    def _count(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> int:
         """Convert a select query to a count query and execute it."""
 
         count_query = re.sub(
@@ -163,12 +182,19 @@ class Sqlite:
         placeholder_count = count_query.count('?')
         placeholder_values = values[0:placeholder_count]
 
-        return self._selectFirst(
-            count_query,
-            placeholder_values
+        return typing.cast(
+            int,
+            self._selectFirst(
+                count_query,
+                placeholder_values
+            )
         )
 
-    def _select(self, query, values=()) -> List[sqlite3.Row]:
+    def _select(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> typing.List[sqlite3.Row]:
         """Issue a select query."""
 
         result = None
@@ -191,7 +217,7 @@ class Sqlite:
     def _select_generator(
             self,
             query: str,
-            values: typing.Tuple[typing.Any, ...] = (),
+            values: typing.Sequence[typing.Any] = (),
             arraysize: int = 1
     ) -> typing.Iterator[sqlite3.Row]:
         """Issue a select query and return results as a generator.
@@ -219,64 +245,54 @@ class Sqlite:
                 break
             yield from result
 
-    def _explain(self, query, values=()) -> sqlite3.Row:
+    def _explain(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> typing.List[str]:
         """Get the query plan for a query."""
 
-        return self._select(
+        generator = self._select_generator(
             f"EXPLAIN QUERY PLAN {query}",
             values
         )
 
-    @staticmethod
-    def _cacheTable(query):
-        """The name of the table that will cache results for the specified
-        query.
+        result = []
+        for row in generator:
+            prefix = ""
+            if row["parent"] > 0:
+                prefix = "-- "
+            result.append(f"{prefix}{row['detail']}")
 
-        """
+        return result
 
-        checksum = cherrypy.engine.publish("checksum:string", query).pop()
-        return f"cache_{checksum}"
-
-    def _tableNames(self):
-        """Get a list of tables in the database."""
-        result = self._select(
-            "SELECT name FROM sqlite_master WHERE type=?",
-            ("table",)
-        )
-        return [row["name"] for row in result]
-
-    def _dropCacheTables(self):
-        """Remove all existing cache tables"""
-        delete_queries = [
-            (f"DROP TABLE {table}", ())
-            for table in self._tableNames()
-            if table.startswith("cache_")
-        ]
-
-        self._multi(delete_queries)
-
-    def _selectOne(self, query, values=()) -> Union[sqlite3.Row, None]:
+    def _selectOne(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> typing.Optional[sqlite3.Row]:
         """Issue a select query and return the first row."""
-        result = self._select(query, values)
+        generator = self._select_generator(query, values)
 
         try:
-            return result.pop()
-        except IndexError:
+            return next(generator)
+        except StopIteration:
             return None
 
-    def _selectFirst(self, query, values=()) -> Optional[sqlite3.Row]:
+    def _selectFirst(
+            self,
+            query: str,
+            values: typing.Sequence[typing.Any] = ()
+    ) -> typing.Any:
         """Issue a select query and return the first value of the first
         row.
 
         """
 
-        result = self._select(query, values)
-
-        try:
-            row = result.pop()
-            return row[0]
-        except IndexError:
-            return None
+        result = self._selectOne(query, values)
+        if result:
+            return result[0]
+        return None
 
     def _logError(self, err: sqlite3.DatabaseError) -> None:
         """Write database exceptions to the cherrypy log."""

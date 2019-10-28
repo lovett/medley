@@ -108,7 +108,10 @@ class Plugin(plugins.SimplePlugin, mixins.Sqlite):
             dst_filter=dst_filter
         )
 
-        return self._select(query_str, list(reversed(reversed_values)))
+        return self._select(
+            query_str,
+            tuple(reversed(reversed_values))
+        )
 
     def call_history(
             self,

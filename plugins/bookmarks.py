@@ -191,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 bookmark["rowid"]
             )
 
-            self._update(sql, [update_values])
+            self._update(sql, (update_values))
             return True
 
         sql = """INSERT INTO bookmarks
@@ -316,7 +316,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             order: str = "date-desc",
             limit: int = 20,
             offset: int = 0
-    ) -> typing.Tuple[typing.List[sqlite3.Row], int, sqlite3.Row]:
+    ) -> typing.Tuple[
+        typing.List[sqlite3.Row], int, typing.List[str]
+    ]:
         """Locate bookmarks via fulltext search.
 
         Ranking is based on the built-in hidden rank column provided
@@ -387,7 +389,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             limit: int = 20,
             offset: int = 0,
             max_days: int = 180
-    ) -> typing.Tuple[typing.List[sqlite3.Row], int, sqlite3.Row]:
+    ) -> typing.Tuple[
+        typing.List[sqlite3.Row], int, typing.List[str]
+    ]:
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT url, domain, title,
@@ -517,5 +521,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (domain, _) = self.domain_and_url(row["url"])
             self._update(
                 "UPDATE bookmarks SET domain=? WHERE rowid=?",
-                [(domain, row["rowid"])]
+                ((domain, row["rowid"]))
             )

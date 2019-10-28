@@ -504,7 +504,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._insert(
             """INSERT OR IGNORE INTO reverse_ip (ip) VALUES (?)""",
-            {(ip,) for ip in ips}
+            tuple({(ip,) for ip in ips})
         )
 
         cherrypy.engine.publish(
@@ -543,7 +543,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def query(
             self,
             query: str
-    ) -> typing.Tuple[typing.List[sqlite3.Row], sqlite3.Row]:
+    ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
         """Perform a search against parsed log lines."""
 
         parsed_query = cherrypy.engine.publish(
