@@ -191,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 bookmark["rowid"]
             )
 
-            self._update(sql, (update_values))
+            self._execute(sql, update_values)
             return True
 
         sql = """INSERT INTO bookmarks
@@ -519,7 +519,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         for row in rows_without_domain:
             (domain, _) = self.domain_and_url(row["url"])
-            self._update(
+            self._execute(
                 "UPDATE bookmarks SET domain=? WHERE rowid=?",
-                ((domain, row["rowid"]))
+                (domain, row["rowid"])
             )

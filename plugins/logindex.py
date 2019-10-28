@@ -348,7 +348,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (batch_size,)
         )
 
-        batch = []
+        batch: typing.List[typing.Tuple[str, typing.Sequence[typing.Any]]] = []
 
         unreversed_ips = records[0]["value"]
 
@@ -369,17 +369,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ).pop()
 
             batch.append((
-                facts.get("reverse_host"),
-                facts.get("reverse_domain"),
-                record["id"],
+                """UPDATE reverse_ip
+                SET reverse_host=?, reverse_domain=?
+                WHERE rowid=?""",
+                (
+                    facts.get("reverse_host"),
+                    facts.get("reverse_domain"),
+                    record["id"]
+                )
             ))
 
-        self._update(
-            """UPDATE reverse_ip
-            SET reverse_host=?, reverse_domain=?
-            WHERE rowid=?""",
-            batch
-        )
+        self._multi(batch)
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:reversal")
 
@@ -425,7 +425,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
 
-        batch = []
+        batch: typing.List[typing.Tuple[str, typing.Sequence[typing.Any]]] = []
         ips = set()
         cache: typing.Dict[str, defaultdict] = {
             "ip": defaultdict(),
@@ -494,13 +494,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 record["id"]
             )
 
-            batch.append(values)
+            batch.append((update_sql, values))
             if len(batch) > batch_size:
-                self._update(update_sql, batch)
+                self._multi(batch)
                 batch = []
 
         if batch:
-            self._update(update_sql, batch)
+            self._multi(batch)
 
         self._insert(
             """INSERT OR IGNORE INTO reverse_ip (ip) VALUES (?)""",

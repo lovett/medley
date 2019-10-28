@@ -80,7 +80,10 @@ class Sqlite:
 
         return result
 
-    def _multi(self, queries: typing.List[str]) -> bool:
+    def _multi(
+            self,
+            queries: typing.Sequence[typing.Tuple[str, typing.Any]]
+    ) -> bool:
         """Issue several queries."""
 
         result = True
@@ -108,27 +111,6 @@ class Sqlite:
         Cannot return lastrowid because it is not populated
         during executemany().
         """
-
-        result = True
-        con = self._open()
-
-        try:
-            with con:
-                con.executemany(query, values)
-        except sqlite3.DatabaseError as err:
-            result = False
-            self._logError(err)
-        finally:
-            con.close()
-
-        return result
-
-    def _update(
-            self,
-            query: str,
-            values: typing.Sequence[typing.Any]
-    ) -> bool:
-        """Issue an update query."""
 
         result = True
         con = self._open()
