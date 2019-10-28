@@ -115,6 +115,12 @@ DD.supplemental A {
     text-decoration: none;
 }
 
+FIELDSET {
+    border: 0;
+    display: block;
+    padding: 0;
+}
+
 INPUT {
     font-size: 1em;
 }
@@ -143,6 +149,11 @@ NAV.secondary > DIV  {
     margin-right: 2em;
 }
 
+NAV.secondary .field {
+    font-size: 0.85em;
+    padding-bottom: 0;
+}
+
 NAV.secondary DIV:last-of-type {
     margin-right: 0;
 }
@@ -152,11 +163,7 @@ NAV.secondary .warning {
 }
 
 NAV.secondary FIELDSET {
-    border: 0;
-    display: flex;
-    flex-flow: row nowrap;
     font-size: 0.85em;
-    padding: 0;
 }
 
 NAV.secondary FIELDSET BUTTON,
@@ -347,6 +354,7 @@ TEXTAREA {
 .field .inline {
     display: inline-block;
     padding-right: 1em;
+    vertical-align: middle;
 }
 
 .field INPUT.inline {
