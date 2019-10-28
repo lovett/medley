@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("search", "delete", "icon-tag", "arrow-right", "arrow-left", "close", "globe") }}
+    {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
 
     <header class="app-nav">
         <form method="get" action="{{ app_url }}">
@@ -88,19 +88,12 @@
         {% endif %}
     </nav>
 
-    {% if recent_tags %}
-        <nav class="secondary">
-            <ul class="tag-list">
-                {% for tag in recent_tags|sort %}
-                    <li>
-                        <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
-                        <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
-                    </li>
-                {% endfor %}
-            </ul>
-            <a href="{{ app_url }}/taglist">view all</a>
-        </nav>
-    {% endif %}
+    <nav class="secondary">
+        <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
+        <a href="{{ app_url }}/taglist">
+            tag list
+        </a>
+    </nav>
 
     <main>
         <section class="bookmarks">

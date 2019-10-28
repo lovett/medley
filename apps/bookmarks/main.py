@@ -37,7 +37,6 @@ class Controller:
         page = int(kwargs.get('page', 1))
         per_page = 20
         offset = (page - 1) * per_page
-        recent_tags = ()
 
         if query:
             query = query.strip()
@@ -68,11 +67,6 @@ class Controller:
                 max_days=max_days
             ).pop()
 
-            recent_tags = cherrypy.engine.publish(
-                "bookmarks:tags:recent",
-                max_days=max_days
-            ).pop()
-
         start_index = offset + 1
         end_index = offset + len(bookmarks)
 
@@ -96,7 +90,6 @@ class Controller:
         return {
             "html": ("bookmarks.jinja.html", {
                 "bookmarks": bookmarks,
-                "recent_tags": recent_tags,
                 "max_days": max_days,
                 "count": count,
                 "query": query,

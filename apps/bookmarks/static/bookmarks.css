@@ -50,7 +50,6 @@
 }
 
 .tag-list {
-    flex-basis: 100%;
     flex-grow: 1;
     padding-left: 0;
     list-style-type: none;
@@ -62,7 +61,7 @@
     font-size: .85em;
 }
 
-.tag-list LI {
+.tag-list li {
     padding: .5em 0 0 0;
     font-size: .85em;
     white-space: nowrap;
