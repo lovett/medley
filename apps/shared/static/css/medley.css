@@ -82,6 +82,7 @@ BUTTON.small {
 }
 
 CODE {
+    display: block;
     word-break: break-all;
     white-space: pre-line;
 }
