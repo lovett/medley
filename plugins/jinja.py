@@ -429,8 +429,9 @@ class Plugin(plugins.SimplePlugin):
             return value
 
         href = self.anonymize_filter(None, value)
-        return f"""<a href="{href}"
-        target="_blank" rel="noreferrer"'>{value}</a>"""
+
+        return jinja2.Markup(f"""<a href="{href}"
+        target="_blank" rel="noreferrer"'>{value}</a>""")
 
     def optional_qs_param_filter(self, value: str, key: str) -> str:
         """Return a URL querystring key-value pair if the value exists."""
