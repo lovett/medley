@@ -97,6 +97,29 @@ class Controller:
 
         result["current_summary"] = currently.get("summary")
 
+        result["upcoming"] = days[1:]
+
+        for item in result["upcoming"]:
+            item["time"] = pendulum.from_timestamp(
+                item.get("time"), tz=timezone
+            )
+
+            if "temperatureHigh" in item:
+                item["high"] = math.ceil(item.get("temperatureHigh"))
+
+            if "temperatureHighTime" in item:
+                item["high_at"] = pendulum.from_timestamp(
+                    item.get("temperatureHighTime"), tz=timezone
+                )
+
+            if "temperatureLow" in item:
+                item["low"] = math.ceil(item.get("temperatureLow"))
+
+            if "temperatureLowTime" in item:
+                item["low_at"] = pendulum.from_timestamp(
+                    item.get("temperatureLowTime"), tz=timezone
+                )
+
         result["current_temperature"] = math.ceil(
             currently.get("temperature")
         )
@@ -133,17 +156,17 @@ class Controller:
             today.get("temperatureLowTime"), tz=timezone
         )
 
-        result["precip_prob"] = currently.get("precipProbability", 0) * 100
-
-        result["precip_type"] = currently.get("precipType")
+        now = pendulum.now()
+        hours_remaining_today = 24 - now.hour
 
         if "data" in hourly:
             result["hourly"] = []
-            for hour in hourly["data"][0:24]:
+            for hour in hourly["data"][0:hours_remaining_today]:
                 hour_clone = copy.copy(hour)
                 hour_clone["time"] = pendulum.from_timestamp(
                     hour_clone["time"], tz=timezone
                 )
+
                 result["hourly"].append(hour_clone)
 
         return result

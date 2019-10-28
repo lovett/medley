@@ -4,36 +4,19 @@
     <main>
         {% for label, forecast in forecasts.items() %}
 
-            <h1>
-                {{ label }}
-                {% if forecast.time %}
-                    at {{ forecast.time|dateformat('LT') }}
-                {% endif %}
-            </h1>
+            <h1>{{ label }} Weather</h1>
 
             <p>
+                {{ forecast.current_summary|capitalize }},
                 {{ forecast.current_temperature }}° F
                 as of {{ forecast.current_time|dateformat('LT') }}.
-                {{ forecast.current_summary|capitalize }}.
             </p>
-
 
             {% if "alerts" in forecast %}
                 {{ forecast.alerts }}
             {% endif %}
 
-
             <p>{{ forecast.summary }}</p>
-
-            {% if forecast.precip_prob == 0 %}
-                <p>No chance of rain.</p>
-            {% else %}
-                <p>
-                    {{ forecast.precip_prob|percentage }} chance
-                    of {{ forecast.precip_type or 'rain' }}
-                </p>
-            {% endif %}
-
 
             {% if forecast.high %}
                 <p>High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.</p>
@@ -42,7 +25,6 @@
             {% if forecast.low %}
                 <p>Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.</p>
             {% endif %}
-
 
             <p>{{ forecast.humidity|percentage }} humidity.</p>
 
@@ -54,9 +36,33 @@
                 <p>Sunset at {{ forecast.sunset|dateformat('LT') }}</p>
             {% endif %}
 
-            <h2>Hourly</h2>
+            {% if forecast.upcoming %}
+                <h2>Upcoming</h2>
+                <table>
+                    {% for forecast in forecast.upcoming %}
+                        <tr>
+                            <th>{{ forecast.time|dateformat('dddd') }}</th>
+                            <td>
+                                {{ forecast.summary }}
+
+                            </td>
+                            <td>
+                                {% if forecast.high %}
+                                    High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.
+                                {% endif %}
+                            </td>
+                            <td>
+                            {% if forecast.low %}
+                                Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.
+                            {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
 
             {% if forecast.hourly %}
+                <h2>Today</h2>
                 <table>
                     <colgroup>
                         <col>
@@ -67,23 +73,13 @@
                         <tr>
                             <th>{{ record.time|dateformat('LT') }}</th>
                             <td>
-                                {{ record.temperature|round|int }}° F
                                 {{ record.summary }},
-                                {% if record.temperature != record.apparentTemperature %}
-                                    but will feel like {{ record.apparentTemperature }}
-                                {% endif %}
-                                {% if record.humidity %}
-                                    {{ record.humidity|percentage }} humidity.
-                                {% endif %}
-                                {% if record.windSpeed %}
-                                    Wind {{ record.windSpeed }} mph.
-                                {% endif %}
+                                {{ record.temperature|round|int }}° F
                             </td>
                         </tr>
                     {% endfor %}
                 </table>
             {% endif %}
-
         {% endfor %}
 
         <p>
