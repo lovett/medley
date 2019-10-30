@@ -1,17 +1,18 @@
 """Text formatting function."""
 
 import re
-from cherrypy.process import plugins
+import typing
+import cherrypy
 import pendulum
 
 
-class Plugin(plugins.SimplePlugin):
+class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for miscellaneous text formatting needs."""
 
-    def __init__(self, bus):
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the formatting prefix.
@@ -43,7 +44,7 @@ class Plugin(plugins.SimplePlugin):
         )
 
     @staticmethod
-    def dbpedia_abstract(text):
+    def dbpedia_abstract(text: str) -> str:
         """Extract the first two meaningful sentences from a dbpedia
         abstract.
 
@@ -59,7 +60,7 @@ class Plugin(plugins.SimplePlugin):
         abbreviated_text = re.sub(r'([^A-Z])\.([^ ])', '\\1. \\2', text)
 
         # Remove sentences referring to maps
-        abbreviated_text = [
+        sentences = [
             sentence for sentence in abbreviated_text.split(". ")
             if not re.search(
                 " in (red|blue) (is|are)", sentence,
@@ -75,7 +76,7 @@ class Plugin(plugins.SimplePlugin):
             )
         ][:2]
 
-        abbreviated_text = ". ".join(abbreviated_text)
+        abbreviated_text = ". ".join(sentences)
 
         if abbreviated_text and not abbreviated_text.endswith("."):
             abbreviated_text += "."
@@ -83,17 +84,20 @@ class Plugin(plugins.SimplePlugin):
         return abbreviated_text
 
     @staticmethod
-    def http_timestamp(instance):
+    def http_timestamp(instance: pendulum.DateTime) -> str:
         """Custom Pendulum formatter for an HTTP-date timestamp, as defined in
         Section 7.1.1.1 of [RFC7231].
 
         Example output: Thu, 01 Dec 1994 16:00:00 GMT
 
         """
-        return instance.format('ddd, DD MMM YYYY HH:mm:ss zz')
+        return typing.cast(
+            str,
+            instance.format('ddd, DD MMM YYYY HH:mm:ss zz')
+        )
 
     @staticmethod
-    def time_duration(**kwargs):
+    def time_duration(**kwargs: typing.Dict[str, typing.Any]) -> str:
         """Convert a time interval expressed in one or more units to a human
         readable string.
 
@@ -101,10 +105,13 @@ class Plugin(plugins.SimplePlugin):
         should match the keywords supported there.
 
         """
-        return pendulum.duration(**kwargs).in_words()
+        return typing.cast(
+            str,
+            pendulum.duration(**kwargs).in_words()
+        )
 
     @staticmethod
-    def phone_sanitize(number):
+    def phone_sanitize(number: str) -> str:
         """Strip non-numeric characters from a numeric string"""
         if not number:
             return ""
@@ -114,7 +121,7 @@ class Plugin(plugins.SimplePlugin):
         return number
 
     @staticmethod
-    def string_sanitize(value, also_allowed=""):
+    def string_sanitize(value: str, also_allowed: str = '') -> str:
         """Remove non-alphanumeric characters from a string."""
 
         return "".join(
