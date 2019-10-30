@@ -1,5 +1,6 @@
 """Calculate checksums for files and strings."""
 
+import typing
 import zlib
 import cherrypy
 
@@ -7,10 +8,10 @@ import cherrypy
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for calculating checksums."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the checksum prefix.
@@ -19,7 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("checksum:string", self.adler32_string)
 
     @staticmethod
-    def adler32_string(val):
+    def adler32_string(val: str) -> str:
         """Calculate the adler32 checksum of a string."""
 
         result = zlib.adler32(bytes(val, "utf-8"), 0)
@@ -27,10 +28,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return result_hash
 
     @staticmethod
-    def adler32_path(path):
+    def adler32_path(path: str) -> str:
         """Calculate the adler32 checksum of a file."""
 
-        memorized_hash = cherrypy.engine.publish("memorize:get", path).pop()
+        memorized_hash = typing.cast(
+            str,
+            cherrypy.engine.publish("memorize:get", path).pop()
+        )
+
         if memorized_hash[0]:
             return memorized_hash[1]
 
