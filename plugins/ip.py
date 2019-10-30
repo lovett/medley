@@ -2,18 +2,21 @@
 
 import os.path
 import socket
+import typing
 from collections import defaultdict
 import cherrypy
 import geoip2.database
+import geoip2.errors
+import geoip2.models
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for looking up information about an IP address."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the ip prefix.
@@ -22,7 +25,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("ip:reverse", self.reverse)
 
     @staticmethod
-    def facts(ip_address):
+    def facts(ip_address: str) -> typing.Dict[str, str]:
         """Look up geographic information for an IP address."""
 
         annotations = cherrypy.engine.publish(
@@ -30,7 +33,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             f"ip:{ip_address}"
         ).pop()
 
-        facts = defaultdict()
+        facts: typing.Dict[str, typing.Any] = defaultdict()
 
         if annotations:
             facts["annotations"] = [
@@ -43,44 +46,46 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "GeoLite2-City.mmdb"
         )
 
+        result: typing.Optional[geoip2.models.City] = None
         try:
             reader = geoip2.database.Reader(geodb_path)
             result = reader.city(ip_address)
         except FileNotFoundError:
-            result = {}
+            pass
         except geoip2.errors.AddressNotFoundError:
-            result = {}
+            pass
 
         facts["geo"] = defaultdict(lambda: None)
 
-        try:
-            facts["geo"]["city"] = result.city.name
-        except AttributeError:
-            pass
+        if result:
+            try:
+                facts["geo"]["city"] = result.city.name
+            except AttributeError:
+                pass
 
-        try:
-            facts["geo"]["country_code"] = result.country.iso_code
-        except AttributeError:
-            pass
+            try:
+                facts["geo"]["country_code"] = result.country.iso_code
+            except AttributeError:
+                pass
 
-        try:
-            facts["geo"]["country_name"] = result.country.name
-        except AttributeError:
-            pass
+            try:
+                facts["geo"]["country_name"] = result.country.name
+            except AttributeError:
+                pass
 
-        try:
-            subdivision = result.subdivisions.most_specific
-            facts["geo"]["region_code"] = subdivision.iso_code
-        except AttributeError:
-            pass
+            try:
+                subdivision = result.subdivisions.most_specific
+                facts["geo"]["region_code"] = subdivision.iso_code
+            except AttributeError:
+                pass
 
-        try:
-            location = result.location
-            facts["geo"]["latitude"] = location.latitude
-            facts["geo"]["longitude"] = location.longitude
-            facts["geo"]["metro_code"] = location.metro_code
-        except (AttributeError, geoip2.errors.AddressNotFoundError):
-            pass
+            try:
+                location = result.location
+                facts["geo"]["latitude"] = location.latitude
+                facts["geo"]["longitude"] = location.longitude
+                facts["geo"]["metro_code"] = location.metro_code
+            except (AttributeError, geoip2.errors.AddressNotFoundError):
+                pass
 
         # Google charts
         facts["geo"]["map_region"] = facts["geo"]["country_code"]
@@ -93,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return facts
 
     @staticmethod
-    def reverse(ip_address):
+    def reverse(ip_address: str) -> typing.Dict[str, typing.Any]:
         """Look up the reverse host and domain for an IP address.
 
         These are treated as separate values because the reverse host
@@ -102,7 +107,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        facts = defaultdict()
+        facts: typing.Dict[str, typing.Any] = defaultdict()
 
         reverse_host = socket.getfqdn(ip_address)
 
