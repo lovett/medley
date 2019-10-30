@@ -1,6 +1,8 @@
 """Key-value storage for app configuration and data."""
 
 from collections import defaultdict
+import sqlite3
+import typing
 import cherrypy
 import pendulum
 from . import mixins
@@ -9,7 +11,7 @@ from . import mixins
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A key-value style storage resource backed by an SQLite database."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("registry.sqlite")
@@ -25,7 +27,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the registry prefix.
@@ -42,7 +44,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:local_timezone", self.local_timezone)
 
-    def find(self, uid):
+    def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
 
         return self._selectOne(
@@ -52,7 +54,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (uid,)
         )
 
-    def add(self, key, values=(), replace=False):
+    def add(
+            self,
+            key: str,
+            values: typing.Iterable[typing.Any] = (),
+            replace: bool = False
+    ) -> bool:
         """Add one or more values for the given key, optionally deleting any
         existing values.
 
@@ -78,12 +85,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-branches
-    def search(self, key=None, keys=(), value=None, limit=25, exact=False,
-               as_dict=False, as_value_list=False, as_multivalue_dict=False,
-               key_slice=0, sorted_by_key=False, include_count=False):
+    def search(
+            self,
+            key: typing.Optional[str] = None,
+            keys: typing.Tuple[typing.Any, ...] = (),
+            value: typing.Any = None,
+            limit: int = 25,
+            exact: bool = False,
+            as_dict: bool = False,
+            as_value_list: bool = False,
+            as_multivalue_dict: bool = False,
+            key_slice: int = 0,
+            sorted_by_key: bool = False,
+            include_count: bool = False
+    ) -> typing.Any:
         """Search for records by key or value."""
 
-        params = []
+        params: typing.Tuple[typing.Any, ...] = ()
 
         sql = """
         SELECT rowid, key, value, created as 'created [datetime]'
@@ -108,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             else:
                 sql += "AND key LIKE ? "
 
-            params.append(key)
+            params = params + (key,)
 
         if value:
             fuzzy = "*" in value
@@ -119,7 +137,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             else:
                 sql += "AND value=?"
 
-            params.append(value)
+            params = params + (value,)
 
         if sorted_by_key:
             sql += "ORDER BY key"
@@ -128,7 +146,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql += f" LIMIT {limit}"
 
-        result = self._select(sql, params)
+        result = typing.cast(
+            typing.Any,
+            self._select(sql, params)
+        )
 
         if as_dict:
             result = {
@@ -138,7 +159,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             }
 
         if as_multivalue_dict:
-            multi_dict = defaultdict(list)
+            multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
 
             for row in result:
                 k = row["key"]
@@ -157,7 +178,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result
 
-    def remove(self, key):
+    def remove(self, key: str) -> int:
         """Delete any records for a key."""
 
         cherrypy.engine.publish("memorize:clear", key)
@@ -165,7 +186,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return deletions
 
-    def remove_id(self, rowid):
+    def remove_id(self, rowid: int) -> int:
         """Delete a record by unique id (sqlite rowid)."""
 
         deletions = self._delete(
@@ -175,7 +196,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return deletions
 
-    def first_key(self, value=None, key_prefix=None):
+    def first_key(
+            self,
+            value: typing.Any = None,
+            key_prefix: str = None
+    ) -> typing.Optional[str]:
         """Perform a search by value and return the key of the first match.
 
         For cases where the value may be associated with more than one
@@ -187,9 +212,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not result:
             return None
 
-        return result[0]["key"]
+        return typing.cast(str, result[0]["key"])
 
-    def first_value(self, key, memorize=False):
+    def first_value(
+            self,
+            key: str,
+            memorize: bool = False
+    ) -> typing.Any:
         """Perform a search by key and return the value of the first match."""
 
         if memorize:
@@ -212,7 +241,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("memorize:set", key, value)
         return value
 
-    def distinct_keys(self, key, strip_prefix=True):
+    def distinct_keys(
+            self,
+            key: str,
+            strip_prefix: bool = True
+    ) -> typing.List[str]:
         """Find all keys that share a common prefix."""
 
         sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
@@ -228,7 +261,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return keys
 
-    def local_timezone(self):
+    def local_timezone(self) -> str:
         """Determine the timezone of the application.
 
         The registry is checked first so that the application timezone
@@ -245,9 +278,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not timezone:
             timezone = pendulum.now().timezone.name
 
-        return timezone
+        return typing.cast(str, timezone)
 
-    def list_keys(self, depth=1):
+    def list_keys(
+            self,
+            depth: int = 1
+    ) -> typing.Generator[typing.Any, None, None]:
         """List known keys filtered by the number of segments.
 
         Returns a generator that yields key names.
