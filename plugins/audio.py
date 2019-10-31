@@ -14,7 +14,6 @@ See  https://github.com/hamiltron/py-simple-audio
 """
 
 import cherrypy
-from cherrypy.process import plugins
 
 # Failure to import simpleaudio is allowed.
 try:
@@ -23,13 +22,13 @@ except Exception:   # pylint: disable=broad-except
     SIMPLE_AUDIO = None
 
 
-class Plugin(plugins.SimplePlugin):
+class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for audio playback."""
 
-    def __init__(self, bus):
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the audio prefix.
@@ -40,7 +39,7 @@ class Plugin(plugins.SimplePlugin):
         self.bus.subscribe('audio:wav:play', self.play)
 
     @staticmethod
-    def play(path):
+    def play(path: str) -> None:
         """Play a file. So far only WAVE is supported."""
 
         if not SIMPLE_AUDIO:
