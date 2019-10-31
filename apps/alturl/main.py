@@ -59,17 +59,8 @@ class Controller:
         }
 
     @staticmethod
-    def POST(_, **kwargs) -> None:
+    def POST(url: str) -> None:
         """Redirect to a site-specific display view."""
-
-        url = kwargs.get("url")
-
-        app_url = cherrypy.engine.publish(
-            "url:internal"
-        ).pop()
-
-        if not url:
-            raise cherrypy.HTTPRedirect(app_url)
 
         if "//" not in url:
             url = f"//{url}"
