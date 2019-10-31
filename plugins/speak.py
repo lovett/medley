@@ -10,6 +10,7 @@ import os
 import os.path
 import re
 import time
+import typing
 import cherrypy
 
 
@@ -81,10 +82,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ("zh-TW", "Male"): "Zhiwei, Apollo"
     }
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the speak prefix.
@@ -96,7 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak", self.speak)
 
     @staticmethod
-    def get_cache_path(hash_digest=None):
+    def get_cache_path(hash_digest: typing.Optional[str] = None) -> str:
         """The filesystem path of an audio file.
 
         Caching audio files prevents unnecessary requests to the
@@ -120,7 +121,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def play_cached_file(cache_path):
+    def play_cached_file(cache_path: str) -> None:
         """Submit a previously-generated audio file for playback."""
 
         cherrypy.engine.publish(
@@ -131,7 +132,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def adjust_pronunciation(statement):
+    def adjust_pronunciation(statement: str) -> str:
         """Replace words that are prone to mispronunciation with
         better-sounding equivalents.
 
@@ -162,7 +163,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return replaced_statement
 
-    def ssml(self, statement, locale, gender):
+    def ssml(self, statement: str, locale: str, gender: str) -> bytes:
         """Build an SSML document representing the text to be spoken.
 
         SSML is XML-based, but the document is assembled as a string
@@ -190,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return document.strip().encode("utf-8")
 
     @staticmethod
-    def can_speak():
+    def can_speak() -> bool:
         """Determine whether the application has been muted."""
 
         config = cherrypy.engine.publish(
@@ -212,7 +213,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             for line in config.get("mute", "").split("\n")
         ]
 
-        time_range = [None, None]
         for time_format in ("%I:%M %p", "%H:%M"):
             try:
                 time_range = [
@@ -221,10 +221,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 ]
                 break
             except ValueError:
-                pass
-
-        if not isinstance(time_range[0], datetime.datetime):
-            return True
+                return True
 
         start = datetime.datetime.combine(today, time_range[0].time())
         if time_range[1] < time_range[0]:
@@ -235,7 +232,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         in_schedule = start <= now <= end
         return not in_schedule
 
-    def speak(self, statement, locale="en-GB", gender="Male"):
+    def speak(
+            self,
+            statement: str,
+            locale: str = "en-GB",
+            gender: str = "Male"
+    ) -> bool:
         """Speak a statement in one of the supported voices."""
 
         if (locale, gender) not in self.voice_fonts:
@@ -347,7 +349,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.play_cached_file(cache_path)
         return True
 
-    def prune(self, max_days=45):
+    def prune(self, max_days: int = 45) -> None:
         """Delete cache files older than the specified age."""
 
         cache_root = self.get_cache_path()
@@ -390,7 +392,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def mute():
+    def mute() -> None:
         """Disable text-to-speech by creating a 24-hour muting
         schedule.
 
@@ -404,7 +406,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def unmute():
+    def unmute() -> None:
         """Re-enable text-to-speech."""
 
         cherrypy.engine.publish(
