@@ -2,14 +2,18 @@
 
 from time import perf_counter
 import functools
+import typing
 import cherrypy
 
+FuncType = typing.Callable[..., typing.Any]
+Func = typing.TypeVar('Func', bound=FuncType)
 
-def log_runtime(func):
+
+def log_runtime(func: Func) -> Func:
     """Measure and store the runtime of a method call."""
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
         """Calculate elapsed time and write to the applog."""
 
         start = perf_counter()
@@ -24,4 +28,4 @@ def log_runtime(func):
 
         return result
 
-    return wrapper
+    return typing.cast(Func, wrapper)
