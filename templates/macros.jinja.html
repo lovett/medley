@@ -207,15 +207,13 @@ in the argument list are returned.  #}
     {% endif %}
 {%- endmacro -%}
 
-{% macro cancelLink(trigger, url, withIcon=True) -%}
-    {% if trigger %}
-        <a class="cancel" href="{{ url }}">
-            {%- if withIcon -%}
-                <svg class="icon"><use xlink:href="#icon-close"></use></svg>
-            {%- endif -%}
-            Cancel
-        </a>
-    {% endif %}
+{% macro cancelLink(url, withIcon=True) -%}
+    <a class="cancel" href="{{ url }}">
+        {%- if withIcon -%}
+            <svg class="icon"><use xlink:href="#icon-close"></use></svg>
+        {%- endif -%}
+        Cancel
+    </a>
 {%- endmacro -%}
 
 {% macro newerOlderPagination(newer_url, older_url) -%}

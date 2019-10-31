@@ -80,7 +80,9 @@
             <div class="warning">Nothing found.</div>
         {% endif %}
 
-        <div>{{ macros.cancelLink(query, app_url) }}</div>
+        {% if query %}
+            <div>{{ macros.cancelLink(app_url) }}</div>
+        {% endif %}
 
         {% if general_query %}
             <div>{{ general_query|websearch("google") }}</div>

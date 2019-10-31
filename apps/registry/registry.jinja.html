@@ -46,8 +46,8 @@
                 </div>
                 {% endif %}
 
-            {% if q %}
-                <div>{{ macros.cancelLink(q or view == "add", app_url) }}</div>
+            {% if q or view == "add"%}
+                <div>{{ macros.cancelLink(app_url) }}</div>
             {% endif %}
 
             <div>
@@ -81,7 +81,7 @@
                 </div>
 
                 <button>Add</button>
-                {{ macros.cancelLink(True, app_url, False) }}
+                {{ macros.cancelLink(app_url, False) }}
             </form>
         {% endif %}
 

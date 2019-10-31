@@ -27,11 +27,11 @@
     </header>
 
     {% if number %}
-    <nav class="secondary">
-        <div>{{ macros.cancelLink(number, app_url) }}</div>
-        <div>{{ number|websearch("google") }}</div>
-        <div>{{ number|websearch("bing") }}</div>
-    </nav>
+        <nav class="secondary">
+            <div>{{ macros.cancelLink(app_url) }}</div>
+            <div>{{ number|websearch("google") }}</div>
+            <div>{{ number|websearch("bing") }}</div>
+        </nav>
     {% endif %}
 
     <main>

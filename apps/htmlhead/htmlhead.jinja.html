@@ -63,7 +63,9 @@
             </div>
         {% endif %}
 
-        <div>{{ macros.cancelLink(url, app_url) }}</div>
+        {% if url %}
+            <div>{{ macros.cancelLink(app_url) }}</div>
+        {% endif %}
     </nav>
 
     <main>

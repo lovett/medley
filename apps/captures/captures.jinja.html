@@ -31,7 +31,9 @@
             <div class="warning">No captures found.</div>
         {% endif %}
 
-        <div>{{ macros.cancelLink(path, app_url) }}</div>
+        {% if path %}
+            <div>{{ macros.cancelLink(app_url) }}</div>
+        {% endif %}
     </nav>
 
     <main>

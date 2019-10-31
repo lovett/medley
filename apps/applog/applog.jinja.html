@@ -39,7 +39,9 @@
                     </label>
                 </div>
 
-                <div>{{ macros.cancelLink(sources, app_url) }}</div>
+                {% if sources %}
+                    <div>{{ macros.cancelLink(app_url) }}</div>
+                {% endif %}
             </div>
         </form>
     </header>
