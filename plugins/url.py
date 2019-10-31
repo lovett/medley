@@ -3,16 +3,15 @@
 import ipaddress
 from urllib.parse import urlencode, urlparse
 import cherrypy
-from cherrypy.process import plugins
 
 
-class Plugin(plugins.SimplePlugin):
+class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for building app-specific URLs."""
 
-    def __init__(self, bus):
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the url prefix.

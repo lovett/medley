@@ -13,14 +13,13 @@ import urllib
 from urllib.parse import urlparse
 import json
 import re
-from cherrypy.process import plugins
 import cherrypy
 import jinja2
 import pendulum
 
 
 # pylint: disable=too-many-public-methods
-class Plugin(plugins.SimplePlugin):
+class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for rendering Jinja2 templates."""
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
@@ -86,7 +85,7 @@ class Plugin(plugins.SimplePlugin):
         self.env.filters["unescape"] = self.unescape_filter
         self.env.filters["internal_url"] = self.internal_url_filter
 
-        plugins.SimplePlugin.__init__(self, bus)
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.

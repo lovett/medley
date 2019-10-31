@@ -7,14 +7,13 @@ import tarfile
 import typing
 import requests
 import cherrypy
-from cherrypy.process import plugins, wspbus
 
 
-class Plugin(plugins.SimplePlugin):
+class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for making HTTP requests."""
 
-    def __init__(self, bus: wspbus.Bus) -> None:
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.

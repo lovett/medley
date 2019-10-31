@@ -3,15 +3,15 @@
 import sqlite3
 import typing
 from string import Template
-from cherrypy.process import plugins, wspbus
+import cherrypy
 from . import mixins
 
 
-class Plugin(plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for querying an Asterisk CDR database."""
 
-    def __init__(self, bus: wspbus.Bus) -> None:
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         self.db_path = self._path("asterisk_cdr.sqlite")
 

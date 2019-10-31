@@ -5,16 +5,15 @@ import os
 import time
 import typing
 import cherrypy
-from cherrypy.process import plugins
 from . import mixins
 from . import decorators
 
 
-class Plugin(plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for executing maintenance tasks."""
 
-    def __init__(self, bus: cherrypy.process.wspbus.Bus):
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.

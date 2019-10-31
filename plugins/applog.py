@@ -4,16 +4,15 @@ from collections import deque
 import sqlite3
 import typing
 import cherrypy
-from cherrypy.process import plugins, wspbus
 from . import mixins
 from . import decorators
 
 
-class Plugin(plugins.SimplePlugin, mixins.Sqlite):
+class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for storing application-centric log messages."""
 
-    def __init__(self, bus: wspbus.Bus) -> None:
-        plugins.SimplePlugin.__init__(self, bus)
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
+        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("applog.sqlite")
         self.queue: deque = deque()
 
