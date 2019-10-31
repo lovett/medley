@@ -422,16 +422,24 @@ class Plugin(plugins.SimplePlugin):
 
         return value
 
-    def autolink_filter(self, value: str) -> str:
+    @jinja2.contextfilter
+    def autolink_filter(
+            self,
+            value: str
+    ) -> str:
         """Convert a bare URL to a hyperlink"""
 
-        if not value.startswith("http"):
-            return value
+        links = re.findall("http[^ ]+", value)
 
-        href = self.anonymize_filter(None, value)
+        for link in links:
+            anonymized_link = self.anonymize_filter(None, link)
+            anchor = f"""<a href="{anonymized_link}"
+            target="_blank" rel="noreferrer"'>{link}</a>
+            """
 
-        return jinja2.Markup(f"""<a href="{href}"
-        target="_blank" rel="noreferrer"'>{value}</a>""")
+            value = value.replace(link, anchor)
+
+        return value
 
     def optional_qs_param_filter(self, value: str, key: str) -> str:
         """Return a URL querystring key-value pair if the value exists."""

@@ -10,6 +10,8 @@
     --highlight-bg-color: #2F4858;
     --highlight-fg-color: white;
     --focus-bg-color: #f9ab55;
+    --tag-bg-color: #00171F;
+    --tag-fg-color: white;
 }
 
 [hidden] {

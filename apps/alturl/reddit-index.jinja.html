@@ -1,0 +1,11 @@
+{% extends "alturl.jinja.html" %}
+
+{% block content %}
+    {% for story in stories %}
+        <p class="headline">
+            <a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title }}</a>
+            <span class="tag">{{ story.subreddit }}</span>
+            <span class="tag">{{ story.num_comments|pluralize('comment', 'comments') }}</span>
+        </p>
+    {% endfor %}
+{% endblock %}

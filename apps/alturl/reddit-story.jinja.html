@@ -1,0 +1,62 @@
+{% extends "alturl.jinja.html" %}
+
+{% macro commentBlock(comment) %}
+    {% if comment.author %}
+
+    <details open class="comment">
+        <summary>
+            <time>{{ comment.created_utc|localtime|dateformat('YYYY-MM-DD h:MM A') }}</time>
+            by {{ comment.author }},
+            {{ comment.replies|length|pluralize('reply', 'replies') }}
+        </summary>
+        <div class="body">
+            {{ comment.body_html|unescape }}
+        </div>
+        {% if comment.replies %}
+            {% for reply in comment.replies.data.children %}
+                {{ commentBlock(reply.data) }}
+            {% endfor %}
+        {% endif %}
+    </details>
+    {%- endif -%}
+{%- endmacro -%}
+
+{% block content %}
+    <header class="intro">
+        <h2>{{ story.title }}</h2>
+
+        {% if story.selftext %}
+            <p>{{ story.selftext|unescape }}</p>
+        {% endif %}
+
+
+        <span class="tag">
+            {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
+        </span>
+
+        <span class="tag">{{ story.domain }}</span>
+
+        <span class="tag">
+            {{ story.num_comments|pluralize("comment", "comments") }}
+        </span>
+
+    </header>
+    {% for comment in comments %}
+        {{ commentBlock(comment) }}
+    {% endfor %}
+{% endblock %}
+
+{% block secondary_nav %}
+    <div>
+        <a href="{{ subreddit_alturl }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            r/{{ story.subreddit}}
+        </a>
+    </div>
+    <div>
+        <a href="{{ story.url|anonymize|unescape }}" target="_blank">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            View
+        </a>
+    </div>
+{% endblock %}

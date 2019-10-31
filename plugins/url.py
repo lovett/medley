@@ -18,6 +18,8 @@ class Plugin(plugins.SimplePlugin):
         This plugin owns the url prefix.
         """
         self.bus.subscribe("url:internal", self.internal_url)
+        self.bus.subscribe("url:alt", self.alt_url)
+        self.bus.subscribe("url:readable", self.readable_url)
         self.bus.subscribe(
             "url:paginate:newer_older",
             self.paginate_newer_older
@@ -102,6 +104,27 @@ class Plugin(plugins.SimplePlugin):
             url = f"https:{url.split(':', 1).pop()}"
 
         return url
+
+    def alt_url(self, url: str):
+        """Convert an external URL to the equivalent in the alturl app."""
+
+        if not url.startswith("http"):
+            url = f"//{url}"
+
+        parsed_url = urlparse(url)
+
+        return self.internal_url(
+            f"/alturl/{parsed_url.netloc}{parsed_url.path}"
+        )
+
+    @staticmethod
+    def readable_url(url: str):
+        """Convert a URL to a form suitable for bare display."""
+
+        readable_url = url.replace("https://", "")
+        readable_url = readable_url.replace("http://", "")
+        readable_url = readable_url.split('#', 1)[0]
+        return readable_url
 
     def paginate_newer_older(self, params, per_page=10, offset=0, total=0):
         """Determine the next-page and previous-page URLs for paginated

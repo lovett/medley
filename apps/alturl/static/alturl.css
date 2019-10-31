@@ -1,0 +1,77 @@
+h2 {
+    font-size: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.comment {
+    margin-bottom: 1em;
+}
+
+.comment summary {
+    margin: 0 -1em;
+    padding: 1em;
+    background-color: var(--grey);
+    font-size: .75em;
+}
+
+.comment .body {
+    padding: 0.5em 0;
+}
+
+.comment p {
+    line-height: 1.3;
+    margin: 0 0 .5em 0;
+}
+
+.comment blockquote {
+    border-left: .25em solid var(--grey);
+    font-style: italic;
+    padding-left: 1em;
+    font-family: monospace;
+    margin-left: 0.5em;
+}
+
+.headline {
+    padding-bottom: .5em;
+}
+
+.headline > a {
+    display: block;
+    margin-bottom: .5em;
+}
+
+.intro {
+    background-color: #DAF7DC;
+    margin-bottom: 1em;
+    margin: 0 -1em 2em -1em;
+    padding: 1em;
+    line-height: 1.4;
+}
+
+.tag {
+    font-size: .75em;
+    background-color: var(--tag-bg-color);
+    color: var(--tag-fg-color);
+    padding: .25em .5em;
+    display: inline-block;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    .comment .comment {
+        margin-left: 1em;
+    }
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}

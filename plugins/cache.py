@@ -109,7 +109,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            "set:{key}",
+            f"set:{key}",
             lifespan_seconds
         )
 

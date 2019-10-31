@@ -1,0 +1,46 @@
+{% extends "base.jinja.html" %}
+
+{% import "macros.jinja.html" as macros -%}
+
+{% block stylesheets %}
+    {{ macros.staticAsset('alturl', 'alturl.css') }}
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("globe", "close", "arrow-left") }}
+    <header class="app-nav">
+        <form method="post" action="{{ app_url }}">
+            <div class="field">
+                <label for="url">URL:</label>
+                <input type="text" id="url" name="url" value="{{ url }}" />
+            </div>
+            <div class="field">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                </button>
+            </div>
+        </form>
+    </header>
+
+    <nav class="secondary">
+        {% if url %}
+            {% block secondary_nav %}{% endblock %}
+            <div>{{ macros.cancelLink(True, app_url) }}</div>
+        {% endif %}
+    </nav>
+
+    <main>
+        {% if unrecognized %}
+            <p>That URL isn't supported here.</p>
+        {% endif %}
+
+        {% block content %}
+            Favorites
+
+            {% for (favorite_url, alt_url) in favorites %}
+                <p><a href="{{ alt_url }}">{{ favorite_url }}</a></p>
+            {% endfor %}
+        {% endblock %}
+    </main>
+
+{% endblock %}
