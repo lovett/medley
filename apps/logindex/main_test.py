@@ -13,7 +13,7 @@ import apps.logindex.main
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the whois application controller
+    Tests for the application controller.
     """
 
     @classmethod

@@ -11,7 +11,7 @@ import apps.alturl.main
 
 class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the alturl application controller
+    Tests for the application controller.
     """
 
     @classmethod

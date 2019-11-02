@@ -5,7 +5,9 @@ import parsers.htmltext
 
 
 class TestHtmlTextParser(unittest.TestCase):
-    """Tests for the html-to-text parser."""
+    """
+    Tests for the html-to-text parser.
+    """
 
     parser = None
 

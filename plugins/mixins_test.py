@@ -7,7 +7,7 @@ import unittest
 
 class TestMixins(unittest.TestCase):
     """
-    Tests for the mixins plugin
+    Tests for the mixins plugin.
     """
 
     def setUp(self):

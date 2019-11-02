@@ -7,7 +7,7 @@ import unittest
 
 class TestDecorators(unittest.TestCase):
     """
-    Tests for the decorators plugin
+    Tests for the decorators plugin.
     """
 
     def setUp(self):

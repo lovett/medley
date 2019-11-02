@@ -11,7 +11,7 @@ import apps.visitors.main
 
 class TestVisitors(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the visitors application controller
+    Tests for the application controller.
     """
 
     @classmethod

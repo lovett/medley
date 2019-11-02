@@ -11,7 +11,7 @@ import apps.headers.main
 
 class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the whois application controller
+    Tests for the application controller.
     """
 
     @classmethod

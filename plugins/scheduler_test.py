@@ -9,7 +9,7 @@ import plugins.scheduler
 
 class TestScheduler(unittest.TestCase):
     """
-    Tests for the scheduler plugin
+    Tests for the scheduler plugin.
     """
 
     def setUp(self):

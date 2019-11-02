@@ -5,7 +5,9 @@ import parsers.startpage
 
 
 class TestStartpageParser(unittest.TestCase):
-    """Tests for the config parser used by the startpage app."""
+    """
+    Tests for the startpage parser.
+    """
 
     anonymizer_url = "http://a.example.com?u="
 

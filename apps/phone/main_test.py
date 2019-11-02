@@ -12,7 +12,7 @@ import apps.phone.main
 
 class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the phone application controller
+    Tests for the application controller.
     """
 
     @classmethod

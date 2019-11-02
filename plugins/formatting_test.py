@@ -9,7 +9,7 @@ import plugins.formatting
 
 class TestFormatting(unittest.TestCase):
     """
-    Tests for the formatting plugin
+    Tests for the formatting plugin.
     """
 
     def setUp(self):

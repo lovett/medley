@@ -5,7 +5,9 @@ import parsers.htmlhead
 
 
 class TestHtmlHeadParser(unittest.TestCase):
-    """Tests for the html head parser."""
+    """
+    Tests for the html-to-text parser.
+    """
 
     parser = None
 

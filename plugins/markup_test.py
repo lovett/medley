@@ -9,7 +9,7 @@ import plugins.markup
 
 class TestMarkup(unittest.TestCase):
     """
-    Tests for the markup plugin
+    Tests for the markup plugin.
     """
 
     def setUp(self):

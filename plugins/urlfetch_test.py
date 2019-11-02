@@ -9,7 +9,7 @@ import plugins.urlfetch
 
 class TestUrlfetch(unittest.TestCase):
     """
-    Tests for the urlfetch plugin
+    Tests for the urlfetch plugin.
     """
 
     def setUp(self):

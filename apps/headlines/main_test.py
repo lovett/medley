@@ -12,7 +12,7 @@ import apps.headlines.main
 
 class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the headlines application controller
+    Tests for the application controller.
     """
 
     @classmethod

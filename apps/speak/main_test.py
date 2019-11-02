@@ -12,7 +12,7 @@ import apps.speak.main
 
 class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the speak application controller
+    Tests for the application controller.
     """
 
     @classmethod

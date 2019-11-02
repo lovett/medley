@@ -12,7 +12,7 @@ import apps.wakeup.main
 
 class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the wakeup application controller
+    Tests for the application controller.
     """
 
     @classmethod

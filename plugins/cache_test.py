@@ -9,7 +9,7 @@ import plugins.cache
 
 class TestCache(unittest.TestCase):
     """
-    Tests for the cache plugin
+    Tests for the cache plugin.
     """
 
     def setUp(self):

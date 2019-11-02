@@ -9,7 +9,7 @@ import plugins.memorize
 
 class TestMemorize(unittest.TestCase):
     """
-    Tests for the memorize plugin
+    Tests for the memorize plugin.
     """
 
     def setUp(self):

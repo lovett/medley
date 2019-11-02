@@ -13,15 +13,13 @@ class Controller:
 
     @staticmethod
     def parse_log_date(val):
-        """Convert a date string in either date or filename format
-exposed = True
-user_facing = True
+        """
+        Convert a date string in either date or filename format
         to a datetime.
 
         Date format is YYYY-mm-dd. Filename format is the same, but with
-        any extension at the end, most likely ".log"
-
-        If parsing fails, raise a 400 error."""
+        a file extension at the end.
+        """
 
         filename = os.path.splitext(val)[0]
 

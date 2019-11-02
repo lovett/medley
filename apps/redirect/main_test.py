@@ -11,7 +11,7 @@ import apps.redirect.main
 
 class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the redirect application controller
+    Tests for the application controller.
     """
 
     @classmethod

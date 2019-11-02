@@ -10,7 +10,7 @@ import plugins.url
 
 class TestUrl(unittest.TestCase):
     """
-    Tests for the url plugin
+    Tests for the url plugin.
     """
 
     def setUp(self):

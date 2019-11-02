@@ -12,7 +12,7 @@ import apps.countries.main
 
 class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the jenkins application controller
+    Tests for the application controller.
     """
 
     @classmethod

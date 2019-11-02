@@ -9,7 +9,7 @@ import plugins.speak
 
 class TestSpeak(unittest.TestCase):
     """
-    Tests for the speak plugin
+    Tests for the speak plugin.
     """
 
     def setUp(self):

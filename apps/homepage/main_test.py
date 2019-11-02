@@ -13,7 +13,7 @@ import apps.homepage.main
 
 class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the homepage application controller
+    Tests for the application controller.
     """
 
     @classmethod

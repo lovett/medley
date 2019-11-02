@@ -11,7 +11,7 @@ import apps.whois.main
 
 class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the whois application controller
+    Tests for the application controller.
     """
 
     @classmethod

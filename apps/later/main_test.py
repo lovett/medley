@@ -12,7 +12,7 @@ import apps.later.main
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the later application controller
+    Tests for the application controller.
     """
 
     @classmethod

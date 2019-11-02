@@ -9,7 +9,9 @@ import apps.azure.main
 
 
 class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the azure application controller."""
+    """
+    Tests for the application controller.
+    """
 
     @classmethod
     def setUpClass(cls):

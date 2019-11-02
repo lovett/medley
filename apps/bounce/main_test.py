@@ -12,7 +12,7 @@ import apps.bounce.main
 
 class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the bounce application controller
+    Tests for the application controller.
     """
 
     @classmethod

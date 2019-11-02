@@ -12,7 +12,7 @@ import apps.notification.main
 
 class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the notification application controller
+    Tests for the application controller.
     """
 
     @classmethod

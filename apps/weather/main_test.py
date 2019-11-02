@@ -11,7 +11,7 @@ import apps.weather.main
 
 class TestWeather(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the weather application controller
+    Tests for the application controller.
     """
 
     @classmethod

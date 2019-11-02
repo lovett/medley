@@ -9,7 +9,7 @@ import plugins.ip
 
 class TestIp(unittest.TestCase):
     """
-    Tests for the ip plugin
+    Tests for the ip plugin.
     """
 
     def setUp(self):

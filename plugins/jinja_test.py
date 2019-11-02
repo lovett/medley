@@ -9,7 +9,7 @@ import plugins.jinja
 
 class TestJinja(unittest.TestCase):
     """
-    Tests for the jinja plugin
+    Tests for the jinja plugin.
     """
 
     def setUp(self):

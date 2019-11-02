@@ -12,7 +12,7 @@ import apps.calls.main
 
 class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the calls application controller
+    Tests for the application controller.
     """
 
     @classmethod

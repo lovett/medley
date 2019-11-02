@@ -14,7 +14,7 @@ import apps.htmlhead.main
 
 class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the htmlhead application controller
+    Tests for the application controller.
     """
 
     @classmethod

@@ -9,7 +9,7 @@ import plugins.capture
 
 class TestCapture(unittest.TestCase):
     """
-    Tests for the capture plugin
+    Tests for the capture plugin.
     """
 
     def setUp(self):

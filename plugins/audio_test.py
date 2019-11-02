@@ -9,7 +9,7 @@ import plugins.audio
 
 class TestAudio(unittest.TestCase):
     """
-    Tests for the audio plugin
+    Tests for the audio plugin.
     """
 
     def setUp(self):

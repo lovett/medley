@@ -9,7 +9,7 @@ import plugins.hasher
 
 class TestHasher(unittest.TestCase):
     """
-    Tests for the hasher plugin
+    Tests for the hasher plugin.
     """
 
     def setUp(self):

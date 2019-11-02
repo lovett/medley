@@ -9,7 +9,7 @@ import plugins.applog
 
 class TestApplog(unittest.TestCase):
     """
-    Tests for the applog plugin
+    Tests for the applog plugin.
     """
 
     def setUp(self):

@@ -9,7 +9,7 @@ import plugins.cdr
 
 class TestCdr(unittest.TestCase):
     """
-    Tests for the cdr plugin
+    Tests for the cdr plugin.
     """
 
     def setUp(self):

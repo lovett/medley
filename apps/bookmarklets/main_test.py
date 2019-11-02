@@ -8,7 +8,9 @@ import apps.bookmarklets.main
 
 
 class TestBookmarklets(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the bookmarklets application controller"""
+    """
+    Tests for the application controller.
+    """
 
     @classmethod
     def setUpClass(cls):

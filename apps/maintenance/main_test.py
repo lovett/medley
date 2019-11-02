@@ -12,7 +12,7 @@ import apps.maintenance.main
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the maintenance application controller
+    Tests for the application controller.
     """
 
     @classmethod

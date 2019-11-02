@@ -9,7 +9,7 @@ import plugins.parse
 
 class TestParse(unittest.TestCase):
     """
-    Tests for the parse plugin
+    Tests for the parse plugin.
     """
 
     def setUp(self):

@@ -9,7 +9,7 @@ import plugins.logindex
 
 class TestLogindex(unittest.TestCase):
     """
-    Tests for the logindex plugin
+    Tests for the logindex plugin.
     """
 
     def setUp(self):

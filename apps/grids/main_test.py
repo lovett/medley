@@ -14,7 +14,7 @@ import apps.grids.main
 
 class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the grids application controller
+    Tests for the application controller.
     """
 
     @classmethod

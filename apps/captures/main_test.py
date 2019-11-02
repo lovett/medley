@@ -12,7 +12,7 @@ import apps.captures.main
 
 class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the captures application controller
+    Tests for the application controller.
     """
 
     @classmethod

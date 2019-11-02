@@ -12,7 +12,7 @@ import apps.bookmarks.main
 
 class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the bookmarks application controller
+    Tests for the application controller.
     """
 
     @classmethod

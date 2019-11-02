@@ -9,7 +9,7 @@ import plugins.bookmarks
 
 class TestBookmarks(unittest.TestCase):
     """
-    Tests for the bookmarks plugin
+    Tests for the bookmarks plugin.
     """
 
     def setUp(self):

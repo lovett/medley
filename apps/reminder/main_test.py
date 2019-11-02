@@ -11,7 +11,7 @@ import apps.reminder.main
 
 class TestReminder(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the reminder application controller.
+    Tests for the application controller.
     """
 
     @classmethod

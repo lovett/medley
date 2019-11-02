@@ -16,7 +16,9 @@ import apps.geodb.main
 
 
 class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the whois application controller"""
+    """
+    Tests for the application controller.
+    """
 
     temp_dir = None
     temp_file = None

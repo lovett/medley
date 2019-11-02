@@ -12,7 +12,7 @@ import plugins.geography
 
 class TestGeography(unittest.TestCase):
     """
-    Tests for the geography plugin
+    Tests for the geography plugin.
     """
 
     def setUp(self):

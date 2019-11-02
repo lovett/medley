@@ -9,7 +9,7 @@ import plugins.notifier
 
 class TestNotifier(unittest.TestCase):
     """
-    Tests for the notifier plugin
+    Tests for the notifier plugin.
     """
 
     def setUp(self):

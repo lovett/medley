@@ -12,7 +12,7 @@ import apps.registry.main
 
 class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the registry application controller
+    Tests for the application controller.
     """
 
     @classmethod

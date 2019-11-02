@@ -9,7 +9,7 @@ import plugins.maintenance
 
 class TestMaintenance(unittest.TestCase):
     """
-    Tests for the maintenance plugin
+    Tests for the maintenance plugin.
     """
 
     def setUp(self):

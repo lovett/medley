@@ -10,7 +10,7 @@ import plugins.converters
 
 class TestConverters(unittest.TestCase):
     """
-    Tests for the converters plugin
+    Tests for the converters plugin.
     """
 
     def setUp(self):

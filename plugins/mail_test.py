@@ -9,7 +9,7 @@ import plugins.mail
 
 class TestMail(unittest.TestCase):
     """
-    Tests for the mail plugin
+    Tests for the mail plugin.
     """
 
     def setUp(self):

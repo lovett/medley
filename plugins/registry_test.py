@@ -9,7 +9,7 @@ import plugins.registry
 
 class TestRegistry(unittest.TestCase):
     """
-    Tests for the registry plugin
+    Tests for the registry plugin.
     """
 
     def setUp(self):

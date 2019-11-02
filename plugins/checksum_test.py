@@ -9,7 +9,7 @@ import plugins.checksum
 
 class TestChecksum(unittest.TestCase):
     """
-    Tests for the checksum plugin
+    Tests for the checksum plugin.
     """
 
     def setUp(self):

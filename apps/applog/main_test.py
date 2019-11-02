@@ -11,7 +11,7 @@ import apps.applog.main
 
 class TestApplog(BaseCherryPyTestCase, ResponseAssertions):
     """
-    Tests for the applog application controller
+    Tests for the application controller.
     """
 
     @classmethod
