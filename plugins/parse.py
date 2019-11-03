@@ -43,11 +43,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         timestamp = pp.Group(
             pp.Suppress("[") +
-            pp.Combine(
-                integer + "/" + month3 + "/" + integer + ":" +
-                integer + ":" + integer + ":" + integer +
-                " " + tzoffset
-            ) +
+            pp.MatchFirst([
+                pp.Combine(
+                    integer + "/" + month3 + "/" + integer + ":" +
+                    integer + ":" + integer + ":" + integer +
+                    " " + tzoffset
+                ),
+                pp.Combine(
+                    integer + "/" + month3 + "/" + integer + ":" +
+                    integer + ":" + integer + ":" + integer + ":" + integer +
+                    " " + tzoffset
+                )
+            ]) +
             pp.Suppress("]")
         )
 
@@ -443,10 +450,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 val
             )
 
-        utc_time = pendulum.from_format(
-            fields["timestamp"],
-            "DD/MMM/YYYY:HH:mm:ss ZZ"
-        ).in_tz('utc')
+        timestamp_formats = (
+            "DD/MMM/YYYY:HH:mm:ss ZZ",
+            "DD/MMM/YYYY:HH:mm:ss:SSSSSS ZZ"
+        )
+
+        for timestamp_format in timestamp_formats:
+            try:
+                utc_time = pendulum.from_format(
+                    fields["timestamp"],
+                    timestamp_format
+                ).in_tz('utc')
+                break
+            except ValueError:
+                pass
 
         fields["unix_timestamp"] = utc_time.timestamp()
         fields["datestamp"] = utc_time.format("YYYY-MM-DD-HH")

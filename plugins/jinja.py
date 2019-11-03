@@ -212,11 +212,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Calculate a human-readable time delta between a date in the past
         and now.
 
-        If the date provided as an integer, it is treated as a unix timestamp.
+        If the date provided as an integer or float, it is treated as
+        a unix timestamp.
 
         """
 
-        if isinstance(value, int):
+        if isinstance(value, (int, float)):
             date = pendulum.from_timestamp(value)
         else:
             date = value
