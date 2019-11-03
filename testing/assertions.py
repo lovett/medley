@@ -87,3 +87,7 @@ class ResponseAssertions(unittest.TestCase):
     def assert_not_user_facing(self, controller):
         """The application is not presented on the homepge."""
         self.assertFalse(controller.user_facing)
+
+    def assert_404(self, response):
+        """The response code is 404."""
+        self.assertEqual(response.code, 404)

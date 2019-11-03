@@ -153,7 +153,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
             as_text=True
         )
 
-        self.assertEqual(response.code, 404)
+        self.assert_404(response)
 
 
 if __name__ == "__main__":
