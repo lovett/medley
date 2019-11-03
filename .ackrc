@@ -8,3 +8,4 @@
 --ignore-dir=__pycache__
 --ignore-file=ext:pyc
 --ignore-file=is:.coverage
+--type-set=test:match:/_test.py/
