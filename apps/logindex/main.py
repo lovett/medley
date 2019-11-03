@@ -1,6 +1,8 @@
 """Trigger indexing of log files."""
 
 import os.path
+import pathlib
+import typing
 import pendulum
 import cherrypy
 
@@ -11,8 +13,82 @@ class Controller:
     exposed = True
     user_facing = False
 
+    def POST(self, *args, **kwargs):
+        """
+        Dispatch to a subhandler.
+        """
+
+        if not args:
+            start = kwargs.get("start", "")
+            end = kwargs.get("end", "")
+
+            self.index_by_date(start, end)
+            cherrypy.response.status = 204
+            return
+
+        if args[0] == "bucket":
+            url_path = "/".join(args)
+            path = kwargs.get("path", "")
+
+            channel: typing.Optional[str] = None
+            if url_path == "bucket/gcp/appengine":
+                channel = "gcp:appengine:ingest_file"
+
+            if channel:
+                self.index_by_file(path, channel)
+                cherrypy.response.status = 204
+                return
+
+        cherrypy.response.status = 404
+
+    def index_by_date(self, start: str, end: str) -> None:
+        """
+        Index logs in combined format based on a date range.
+        """
+
+        start_date = self.parse_log_date(start, None)
+        end_date = self.parse_log_date(end, start_date)
+
+        if not start_date:
+            raise cherrypy.HTTPError(400, "Invalid start")
+
+        if start_date > end_date:
+            raise cherrypy.HTTPError(400, "Invalid range")
+
+        cherrypy.engine.publish("logindex:enqueue", start_date, end_date)
+
     @staticmethod
-    def parse_log_date(val):
+    def index_by_file(path: str, channel: str) -> None:
+        """Index a log file by its path.
+
+        The channel argument dictates how the indexing will
+        occur. Unlike date-based indexing, there is no expectation
+        that the file will be in combined format.
+        """
+
+        bucket_root = typing.cast(
+            pathlib.Path,
+            cherrypy.engine.publish(
+                "registry:first_value",
+                "config:bucket_root",
+                as_path=True
+            ).pop()
+        )
+
+        try:
+            bucket_path = bucket_root.joinpath(path)
+            bucket_path.relative_to(bucket_root)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid path")
+
+        if not bucket_path.is_file():
+            raise cherrypy.HTTPError(400, "Path is not a file")
+
+        cherrypy.engine.publish(channel, bucket_path)
+
+    @staticmethod
+    def parse_log_date(val, default: typing.Any) -> typing.Any:
+
         """
         Convert a date string in either date or filename format
         to a datetime.
@@ -21,29 +97,8 @@ class Controller:
         a file extension at the end.
         """
 
-        filename = os.path.splitext(val)[0]
-
         try:
+            filename = os.path.splitext(val)[0]
             return pendulum.from_format(filename, "YYYY-MM-DD")
-        except ValueError:
-            raise cherrypy.HTTPError(
-                400,
-                f"Unable to parse a date from {filename}"
-            )
-
-    def POST(self, start, end=None):
-        """
-        Initiate log file parsing within a specified date range.
-        """
-
-        start_date = self.parse_log_date(start)
-        end_date = start_date
-
-        if end:
-            end_date = self.parse_log_date(end)
-            if start_date > end_date:
-                raise cherrypy.HTTPError(400, "Invalid date range")
-
-        cherrypy.engine.publish("logindex:enqueue", start_date, end_date)
-
-        cherrypy.response.status = 204
+        except (TypeError, ValueError):
+            return default
