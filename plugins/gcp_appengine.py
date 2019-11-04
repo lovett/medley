@@ -114,6 +114,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         payload = json_line.get("protoPayload")
 
+        line = payload.get("line")
+        message = ""
+        if line:
+            message = line[0].get("logMessage", "")
+
         resource = " ".join((
             payload["method"],
             payload["resource"],
@@ -138,7 +143,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.combined_pair("latency", payload.get("latency")),
             self.combined_pair("end_time", payload.get("endTime")),
             self.combined_pair("version", payload.get("versionId")),
-            self.combined_pair("request_id", payload.get("requestId"))
+            self.combined_pair("request_id", payload.get("requestId")),
+            message
         )
 
         return " ".join(fields).strip()
