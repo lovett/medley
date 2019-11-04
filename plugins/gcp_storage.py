@@ -40,9 +40,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             key_slice=1
         ).pop()
 
-        bucket_root = cherrypy.engine.publish(
+        storage_root = cherrypy.engine.publish(
             "registry:first_value",
-            "config:bucket_root"
+            "config:storage_root"
         ).pop()
 
         if "service_account" not in config:
@@ -71,7 +71,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         for blob in blobs:
             blob_path = pathlib.Path(blob.name)
 
-            download_root = pathlib.Path(bucket_root)
+            download_root = pathlib.Path(storage_root)
 
             destination_path = download_root / blob_path
 

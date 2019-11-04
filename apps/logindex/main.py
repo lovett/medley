@@ -66,18 +66,18 @@ class Controller:
         that the file will be in combined format.
         """
 
-        bucket_root = typing.cast(
+        storage_root = typing.cast(
             pathlib.Path,
             cherrypy.engine.publish(
                 "registry:first_value",
-                "config:bucket_root",
+                "config:storage_root",
                 as_path=True
             ).pop()
         )
 
         try:
-            bucket_path = bucket_root.joinpath(path)
-            bucket_path.relative_to(bucket_root)
+            bucket_path = storage_root.joinpath(path)
+            bucket_path.relative_to(storage_root)
         except ValueError:
             raise cherrypy.HTTPError(400, "Invalid path")
 

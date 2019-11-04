@@ -46,16 +46,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         it this way reduces duplication with the logindex plugin.
         """
 
-        bucket_root = cherrypy.engine.publish(
+        storage_root = cherrypy.engine.publish(
             "registry:first_value",
-            "config:bucket_root",
+            "config:storage_root",
             as_path=True
         ).pop()
 
         if not log_path.is_file():
             return
 
-        source_file = log_path.relative_to(bucket_root)
+        source_file = log_path.relative_to(storage_root)
 
         line_count = 0
         batch: typing.List[typing.Any] = []
