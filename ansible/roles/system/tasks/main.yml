@@ -34,6 +34,8 @@
   with_items:
     - /var/cache/{{ project_name }}
     - /var/cache/{{ project_name }}/speak
+    - /var/medley
+    - /var/medley/storage
 
 - name: Install python3 system packages
   become: true
