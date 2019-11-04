@@ -1,6 +1,7 @@
 """Key-value storage for app configuration and data."""
 
 from collections import defaultdict
+import pathlib
 import sqlite3
 import typing
 import cherrypy
@@ -217,7 +218,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def first_value(
             self,
             key: str,
-            memorize: bool = False
+            memorize: bool = False,
+            as_path: bool = False
     ) -> typing.Any:
         """Perform a search by key and return the value of the first match."""
 
@@ -237,8 +239,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         except IndexError:
             value = None
 
+        if as_path:
+            value = pathlib.Path(value)
+
         if memorize:
             cherrypy.engine.publish("memorize:set", key, value)
+
         return value
 
     def distinct_keys(

@@ -25,6 +25,8 @@ import plugins.checksum
 import plugins.converters
 import plugins.decorators
 import plugins.formatting
+import plugins.gcp_appengine
+import plugins.gcp_storage
 import plugins.geography
 import plugins.hasher
 import plugins.ip
@@ -190,6 +192,8 @@ def setup() -> None:
     plugins.checksum.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
+    plugins.gcp_appengine.Plugin(cherrypy.engine).subscribe()
+    plugins.gcp_storage.Plugin(cherrypy.engine).subscribe()
     plugins.geography.Plugin(cherrypy.engine).subscribe()
     plugins.hasher.Plugin(cherrypy.engine).subscribe()
     plugins.ip.Plugin(cherrypy.engine).subscribe()

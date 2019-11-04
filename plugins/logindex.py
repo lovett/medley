@@ -129,6 +129,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:reversal', self.reversal)
         self.bus.subscribe('logindex:alert', self.alert)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
+        self.bus.subscribe('logindex:insert_line', self.insert_line)
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
@@ -325,8 +326,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            "ingest_file",
-            file_path
+            "lines_ingested",
+            line_count
         )
 
     @decorators.log_runtime

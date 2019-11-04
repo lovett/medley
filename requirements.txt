@@ -1,6 +1,7 @@
 CherryPy==18.3.0
 Jinja2==2.10.3
 geoip2==2.9.0
+google-cloud-storage==1.21.0
 httplib2==0.14.0
 msgpack-python==0.5.6
 pendulum==2.0.5
