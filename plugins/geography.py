@@ -1,5 +1,6 @@
 """Look up geographic information by various identifiers."""
 
+import typing
 import cherrypy
 
 
@@ -9,10 +10,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     """
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the geography prefix.
@@ -34,7 +35,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def state_by_area_code(area_code):
+    def state_by_area_code(
+            area_code: str
+    ) -> typing.Tuple[str, typing.Optional[str], typing.Optional[str]]:
         """Query dbpedia for the geographic location of a North American
         telephone area code. Returns a dictionary with keys for state
         abbreviation, full name, and comment.
@@ -84,7 +87,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return (sparql, None, None)
 
     @staticmethod
-    def unabbreviate_us_state(abbreviation):
+    def unabbreviate_us_state(
+            abbreviation: str
+    ) -> typing.Tuple[str, typing.Optional[str]]:
         """Query dbpedia for the full name of a U.S. state by its 2-letter
         abbreviation.
 
@@ -124,7 +129,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return (sparql, None)
 
     @staticmethod
-    def country_by_abbreviation(abbreviations=()):
+    def country_by_abbreviation(
+            abbreviations: typing.Iterable[str] = ()
+    ) -> typing.Dict[str, str]:
         """Query the registry for the name of a country from its 2-letter
         abbreviation.
 
@@ -135,9 +142,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             for abbreviation in abbreviations
         )
 
-        return cherrypy.engine.publish(
-            "registry:search",
-            keys=tuple(keys),
-            as_dict=True,
-            key_slice=2
-        ).pop()
+        return typing.cast(
+            typing.Dict[str, str],
+            cherrypy.engine.publish(
+                "registry:search",
+                keys=tuple(keys),
+                as_dict=True,
+                key_slice=2
+            ).pop()
+        )
