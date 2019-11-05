@@ -44,6 +44,11 @@ class Controller:
                 "registry:list_keys",
             ).pop()
 
+        entries = [dict(entry) for entry in entries]
+
+        for entry in entries:
+            entry["value"] = entry["value"].strip()
+
         return {
             "html": ("registry.jinja.html", {
                 "q": q,
@@ -63,6 +68,9 @@ class Controller:
     @staticmethod
     def PUT(key, value, replace=False):
         """Store a new entry in the database or replace an existing entry"""
+
+        key = key.strip()
+        value = value.strip()
 
         cherrypy.engine.publish(
             "registry:add",
