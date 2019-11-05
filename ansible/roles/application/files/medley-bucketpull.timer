@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer for Medley bucketpull app
+
+[Timer]
+OnCalendar=*:15:00
+
+Persistent=false
+
+[Install]
+WantedBy=timers.target

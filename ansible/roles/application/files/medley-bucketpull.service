@@ -1,0 +1,11 @@
+[Unit]
+Description=Medley bucketpull
+After=medley.service
+Requires=medley.service
+OnFailure=medley-failure@%n
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/curl --user-agent medley-bucketpull.service --silent --show-error "http://127.0.0.1:8085/bucketpull/gcp/appengine"
+StandardOutput=null
+Restart=no
