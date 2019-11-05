@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import pathlib
 import re
 import sqlite3
 import typing
@@ -130,6 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:alert', self.alert)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:insert_line', self.insert_line)
+        self.bus.subscribe('logindex:count_lines', self.count_lines)
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
@@ -539,6 +541,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         VALUES (?, ?, ?, ?)""", records)
 
         return len(records)
+
+    def count_lines(self, source: pathlib.Path) -> int:
+        """Tally the number of stored records for the given source file."""
+        return self._selectFirst(
+            """SELECT count(*)
+            FROM logs
+            WHERE source_file=?""",
+            (str(source),)
+        )
 
     @decorators.log_runtime
     def query(

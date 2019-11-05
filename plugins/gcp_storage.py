@@ -69,6 +69,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         blobs = storage_client.list_blobs(config.get("bucket"))
 
         files_pulled = 0
+
         for blob in blobs:
             blob_path = pathlib.Path(blob.name)
 
@@ -76,16 +77,40 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             destination_path = download_root / blob_path
 
+            should_delete = False
+
             if destination_path.exists():
-                if blob.size == destination_path.stat().st_size:
-                    try:
-                        blob.delete()
-                    except google.api_core.exceptions.GoogleAPIError:
-                        bucket_name = config.get("bucket_name")
-                        cherrypy.log(
-                            f"Cannot delete GCP blob in {bucket_name}"
-                        )
-                    continue
+                should_delete = True
+
+                if blob.size != destination_path.stat().st_size:
+                    should_delete = False
+
+                if should_delete:
+                    lines_in_blob = 0
+                    with open(destination_path) as handle:
+                        for lines_in_blob, _ in enumerate(handle):
+                            pass
+
+                    # Add one to account for the last line.
+                    lines_in_blob += 1
+
+                    lines_in_database = cherrypy.engine.publish(
+                        "logindex:count_lines",
+                        blob_path
+                    ).pop()
+
+                    if lines_in_database != lines_in_blob:
+                        should_delete = False
+
+            if should_delete:
+                try:
+                    blob.delete()
+                except google.api_core.exceptions.GoogleAPIError:
+                    bucket_name = config.get("bucket")
+                    cherrypy.log(
+                        f"Cannot delete GCP blob in {bucket_name}"
+                    )
+                continue
 
             if not destination_path.parent.is_dir():
                 destination_path.parent.mkdir(parents=True)
