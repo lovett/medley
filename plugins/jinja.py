@@ -239,9 +239,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return json.dumps(value, sort_keys=True, indent=2)
 
     @staticmethod
-    @jinja2.evalcontextfilter
+    @jinja2.contextfilter
     def websearch_filter(
-            eval_ctx: jinja2.Environment,
+            context: jinja2.runtime.Context,
             value: str,
             engine: str = "",
             url_only: bool = False,
@@ -274,7 +274,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         target="{target}" rel="noopener noreferer"
         >{icon} {engine.capitalize()}</a>"""
 
-        if eval_ctx.autoescape:
+        if context.eval_ctx.autoescape:
             return jinja2.Markup(result)
 
         return result
@@ -377,9 +377,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ".".join(segment_slice[::-1])
 
     @staticmethod
-    @jinja2.evalcontextfilter
+    @jinja2.contextfilter
     def logline_with_links_filter(
-            eval_ctx: jinja2.Environment,
+            context: jinja2.runtime.Context,
             record: sqlite3.Row
     ) -> str:
         """Add hyperlinks to a log entry."""
@@ -393,7 +393,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         result = result.replace(record["ip"], link)
 
-        if eval_ctx.autoescape:
+        if context.eval_ctx.autoescape:
             return jinja2.Markup(result)
 
         return result
@@ -451,23 +451,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"&{key}={encoded_value}"
 
     @staticmethod
-    @jinja2.evalcontextfilter
-    def unescape_filter(eval_ctx: jinja2.Environment, value: str) -> str:
+    @jinja2.contextfilter
+    def unescape_filter(
+            context: jinja2.runtime.Context,
+            value: str
+    ) -> str:
         """De-entify HTML"""
 
         result = html.unescape(value)
 
-        if eval_ctx.autoescape:
+        if context.eval_ctx.autoescape:
             return jinja2.Markup(result)
 
         return result
 
     @staticmethod
-    @jinja2.evalcontextfilter
-    def internal_url_filter(eval_ctx: jinja2.Environment,
-                            value: str,
-                            query: typing.Dict[str, typing.Any] = None,
-                            trailing_slash: bool = False) -> str:
+    @jinja2.contextfilter
+    def internal_url_filter(
+            context: jinja2.runtime.Context,
+            value: str,
+            query: typing.Dict[str, typing.Any] = None,
+            trailing_slash: bool = False
+    ) -> str:
         """Generate an application URL via the URL plugin."""
 
         url = typing.cast(
@@ -480,7 +485,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).pop()
         )
 
-        if eval_ctx.autoescape:
+        if context.eval_ctx.autoescape:
             return jinja2.Markup(url)
 
         return url
