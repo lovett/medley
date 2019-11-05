@@ -2,7 +2,6 @@
 Download files from a storage bucket.
 """
 
-import typing
 import cherrypy
 
 
@@ -13,15 +12,12 @@ class Controller:
     user_facing = False
 
     @staticmethod
-    def POST(*args: typing.Iterable[str], **_kwargs) -> None:
+    def POST(*_args, **kwargs) -> None:
         """
         Dispatch to a service-specific plugin.
         """
 
-        try:
-            service = args[0]
-        except IndexError:
-            service = None
+        service = kwargs.get("service")
 
         if service == "gcp":
             cherrypy.engine.publish(
