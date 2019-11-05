@@ -2,7 +2,6 @@
 
 import sqlite3
 import typing
-from string import Template
 import cherrypy
 from . import mixins
 
@@ -32,10 +31,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Optional[int]:
         """Get the number of calls made or received by a number."""
 
-        query = Template("""
-        SELECT count(*) as count FROM cdr
-        WHERE 1=1 $src_target $src_filter $dst_filter""")
-
         src_target = ""
         src_filter = ""
         dst_filter = ""
@@ -55,13 +50,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             dst_filter = f"AND dst NOT IN ({exclusions})"
             values.extend(dst_exclude)
 
-        query_str = query.substitute(
-            src_target=src_target,
-            src_filter=src_filter,
-            dst_filter=dst_filter
-        )
+        sql = f"""
+        SELECT count(*) as count FROM cdr
+        WHERE 1=1 {src_target} {src_filter} {dst_filter}"""
 
-        row = self._selectOne(query_str, values)
+        row = self._selectOne(sql, values)
 
         if row:
             return int(row["count"])
@@ -73,21 +66,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                  offset: int = 0,
                  limit: int = 50) -> typing.List[sqlite3.Row]:
         """Get a list of calls in reverse-chronological order."""
-
-        query = Template("""
-        SELECT calldate as "date [calldate_to_utc]", end as
-        "end_date [calldate_to_utc]",
-        CASE LENGTH(src)
-          WHEN 3 THEN "outgoing"
-          ELSE "incoming"
-          END AS direction,
-        duration AS "duration [duration]",
-        clid AS "clid [clid]",
-        src, dst
-        FROM cdr
-        WHERE 1=1 $src_filter $dst_filter
-        ORDER BY calldate DESC
-        LIMIT ? OFFSET ?""")
 
         reversed_values = [str(offset), str(limit)]
         dst_filter = ""
@@ -103,13 +81,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             src_filter = f"AND src NOT IN ({exclusions})"
             reversed_values.extend(src_exclude)
 
-        query_str = query.substitute(
-            src_filter=src_filter,
-            dst_filter=dst_filter
-        )
+        sql = f"""
+        SELECT calldate as "date [calldate_to_utc]", end as
+        "end_date [calldate_to_utc]",
+        CASE LENGTH(src)
+          WHEN 3 THEN "outgoing"
+          ELSE "incoming"
+          END AS direction,
+        duration AS "duration [duration]",
+        clid AS "clid [clid]",
+        src, dst
+        FROM cdr
+        WHERE 1=1 {src_filter} {dst_filter}
+        ORDER BY calldate DESC
+        LIMIT ? OFFSET ?"""
 
         return self._select(
-            query_str,
+            sql,
             tuple(reversed(reversed_values))
         )
 
@@ -123,7 +111,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        query = """
+        sql = """
         SELECT calldate as "date [calldate_to_utc]",
         CASE LENGTH(src)
           WHEN 3 THEN "outgoing"
@@ -139,6 +127,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         wildcard_number = f"%{number}"
 
         return self._select(
-            query,
+            sql,
             (wildcard_number, wildcard_number, limit)
         )
