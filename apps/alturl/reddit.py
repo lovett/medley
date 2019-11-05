@@ -16,6 +16,9 @@ def view(url: str) -> aliases.NegotiableView:
         cache_lifespan=900
     ).pop()
 
+    if not response:
+        return unavailable()
+
     match = re.search(
         "/r/(?P<subreddit>[^/]+)/?(?P<comments>comments)?",
         url
@@ -25,6 +28,25 @@ def view(url: str) -> aliases.NegotiableView:
         return view_story(response)
 
     return view_index(response)
+
+
+def unavailable() -> aliases.NegotiableView:
+    """Display a message saying the URL could not be retrieved."""
+
+    applog_url = cherrypy.engine.publish(
+        "url:internal",
+        "/applog",
+        {
+            "sources": "exception",
+            "exclude": 0
+        }
+    ).pop()
+
+    return {
+        "html": ("unavailable.jinja.html", {
+            "applog_url": applog_url
+        })
+    }
 
 
 def view_index(response: typing.Any) -> aliases.NegotiableView:

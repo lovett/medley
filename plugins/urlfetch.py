@@ -73,7 +73,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             req = requests.get(
                 url,
                 auth=auth,
-                timeout=5,
+                timeout=15,
                 headers=request_headers,
                 params=params
             )
@@ -82,9 +82,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
-                "applog:addo",
-                "urlfetch",
-                "failure",
+                "applog:add",
+                "exception",
+                "urlfetch:get",
                 exception
             )
 
