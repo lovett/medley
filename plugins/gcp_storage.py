@@ -9,6 +9,7 @@ import pathlib
 import cherrypy
 from google.cloud import storage
 from google.oauth2.service_account import Credentials
+import google.api_core.exceptions
 from . import decorators
 
 
@@ -77,7 +78,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             if destination_path.exists():
                 if blob.size == destination_path.stat().st_size:
-                    blob.delete()
+                    try:
+                        blob.delete()
+                    except google.api_core.exceptions.GoogleAPIError:
+                        bucket_name = config.get("bucket_name")
+                        cherrypy.log(
+                            f"Cannot delete GCP blob in {bucket_name}"
+                        )
                     continue
 
             if not destination_path.parent.is_dir():
