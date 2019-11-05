@@ -76,7 +76,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             destination_path = download_root / blob_path
 
             if destination_path.exists():
-                continue
+                if blob.size == destination_path.stat().st_size:
+                    blob.delete()
+                    continue
 
             if not destination_path.parent.is_dir():
                 destination_path.parent.mkdir(parents=True)
