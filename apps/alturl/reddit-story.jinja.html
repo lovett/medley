@@ -53,10 +53,19 @@
             r/{{ story.subreddit}}
         </a>
     </div>
+
+    {% if "reddit.com" not in story.url %}
     <div>
-        <a href="{{ story.url|anonymize|unescape }}" target="_blank">
+        <a href="{{ story.url|anonymize }}" target="_blank">
             <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            View
+            {{ story.domain }}
+        </a>
+    </div>
+    {% endif %}
+    <div>
+        <a href="{{ ("https://reddit.com" ~ story.permalink)|anonymize }}" target="_blank">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            reddit.com
         </a>
     </div>
 {% endblock %}
