@@ -104,6 +104,8 @@
     - files/medley-fs-maintenance.timer
     - files/medley-headlines.service
     - files/medley-headlines.timer
+    - files/medley-bucketpull.service
+    - files/medley-bucketpull.timer
 
 - name: Enable medley systemd service
   become: true
@@ -127,6 +129,7 @@
     - medley-db-maintenance.timer
     - medley-fs-maintenance.timer
     - medley-headlines.timer
+    - medley-bucketpull.timer
 
 - name: Check server availability
   uri:
