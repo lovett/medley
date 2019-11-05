@@ -9,3 +9,7 @@ Type=exec
 ExecStart=/usr/bin/curl --user-agent medley-bucketpull.service --silent --show-error -d "service=gcp" "http://127.0.0.1:8085/bucketpull"
 StandardOutput=null
 Restart=no
+
+# Local Variables:
+# mode: conf
+# End:

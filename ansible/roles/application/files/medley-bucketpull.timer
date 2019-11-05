@@ -2,9 +2,16 @@
 Description=Timer for Medley bucketpull app
 
 [Timer]
-OnCalendar=*:15:00
+# Hourly at 15 minutes past the hour with a break for maintenance
+# from 6AM to 8AM.
+OnCalendar=00..05:15:00
+OnCalendar=08..23:15:00
 
 Persistent=false
 
 [Install]
 WantedBy=timers.target
+
+# Local Variables:
+# mode: conf
+# End:
