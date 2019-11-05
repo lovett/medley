@@ -26,8 +26,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.bus.subscribe("gcp:storage:pull", self.pull_bucket)
 
-    @decorators.log_runtime
     @staticmethod
+    @decorators.log_runtime
     def pull_bucket() -> None:
         """
         Download files from a Google Cloud Storage bucket.
