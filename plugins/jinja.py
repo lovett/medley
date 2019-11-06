@@ -16,6 +16,7 @@ import re
 import cherrypy
 import jinja2
 import pendulum
+from . import jinja_cache
 
 
 # pylint: disable=too-many-public-methods
@@ -24,18 +25,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         server_root = cherrypy.config.get("server_root", "./")
-
-        cache_dir = os.path.join(
-            cherrypy.config.get("cache_dir", "cache"),
-            "jinja"
-        )
-
-        try:
-            os.mkdir(cache_dir)
-        except PermissionError:
-            raise SystemExit(f"Unable to create {cache_dir} directory")
-        except FileExistsError:
-            pass
 
         paths = [os.path.join(server_root, "templates")]
 
@@ -50,7 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         loader = jinja2.FileSystemLoader(paths)
 
-        cache = jinja2.FileSystemBytecodeCache(cache_dir, '%s.cache')
+        cache = jinja_cache.Cache()
 
         self.env = jinja2.Environment(
             loader=loader,

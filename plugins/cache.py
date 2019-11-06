@@ -63,31 +63,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def get(self, key: str) -> Any:
         """Retrieve a value from the store by its key."""
 
-        row = self._selectOne(
-            """SELECT value as 'value [binary]', created as 'created [datetime]'
+        return self._selectFirst(
+            """SELECT value as 'value [binary]'
             FROM cache
             WHERE key=?
             AND expires > strftime('%s','now')""",
             (key,)
         )
-
-        if row:
-            cherrypy.engine.publish(
-                "applog:add",
-                "cache",
-                f"get:{key}",
-                "hit"
-            )
-            return row["value"]
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "cache",
-            f"get:{key}",
-            "miss"
-        )
-
-        return False
 
     def set(self,
             key: str,
@@ -104,13 +86,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (key, value, expires)
             VALUES (?, ?, ?)""",
             [(key, packed_value, expires)]
-        )
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "cache",
-            f"set:{key}",
-            lifespan_seconds
         )
 
         return True
