@@ -496,7 +496,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 continue
 
             if key == "forwarded-for":
-                fields["ip"] = value
+                ips = value.split(",")
+                fields["ip"] = ips[0].strip()
 
             fields[key] = value
 
