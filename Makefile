@@ -48,27 +48,10 @@ print-%:
 
 
 # Set up a virtualenv
-#
-# The --system-site-packages flag is not used because it results in a
-# venv without pip. Instead, system packages are enabled
-# after-the-fact by editing the pyvenv.cfg file.
-#
-# This results in the best of both worlds: a local copy of pip with a
-# predictable name (no confusion about pip vs pip3) and access to site
-# packages for faster builds.
-#
-# Although the documentation for Python 3.5 says that pip is installed
-# by default, this doesn't appear to be the case at the moment on
-# Raspbian Stretch. Fiddling with pyenv.cfg is a workaround.
-#
 venv: dummy
 	@echo -n "Creating a new virtual environment..."
 	@rm -rf venv
-	@python3 -m venv venv
-	@echo "[global]" > venv/pip.conf
-	@echo "format = columns" >> venv/pip.conf
-	@sed 's/include-system-site-packages = false/include-system-site-packages = true/' venv/pyvenv.cfg > venv/pyvenv.cfg.tmp
-	@mv venv/pyvenv.cfg.tmp venv/pyvenv.cfg
+	@python3 -m venv --system-site-packages venv
 	@echo  "done."
 	@echo "Now run: source venv/bin/activate"
 	@echo "After that, run: make setup"
