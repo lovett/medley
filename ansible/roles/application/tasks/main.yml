@@ -21,12 +21,6 @@
       - "--exclude=requirements.txt"
       - "--exclude=requirements-audio.txt"
 
-- name: Clear template cache
-  become: true
-  file:
-    path="/var/cache/{{ project_name }}/jinja"
-    state="absent"
-
 # The shell module is used to create the virtualenv for simplicity.
 # The pip module could do it, but needs a virtualenv executable which
 # the Debian python3-virtualenv package somehow doesn't provide. All
