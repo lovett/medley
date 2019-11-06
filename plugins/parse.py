@@ -495,6 +495,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 fields["latitude"], fields["longitude"] = value.split(",")
                 continue
 
+            if key == "forwarded-for":
+                fields["ip"] = value
+
             fields[key] = value
 
         del fields["extras"]
