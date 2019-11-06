@@ -70,10 +70,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         files_pulled = 0
 
+        download_root = pathlib.Path(storage_root)
+
         for blob in blobs:
             blob_path = pathlib.Path(blob.name)
-
-            download_root = pathlib.Path(storage_root)
 
             destination_path = download_root / blob_path
 
@@ -117,14 +117,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             blob.download_to_filename(destination_path)
 
-            if blob_path.parts[0] == "appengine.googleapis.com":
-                if blob_path.parts[1] == config.get("log_sink"):
-                    cherrypy.engine.publish(
-                        "scheduler:add",
-                        1,
-                        "gcp:appengine:ingest_file",
-                        destination_path
-                    )
+            request_top_path = ("appengine.googleapis.com", "request_log")
+
+            publish_event = None
+
+            if blob_path.parts[0:2] == request_top_path:
+                publish_event = "gcp:appengine:ingest_file"
+
+            if publish_event:
+                cherrypy.engine.publish(
+                    "scheduler:add",
+                    1,
+                    publish_event,
+                    blob_path
+                )
 
             files_pulled += 1
 

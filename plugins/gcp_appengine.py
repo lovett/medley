@@ -7,6 +7,7 @@ See https://googleapis.dev/python/storage/latest/client.html
 import json
 import pathlib
 import typing
+import urllib.parse
 import cherrypy
 import pendulum
 from . import decorators
@@ -29,12 +30,111 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.ingest_file
         )
 
+    @staticmethod
+    def full_storage_path(path: pathlib.Path) -> pathlib.Path:
+        """Get an absolute path to a file within the storage root."""
+
+        storage_root = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:storage_root",
+            as_path=True
+        ).pop()
+
+        return storage_root / path
+
+    def ingest_file(self, storage_path: pathlib.Path, batch_size: int = 100):
+        """Match a log file to a processor based on its file path."""
+
+        request_top_path = ("appengine.googleapis.com", "request_log")
+
+        if not storage_path.parts[0:2] == request_top_path:
+            return
+
+        extras_path = pathlib.Path("stdout").joinpath(*storage_path.parts[2:])
+
+        line_count = self.process_request_log(storage_path, batch_size)
+
+        self.process_application_log(extras_path, batch_size)
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "gcp_appengine",
+            "lines_ingested",
+            line_count
+        )
+
+        cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
+
     @decorators.log_runtime
-    def ingest_file(
+    def process_application_log(
             self,
-            log_path: pathlib.Path,
+            storage_path: pathlib.Path,
             batch_size: int = 100
     ) -> None:
+        """Add the lines of an hourly application log in JSON format to the
+        logindex database.
+        """
+
+        log_path = self.full_storage_path(storage_path)
+
+        if not log_path.is_file():
+            print("application log does not exist")
+            return
+
+        batch: typing.List[typing.Any] = []
+
+        with open(log_path, "r") as file_handle:
+            while True:
+                line = file_handle.readline()
+                if not line:
+                    break
+
+                json_line = json.loads(line)
+
+                payload = json_line.get("textPayload")
+
+                if not payload:
+                    continue
+
+                # Handle payloads that aren't key-value pairs.
+                pairs = {
+                    "message": payload.replace('"', "'")
+                }
+
+                if "=" in payload:
+                    pairs = {
+                        key: value[0].replace('"', "'")
+                        for key, value
+                        in urllib.parse.parse_qs(payload).items()
+                    }
+
+                if "forwarded-for" in pairs:
+                    value = pairs["forwarded-for"]
+                    pairs["forwarded-for"] = value.split(',')[0]
+
+                if "trace" not in pairs:
+                    continue
+
+                record_hash = pairs["trace"].split("/")[0]
+                batch.append((
+                    self.pairs_to_extras(pairs),
+                    record_hash
+                ))
+
+                if len(batch) > batch_size:
+                    self.publish_extras(batch)
+                    batch = []
+
+        if batch:
+            self.publish_extras(batch)
+            batch = []
+
+    @decorators.log_runtime
+    def process_request_log(
+            self,
+            storage_path: pathlib.Path,
+            batch_size: int = 100
+    ) -> int:
         """
         Add the lines of an hourly request log in JSON format to the
         logindex database.
@@ -46,16 +146,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         it this way reduces duplication with the logindex plugin.
         """
 
-        storage_root = cherrypy.engine.publish(
-            "registry:first_value",
-            "config:storage_root",
-            as_path=True
-        ).pop()
+        log_path = self.full_storage_path(storage_path)
 
         if not log_path.is_file():
-            return
-
-        source_file = log_path.relative_to(storage_root)
+            return 0
 
         line_count = 0
         batch: typing.List[typing.Any] = []
@@ -68,12 +162,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 offset = file_handle.tell()
 
-                combined_line = self.json_to_combined(line)
+                json_line = json.loads(line)
+
+                payload = json_line.get("protoPayload")
+
+                if not payload:
+                    continue
+
+                combined_line = self.json_to_combined(payload)
+
+                record_hash = payload.get("traceId")
+                if not record_hash:
+                    record_hash = cherrypy.engine.publish(
+                        "hasher:md5",
+                        line
+                    ).pop()
 
                 batch.append((
-                    str(source_file),
+                    str(log_path),
                     offset,
-                    cherrypy.engine.publish("hasher:md5", line).pop(),
+                    record_hash,
                     combined_line
                 ))
 
@@ -84,14 +192,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             line_count += self.publish_batch(batch)
             batch = []
 
-        cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "gcp_appengine",
-            "lines_ingested",
-            line_count
-        )
+        return line_count
 
     @staticmethod
     def combined_quoted(value: str = None) -> str:
@@ -108,16 +209,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return f'{key}="{value}"'
         return ""
 
-    def json_to_combined(self, line: str) -> str:
+    def json_to_combined(self, payload: typing.Any) -> str:
         """Format a JSON-formatted string in combined log format."""
-        json_line = json.loads(line)
-
-        payload = json_line.get("protoPayload")
-
-        line = payload.get("line")
-        message = ""
-        if line:
-            message = line[0].get("logMessage", "")
 
         resource = " ".join((
             payload["method"],
@@ -144,10 +237,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.combined_pair("end_time", payload.get("endTime")),
             self.combined_pair("version", payload.get("versionId")),
             self.combined_pair("request_id", payload.get("requestId")),
-            message
+            self.combined_pair("trace_id", payload.get("traceId"))
         )
 
         return " ".join(fields).strip()
+
+    def pairs_to_extras(self, pairs: typing.Dict[str, str]) -> str:
+        """Format a dict as a quoted key-value string."""
+
+        quoted_pairs = [
+            self.combined_pair(key, value)
+            for key, value
+            in pairs.items()
+        ]
+
+        return " ".join(quoted_pairs)
 
     @staticmethod
     def publish_batch(batch) -> int:
@@ -159,3 +263,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         return typing.cast(int, result)
+
+    @staticmethod
+    def publish_extras(batch) -> None:
+        """Append extra name-value fields a previously-saved combined log."""
+
+        cherrypy.engine.publish(
+            "logindex:append_line",
+            batch
+        )

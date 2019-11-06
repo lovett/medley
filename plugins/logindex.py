@@ -131,6 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:alert', self.alert)
         self.bus.subscribe('logindex:enqueue', self.enqueue)
         self.bus.subscribe('logindex:insert_line', self.insert_line)
+        self.bus.subscribe('logindex:append_line', self.append_line)
         self.bus.subscribe('logindex:count_lines', self.count_lines)
         self.bus.subscribe('logindex:process_queue', self.process_queue)
         self.bus.subscribe('logindex:query', self.query)
@@ -539,6 +540,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self._insert("""INSERT OR IGNORE INTO logs
         (source_file, source_offset, hash, logline)
         VALUES (?, ?, ?, ?)""", records)
+
+        return len(records)
+
+    def append_line(
+            self,
+            records: typing.List[typing.Tuple[str, str]]
+    ) -> int:
+        """Append additional values to a log line."""
+
+        if not records:
+            return 0
+
+        self._insert("""UPDATE logs SET logline=(logline || ?)
+        WHERE hash=?""", records)
 
         return len(records)
 

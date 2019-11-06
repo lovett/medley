@@ -76,6 +76,7 @@ class Controller:
         )
 
         try:
+            # Is the file within the storage root?
             bucket_path = storage_root.joinpath(path)
             bucket_path.relative_to(storage_root)
         except ValueError:
@@ -84,7 +85,8 @@ class Controller:
         if not bucket_path.is_file():
             raise cherrypy.HTTPError(400, "Path is not a file")
 
-        cherrypy.engine.publish(channel, bucket_path)
+        storage_path = pathlib.Path(path)
+        cherrypy.engine.publish(channel, storage_path)
 
     @staticmethod
     def parse_log_date(val, default: typing.Any) -> typing.Any:
