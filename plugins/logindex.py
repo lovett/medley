@@ -546,16 +546,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def append_line(
             self,
             records: typing.List[typing.Tuple[str, str]]
-    ) -> int:
+    ) -> bool:
         """Append additional values to a log line."""
 
         if not records:
-            return 0
+            return False
 
-        self._insert("""UPDATE logs SET logline=(logline || ' ' || ?)
-        WHERE hash=?""", records)
+        sql = """UPDATE logs SET logline=(logline || ' ' || ?)
+        WHERE hash=?"""
 
-        return len(records)
+        queries = [(sql, values) for values in records]
+
+        return self._multi(queries)
 
     def count_lines(self, source: pathlib.Path) -> int:
         """Tally the number of stored records for the given source file."""
