@@ -179,7 +179,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     ).pop()
 
                 batch.append((
-                    str(log_path),
+                    str(storage_path),
                     offset,
                     record_hash,
                     combined_line
