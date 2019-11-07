@@ -5,7 +5,8 @@
         <p class="headline">
             <a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title }}</a>
             <time class="tag">{{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}</time>
-            <span class="tag">{{ story.subreddit }}</span>
+            <span class="tag">{{ story.domain }}</span>
+
             <span class="tag">{{ story.num_comments|pluralize('comment', 'comments') }}</span>
         </p>
     {% endfor %}
