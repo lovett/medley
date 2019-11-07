@@ -35,11 +35,13 @@
         {% endif %}
 
         {% block content %}
-            Favorites
+            {% if favorites %}
+                Favorites
 
-            {% for (favorite_url, alt_url) in favorites %}
-                <p><a href="{{ alt_url }}">{{ favorite_url }}</a></p>
-            {% endfor %}
+                {% for (favorite_url, alt_url) in favorites %}
+                    <p><a href="{{ alt_url }}">{{ favorite_url }}</a></p>
+                {% endfor %}
+            {% endif %}
         {% endblock %}
     </main>
 
