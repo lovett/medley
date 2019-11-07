@@ -552,7 +552,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not records:
             return 0
 
-        self._insert("""UPDATE logs SET logline=(logline || ?)
+        self._insert("""UPDATE logs SET logline=(logline || ' ' || ?)
         WHERE hash=?""", records)
 
         return len(records)

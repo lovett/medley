@@ -236,8 +236,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.combined_pair("latency", payload.get("latency")),
             self.combined_pair("end_time", payload.get("endTime")),
             self.combined_pair("version", payload.get("versionId")),
-            self.combined_pair("request_id", payload.get("requestId")),
-            self.combined_pair("trace_id", payload.get("traceId"))
+            self.combined_pair("request_id", payload.get("requestId"))
         )
 
         return " ".join(fields).strip()
