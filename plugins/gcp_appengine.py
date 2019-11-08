@@ -117,8 +117,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 record_hash = pairs["trace"].split("/")[0]
                 batch.append((
-                    self.pairs_to_extras(pairs),
-                    record_hash
+                    record_hash,
+                    self.pairs_to_extras(pairs)
                 ))
 
                 if len(batch) > batch_size:

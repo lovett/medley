@@ -547,15 +547,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             records: typing.List[typing.Tuple[str, str]]
     ) -> bool:
-        """Append additional values to a log line."""
+        """Append a string of additional key-value pairs to a logline."""
 
         if not records:
             return False
 
         sql = """UPDATE logs SET logline=(logline || ' ' || ?)
-        WHERE hash=?"""
+        WHERE hash=? AND INSTR(logline, ?) == 0"""
 
-        queries = [(sql, values) for values in records]
+        queries = [
+            (sql, (values[1], values[0], values[1]))
+            for values in records
+        ]
 
         return self._multi(queries)
 
