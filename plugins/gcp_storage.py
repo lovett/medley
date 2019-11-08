@@ -85,7 +85,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 if blob.size != destination_path.stat().st_size:
                     should_delete = False
 
-                if should_delete:
+                if should_delete and "request_log" in blob_path.parts:
                     lines_in_blob = 0
                     with open(destination_path) as handle:
                         for lines_in_blob, _ in enumerate(handle):
