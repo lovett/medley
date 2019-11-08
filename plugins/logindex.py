@@ -54,6 +54,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE INDEX IF NOT EXISTS index_datestamp
             ON logs (datestamp desc);
+        CREATE INDEX IF NOT EXISTS index_datestamp_yyyymmdd
+            ON logs(substr(datestamp, 0, 11));
         CREATE INDEX IF NOT EXISTS index_ip
             ON logs(ip);
         CREATE INDEX IF NOT EXISTS index_ip_datestamp
