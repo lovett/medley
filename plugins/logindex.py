@@ -137,6 +137,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe('logindex:query', self.query)
         self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
         self.bus.subscribe('logindex:count_visit_days', self.count_visit_days)
+        self.bus.subscribe('logindex:repair', self.repair)
 
     @staticmethod
     def get_root() -> str:
@@ -686,3 +687,38 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         return dict(record)
+
+    @decorators.log_runtime
+    def repair(self) -> None:
+        """Correct wrong or missing values."""
+
+        rows_with_multiple_extras = self._select_generator(
+            """SELECT rowid, logline
+            FROM logs
+            WHERE substr(datestamp, 0, 11) == date('now', '-1 day', 'utc')
+            AND ((LENGTH(logline) - LENGTH(REPLACE(logline, 'trace=', '')))
+            /
+            LENGTH('trace=')) > 1"""
+        )
+
+        row_counter = 0
+
+        for row in rows_with_multiple_extras:
+            new_logline = re.sub("trace=.*trace=", "trace=", row["logline"])
+
+            if new_logline == row["logline"]:
+                continue
+
+            self._execute(
+                "UPDATE logs SET logline=? WHERE rowid=?",
+                (new_logline, row["rowid"])
+            )
+
+            row_counter += 1
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "logindex",
+            "repair",
+            row_counter
+        )

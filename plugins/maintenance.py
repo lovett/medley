@@ -34,6 +34,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("applog:prune")
         cherrypy.engine.publish("bookmarks:prune")
         cherrypy.engine.publish("bookmarks:repair")
+        cherrypy.engine.publish("logindex:repair")
 
         pattern = self._path("*.sqlite")
         file_names = glob.glob(pattern, recursive=False)

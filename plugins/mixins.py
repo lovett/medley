@@ -64,7 +64,7 @@ class Sqlite:
             query: str,
             params: typing.Sequence[typing.Any] = ()
     ) -> bool:
-        """Execute a single query with no parameters."""
+        """Issue a single query."""
 
         result = True
         con = self._open()
