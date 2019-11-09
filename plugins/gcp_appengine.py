@@ -197,16 +197,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def combined_quoted(value: str = None) -> str:
         """Wrap a value in quotes unless it is empty."""
+
+        quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
+
         if value:
-            return f'"{value}"'
+            return f'"{quoteless_value}"'
 
         return "-"
 
     @staticmethod
     def combined_pair(key: str, value: str = None) -> str:
         """Pair a key and its quoted value or suppress both."""
+
+        quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
+
         if value:
-            return f'{key}="{value}"'
+            return f'{key}="{quoteless_value}"'
         return ""
 
     def json_to_combined(self, payload: typing.Any) -> str:
@@ -227,7 +233,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "-",
             "-",
             f'[{timestamp}]',
-            f'"{resource}"',
+            self.combined_quoted(resource),
             str(payload["status"]),
             payload.get("responseSize", "0"),
             self.combined_quoted(payload.get("referrer")),
