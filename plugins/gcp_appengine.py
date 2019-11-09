@@ -198,9 +198,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def combined_quoted(value: str = None) -> str:
         """Wrap a value in quotes unless it is empty."""
 
-        quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
-
         if value:
+            quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
             return f'"{quoteless_value}"'
 
         return "-"
@@ -209,9 +208,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def combined_pair(key: str, value: str = None) -> str:
         """Pair a key and its quoted value or suppress both."""
 
-        quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
-
         if value:
+            quoteless_value = value.replace('"', '[DOUBLEQUOTE]')
             return f'{key}="{quoteless_value}"'
         return ""
 
