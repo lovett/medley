@@ -8,16 +8,9 @@ import cherrypy
 class Plugin(cherrypy.process.plugins.Monitor):
     """A CherryPy plugin for deferring work until a later time.
 
-    Unlike all the other plugins, this is a subclass of Monitor rather
-    than SimplePlugin. For reasons unknown, the main() method of
-    SimplePlugin wasn't getting called under macOS in spite of working
-    fine under Linux, and in spite of also working fine under macOS in
-    the past.
-
-    The main difference between Monitor and SimplePlugin is the
-    presence of a callback argument in the constructor. This does
-    explicitly what was previously done implicitly with SimplePlugin
-    by having a main() method.
+    Unlike other plugins, this is a subclass of Monitor rather than
+    SimplePlugin. Monitor provides a way of doing something repeatedly
+    using its internal BackgroundTask instance.
 
     """
 
@@ -27,9 +20,9 @@ class Plugin(cherrypy.process.plugins.Monitor):
         cherrypy.process.plugins.Monitor.__init__(
             self,
             bus,
-            self.run,
+            self.run_scheduled_tasks,
             1,
-            'Scheduler'
+            'MedleyScheduler'
         )
 
     def start(self):
@@ -48,13 +41,12 @@ class Plugin(cherrypy.process.plugins.Monitor):
         self.scheduler = sched.scheduler(time.time, time.sleep)
         cherrypy.process.plugins.Monitor.start(self)
 
-    def run(self):
-        """Run scheduled tasks.
+    def run_scheduled_tasks(self):
+        """Process the scheduler queue.
 
-        This method is responsible for taking action on scheduled
-        events. The scheduler determines when the task should be
-        executed, and the add() method determines what should happen,
-        but without something to connect the two, nothing would happen.
+        The scheduler determines when the task should be
+        executed, and the add() method determines what should happen.
+        This is the final step where execution occurs.
 
         """
         self.scheduler.run(False)
