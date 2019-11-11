@@ -131,6 +131,12 @@ MEDLEY.visitors = (function () {
             return accumulator + '\n' + segment.trim();
         });
         document.getElementById('query').value = multilineQuery;
+        document.getElementById('search').setAttribute('disabled', true);
+
+        setTimeout(() => {
+            document.getElementById('visitors-form').submit();
+        }, 250);
+
     }
 
     /**
