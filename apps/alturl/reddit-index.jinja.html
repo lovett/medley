@@ -4,10 +4,19 @@
     {% for story in stories %}
         <p class="headline">
             <a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title }}</a>
-            <time class="tag">{{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}</time>
-            <span class="tag">{{ story.domain }}</span>
+            <time class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
+            </time>
+            <span class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                {{ story.domain }}
+            </span>
 
-            <span class="tag">{{ story.num_comments|pluralize('comment', 'comments') }}</span>
+            <span class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                {{ story.num_comments|pluralize('comment', 'comments') }}
+            </span>
         </p>
     {% endfor %}
 {% endblock %}

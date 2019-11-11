@@ -30,13 +30,18 @@
         {% endif %}
 
 
-        <span class="tag">
+        <span class="info">
+            <svg class="icon"><use xlink:href="#icon-info"></use></svg>
             {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
         </span>
 
-        <span class="tag">{{ story.domain }}</span>
+        <span class="info">
+            <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+            {{ story.domain }}
+        </span>
 
-        <span class="tag">
+        <span class="info">
+            <svg class="icon"><use xlink:href="#icon-info"></use></svg>
             {{ story.num_comments|pluralize("comment", "comments") }}
         </span>
 

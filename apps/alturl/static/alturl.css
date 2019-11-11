@@ -11,8 +11,12 @@ h2 {
 .comment summary {
     margin: 0 -1em;
     padding: 1em;
-    background-color: var(--grey);
+    background-color: var(--accent);
     font-size: .75em;
+}
+
+.comment summary:hover {
+    cursor: pointer;
 }
 
 .comment .body {
@@ -42,20 +46,20 @@ h2 {
 }
 
 .intro {
-    background-color: #DAF7DC;
+    background-color: var(--secondary);
     margin-bottom: 1em;
     margin: 0 -1em 2em -1em;
     padding: 1em;
     line-height: 1.4;
 }
 
-.tag {
-    font-size: .75em;
-    background-color: var(--tag-bg-color);
-    color: var(--tag-fg-color);
-    padding: .25em .5em;
-    display: inline-block;
+.info {
+    font-size: .85em;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 1em;
 }
+
 
 /* Small devices */
 @media (min-width: 576px) {
