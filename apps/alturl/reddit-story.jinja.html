@@ -6,8 +6,11 @@
     <details open class="comment">
         <summary>
             <time>{{ comment.created_utc|localtime|dateformat('YYYY-MM-DD h:MM A') }}</time>
-            by {{ comment.author }},
-            {{ comment.replies|length|pluralize('reply', 'replies') }}
+            by {{ comment.author }}
+
+            {%- if comment.replies -%} ,
+                {{ comment.replies|length|pluralize('reply', 'replies') }}
+            {%- endif -%}
         </summary>
         <div class="body">
             {{ comment.body_html|unescape }}
@@ -40,12 +43,19 @@
             {{ story.domain }}
         </span>
 
+        {% if story.num_comments > 0 %}
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-            {{ story.num_comments|pluralize("comment", "comments") }}
+                {{ story.num_comments|pluralize("comment", "comments") }}
         </span>
+        {% endif %}
 
     </header>
+
+    {% if not comments %}
+        <p>No comments.</p>
+    {% endif %}
+
     {% for comment in comments %}
         {{ commentBlock(comment) }}
     {% endfor %}
