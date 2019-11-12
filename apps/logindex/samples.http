@@ -1,14 +1,18 @@
 :today := (format-time-string "%Y-%m-%d")
 :yesterday := (format-time-string "%Y-%m-%d" (time-subtract (current-time) (days-to-time 1)))
 
+:year := "2019"
+:month := "11"
+:day := "08"
+:hour := "19"
+
+POST http://127.0.0.1:8085/logindex/bucket/gcp/appengine
+Content-Type: application/x-www-form-urlencoded
+path=appengine.googleapis.com/request_log/:year/:month/:day/:hour:00:00_:hour:59:59_S0.json
+#
+
 POST http://127.0.0.1:8085/logindex
 Content-Type: application/x-www-form-urlencoded
 
 start=:yesterday&end=:today
-#
-
-POST http://127.0.0.1:8085/logindex/bucket/gcp/appengine
-Content-Type: application/x-www-form-urlencoded
-
-path=appengine.googleapis.com/request_log/2019/11/01/21:00:00_21:59:59_S0.json
 #
