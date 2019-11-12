@@ -10,7 +10,7 @@ endpoint. The app will determine whether to relay the notification
 or drop it.
 
 For notifications from the Jenkins Notification plugin, all event
-types will be accepted but the completed event will be silently
+local_types will be accepted but the completed event will be silently
 dropped. The finalized event is favored instead to avoid double
 notifications.
 
@@ -24,7 +24,7 @@ post-processing them."
 
 from collections import defaultdict
 import cherrypy
-import aliases
+import local_types
 
 
 class Controller:
@@ -87,7 +87,7 @@ class Controller:
             group = "sysdown"
             title = f"Jenkins had trouble {action} {name}"
 
-        return aliases.Notification(
+        return local_types.Notification(
             group=group,
             badge="jenkins.svg",
             url=url,

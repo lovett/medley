@@ -1,7 +1,7 @@
 """Relay deployment notifications from Azure to notifier."""
 
 import cherrypy
-import aliases
+import local_types
 
 
 class Controller:
@@ -40,7 +40,7 @@ class Controller:
         else:
             title += " has uncertain status"
 
-        notification = aliases.Notification(
+        notification = local_types.Notification(
             group="azure",
             body=body,
             url=url,

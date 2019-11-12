@@ -4,7 +4,7 @@ import time
 import sched
 import typing
 import cherrypy
-import aliases
+import local_types
 
 
 class ScheduledEvent():
@@ -137,8 +137,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     @staticmethod
     def execute(
             name: str,
-            *args: aliases.Args,
-            **kwargs: aliases.Kwargs
+            *args: local_types.Args,
+            **kwargs: local_types.Kwargs
     ) -> None:
         """Run a previously-scheduled job."""
         cherrypy.engine.publish(name, *args, **kwargs)
@@ -146,8 +146,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     def add(
             self,
             delay_seconds: int,
-            *args: aliases.Args,
-            **kwargs: aliases.Kwargs
+            *args: local_types.Args,
+            **kwargs: local_types.Kwargs
     ) -> ScheduledEvent:
         """Schedule an event for future execution
 
@@ -175,8 +175,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     def persist(
             self,
             delay_seconds: int,
-            *args: aliases.Args,
-            **kwargs: aliases.Kwargs
+            *args: local_types.Args,
+            **kwargs: local_types.Kwargs
     ) -> ScheduledEvent:
         """Schedule an event and then cache it.
 

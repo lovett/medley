@@ -4,7 +4,7 @@ import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
-import aliases
+import local_types
 
 
 class Controller:
@@ -16,7 +16,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(*args) -> aliases.NegotiableView:
+    def GET(*args) -> local_types.NegotiableView:
         """Dispatch to a site-specific handler."""
 
         if not args:

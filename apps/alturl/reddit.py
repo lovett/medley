@@ -3,10 +3,10 @@
 import re
 import typing
 import cherrypy
-import aliases
+import local_types
 
 
-def view(url: str) -> aliases.NegotiableView:
+def view(url: str) -> local_types.NegotiableView:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     response = cherrypy.engine.publish(
@@ -30,7 +30,7 @@ def view(url: str) -> aliases.NegotiableView:
     return view_index(response)
 
 
-def unavailable() -> aliases.NegotiableView:
+def unavailable() -> local_types.NegotiableView:
     """Display a message saying the URL could not be retrieved."""
 
     applog_url = cherrypy.engine.publish(
@@ -49,7 +49,7 @@ def unavailable() -> aliases.NegotiableView:
     }
 
 
-def view_index(response: typing.Any) -> aliases.NegotiableView:
+def view_index(response: typing.Any) -> local_types.NegotiableView:
     """Render a list of story links."""
 
     stories = (
@@ -64,7 +64,7 @@ def view_index(response: typing.Any) -> aliases.NegotiableView:
     }
 
 
-def view_story(response: typing.Any) -> aliases.NegotiableView:
+def view_story(response: typing.Any) -> local_types.NegotiableView:
     """Render the comments of a single story."""
 
     listing = response[0].get("data", {})

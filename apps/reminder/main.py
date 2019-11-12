@@ -4,7 +4,7 @@ import random
 import string
 from urllib.parse import urlencode, parse_qs
 import cherrypy
-import aliases
+import local_types
 
 
 class Controller:
@@ -94,7 +94,7 @@ class Controller:
 
         # Send a notification immediately to confirm creation of the
         # reminder and make the time remaining visible.
-        start_notification = aliases.Notification(
+        start_notification = local_types.Notification(
             group="timer",
             title="Timer in progress",
             body=message,
@@ -108,7 +108,7 @@ class Controller:
         )
 
         # Send a second notification in the future.
-        finish_notification = aliases.Notification(
+        finish_notification = local_types.Notification(
             group="timer",
             title=message,
             body=comments,
@@ -174,7 +174,7 @@ class Controller:
 
         deleted_notification = wanted_events[0].argument[1]
 
-        cancel_notification = aliases.Notification(
+        cancel_notification = local_types.Notification(
             group="timer",
             title="Timer cancelled",
             body=deleted_notification.body,
