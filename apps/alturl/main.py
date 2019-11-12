@@ -19,29 +19,40 @@ class Controller:
     def GET(*args) -> local_types.NegotiableView:
         """Dispatch to a site-specific handler."""
 
+        bookmarks = cherrypy.engine.publish(
+            "registry:search",
+            "alturl:bookmark",
+            exact=True,
+        ).pop()
+
+        bookmark_pairs = ((
+            cherrypy.engine.publish("url:readable", bookmark["value"]).pop(),
+            cherrypy.engine.publish("url:alt", bookmark["value"]).pop()
+        ) for bookmark in bookmarks)
+
         if not args:
-            favorites = cherrypy.engine.publish(
-                "registry:search",
-                "alturl:favorite",
-                exact=True,
-                as_value_list=True
-            ).pop()
-
-            favorites_generator = (
-                (
-                    cherrypy.engine.publish("url:readable", favorite).pop(),
-                    cherrypy.engine.publish("url:alt", favorite).pop()
-                )
-                for favorite in favorites
-            )
-
             return {
                 "html": ("alturl.jinja.html", {
-                    "favorites": favorites_generator
+                    "bookmarks": bookmarks,
+                    "bookmark_pairs": bookmark_pairs
                 })
             }
 
         target_url = "/".join(args)
+
+        bookmark_id = next((
+            bookmark["rowid"]
+            for bookmark in bookmarks
+            if target_url == bookmark["value"]
+        ), None)
+
+        bookmark_delete_url = None
+        if bookmark_id:
+            bookmark_delete_url = cherrypy.engine.publish(
+                "url:internal",
+                "/registry",
+                {"uid": bookmark_id}
+            ).pop()
 
         parsed_url = urlparse(f"//{target_url}")
 
@@ -52,6 +63,8 @@ class Controller:
 
         if result:
             result["html"][1]["url"] = target_url
+            result["html"][1]["bookmark_delete_url"] = bookmark_delete_url
+            result["html"][1]["bookmarks"] = bookmarks
             return result
 
         return {

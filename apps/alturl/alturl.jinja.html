@@ -1,13 +1,18 @@
 {% extends "base.jinja.html" %}
-
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
     {{ macros.staticAsset('alturl', 'alturl.css') }}
 {% endblock %}
 
+
+{% block scripts %}
+    {{ macros.vueApp('nav.secondary', ('countdown', 'discardable-record', 'discard-button')) }}
+    {{ macros.staticAsset('alturl', 'alturl.js') }}
+{% endblock %}
+
 {% block page_body %}
-    {{ macros.svgSymbols("globe", "close", "arrow-left", "info", "link") }}
+    {{ macros.svgSymbols("globe", "close", "arrow-left", "info", "link", "bookmark", "delete") }}
     <header class="app-nav">
         <form method="post" action="{{ app_url }}">
             <div class="field">
@@ -35,11 +40,11 @@
         {% endif %}
 
         {% block content %}
-            {% if favorites %}
-                Favorites
+            {% if bookmarks %}
+                Bookmarked URLs
 
-                {% for (favorite_url, alt_url) in favorites %}
-                    <p><a href="{{ alt_url }}">{{ favorite_url }}</a></p>
+                {% for (bookmark_url, alt_url) in bookmark_pairs %}
+                    <p><a href="{{ alt_url }}">{{ bookmark_url }}</a></p>
                 {% endfor %}
             {% endif %}
         {% endblock %}
