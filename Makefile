@@ -321,8 +321,6 @@ favicon: dummy
 	convert $(FAVICON_DIR)/app-icon.png -geometry 16x16 temp-16.png
 	convert temp-16.png temp-32.png temp-48.png apps/shared/static/favicon/favicon.ico
 	rm temp-48.png temp-32.png temp-16.png
-	convert $(FAVICON_DIR)/app-icon.png -density 600 -geometry 76x76 $(FAVICON_DIR)/app-icon-76.png
-	convert $(FAVICON_DIR)/app-icon.png -geometry 144x144 $(FAVICON_DIR)/app-icon-144.png
 	convert $(FAVICON_DIR)/app-icon.png -geometry 180x180 $(FAVICON_DIR)/app-icon-180.png
 	cd $(FAVICON_DIR) && optipng -quiet -o 3 *.png
 

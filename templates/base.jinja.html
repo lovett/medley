@@ -15,19 +15,15 @@
 
         <meta
             name="theme-color"
-            content="#00A7E1"
+            content="#279AF1"
         />
 
         {{ macros.staticAsset('shared', 'css/medley.css') }}
 
         {% block stylesheets %}{% endblock %}
 
-        <link rel="apple-touch-icon" sizes="76x76" href="/shared/static/favicon/favicon-76.png"/>
         <link rel="apple-touch-icon" sizes="180x180" href="/shared/static/favicon/app-icon-180.png"/>
         <link rel="mask-icon" href="/shared/static/favicon/app-icon.svg" color="black">
-
-        <meta name="msapplication-TileColor" content="#4B88A2" />
-        <meta name="msapplication-TileImage" content="/shared/static/favicon/app-icon-144.png" />
 
         <meta name="medley-home" content="{{ '/' | internal_url }}" />
         <meta name="medley-startpage" content="{{ '/startpage' | internal_url }}" />
