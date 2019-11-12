@@ -1,5 +1,6 @@
 """Display a URL in an alternate format."""
 
+import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
@@ -44,7 +45,9 @@ class Controller:
 
         parsed_url = urlparse(f"//{target_url}")
 
-        if parsed_url.netloc.endswith("reddit.com"):
+        result: typing.Any = None
+
+        if parsed_url.netloc.lower().endswith("reddit.com"):
             result = apps.alturl.reddit.view(target_url)
 
         if result:
