@@ -4,6 +4,7 @@ import random
 import string
 from urllib.parse import urlencode, parse_qs
 import cherrypy
+import aliases
 
 
 class Controller:
@@ -93,13 +94,13 @@ class Controller:
 
         # Send a notification immediately to confirm creation of the
         # reminder and make the time remaining visible.
-        start_notification = {
-            "group": "timer",
-            "title": "Timer in progress",
-            "body": message,
-            "expiresAt": f"{total_minutes} minutes",
-            "localId": local_id
-        }
+        start_notification = aliases.Notification(
+            group="timer",
+            title="Timer in progress",
+            body=message,
+            localId=local_id,
+            expiresAt=f"{total_minutes} minutes"
+        )
 
         cherrypy.engine.publish(
             "notifier:send",
@@ -107,15 +108,13 @@ class Controller:
         )
 
         # Send a second notification in the future.
-        finish_notification = {
-            "group": "timer",
-            "title": message,
-            "body": comments,
-            "localId": local_id
-        }
-
-        if url:
-            finish_notification["url"] = url
+        finish_notification = aliases.Notification(
+            group="timer",
+            title=message,
+            body=comments,
+            localId=local_id,
+            url=url
+        )
 
         cherrypy.engine.publish(
             self.add_command,
@@ -175,13 +174,13 @@ class Controller:
 
         deleted_notification = wanted_events[0].argument[1]
 
-        cancel_notification = {
-            "group": "timer",
-            "title": "Timer cancelled",
-            "body": deleted_notification.get("body"),
-            "expiresAt": f"10 seconds",
-            "localId": deleted_notification.get("localId")
-        }
+        cancel_notification = aliases.Notification(
+            group="timer",
+            title="Timer cancelled",
+            body=deleted_notification.body,
+            localId=deleted_notification.localId,
+            expiresAt=f"10 seconds"
+        )
 
         cherrypy.engine.publish(
             "notifier:send",

@@ -1,6 +1,7 @@
 """Send messages to a Notifier instance."""
 
 import cherrypy
+import aliases
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -22,7 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("notifier:send", self.send)
 
     @staticmethod
-    def send(notification):
+    def send(notification: aliases.Notification) -> bool:
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
@@ -42,7 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.engine.publish(
             "urlfetch:post",
             config["notifier:url"],
-            notification,
+            notification._asdict(),
             auth=auth,
             as_json=True
         )

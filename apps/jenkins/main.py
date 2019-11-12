@@ -24,6 +24,7 @@ post-processing them."
 
 from collections import defaultdict
 import cherrypy
+import aliases
 
 
 class Controller:
@@ -45,7 +46,7 @@ class Controller:
 
         notification = self.build_notification(payload)
 
-        if notification.get("title"):
+        if notification.title:
             cherrypy.engine.publish(
                 "notifier:send",
                 notification
@@ -86,14 +87,14 @@ class Controller:
             group = "sysdown"
             title = f"Jenkins had trouble {action} {name}"
 
-        return {
-            "group": group,
-            "badge": "jenkins.svg",
-            "url": url,
-            "localId": f"jenkins.{payload['name']}",
-            "title": title,
-            "body": f"Build #{build_number}, {branch}"
-        }
+        return aliases.Notification(
+            group=group,
+            badge="jenkins.svg",
+            url=url,
+            localId=f"jenkins.{payload['name']}",
+            title=title,
+            body=f"Build #{build_number}, {branch}"
+        )
 
     @staticmethod
     def normalize_payload(raw_payload):

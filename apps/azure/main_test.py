@@ -66,12 +66,12 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
         self.assertEqual(
             "Deployment to azuretest is complete",
-            notification["title"]
+            notification.title
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification["url"]
+            notification.url
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -97,12 +97,12 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
         self.assertEqual(
             "Deployment to azuretest has failed",
-            notification["title"]
+            notification.title
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification["url"]
+            notification.url
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -130,12 +130,12 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
         self.assertEqual(
             "Deployment to azuretest has uncertain status",
-            notification["title"]
+            notification.title
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification["url"]
+            notification.url
         )
 
     @mock.patch("cherrypy.engine.publish")
