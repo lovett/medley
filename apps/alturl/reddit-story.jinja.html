@@ -32,7 +32,6 @@
             <p>{{ story.selftext|unescape }}</p>
         {% endif %}
 
-
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
             {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
@@ -49,7 +48,6 @@
                 {{ story.num_comments|pluralize("comment", "comments") }}
         </span>
         {% endif %}
-
     </header>
 
     {% if not comments %}
@@ -69,18 +67,17 @@
         </a>
     </div>
 
-    {% if "reddit.com" not in story.url %}
     <div>
         <a href="{{ story.url|anonymize }}" target="_blank">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-link"></use></svg>
             {{ story.domain }}
         </a>
     </div>
-    {% endif %}
+
     <div>
         <a href="{{ ("https://reddit.com" ~ story.permalink)|anonymize }}" target="_blank">
             <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            reddit.com
+              original
         </a>
     </div>
 {% endblock %}
