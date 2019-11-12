@@ -1,6 +1,7 @@
 """Work out an app URL from a controller instance."""
 
 import ipaddress
+import typing
 from urllib.parse import urlencode, urlparse
 import cherrypy
 
@@ -25,7 +26,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def internal_url(path=None, query=None, trailing_slash=False):
+    def internal_url(
+            path: typing.Optional[str] = None,
+            query: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            trailing_slash: bool = False
+    ) -> str:
         """Create an absolute internal URL.
 
         The URL hostname is sourced from two places. Most of the time,
@@ -104,7 +109,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return url
 
-    def alt_url(self, url: str):
+    def alt_url(self, url: str) -> str:
         """Convert an external URL to the equivalent in the alturl app."""
 
         if not url.startswith("http"):
@@ -117,7 +122,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def readable_url(url: str):
+    def readable_url(url: str) -> str:
         """Convert a URL to a form suitable for bare display."""
 
         readable_url = url.replace("https://", "")
@@ -125,7 +130,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         readable_url = readable_url.split('#', 1)[0]
         return readable_url
 
-    def paginate_newer_older(self, params, per_page=10, offset=0, total=0):
+    def paginate_newer_older(
+            self,
+            params: typing.Dict[str, typing.Any],
+            per_page: int = 10,
+            offset: int = 0,
+            total: int = 0
+    ) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
         """Determine the next-page and previous-page URLs for paginated
         records presented in reverse chronological order.
 
