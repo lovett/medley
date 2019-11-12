@@ -8,6 +8,12 @@
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
             </time>
+            {% if "r/" not in url %}
+            <span class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                r/{{ story.subreddit }}
+            </span>
+            {% endif %}
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.domain }}
