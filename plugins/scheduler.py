@@ -2,7 +2,62 @@
 
 import time
 import sched
+import typing
 import cherrypy
+import aliases
+
+
+class ScheduledEvent():
+    """A wrapper for the named tuple returned by the scheduler.
+
+    """
+
+    cache_prefix = "scheduler.event"
+
+    event: sched.Event
+
+    def __init__(self, event: sched.Event) -> None:
+        self.event = event
+
+    @property
+    def cache_key(self) -> str:
+        """Map an event to a string for use with the cache plugin.
+        """
+
+        return f"{self.cache_prefix}.{round(self.event.time, 3)}"
+
+    @property
+    def time_remaining(self) -> float:
+        """How much time is left until the event is due.
+
+        A float representing a number of fractional seconds."""
+
+        return self.event.time - time.time()
+
+    def persist(self) -> None:
+        """Add the event to the cache."""
+
+        values = {
+            "time": self.event.time,
+            "priority": self.event.priority,
+            "argument": self.event.argument,
+            "kwargs": self.event.kwargs
+        }
+
+        cherrypy.engine.publish(
+            "cache:set",
+            self.cache_key,
+            values,
+            self.time_remaining
+        )
+
+    def forget(self) -> None:
+        """Discard the cached record of a persisted event."""
+
+        cherrypy.engine.publish(
+            "cache:clear",
+            self.cache_key
+        )
 
 
 class Plugin(cherrypy.process.plugins.Monitor):
@@ -14,9 +69,9 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
     """
 
-    scheduler = None
+    scheduler: sched.scheduler
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.Monitor.__init__(
             self,
             bus,
@@ -25,7 +80,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
             'MedleyScheduler'
         )
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for and start running the
         scheduler.
 
@@ -41,7 +96,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
         self.scheduler = sched.scheduler(time.time, time.sleep)
         cherrypy.process.plugins.Monitor.start(self)
 
-    def run_scheduled_tasks(self):
+    def run_scheduled_tasks(self) -> None:
         """Process the scheduler queue.
 
         The scheduler determines when the task should be
@@ -51,7 +106,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
         """
         self.scheduler.run(False)
 
-    def revive(self):
+    def revive(self) -> None:
         """Add back any previously-scheduled jobs that are still valid.
 
         This is usually only called at server start.
@@ -80,11 +135,20 @@ class Plugin(cherrypy.process.plugins.Monitor):
             )
 
     @staticmethod
-    def execute(name, *args, **kwargs):
+    def execute(
+            name: str,
+            *args: aliases.Args,
+            **kwargs: aliases.Kwargs
+    ) -> None:
         """Run a previously-scheduled job."""
         cherrypy.engine.publish(name, *args, **kwargs)
 
-    def add(self, delay_seconds, *args, **kwargs):
+    def add(
+            self,
+            delay_seconds: int,
+            *args: aliases.Args,
+            **kwargs: aliases.Kwargs
+    ) -> ScheduledEvent:
         """Schedule an event for future execution
 
         args should be a plugin command and arguments it expects. When
@@ -108,7 +172,12 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
         return ScheduledEvent(event_tuple)
 
-    def persist(self, delay_seconds, *args, **kwargs):
+    def persist(
+            self,
+            delay_seconds: int,
+            *args: aliases.Args,
+            **kwargs: aliases.Kwargs
+    ) -> ScheduledEvent:
         """Schedule an event and then cache it.
 
         Cache storage makes it possible for events to last across
@@ -130,7 +199,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
         return event
 
-    def remove(self, event):
+    def remove(self, event: typing.Union[str, sched.Event]) -> bool:
         """Cancel a previously-scheduled event.
 
         Event can either be a string or an object.
@@ -152,7 +221,10 @@ class Plugin(cherrypy.process.plugins.Monitor):
         except ValueError:
             return False
 
-    def upcoming(self, event_filter=None):
+    def upcoming(
+            self,
+            event_filter: str = None
+    ) -> typing.List[sched.Event]:
         """List upcoming events in the order they will be run."""
 
         return [
@@ -160,56 +232,3 @@ class Plugin(cherrypy.process.plugins.Monitor):
             if event.argument[0] == event_filter
             or event_filter is None
         ]
-
-
-class ScheduledEvent():
-    """A wrapper for the named tuple returned by the scheduler.
-
-    """
-
-    cache_prefix = "scheduler.event"
-
-    event = ()
-
-    def __init__(self, event):
-        self.event = event
-
-    @property
-    def cache_key(self):
-        """Map an event to a string for use with the cache plugin.
-        """
-
-        return f"{self.cache_prefix}.{round(self.event.time, 3)}"
-
-    @property
-    def time_remaining(self):
-        """How much time is left until the event is due.
-
-        A float representing a number of fractional seconds."""
-
-        return self.event.time - time.time()
-
-    def persist(self):
-        """Add the event to the cache."""
-
-        values = {
-            "time": self.event.time,
-            "priority": self.event.priority,
-            "argument": self.event.argument,
-            "kwargs": self.event.kwargs
-        }
-
-        cherrypy.engine.publish(
-            "cache:set",
-            self.cache_key,
-            values,
-            self.time_remaining
-        )
-
-    def forget(self):
-        """Discard the cached record of a persisted event."""
-
-        cherrypy.engine.publish(
-            "cache:clear",
-            self.cache_key
-        )
