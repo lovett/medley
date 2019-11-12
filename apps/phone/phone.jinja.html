@@ -16,7 +16,14 @@
         <form method="get" action="/phone">
             <div class="field">
                 <label for="number">Number</label>
-                <input type="text" id="number" name="number" placeholder="enter a phone number or area code" value="{{ number }}"/>
+                <input
+                    type="search"
+                    id="number"
+                    name="number"
+                    placeholder="enter a phone number or area code"
+                    value="{{ number }}"
+                    autocapitalize="none"
+                />
             </div>
             <div class="field">
                 <button>

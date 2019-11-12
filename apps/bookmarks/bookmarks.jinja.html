@@ -16,7 +16,7 @@
         <form method="get" action="{{ app_url }}">
             <div class="field">
                 <label for="address">Keyword</label>
-                <input type="text" id="query" name="query" value="{{ query|default('', true)|e }}"/>
+                <input type="search" id="query" name="query" value="{{ query|default('', true)|e }}" autocapitalize="none" />
             </div>
             <div class="field">
                 <button>

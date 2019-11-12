@@ -7,7 +7,7 @@
         <form method="get" action="{{ app_url }}">
             <div class="field">
                 <label for="sources">Sources</label>
-                <input type="text" id="sources" name="sources" value="{{ sources|default('', true)|e }}"/>
+                <input type="search" id="sources" name="sources" value="{{ sources|default('', true)|e }}" autocapitalize="none" />
             </div>
             <div class="field">
                 <button>

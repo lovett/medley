@@ -37,12 +37,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_user_facing(apps.whois.main.Controller)
 
-    def test_default(self):
-        """Make a request with no arguments"""
-
-        response = self.request("/")
-        self.assertEqual(response.code, 200)
-
     @mock.patch("cherrypy.engine.publish")
     def test_invalid_address_hostname(self, publish_mock):
         """Request lookup of an invalid hostname"""

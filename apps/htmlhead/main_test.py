@@ -40,13 +40,6 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_user_facing(apps.htmlhead.main.Controller)
 
-    def test_default(self):
-        """The default view is a form to enter a URL."""
-
-        response = self.request("/")
-
-        self.assertEqual(response.code, 200)
-
     @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     @responses.activate

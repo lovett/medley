@@ -133,6 +133,10 @@ INPUT[type=reset] {
     border-color: var(--grey);
 }
 
+INPUT[type=search] {
+    -webkit-appearance: textfield;
+}
+
 MAIN {
     flex: 1;
     padding: 0 1em;
