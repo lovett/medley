@@ -1,3 +1,12 @@
+:root {
+    --visitors-active: green;
+    --visitors-nocontent: #fcebd3;
+    --visitors-notfound: #b8676d;
+    --visitors-gone: #e5e5e5;
+    --visitors-redirect-permanent: GhostWhite;
+    --visitors-moved: LightCyan;
+}
+
 .app-nav form {
     grid-template-columns: auto;
 }
@@ -11,38 +20,38 @@ input[type=range] {
 }
 
 .code-204 td {
-    background-color: #fcebd3;
+    background-color: var(--visitors-nocontent);
 }
 
 .code-404 td {
-    background-color: #b8676d;
-    color: white;
+    background-color: var(--visitors-notfound);
+    color: var(--white);
 }
 
 .code-404 a {
-    color: white;
+    color: var(--white);
 }
 
 .code-410 td {
-    background-color: #e5e5e5;
+    background-color: var(--visitors-gone);
 }
 
 .code-301 td {
-    background-color: GhostWhite;
+    background-color: var(--visitors-redirect-permanent);
 }
 
 .code-302 td {
-    background-color: LightCyan;
+    background-color: var(--visitors-moved);
 }
 
 .calc-delta.active .icon {
-    fill: green;
+    fill: var(--visitors-active);
 }
 
 .flag-icon {
     padding: .25em;
     margin-bottom: .25em;
-    box-shadow: 1px 2px 2px 0 rgba(50, 50, 50, 1);
+    box-shadow: 1px 2px 2px 0 var(--black);
 }
 
 .delete {
@@ -54,7 +63,7 @@ input[type=range] {
 }
 
 .expandable td {
-    background-color: #efefef;
+    background-color: var(--secondary);
     padding: .5em 1em;
 }
 
@@ -84,7 +93,7 @@ input[type=range] {
 
 #matches td {
     border-color: transparent;
-    border-bottom-color: #eee;
+    border-bottom-color: var(--offwhite);
 }
 
 .next-actions {
@@ -98,13 +107,9 @@ input[type=range] {
     padding: 0 1em;
 }
 
-.next-actions svg {
-    fill: #666;
-}
-
 ul.querystring {
-    background-color: rgba(0, 0, 0, .05);
-    border-left: .3em solid rgba(0, 0, 0, .1);
+    background-color: var(--offwhite);
+    border-left: .3em solid var(--accent);
     margin: 0;
     padding: .3em;
     list-style-type: none;

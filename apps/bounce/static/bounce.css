@@ -1,7 +1,7 @@
 .shortcut-link span {
     display: inline-block;
-    background-color: DarkCyan;
-    color: #fff;
+    background-color: var(--accent);
+    color: var(--white);
     vertical-align: middle;
     font-weight: bold;
     text-decoration: none;

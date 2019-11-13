@@ -14,6 +14,7 @@ DD {
     font-size: .85em;
     font-weight: normal;
     display: block;
+    margin-top: .5em;
 }
 
 .item {
@@ -21,15 +22,8 @@ DD {
     padding: .5em 1em;
 }
 
-.item A {
-    padding: .25em 0;
-    display: block;
-}
-
-.item A:focus {
-    color: inherit;
-    outline: 0;
-    background-color: var(--focus-bg-color);
+.item A.focus-candidate {
+    margin-left: -1em;
 }
 
 .name {

@@ -1,6 +1,6 @@
 .entry {
     margin-bottom: 1em;
-    border: 1px solid var(--bg-color-secondary);
+    border: 1px solid var(--accent);
     border-left-width: 1em;
 }
 
@@ -33,17 +33,6 @@
 
 .roots li {
     line-height: 3;
-}
-
-.roots a {
-    outline: 0;
-    padding: .25em;
-    text-decoration: none;
-}
-
-.roots a:focus {
-    background-color: #369;
-    color: white;
 }
 
 /* Small devices */

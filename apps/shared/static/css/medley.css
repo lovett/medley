@@ -1,17 +1,14 @@
 :root {
-    --black: #00171F;
+    --black: #323031;
+    --primary: #279AF1;
+    --secondary: #DBD9DB;
+    --accent: #B0DAF9;
+    --alert: #C42333;
     --white: #fff;
-    --bg-color-primary: #00A7E1;
-    --bg-color-secondary: #003459;
-    --link: #007EA7;
-    --icon-active: #73CFEE;
+    --candidate: #5B8C5A;
     --grey: #D1D1D1;
-    --discard-bg-color: FireBrick;
-    --highlight-bg-color: #2F4858;
-    --highlight-fg-color: white;
-    --focus-bg-color: #f9ab55;
-    --tag-bg-color: #00171F;
-    --tag-fg-color: white;
+    --offwhite: #f5f5f5;
+    --green: #87D68D;
 }
 
 [hidden] {
@@ -19,14 +16,9 @@
 }
 
 A {
-    color: var(--link);
+    color: var(--primary);
     text-decoration: none;
 }
-
-A:hover .icon {
-    fill: var(--icon-active);
-}
-
 
 HTML {
     height: 100%;
@@ -39,13 +31,14 @@ BODY {
     flex-direction: column;
     margin: 0;
     font-size: 16px;
+    background-color: var(--offwhite);
 }
 
 BUTTON, INPUT[type=reset] {
     font-family: inherit;
     font-size: 1em;
-    border: 1px solid var(--bg-color-primary);
-    background-color: var(--bg-color-primary);
+    border: 1px solid var(--primary);
+    background-color: var(--primary);
     color: var(--white);
     padding: .5em 1em;
     height: 2.25em;
@@ -62,9 +55,9 @@ BUTTON:hover {
 }
 
 BUTTON[disabled] {
-    background-color: #ccc;
-    border: #efefef;
-    color: #efefef;
+    background-color: var(--grey);
+    border: var(--grey);
+    color: var(--grey);
 }
 
 BUTTON .icon {
@@ -135,6 +128,8 @@ INPUT[type=reset] {
 
 INPUT[type=search] {
     -webkit-appearance: textfield;
+    -webkit-margin-before: 0;
+    -webkit-margin-after: 0;
 }
 
 MAIN {
@@ -145,15 +140,25 @@ MAIN {
 NAV.secondary {
     display: flex;
     flex-flow: row wrap;
+    align-items: center;
     justify-content: flex-start;
     padding: 0 1em 1em 1em;
 }
 
 NAV.secondary > DIV  {
-    display: flex;
-    align-items: center;
     margin-right: 2em;
 }
+
+NAV.secondary > DIV A {
+    display: inline-flex;
+    justify-content: center;
+    color: currentColor;
+}
+
+NAV.secondary > DIV A:hover .icon {
+    fill: var(--primary);
+}
+
 
 NAV.secondary .field {
     font-size: 0.85em;
@@ -197,7 +202,7 @@ TABLE CAPTION {
 }
 
 TABLE TR {
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid var(--black);
 }
 
 TABLE TR:last-child {
@@ -205,7 +210,7 @@ TABLE TR:last-child {
 }
 
 TABLE TH {
-    background-color: #333;
+    background-color: var(--black);
     font-weight: bold;
     padding: .75em;
     white-space: nowrap;
@@ -241,14 +246,13 @@ TEXTAREA {
 
 
 #page-header {
-    background: var(--bg-color-primary);
-    background: linear-gradient(45deg, var(--bg-color-primary) 0%, var(--black) 100%);
+    background: linear-gradient(45deg, var(--primary) 0%, var(--black) 100%);
     color: var(--white);
     padding: .5em 1em;
     display: flex;
     flex-flow: row;
     justify-content: space-between;
-    box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 2px 2px 0px var(--black);
     margin-bottom: 1em;
 }
 
@@ -299,6 +303,7 @@ TEXTAREA {
 }
 
 .app-nav .options input[type=text],
+.app-nav .options input[type=search],
 .app-nav .options input[type=password] {
     width: auto;
 }
@@ -319,8 +324,8 @@ TEXTAREA {
 }
 
 .bookmarklet-container A {
-    background-color: #4C699A;
-    color: var(--white);
+    background-color: var(--accent);
+    color: var(--black);
     padding: .5em 1.5em;
     border-radius: .25em;
     font-size: .75em;
@@ -334,12 +339,12 @@ TEXTAREA {
 }
 
 .error {
-    background-color: #B03C25;
-    color: white;
+    background-color: var(--alert);
+    color: var(--white);
 }
 
 .notice {
-    background-color: #ffffcc;
+    background-color: var(--accent);
 }
 
 .field-group {
@@ -368,6 +373,7 @@ TEXTAREA {
 }
 
 .field INPUT[type=text],
+.field INPUT[type=search],
 .field INPUT[type=password],
 .field INPUT[type=number],
 .field TEXTAREA {
@@ -399,9 +405,9 @@ TEXTAREA {
     margin-top: .5em;
 }
 
-.focus-candidate {
-    background-color: var(--highlight-bg-color);
-    color: var(--highlight-fg-color) !important;
+.focus-candidate:before {
+    content: '✿ ';
+    color: var(--candidate);
 }
 
 .half-column {
@@ -505,7 +511,7 @@ TEXTAREA {
 }
 
 .success {
-    background-color: #87D68D;
+    background-color: var(--green);
 }
 
 .svg-defs {
@@ -614,20 +620,6 @@ TABLE.natural-width {
     }
 }
 
-.search-form {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    grid-gap: 1em;
-    align-items: stretch;
-    justify-items: stretch;
-    align-content: stretch;
-}
-
-.search-form button {
-    text-align: center;
-    padding: 0;
-}
-
 /* Small devices */
 @media (min-width: 576px) {
 }
@@ -687,7 +679,7 @@ TABLE.natural-width {
 
 .clipboard-button a:hover {
     fill: white;
-    background-color: MediumSeaGreen;
+    background-color: var(--green);
 }
 
 .clipboard-button a.clicked {
@@ -721,7 +713,7 @@ TABLE.natural-width {
 }
 
 .discard-button a:hover {
-    background-color: var(--discard-bg-color);
+    background-color: var(--alert);
     fill: var(--white);
 }
 

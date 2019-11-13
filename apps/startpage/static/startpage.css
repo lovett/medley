@@ -1,3 +1,7 @@
+BODY {
+    background-color: var(--white);
+}
+
 section {
     column-break-inside: avoid;
     page-break-inside: avoid;
@@ -11,7 +15,7 @@ section {
 }
 
 section:last-of-type {
-    background-color: #eee;
+    background-color: var(--secondary);
     margin-bottom: 0;
     padding: .5em;
     box-sizing: border-box;
@@ -26,19 +30,15 @@ section:last-of-type li:last-of-type {
 }
 
 section a {
-    color: #FF4500;
-}
-
-section a.focus-candidate {
     padding: .25em;
+    color: var(--alert);
 }
 
 section a:focus {
     outline: 0;
-    background-color: var(--focus-bg-color);
-    color: white;
+    background-color: var(--primary);
+    color: var(--white);
     border-bottom-color: transparent;
-    padding: .25em;
 }
 
 section h1 {
@@ -76,7 +76,7 @@ li.group .all {
 
 li.group:hover .all {
     visibility: visible;
-    color: green;
+    color: var(--green);
 }
 
 #startpage-edit TEXTAREA {

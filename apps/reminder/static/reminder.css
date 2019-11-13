@@ -1,5 +1,5 @@
 #upcoming {
-    background-color: #ccc;
+    background-color: var(--secondary);
     margin: 0 -1em;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .template .summary:focus {
-    background-color: var(--focus-bg-color);
+    background-color: var(--secondary);
     color: currentColor;
 }
 

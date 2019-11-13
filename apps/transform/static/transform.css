@@ -6,8 +6,7 @@ MAIN {
 
 #transform-result {
     flex-grow: 1;
-    background-color: var(--secondary-bg-color);
-    color: #fff;
+    background-color: var(--secondary);
     margin: 1em -1em 0;
     padding: 1em;
 }

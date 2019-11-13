@@ -23,7 +23,7 @@
 }
 
 .capture .options {
-    background-color: #fff;
+    background-color: var(--offwhite);
     float: right;
 }
 

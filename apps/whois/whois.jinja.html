@@ -16,10 +16,16 @@
     {{ macros.svgSymbols("binoculars", "search", "close") }}
 
     <header class="app-nav">
-        <form class="search-form" method="get" action="/whois">
+        <form id="search-form" method="get" action="/whois">
             <div class="field">
                 <label for="address">IP or host</label>
-                <input type="search" id="address" name="address" value="{{ address }}" autocapitalize="none" />
+                <input
+                    type="search"
+                    id="address"
+                    name="address"
+                    value="{{ address }}"
+                    autocapitalize="none"
+                />
             </div>
             <div class="field">
                 <button>
