@@ -7,6 +7,8 @@ import cherrypy
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for managing an in-memory cache."""
 
+    cache: typing.Dict[str, typing.Any]
+
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.cache = {}
@@ -23,22 +25,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("memorize:etag", self.etag)
         self.bus.subscribe("memorize:check_etag", self.check_etag)
 
-    def get(self, key, default=None) -> typing.Tuple[bool, str]:
+    def get(
+            self,
+            key: str,
+            default: typing.Optional[str] = None
+    ) -> typing.Tuple[bool, str]:
         """Retrieve a value from the cache."""
 
-        cache_hit = key in self.cache
-        cache_value = self.cache.get(key, default)
-        return (cache_hit, cache_value)
+        return (
+            key in self.cache,
+            self.cache.get(key, default)
+        )
 
-    def set(self, key, value) -> None:
+    def set(self, key: str, value: typing.Any) -> None:
         """Store a value in the cache."""
         self.cache[key] = value
 
-    def clear(self, key) -> None:
+    def clear(self, key: str) -> None:
         """Remove a value from the cache."""
         self.cache.pop(key, None)
 
-    def etag(self, template, value) -> None:
+    def etag(self, template: str, value: str) -> None:
         """Store an etag hash for a template.
 
         This is just like calling set(), except it includes an
@@ -48,7 +55,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.set(f"etag:{template}", value)
 
-    def check_etag(self, identifier) -> bool:
+    def check_etag(self, identifier: str) -> bool:
         """Decide whether an etag hash is valid.
 
         The hash being checked is taken out of the request headers
@@ -61,6 +68,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not wanted_value:
             return False
 
-        _, cache_value = self.get(f"etag:{identifier}")
+        cache_hit, cache_value = self.get(f"etag:{identifier}")
 
-        return cache_value == wanted_value
+        if not cache_hit:
+            return False
+
+        if cache_value != wanted_value:
+            return False
+
+        return True
