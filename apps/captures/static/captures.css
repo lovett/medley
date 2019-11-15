@@ -12,9 +12,11 @@
     padding: .5em;
     display: flex;
     justify-content: space-between;
+    background-color: var(--secondary);
+
 }
 
-.capture header {
+.capture div header {
     position: relative;
     font-style: italic;
     text-transform: uppercase;

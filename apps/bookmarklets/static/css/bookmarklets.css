@@ -5,6 +5,15 @@ main {
     align-items: center;
 }
 
+.bookmarklet-container A {
+    text-decoration: none;
+    background-color: var(--primary);
+    color: var(--white);
+    padding: .5em 1.5em;
+    border-radius: .25em;
+    text-align: center;
+}
+
 /* Small devices */
 @media (min-width: 576px) {
 }

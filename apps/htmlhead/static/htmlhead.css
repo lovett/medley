@@ -15,7 +15,7 @@ DL {
 }
 
 DT {
-    color: green;
+    color: var(--success);
 }
 
 DD {

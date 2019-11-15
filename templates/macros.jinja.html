@@ -28,7 +28,7 @@ instantiates a root Vue instance which renders each component. #}
 This is the master list of all available symbols. Only the ones specified
 in the argument list are returned.  #}
 {% macro svgSymbols() %}
-    <svg class="svg-defs" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <svg hidden version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
             {% if "download" in varargs %}
                 <symbol id="icon-download" viewBox="0 0 20 20">

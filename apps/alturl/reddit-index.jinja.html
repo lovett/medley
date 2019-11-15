@@ -2,8 +2,8 @@
 
 {% block content %}
     {% for story in stories %}
-        <p class="headline">
-            <a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title }}</a>
+        <div class="headline">
+            <h2 class="title"><a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title|safe }}</a></h2>
             <time class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
@@ -23,7 +23,7 @@
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.num_comments|pluralize('comment', 'comments') }}
             </span>
-        </p>
+        </div>
     {% endfor %}
 {% endblock %}
 

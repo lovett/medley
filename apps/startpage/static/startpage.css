@@ -39,6 +39,7 @@ section a:focus {
     background-color: var(--primary);
     color: var(--white);
     border-bottom-color: transparent;
+    text-decoration: none;
 }
 
 section h1 {
@@ -76,7 +77,7 @@ li.group .all {
 
 li.group:hover .all {
     visibility: visible;
-    color: var(--green);
+    color: var(--primary);
 }
 
 #startpage-edit TEXTAREA {

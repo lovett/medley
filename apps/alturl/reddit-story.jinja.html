@@ -26,16 +26,16 @@
 
 {% block content %}
     <header class="intro">
-        <h2>{{ story.title }}</h2>
+        <h2 class="title">{{ story.title|safe }}</h2>
 
         {% if story.selftext %}
             <p>{{ story.selftext|unescape }}</p>
         {% endif %}
 
-        <span class="info">
+        <time class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
             {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
-        </span>
+        </time>
 
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>

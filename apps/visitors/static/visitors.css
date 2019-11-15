@@ -1,5 +1,4 @@
 :root {
-    --visitors-active: green;
     --visitors-nocontent: #fcebd3;
     --visitors-notfound: #b8676d;
     --visitors-gone: #e5e5e5;
@@ -45,7 +44,7 @@ input[type=range] {
 }
 
 .calc-delta.active .icon {
-    fill: var(--visitors-active);
+    fill: var(--success);
 }
 
 .flag-icon {

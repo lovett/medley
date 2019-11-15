@@ -1,5 +1,5 @@
 :root {
-    --aluturl-code: #FDF6E8;
+    --alturl-code: #FDF6E8;
 }
 
 h2 {
@@ -10,7 +10,6 @@ h2 {
 
 code {
     display: inline-block;
-    padding: 1em;
     font-size: .85em;
     line-height: 1.3;
     background-color: var(--alturl-code);
@@ -24,7 +23,7 @@ code {
 .comment summary {
     margin: 0 -1em;
     padding: 1em;
-    background-color: var(--accent);
+    background-color: var(--tertiary);
     font-size: .75em;
 }
 
@@ -37,7 +36,7 @@ code {
 }
 
 .comment p {
-    line-height: 1.3;
+    line-height: 1.4;
     margin: 0 0 .5em 0;
 }
 
@@ -50,7 +49,7 @@ code {
 }
 
 .headline {
-    padding-bottom: .5em;
+    padding-bottom: 1.5em;
 }
 
 .headline > a {
@@ -71,6 +70,10 @@ code {
     display: inline-flex;
     align-items: center;
     margin-right: 1em;
+}
+
+.title {
+    line-height: 1.5;
 }
 
 .unbookmark > * {
