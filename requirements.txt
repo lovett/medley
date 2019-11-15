@@ -1,11 +1,11 @@
 CherryPy==18.4.0
 Jinja2==2.10.3
 geoip2==2.9.0
-google-cloud-storage==1.22.0
+google-cloud-storage==1.23.0
 httplib2==0.14.0
 msgpack==0.6.2
 pendulum==2.0.5
-pyparsing==2.4.4
+pyparsing==2.4.5
 pytz==2019.3
 pytzdata==2019.3
 requests==2.22.0
