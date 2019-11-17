@@ -8,16 +8,24 @@
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
             </time>
-            {% if "r/" not in url %}
+
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                r/{{ story.subreddit }}
+                <a target="_blank" rel="noopeneer noreferrer" href="{{ story.permalink|anonymize }}">
+                    {% if "r/" not in url %}
+                        r/{{ story.subreddit }}
+                    {% else %}
+                    original
+                    {% endif %}
+                </a>
+            </span>
+
+            {% if "self." not in story.domain %}
+            <span class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">{{ story.domain }}</a>
             </span>
             {% endif %}
-            <span class="info">
-                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                {{ story.domain }}
-            </span>
 
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>

@@ -39,7 +39,14 @@
 
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-            {{ story.domain }}
+            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">{{ story.domain }}</a>
+        </span>
+
+        <span class="info">
+            <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.permalink|anonymize }}">
+                r/{{ story.subreddit }}
+            </a>
         </span>
 
         {% if story.num_comments > 0 %}
@@ -64,20 +71,6 @@
         <a href="{{ subreddit_alturl }}">
             <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
             r/{{ story.subreddit}}
-        </a>
-    </div>
-
-    <div>
-        <a href="{{ story.url|anonymize }}" target="_blank">
-            <svg class="icon"><use xlink:href="#icon-link"></use></svg>
-            {{ story.domain }}
-        </a>
-    </div>
-
-    <div>
-        <a href="{{ ("https://reddit.com" ~ story.permalink)|anonymize }}" target="_blank">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-              original
         </a>
     </div>
 {% endblock %}
