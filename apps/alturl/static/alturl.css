@@ -17,7 +17,15 @@ code {
 }
 
 .comment {
-    margin-bottom: 1em;
+}
+
+.comment a {
+    word-break: break-all;
+}
+
+.comment h1, .comment h2, .comment h3, .comment h4, .comment h5, .comment h6 {
+    font-size: 1.1em;
+    margin: 1.5em 0 0 0;
 }
 
 .comment summary {
@@ -29,6 +37,15 @@ code {
 
 .comment summary:hover {
     cursor: pointer;
+}
+
+.comment ul {
+    margin-top: 0.5em;
+    padding-left: 1.25em;
+}
+
+.comment ul li {
+    margin-bottom: .5em;
 }
 
 .comment .body {
@@ -43,9 +60,15 @@ code {
 .comment blockquote {
     border-left: .25em solid var(--grey);
     font-style: italic;
-    padding-left: 1em;
+    padding-left: 0.5em;
     font-family: monospace;
-    margin-left: 0.5em;
+    margin: 1.5em 0;
+    font-size: .85em;
+    line-height: 1.2;
+}
+
+.comment blockquote p {
+    line-height: inherit;
 }
 
 .headline {
@@ -73,7 +96,7 @@ code {
 }
 
 .title {
-    line-height: 1.5;
+    margin-bottom: .5em;
 }
 
 .unbookmark > * {
@@ -92,6 +115,10 @@ code {
 
 /* Large devices */
 @media (min-width: 992px) {
+    .comment blockquote {
+        font-size: 1em;
+    }
+
     .comment .comment {
         margin-left: 1em;
     }
