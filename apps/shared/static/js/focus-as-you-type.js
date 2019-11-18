@@ -60,6 +60,10 @@ MEDLEY.focusAsYouType = (function () {
     // Chrome won't send keypress events for non-printable
     // keys. Handle them on keyup instead.
     function onKeyUp(e) {
+        if (e.which === 13) { // enter key
+            return;
+        }
+
         if (e.which === 27) { // escape key
             clearBuffer();
             return;
@@ -80,6 +84,11 @@ MEDLEY.focusAsYouType = (function () {
 
         // Take no action when the control or alt keys are being pressed.
         if (e.ctrlKey || e.altKey) {
+            return;
+        }
+
+        // Take no action when the enter is is being pressed.
+        if (e.which === 13) {
             return;
         }
 
