@@ -62,7 +62,11 @@ BUTTON:hover {
 BUTTON[disabled] {
     background-color: var(--grey);
     border: var(--grey);
-    color: var(--grey);
+    color: var(--black);
+}
+
+BUTTON[disabled] .icon {
+    fill: var(--black);
 }
 
 BUTTON .icon {
