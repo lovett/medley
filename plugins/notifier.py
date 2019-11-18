@@ -1,5 +1,6 @@
 """Send messages to a Notifier instance."""
 
+import typing
 import cherrypy
 import local_types
 
@@ -21,6 +22,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the notifier prefix.
         """
         self.bus.subscribe("notifier:send", self.send)
+        self.bus.subscribe("notifier:clear", self.clear)
 
     @staticmethod
     def send(notification: local_types.Notification) -> bool:
@@ -44,6 +46,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "urlfetch:post",
             config["notifier:url"],
             notification._asdict(),
+            auth=auth,
+            as_json=True
+        )
+
+        return True
+
+    @staticmethod
+    def clear(local_id: typing.Optional[str] = None) -> bool:
+        """Send a retraction to Notifier."""
+
+        config = cherrypy.engine.publish(
+            "registry:search",
+            "notifier:*",
+            as_dict=True
+        ).pop()
+
+        if not config:
+            return False
+
+        auth = (
+            config["notifier:username"],
+            config["notifier:password"],
+        )
+
+        cherrypy.engine.publish(
+            "urlfetch:post",
+            f"{config['notifier:url']}/clear",
+            {"localId": local_id},
             auth=auth,
             as_json=True
         )

@@ -120,7 +120,7 @@ class Controller:
             self.add_command,
             total_minutes * 60,
             "notifier:send",
-            finish_notification
+            finish_notification._asdict()
         )
 
         if remember == 1:
@@ -160,7 +160,7 @@ class Controller:
         ]
 
         if not wanted_events:
-            cherrypy.response.status = 400
+            cherrypy.response.status = 404
             return
 
         result = cherrypy.engine.publish(
@@ -174,17 +174,12 @@ class Controller:
 
         deleted_notification = wanted_events[0].argument[1]
 
-        cancel_notification = local_types.Notification(
-            group="timer",
-            title="Timer cancelled",
-            body=deleted_notification.body,
-            localId=deleted_notification.localId,
-            expiresAt=f"10 seconds"
-        )
+        local_id = deleted_notification.get("localId")
 
-        cherrypy.engine.publish(
-            "notifier:send",
-            cancel_notification
-        )
+        if local_id:
+            cherrypy.engine.publish(
+                "notifier:clear",
+                deleted_notification.get("localId")
+            )
 
         cherrypy.response.status = 204

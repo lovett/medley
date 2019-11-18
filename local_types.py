@@ -12,9 +12,9 @@ Kwargs = typing.Dict[str, typing.Any]
 
 class Notification(typing.NamedTuple):
     """Named tuple for a message payload to send to a notifier instance."""
-    group: str
     title: str
     body: str
+    group: typing.Optional[str] = None
     badge: typing.Optional[str] = None
     localId: typing.Optional[str] = None
     expiresAt: typing.Optional[str] = None
