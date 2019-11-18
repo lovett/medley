@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("globe") }}
     <header class="app-nav">
         <button
             data-limit="{{ limit }}"
@@ -20,6 +21,7 @@
 
     <nav class="secondary">
         <div>
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
             <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
         </div>
     </nav>
