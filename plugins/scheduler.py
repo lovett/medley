@@ -128,13 +128,6 @@ class Plugin(cherrypy.process.plugins.Monitor):
         )
 
         for cached_event in cached_events:
-            # Workaround for named tuple serialization
-            if cached_event["argument"][0] == "notifier:send":
-                notification_dict = cached_event["argument"][1]
-                cached_event["argument"][1] = local_types.Notification(
-                    **notification_dict
-                )
-
             self.add(
                 cached_event["time"] - time.time(),
                 *cached_event["argument"],

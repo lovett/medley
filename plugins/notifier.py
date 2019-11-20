@@ -25,7 +25,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("notifier:clear", self.clear)
 
     @staticmethod
-    def send(notification: local_types.Notification) -> bool:
+    def send(notification: typing.Union[
+            local_types.Notification, typing.OrderedDict
+    ]) -> bool:
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
@@ -42,10 +44,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config["notifier:password"],
         )
 
+        if isinstance(notification, local_types.Notification):
+            notification = notification._asdict()
+
         cherrypy.engine.publish(
             "urlfetch:post",
             config["notifier:url"],
-            notification._asdict(),
+            notification,
             auth=auth,
             as_json=True
         )

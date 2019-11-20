@@ -107,20 +107,21 @@ class Controller:
             start_notification
         )
 
-        # Send a second notification in the future.
-        finish_notification = local_types.Notification(
+        # Send a second notification in the future. This gets turned
+        # into a dict so that the scheduler can properly serialize it.
+        finish_notification_dict = local_types.Notification(
             group="timer",
             title=message,
             body=comments,
             localId=local_id,
             url=url
-        )
+        )._asdict()
 
         cherrypy.engine.publish(
             self.add_command,
             total_minutes * 60,
             "notifier:send",
-            finish_notification._asdict()
+            finish_notification_dict
         )
 
         if remember == 1:
@@ -169,7 +170,7 @@ class Controller:
         ).pop()
 
         if result is False:
-            cherrypy.response.status = 500
+            cherrypy.response.status = 404
             return
 
         deleted_notification = wanted_events[0].argument[1]
@@ -179,7 +180,7 @@ class Controller:
         if local_id:
             cherrypy.engine.publish(
                 "notifier:clear",
-                deleted_notification.get("localId")
+                local_id
             )
 
         cherrypy.response.status = 204
