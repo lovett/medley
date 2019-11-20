@@ -2,6 +2,7 @@ Vue.component('discardable-record', {
 
     created: function () {
         this.$on('discard', this.discard);
+        this.$on('hide', this.hide);
     },
 
     data: function() {
@@ -22,6 +23,11 @@ Vue.component('discardable-record', {
             }).catch(err => {
                 this.$el.hidden = false;
             });
+        },
+
+        hide: function () {
+            this.$el.hidden = true;
+            this.$parent.$emit('discarded');
         }
     },
 
