@@ -78,12 +78,13 @@ class Controller:
     def GET(self, *_args, **kwargs):
         """Display all the URLs in a group."""
 
-        host = None
-        bounces = None
-        name = None
-        group = kwargs.get('group')
-        url = kwargs.get('u')
-        registry_url = None
+        host = ''
+        bounces = ''
+        name = ''
+        group = kwargs.get('group', '')
+        url = kwargs.get('u', '')
+        invalid = kwargs.get('invalid')
+        registry_url = ''
 
         if url:
             host = self.url_to_host(url)
@@ -113,7 +114,7 @@ class Controller:
             ).pop()
 
         departing_from = None
-        if host and bounces:
+        if bounces:
             # Match the current URL to a known site.
             for bounce in bounces:
                 if bounce["value"] == host:
@@ -123,43 +124,46 @@ class Controller:
             # If the departing site can't be determined, the
             # list of bounces isn't viable.
             if not departing_from:
-                bounces = ()
+                bounces = []
 
             # Re-scope the current URL to each known destination.
-            bounces = {
-                bounce["rowid"]: (
-                    url.replace(host, bounce["value"]),
-                    bounce["key"].split(":").pop()
-                )
+            bounces = [
+                (url.replace(host, bounce["value"]),
+                 bounce["key"].split(":").pop())
                 for bounce in bounces
-            }
+            ]
 
         return {
             "html": ("bounce.jinja.html", {
                 "departing_from": departing_from,
-                "departing_url": url,
+                "url": url,
                 "site": host,
                 "group": group,
                 "name": name,
                 "bounces": bounces,
-                "registry_url": registry_url
+                "registry_url": registry_url,
+                "invalid": invalid
             })
         }
 
-    def PUT(self, site, name, group):
+    def POST(self, url, name, group):
         """Add a new URL to a group."""
 
-        host = self.url_to_host(site)
+        host = self.url_to_host(url)
 
         group = cherrypy.engine.publish(
             "formatting:string_sanitize",
             group
         ).pop()
 
-        print(group)
-
         if not group:
-            raise cherrypy.HTTPError(400, "Invalid group")
+            redirect_url = cherrypy.engine.publish(
+                "url:internal",
+                None,
+                {"name": name, "url": url, "invalid": "group"}
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         name = cherrypy.engine.publish(
             "formatting:string_sanitize",
@@ -167,7 +171,13 @@ class Controller:
         ).pop()
 
         if not name:
-            raise cherrypy.HTTPError(400, "Invalid name")
+            redirect_url = cherrypy.engine.publish(
+                "url:internal",
+                None,
+                {"url": url, "group": group, "invalid": "name"}
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         key = f"bounce:{group}:{name}"
 
@@ -178,4 +188,10 @@ class Controller:
             replace=True
         )
 
-        cherrypy.response.status = 204
+        redirect_url = cherrypy.engine.publish(
+            "url:internal",
+            None,
+            {"group": group}
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(redirect_url)

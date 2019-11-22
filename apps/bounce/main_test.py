@@ -33,7 +33,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self):
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assert_allowed(response, ("GET", "PUT"))
+        self.assert_allowed(response, ("GET", "POST"))
 
     def test_exposed(self):
         """The application is publicly available."""
@@ -170,22 +170,22 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         bounces = helpers.html_var(render_mock, "bounces")
 
         self.assertEqual(
-            bounces[1][0],
+            bounces[0][0],
             "http://stage.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounces[1][1],
+            bounces[0][1],
             "stage"
         )
 
         self.assertEqual(
-            bounces[2][0],
+            bounces[1][0],
             "http://othersite.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounces[2][1],
+            bounces[1][1],
             "othersite"
         )
 
@@ -330,65 +330,79 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function."""
+            if args[0] == "formatting:string_sanitize":
+                return [args[1]]
             if args[0] == "registry:add":
                 return [{"uid": 1, "group": "example"}]
+            if args[0] == "url:internal":
+                return ["http://example.com"]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
-            method="PUT",
-            site="http://dev.example.com",
+            method="POST",
+            url="http://dev.example.com",
             group="example",
             name="dev",
         )
 
-        self.assertEqual(response.code, 204)
+        self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
     def test_add_site_invalid_group(self, publish_mock):
-        """A PUT is rejected if the provided group is non-alphanumeric."""
+        """A POST is rejected if the provided group is non-alphanumeric."""
 
         def side_effect(*args, **_):
             """Side effects local function."""
             if args[0] == "formatting:string_sanitize":
-                return [""]
+                if args[1] == "???":
+                    return [""]
+                return [args[1]]
+            if args[0] == "url:internal":
+                return ["http://example.com"]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
-            method="PUT",
-            site="http://dev.example.com",
-            group="",
+            method="POST",
+            url="http://dev.example.com",
+            group="???",
             name="dev",
         )
 
-        self.assertEqual(response.code, 400)
+        self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
     def test_add_site_invalid_name(self, publish_mock):
-        """A PUT is rejected if the provided name is non-alphanumeric."""
+        """A POST is rejected if the provided name is non-alphanumeric."""
 
         def side_effect(*args, **_):
             """Side effects local function."""
-            if args[0] == "formatting:string_sanitize" and args[1] == "???":
-                return [""]
+            if args[0] == "formatting:string_sanitize":
+                if args[1] == "???":
+                    return [""]
+                return [args[1]]
+            if args[0] == "url:internal":
+                return ["http://example.com"]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
-            method="PUT",
-            site="http://dev.example.com",
+            method="POST",
+            url="http://dev.example.com",
             group="example",
             name="???",
         )
 
-        self.assertEqual(response.code, 400)
+        self.assertEqual(response.code, 303)
 
 
 if __name__ == "__main__":

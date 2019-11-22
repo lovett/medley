@@ -6,54 +6,49 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('shortcut-link', '/bounce/static/bounce.js')) }}
+    {{ macros.vueApp('main', ('shortcut-link',)) }}
+{% endblock %}
+
+{% block app_message %}
+    {% if invalid == "group" %}
+        <section id="app-message" class="error">Invalid group.</section>
+    {% elif invalid == "name" %}
+        <section id="app-message" class="error">Invalid name.</section>
+    {% else %}
+        {{ super() }}
+    {% endif %}
 {% endblock %}
 
 {% block page_body %}
-
     <main>
         {% if not bounces %}
-            <bounce-form
-                inline-template
-                endpoint="/bounce"
-                url="{{ departing_url|default('', true)|e }}"
-                site="{{ site|default('', true)|e }}"
-                group="{{ group|default('', true)|e }}"
-                name="{{ name|default('', true)|e }}"
-            >
-                <form v-on:submit.prevent="submit" method="post" action="/bounce">
-                    <div v-if="errorMessage" v-text="errorMessage" class="error message"></div>
-                    <div v-if="successMessage" v-text="successMessage" class="success message"></div>
+            <form method="post" action="/bounce">
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input required type="text" id="name" name="name" value="{{ name }}"/>
+                </div>
+                <div class="field">
+                    <label for="group">Group</label>
+                    <input required type="text" id="group" name="group" value="{{ group }}"/>
+                </div>
+                <div class="field">
+                    <label for="url">URL</label>
+                    <input required type="text" id="url" name="url" value="{{ url }}"/>
+                </div>
 
-                    <div class="field-group">
-                        <div class="field">
-                            <label for="title">Group</label>
-                            <input v-model="group" required type="text" id="group" name="group" value="{{ group|default('', true)|e }}"/>
-                        </div>
-                        <div class="field">
-                            <label for="title">Site Name</label>
-                            <input v-model="name" required type="text" id="name" name="name" value="{{ name|default('', true)|e }}"/>
-                        </div>
-                        <div class="field">
-                            <label for="title">Site</label>
-                            <input v-model="site" required type="text" id="site" name="site" value="{{ site|default('', true)|e }}"/>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <button data-default="Add" data-alt="Please wait">Add</button>
-                    </div>
-                </form>
-            </bounce-form>
+                <div class="field">
+                    <button data-default="Add" data-alt="Please wait">Add</button>
+                </div>
+            </form>
         {% endif %}
 
         {% if bounces %}
-            {% for id, values in bounces.items() %}
+            {% for url, name in bounces %}
                 <p class="destination">
                     <shortcut-link
                         v-bind:index="{{ loop.index }}"
-                        url="{{ values[0]|anonymize }}"
-                        label="{{ values[1] }} @ {{ values[0]|truncate(100) }}"
+                        url="{{ url|anonymize }}"
+                        label="{{ name }} @ {{ url|truncate(100) }}"
                     />
                 </p>
             {% endfor %}
