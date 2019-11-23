@@ -61,17 +61,21 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
             "complete": True
         })
 
-        notification = publish_mock.call_args[0][1]
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
 
         self.assertEqual(response.code, 204)
+
         self.assertEqual(
             "Deployment to azuretest is complete",
-            notification.title
+            notification_call[1].get("title")
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification.url
+            notification_call[1].get("url")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -92,17 +96,20 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
             "complete": True
         })
 
-        notification = publish_mock.call_args[0][1]
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
 
         self.assertEqual(response.code, 204)
         self.assertEqual(
             "Deployment to azuretest has failed",
-            notification.title
+            notification_call[1].get("title")
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification.url
+            notification_call[1].get("url")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -125,17 +132,20 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
             "complete": True
         })
 
-        notification = publish_mock.call_args[0][1]
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
 
         self.assertEqual(response.code, 204)
         self.assertEqual(
             "Deployment to azuretest has uncertain status",
-            notification.title
+            notification_call[1].get("title")
         )
 
         self.assertEqual(
             "http://example.com/azuretest",
-            notification.url
+            notification_call[1].get("url")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -156,10 +166,13 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
             "complete": True
         })
 
-        notification = publish_mock.call_args[0][1]
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
 
         self.assertEqual(response.code, 204)
-        self.assertNotIn("url", notification)
+        self.assertIsNone(notification_call[1]["url"])
 
 
 if __name__ == "__main__":

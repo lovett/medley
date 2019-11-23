@@ -1,7 +1,6 @@
 """Relay deployment notifications from Azure to notifier."""
 
 import cherrypy
-import local_types
 
 
 class Controller:
@@ -40,12 +39,13 @@ class Controller:
         else:
             title += " has uncertain status"
 
-        notification = local_types.Notification(
+        notification = cherrypy.engine.publish(
+            "notifier:build",
             group="azure",
             body=body,
             url=url,
             title=title
-        )
+        ).pop()
 
         cherrypy.engine.publish("notifier:send", notification)
 

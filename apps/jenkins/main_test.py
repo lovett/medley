@@ -244,10 +244,16 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
         fixture = self.queued_fixture
         payload = self.controller.normalize_payload(fixture)
-        notification = self.controller.build_notification(payload)
 
-        self.assertIn("has queued", notification.title)
-        self.assertIn("for building", notification.title)
+        self.controller.build_notification(payload)
+
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
+
+        self.assertIn("has queued", notification_call[1].get("title"))
+        self.assertIn("for building", notification_call[1].get("title"))
 
     @mock.patch("cherrypy.engine.publish")
     def test_started(self, publish_mock):
@@ -257,9 +263,15 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
         fixture = self.started_fixture
         payload = self.controller.normalize_payload(fixture)
-        notification = self.controller.build_notification(payload)
 
-        self.assertIn("is building", notification.title)
+        self.controller.build_notification(payload)
+
+        notification_call = helpers.find_publish_call(
+            publish_mock,
+            "notifier:build"
+        )
+
+        self.assertIn("is building", notification_call[1].get("title"))
 
 
 if __name__ == "__main__":

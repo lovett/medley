@@ -4,7 +4,6 @@ import random
 import string
 from urllib.parse import urlencode, parse_qs
 import cherrypy
-import local_types
 
 
 class Controller:
@@ -92,15 +91,14 @@ class Controller:
                 )
             )
 
-        # Send a notification immediately to confirm creation of the
-        # reminder and make the time remaining visible.
-        start_notification = local_types.Notification(
+        start_notification = cherrypy.engine.publish(
+            "notifier:build",
             group="timer",
             title="Timer in progress",
             body=message,
             localId=local_id,
             expiresAt=f"{total_minutes} minutes"
-        )
+        ).pop()
 
         cherrypy.engine.publish(
             "notifier:send",
@@ -109,19 +107,20 @@ class Controller:
 
         # Send a second notification in the future. This gets turned
         # into a dict so that the scheduler can properly serialize it.
-        finish_notification_dict = local_types.Notification(
+        finish_notification = cherrypy.engine.publish(
+            "notifier:build",
             group="timer",
             title=message,
             body=comments,
             localId=local_id,
             url=url
-        )._asdict()
+        ).pop()
 
         cherrypy.engine.publish(
             self.add_command,
             total_minutes * 60,
             "notifier:send",
-            finish_notification_dict
+            finish_notification
         )
 
         if remember == 1:

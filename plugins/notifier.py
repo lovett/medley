@@ -21,13 +21,36 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the notifier prefix.
         """
-        self.bus.subscribe("notifier:send", self.send)
         self.bus.subscribe("notifier:clear", self.clear)
+        self.bus.subscribe("notifier:send", self.send)
 
     @staticmethod
-    def send(notification: typing.Union[
-            local_types.Notification, typing.OrderedDict
-    ]) -> bool:
+    def build_notification(
+            **kwargs: local_types.Kwargs
+    ) -> typing.Dict[str, str]:
+        """Populate a dict with key value pairs.
+
+        This dict can be provided to send() for immediate delivery, or
+        given to the scheduler plugin for future delivery.
+
+        A dict is used to represent the notification message so that
+        serialization by the scheduler is as straightforward as
+        possible."""
+
+        fields = (
+            "title", "body", "group", "badge",
+            "localId", "expiresAt", "url"
+        )
+
+        notification = {
+            field: kwargs.get(field, None)
+            for field in fields
+        }
+
+        return notification
+
+    @staticmethod
+    def send(notification: typing.Dict[str, str]) -> bool:
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
@@ -43,9 +66,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config["notifier:username"],
             config["notifier:password"],
         )
-
-        if isinstance(notification, local_types.Notification):
-            notification = notification._asdict()
 
         cherrypy.engine.publish(
             "urlfetch:post",

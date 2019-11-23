@@ -24,7 +24,6 @@ post-processing them."
 
 from collections import defaultdict
 import cherrypy
-import local_types
 
 
 class Controller:
@@ -87,14 +86,15 @@ class Controller:
             group = "sysdown"
             title = f"Jenkins had trouble {action} {name}"
 
-        return local_types.Notification(
+        return cherrypy.engine.publish(
+            "notifier:build",
             group=group,
             badge="jenkins.svg",
             url=url,
             localId=f"jenkins.{payload['name']}",
             title=title,
             body=f"Build #{build_number}, {branch}"
-        )
+        ).pop()
 
     @staticmethod
     def normalize_payload(raw_payload):
