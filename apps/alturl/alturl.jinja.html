@@ -29,8 +29,8 @@
 
     <nav class="secondary">
         {% if url %}
-            {% block secondary_nav %}{% endblock %}
             <div>{{ macros.cancelLink(app_url) }}</div>
+            {% block secondary_nav %}{% endblock %}
         {% endif %}
     </nav>
 
