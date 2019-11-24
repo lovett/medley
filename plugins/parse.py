@@ -1,6 +1,7 @@
 """Grammar-based parsing using pyparsing."""
 
 import string
+import typing
 from urllib.parse import urlparse
 import pyparsing as pp
 import cherrypy
@@ -10,7 +11,7 @@ import pendulum
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for interacting with pyparsing grammars."""
 
-    def __init__(self, bus):
+    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
         # Parsing primitives
@@ -194,7 +195,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "|"
         )
 
-    def start(self):
+    def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the parse prefix.
@@ -204,7 +205,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe('parse:log_query', self.parse_log_query)
 
     @staticmethod
-    def request_fields(_string, _location, tokens):
+    def request_fields(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> None:
         """Subdivide the cmd field to isolate method, uri, query, and version
 
         Extra care needs to be taken because the uri could contain
@@ -224,20 +229,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             tokens["uri"], tokens["query"] = tokens["uri"].split('?', 1)
 
     @staticmethod
-    def first_in_group(_string, _location, tokens):
+    def first_in_group(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Return the first item in a group."""
-        return tokens[0][0]
+        return typing.cast(str, tokens[0][0])
 
     @staticmethod
-    def dash_to_none(_string, _location, tokens):
+    def dash_to_none(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> typing.Optional[str]:
         """Coerce a bare hypen to None"""
         if tokens[0] == "-":
             return None
 
-        return tokens[0]
+        return typing.cast(str, tokens[0])
 
     @staticmethod
-    def log_query_relative_date(_string, _location, tokens):
+    def log_query_relative_date(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Generate an SQL where clause for a date expressed via keyword.
 
         Recognized keywords are "today" and "yesterday".
@@ -268,7 +285,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"datestamp BETWEEN '{sql_start}' AND '{sql_end}'"
 
     @staticmethod
-    def log_query_absolute_date(_string, _location, tokens):
+    def log_query_absolute_date(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Generate an SQL where clause for a date expressed literally.
 
         Dates can either be in YYYY-mm or YYYY-mm-dd format.
@@ -319,11 +340,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             sql.append(f"datestamp BETWEEN '{sql_start}' AND '{sql_end}'")
 
-        sql = " OR ".join(sql)
-        return f"({sql})"
+        joined_sql = " OR ".join(sql)
+        return f"({joined_sql})"
 
     @staticmethod
-    def log_query_numeric(_string, _location, tokens):
+    def log_query_numeric(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Build an SQL string for a numeric comparison."""
 
         field = tokens[0]
@@ -340,7 +365,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"({joined_sql})"
 
     @staticmethod
-    def log_query_wildcard(_string, _location, tokens):
+    def log_query_wildcard(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Build an SQL string for a wildcard comparison."""
         field = tokens[0]
 
@@ -365,7 +394,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"({boolean_keyword.join(sql)})"
 
     @staticmethod
-    def log_query_subquery(_string, _location, tokens):
+    def log_query_subquery(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Build an SQL where clause fragment for a field lookup that involves
         a subquery.
 
@@ -385,7 +418,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return sql
 
     @staticmethod
-    def log_query_exact_string(_string, _location, tokens):
+    def log_query_exact_string(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> str:
         """Build an SQL string for an exact string comparison."""
 
         field = tokens[0]
@@ -408,7 +445,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"({joined_sql})"
 
     @staticmethod
-    def to_dict(_string, _location, tokens):
+    def to_dict(
+            _string: str,
+            _location: int,
+            tokens: pp.ParseResults
+    ) -> typing.Dict[str, typing.Any]:
         """Apply the keys and values returned by pyparsing.dictOf to the main
         parse result
 
@@ -422,7 +463,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return result
 
-    def parse_appengine(self, val):
+    def parse_appengine(self, val: str) -> typing.Dict[str, typing.Any]:
         """Parse a log line in combined-plus-Appengine-extras format
 
         App Engine extras consist of additional key=value pairs after
@@ -441,7 +482,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         val = val.replace(' "" "', ' - "')
 
         try:
-            fields = self.appengine_grammar.parseString(val).asDict()
+            fields = typing.cast(
+                typing.Dict[str, typing.Any],
+                self.appengine_grammar.parseString(val).asDict()
+            )
         except pp.ParseException as exception:
             cherrypy.engine.publish(
                 "applog:add",
@@ -506,7 +550,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         del fields["extras"]
         return fields
 
-    def parse_log_query(self, val):
+    def parse_log_query(self, val: str) -> str:
         """Convert a logindex query to sql
 
         The query is used to build the WHERE clause of an SQL query,

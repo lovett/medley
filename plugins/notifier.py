@@ -27,7 +27,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def build_notification(
             **kwargs: local_types.Kwargs
-    ) -> typing.Dict[str, str]:
+    ) -> typing.Dict[str, typing.Any]:
         """Populate a dict with key value pairs.
 
         This dict can be provided to send() for immediate delivery, or
@@ -47,7 +47,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             for field in fields
         }
 
-        return notification
+        return typing.cast(
+            typing.Dict[str, typing.Any],
+            notification
+        )
 
     @staticmethod
     def send(notification: typing.Dict[str, str]) -> bool:

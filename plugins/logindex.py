@@ -567,11 +567,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def count_lines(self, source: pathlib.Path) -> int:
         """Tally the number of stored records for the given source file."""
-        return self._selectFirst(
-            """SELECT count(*)
-            FROM logs
-            WHERE source_file=?""",
-            (str(source),)
+        return typing.cast(
+            int,
+            self._selectFirst(
+                """SELECT count(*)
+                FROM logs
+                WHERE source_file=?""",
+                (str(source),)
+            )
         )
 
     @decorators.log_runtime

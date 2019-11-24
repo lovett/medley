@@ -40,9 +40,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             as_path=True
         ).pop()
 
-        return storage_root / path
+        return typing.cast(pathlib.Path, storage_root / path)
 
-    def ingest_file(self, storage_path: pathlib.Path, batch_size: int = 100):
+    def ingest_file(
+            self,
+            storage_path: pathlib.Path,
+            batch_size: int = 100
+    ) -> None:
         """Match a log file to a processor based on its file path."""
 
         request_top_path = ("appengine.googleapis.com", "request_log")
@@ -257,7 +261,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return " ".join(quoted_pairs)
 
     @staticmethod
-    def publish_lines(batch) -> int:
+    def publish_lines(batch: typing.Iterable[str]) -> int:
         """Send a batch of request logs in combined format to the logindex
         plugin.
 
@@ -270,7 +274,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return typing.cast(int, result)
 
     @staticmethod
-    def publish_extras(batch) -> None:
+    def publish_extras(batch: typing.List[typing.Tuple[str, str]]) -> None:
         """Append extra name-value fields a previously-saved combined log."""
 
         cherrypy.engine.publish(
