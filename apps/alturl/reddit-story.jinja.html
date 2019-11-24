@@ -29,7 +29,7 @@
         <h2 class="title">{{ story.title|safe }}</h2>
 
         {% if story.selftext %}
-            <p>{{ story.selftext|unescape }}</p>
+            {{ story.selftext|unescape }}
         {% endif %}
 
         <time class="info">

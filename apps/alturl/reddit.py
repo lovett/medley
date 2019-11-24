@@ -3,6 +3,7 @@
 import re
 import typing
 import cherrypy
+import markdown
 import local_types
 
 
@@ -70,6 +71,9 @@ def view_story(response: typing.Any) -> local_types.NegotiableView:
     listing = response[0].get("data", {})
     story_wrapper = listing.get("children").pop()
     story = story_wrapper.get("data")
+
+    if story.get("selftext"):
+        story["selftext"] = markdown.markdown(story["selftext"], tab_length=2)
 
     comments = (
         child.get("data", {})
