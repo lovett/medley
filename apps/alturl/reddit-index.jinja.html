@@ -3,23 +3,23 @@
 {% block content %}
     {% for story in stories %}
         <div class="headline">
-            <h2 class="title"><a href="{{ app_url }}/reddit.com/{{ story.permalink }}">{{ story.title|safe }}</a></h2>
+            <h2 class="title"><a href="{{ app_url }}/reddit.com{{ story.permalink }}">{{ story.title|safe }}</a></h2>
             <time class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                 {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
             </time>
 
+            {# Internally link to the subreddit when not viewing the Reddit homepage. #}
+            {% if "r/" not in url %}
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                <a target="_blank" rel="noopeneer noreferrer" href="{{ story.permalink|anonymize }}">
-                    {% if "r/" not in url %}
+                <a href="{{ app_url }}/reddit.com/r/{{ story.subreddit }}">
                         r/{{ story.subreddit }}
-                    {% else %}
-                    original
-                    {% endif %}
                 </a>
             </span>
+            {% endif %}
 
+            {# Externally link to the story URL if not a self-post. #}
             {% if "self." not in story.domain %}
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>

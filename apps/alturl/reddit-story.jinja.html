@@ -39,12 +39,18 @@
 
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">{{ story.domain }}</a>
+            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
+                {% if "self." not in story.domain %}
+                    {{ story.domain }}
+                {% else %}
+                    original
+                {% endif %}
+            </a>
         </span>
 
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.permalink|anonymize }}">
+            <a target="_blank" rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit }}">
                 r/{{ story.subreddit }}
             </a>
         </span>
