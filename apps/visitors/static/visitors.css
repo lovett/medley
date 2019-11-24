@@ -62,7 +62,7 @@ input[type=range] {
 }
 
 .expandable td {
-    background-color: var(--secondary);
+    background-color: var(--offwhite);
     padding: .5em 1em;
 }
 

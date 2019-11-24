@@ -207,7 +207,7 @@
                                         </a>
                                     </p>
 
-                                    {% if result.query %}
+                                    {% if result.query and result.statusCode != 404 %}
                                         <ul class="querystring smaller">
                                             {% for item in result.query|dictsort %}
                                                 <li>{{ item.0|truncate(50, True) }}: {{ item.1|join(',')|truncate(50, True) }}</li>
