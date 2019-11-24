@@ -156,7 +156,7 @@ MEDLEY.startpage = (function () {
             window.addEventListener('offline', whenOffline);
             window.addEventListener('online', whenOnline);
 
-            MEDLEY.focusAsYouType('SECTION A, SECTION H1');
+            MEDLEY.focusAsYouType('SECTION A');
         }
     }
 })();
