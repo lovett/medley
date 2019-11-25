@@ -21,7 +21,7 @@
 
 
 {% block page_body %}
-    {{ macros.svgSymbols("delete") }}
+    {{ macros.svgSymbols("delete", "edit") }}
 
     <main>
         {% if upcoming %}
@@ -59,23 +59,30 @@
                              data-notification_id="{{ template.notification_id }}"
                              data-url="{{ template.url }}"
                         >
-                            <div><discard-button tooltip="Delete this template" /></div>
                             <a href="#"
-                               class="summary hash-focus-candidate"
+                               class="hash-focus-candidate"
                                data-hash-focus-id="{{ template.notification_id }}"
                             >
-                                {{ template.message }}
-                                <br/>
-                                <span class="smaller">
+                                ◆ {{ template.message }}
+                            </a>
+                            <div class="details">
+                                <p>
                                     {{ template.duration_in_words }}
                                     {%- if template.notification_id %}
                                         / #{{ template.notification_id }}
                                     {%- endif -%}
-                                </span>
-                            </a>
+                                </p>
+                            </div>
                         </div>
                     </discardable-record>
                 {% endfor %}
+
+                {% if registry_url %}
+                    <a href="{{ registry_url }}">
+                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                        Edit
+                    </a>
+                {% endif %}
             </div>
             <div>
                 <div class="field">
@@ -112,7 +119,7 @@
 
                 <div class="field">
                     <input type="checkbox" id="remember" name="remember" value="1" />
-                    <label for="remember" class="inline">Save for future use</later>
+                    <label for="remember" class="inline">Save as a template</later>
                 </div>
 
                 <div class="field">

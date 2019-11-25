@@ -20,6 +20,8 @@
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("edit") }}
+
     <main>
         {% if not bounces %}
             <form method="post" action="/bounce">
@@ -54,7 +56,12 @@
             {% endfor %}
 
             {% if registry_url %}
-                <p><a href="{{ registry_url }}" target="_blank">Edit</a></p>
+                <p>
+                    <a href="{{ registry_url }}" target="_blank">
+                        <svg class="icon"><use xlink:href="#delete"></use></svg>
+                        Edit
+                    </a>
+                </p>
             {% endif %}
         {% endif %}
     </main>

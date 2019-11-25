@@ -31,6 +31,14 @@ class Controller:
             exact=True,
         ).pop()
 
+        registry_url = ''
+        if registry_rows:
+            registry_url = cherrypy.engine.publish(
+                "url:internal",
+                "/registry",
+                {"q": "reminder:template"}
+            ).pop()
+
         templates = {
             row["rowid"]: {k: v[-1] for k, v in parse_qs(row["value"]).items()}
             for row in registry_rows
@@ -55,8 +63,9 @@ class Controller:
 
         return {
             "html": ("reminder.jinja.html", {
+                "registry_url": registry_url,
                 "templates": templates,
-                "upcoming": upcoming,
+                "upcoming": upcoming
             }),
         }
 

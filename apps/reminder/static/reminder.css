@@ -1,6 +1,6 @@
 #upcoming {
     background-color: var(--secondary);
-    margin: 0 -1em;
+    margin: 0 -1em 1em -1em;
 }
 
 #upcoming > div:not([hidden]) {
@@ -13,11 +13,11 @@
 
 #upcoming .upcoming-reminder:first-of-type {
     margin-top: -1em;
-    padding-top: 2em;
+    padding-top: 1em;
 }
 
 #upcoming .upcoming-reminder:last-of-type {
-    padding-bottom: 2em;
+    padding-bottom: 1em;
 }
 
 #upcoming .summary {
@@ -47,17 +47,33 @@
 }
 
 .template {
+    margin-bottom: 1em;
+}
+
+.template > a {
+    display: block;
+    grid-area: template-trigger;
+    padding: .25em;
+    margin-left: -.25em;
+}
+
+.template p {
+    margin: 0;
+}
+
+.template .details {
     display: flex;
-    align-items: center;
-    box-sizing: border-box;
+    flex-flow: row nowrap;
+    align-items: baseline;
+    font-size: .75em;
+    margin-left: 1.5em;
 }
 
-.template .summary {
-    padding: .5em;
-    flex-grow: 1;
+.template .action-button {
+    margin-left: 1em;
 }
 
-.template .summary:focus {
+.template a:focus {
     background-color: var(--secondary);
     color: currentColor;
 }
