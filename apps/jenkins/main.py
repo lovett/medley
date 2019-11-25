@@ -45,7 +45,7 @@ class Controller:
 
         notification = self.build_notification(payload)
 
-        if notification.title:
+        if notification.get("title"):
             cherrypy.engine.publish(
                 "notifier:send",
                 notification

@@ -29,12 +29,6 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
     def setUp(self):
         """Fixtures available to all tests"""
 
-        self.config_fixture = {
-            "notifier:url": "http://example.com",
-            "notifier:username": "testuser",
-            "notifier:password": "testpass",
-        }
-
         self.started_fixture = {
             "name": "testjob",
             "url": "job/testjob/",
@@ -128,14 +122,13 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
         return fixture
 
-    def default_side_effect_callback(self, *args, **_):
+    @staticmethod
+    def default_side_effect_callback(*args, **_):
         """
         The standard mock side effect function used by all tests
         """
 
         if args[0] == "registry:search":
-            if args[1] == "notifier:*":
-                return [self.config_fixture]
             if args[1] == "jenkins:skip":
                 return [["skippable"]]
         if args[0] == "registry:first_value":
@@ -168,7 +161,19 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
 
         payload_fixture = self.get_fixture("plugin", "finalized", "success")
 
-        publish_mock.side_effect = self.default_side_effect_callback
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "notifier:build":
+                return [{"title": "test"}]
+            if args[0] == "registry:search":
+                if args[1] == "jenkins:skip":
+                    return [["skippable"]]
+                if args[0] == "registry:first_value":
+                    if args[1].startswith("site_url"):
+                        return [None]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -176,6 +181,45 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             json_body=payload_fixture,
         )
 
+        notification_send_call = helpers.find_publish_call(
+            publish_mock, 'notifier:send'
+        )
+
+        self.assertIsNotNone(notification_send_call)
+        self.assertEqual(notification_send_call[0][1]["title"], "test")
+        self.assertEqual(response.code, 204)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_plugin_finalized_skip_send(self, publish_mock):
+        """A notification is not sent if the title is missing."""
+
+        payload_fixture = self.get_fixture("plugin", "finalized", "success")
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "notifier:build":
+                return [{}]
+            if args[0] == "registry:search":
+                if args[1] == "jenkins:skip":
+                    return [["skippable"]]
+                if args[0] == "registry:first_value":
+                    if args[1].startswith("site_url"):
+                        return [None]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request(
+            "/",
+            method="POST",
+            json_body=payload_fixture,
+        )
+
+        notification_send_call = helpers.find_publish_call(
+            publish_mock, 'notifier:send'
+        )
+
+        self.assertIsNone(notification_send_call)
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
