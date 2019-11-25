@@ -23,9 +23,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("notifier:clear", self.clear)
         self.bus.subscribe("notifier:send", self.send)
+        self.bus.subscribe("notifier:build", self.build)
 
     @staticmethod
-    def build_notification(
+    def build(
             **kwargs: local_types.Kwargs
     ) -> typing.Dict[str, typing.Any]:
         """Populate a dict with key value pairs.
