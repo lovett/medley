@@ -66,6 +66,19 @@
     owner: "{{ project_user }}"
     group: "{{ project_group }}"
 
+- name: Install nginx vhost
+  become: true
+  template:
+    src: "templates/medley-vhost.j2"
+    dest: "/etc/nginx/sites-available/medley"
+
+- name: Symlink nginx vhost
+  become: true
+  file:
+    src: "/etc/nginx/sites-available/medley"
+    dest: "/etc/nginx/sites-enabled/medley"
+    state: link
+
 - name: Install global config
   become: true
   copy:

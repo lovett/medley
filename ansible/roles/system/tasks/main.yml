@@ -37,7 +37,7 @@
     - /var/medley
     - /var/medley/storage
 
-- name: Install python3 system packages
+- name: Install system packages
   become: true
   apt:
     name:
@@ -47,5 +47,6 @@
       - python3-venv
       - libasound2-dev
       - make
+      - nginx-light
       - rsync
     state: latest
