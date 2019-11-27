@@ -71,6 +71,7 @@
   template:
     src: "templates/medley-vhost.j2"
     dest: "/etc/nginx/sites-available/medley"
+  notify: Restart Nginx
 
 - name: Symlink nginx vhost
   become: true
