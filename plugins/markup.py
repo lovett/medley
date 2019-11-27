@@ -1,7 +1,6 @@
 """Tools for working with text containing HTML markup."""
 
 from urllib.parse import urlparse
-from html.parser import HTMLParser
 import typing
 import cherrypy
 import parsers.htmltext
@@ -70,52 +69,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             parser = parsers.htmltext.Parser(blacklist)
 
         return typing.cast(str, parser.parse(html))
-
-
-class HtmlTitleParser(HTMLParser):
-    """Extract the title tag from an HTML document."""
-
-    AttributesType = typing.List[
-        typing.Tuple[
-            str, typing.Optional[str]
-        ]
-    ]
-
-    in_title_tag: bool = False
-    result: typing.Optional[str] = None
-
-    def parse(self, markup: str) -> typing.Optional[str]:
-        """Parse an HTML string."""
-        self.feed(markup)
-        return typing.cast(
-            typing.Optional[str],
-            self.result
-        )
-
-    def handle_starttag(
-            self,
-            tag: str,
-            attrs: AttributesType
-    ) -> None:
-        """Locate the title opening tag."""
-        if not self.result and tag == "title":
-            self.in_title_tag = True
-
-    def handle_endtag(self, tag: str) -> None:
-        """Locate the title close tag."""
-        if not self.result and tag == "title":
-            self.in_title_tag = False
-
-    def handle_data(self, data: str) -> None:
-        """Capture the text node of the title tag."""
-
-        if not self.result and self.in_title_tag:
-            self.result = data.strip()
-
-    def error(self, message: str) -> None:
-        cherrypy.engine.publish(
-            "applog:add",
-            "markup",
-            "HtmlTitleParser",
-            message
-        )
