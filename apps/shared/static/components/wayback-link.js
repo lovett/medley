@@ -23,7 +23,7 @@ Vue.component('wayback-link', {
         click: function (e) {
             this.label = 'checking...';
 
-            fetch(this.url)
+            fetch(this.url, {headers: {'Accept': 'application/json'}})
                 .then(res => res.json())
                 .then(data => {
                     if (data.url) {
