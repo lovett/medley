@@ -97,16 +97,6 @@ used. Default: `False`
 **server.socket_port**: The port the server should listen on. Default:
 `8085`
 
-**tools.conditional_auth.on**: Whether to require HTTP Basic
-authorization. Default: `False`
-
-**users**: If using conditional auth, a Python dictionary of usernames
-and passwords for Basic Auth. Default: `{}`
-
-**tools.conditional_auth.whitelist**: If using conditional auth, a
-space-separated string of IP addresses or fragments that are allowed
-to bypass authorization. Default: `None`
-
 **tools.gzip.on**: Whether to enable gzip compression. Default: `True`
 
 ## Acknowledgements

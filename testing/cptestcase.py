@@ -17,11 +17,9 @@ import urllib
 import json
 import cherrypy
 import tools.capture
-import tools.conditional_auth
 import tools.negotiable
 
 cherrypy.config.update({'environment': "test_suite"})
-cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
 cherrypy.tools.negotiable = tools.negotiable.Tool()
 cherrypy.tools.capture = tools.capture.Tool()
 

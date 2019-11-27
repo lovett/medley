@@ -45,7 +45,6 @@ import plugins.speak
 import plugins.urlfetch
 import plugins.url
 import tools.capture
-import tools.conditional_auth
 import tools.negotiable
 
 # pylint: disable=too-many-statements
@@ -81,10 +80,7 @@ def setup() -> None:
         "server.socket_host": "127.0.0.1",
         "server.socket_port": 8085,
         "server_root": server_root,
-        "tools.conditional_auth.on": False,
-        "users": {},
         "use_service_workers": True,
-        "tools.conditional_auth.whitelist": "",
 
         # Jinja templating won't work unless tools.encode is off
         "tools.encode.on": False,
@@ -211,7 +207,6 @@ def setup() -> None:
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
 
     # Tools
-    cherrypy.tools.conditional_auth = tools.conditional_auth.Tool()
     cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
 
