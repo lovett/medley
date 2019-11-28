@@ -4,3 +4,7 @@ Description=Medley Failure Notifier
 [Service]
 Type=exec
 ExecStart=/usr/bin/systemctl status %i | /usr/bin/mail -s "[medley] %i service failed" {{ admin_email }}
+
+# Local Variables:
+# mode: conf
+# End:

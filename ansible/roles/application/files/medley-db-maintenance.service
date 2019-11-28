@@ -6,3 +6,7 @@ OnFailure=medley-failure@%n
 Type=exec
 ExecStart=/usr/bin/curl --user-agent medley-db-maintenance.service --silent --show-error -d "group=db" "http://127.0.0.1:8085/maintenance"
 Restart=no
+
+# Local Variables:
+# mode: conf
+# End:

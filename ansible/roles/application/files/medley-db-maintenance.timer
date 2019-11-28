@@ -10,3 +10,7 @@ Persistent=false
 
 [Install]
 WantedBy=timers.target
+
+# Local Variables:
+# mode: conf
+# End:

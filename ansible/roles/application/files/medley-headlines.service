@@ -7,3 +7,7 @@ Type=exec
 ExecStart=/usr/bin/curl --user-agent medley-headlines.service --silent --show-error "http://127.0.0.1:8085/headlines"
 StandardOutput=null
 Restart=no
+
+# Local Variables:
+# mode: conf
+# End:
