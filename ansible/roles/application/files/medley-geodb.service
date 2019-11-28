@@ -1,7 +1,5 @@
 [Unit]
 Description=Medley Geodb Database Download
-After=medley.service
-Requires=medley.service
 OnFailure=medley-failure@%n
 
 [Service]
