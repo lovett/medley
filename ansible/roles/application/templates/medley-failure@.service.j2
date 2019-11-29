@@ -2,8 +2,8 @@
 Description=Medley Failure Notifier
 
 [Service]
-Type=exec
-ExecStart=/usr/bin/systemctl status %i | /usr/bin/mail -s "[medley] %i service failed" {{ admin_email }}
+Type=oneshot
+ExecStart={{ project_root }}/venv/bin/pthon {{ project_root }}/scripts/failmail.py %i {{ admin_email }}
 
 # Local Variables:
 # mode: conf

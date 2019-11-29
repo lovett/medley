@@ -16,12 +16,15 @@
     append=yes
     groups="{{ project_user }},audio"
 
-- name: Put ansible user in application group
+- name: Set application user groups
   become: true
   user:
     name="{{ ansible_user }}"
-    group="{{ project_user }}"
+    group="{{ item }}"
     append=yes
+  with_items:
+    - "{{ project_user }}"
+    - "systemd-journal"
 
 - name: Create application directories
   become: true
