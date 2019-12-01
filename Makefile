@@ -12,6 +12,11 @@ APPS := $(notdir $(APPS))
 APPS := $(filter-out __%,$(APPS))
 APPS := $(addprefix apps., $(APPS))
 
+# A list of app-specific icons.
+APP_ICONS := $(wildcard apps/*/static/app-icon.svg)
+APP_ICONS := $(patsubst %.svg,%.png,$(APP_ICONS))
+
+
 # A list of parsers with test suites in the form "parsers.[name of parser]".
 PARSERS := $(wildcard parsers/*_test.py)
 PARSERS := $(notdir $(PARSERS))
@@ -32,7 +37,6 @@ REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
 
 SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
-FAVICON_DIR := $(CURDIR)/apps/shared/static/favicon
 TMUX_SESSION_NAME := medley
 
 vpath %.cov coverage
@@ -316,13 +320,12 @@ hooks: dummy
 
 
 favicon: dummy
-	convert -density 900 -background none -geometry 360x360 $(FAVICON_DIR)/app-icon.svg $(FAVICON_DIR)/app-icon.png
-	convert -density 900 -background none -geometry 48x48   $(FAVICON_DIR)/app-icon.svg temp-48.png
-	convert -density 900 -background none -geometry 32x32   $(FAVICON_DIR)/app-icon.svg temp-32.png
-	convert -density 900 -background none -geometry 16x16   $(FAVICON_DIR)/app-icon.svg temp-16.png
-	convert temp-16.png temp-32.png temp-48.png apps/shared/static/favicon/favicon.ico
+	convert -density 900 -background none -geometry 48x48 apps/shared/static/app-icon.svg temp-48.png
+	convert -density 900 -background none -geometry 32x32 apps/shared/static/app-icon.svg temp-32.png
+	convert -density 900 -background none -geometry 16x16 apps/shared/static/app-icon.svg temp-16.png
+	convert temp-16.png temp-32.png temp-48.png apps/shared/static/favicon.ico
 	rm temp-48.png temp-32.png temp-16.png
-	cd $(FAVICON_DIR) && optipng -quiet -o 3 *.png
+	cd apps/shared/static && optipng -quiet -o 3 *.png
 
 # Automation for merging changes from the master branch into the
 # production branch.
@@ -362,3 +365,10 @@ reset:
 	rm -r coverage
 	rm -r htmlcov
 	rm .coverage
+
+# Render an app icon SVG to PNG.
+$(APP_ICONS):
+	convert -density 900 -background none -geometry 360x360 $(patsubst %.png, %.svg, $@) $@
+
+# Geneate PNGs for all app icon SVGs.
+app-icons: $(APP_ICONS)

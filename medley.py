@@ -144,7 +144,7 @@ def setup() -> None:
             app_config["/favicon.ico"] = {
                 "tools.staticfile.on": True,
                 "tools.staticfile.filename": os.path.realpath(
-                    "./apps/shared/static/favicon/favicon.ico"
+                    "./apps/shared/static/favicon.ico"
                 ),
             }
 

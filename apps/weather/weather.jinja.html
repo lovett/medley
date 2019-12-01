@@ -1,4 +1,9 @@
 {% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
+
+{% block app_icon -%}
+    {{ macros.appSpecificIcon(app_url) }}
+{%- endblock %}
 
 {% block page_body %}
     <main>

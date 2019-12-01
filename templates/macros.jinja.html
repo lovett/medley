@@ -248,3 +248,8 @@ in the argument list are returned.  #}
         {% endif %}
     </section>
 {%- endmacro -%}
+
+{% macro appSpecificIcon(app_url) -%}
+        <link rel="shortcut icon" href="{{ app_url }}/static/app-icon.png" />
+        <link rel="mask-icon" href="{{ app_url }}/static/app-icon.svg" color="black">
+{%- endmacro %}

@@ -22,8 +22,10 @@
 
         {% block stylesheets %}{% endblock %}
 
-        <link rel="apple-touch-icon" href="/shared/static/favicon/app-icon.png"/>
-        <link rel="mask-icon" href="/shared/static/favicon/app-icon.svg" color="black">
+        {% block app_icon -%}
+        <link rel="shortcut icon" href="/shared/static/app-icon.png" />
+        <link rel="mask-icon" href="/shared/static/app-icon.svg" color="black">
+        {%- endblock %}
 
         <meta name="medley-home" content="{{ '/' | internal_url }}" />
         <meta name="medley-startpage" content="{{ '/startpage' | internal_url }}" />
