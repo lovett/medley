@@ -4,7 +4,7 @@ OnFailure=medley-failure@%n
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/curl --user-agent medley-geodb.service --silent --show-error -d "action=update" "http://127.0.0.1:8085/geodb"
+ExecStart=/usr/bin/curl --user-agent medley-geodb.service --silent --show-error --max-time 30 -d "action=update" "http://127.0.0.1:8085/geodb"
 Restart=no
 
 # Local Variables:

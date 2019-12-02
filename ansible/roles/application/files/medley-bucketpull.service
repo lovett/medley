@@ -4,7 +4,7 @@ OnFailure=medley-failure@%n
 
 [Service]
 Type=exec
-ExecStart=/usr/bin/curl --user-agent medley-bucketpull.service --silent --show-error -d "service=gcp" "http://127.0.0.1:8085/bucketpull"
+ExecStart=/usr/bin/curl --user-agent medley-bucketpull.service --silent --show-error --max-time 30 -d "service=gcp" "http://127.0.0.1:8085/bucketpull"
 StandardOutput=null
 Restart=no
 

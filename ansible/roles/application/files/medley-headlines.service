@@ -4,7 +4,7 @@ OnFailure=medley-failure@%n
 
 [Service]
 Type=exec
-ExecStart=/usr/bin/curl --user-agent medley-headlines.service --silent --show-error "http://127.0.0.1:8085/headlines"
+ExecStart=/usr/bin/curl --user-agent medley-headlines.service --silent --show-error --max-time 30 "http://127.0.0.1:8085/headlines"
 StandardOutput=null
 Restart=no
 

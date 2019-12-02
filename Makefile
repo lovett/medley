@@ -267,8 +267,8 @@ assets: assets-vue assets-flags
 # needs.
 #
 assets-vue: dummy
-	curl --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
-	curl --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
+	curl --max-time 10 --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
+	curl --max-time 10 --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
 
 
 # Asset download of flag-icon-css library used in visitors app
@@ -279,7 +279,7 @@ assets-vue: dummy
 #
 assets-flags: dummy
 	rm -fr master.zip apps/visitors/static/flag-icon-css/flags/4x3
-	curl --silent -L -O 'https://github.com/lipis/flag-icon-css/archive/master.zip'
+	curl --max-time 10 --silent -L -O 'https://github.com/lipis/flag-icon-css/archive/master.zip'
 	unzip master.zip
 	mv flag-icon-css-master/flags/4x3 apps/visitors/static/flag-icon-css/flags/
 	mv flag-icon-css-master/css/flag-icon.min.css apps/visitors/static/flag-icon-css/css/
