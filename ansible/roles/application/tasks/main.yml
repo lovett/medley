@@ -108,8 +108,6 @@
     - files/medley-geodb.timer
     - files/medley-db-maintenance.service
     - files/medley-db-maintenance.timer
-    - files/medley-fs-maintenance.service
-    - files/medley-fs-maintenance.timer
     - files/medley-headlines.service
     - files/medley-headlines.timer
     - files/medley-bucketpull.service

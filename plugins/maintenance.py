@@ -21,7 +21,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the maintenance prefix.
         """
         self.bus.subscribe("maintenance:db", self.db_maintenance)
-        self.bus.subscribe("maintenance:filesystem", self.fs_maintenance)
 
     @decorators.log_runtime
     def db_maintenance(
@@ -63,10 +62,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 f"db:{self.db_path}",
                 "ok"
             )
-
-    @staticmethod
-    @decorators.log_runtime
-    def fs_maintenance() -> None:
-        """Execute filesystem maintenance tasks."""
-
-        cherrypy.engine.publish("speak:prune")

@@ -6,11 +6,7 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-
 """
 
 import datetime
-import os
-import os.path
 import re
-import time
-import typing
 import cherrypy
 
 
@@ -93,43 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak:can_speak", self.can_speak)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
-        self.bus.subscribe("speak:prune", self.prune)
         self.bus.subscribe("speak", self.speak)
-
-    @staticmethod
-    def get_cache_path(hash_digest: typing.Optional[str] = None) -> str:
-        """The filesystem path of an audio file.
-
-        Caching audio files prevents unnecessary requests to the
-        external text-to-speech service and improves response time.
-
-        """
-
-        cache_root = os.path.join(
-            cherrypy.config.get("cache_dir"),
-            "speak",
-        )
-
-        if not hash_digest:
-            return cache_root
-
-        return os.path.join(
-            cache_root,
-            hash_digest[0:1],
-            hash_digest[0:2],
-            hash_digest + ".wav"
-        )
-
-    @staticmethod
-    def play_cached_file(cache_path: str) -> None:
-        """Submit a previously-generated audio file for playback."""
-
-        cherrypy.engine.publish(
-            "scheduler:add",
-            1,
-            "audio:wav:play",
-            cache_path
-        )
 
     @staticmethod
     def adjust_pronunciation(statement: str) -> str:
@@ -294,14 +254,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ssml_string
         ).pop()
 
-        cache_path = self.get_cache_path(hash_digest)
+        cache_key = f"speak:{hash_digest}"
 
-        if os.path.exists(cache_path) and os.path.getsize(cache_path) > 0:
-            # Updating the access time of the file makes it easier to identify
-            # unused files. Both access and modified times will be updated.
-            os.utime(cache_path)
+        cached_wave = cherrypy.engine.publish(
+            "cache:get",
+            cache_key
+        ).pop()
 
-            self.play_cached_file(cache_path)
+        if cached_wave:
+            cherrypy.engine.publish(
+                "scheduler:add",
+                1,
+                "audio:wav:play",
+                cached_wave
+            )
+
             return True
 
         auth_response = cherrypy.engine.publish(
@@ -333,63 +300,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             # The post request failed to return audio.
             return False
 
-        try:
-            os.makedirs(os.path.dirname(cache_path))
-        except FileExistsError:
-            pass
+        cherrypy.engine.publish(
+            "cache:set",
+            cache_key,
+            audio_bytes,
+            lifespan_seconds=2592000  # 1 month
+        )
 
-        with open(cache_path, "wb") as file_handle:
-            file_handle.write(audio_bytes)
+        cherrypy.engine.publish(
+            "scheduler:add",
+            1,
+            "audio:wav:play",
+            audio_bytes
+        )
 
-        if os.path.getsize(cache_path) == 0:
-            # The cache file didn't get written.
-            os.unlink(cache_path)
-            return False
-
-        self.play_cached_file(cache_path)
         return True
-
-    def prune(self, max_days: int = 45) -> None:
-        """Delete cache files older than the specified age."""
-
-        cache_root = self.get_cache_path()
-
-        if not os.path.isdir(cache_root):
-            return
-
-        min_age = time.time() - (max_days * 86400)
-
-        files_pruned = 0
-        dirs_pruned = 0
-
-        for root, dirs, files in os.walk(cache_root, topdown=False):
-            for file_name in files:
-                file_path = os.path.join(root, file_name)
-                statinfo = os.stat(file_path)
-
-                if statinfo.st_mtime < min_age:
-                    os.remove(file_path)
-                    files_pruned += 1
-
-            for dir_name in dirs:
-                dir_path = os.path.join(root, dir_name)
-                if not any(os.scandir(dir_path)):
-                    os.rmdir(dir_path)
-                    dirs_pruned += 1
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak",
-            "prune:files",
-            files_pruned
-        )
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak",
-            "prune:dirs",
-            dirs_pruned
-        )
 
     @staticmethod
     def mute() -> None:

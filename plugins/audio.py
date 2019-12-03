@@ -14,6 +14,7 @@ See  https://github.com/hamiltron/py-simple-audio
 """
 
 import cherrypy
+from . import decorators
 
 # Failure to import simpleaudio is allowed.
 try:
@@ -39,20 +40,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe('audio:wav:play', self.play)
 
     @staticmethod
-    def play(path: str) -> None:
-        """Play a file. So far only WAVE is supported."""
+    @decorators.log_runtime
+    def play(
+            audio_bytes: bytes,
+            channels: int = 1,
+            bytes_per_sample: int = 2,
+            sample_rate: int = 16000
+    ) -> None:
+        """Play a wave file provide as raw bytes."""
 
         if not SIMPLE_AUDIO:
-            cherrypy.log(f"Ignoring request to play {path}")
+            cherrypy.log(f"Ignoring request to play audio")
             return
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "audio",
-            "play",
-            path
+        play_obj = SIMPLE_AUDIO.play_buffer(
+            audio_bytes,
+            channels,
+            bytes_per_sample,
+            sample_rate
         )
 
-        wave_obj = SIMPLE_AUDIO.WaveObject.from_wave_file(path)
-        play_obj = wave_obj.play()
         play_obj.wait_done()
