@@ -3,7 +3,7 @@
 import typing
 
 
-NegotiableView = typing.Dict[str, str]
+NegotiableView = typing.Dict[str, typing.Any]
 
 Args = typing.List[typing.Any]
 

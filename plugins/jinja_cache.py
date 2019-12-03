@@ -18,13 +18,13 @@ class Cache(jinja2.BytecodeCache):
 
         key = self._cache_key(bucket)
 
-        cached_value = cherrypy.engine.publish(
+        publish_response = cherrypy.engine.publish(
             "cache:get",
             key
-        ).pop()
+        )
 
-        if cached_value:
-            bucket.bytecode_from_string(cached_value)
+        if publish_response:
+            bucket.bytecode_from_string(publish_response.pop())
 
     def dump_bytecode(self, bucket: jinja2.bccache.Bucket) -> None:
         """Store bytecode for future use."""

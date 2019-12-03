@@ -2,7 +2,9 @@
 
 import json
 import os.path
+import typing
 import cherrypy
+import local_types
 
 
 class Tool(cherrypy.Tool):
@@ -21,7 +23,7 @@ class Tool(cherrypy.Tool):
 
     response_format = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         cherrypy.Tool.__init__(
             self,
             "on_start_resource",
@@ -29,7 +31,7 @@ class Tool(cherrypy.Tool):
             priority=10
         )
 
-    def _setup(self):
+    def _setup(self) -> None:
         cherrypy.Tool._setup(self)
 
         cherrypy.request.hooks.attach(
@@ -38,7 +40,7 @@ class Tool(cherrypy.Tool):
             priority=5
         )
 
-    def _negotiate(self):
+    def _negotiate(self) -> None:
         """Decide on a response format.
 
         The default strategy is to base this decision on the Accept
@@ -76,7 +78,7 @@ class Tool(cherrypy.Tool):
             self.response_format = "text/html"
             return
 
-    def _finalize(self):
+    def _finalize(self) -> None:
         """Transform the response body provided by the controller to its final
         form.
 
@@ -107,40 +109,45 @@ class Tool(cherrypy.Tool):
         cherrypy.response.body = f"{final_body}\n\n".encode(self.charset)
 
     @staticmethod
-    def render_json(body):
+    def render_json(body: local_types.NegotiableView) -> str:
         """Render a response as JSON"""
         part = body.get("json")
 
         cherrypy.response.headers["Content-Type"] = "application/json"
 
-        return json.JSONEncoder().encode(part) if part else None
+        if not part:
+            return ''
 
-    def render_text(self, body):
+        return json.JSONEncoder().encode(part)
+
+    def render_text(self, body: local_types.NegotiableView) -> str:
         """Render a response as plain text"""
-        part = body.get("text")
-
-        if isinstance(part, str):
-            part = [part]
+        part = typing.cast(str, body.get("text"))
 
         content_type = f"text/plain;charset={self.charset}"
         cherrypy.response.headers["Content-Type"] = content_type
 
-        return "\n".join([str(line) for line in part]) if part else None
+        if part:
+            return part
 
-    def render_html(self, body):
+        return ''
+
+    def render_html(self, body: local_types.NegotiableView) -> str:
         """Render a response as HTML"""
         template_file, values = body.get("html", (None, None))
 
         if not template_file:
-            return None
+            return ''
 
-        template = cherrypy.engine.publish(
+        publish_response = cherrypy.engine.publish(
             "lookup-template",
             template_file
-        ).pop()
+        )
 
-        if not template:
-            return None
+        if not publish_response:
+            return ''
+
+        template = publish_response.pop()
 
         if not values:
             values = {}
@@ -159,7 +166,7 @@ class Tool(cherrypy.Tool):
         content_type = f"text/html;charset={self.charset}"
         cherrypy.response.headers["Content-Type"] = content_type
 
-        html = template.render(**values)
+        html = typing.cast(str, template.render(**values))
 
         if body.get("etag_key"):
             content_hash = cherrypy.engine.publish("hasher:md5", html).pop()

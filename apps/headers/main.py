@@ -22,7 +22,10 @@ class Controller:
 
         return {
             "json": headers,
-            "text": [f"{header[0]}: {header[1]}" for header in headers],
+            "text": "\n".join([
+                f"{header[0]}: {header[1]}"
+                for header in headers
+            ]),
             "html": ("headers.jinja.html", {
                 "headers": headers,
             })

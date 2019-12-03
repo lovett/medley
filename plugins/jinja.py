@@ -464,14 +464,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> str:
         """Generate an application URL via the URL plugin."""
 
+        publish_response = cherrypy.engine.publish(
+            "url:internal",
+            path=value,
+            query=query,
+            trailing_slash=trailing_slash
+        )
+
+        if not publish_response:
+            return ''
+
         url = typing.cast(
             str,
-            cherrypy.engine.publish(
-                "url:internal",
-                path=value,
-                query=query,
-                trailing_slash=trailing_slash
-            ).pop()
+            publish_response.pop()
         )
 
         if context.eval_ctx.autoescape:
