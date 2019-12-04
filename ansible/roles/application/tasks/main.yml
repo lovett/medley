@@ -119,7 +119,6 @@
   with_items:
     - medley-geodb.timer
     - medley-db-maintenance.timer
-    - medley-fs-maintenance.timer
     - medley-headlines.timer
     - medley-bucketpull.timer
 
