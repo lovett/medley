@@ -219,7 +219,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             key: str,
             memorize: bool = False,
-            as_path: bool = False
+            as_path: bool = False,
+            default: typing.Any = None
     ) -> typing.Any:
         """Perform a search by key and return the value of the first match."""
 
@@ -237,7 +238,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         try:
             value = result[0]["value"]
         except IndexError:
-            value = None
+            value = default
 
         if as_path:
             value = pathlib.Path(value)

@@ -83,17 +83,6 @@ setup: dummy
 	pip install -r requirements-dev.txt
 
 
-# Install simpleaudio, an additional library for wav file playback
-#
-# This is an optional step that is separate from the main setup target
-# because it can be a hassle to build. On Debian you'll need to have the
-# libasound2-dev package installed.
-#
-# The non-audio parts of medley work fine without this library.
-#
-setup-audio:
-	pip install -r requirements-audio.txt
-
 # Run a local development webserver
 #
 serve: dummy

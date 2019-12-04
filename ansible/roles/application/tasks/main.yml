@@ -51,13 +51,6 @@
     requirements: "{{ project_root }}/requirements.txt"
     virtualenv: "{{ project_root }}/venv"
 
-- name: Install python audio packages
-  become: true
-  become_user: "{{ project_user }}"
-  pip:
-    requirements: "{{ project_root }}/requirements-audio.txt"
-    virtualenv: "{{ project_root }}/venv"
-
 - name: Set permissions on application root
   become: true
   file:

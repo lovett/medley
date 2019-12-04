@@ -265,7 +265,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "scheduler:add",
                 1,
-                "audio:wav:play",
+                "audio:play_bytes",
                 cached_wave
             )
 
@@ -310,7 +310,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.engine.publish(
             "scheduler:add",
             1,
-            "audio:wav:play",
+            "audio:play_bytes",
             audio_bytes
         )
 
