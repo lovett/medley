@@ -19,7 +19,6 @@
       - "--exclude=venv"
       - "--exclude=.cache"
       - "--exclude=requirements.txt"
-      - "--exclude=requirements-audio.txt"
 
 # The shell module is used to create the virtualenv for simplicity.
 # The pip module could do it, but needs a virtualenv executable which
@@ -37,12 +36,6 @@
   copy:
     src: "../../../../requirements.txt"
     dest: "{{ project_root }}/requirements.txt"
-
-- name: Install audio requirements file
-  become: true
-  copy:
-    src: "../../../../requirements-audio.txt"
-    dest: "{{ project_root }}/requirements-audio.txt"
 
 - name: Install python application packages
   become: true
