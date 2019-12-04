@@ -27,15 +27,49 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.capture()
-    def POST(statement=None, locale="en-IE", gender="Male", **kwargs):
+    def POST(*_args, **kwargs):
         """Accept a piece of text for text-to-speech conversion"""
 
+        statement = kwargs.get("statement")
+        locale = kwargs.get("locale", "en-GB")
+        gender = kwargs.get("gender", "Male")
         action = kwargs.get("action", None)
+
+        announcements = cherrypy.engine.publish(
+            "registry:search",
+            "speak:announcement:*",
+            as_dict=True,
+            key_slice=2
+        ).pop()
+
+        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
+
+        if action == "toggle":
+            action = "unmute"
+            if can_speak:
+                action = "mute"
+
         if action == "mute":
             cherrypy.engine.publish("speak:mute")
 
+            if "mute" in announcements:
+                cherrypy.engine.publish(
+                    "speak",
+                    announcements["mute"],
+                    locale,
+                    gender
+                )
+
         if action == "unmute":
             cherrypy.engine.publish("speak:unmute")
+
+            if "unmute" in announcements:
+                cherrypy.engine.publish(
+                    "speak",
+                    announcements["unmute"],
+                    locale,
+                    gender
+                )
 
         if action:
             app_url = cherrypy.engine.publish(
@@ -43,8 +77,6 @@ class Controller:
             ).pop()
 
             raise cherrypy.HTTPRedirect(app_url)
-
-        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
 
         if not can_speak:
             response_status = 202
