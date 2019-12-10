@@ -112,10 +112,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                         in urllib.parse.parse_qs(payload).items()
                     }
 
-                if "forwarded-for" in pairs:
-                    value = pairs["forwarded-for"]
-                    pairs["forwarded-for"] = value.split(',')[0]
-
                 if "trace" not in pairs:
                     continue
 
