@@ -7,9 +7,14 @@ Type=notify
 NotifyAccess=all
 User=medley
 Group=medley
-Environment=MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP=1
+Environment=MEDLEY.notify_systemd_at_startup=1
+Environment=MEDLEY.database_dir=/var/medley/db
 WorkingDirectory={{ project_root }}
 ExecStart={{ project_root }}/venv/bin/python medley.py
 
 [Install]
 WantedBy=multi-user.target
+
+# Local Variables:
+# mode: conf
+# End:

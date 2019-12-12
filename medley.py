@@ -65,7 +65,6 @@ def setup() -> None:
     # These are reasonable values for a production environment.
     cherrypy.config.update({
         "app_root": app_root,
-        "cache_dir": "./cache",
         "cache_static_assets": True,
         "database_dir": "./db",
         "engine.autoreload.on": False,
@@ -90,33 +89,36 @@ def setup() -> None:
         "tools.gzip.on": True,
     })
 
-    # Overrides to the default configuration are sourced from
-    # one or more external files.
-    config_candidates = (
-        "/etc/medley.conf",
-        os.path.join(server_root, "medley.conf")
-    )
-
-    for path in config_candidates:
-        if os.path.isfile(path):
-            cherrypy.config.update(path)
-            cherrypy.log(f"Configuration overrides loaded from {path}")
-
-    # Directory creation
+    # Configuration overrides
     #
-    # Filesystem paths specified in the configuration are expected to
-    # already exist. Try to create them if they don't.
-    for key in ("database_dir", "cache_dir"):
-        value = cherrypy.config.get(key)
+    # Accept any environment variable that starts with "MEDLEY."
+    environment_config = {
+        key[7:]: os.getenv(key)
+        for key in os.environ
+        if key.startswith("MEDLEY")
+    }
 
-        try:
-            os.mkdir(value)
-        except FileExistsError:
-            pass
-        except PermissionError:
-            raise SystemExit(
-                f"Unable to create {key} directory at {value}"
-            )
+    for key, value in environment_config.items():
+        if value == "True":
+            environment_config[key] = True
+        if value == "False":
+            environment_config[key] = False
+        if value.isnumeric():
+            environment_config[key] = int(value)
+
+    if environment_config:
+        cherrypy.config.update(environment_config)
+
+    # Database Directory
+    #
+    # Databases will be created automatically, but the directory they
+    # reside in needs to exist.
+    try:
+        os.mkdir(cherrypy.config.get("database_dir"))
+    except FileExistsError:
+        pass
+    except PermissionError:
+        raise SystemExit("No permission to create database directory")
 
     # Mount the apps
     for app in os.listdir(app_root):
@@ -229,7 +231,7 @@ def setup() -> None:
 if __name__ == '__main__':
     setup()
 
-    if os.environ.get("MEDLEY_NOTIFY_SYSTEMD_AT_STARTUP"):
+    if cherrypy.config.get("notify_systemd_at_startup"):
         sdnotify.SystemdNotifier().notify("READY=1")
 
     cherrypy.engine.publish("server:ready")

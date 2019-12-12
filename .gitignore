@@ -21,7 +21,6 @@ ansible/*.hosts
 ansible/host_vars
 ansible/install.retry
 venv
-cache
 node_modules
 .pytest_cache
 .mypy_cache

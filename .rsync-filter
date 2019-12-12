@@ -6,7 +6,6 @@
 - /.vagrant
 - /.cache
 - /.git
-- /cache
 - /coverage
 - /.coverage
 - /testing
