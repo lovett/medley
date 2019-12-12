@@ -1,19 +1,47 @@
 {% extends "base.jinja.html" %}
+{% import "macros.jinja.html" as macros -%}
 
 {% block page_body %}
+    {{ macros.svgSymbols("edit") }}
+
     <main>
-        {% if can_speak %}
-            <form method="POST" action="{{ app_url }}">
-                <input type="hidden" name="action" value="mute" />
-                <button>Mute now</button>
-                <span class="label">Not currently muted.</span>
-            </form>
-        {% else %}
-            <form method="POST" action="{{ app_url }}">
-                <input type="hidden" name="action" value="unmute" />
-                <button>Unmute</button>
-                <span class="label">Currently muted.</span>
-            </form>
+        {% if muted_by_schedule %}
+            <p>Automuted by schedule.</p>
         {% endif %}
+
+        {% if not muted_by_schedule %}
+            {% if can_speak %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="mute" />
+                    <button>Mute now</button>
+                    <span class="label">Not currently muted.</span>
+                </form>
+            {% else %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button>Unmute</button>
+                    <span class="label">Currently muted.</span>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        {% if schedules %}
+            <p>
+                Muting occurs automatically from
+
+                {% for schedule in schedules %}
+                    {{ schedule|replace("\n", " → ") }}
+
+                    {% if not loop.last %}and{% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        <p>
+            <a class="template-edit" href="{{ registry_url }}">
+                <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                Edit schedule
+            </a>
+        </p>
     </main>
 {% endblock %}

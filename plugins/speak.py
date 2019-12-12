@@ -87,6 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the speak prefix.
         """
         self.bus.subscribe("speak:can_speak", self.can_speak)
+        self.bus.subscribe("speak:muted_by_schedule", self.muted_by_schedule)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak", self.speak)
@@ -150,47 +151,64 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return document.strip().encode("utf-8")
 
-    @staticmethod
-    def can_speak() -> bool:
+    def can_speak(self) -> bool:
         """Determine whether the application has been muted."""
 
-        config = cherrypy.engine.publish(
-            "registry:search",
-            keys=("speak:mute", "speak:mute:temporary"),
-            as_dict=True,
-            key_slice=1
+        temporarily_muted = cherrypy.engine.publish(
+            "registry:first_value",
+            "speak:mute:temporary"
         ).pop()
+
+        if temporarily_muted:
+            return False
+
+        return not self.muted_by_schedule()
+
+    @staticmethod
+    def muted_by_schedule() -> bool:
+        """Determine whether an automute schedule is active."""
+
+        schedules = cherrypy.engine.publish(
+            "registry:search",
+            "speak:mute",
+            exact=True,
+            as_value_list=True
+        ).pop()
+
+        if not schedules:
+            return False
 
         today = datetime.date.today()
         tomorrow = today + datetime.timedelta(1)
         now = datetime.datetime.now()
 
-        if "mute:temporary" in config:
-            return False
+        for schedule in schedules:
+            schedule_lines = [
+                line.rstrip()
+                for line in schedule.split("\n")
+            ]
 
-        schedule = [
-            line.rstrip()
-            for line in config.get("mute", "").split("\n")
-        ]
+            for time_format in ("%I:%M %p", "%H:%M"):
+                try:
+                    time_range = [
+                        datetime.datetime.strptime(line, time_format)
+                        for line in schedule_lines
+                    ]
+                    break
+                except ValueError:
+                    return True
 
-        for time_format in ("%I:%M %p", "%H:%M"):
-            try:
-                time_range = [
-                    datetime.datetime.strptime(line, time_format)
-                    for line in schedule
-                ]
-                break
-            except ValueError:
+            start = datetime.datetime.combine(today, time_range[0].time())
+
+            if time_range[1] < time_range[0]:
+                end = datetime.datetime.combine(tomorrow, time_range[1].time())
+            else:
+                end = datetime.datetime.combine(today, time_range[1].time())
+
+            if start <= now <= end:
                 return True
 
-        start = datetime.datetime.combine(today, time_range[0].time())
-        if time_range[1] < time_range[0]:
-            end = datetime.datetime.combine(tomorrow, time_range[1].time())
-        else:
-            end = datetime.datetime.combine(today, time_range[1].time())
-
-        in_schedule = start <= now <= end
-        return not in_schedule
+        return False
 
     def speak(
             self,
@@ -318,15 +336,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def mute() -> None:
-        """Disable text-to-speech by creating a 24-hour muting
-        schedule.
-
-        """
+        """Disable text-to-speech."""
 
         cherrypy.engine.publish(
             "registry:add",
             "speak:mute:temporary",
-            ["12:00 AM\n11:59 PM"],
+            ["1"],
             False
         )
 

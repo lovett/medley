@@ -233,7 +233,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if memorize_hit:
                 return memorize_value
 
-        result = self.search(key=key, limit=1)
+        result = self.search(key=key, exact=True, limit=1)
 
         try:
             value = result[0]["value"]

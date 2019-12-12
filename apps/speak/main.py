@@ -13,15 +13,33 @@ class Controller:
     @staticmethod
     @cherrypy.tools.negotiable()
     def GET(*_args, **_kwargs):
-        """Present an interface for on-demand and scheduled muting of the
-        application.
+        """Present an interface for on-demand muting of the speech service."""
 
-        """
         can_speak = cherrypy.engine.publish("speak:can_speak").pop()
+
+        muted_by_schedule = cherrypy.engine.publish(
+            "speak:muted_by_schedule"
+        ).pop()
+
+        schedules = cherrypy.engine.publish(
+            "registry:search",
+            "speak:mute",
+            exact=True,
+            as_value_list=True
+        ).pop()
+
+        registry_url = cherrypy.engine.publish(
+            "url:internal",
+            "/registry",
+            {"q": "speak:mute"}
+        ).pop()
 
         return {
             "html": ("speak.jinja.html", {
-                "can_speak": can_speak
+                "can_speak": can_speak,
+                "muted_by_schedule": muted_by_schedule,
+                "registry_url": registry_url,
+                "schedules": schedules
             })
         }
 
