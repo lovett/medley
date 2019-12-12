@@ -3,7 +3,7 @@
 import re
 import typing
 import cherrypy
-import markdown
+import mistletoe
 import local_types
 
 
@@ -73,7 +73,7 @@ def view_story(response: typing.Any) -> local_types.NegotiableView:
     story = story_wrapper.get("data")
 
     if story.get("selftext"):
-        story["selftext"] = markdown.markdown(story["selftext"], tab_length=2)
+        story["selftext"] = mistletoe.markdown(story["selftext"])
 
     comments = (
         child.get("data", {})
