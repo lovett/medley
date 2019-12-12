@@ -7,8 +7,8 @@ Type=notify
 NotifyAccess=all
 User=medley
 Group=medley
-Environment=MEDLEY.notify_systemd_at_startup=1
-Environment=MEDLEY.database_dir=/var/medley/db
+Environment=MEDLEY__notify_systemd_at_startup=1
+Environment=MEDLEY__database_dir=/var/medley/db
 WorkingDirectory={{ project_root }}
 ExecStart={{ project_root }}/venv/bin/python medley.py
 

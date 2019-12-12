@@ -85,11 +85,11 @@ setup: dummy
 
 # Run a local development webserver
 #
-serve: export MEDLEY.engine.autoreload.on=True
-serve: export MEDLEY.memorize_checksums=False
-serve: export MEDLEY.request.show_tracebacks=True
-serve: export MEDLEY.cache_static_assets=True
-serve: export MEDLEY.use_service_workers=True
+serve: export MEDLEY__engine__autoreload__on=True
+serve: export MEDLEY__memorize_checksums=False
+serve: export MEDLEY__request__show_tracebacks=True
+serve: export MEDLEY__cache_static_assets=True
+serve: export MEDLEY__use_service_workers=True
 serve:
 	python medley.py
 

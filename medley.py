@@ -91,9 +91,10 @@ def setup() -> None:
 
     # Configuration overrides
     #
-    # Accept any environment variable that starts with "MEDLEY."
+    # Accept any environment variable that starts with "MEDLEY".
+    # Double underscores are used for systemd compatibilty.
     environment_config = {
-        key[7:]: os.getenv(key)
+        key[8:].replace("__", "."): os.getenv(key)
         for key in os.environ
         if key.startswith("MEDLEY")
     }
