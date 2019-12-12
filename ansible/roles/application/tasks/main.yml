@@ -41,6 +41,7 @@
   become: true
   become_user: "{{ project_user }}"
   pip:
+    extra_args: "--disable-pip-version-check"
     requirements: "{{ project_root }}/requirements.txt"
     virtualenv: "{{ project_root }}/venv"
 
