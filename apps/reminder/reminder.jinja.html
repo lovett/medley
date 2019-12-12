@@ -67,24 +67,22 @@
                                class="hash-focus-candidate"
                                data-hash-focus-id="{{ template.notification_id }}"
                             >
-                                ◆ {{ template.message }}
-                            </a>
-                            <div class="details">
-                                <p>
+                                <span class="title">{{ template.message }}</span>
+                                <div class="details">
                                     {{ template.duration_in_words }}
                                     {%- if template.notification_id %}
                                         / #{{ template.notification_id }}
                                     {%- endif -%}
-                                </p>
-                            </div>
+                                </div>
+                            </a>
                         </div>
                     </discardable-record>
                 {% endfor %}
 
                 {% if registry_url %}
-                    <a href="{{ registry_url }}">
+                    <a class="template-edit" href="{{ registry_url }}">
                         <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                        Edit
+                        Edit templates
                     </a>
                 {% endif %}
             </div>

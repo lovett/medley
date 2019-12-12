@@ -47,18 +47,23 @@
 }
 
 .template {
-    margin-bottom: 1em;
+    margin-bottom: 0.5em;
 }
 
 .template > a {
     display: block;
     grid-area: template-trigger;
-    padding: .25em;
-    margin-left: -.25em;
+    text-decoration: none;
+    padding: .25em 0;
+    line-height: 1.3;
 }
 
-.template p {
-    margin: 0;
+.template .title {
+    display: block;
+}
+
+.template .title:hover {
+    text-decoration: underline;
 }
 
 .template .details {
@@ -66,7 +71,7 @@
     flex-flow: row nowrap;
     align-items: baseline;
     font-size: .75em;
-    margin-left: 1.5em;
+    color: var(--black);
 }
 
 .template .action-button {
@@ -74,8 +79,14 @@
 }
 
 .template a:focus {
+    padding: .5em;
     background-color: var(--secondary);
     color: currentColor;
+}
+
+.template-edit {
+    display: block;
+    padding: 2em 0;
 }
 
 /* Small devices */
