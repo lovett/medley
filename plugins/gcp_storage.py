@@ -52,12 +52,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "Missing gcp:service_account in registry"
             )
 
-        service_account_json = json.loads(config["service_account"])
-
         scopes = config.get("scope", "").split("\n")
 
         credentials = Credentials.from_service_account_info(
-            service_account_json,
+            json.loads(config["service_account"]),
             scopes=scopes
         )
 
@@ -72,67 +70,75 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         download_root = pathlib.Path(storage_root)
 
-        for blob in blobs:
-            blob_path = pathlib.Path(blob.name)
+        try:
+            for blob in blobs:
+                blob_path = pathlib.Path(blob.name)
 
-            destination_path = download_root / blob_path
+                destination_path = download_root / blob_path
 
-            should_delete = False
+                should_delete = False
 
-            if destination_path.exists():
-                should_delete = True
+                if destination_path.exists():
+                    should_delete = True
 
-                if blob.size != destination_path.stat().st_size:
-                    should_delete = False
-
-                if should_delete and "request_log" in blob_path.parts:
-                    lines_in_blob = 0
-                    with open(destination_path) as handle:
-                        for lines_in_blob, _ in enumerate(handle):
-                            pass
-
-                    # Add one to account for the last line.
-                    lines_in_blob += 1
-
-                    lines_in_database = cherrypy.engine.publish(
-                        "logindex:count_lines",
-                        blob_path
-                    ).pop()
-
-                    if lines_in_database != lines_in_blob:
+                    if blob.size != destination_path.stat().st_size:
                         should_delete = False
 
-            if should_delete:
-                try:
-                    blob.delete()
-                except google.api_core.exceptions.GoogleAPIError:
-                    bucket_name = config.get("bucket")
-                    cherrypy.log(
-                        f"Cannot delete GCP blob in {bucket_name}"
+                    if should_delete and "request_log" in blob_path.parts:
+                        lines_in_blob = 0
+                        with open(destination_path) as handle:
+                            for lines_in_blob, _ in enumerate(handle):
+                                pass
+
+                        # Add one to account for the last line.
+                        lines_in_blob += 1
+
+                        lines_in_database = cherrypy.engine.publish(
+                            "logindex:count_lines",
+                            blob_path
+                        ).pop()
+
+                        if lines_in_database != lines_in_blob:
+                            should_delete = False
+
+                if should_delete:
+                    try:
+                        blob.delete()
+                    except google.api_core.exceptions.GoogleAPIError:
+                        bucket_name = config.get("bucket")
+                        cherrypy.log(
+                            f"Cannot delete GCP blob in {bucket_name}"
+                        )
+                    continue
+
+                if not destination_path.parent.is_dir():
+                    destination_path.parent.mkdir(parents=True)
+
+                blob.download_to_filename(destination_path)
+
+                request_top_path = ("appengine.googleapis.com", "request_log")
+
+                publish_event = None
+
+                if blob_path.parts[0:2] == request_top_path:
+                    publish_event = "gcp:appengine:ingest_file"
+
+                if publish_event:
+                    cherrypy.engine.publish(
+                        "scheduler:add",
+                        1,
+                        publish_event,
+                        blob_path
                     )
-                continue
 
-            if not destination_path.parent.is_dir():
-                destination_path.parent.mkdir(parents=True)
-
-            blob.download_to_filename(destination_path)
-
-            request_top_path = ("appengine.googleapis.com", "request_log")
-
-            publish_event = None
-
-            if blob_path.parts[0:2] == request_top_path:
-                publish_event = "gcp:appengine:ingest_file"
-
-            if publish_event:
-                cherrypy.engine.publish(
-                    "scheduler:add",
-                    1,
-                    publish_event,
-                    blob_path
-                )
-
-            files_pulled += 1
+                files_pulled += 1
+        except google.auth.exceptions.GoogleAuthError as exception:
+            cherrypy.engine.publish(
+                "applog:add",
+                "exception",
+                "gcp_storage:pull_bucket",
+                exception
+            )
 
         cherrypy.engine.publish(
             "applog:add",
