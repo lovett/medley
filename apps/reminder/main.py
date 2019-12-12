@@ -4,6 +4,7 @@ import random
 import string
 from urllib.parse import urlencode, parse_qs
 import cherrypy
+import pendulum
 
 
 class Controller:
@@ -95,12 +96,7 @@ class Controller:
                     in parse_qs(template).items()
                 }
 
-                parsed_id = parsed_template.get("notification_id")
-
-                if not parsed_id:
-                    continue
-
-                if parsed_id == notification_id:
+                if parsed_template.get("notification_id") == notification_id:
                     message = parsed_template.get("message")
                     minutes = parsed_template.get("minutes")
                     hours = parsed_template.get("hours")
@@ -140,10 +136,14 @@ class Controller:
                 )
             )
 
+        expiration_time = pendulum.now().add(
+            minutes=total_minutes
+        ).format('LT')
+
         start_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
-            title="Timer in progress",
+            title=f"Timer in progress until {expiration_time}",
             body=message,
             localId=local_id,
             expiresAt=f"{total_minutes} minutes"
