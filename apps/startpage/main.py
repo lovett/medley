@@ -10,7 +10,7 @@ class Controller:
 
     name = "Startpage"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     default_page_name = "default"
 

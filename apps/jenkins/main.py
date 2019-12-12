@@ -30,7 +30,7 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     exposed = True
-    user_facing = False
+    show_on_homepage = False
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()

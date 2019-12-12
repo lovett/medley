@@ -34,9 +34,9 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.notification.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.notification.main.Controller)
+        self.assert_not_show_on_homepage(apps.notification.main.Controller)
 
     def test_requires_json(self):
         """Request bodies must be JSON"""

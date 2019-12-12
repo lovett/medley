@@ -10,7 +10,7 @@ class Controller:
 
     name = "Homepage"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @decorators.log_runtime
     def catalog_apps(self, apps):
@@ -29,7 +29,11 @@ class Controller:
 
             summary = doc.strip().split("\n").pop(0)
 
-            user_facing = getattr(controller.root, "user_facing", False)
+            show_on_homepage = getattr(
+                controller.root,
+                "show_on_homepage",
+                False
+            )
 
             name = mount_path.lstrip("/")
 
@@ -45,7 +49,7 @@ class Controller:
                 name,
                 url,
                 summary,
-                user_facing
+                show_on_homepage
             ))
 
         catalog.sort(key=lambda tup: tup[0])

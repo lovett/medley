@@ -10,7 +10,7 @@ class Controller:
 
     name = "Transform"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     transforms = {}
 
@@ -49,7 +49,7 @@ class Controller:
 
     def list_of_transforms(self):
         """Shape the list of transforms into a list of keys"""
-        return sorted(list(self.transforms.keys()))
+        return sorted(self.transforms.keys())
 
     @cherrypy.tools.negotiable()
     def GET(self, *_args, **_kwargs):

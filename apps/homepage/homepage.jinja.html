@@ -13,8 +13,8 @@
 {% block page_body %}
     <main>
         <section>
-            {% for name, url, description, user_facing in apps %}
-                {% if user_facing %}
+            {% for name, url, description, show_on_homepage in apps %}
+                {% if show_on_homepage %}
                     <p class="item">
                         <a class="name" href="{{ url }}">{{ name }}</a>
                         <span class="description">{{ description }}</span>

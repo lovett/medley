@@ -8,7 +8,7 @@ class Controller:
 
     exposed = True
 
-    user_facing = False
+    show_on_homepage = False
 
     cache_key = "countries"
 

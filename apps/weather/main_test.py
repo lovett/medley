@@ -28,9 +28,9 @@ class TestWeather(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.weather.main.Controller)
 
-    def test_user_facing(self):
+    def test_show_on_homepage(self):
         """The application is displayed in the homepage app."""
-        self.assert_user_facing(apps.weather.main.Controller)
+        self.assert_show_on_homepage(apps.weather.main.Controller)
 
 
 if __name__ == "__main__":

@@ -33,9 +33,9 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.headers.main.Controller)
 
-    def test_user_facing(self):
+    def test_show_on_homepage(self):
         """The application is displayed in the homepage app."""
-        self.assert_user_facing(apps.headers.main.Controller)
+        self.assert_show_on_homepage(apps.headers.main.Controller)
 
     def test_returns_html(self):
         """GET returns text/html by default"""

@@ -61,9 +61,9 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.geodb.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.geodb.main.Controller)
+        self.assert_not_show_on_homepage(apps.geodb.main.Controller)
 
     def test_action_required(self):
         """A post request without a valid action fails."""

@@ -34,9 +34,9 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.speak.main.Controller)
 
-    def test_user_facing(self):
+    def test_show_on_homepage(self):
         """The application is displayed in the homepage app."""
-        self.assert_user_facing(apps.speak.main.Controller)
+        self.assert_show_on_homepage(apps.speak.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
     def test_muted(self, publish_mock):

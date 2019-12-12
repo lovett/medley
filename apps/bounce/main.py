@@ -9,7 +9,7 @@ class Controller:
 
     name = "Bounce"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     common_names = {
         "dev",

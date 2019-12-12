@@ -12,7 +12,7 @@ class Controller:
 
     name = "Weather"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @cherrypy.tools.negotiable()
     def GET(self, *_args, **_kwargs):

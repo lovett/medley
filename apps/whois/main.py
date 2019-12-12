@@ -12,7 +12,7 @@ class Controller:
 
     name = "Whois"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @staticmethod
     @cherrypy.tools.negotiable()

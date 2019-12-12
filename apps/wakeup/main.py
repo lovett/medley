@@ -10,7 +10,7 @@ class Controller:
 
     name = "Wakeup"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @staticmethod
     @cherrypy.tools.negotiable()

@@ -64,9 +64,9 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.countries.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.countries.main.Controller)
+        self.assert_not_show_on_homepage(apps.countries.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
     def test_registry_save(self, publish_mock):

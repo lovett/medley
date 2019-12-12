@@ -34,9 +34,9 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.maintenance.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not_displayed in the homepage app."""
-        self.assert_not_user_facing(apps.maintenance.main.Controller)
+        self.assert_not_show_on_homepage(apps.maintenance.main.Controller)
 
     def test_group_required(self):
         """The group parameter must be specified."""

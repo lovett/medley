@@ -33,9 +33,9 @@ class TestBucketpull(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.bucketpull.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.bucketpull.main.Controller)
+        self.assert_not_show_on_homepage(apps.bucketpull.main.Controller)
 
     def test_service_missing(self):
         """The service to pull from is specified in the first URL segment."""

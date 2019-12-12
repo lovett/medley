@@ -12,7 +12,7 @@ class Controller:
 
     name = "Reminder"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     registry_key = "reminder:template"
 

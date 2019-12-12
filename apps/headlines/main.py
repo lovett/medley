@@ -9,7 +9,7 @@ class Controller:
 
     name = "Headlines"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     cache_key = "headlines"
 

@@ -31,9 +31,9 @@ class TestShared(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.shared.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.shared.main.Controller)
+        self.assert_not_show_on_homepage(apps.shared.main.Controller)
 
     def test_redirect(self):
         """GET redirects to the homepage"""

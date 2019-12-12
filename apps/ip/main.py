@@ -8,7 +8,7 @@ class Controller:
 
     name = "IP"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     cache_key = "ip:external"
 

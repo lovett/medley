@@ -11,7 +11,7 @@ class Controller:
     """Dispatch application requests based on HTTP verb."""
 
     exposed = True
-    user_facing = False
+    show_on_homepage = False
 
     def POST(self, *args, **kwargs):
         """

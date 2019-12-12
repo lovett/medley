@@ -33,9 +33,9 @@ class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.alturl.main.Controller)
 
-    def test_user_facing(self):
+    def test_show_on_homepage(self):
         """The application is displayed in the homepage app."""
-        self.assert_user_facing(apps.alturl.main.Controller)
+        self.assert_show_on_homepage(apps.alturl.main.Controller)
 
 
 if __name__ == "__main__":

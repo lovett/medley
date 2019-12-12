@@ -39,9 +39,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.bounce.main.Controller)
 
-    def test_user_facing(self):
+    def test_show_on_homepage(self):
         """The application is displayed in the bounce app."""
-        self.assert_user_facing(apps.bounce.main.Controller)
+        self.assert_show_on_homepage(apps.bounce.main.Controller)
 
     def test_host_reduction(self):
         """An incoming URL is reduced to its host name."""

@@ -32,9 +32,9 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.azure.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is displayed in the homepage app."""
-        self.assert_not_user_facing(apps.azure.main.Controller)
+        self.assert_not_show_on_homepage(apps.azure.main.Controller)
 
     def test_requires_site_name(self):
         """The request body must specify a site name"""

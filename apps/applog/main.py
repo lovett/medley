@@ -8,7 +8,7 @@ class Controller:
 
     name = "App Log"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @staticmethod
     @cherrypy.tools.negotiable()

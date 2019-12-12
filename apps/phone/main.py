@@ -8,7 +8,7 @@ class Controller:
 
     name = "Phone"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     messages = {
         "invalid": "The number provided was invalid",

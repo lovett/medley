@@ -145,9 +145,9 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.jenkins.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.jenkins.main.Controller)
+        self.assert_not_show_on_homepage(apps.jenkins.main.Controller)
 
     def test_rejects_html(self):
         """The request body must contain JSON"""

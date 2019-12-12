@@ -80,13 +80,13 @@ class ResponseAssertions(unittest.TestCase):
         """The application controller's exposed attribute is set."""
         self.assertTrue(controller.exposed)
 
-    def assert_user_facing(self, controller):
+    def assert_show_on_homepage(self, controller):
         """The application is presented on the homepge."""
-        self.assertTrue(controller.user_facing)
+        self.assertTrue(controller.show_on_homepage)
 
-    def assert_not_user_facing(self, controller):
+    def assert_not_show_on_homepage(self, controller):
         """The application is not presented on the homepge."""
-        self.assertFalse(controller.user_facing)
+        self.assertFalse(controller.show_on_homepage)
 
     def assert_404(self, response):
         """The response code is 404."""

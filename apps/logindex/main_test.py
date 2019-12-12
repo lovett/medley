@@ -35,9 +35,9 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.logindex.main.Controller)
 
-    def test_not_user_facing(self):
+    def test_not_show_on_homepage(self):
         """The application is not displayed in the homepage app."""
-        self.assert_not_user_facing(apps.logindex.main.Controller)
+        self.assert_not_show_on_homepage(apps.logindex.main.Controller)
 
     def test_invalid_start(self):
         """An error should be thrown if the start date cannot be parsed"""
