@@ -69,10 +69,50 @@ class Controller:
             }),
         }
 
-    # pylint: disable=too-many-arguments
-    def POST(self, message, minutes=None, hours=None, comments=None,
-             notification_id=None, url=None, remember=None):
+    def POST(self, *args, **kwargs):
         """Queue a new reminder for delivery."""
+
+        message = kwargs.get("message")
+        minutes = kwargs.get("minutes")
+        hours = kwargs.get("hours")
+        comments = kwargs.get("comments")
+        notification_id = kwargs.get("notification_id")
+        url = kwargs.get("url")
+        remember = kwargs.get("remember")
+
+        if notification_id and not message:
+            templates = cherrypy.engine.publish(
+                "registry:search",
+                "reminder:template",
+                as_value_list=True,
+                exact=True
+            ).pop()
+
+            for template in templates:
+                parsed_template = {
+                    k: v[-1]
+                    for k, v
+                    in parse_qs(template).items()
+                }
+
+                parsed_id = parsed_template.get("notification_id")
+
+                if not parsed_id:
+                    continue
+
+                if parsed_id == notification_id:
+                    message = parsed_template.get("message")
+                    minutes = parsed_template.get("minutes")
+                    hours = parsed_template.get("hours")
+                    comments = parsed_template.get("comments")
+                    url = parsed_template.get("url")
+                    break
+
+        if notification_id and not message:
+            raise cherrypy.HTTPError(
+                400,
+                "Invalid notification id"
+            )
 
         try:
             minutes = int(minutes)
