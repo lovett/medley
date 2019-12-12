@@ -1,103 +1,82 @@
 # Medley
 
 A collection of small, single-purpose web applications that live under
-one roof so that each one doesn't have to reinvent all the wheels.
+one roof. It's for odds-and-ends situations where you think to
+yourself, "I should write a script/app/api for that..." but
+don't want it to turn into a full-blown project.
 
-It's for all the situations when you think to yourself, "I should
-write a script/app/webpage that does X" but then get waylaid by
-setting up Y, Z, and all the other things that need to be established
-before X is even on the table.
-
-It's also driven by whatever I have a need for, so unless you're me
-the roster of what's available will seem random. Because it is.
-
-There currently around two dozen applications and services. Some of
-the more interesting ones include:
-
-* a bookmark manager
-* a text-to-speech service that uses Microsoft's Speech API
-* a URL bouncer for jumping between dev, stage, and production
-  versions of a given URL
-* a webserver log file parser, archiver, and viewer
-* an alarm and reminder service
-
-Medley is written in Python 3 and uses the CherryPy framework with
+Medley is written in Python and uses the CherryPy framework with
 SQLite.
 
+You probably don't want to run this application yourself. It's
+entirely driven by whatever I have a need for, so unless you're me the
+roster of what's available will seem random.
+
+It might be relevant if you're building something of your own with
+CherryPy and are interested in how the pieces of that framework can be
+put together.
+
 ## Setup
-You'll need at least Python 3.5. The rest should just be standard
-Python application ceremony:
+
+I target the current version of Python 3 in Raspbian, currently
+3.7. Everything else should be standard Python application ceremony,
+driven by `make`:
 
 ```sh
-# Set up a virtual environment
+# Create a virtual environment
 make venv
 source venv/bin/activate
 
 # Install third-party libraries
 make setup
 
-# Optional: install one additional library for audio playback.
-make setup-audio
-
-# Start the server
+# Start a dev server on localhost:8085
 make serve
 ```
 
 ## Configuration
-By default the server runs under a development configuration and
-listens on port 8085. The following default values can be overridden
-by creating a file named `medley.conf` in either the application root,
-or under `/etc`.
 
-If used, the `medley.conf` file should be formatted in INI style with
-all values placed under a section called "global". For example:
+The server's default configuration is reasonable for production use.
+Adjustments to the defaults can be made with environment
+variables. Any environment variable that starts with `MEDLEY.` will be
+added to the CherryPy global config.
 
-```ini
-[global]
-database_dir: "/var/db"
-engine.autoreload.on: False
-...
-```
+**MEDLEY.database_dir**: The filesystem path to the directory that
+should be used for Sqlite databases. Default: `./db`
 
-**cache_dir**: The path to the directory that should be used for
-filesystem caching. Default: `./cache`
-
-**database_dir**: The path to the directory that should be used for
-Sqlite databases. Default: `./db`
-
-**engine.autoreload.on**: Whether the CherryPy webserver should watch
+**MEDLEY.engine.autoreload.on**: Whether the CherryPy webserver should watch
 for changes to application files and restart itself. Only useful in
 development. Default: `False`
 
-**local_maintenance**: Whether the server should allow requests
+**MEDLEY.local_maintenance**: Whether the server should allow requests
 from localhost that perform cleanup and maintenance operations. These
 can be time intensive and block other requests, and are meant to run
-when the application is otherwise dormant. Default: `True`
+when the application isn't busy. Default: `True`
 
-**log.screen**: Whether requests should be written to the stdout of the
+**MEDLEY.log.screen**: Whether log messages should be written to the stdout of the
 tty running the server process. Default: `True`
 
-**log.screen_access**: Whether access logs should be written to stdout
-when screen logging is enabled. Default: `False`
+**MEDLEY.log.screen_access**: Whether access logs should be written to stdout
+when `log.screen` is enabled. Default: `False`
 
-**memorize_checksums**: Whether the server should keep static asset file
+**MEDLEY.memorize_checksums**: Whether the server should keep static asset file
 hashes in memory for use with HTTP cache control. Useful in production
 but counterproductive in development. Default: `True`
 
-**request.show_tracebacks**: Whether CherryPy should display Python
-trackebacks when errors occur. Default: `False`
+**MEDLEY.request.show_tracebacks**: Whether CherryPy should display Python
+trackebacks in the browser when errors occur. Default: `False`
 
-**server.daemonize**: Whether the CherryPy server should run as a
-daemon. Not meaningful in production unless systemd is not being
-used. Default: `False`
+**MEDLEY.server.daemonize**: Whether the CherryPy server should run as
+a daemon. Not necessary when the server is being manged by
+`systemd`. Default: `False`
 
-**server.socket_host**: The IP the server should listen on. Default:
+**MEDLEY.server.socket_host**: The IP the server should listen on. Default:
 `127.0.0.1`
 
-**server.socket_port**: The port the server should listen on. Default:
-`8085`
+**MEDLEY.server.socket_port**: The port the server should listen
+on. Default: `8085`
 
-**tools.gzip.on**: Whether to enable gzip compression. Default: `True`
+**MEDLEY.tools.gzip.on**: Whether to enable gzip compression. Default: `True`
 
 ## Acknowledgements
 
@@ -106,4 +85,6 @@ including but not limited to:
 
 * [CherryPy](https://cherrypy.org/)
 * [flag-icon-css](http://flag-icon-css.lip.is/)
+* [Pendulum](https://pendulum.eustace.io)
+* [Sqlite](https://sqlite.org/)
 * [Vue.js](https://vuejs.org/)
