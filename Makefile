@@ -79,8 +79,8 @@ outdated: .pip-outdated $(REQUIREMENTS_FILES)
 #
 setup: dummy
 	pip install --upgrade pip setuptools
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	pip --disable-pip-version-check install -r requirements.txt
+	pip --disable-pip-version-check install -r requirements-dev.txt
 
 
 # Run a local development webserver
@@ -126,7 +126,7 @@ $(REQUIREMENTS_FILES): dummy
 
 # Save pip's list of outdated packages to a temp file.
 .pip-outdated: dummy
-	pip list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
+	pip --disable-pip-version-check list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report for all available coverage files.
