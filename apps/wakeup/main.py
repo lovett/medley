@@ -54,7 +54,7 @@ class Controller:
 
         mac_address = cherrypy.engine.publish(
             "registry:first_value",
-            key=host,
+            key=f"wakeup:{host}",
             memorize=True
         ).pop()
 
