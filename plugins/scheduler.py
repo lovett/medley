@@ -12,8 +12,6 @@ class ScheduledEvent():
 
     """
 
-    cache_prefix = "scheduler.event"
-
     event: sched.Event
 
     def __init__(self, event: sched.Event) -> None:
@@ -24,7 +22,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return f"{self.cache_prefix}.{round(self.event.time, 3)}"
+        return str(round(self.event.time, 3))
 
     @property
     def time_remaining(self) -> float:
@@ -46,6 +44,7 @@ class ScheduledEvent():
 
         cherrypy.engine.publish(
             "cache:set",
+            "scheduler",
             self.cache_key,
             values,
             self.time_remaining
@@ -56,6 +55,7 @@ class ScheduledEvent():
 
         cherrypy.engine.publish(
             "cache:clear",
+            "scheduler",
             self.cache_key
         )
 
@@ -114,7 +114,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
         cached_events = cherrypy.engine.publish(
             "cache:match",
-            ScheduledEvent.cache_prefix
+            "scheduler"
         ).pop()
 
         if not cached_events:

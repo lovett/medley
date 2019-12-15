@@ -1,8 +1,7 @@
 """Store arbitrary values in an SQLite database."""
 
 import sqlite3
-import time
-from typing import List, Any
+import typing
 import cherrypy
 import msgpack
 from . import mixins
@@ -20,12 +19,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA journal_mode=WAL;
 
         CREATE TABLE IF NOT EXISTS cache (
-            key UNIQUE NOT NULL,
-            value TEXT,
-            expires REAL,
-            created DEFAULT CURRENT_TIMESTAMP
+            prefix TEXT,
+            key TEXT,
+            value BLOB,
+            expires TEXT,
+            created TEXT DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE UNIQUE INDEX IF NOT EXISTS index_prefix_and_key
+            ON cache(prefix, key);
+
+        CREATE VIEW IF NOT EXISTS unexpired AS
+            SELECT prefix, key, value
+            FROM cache
+            WHERE expires > datetime('now');
         """)
 
     def start(self) -> None:
@@ -40,65 +47,88 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cache:clear", self.clear)
         self.bus.subscribe("cache:prune", self.prune)
 
-    def match(self, key_prefix: str) -> List[sqlite3.Row]:
-        """Retrieve multiple keys based on a common prefix."""
+    @staticmethod
+    def keysplit(key: str) -> typing.Tuple[str, str]:
+        """Break a key into two parts."""
+
+        if ":" in key:
+            return tuple(key.split(":", 1))
+
+        return ("_", key)
+
+    def match(self, prefix: str) -> typing.List[sqlite3.Row]:
+        """Retrieve multiple values based on a common prefix."""
 
         rows = self._select(
-            """SELECT value as 'value [binary]', created as 'created [datetime]'
-            FROM cache
-            WHERE key LIKE ?
-            AND expires > strftime('%s','now')""",
-            (key_prefix + "%",)
+            """SELECT value as 'value [binary]'
+            FROM unexpired
+            WHERE prefix=?""",
+            (prefix,)
         )
 
         cherrypy.engine.publish(
             "applog:add",
             "cache",
-            f"match:{key_prefix}",
+            f"match:{prefix}",
             len(rows)
         )
 
         return [row["value"] for row in rows]
 
-    def get(self, key: str) -> Any:
-        """Retrieve a value from the store by its key."""
+    def get(self, key: str) -> typing.Any:
+        """Retrieve a value from the store."""
+
+        prefix, rest = self.keysplit(key)
 
         return self._selectFirst(
             """SELECT value as 'value [binary]'
-            FROM cache
-            WHERE key=?
-            AND expires > strftime('%s','now')""",
-            (key,)
+            FROM unexpired
+            WHERE prefix=? AND key=?""",
+            (prefix, rest)
         )
 
-    def set(self,
+    def set(
+            self,
             key: str,
-            value: Any,
-            lifespan_seconds: int = 604800) -> bool:
-        """Add a value to the store.
+            value: typing.Any,
+            lifespan_seconds: int = 604800
+    ) -> bool:
+        """Add a value to the store."""
 
-        The default lifespan for a cache entry is 1 week."""
+        prefix, rest = self.keysplit(key)
 
-        expires = time.time() + int(lifespan_seconds)
-        packed_value = msgpack.packb(value, use_bin_type=True)
-        self._insert(
+        self._execute(
             """INSERT OR REPLACE INTO cache
-            (key, value, expires)
-            VALUES (?, ?, ?)""",
-            [(key, packed_value, expires)]
+            (prefix, key, value, expires)
+            VALUES (?, ?, ?, datetime('now', ?))""",
+            (
+                prefix,
+                rest,
+                msgpack.packb(value, use_bin_type=True),
+                f"{lifespan_seconds} seconds"
+            )
         )
 
         return True
 
     def clear(self, key: str) -> int:
         """Remove a value from the store by its key."""
-        deletion_count = self._delete("DELETE FROM cache WHERE key=?", (key,))
+
+        prefix, rest = self.keysplit(key)
+
+        deletion_count = self._delete(
+            """DELETE FROM cache
+            WHERE prefix=? AND key=?""",
+            (prefix, rest)
+        )
+
         cherrypy.engine.publish(
             "applog:add",
             "cache",
             f"clear:{key}",
             deletion_count
         )
+
         return deletion_count
 
     def prune(self) -> None:
@@ -106,7 +136,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         deletion_count = self._delete(
             """DELETE FROM cache
-            WHERE expires < strftime('%s', 'now')"""
+            WHERE expires < datetime()"""
         )
 
         cherrypy.engine.publish(
