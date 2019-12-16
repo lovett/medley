@@ -4,6 +4,7 @@ Playback occurs by invoking an external utility. Alsa's aplay is used
 by default, but an alternate can be defined in the registry.
 """
 
+import os.path
 import subprocess
 import cherrypy
 from . import decorators
@@ -44,7 +45,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def play_sound(keyword) -> None:
-        """Play an audio file specified as keyword.
+        """Play an audio file specified as a keyword.
 
         Keywords correspond to filenames under apps/shared/static/wav.
         """
@@ -57,6 +58,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         wav_file = f"apps/shared/static/wav/{keyword}.wav"
+
+        if not os.path.exists(wav_file):
+            cherrypy.log(f"ERROR: Could not match '{keyword}' to a sound file")
 
         subprocess.run(
             f"{audio_player} {wav_file}".split(" "),

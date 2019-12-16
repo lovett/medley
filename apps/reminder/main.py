@@ -14,21 +14,14 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    registry_key = "reminder:template"
-
-    list_command = "scheduler:upcoming"
-
-    add_command = "scheduler:persist"
-
-    remove_command = "scheduler:remove"
-
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(*_args, **_kwargs):
         """Display scheduled reminders, and a form to create new ones."""
 
         registry_rows = cherrypy.engine.publish(
             "registry:search",
-            self.registry_key,
+            "reminder:template",
             exact=True,
         ).pop()
 
@@ -58,7 +51,7 @@ class Controller:
             ).pop()
 
         upcoming = cherrypy.engine.publish(
-            self.list_command,
+            "scheduler:upcoming",
             "notifier:send"
         ).pop()
 
@@ -70,7 +63,8 @@ class Controller:
             }),
         }
 
-    def POST(self, *args, **kwargs):
+    @staticmethod
+    def POST(*args, **kwargs):
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message")
@@ -81,12 +75,8 @@ class Controller:
         url = kwargs.get("url")
         remember = kwargs.get("remember")
 
+        # Server-side template population
         if notification_id and not message:
-            cherrypy.engine.publish(
-                "audio:play_sound",
-                "attention"
-            )
-
             templates = cherrypy.engine.publish(
                 "registry:search",
                 "reminder:template",
@@ -115,6 +105,11 @@ class Controller:
                 "Invalid notification id"
             )
 
+        cherrypy.engine.publish(
+            "audio:play_sound",
+            "attention"
+        )
+
         try:
             minutes = int(minutes)
         except (ValueError, TypeError):
@@ -125,30 +120,35 @@ class Controller:
         except (ValueError, TypeError):
             hours = 0
 
-        total_minutes = minutes + (hours * 60)
-
         try:
             remember = int(remember)
         except (ValueError, TypeError):
             remember = 0
 
-        local_id = notification_id
-        if not local_id:
-            local_id = ''.join(
-                random.choices(
-                    string.ascii_uppercase + string.digits,
-                    k=10
-                )
-            )
+        total_minutes = minutes + (hours * 60)
 
         expiration_time = pendulum.now().add(
             minutes=total_minutes
         ).format('LT')
 
+        notification_title = f"Timer in progress until {expiration_time}"
+
+        local_id = ''.join(
+            random.choices(
+                string.ascii_uppercase + string.digits,
+                k=10
+            )
+        )
+
+        if notification_id:
+            notification_title = f"Timer in progress for {notification_id}"
+            local_id = notification_id
+
+        # Send an immediate notificationt to confirm reminder creation.
         start_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
-            title=f"Timer in progress until {expiration_time}",
+            title=notification_title,
             body=message,
             localId=local_id,
             expiresAt=f"{total_minutes} minutes"
@@ -159,8 +159,7 @@ class Controller:
             start_notification
         )
 
-        # Send a second notification in the future. This gets turned
-        # into a dict so that the scheduler can properly serialize it.
+        # Send a future notification when the reminder is due.
         finish_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
@@ -171,25 +170,23 @@ class Controller:
         ).pop()
 
         cherrypy.engine.publish(
-            self.add_command,
+            "scheduler:persist",
             total_minutes * 60,
             "notifier:send",
             finish_notification
         )
 
         if remember == 1:
-            registry_value = urlencode({
-                "message": message.strip(),
-                "minutes": total_minutes,
-                "comments": comments.strip(),
-                "notification_id": notification_id,
-                "url": url.strip()
-            })
-
             cherrypy.engine.publish(
                 "registry:add",
-                self.registry_key,
-                [registry_value]
+                "reminder:template",
+                [urlencode({
+                    "message": message.strip(),
+                    "minutes": total_minutes,
+                    "comments": comments.strip(),
+                    "notification_id": notification_id,
+                    "url": url.strip()
+                })]
             )
 
         redirect_url = cherrypy.engine.publish(
@@ -198,13 +195,14 @@ class Controller:
 
         raise cherrypy.HTTPRedirect(redirect_url)
 
-    def DELETE(self, uid):
+    @staticmethod
+    def DELETE(uid):
         """Remove a previously-scheduled reminder."""
 
         uid = float(uid)
 
         scheduled_events = cherrypy.engine.publish(
-            self.list_command,
+            "scheduler:upcoming",
             "notifier:send"
         ).pop()
 
@@ -218,7 +216,7 @@ class Controller:
             return
 
         result = cherrypy.engine.publish(
-            self.remove_command,
+            "scheduler:remove",
             wanted_events[0]
         ).pop()
 
