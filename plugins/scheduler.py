@@ -22,7 +22,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return str(round(self.event.time, 3))
+        return f"scheduleder:{round(self.event.time, 3)}"
 
     @property
     def time_remaining(self) -> float:
@@ -44,7 +44,6 @@ class ScheduledEvent():
 
         cherrypy.engine.publish(
             "cache:set",
-            "scheduler",
             self.cache_key,
             values,
             self.time_remaining
@@ -55,7 +54,6 @@ class ScheduledEvent():
 
         cherrypy.engine.publish(
             "cache:clear",
-            "scheduler",
             self.cache_key
         )
 
