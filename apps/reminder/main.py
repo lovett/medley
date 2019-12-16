@@ -82,6 +82,11 @@ class Controller:
         remember = kwargs.get("remember")
 
         if notification_id and not message:
+            cherrypy.engine.publish(
+                "audio:play_sound",
+                "attention"
+            )
+
             templates = cherrypy.engine.publish(
                 "registry:search",
                 "reminder:template",

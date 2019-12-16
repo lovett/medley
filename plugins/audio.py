@@ -22,6 +22,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         self.bus.subscribe('audio:play_bytes', self.play_bytes)
+        self.bus.subscribe('audio:play_sound', self.play_sound)
 
     @staticmethod
     @decorators.log_runtime
@@ -38,5 +39,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         subprocess.run(
             audio_player.split(" "),
             input=audio_bytes,
+            check=False
+        )
+
+    @staticmethod
+    def play_sound(keyword) -> None:
+        """Play an audio file specified as keyword.
+
+        Keywords correspond to filenames under apps/shared/static/wav.
+        """
+
+        audio_player = cherrypy.engine.publish(
+            "registry:first_value",
+            "config:audio_player",
+            memorize=True,
+            default="/usr/bin/aplay -q"
+        ).pop()
+
+        wav_file = f"apps/shared/static/wav/{keyword}.wav"
+
+        subprocess.run(
+            f"{audio_player} {wav_file}".split(" "),
             check=False
         )
