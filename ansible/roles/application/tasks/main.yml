@@ -67,14 +67,6 @@
     dest: "/etc/nginx/sites-enabled/medley"
     state: link
 
-- name: Install global config
-  become: true
-  copy:
-    src: "files/medley.conf"
-    dest: "/etc/medley.conf"
-    owner: "{{ project_user }}"
-    group: "{{ project_group }}"
-
 - name: Install primary systemd service
   become: true
   template:
