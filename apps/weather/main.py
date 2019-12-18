@@ -68,7 +68,7 @@ class Controller:
         if not cached_api_response:
             endpoint = f"https://api.darksky.net/forecast/"
             endpoint += config['darksky_key']
-            endpoint += f"{latitude},{longitude}"
+            endpoint += f"/{latitude},{longitude}"
             endpoint += "?lang=en&units=us&exclude=minutely"
 
             api_response = cherrypy.engine.publish(
@@ -93,8 +93,6 @@ class Controller:
             "/registry",
             {"q": "weather:latlong"}
         ).pop()
-
-        print(forecast["alerts"])
 
         return {
             "html": ("weather.jinja.html", {
@@ -182,7 +180,7 @@ class Controller:
             today.get("temperatureLowTime"), tz=timezone
         )
 
-        if forecast["alerts"]:
+        if "alerts" in forecast:
             result["alerts"] = [
                 alert.get("description")
                 for alert in forecast["alerts"]
