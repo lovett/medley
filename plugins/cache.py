@@ -52,7 +52,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Break a key into two parts."""
 
         if ":" in key:
-            return tuple(key.split(":", 1))
+            return typing.cast(
+                typing.Tuple[str, str],
+                tuple(key.split(":", 1))
+            )
 
         return ("_", key)
 

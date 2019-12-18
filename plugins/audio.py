@@ -44,7 +44,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def play_sound(keyword) -> None:
+    def play_sound(keyword: str) -> None:
         """Play an audio file specified as a keyword.
 
         Keywords correspond to filenames under apps/shared/static/wav.

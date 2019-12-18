@@ -13,6 +13,7 @@ import importlib
 import logging
 import os
 import os.path
+import typing
 import cherrypy
 import sdnotify
 import plugins.applog
@@ -93,7 +94,7 @@ def setup() -> None:
     #
     # Accept any environment variable that starts with "MEDLEY".
     # Double underscores are used for systemd compatibilty.
-    environment_config = {
+    environment_config: typing.Dict[str, typing.Any] = {
         key[8:].replace("__", "."): os.getenv(key)
         for key in os.environ
         if key.startswith("MEDLEY")

@@ -10,6 +10,7 @@ import cherrypy
 from google.cloud import storage
 from google.oauth2.service_account import Credentials
 import google.api_core.exceptions
+import google.auth.exceptions
 from . import decorators
 
 

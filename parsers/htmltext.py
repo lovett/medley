@@ -1,8 +1,11 @@
 """Extract the plain text of an HTML string."""
 
+import typing
 from html.parser import HTMLParser
 from html.entities import name2codepoint
 from collections import deque
+
+ParserAttrs = typing.List[typing.Tuple[str, typing.Optional[str]]]
 
 
 class Parser(HTMLParser):  # pylint: disable=abstract-method
@@ -13,20 +16,24 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
     """
 
-    stack = deque([], 50)
+    stack: typing.Deque[str] = deque([], 50)
 
     always_ignored = ("br", "img")
 
-    blacklist = ()
+    blacklist: typing.Tuple[str, ...] = ()
 
-    whitelist = (
+    whitelist: typing.Tuple[str, ...] = (
         "p", "span", "li", "div", "td", "a", "b",
         "strong", "i", "em", "u", "font", "pre", "form"
     )
 
-    result = []
+    result: typing.List[str] = []
 
-    def __init__(self, blacklist=(), whitelist=()):
+    def __init__(
+            self,
+            blacklist: typing.Tuple[str, ...] = (),
+            whitelist: typing.Tuple[str, ...] = ()
+    ) -> None:
         if blacklist:
             self.blacklist = blacklist
 
@@ -35,7 +42,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         super().__init__()
 
-    def parse(self, markup):
+    def parse(self, markup: str = '') -> str:
         """Parse an HTML string."""
         self.result = []
 
@@ -47,7 +54,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         self.feed(trimmed_markup)
         return " ".join(self.result).strip()
 
-    def handle_starttag(self, tag, attrs):
+    def handle_starttag(self, tag: str, attrs: ParserAttrs) -> None:
         """Track the current tag."""
 
         if tag in self.always_ignored:
@@ -56,8 +63,17 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         if tag not in self.whitelist:
             return
 
-        ids = tuple({attr[1] for attr in attrs if attr[0] == "id"})
-        classes = tuple({attr[1] for attr in attrs if attr[0] == "class"})
+        ids = typing.cast(
+            typing.Tuple[str, ...],
+            tuple(
+                {attr[1] for attr in attrs if attr[0] == "id"}
+            )
+        )
+
+        classes = typing.cast(
+            typing.Tuple[str, ...],
+            tuple({attr[1] for attr in attrs if attr[0] == "class"})
+        )
 
         tag_name = tag
         if ids:
@@ -67,7 +83,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         self.stack.append(tag_name)
 
-    def handle_endtag(self, tag):
+    def handle_endtag(self, tag: str) -> None:
         """Track the current tag."""
 
         if tag not in self.whitelist:
@@ -78,7 +94,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
             if popped_tag.startswith(tag):
                 break
 
-    def handle_data(self, data):
+    def handle_data(self, data: str) -> None:
         """Capture the text node for non-blacklisted tags."""
 
         if not self.stack:
@@ -93,5 +109,5 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         self.result.append(data.strip())
 
-    def handle_entityref(self, name):
+    def handle_entityref(self, name: str) -> None:
         self.result.append(chr(name2codepoint[name]))
