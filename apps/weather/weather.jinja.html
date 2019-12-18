@@ -5,90 +5,125 @@
     {{ macros.appSpecificIcon(app_url) }}
 {%- endblock %}
 
+{% block stylesheets %}
+    {{ macros.staticAsset('weather', 'weather.css') }}
+{% endblock %}
+
 {% block page_body %}
+    {{ macros.svgSymbols("globe", "edit") }}
+
+    <header class="app-nav">
+        <ul class="inline-list">
+            {% for latitude, longitude, label in other_locations %}
+                {% if label != location_name %}
+                    <li>
+                        <a href="{{ app_url }}/{{ latitude }},{{ longitude }}">
+                            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                            {{ label }}
+                        </a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <p>
+            <a class="template-edit" href="{{ edit_url }}">
+                <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                Edit locations
+            </a>
+        </p>
+    </header>
+
     <main>
-        {% for label, forecast in forecasts.items() %}
+        <h2>{{ location_name }} as of {{ forecast.current_time|dateformat('LT') }}</h2>
 
-            <h1>{{ label }} Weather</h1>
-
-            <p>
-                {{ forecast.current_summary|capitalize }},
-                {{ forecast.current_temperature }}° F
-                as of {{ forecast.current_time|dateformat('LT') }}.
-            </p>
-
-            {% if "alerts" in forecast %}
-                {{ forecast.alerts }}
-            {% endif %}
-
-            <p>{{ forecast.summary }}</p>
-
-            {% if forecast.high %}
-                <p>High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.</p>
-            {% endif %}
-
-            {% if forecast.low %}
-                <p>Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.</p>
-            {% endif %}
-
-            <p>{{ forecast.humidity|percentage }} humidity.</p>
-
-            {% if forecast.sunrise %}
-                <p>Sunrise at {{ forecast.sunrise|dateformat('LT') }}</p>
-            {% endif %}
-
-            {% if forecast.sunset %}
-                <p>Sunset at {{ forecast.sunset|dateformat('LT') }}</p>
-            {% endif %}
-
-            {% if forecast.upcoming %}
-                <h2>Upcoming</h2>
-                <table>
-                    {% for forecast in forecast.upcoming %}
-                        <tr>
-                            <th>{{ forecast.time|dateformat('dddd') }}</th>
-                            <td>
-                                {{ forecast.summary }}
-
-                            </td>
-                            <td>
-                                {% if forecast.high %}
-                                    High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.
-                                {% endif %}
-                            </td>
-                            <td>
-                            {% if forecast.low %}
-                                Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.
-                            {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
-
-            {% if forecast.hourly %}
-                <h2>Today</h2>
-                <table>
-                    <colgroup>
-                        <col>
-                        <col width="100%">
-                    </colgroup>
-
-                    {% for record in forecast.hourly %}
-                        <tr>
-                            <th>{{ record.time|dateformat('LT') }}</th>
-                            <td>
-                                {{ record.summary }},
-                                {{ record.temperature|round|int }}° F
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </table>
-            {% endif %}
+        {% for alert in forecast.alerts  %}
+            <div class="alert">{{ alert }}</div>
         {% endfor %}
 
         <p>
-            <a href="https://darksky.net/poweredby/" target="_blank" rel="noopener noreferrer">Powered by Dark Sky</a>
+            {{ forecast.current_summary|capitalize }},
+            {{ forecast.current_temperature }}° F
+        </p>
+
+
+        <p>{{ forecast.summary }}</p>
+
+        {% if forecast.high %}
+            <p>High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.</p>
+        {% endif %}
+
+        {% if forecast.low %}
+            <p>Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.</p>
+        {% endif %}
+
+        <p>{{ forecast.humidity|percentage }} humidity.</p>
+
+        {% if forecast.sunrise %}
+            <p>Sunrise at {{ forecast.sunrise|dateformat('LT') }}</p>
+        {% endif %}
+
+        {% if forecast.sunset %}
+            <p>Sunset at {{ forecast.sunset|dateformat('LT') }}</p>
+        {% endif %}
+
+        <div class="panels">
+            <div>
+                {% if forecast.hourly %}
+                    <h3>Today</h3>
+
+                    <table>
+                        <colgroup>
+                            <col>
+                            <col width="100%">
+                        </colgroup>
+
+                        {% for record in forecast.hourly %}
+                            <tr>
+                                <th>{{ record.time|dateformat('LT') }}</th>
+                                <td>
+                                    {{ record.summary }},
+                                    {{ record.temperature|round|int }}° F
+                        </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+            <div>
+                {% if forecast.upcoming %}
+                    <h3>Upcoming</h3>
+                    <table>
+                        <colgroup>
+                            <col>
+                            <col width="100%">
+                        </colgroup>
+
+                        {% for forecast in forecast.upcoming %}
+                            <tr>
+                                <th>{{ forecast.time|dateformat('dddd') }}</th>
+                                <td>
+                                    {{ forecast.summary }}
+
+                                    {% if forecast.high %}
+                                        <br/>High: {{ forecast.high }}° F
+                                    {% endif %}
+
+                                    {% if forecast.low %}
+                                        <br/>Low: {{ forecast.low }}° F
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+        <p>
+            <a href="https://darksky.net/poweredby/"
+               target="_blank"
+               rel="noopener noreferrer"
+            >Powered by Dark Sky</a>
         </p>
     </main>
 {% endblock %}

@@ -15,44 +15,59 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(self, *args, **_kwargs):
         """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(
             "registry:search",
             "weather:*",
+            key_slice=1,
+            as_dict=True
         ).pop()
 
-        try:
-            api_key = next(
-                item["value"]
-                for item in config
-                if item["key"] == "weather:darksky_key"
-            )
-
-        except StopIteration:
+        if "darksky_key" not in config:
             raise cherrypy.HTTPError(500, "No api key")
 
-        locations = dict(
-            item["value"].split("=")
-            for item in config
-            if item["key"].endswith("latlong")
+        locations = tuple(
+            tuple(value.split(",", 2))
+            for key, value in config.items()
+            if key.startswith("latlong")
         )
 
-        forecasts = {}
-        for label, latlong in locations.items():
-            cache_key = f"darksky_{latlong}"
-            answer = cherrypy.engine.publish(
-                "cache:get",
-                cache_key
-            ).pop()
+        latitude = 0
+        longitude = 0
+        location_name = None
 
-            if answer:
-                forecasts[label] = self.shape_forecast(answer)
-                continue
+        if "latlong:default" in config:
+            defaults = config["latlong:default"].split(",", 2)
+            latitude = float(defaults[0])
+            longitude = float(defaults[1])
+            location_name = defaults[2]
 
-            latitude, longitude = latlong.split(",")
-            endpoint = f"https://api.darksky.net/forecast/{api_key}/"
+        if len(args) == 1:
+            params = args[0].split(",", 1)
+            latitude = float(params[0])
+            longitude = float(params[1])
+            location_name = next((
+                location[2]
+                for location in locations
+                if location[0] == latitude
+                and location[1] == longitude
+            ), None)
+
+        cache_key = f"darksky_{latitude},{longitude}"
+
+        cached_api_response = cherrypy.engine.publish(
+            "cache:get",
+            cache_key
+        ).pop()
+
+        if cached_api_response:
+            forecast = self.shape_forecast(cached_api_response)
+
+        if not cached_api_response:
+            endpoint = f"https://api.darksky.net/forecast/"
+            endpoint += config['darksky_key']
             endpoint += f"{latitude},{longitude}"
             endpoint += "?lang=en&units=us&exclude=minutely"
 
@@ -70,11 +85,23 @@ class Controller:
                     api_response,
                     3600
                 )
-                forecasts[label] = self.shape_forecast(api_response)
+
+                forecast = self.shape_forecast(api_response)
+
+        edit_url = cherrypy.engine.publish(
+            "url:internal",
+            "/registry",
+            {"q": "weather:latlong"}
+        ).pop()
+
+        print(forecast["alerts"])
 
         return {
             "html": ("weather.jinja.html", {
-                "forecasts": forecasts
+                "forecast": forecast,
+                "other_locations": locations,
+                "location_name": location_name,
+                "edit_url": edit_url
             })
         }
 
@@ -154,6 +181,12 @@ class Controller:
         result["low_at"] = pendulum.from_timestamp(
             today.get("temperatureLowTime"), tz=timezone
         )
+
+        if forecast["alerts"]:
+            result["alerts"] = [
+                alert.get("description")
+                for alert in forecast["alerts"]
+            ]
 
         now = pendulum.now()
         hours_remaining_today = 24 - now.hour

@@ -222,6 +222,7 @@ TABLE TD {
     word-break: break-word;
     vertical-align: top;
     border: 1px solid var(--black);
+    line-height: 1.3;
 }
 
 TEXTAREA {
