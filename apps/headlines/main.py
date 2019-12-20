@@ -7,7 +7,6 @@ import pendulum
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Headlines"
     exposed = True
     show_on_homepage = True
 

@@ -10,7 +10,6 @@ import pendulum
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Reminder"
     exposed = True
     show_on_homepage = True
 

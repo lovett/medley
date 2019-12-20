@@ -8,7 +8,6 @@ from plugins import decorators
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Homepage"
     exposed = True
     show_on_homepage = True
 

@@ -10,7 +10,6 @@ import local_types
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Alt URL"
     exposed = True
     show_on_homepage = True
 

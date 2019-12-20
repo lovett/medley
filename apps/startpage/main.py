@@ -8,7 +8,6 @@ from parsers.startpage import Parser
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Startpage"
     exposed = True
     show_on_homepage = True
 

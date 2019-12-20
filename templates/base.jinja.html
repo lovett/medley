@@ -2,11 +2,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        {% if app_name == "Homepage" -%}
-            <title>Medley</title>
-        {%- else -%}
-            <title>{{ app_name or "Medley" }}</title>
-        {%- endif %}
+        <title>{{ (app_name or "Medley")|capitalize }}</title>
 
         <meta
             name="viewport"
@@ -36,8 +32,8 @@
         <header id="page-header">
             <h1>
                 <a href="{{ '/' | internal_url }}">Medley</a>
-                {% if app_url -%}
-                    : <a href="{{ app_url }}">{{ app_name }}</a>
+                {% if app_name -%}
+                    : <a href="{{ app_url }}">{{ app_name|capitalize }}</a>
                 {%- endif %}
             </h1>
 

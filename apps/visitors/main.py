@@ -14,7 +14,6 @@ class Controller:
     method-based dispatch
     """
 
-    name = "Visitors"
     exposed = True
     show_on_homepage = True
 

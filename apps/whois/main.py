@@ -10,7 +10,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Whois"
     exposed = True
     show_on_homepage = True
 

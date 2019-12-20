@@ -7,7 +7,6 @@ import parsers.htmlhead
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "HTML Head"
     exposed = True
     show_on_homepage = True
 

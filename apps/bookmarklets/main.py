@@ -6,7 +6,6 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Bookmarklets"
     exposed = True
     show_on_homepage = True
 

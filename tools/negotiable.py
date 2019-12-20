@@ -152,7 +152,7 @@ class Tool(cherrypy.Tool):
         if not values:
             values = {}
 
-        values["app_name"] = cherrypy.request.app.root.name
+        values["app_name"] = cherrypy.request.script_name.lstrip("/")
 
         values["app_url"] = cherrypy.engine.publish(
             "url:internal"
