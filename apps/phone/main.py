@@ -9,13 +9,9 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    messages = {
-        "invalid": "The number provided was invalid",
-        "missing": "A number was not provided"
-    }
-
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """
         Display information about the specified number, or a search form to
         look up a number
@@ -39,14 +35,16 @@ class Controller:
             }
 
         if not sanitized_number:
+            invalid_message = "The number provided was invalid."
+
             return {
                 "html": ("phone.jinja.html", {
-                    "error": self.messages.get("invalid")
+                    "error": invalid_message
                 }),
                 "json": {
-                    "error": self.messages.get("invalid")
+                    "error": invalid_message
                 },
-                "text": self.messages.get("invalid")
+                "text": invalid_message
             }
 
         area_code = sanitized_number[:3]

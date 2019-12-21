@@ -106,7 +106,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         self.assertTrue(helpers.response_is_text(response))
         self.assertEqual(
             response.body.strip(),
-            apps.phone.main.Controller.messages["invalid"]
+            "The number provided was invalid."
         )
 
     @mock.patch("cherrypy.tools.negotiable.render_html")

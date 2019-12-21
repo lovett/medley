@@ -10,10 +10,9 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    cache_key = "headlines"
-
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **kwargs):
+    def GET(*_args, **kwargs):
         """Display a list of headlines."""
 
         limit = kwargs.get('limit')
@@ -35,7 +34,7 @@ class Controller:
 
         headlines = cherrypy.engine.publish(
             "cache:get",
-            self.cache_key
+            "headlines"
         ).pop()
 
         if not headlines:
@@ -67,7 +66,7 @@ class Controller:
 
             cherrypy.engine.publish(
                 "cache:set",
-                self.cache_key,
+                "headlines",
                 headlines,
                 cache_lifespan
             )

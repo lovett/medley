@@ -9,10 +9,9 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    cache_key = "ip:external"
-
+    @staticmethod
     @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
+    def GET(*_args, **_kwargs):
         """Display the client's local IP, and the server's external IP"""
 
         client_ip = cherrypy.request.headers.get("Remote-Addr")
@@ -22,7 +21,7 @@ class Controller:
 
         external_ip = cherrypy.engine.publish(
             "cache:get",
-            self.cache_key
+            "ip:external"
         ).pop()
 
         if not external_ip:
@@ -34,7 +33,7 @@ class Controller:
             if external_ip:
                 cherrypy.engine.publish(
                     "cache:set",
-                    self.cache_key,
+                    "ip:external",
                     external_ip,
                     300
                 )

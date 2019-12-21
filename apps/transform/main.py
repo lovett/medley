@@ -11,8 +11,6 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    transforms = {}
-
     def __init__(self):
         self.transforms = {
             "capitalize": lambda x: x.capitalize(),

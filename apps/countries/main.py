@@ -10,33 +10,30 @@ class Controller:
 
     show_on_homepage = False
 
-    cache_key = "countries"
-
-    registry_key = "country_code:alpha2:{}"
-
-    source_url = "https://pkgstore.datahub.io" \
-                 "/core/country-codes/country-codes_json/data" \
-                 "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
-
-    def GET(self, *_args, **_kwargs):
+    @staticmethod
+    def GET(*_args, **_kwargs):
         """Request the country code list and populate the registry"""
 
         country_codes = cherrypy.engine.publish(
             "cache:get",
-            self.cache_key
+            "countries"
         ).pop()
 
         if not country_codes:
+            source_url = "https://pkgstore.datahub.io" \
+                "/core/country-codes/country-codes_json/data" \
+                "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
+
             country_codes = cherrypy.engine.publish(
                 "urlfetch:get",
-                self.source_url,
+                source_url,
                 as_json=True
             ).pop()
 
             if country_codes:
                 cherrypy.engine.publish(
                     "cache:set",
-                    self.cache_key,
+                    "countries",
                     country_codes
                 )
 
@@ -51,7 +48,11 @@ class Controller:
             abbrev = code.get("ISO3166-1-Alpha-2")
 
             if name and abbrev:
-                key = self.registry_key.format(abbrev)
-                cherrypy.engine.publish("registry:add", key, (name,), True)
+                cherrypy.engine.publish(
+                    "registry:add",
+                    f"country_code:alpha2:{abbrev}",
+                    (name,),
+                    True
+                )
 
         cherrypy.response.status = 204

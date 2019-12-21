@@ -6,9 +6,8 @@ import cherrypy
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
-    name = "Coverage"
     exposed = True
-    user_facing = True
+    show_on_homepage = True
 
     @staticmethod
     def GET():

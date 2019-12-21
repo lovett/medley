@@ -143,7 +143,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.assert_any_call(
             "cache:set",
-            apps.ip.main.Controller.cache_key,
+            "ip:external",
             "3.3.3.3",
             300
         )
