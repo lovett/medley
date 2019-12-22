@@ -39,7 +39,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:find_id", self.find)
         self.bus.subscribe("registry:first_key", self.first_key)
         self.bus.subscribe("registry:first_value", self.first_value)
-        self.bus.subscribe("registry:distinct_keys", self.distinct_keys)
         self.bus.subscribe("registry:list_keys", self.list_keys)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:search", self.search)
@@ -241,26 +240,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("memorize:set", key, value)
 
         return value
-
-    def distinct_keys(
-            self,
-            key: str,
-            strip_prefix: bool = True
-    ) -> typing.List[str]:
-        """Find all keys that share a common prefix."""
-
-        sql = "SELECT distinct key FROM registry WHERE (1) AND key LIKE ?"
-
-        key = key.replace("*", "%")
-
-        rows = self._select(sql, [key])
-
-        keys = [row["key"] for row in rows]
-
-        if strip_prefix:
-            return [key.split(":", 1).pop() for key in keys]
-
-        return keys
 
     def local_timezone(self) -> str:
         """Determine the timezone of the application.
