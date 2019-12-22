@@ -22,8 +22,7 @@ class Controller:
             "registry:search",
             "wakeup:*",
             key_slice=1,
-            as_dict=True,
-            sorted_by_key=True
+            as_dict=True
         ).pop()
 
         registry_url = cherrypy.engine.publish(

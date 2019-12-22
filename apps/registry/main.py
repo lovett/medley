@@ -35,8 +35,7 @@ class Controller:
             total_entries, entries = cherrypy.engine.publish(
                 "registry:search",
                 key=q,
-                include_count=True,
-                sorted_by_key=True
+                include_count=True
             ).pop()
         elif view != "add":
             roots = cherrypy.engine.publish(

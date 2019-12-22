@@ -97,7 +97,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             as_value_list: bool = False,
             as_multivalue_dict: bool = False,
             key_slice: int = 0,
-            sorted_by_key: bool = False,
             include_count: bool = False
     ) -> typing.Any:
         """Search for records by key or value."""
@@ -140,12 +139,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             params = params + (value,)
 
-        if sorted_by_key:
-            sql += "ORDER BY key"
-        else:
-            sql += " ORDER BY rowid DESC"
-
-        sql += f" LIMIT {limit}"
+        sql += f"ORDER BY key LIMIT {limit}"
 
         result = typing.cast(
             typing.Any,
