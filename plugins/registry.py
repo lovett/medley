@@ -83,8 +83,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-locals
-    # pylint: disable=too-many-branches
     def search(
             self,
             key: typing.Optional[str] = None,
@@ -146,31 +144,54 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         if as_dict:
-            result = {
-                row["key"].split(":", key_slice).pop():
-                row["value"]
-                for row in result
-            }
+            result = self.to_dict(result, key_slice)
 
         if as_multivalue_dict:
-            multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
-
-            for row in result:
-                k = row["key"]
-                if key_slice > 0:
-                    sliced_key = k.split(":")[key_slice:]
-                    k = ":".join(sliced_key)
-                multi_dict[k].append(row["value"])
-            result = multi_dict
+            result = self.to_multivalue_dict(result, key_slice)
 
         if as_value_list:
-            result = [row["value"] for row in result]
+            result = self.to_value_list(result)
 
         if include_count:
             count = self._count(sql, params)
             return (count, result)
 
         return result
+
+    @staticmethod
+    def to_dict(
+            rows: typing.Iterable[sqlite3.Row],
+            key_slice: int = 0
+    ) -> typing.Dict[str, typing.Any]:
+        """Shape a result set as a key-value dict."""
+        return {
+            row["key"].split(":", key_slice).pop():
+            row["value"]
+            for row in rows
+        }
+
+    @staticmethod
+    def to_multivalue_dict(
+            rows: typing.Iterable[sqlite3.Row],
+            key_slice: int = 0
+    ) -> typing.Dict[str, typing.List]:
+        """Shape a result set as a dict whose values are lists."""
+        multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
+
+        for row in rows:
+            k = row["key"]
+            if key_slice > 0:
+                sliced_key = k.split(":")[key_slice:]
+                k = ":".join(sliced_key)
+            multi_dict[k].append(row["value"])
+        return multi_dict
+
+    @staticmethod
+    def to_value_list(
+            rows: typing.Iterable[sqlite3.Row],
+    ) -> typing.List:
+        """Shape a result set as a list."""
+        return [row["value"] for row in rows]
 
     def remove(self, key: str) -> int:
         """Delete any records for a key."""
