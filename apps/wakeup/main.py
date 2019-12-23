@@ -40,20 +40,19 @@ class Controller:
         }
 
     @staticmethod
+    @cherrypy.tools.encode()
+    @cherrypy.tools.wants()
     def POST(*_args, **kwargs):
         """Send a WoL packet to the mac address of the specified host."""
 
         host = kwargs.get('host')
-
-        as_text = cherrypy.request.headers.get("Accept") == "text/plain"
 
         if not host:
             raise cherrypy.HTTPError(400, "No host specified")
 
         mac_address = cherrypy.engine.publish(
             "registry:first_value",
-            key=f"wakeup:{host}",
-            memorize=True
+            key=f"wakeup:{host}"
         ).pop()
 
         if not mac_address:
@@ -72,13 +71,12 @@ class Controller:
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             udp_socket.sendto(packet, ('<broadcast>', 9))
 
-        if as_text:
-            content_type = "text/plain;charset=utf-8"
-            cherrypy.response.headers["Content-Type"] = content_type
-            return "WoL packet sent.".encode("utf-8")
+        if cherrypy.request.wants == "text":
+            return "WoL packet sent."
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
             query={"sent": 1}
         ).pop()
+
         raise cherrypy.HTTPRedirect(redirect_url)

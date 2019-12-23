@@ -47,6 +47,7 @@ import plugins.urlfetch
 import plugins.url
 import tools.capture
 import tools.negotiable
+import tools.wants
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
@@ -213,6 +214,7 @@ def setup() -> None:
     # Tools
     cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
+    cherrypy.tools.wants = tools.wants.Tool()
 
     # Disable access logging to the console
     #

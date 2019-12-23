@@ -18,10 +18,12 @@ import json
 import cherrypy
 import tools.capture
 import tools.negotiable
+import tools.wants
 
 cherrypy.config.update({'environment': "test_suite"})
 cherrypy.tools.negotiable = tools.negotiable.Tool()
 cherrypy.tools.capture = tools.capture.Tool()
+cherrypy.tools.wants = tools.wants.Tool()
 
 # Don't start the HTTP server
 cherrypy.server.unsubscribe()
