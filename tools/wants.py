@@ -33,6 +33,3 @@ class Tool(cherrypy.Tool):
 
         if accept.startswith("application/json"):
             cherrypy.request.wants = "json"
-
-
-cherrypy.tools.wants = Tool()

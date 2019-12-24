@@ -123,6 +123,11 @@ def setup() -> None:
     except PermissionError:
         raise SystemExit("No permission to create database directory")
 
+    # Tools
+    cherrypy.tools.negotiable = tools.negotiable.Tool()
+    cherrypy.tools.capture = tools.capture.Tool()
+    cherrypy.tools.wants = tools.wants.Tool()
+
     # Mount the apps
     for app in os.listdir(app_root):
 
@@ -210,11 +215,6 @@ def setup() -> None:
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.url.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
-
-    # Tools
-    cherrypy.tools.negotiable = tools.negotiable.Tool()
-    cherrypy.tools.capture = tools.capture.Tool()
-    cherrypy.tools.wants = tools.wants.Tool()
 
     # Disable access logging to the console
     #

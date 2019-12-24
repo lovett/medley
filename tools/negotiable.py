@@ -187,6 +187,3 @@ class Tool(cherrypy.Tool):
             cherrypy.response.headers["Cache-Control"] = cache_control
 
         return html
-
-
-cherrypy.tools.negotiable = Tool()

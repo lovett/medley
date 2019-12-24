@@ -20,6 +20,3 @@ class Tool(cherrypy.Tool):
             cherrypy.request,
             cherrypy.response
         )
-
-
-cherrypy.tools.capture = Tool()
