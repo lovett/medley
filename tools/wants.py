@@ -1,5 +1,6 @@
 """Identify the desired content type of a request."""
 
+import pathlib
 import cherrypy
 
 
@@ -19,17 +20,30 @@ class Tool(cherrypy.Tool):
         """Reshape the accept header as a custom request property.
 
         Preference weights (;q=) are not considered.
+
+        If a JSON or TXT file extension is specified in the request
+        path, it takes precedence.
+
         """
 
         accept = cherrypy.request.headers.get("Accept", "*/*")
+
+        request_path = pathlib.Path(cherrypy.request.path_info)
+
+        # Handle bare extensions.
+        if request_path.name.startswith("."):
+            request_path = pathlib.Path(f"/index{request_path.name}")
 
         response_headers = cherrypy.response.headers
 
         cherrypy.request.wants = "html"
 
-        if accept.startswith("text/plain"):
+        if request_path.suffix == ".txt" or accept.startswith("text/plain"):
             cherrypy.request.wants = "text"
             response_headers["Content-Type"] = "text/plain;charset=utf-8"
+            return
 
-        if accept.startswith("application/json"):
+        if request_path.suffix == ".json" or accept.startswith("application/json"):  # noqa: E501
             cherrypy.request.wants = "json"
+            response_headers["Content-Type"] = "application/json"
+            return
