@@ -6,7 +6,7 @@ httplib2==0.15.0
 mistletoe==0.7.2
 msgpack==0.6.2
 pendulum==2.0.5
-pyparsing==2.4.5
+pyparsing==2.4.6
 pytz==2019.3
 pytzdata==2019.3
 requests==2.22.0
