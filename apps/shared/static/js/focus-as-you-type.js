@@ -12,9 +12,11 @@ MEDLEY.focusAsYouType = (function () {
     let elements = [];
     let candidates = [];
     let options = {}
+    let matchCount = 0;
 
     function clearBuffer() {
         buffer = '';
+        matchCount = 0;
         elements.forEach((element) => {
             element.classList.remove(options.candidateClass);
             element.blur();
@@ -23,7 +25,17 @@ MEDLEY.focusAsYouType = (function () {
     }
 
     function displayBuffer() {
-        bufferDisplay.innerText = buffer;
+        if (matchCount == 0) {
+            bufferDisplay.innerText = buffer;
+        }
+
+        if (matchCount == 1) {
+            bufferDisplay.innerText = `${buffer} - 1 match`;
+        }
+
+        if (matchCount > 1) {
+            bufferDisplay.innerText = `${buffer} - ${matchCount} matches`;
+        }
     }
 
     function match() {
@@ -38,7 +50,7 @@ MEDLEY.focusAsYouType = (function () {
             return (candidate.indexOf(buffer) === 0)? 1 : 0;
         });
 
-        let score = matches.reduce(function (accumulator, value) {
+        matchCount = matches.reduce(function (accumulator, value) {
             return accumulator + value;
         });
 
@@ -46,7 +58,7 @@ MEDLEY.focusAsYouType = (function () {
             element.classList.remove(options.candidateClass);
         })
 
-        if (score == 1) {
+        if (matchCount == 1) {
             elements[matches.indexOf(1)].focus();
         } else {
             matches.forEach(function (match, index) {
