@@ -55,7 +55,7 @@ class Controller:
 
         return catalog
 
-    @cherrypy.tools.wants()
+    @cherrypy.tools.wants(only="html")
     @cherrypy.tools.etag()
     def GET(self, *_args, **_kwargs) -> str:
         """List all available applications.
@@ -64,9 +64,6 @@ class Controller:
         show_on_homepage to False.
 
         """
-
-        if cherrypy.request.wants != "html":
-            raise cherrypy.HTTPError(406)
 
         apps = self.catalog_apps(cherrypy.tree.apps)
 

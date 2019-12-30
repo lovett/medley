@@ -16,7 +16,7 @@ class Tool(cherrypy.Tool):
         )
 
     @staticmethod
-    def wants() -> None:
+    def wants(*_args, **kwargs) -> None:
         """Reshape the accept header as a custom request property.
 
         Preference weights (;q=) are not considered.
@@ -24,7 +24,13 @@ class Tool(cherrypy.Tool):
         If a JSON or TXT file extension is specified in the request
         path, it takes precedence.
 
+        Callers can indicate what content types are supported by
+        setting the keyword argument "only" to a space-delimited list
+        of keywords.
+
         """
+
+        only_wants = kwargs.get("only")
 
         accept = cherrypy.request.headers.get("Accept", "*/*")
 
@@ -41,9 +47,10 @@ class Tool(cherrypy.Tool):
         if request_path.suffix == ".txt" or accept.startswith("text/plain"):
             cherrypy.request.wants = "text"
             response_headers["Content-Type"] = "text/plain;charset=utf-8"
-            return
 
         if request_path.suffix == ".json" or accept.startswith("application/json"):  # noqa: E501
             cherrypy.request.wants = "json"
             response_headers["Content-Type"] = "application/json"
-            return
+
+        if only_wants and cherrypy.request.wants not in only_wants:
+            raise cherrypy.HTTPError(406)
