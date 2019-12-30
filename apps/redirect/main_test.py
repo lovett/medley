@@ -3,6 +3,7 @@ Test suite for the redirect app
 """
 
 import unittest
+import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -37,8 +38,19 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.redirect.main.Controller)
 
-    def test_no_destination(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_no_destination(self, publish_mock):
         """If no URL is provided, no redirect occurs."""
+
+        def side_effect(*args, **_kwargs):
+            """Side effects local function"""
+            if args[0] == "jinja:render":
+                return [""]
+
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
         response = self.request("/")
 
         self.assertEqual(response.code, 200)
