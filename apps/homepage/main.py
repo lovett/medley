@@ -56,6 +56,7 @@ class Controller:
         return catalog
 
     @cherrypy.tools.wants()
+    @cherrypy.tools.etag()
     def GET(self, *_args, **_kwargs) -> str:
         """List all available applications.
 
@@ -65,25 +66,12 @@ class Controller:
         """
 
         if cherrypy.request.wants != "html":
-            cherrypy.response.status = 406
-            return ""
-
-        template = "homepage.jinja.html"
-
-        etag_match = cherrypy.engine.publish(
-            "memorize:check_etag",
-            template
-        ).pop()
-
-        if etag_match:
-            cherrypy.response.status = 304
-            return ""
+            raise cherrypy.HTTPError(406)
 
         apps = self.catalog_apps(cherrypy.tree.apps)
 
         return cherrypy.engine.publish(
             "jinja:render",
-            template,
-            etag_key=template,
+            "homepage.jinja.html",
             apps=apps
         ).pop()

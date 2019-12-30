@@ -108,20 +108,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         rendered_template = typing.cast(str, template.render(**data))
 
-        if "etag_key" in kwargs:
-            content_hash = cherrypy.engine.publish(
-                "hasher:md5",
-                rendered_template
-            ).pop()
-
-            cherrypy.engine.publish(
-                "memorize:etag",
-                kwargs.get("etag_key"),
-                content_hash
-            )
-
-            cherrypy.response.headers["ETag"] = content_hash
-
         if "max_age" in kwargs:
             cache_control = f"private, max-age={kwargs.get('max_age')}"
             cherrypy.response.headers["Cache-Control"] = cache_control

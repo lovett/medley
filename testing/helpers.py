@@ -5,7 +5,8 @@ import tempfile
 import cherrypy
 import plugins.jinja
 import apps.shared.main
-from tools import negotiable
+import tools.negotiable
+import tools.etag
 
 
 def get_fixture(path):
@@ -44,7 +45,8 @@ def start_server(app):
     )
 
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    cherrypy.tools.negotiable = negotiable.Tool()
+    cherrypy.tools.negotiable = tools.negotiable.Tool()
+    cherrypy.tools.etag = tools.etag.Tool()
     cherrypy.engine.start()
 
 

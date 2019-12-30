@@ -29,8 +29,8 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """
         The standard mock side effect function used by all tests
         """
-        if args[0] == "memorize:check_etag":
-            return [False]
+        if args[0] == "memorize:get":
+            return [(False, None)]
 
         if args[0] == "jinja:render":
             return [""]
@@ -67,23 +67,39 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 406)
-        self.assertEqual(response.body, '')
 
     @mock.patch("cherrypy.engine.publish")
-    def test_etag(self, publish_mock):
+    def test_valid_etag(self, publish_mock):
         """A valid etag produces a 304 response."""
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "memorize:check_etag":
-                return [True]
+            if args[0] == "memorize:get":
+                return [(True, "abc123")]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/")
+        response = self.request("/", headers={"If-None-Match": "abc123"})
         self.assertEqual(response.code, 304)
         self.assertEqual(response.body, "")
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_invalid_etag(self, publish_mock):
+        """An invalid etag produces a 200 response."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "memorize:get":
+                return [(True, "abc456")]
+            if args[0] == "jinja:render":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/", headers={"If-None-Match": "example"})
+        self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
     def test_refuses_text(self, publish_mock):
@@ -93,7 +109,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         response = self.request("/", as_text=True)
         self.assertEqual(response.code, 406)
-        self.assertEqual(response.body, '')
 
     def test_empty_app_list(self):
         """The empty-app cast is handled gracefully"""

@@ -19,11 +19,13 @@ import cherrypy
 import tools.capture
 import tools.negotiable
 import tools.wants
+import tools.etag
 
 cherrypy.config.update({'environment': "test_suite"})
 cherrypy.tools.negotiable = tools.negotiable.Tool()
 cherrypy.tools.capture = tools.capture.Tool()
 cherrypy.tools.wants = tools.wants.Tool()
+cherrypy.tools.etag = tools.etag.Tool()
 
 # Don't start the HTTP server
 cherrypy.server.unsubscribe()
