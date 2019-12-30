@@ -74,11 +74,10 @@ class Controller:
         cache_control = f"private, max-age={cache_lifespan}"
         cherrypy.response.headers["Cache-Control"] = cache_control
 
-        return {
-            "html": ("headlines.jinja.html", {
-                "headlines": headlines,
-                "limit": limit,
-                "offset": offset,
-            }),
-            "json": headlines,
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "headlines.jinja.html",
+            headlines=headlines,
+            limit=limit,
+            offset=offset,
+        ).pop()

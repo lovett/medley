@@ -89,7 +89,7 @@ def text_var(called_mock):
 
 
 def find_publish_call(called_mock, subscription_topic):
-    """Find a topic is the call list of a mock of cherrypy.engine.publish."""
+    """Find a topic in the call list of a mock of cherrypy.engine.publish."""
     for call in called_mock.call_args_list:
         if call[0][0] == subscription_topic:
             return call

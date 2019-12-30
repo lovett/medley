@@ -40,6 +40,36 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
+    def test_cache_hit_bypasses_fetch(self, publish_mock):
+        """If headlines have been cached, urlfetch does not occur."""
+
+        def side_effect(*args, **_kwargs):
+            """Side effects local function"""
+            if args[0] == "cache:get":
+                return [{"foo": "bar"}]
+
+            if args[0] == "jinja:render":
+                return [""]
+
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/")
+
+        self.assertIsNotNone(
+            helpers.find_publish_call(publish_mock, "cache:get")
+        )
+
+        self.assertIsNone(
+            helpers.find_publish_call(publish_mock, "urlfetch:get")
+        )
+
+        self.assertIsNone(
+            helpers.find_publish_call(publish_mock, "cache:set")
+        )
+
+    @mock.patch("cherrypy.engine.publish")
     def test_cache_miss_triggers_fetch(self, publish_mock):
         """A urlfetch occurs when a cached value is not present"""
 
@@ -51,20 +81,30 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
                     "key": "testkey",
                     "category": ["category1", "category2", "category3"]
                 }]
+
             if args[0] == "cache:get":
                 return [None]
+
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/")
 
-        publish_calls = [args[0][0] for args in publish_mock.call_args_list]
+        self.assertIsNotNone(
+            helpers.find_publish_call(publish_mock, "cache:get")
+        )
 
-        print(publish_calls)
+        self.assertIsNotNone(
+            helpers.find_publish_call(publish_mock, "urlfetch:get")
+        )
 
-        self.assertTrue("urlfetch:get" in publish_calls)
-        self.assertTrue("cache:set" in publish_calls)
+        self.assertIsNotNone(
+            helpers.find_publish_call(publish_mock, "cache:set")
+        )
 
     @mock.patch("cherrypy.engine.publish")
     def test_fetch_failure(self, publish_mock):
@@ -97,6 +137,8 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
