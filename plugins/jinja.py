@@ -108,10 +108,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         rendered_template = typing.cast(str, template.render(**data))
 
-        if "max_age" in kwargs:
-            cache_control = f"private, max-age={kwargs.get('max_age')}"
-            cherrypy.response.headers["Cache-Control"] = cache_control
-
         return rendered_template
 
     def get_template(self, name: str) -> jinja2.Template:

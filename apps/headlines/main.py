@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display a list of headlines."""
 
@@ -71,8 +71,10 @@ class Controller:
                 cache_lifespan
             )
 
+        cache_control = f"private, max-age={cache_lifespan}"
+        cherrypy.response.headers["Cache-Control"] = cache_control
+
         return {
-            "max_age": cache_lifespan,
             "html": ("headlines.jinja.html", {
                 "headlines": headlines,
                 "limit": limit,
