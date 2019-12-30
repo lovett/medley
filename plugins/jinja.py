@@ -83,6 +83,50 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         self.bus.subscribe("lookup-template", self.get_template)
+        self.bus.subscribe("jinja:render", self.render)
+
+    def render(self, template_name: str, **kwargs) -> str:
+        """Populate a Jinja template."""
+
+        template = self.env.get_template(template_name)
+
+        data = kwargs
+
+        data["app_name"] = cherrypy.request.script_name.lstrip("/")
+
+        data["app_url"] = cherrypy.engine.publish(
+            "url:internal"
+        )
+
+        if data["app_url"]:
+            data["app_url"] = data["app_url"].pop()
+
+        data["use_service_workers"] = cherrypy.config.get("service_workers")
+
+        content_type = f"text/html;charset=utf-8"
+        cherrypy.response.headers["Content-Type"] = content_type
+
+        rendered_template = typing.cast(str, template.render(**data))
+
+        if "etag_key" in kwargs:
+            content_hash = cherrypy.engine.publish(
+                "hasher:md5",
+                rendered_template
+            ).pop()
+
+            cherrypy.engine.publish(
+                "memorize:etag",
+                kwargs.get("etag_key"),
+                content_hash
+            )
+
+            cherrypy.response.headers["ETag"] = content_hash
+
+        if "max_age" in kwargs:
+            cache_control = f"private, max-age={kwargs.get('max_age')}"
+            cherrypy.response.headers["Cache-Control"] = cache_control
+
+        return rendered_template
 
     def get_template(self, name: str) -> jinja2.Template:
         """Retrieve a Jinja2 template by name."""
