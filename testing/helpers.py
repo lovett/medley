@@ -1,6 +1,6 @@
 """Utility functions to make unit tests easier."""
 
-import os.path
+import pathlib
 import tempfile
 import cherrypy
 import plugins.jinja
@@ -15,31 +15,26 @@ def get_fixture(path):
 
 
 def start_server(app):
-    """Create a cherrypy server for testing with an app mounted at root
-    using method dispatch"""
+    """Create a cherrypy server for testing an app.
 
-    server_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    app_root = os.path.join(server_root, "apps")
+    The app is always mounted at the URL root so that URL references
+    aren't dependent on the app's name.
+
+    """
+
+    server_root = pathlib.Path(__file__).parents[1]
 
     cherrypy.config.update({
-        "app_root": app_root,
+        "app_root": server_root / "apps",
         "server_root": server_root,
         "database_dir": tempfile.gettempdir(),
-        "tools.encode.on": False
     })
 
-    app_config = {
+    cherrypy.tree.mount(app(), "/", {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
-            "tools.encode.on": False
         }
-    }
-
-    # Treat the app as exposed by default. Apps that are not exposed
-    # return 404s, which interferes with testing.
-    app.exposed = True
-
-    cherrypy.tree.mount(app(), "/", app_config)
+    })
 
     # Always load the shared app
     cherrypy.tree.mount(

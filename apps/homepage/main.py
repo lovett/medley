@@ -55,9 +55,18 @@ class Controller:
 
         return catalog
 
-    @cherrypy.tools.negotiable()
-    def GET(self, *_args, **_kwargs):
-        """Display the list of applications"""
+    @cherrypy.tools.wants()
+    def GET(self, *_args, **_kwargs) -> str:
+        """List all available applications.
+
+        Apps can be excluded from this list by setting
+        show_on_homepage to False.
+
+        """
+
+        if cherrypy.request.wants != "html":
+            cherrypy.response.status = 406
+            return ""
 
         template = "homepage.jinja.html"
 
@@ -68,13 +77,13 @@ class Controller:
 
         if etag_match:
             cherrypy.response.status = 304
-            return None
+            return ""
 
         apps = self.catalog_apps(cherrypy.tree.apps)
 
-        return {
-            "etag_key": template,
-            "html": (template, {
-                "apps": apps
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            template,
+            etag_key=template,
+            apps=apps
+        ).pop()

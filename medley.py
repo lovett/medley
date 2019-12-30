@@ -81,10 +81,8 @@ def setup() -> None:
         "server.socket_host": "127.0.0.1",
         "server.socket_port": 8085,
         "server_root": server_root,
+        "tools.encode.on": True,
         "use_service_workers": True,
-
-        # Jinja templating won't work unless tools.encode is off
-        "tools.encode.on": False,
 
         # Gzipping locally avoids Etag complexity. If a reverse
         # proxy handles it, the Etag could be dropped.

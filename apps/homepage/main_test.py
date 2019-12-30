@@ -32,6 +32,9 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         if args[0] == "memorize:check_etag":
             return [False]
 
+        if args[0] == "jinja:render":
+            return [""]
+
         return mock.DEFAULT
 
     def test_allow(self):
@@ -65,6 +68,22 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", as_json=True)
         self.assertEqual(response.code, 406)
         self.assertEqual(response.body, '')
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_etag(self, publish_mock):
+        """A valid etag produces a 304 response."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "memorize:check_etag":
+                return [True]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/")
+        self.assertEqual(response.code, 304)
+        self.assertEqual(response.body, "")
 
     @mock.patch("cherrypy.engine.publish")
     def test_refuses_text(self, publish_mock):
