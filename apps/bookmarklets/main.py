@@ -10,8 +10,9 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
-    def GET():
+    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.etag()
+    def GET(*_args, **_kwargs):
         """Present a static list of bookmarklets"""
 
         later_url = cherrypy.engine.publish(
@@ -24,9 +25,9 @@ class Controller:
             "/bounce"
         ).pop()
 
-        return {
-            "html": ("bookmarklets.jinja.html", {
-                "bounce_url": bounce_url,
-                "later_url": later_url
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarklets.jinja.html",
+            bounce_url=bounce_url,
+            later_url=later_url
+        ).pop()
