@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **_kwargs):
         """Present an interface for on-demand muting of the speech service."""
 
@@ -33,14 +33,14 @@ class Controller:
             {"q": "speak:mute"}
         ).pop()
 
-        return {
-            "html": ("speak.jinja.html", {
-                "can_speak": can_speak,
-                "muted_by_schedule": muted_by_schedule,
-                "registry_url": registry_url,
-                "schedules": schedules
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "speak.jinja.html",
+            can_speak=can_speak,
+            muted_by_schedule=muted_by_schedule,
+            registry_url=registry_url,
+            schedules=schedules
+        ).pop()
 
     @staticmethod
     @cherrypy.tools.capture()
