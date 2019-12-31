@@ -4,10 +4,11 @@ import re
 import typing
 import cherrypy
 import mistletoe
-import local_types
+
+ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 
 
-def view(url: str) -> local_types.NegotiableView:
+def view(url: str) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     response = cherrypy.engine.publish(
@@ -31,7 +32,7 @@ def view(url: str) -> local_types.NegotiableView:
     return view_index(response)
 
 
-def unavailable() -> local_types.NegotiableView:
+def unavailable() -> ViewAndData:
     """Display a message saying the URL could not be retrieved."""
 
     applog_url = cherrypy.engine.publish(
@@ -43,14 +44,12 @@ def unavailable() -> local_types.NegotiableView:
         }
     ).pop()
 
-    return {
-        "html": ("unavailable.jinja.html", {
-            "applog_url": applog_url
-        })
-    }
+    return ("unavailable.jinja.html", {
+        "applog_url": applog_url
+    })
 
 
-def view_index(response: typing.Any) -> local_types.NegotiableView:
+def view_index(response: typing.Any) -> ViewAndData:
     """Render a list of story links."""
 
     stories = (
@@ -58,14 +57,12 @@ def view_index(response: typing.Any) -> local_types.NegotiableView:
         for story in response.get("data").get("children")
     )
 
-    return {
-        "html": ("reddit-index.jinja.html", {
-            "stories": stories
-        })
-    }
+    return ("reddit-index.jinja.html", {
+        "stories": stories
+    })
 
 
-def view_story(response: typing.Any) -> local_types.NegotiableView:
+def view_story(response: typing.Any) -> ViewAndData:
     """Render the comments of a single story."""
 
     listing = response[0].get("data", {})
@@ -86,10 +83,8 @@ def view_story(response: typing.Any) -> local_types.NegotiableView:
         f"reddit.com/r/{story.get('subreddit')}"
     ).pop()
 
-    return {
-        "html": ("reddit-story.jinja.html", {
-            "story": story,
-            "comments": comments,
-            "subreddit_alturl": subreddit_alturl
-        })
-    }
+    return ("reddit-story.jinja.html", {
+        "story": story,
+        "comments": comments,
+        "subreddit_alturl": subreddit_alturl
+    })

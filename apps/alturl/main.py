@@ -1,10 +1,8 @@
 """Display a URL in an alternate format."""
 
-import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
-import local_types
 
 
 class Controller:
@@ -14,8 +12,8 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
-    def GET(*args) -> local_types.NegotiableView:
+    @cherrypy.tools.wants(only="html")
+    def GET(*args) -> str:
         """Dispatch to a site-specific handler."""
 
         bookmarks = cherrypy.engine.publish(
@@ -30,12 +28,12 @@ class Controller:
         ) for bookmark in bookmarks)
 
         if not args:
-            return {
-                "html": ("alturl.jinja.html", {
-                    "bookmarks": bookmarks,
-                    "bookmark_pairs": bookmark_pairs
-                })
-            }
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "alturl.jinja.html",
+                bookmarks=bookmarks,
+                bookmark_pairs=bookmark_pairs
+            ).pop()
 
         target_url = "/".join(args)
 
@@ -55,23 +53,29 @@ class Controller:
 
         parsed_url = urlparse(f"//{target_url}")
 
-        result: typing.Any = None
-
+        site_specific_template = ""
         if parsed_url.netloc.lower().endswith("reddit.com"):
-            result = apps.alturl.reddit.view(target_url)
+            site_specific_template, view_vars = apps.alturl.reddit.view(
+                target_url,
+            )
 
-        if result:
-            result["html"][1]["url"] = target_url
-            result["html"][1]["bookmark_delete_url"] = bookmark_delete_url
-            result["html"][1]["bookmarks"] = bookmarks
-            return result
+        if site_specific_template:
+            view_vars["url"] = target_url
+            view_vars["bookmark_delete_url"] = bookmark_delete_url
+            view_vars["bookmarks"] = bookmarks
 
-        return {
-            "html": ("alturl.jinja.html", {
-                "unrecognized": True,
-                "url": target_url
-            })
-        }
+            return cherrypy.engine.publish(
+                "jinja:render",
+                site_specific_template,
+                **view_vars
+            ).pop()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "alturl.jinja.html",
+            unrecognized=True,
+            url=target_url
+        ).pop()
 
     @staticmethod
     def POST(url: str) -> None:
