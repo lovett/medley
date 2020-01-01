@@ -40,6 +40,8 @@ SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
 
 TMUX_SESSION_NAME := medley
 
+VENV_ACTIVATE := venv/bin/activate$(PYTHON_VENV_ACTIVATE_EXTENSION)
+
 vpath %.cov coverage
 
 export PATH := ./venv/bin:$(PATH)
@@ -57,7 +59,7 @@ venv: dummy
 	@rm -rf venv
 	@python3 -m venv --system-site-packages venv
 	@echo  "done."
-	@echo "Now run: source venv/bin/activate"
+	@echo "Now run: source $(VENV_ACTIVATE)"
 	@echo "After that, run: make setup"
 	@echo "Also consider running: make hooks"
 
@@ -330,16 +332,15 @@ master-to-production: dummy
 # Automation for setting up a tmux session
 workspace:
 # 0: Editor
-	tmux new-session -d -s "$(TMUX_SESSION_NAME)" bash
+	tmux new-session -d -s "$(TMUX_SESSION_NAME)" "$$SHELL"
 	tmux send-keys -t "$(TMUX_SESSION_NAME)" "$(EDITOR) ." C-m
 
 # 1: Shell
-	tmux new-window -a -t "$(TMUX_SESSION_NAME)" bash
-	tmux send-keys -t "$(TMUX_SESSION_NAME)" "source venv/bin/activate" C-m
+	tmux new-window -a -t "$(TMUX_SESSION_NAME)" "$$SHELL"
+	tmux send-keys -t "$(TMUX_SESSION_NAME)" "source $(VENV_ACTIVATE)" C-m
 
 # 2: Dev server
-	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "devserver" "source venv/bin/activate; make serve"
-
+	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "devserver" "source $(VENV_ACTIVATE); make serve"
 	tmux select-window -t "$(TMUX_SESSION_NAME)":0
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
 
