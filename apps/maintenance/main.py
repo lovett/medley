@@ -21,6 +21,7 @@ class Controller:
                 2,
                 "maintenance:db"
             )
+
             cherrypy.response.status = 204
             return
 
@@ -30,6 +31,8 @@ class Controller:
                 2,
                 "maintenance:filesystem"
             )
+
+            cherrypy.response.status = 204
             return
 
         raise cherrypy.HTTPError(400, "Invalid task group")

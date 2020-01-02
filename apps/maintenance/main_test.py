@@ -58,21 +58,28 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.engine.publish")
     def test_invokes_scheduler(self, publish_mock):
         """The maintenance plug is invoked via the scheduler."""
-        response = self.request(
+
+        db_response = self.request(
             "/",
             method="POST",
             group="db"
         )
 
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "scheduler:add":
-                self.assertEqual(args[2], "maintenance:db")
-            return mock.DEFAULT
+        self.assertEqual(db_response.code, 204)
+        publish_mock.assert_called_with(
+            "scheduler:add", 2, "maintenance:db"
+        )
 
-        publish_mock.side_effect = side_effect
+        fs_response = self.request(
+            "/",
+            method="POST",
+            group="filesystem"
+        )
 
-        self.assertEqual(response.code, 204)
+        self.assertEqual(fs_response.code, 204)
+        publish_mock.assert_called_with(
+            "scheduler:add", 2, "maintenance:filesystem"
+        )
 
 
 if __name__ == "__main__":
