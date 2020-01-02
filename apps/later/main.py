@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display a form for for bookmarking a URL"""
 
@@ -81,14 +81,14 @@ class Controller:
             {"query": title, "order": "date-desc"}
         ).pop()
 
-        return {
-            "html": ("later.jinja.html", {
-                "bookmarks_url": bookmarks_url,
-                "error": error,
-                "bookmark": bookmark,
-                "title": title,
-                "url": url,
-                "tags": tags,
-                "comments": comments,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "later.jinja.html",
+            bookmarks_url=bookmarks_url,
+            error=error,
+            bookmark=bookmark,
+            title=title,
+            url=url,
+            tags=tags,
+            comments=comments,
+        ).pop()
