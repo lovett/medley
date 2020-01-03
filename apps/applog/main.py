@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display a list of recent log entries"""
 
@@ -19,7 +19,7 @@ class Controller:
         sources = kwargs.get('sources')
         per_page = 20
 
-        (records, total, query_plan) = cherrypy.engine.publish(
+        records, total, query_plan = cherrypy.engine.publish(
             "applog:search",
             offset=offset,
             sources=sources.split(' ') if sources else None,
@@ -38,14 +38,14 @@ class Controller:
             total=total
         ).pop()
 
-        return {
-            "html": ("applog.jinja.html", {
-                "records": records,
-                "total": total,
-                "sources": sources,
-                "exclude": exclude,
-                "newer_url": newer_url,
-                "older_url": older_url,
-                "query_plan": query_plan
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "applog.jinja.html",
+            records=records,
+            total=total,
+            sources=sources,
+            exclude=exclude,
+            newer_url=newer_url,
+            older_url=older_url,
+            query_plan=query_plan
+        ).pop()
