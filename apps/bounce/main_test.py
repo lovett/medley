@@ -118,9 +118,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             result = self.controller.host_to_keyword(pair[0])
             self.assertEqual(result, pair[1])
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_site_in_group(self, publish_mock, render_mock):
+    def test_site_in_group(self, publish_mock):
         """A request with a URL that belongs to known group returns
         equivalent URLs for other members of the group
         """
@@ -150,6 +149,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                     }
 
                 ]]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
@@ -158,16 +159,16 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", u="http://dev.example.com/with/subpath")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "group"),
+            publish_mock.call_args_list[-1].kwargs.get("group"),
             "example"
         )
 
         self.assertEqual(
+            publish_mock.call_args_list[-1].kwargs.get("name"),
             "dev",
-            helpers.html_var(render_mock, "name")
         )
 
-        bounces = helpers.html_var(render_mock, "bounces")
+        bounces = publish_mock.call_args_list[-1].kwargs.get("bounces")
 
         self.assertEqual(
             bounces[0][0],
@@ -189,9 +190,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             "othersite"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_site_not_in_group(self, publish_mock, render_mock):
+    def test_site_not_in_group(self, publish_mock):
         """A request with a URL that belongs to known group but does not match
         an existing record does not offer a list of bounces.
 
@@ -216,6 +216,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                         "value": "othersite.example.com"
                     }
                 ]]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
@@ -223,13 +225,12 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", u="http://dev.example.com/with/subpath")
 
-        bounces = helpers.html_var(render_mock, "bounces")
+        bounces = publish_mock.call_args_list[-1].kwargs.get("bounces")
 
         self.assertEqual(len(bounces), 0)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_unrecognized_site(self, publish_mock, render_mock):
+    def test_unrecognized_site(self, publish_mock):
         """A  URL that does not belong to known group returns a form."""
 
         def side_effect(*args, **_):
@@ -241,6 +242,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 return [None]
 
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -248,17 +252,17 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", u="http://unrecognized.example.com")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "group"),
+            publish_mock.call_args_list[-1].kwargs.get("group"),
             "example"
         )
 
         self.assertEqual(
-            helpers.html_var(render_mock, "name"),
+            publish_mock.call_args_list[-1].kwargs.get("name"),
             "unrecognized"
         )
 
         self.assertIsNone(
-            helpers.html_var(render_mock, "bounces")
+            publish_mock.call_args_list[-1].kwargs.get("bounces")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -273,6 +277,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 return [None]
 
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -283,9 +290,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             u="http://unrecognized.example.com"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_departing_site(self, publish_mock, render_mock):
+    def test_departing_site(self, publish_mock):
         """If the given URL matches a record in the registry, it is considered
          the departing site.
 
@@ -310,6 +316,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                     }
                 ]]
 
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -320,7 +329,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(
-            helpers.html_var(render_mock, "departing_from"),
+            publish_mock.call_args_list[-1].kwargs.get("departing_from"),
             "othersite"
         )
 
@@ -336,6 +345,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [{"uid": 1, "group": "example"}]
             if args[0] == "url:internal":
                 return ["http://example.com"]
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -362,6 +374,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [args[1]]
             if args[0] == "url:internal":
                 return ["http://example.com"]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
@@ -389,7 +403,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [args[1]]
             if args[0] == "url:internal":
                 return ["http://example.com"]
-
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

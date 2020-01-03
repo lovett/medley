@@ -73,7 +73,7 @@ class Controller:
 
         return "live"
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *_args, **kwargs):
         """Display all the URLs in a group."""
 
@@ -132,18 +132,18 @@ class Controller:
                 for bounce in bounces
             ]
 
-        return {
-            "html": ("bounce.jinja.html", {
-                "departing_from": departing_from,
-                "url": url,
-                "site": host,
-                "group": group,
-                "name": name,
-                "bounces": bounces,
-                "registry_url": registry_url,
-                "invalid": invalid
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bounce.jinja.html",
+            departing_from=departing_from,
+            url=url,
+            site=host,
+            group=group,
+            name=name,
+            bounces=bounces,
+            registry_url=registry_url,
+            invalid=invalid
+        ).pop()
 
     def POST(self, url, name, group):
         """Add a new URL to a group."""
