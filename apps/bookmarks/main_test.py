@@ -38,15 +38,16 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.bookmarks.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_empty(self, publish_mock, render_mock):
+    def test_empty(self, publish_mock):
         """If the database is empty, a no-records message is returned"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "bookmarks:recent":
                 return [[[], 0, _]]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -54,10 +55,12 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            len(helpers.html_var(render_mock, "bookmarks")),
-            0
+            publish_mock.call_args_list[-1].kwargs.get("bookmarks"),
+            []
         )
-        self.assertIsNone(helpers.html_var(render_mock, "query"))
+        self.assertIsNone(
+            publish_mock.call_args_list[-1].kwargs.get("query"),
+        )
 
     @mock.patch("cherrypy.engine.publish")
     def test_add_success(self, publish_mock):
@@ -67,6 +70,9 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "scheduler:add":
                 return [True]
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

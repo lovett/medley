@@ -24,7 +24,7 @@ class Controller:
         closest_snapshot = snapshots.get("closest", {})
         return closest_snapshot
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *args, **kwargs):
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.
@@ -86,23 +86,23 @@ class Controller:
                 query
             ).pop()
 
-        return {
-            "html": ("bookmarks.jinja.html", {
-                "bookmarks": bookmarks,
-                "max_days": max_days,
-                "count": count,
-                "query": query,
-                "general_query": general_query,
-                "query_plan": query_plan,
-                "order": order,
-                "next_page": next_page,
-                "previous_page": previous_page,
-                "total_pages": total_pages,
-                "page": page,
-                "start_index": start_index,
-                "end_index": end_index
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarks.jinja.html",
+            bookmarks=bookmarks,
+            max_days=max_days,
+            count=count,
+            query=query,
+            general_query=general_query,
+            query_plan=query_plan,
+            order=order,
+            next_page=next_page,
+            previous_page=previous_page,
+            total_pages=total_pages,
+            page=page,
+            start_index=start_index,
+            end_index=end_index
+        )
 
     @staticmethod
     def POST(url, title=None, tags=None, comments=None, added=None):
