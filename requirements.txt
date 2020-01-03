@@ -1,7 +1,7 @@
 CherryPy==18.5.0
 Jinja2==2.10.3
 geoip2==3.0.0
-google-cloud-storage==1.23.0
+google-cloud-storage==1.24.1
 httplib2==0.15.0
 mistletoe==0.7.2
 msgpack==0.6.2
