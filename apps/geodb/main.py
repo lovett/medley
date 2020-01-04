@@ -10,7 +10,6 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    @cherrypy.tools.negotiable()
     def POST(action=None):
         """Schedule a database download."""
 
