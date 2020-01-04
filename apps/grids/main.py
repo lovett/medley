@@ -12,7 +12,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *_args, **kwargs):
         """Display the list of available grids, or the current grid"""
 
@@ -45,6 +45,7 @@ class Controller:
             return self.redirect_to_first_grid(grids)
 
         rows = []
+
         if options["layout"] == "month":
             today = pendulum.today()
 
@@ -65,19 +66,19 @@ class Controller:
                 row[0] = day.format("MMM D, YYYY")
                 row[1] = day.format("dddd")
                 rows.append(row)
-        elif headers:
+        else:
             row = [''] * len(headers)
             rows = [row for x in range(1, 30)]
 
-        return {
-            "html": ("grids.jinja.html", {
-                "headers": headers,
-                "name": name,
-                "names": grids.keys(),
-                "options": options,
-                "rows": rows
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "grids.jinja.html",
+            headers=headers,
+            name=name,
+            names=grids.keys(),
+            options=options,
+            rows=rows
+        ).pop()
 
     @staticmethod
     def redirect_to_first_grid(grids):

@@ -38,9 +38,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.grids.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_month_layout(self, publish_mock, render_mock):
+    def test_month_layout(self, publish_mock):
         """The first two columns of a template with layout=month are Date and
         Day, even though these are not otherwise specified in the template"""
 
@@ -49,6 +48,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 value = "Column 1, Column 2, Column 3\nlayout=month"
                 return [{"test1": value}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -56,13 +57,37 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", name="test1")
 
         self.assertCountEqual(
-            helpers.html_var(render_mock, "headers"),
+            publish_mock.call_args_list[-1].kwargs.get("headers"),
             ['Date', 'Day', 'Column 1', 'Column 2', 'Column 3']
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_month_layout_invalid_start(self, publish_mock, render_mock):
+    def test_default_layout(self, publish_mock):
+        """The columns of a default layout are specified entirely by the
+        template.
+
+        """
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                value = "Column A, Column B, Column C"
+                return [{"test_default_layout": value}]
+            if args[0] == "jinja:render":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/", name="test_default_layout")
+
+        self.assertCountEqual(
+            publish_mock.call_args_list[-1].kwargs.get("headers"),
+            ['Column A', 'Column B', 'Column C']
+        )
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_month_layout_invalid_start(self, publish_mock):
         """An invalid start date for a monthly layout is handled gracefully"""
 
         first_of_current_month = pendulum.today().start_of('month')
@@ -72,6 +97,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 value = "Column 4, Column 5, Column 6\nlayout=month"
                 return [{"test1": value}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -79,19 +106,20 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", name="test1", start="1234-56")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "rows")[0][0],
+            publish_mock.call_args_list[-1].kwargs.get("rows")[0][0],
             first_of_current_month.strftime("%b %-d, %Y")
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_plain_layout(self, publish_mock, render_mock):
+    def test_plain_layout(self, publish_mock):
         """No additional columns are added to a plain-layout template"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [{"test1": "Column A, Column B"}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -99,7 +127,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", name="test1")
 
         self.assertCountEqual(
-            helpers.html_var(render_mock, "headers"),
+            publish_mock.call_args_list[-1].kwargs.get("headers"),
             ['Column A', 'Column B']
         )
 
@@ -111,9 +139,31 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [{"test1": "Column A"}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
+
+        self.request("/")
+
+        self.assertRaises(cherrypy.HTTPRedirect)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_invalid_gird(self, publish_mock):
+        """Specifying an unknown grid redirects to the first known template"""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                return [{"test1": "Column A"}]
+            if args[0] == "jinja:render":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/", "invalid")
 
         self.assertRaises(cherrypy.HTTPRedirect)
 
