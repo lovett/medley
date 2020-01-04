@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display a list of recent calls"""
 
@@ -54,11 +54,11 @@ class Controller:
             total=total
         ).pop()
 
-        return {
-            "html": ("calls.jinja.html", {
-                "calls": calls,
-                "total": total,
-                "newer_url": newer_url,
-                "older_url": older_url,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "calls.jinja.html",
+            calls=calls,
+            total=total,
+            newer_url=newer_url,
+            older_url=older_url,
+        ).pop()

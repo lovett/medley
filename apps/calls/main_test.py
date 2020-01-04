@@ -55,6 +55,9 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "url:paginate:newer_older":
                 return [(None, None)]
 
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
