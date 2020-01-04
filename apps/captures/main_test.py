@@ -38,9 +38,8 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.captures.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_search_by_path(self, publish_mock, render_mock):
+    def test_search_by_path(self, publish_mock):
         """Captures can be searched by path"""
 
         def side_effect(*args, **_):
@@ -49,15 +48,43 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
                 return [(1, [{}])]
             if args[0] == "url:paginate:newer_older":
                 return [(None, None)]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/", path="test")
 
-        print(render_mock.call_args_list)
+        self.assertEqual(
+            len(publish_mock.call_args_list[-1].kwargs.get("captures")),
+            1
+        )
 
-        self.assertEqual(len(helpers.html_var(render_mock, "captures")), 1)
+    @mock.patch("cherrypy.engine.publish")
+    def test_view_single_capture(self, publish_mock):
+        """A single capture can be viewed by its ID."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+
+            if args[0] == "capture:get":
+                return [None]
+            if args[0] == "jinja:render":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/", cid="1")
+
+        self.assertIsNone(
+            publish_mock.call_args_list[-1].kwargs.get("newer_url"),
+        )
+
+        self.assertIsNone(
+            publish_mock.call_args_list[-1].kwargs.get("older_url"),
+        )
 
 
 if __name__ == "__main__":

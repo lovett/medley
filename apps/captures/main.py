@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display a list of recent captures, or captures matching a URI path.
         """
@@ -46,11 +46,11 @@ class Controller:
                 total=total
             ).pop()
 
-        return {
-            "html": ("captures.jinja.html", {
-                "path": path,
-                "captures": captures,
-                "newer_url": newer_url,
-                "older_url": older_url,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "captures.jinja.html",
+            path=path,
+            captures=captures,
+            newer_url=newer_url,
+            older_url=older_url,
+        ).pop()
