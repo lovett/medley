@@ -3,6 +3,7 @@ Test suite for the whois app
 """
 
 import unittest
+import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -37,10 +38,26 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.headers.main.Controller)
 
-    def test_returns_html(self):
+    @mock.patch("cherrypy.engine.publish")
+    def test_returns_html(self, publish_mock):
         """GET returns text/html by default"""
-        response = self.request("/")
-        self.assert_html(response, "<table")
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "jinja:render":
+                return [""]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        self.request("/", headers={
+            "X-Test": "Hello"
+        })
+
+        self.assertIn(
+            ("X-Test", "Hello"),
+            publish_mock.call_args_list[-1].kwargs.get("headers")
+        )
 
     def test_returns_json(self):
         """GET returns application/json if requested"""
@@ -56,6 +73,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_custom_header(self):
         """GET recognizes custom headers"""
+
         response = self.request(
             "/",
             headers={"Special_Header": "Special Value"},
@@ -67,6 +85,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             for pair in response.body
             if pair[0] == "Special_Header"
         )
+
         self.assertEqual(value, "Special Value")
 
 
