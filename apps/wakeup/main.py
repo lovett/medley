@@ -12,7 +12,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """Display the list of hosts eligible for wakeup."""
 
@@ -31,16 +31,15 @@ class Controller:
             {"key": "wakeup", "view": "add", "q": "wakeup"}
         ).pop()
 
-        return {
-            "html": ("wakeup.jinja.html", {
-                "hosts": hosts,
-                "registry_url": registry_url,
-                "sent": sent
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "wakeup.jinja.html",
+            hosts=hosts,
+            registry_url=registry_url,
+            sent=sent
+        ).pop()
 
     @staticmethod
-    @cherrypy.tools.encode()
     @cherrypy.tools.wants()
     def POST(*_args, **kwargs):
         """Send a WoL packet to the mac address of the specified host."""

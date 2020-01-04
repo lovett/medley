@@ -36,9 +36,8 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.wakeup.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_get(self, publish_mock, render_mock):
+    def test_get(self, publish_mock):
         """The default view is a list of wake-able hosts."""
 
         def side_effect(*args, **_):
@@ -49,6 +48,9 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "url:internal":
                 return ["/registry"]
 
+            if args[0] == "jinja:render":
+                return [""]
+
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -56,22 +58,28 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "registry_url"),
+            publish_mock.call_args_list[-1].kwargs.get("registry_url"),
             "/registry"
         )
         self.assertEqual(
-            helpers.html_var(render_mock, "hosts").get("host1"),
+            publish_mock.call_args_list[-1].kwargs.get("hosts").get("host1"),
             "mac1"
         )
 
         self.assertNotIn(
             "host3",
-            helpers.html_var(render_mock, "hosts")
+            publish_mock.call_args_list[-1].kwargs.get("hosts")
         )
 
         self.assertFalse(
-            helpers.html_var(render_mock, "sent")
+            publish_mock.call_args_list[-1].kwargs.get("send")
         )
+
+    def test_post_rejects_missing_host(self):
+        """A host must be specified on POST."""
+
+        response = self.request("/", method="POST")
+        self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
     def test_post_rejects_unknown_host(self, publish_mock):
@@ -81,7 +89,8 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:first_value":
                 return [None]
-
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -100,6 +109,8 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
                 return ["00:00:00:00:00"]
             if args[0] == "url:internal":
                 return ["/"]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
