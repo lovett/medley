@@ -11,16 +11,17 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **_kwargs):
         """Present a form for specifying a URL to fetch."""
 
-        return {
-            "html": ("htmlhead.jinja.html", {})
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "htmlhead.jinja.html",
+        ).pop()
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def POST(url=None, username=None, password=None):
         """Request an HTML page and display its the contents of its head
         section.
@@ -62,13 +63,13 @@ class Controller:
                 key="get"
             ).pop()
 
-        return {
-            "html": ("htmlhead.jinja.html", {
-                "failure_message": failure_message,
-                "status_code": status_code,
-                "url": url,
-                "tags": head_tags,
-                "username": username,
-                "password": password
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "htmlhead.jinja.html",
+            failure_message=failure_message,
+            status_code=status_code,
+            url=url,
+            tags=head_tags,
+            username=username,
+            password=password
+        ).pop()

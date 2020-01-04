@@ -40,10 +40,9 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.htmlhead.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
-    def test_with_url(self, publish_mock, render_mock):
+    def test_with_url(self, publish_mock):
         """When a URL is provided, it is parsed for tags in the head."""
 
         def side_effect(*args, **_):
@@ -61,6 +60,8 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
                 )
                 response = requests.get("http://example.com")
                 return [response]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -68,14 +69,13 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "tags"),
+            publish_mock.call_args_list[-1].kwargs.get("tags"),
             [('title', [], 'Hello world')]
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
-    def test_404(self, publish_mock, render_mock):
+    def test_404(self, publish_mock):
         """When a URL is provided, it is parsed for tags in the head."""
 
         def side_effect(*args, **_):
@@ -89,6 +89,8 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
                 )
                 response = requests.get("http://example.com")
                 return [response]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -96,7 +98,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "status_code"),
+            publish_mock.call_args_list[-1].kwargs.get("status_code"),
             404
         )
 
