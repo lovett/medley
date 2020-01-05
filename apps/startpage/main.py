@@ -73,17 +73,10 @@ class Controller:
         }
 
     @staticmethod
+    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.etag()
     def render_page(page_name, page_record):
         """Render INI page content to HTML."""
-
-        etag_match = cherrypy.engine.publish(
-            "memorize:check_etag",
-            page_name,
-        ).pop()
-
-        if etag_match:
-            cherrypy.response.status = 304
-            return None
 
         local_domains = cherrypy.engine.publish(
             "registry:search",
@@ -115,16 +108,15 @@ class Controller:
             "worker.js"
         ).pop()
 
-        return {
-            "etag_key": page_name,
-            "html": ("startpage.jinja.html", {
-                "created": page_record["created"],
-                "anonymizer_url": anonymizer_url,
-                "edit_url": edit_url,
-                "page": page,
-                "worker_url": worker_url
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "startpage.jinja.html",
+            created=page_record["created"],
+            anonymizer_url=anonymizer_url,
+            edit_url=edit_url,
+            page=page,
+            worker_url=worker_url
+        ).pop()
 
     @staticmethod
     def render_worker():
@@ -147,7 +139,7 @@ class Controller:
             content_type="application/javascript"
         )
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *args, **kwargs):
         """Render a page or present the edit form."""
 
@@ -187,11 +179,11 @@ class Controller:
                 trailing_slash=(page_name is None)
             ).pop()
 
-            return {
-                "html": ("postedit.jinja.html", {
-                    "page_url": page_url
-                })
-            }
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "postedit.jinja.html",
+                page_url=page_url
+            ).pop()
 
         # Prevent the default page name from being exposed. This is
         # only case where the canonical URL needs special
