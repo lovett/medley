@@ -36,9 +36,8 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.transform.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_lowercase_html(self, publish_mock, render_mock):
+    def test_lowercase_html(self, publish_mock):
         """Input is converted to lowercase and returned as HTML"""
 
         def side_effect(*args, **_):
@@ -46,6 +45,8 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
 
             if args[0] == "url:internal":
                 return ["/"]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -58,7 +59,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(
-            helpers.html_var(render_mock, "result"),
+            publish_mock.call_args_list[-1].kwargs.get("result"),
             "test"
         )
 

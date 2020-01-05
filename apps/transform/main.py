@@ -1,5 +1,6 @@
 """Convert a string to a different format."""
 
+import json
 import urllib
 import re
 import cherrypy
@@ -48,19 +49,25 @@ class Controller:
         """Shape the list of transforms into a list of keys"""
         return sorted(self.transforms.keys())
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants()
     def GET(self, *_args, **_kwargs):
         """The default view presents the available transformation methods"""
 
-        return {
-            "json": {"transforms": self.list_of_transforms()},
-            "text": "\n".join(self.list_of_transforms()),
-            "html": ("transform.jinja.html", {
-                "transforms": self.list_of_transforms()
-            })
-        }
+        if cherrypy.request.wants == "json":
+            return json.dumps(
+                {"transforms": self.list_of_transforms()}
+            ).encode()
 
-    @cherrypy.tools.negotiable()
+        if cherrypy.request.wants == "text":
+            return "\n".join(self.list_of_transforms())
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "transform.jinja.html",
+            transforms=self.list_of_transforms()
+        ).pop()
+
+    @cherrypy.tools.wants()
     def POST(self, transform, value=''):
         """Perform a transformation and display the result"""
 
@@ -68,13 +75,17 @@ class Controller:
 
         result = transformer(value.strip())
 
-        return {
-            "json": {"result": result},
-            "text": result,
-            "html": ("transform.jinja.html", {
-                "result": result,
-                "current_transform": transform,
-                "transforms": self.list_of_transforms(),
-                "value": value,
-            })
-        }
+        if cherrypy.request.wants == "json":
+            return json.dumps({"result": result}).encode()
+
+        if cherrypy.request.wants == "text":
+            return result
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "transform.jinja.html",
+            result=result,
+            current_transform=transform,
+            transforms=self.list_of_transforms(),
+            value=value,
+        ).pop()
