@@ -1,5 +1,6 @@
 """Determine the internal and external IP address."""
 
+import json
 import cherrypy
 
 
@@ -10,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants()
     def GET(*_args, **_kwargs):
         """Display the client's local IP, and the server's external IP"""
 
@@ -38,14 +39,18 @@ class Controller:
                     300
                 )
 
-        return {
-            "json": {
+        if cherrypy.request.wants == "json":
+            return json.dumps({
                 "client_ip": client_ip,
                 "external_ip": external_ip,
-            },
-            "text": f"client_ip={client_ip}\nexternal_ip={external_ip}",
-            "html": ("ip.jinja.html", {
-                "client_ip": client_ip,
-                "external_ip": external_ip,
-            })
-        }
+            }).encode()
+
+        if cherrypy.request.wants == "text":
+            return f"client_ip={client_ip}\nexternal_ip={external_ip}"
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "ip.jinja.html",
+            client_ip=client_ip,
+            external_ip=external_ip,
+        ).pop()

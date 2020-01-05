@@ -36,9 +36,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.ip.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_returns_html(self, publish_mock, render_mock):
+    def test_returns_html(self, publish_mock):
         """GET returns text/html by default"""
 
         def side_effect(*args, **_):
@@ -46,6 +45,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
             if args[0] == "cache:get":
                 return ["1.1.1.1"]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
@@ -54,17 +55,16 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "external_ip"),
+            publish_mock.call_args_list[-1].kwargs.get("external_ip"),
             "1.1.1.1"
         )
         self.assertEqual(
-            helpers.html_var(render_mock, "client_ip"),
+            publish_mock.call_args_list[-1].kwargs.get("client_ip"),
             "127.0.0.1"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_json")
     @mock.patch("cherrypy.engine.publish")
-    def test_returns_json(self, publish_mock, render_mock):
+    def test_returns_json(self, publish_mock):
         """GET returns application/json if requested"""
 
         def side_effect(*args, **_):
@@ -77,16 +77,17 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", as_json=True)
+        response = self.request("/", as_json=True)
+
+        self.assert_json(response)
 
         self.assertEqual(
-            helpers.html_var(render_mock, "external_ip"),
+            response.body.get("external_ip"),
             "1.1.1.1"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_text")
     @mock.patch("cherrypy.engine.publish")
-    def test_returns_text(self, publish_mock, render_mock):
+    def test_returns_text(self, publish_mock):
         """GET returns text/plain if requested"""
 
         def side_effect(*args, **_):
@@ -98,13 +99,12 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", as_text=True)
+        response = self.request("/", as_text=True)
 
-        self.assertTrue("external_ip=1.1.1.1" in helpers.text_var(render_mock))
+        self.assertIn("external_ip=1.1.1.1", response.body)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_honors_xreal_ip(self, publish_mock, render_mock):
+    def test_honors_xreal_ip(self, publish_mock):
         """The X-Real-IP header takes precedence over Remote-Addr"""
 
         def side_effect(*args, **_):
@@ -112,6 +112,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
             if args[0] == "cache:get":
                 return ["1.1.1.1"]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
@@ -120,7 +122,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
 
         self.assertEqual(
-            helpers.html_var(render_mock, "client_ip"),
+            publish_mock.call_args_list[-1].kwargs.get("client_ip"),
             "2.2.2.2"
         )
 
@@ -135,6 +137,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
                 return [None]
             if args[0] == "urlfetch:get":
                 return ["3.3.3.3"]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -157,6 +161,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
+            if args[0] == "jinja:render":
+                return [""]
 
             return mock.DEFAULT
 
