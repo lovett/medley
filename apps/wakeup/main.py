@@ -12,7 +12,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **kwargs):
         """Display the list of hosts eligible for wakeup."""
 
@@ -40,7 +40,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    @cherrypy.tools.wants()
+    @cherrypy.tools.provides(formats=("text", "html"))
     def POST(*_args, **kwargs):
         """Send a WoL packet to the mac address of the specified host."""
 

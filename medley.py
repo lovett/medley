@@ -47,7 +47,7 @@ import plugins.urlfetch
 import plugins.url
 import tools.capture
 import tools.etag
-import tools.wants
+import tools.provides
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
@@ -124,7 +124,7 @@ def setup() -> None:
     # Tools
     cherrypy.tools.capture = tools.capture.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
-    cherrypy.tools.wants = tools.wants.Tool()
+    cherrypy.tools.provides = tools.provides.Tool()
 
     # Mount the apps
     for app in os.listdir(app_root):

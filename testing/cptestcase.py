@@ -17,12 +17,12 @@ import urllib
 import json
 import cherrypy
 import tools.capture
-import tools.wants
+import tools.provides
 import tools.etag
 
 cherrypy.config.update({'environment': "test_suite"})
 cherrypy.tools.capture = tools.capture.Tool()
-cherrypy.tools.wants = tools.wants.Tool()
+cherrypy.tools.provides = tools.provides.Tool()
 cherrypy.tools.etag = tools.etag.Tool()
 
 # Don't start the HTTP server

@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **kwargs):
         """Display a list of recent captures, or captures matching a URI path.
         """

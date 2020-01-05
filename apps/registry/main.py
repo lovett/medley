@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants()
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **kwargs):
         """Display a UI to search for entries and add new ones."""
 

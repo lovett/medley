@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants()
+    @cherrypy.tools.provides(formats=("json", "text", "html"))
     def GET(*_args, **_kwargs):
         """Display the headers of the current request"""
 

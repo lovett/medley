@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **_kwargs):
         """Present an interface for on-demand muting of the speech service."""
 

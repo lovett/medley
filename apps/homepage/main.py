@@ -55,7 +55,7 @@ class Controller:
 
         return catalog
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
     def GET(self, *_args, **_kwargs) -> str:
         """List all available applications.

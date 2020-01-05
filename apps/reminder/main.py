@@ -14,7 +14,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **_kwargs):
         """Display scheduled reminders, and a form to create new ones."""
 

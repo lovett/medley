@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
     def GET(*_args, **_kwargs):
         """Present a static list of bookmarklets"""

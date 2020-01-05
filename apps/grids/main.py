@@ -12,7 +12,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *_args, **kwargs):
         """Display the list of available grids, or the current grid"""
 

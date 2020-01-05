@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **kwargs):
         """Display a form for for bookmarking a URL"""
 

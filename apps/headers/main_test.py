@@ -80,6 +80,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             as_json=True
         )
 
+        print(response.body)
         _, value = next(
             pair
             for pair in response.body

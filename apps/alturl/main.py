@@ -12,7 +12,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*args) -> str:
         """Dispatch to a site-specific handler."""
 

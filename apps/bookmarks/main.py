@@ -24,7 +24,7 @@ class Controller:
         closest_snapshot = snapshots.get("closest", {})
         return closest_snapshot
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args, **kwargs):
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.

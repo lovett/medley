@@ -73,7 +73,7 @@ class Controller:
         }
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
     def render_page(page_name, page_record):
         """Render INI page content to HTML."""
@@ -139,7 +139,7 @@ class Controller:
             content_type="application/javascript"
         )
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args, **kwargs):
         """Render a page or present the edit form."""
 

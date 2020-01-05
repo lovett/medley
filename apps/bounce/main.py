@@ -73,7 +73,7 @@ class Controller:
 
         return "live"
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *_args, **kwargs):
         """Display all the URLs in a group."""
 

@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **_kwargs):
         """Perform a client-side redirect to the URL specified in the
         querystring.

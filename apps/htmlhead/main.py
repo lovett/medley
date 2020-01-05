@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(*_args, **_kwargs):
         """Present a form for specifying a URL to fetch."""
 
@@ -21,7 +21,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def POST(url=None, username=None, password=None):
         """Request an HTML page and display its the contents of its head
         section.

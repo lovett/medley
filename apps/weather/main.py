@@ -13,7 +13,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @cherrypy.tools.wants(only="html")
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args, **_kwargs):
         """Display selected parts of the most recent Darksky API query"""
 

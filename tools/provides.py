@@ -1,36 +1,38 @@
-"""Identify the desired content type of a request."""
+"""A Cherrypy tool to make it easier to work with the Accept header."""
 
 import pathlib
+import typing
 import cherrypy
 
 
 class Tool(cherrypy.Tool):
-    """A Cherrypy tool to make it easier to work with the Accept header."""
+    """Reconcile the desired content type of a request with what the
+    application supports.
+
+    """
 
     def __init__(self) -> None:
         cherrypy.Tool.__init__(
             self,
             "before_request_body",
-            self.wants,
+            self.provides,
             priority=10
         )
 
     @staticmethod
-    def wants(*_args, **kwargs) -> None:
-        """Reshape the accept header as a custom request property.
+    def provides(formats: typing.Tuple[str]) -> None:
+        """Populate a custom request property with a keyword describing the
+        client's desired content format.
 
-        Preference weights (;q=) are not considered.
+        Preference weights in the Accept header (;q=) are not considered.
 
         If a JSON or TXT file extension is specified in the request
         path, it takes precedence.
 
         Callers can indicate what content types are supported by
-        setting the keyword argument "only" to a space-delimited list
-        of keywords.
+        passing known keywords via *args.
 
         """
-
-        only_wants = kwargs.get("only")
 
         accept = cherrypy.request.headers.get("Accept", "*/*")
 
@@ -52,5 +54,5 @@ class Tool(cherrypy.Tool):
             cherrypy.request.wants = "json"
             response_headers["Content-Type"] = "application/json"
 
-        if only_wants and cherrypy.request.wants not in only_wants:
+        if cherrypy.request.wants not in formats:
             raise cherrypy.HTTPError(406)

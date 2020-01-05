@@ -49,7 +49,7 @@ class Controller:
         """Shape the list of transforms into a list of keys"""
         return sorted(self.transforms.keys())
 
-    @cherrypy.tools.wants()
+    @cherrypy.tools.provides(formats=("json", "text", "html"))
     def GET(self, *_args, **_kwargs):
         """The default view presents the available transformation methods"""
 
@@ -67,7 +67,7 @@ class Controller:
             transforms=self.list_of_transforms()
         ).pop()
 
-    @cherrypy.tools.wants()
+    @cherrypy.tools.provides(formats=("json", "text", "html"))
     def POST(self, transform, value=''):
         """Perform a transformation and display the result"""
 
