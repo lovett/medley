@@ -1,5 +1,6 @@
 """Manage a collection of bookmarked URLs."""
 
+import json
 import cherrypy
 
 
@@ -22,9 +23,9 @@ class Controller:
 
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})
-        return closest_snapshot
+        return json.dumps(closest_snapshot).encode()
 
-    @cherrypy.tools.provides(formats=("html",))
+    @cherrypy.tools.provides(formats=("json", "html"))
     def GET(self, *args, **kwargs):
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.
@@ -44,9 +45,7 @@ class Controller:
             return self.taglist()
 
         if kwargs.get('wayback'):
-            return {
-                "json": self.check_wayback_availability(kwargs.get('wayback'))
-            }
+            return self.check_wayback_availability(kwargs.get('wayback'))
 
         if query:
             max_days = None
