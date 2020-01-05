@@ -38,80 +38,45 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.phone.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_no_number(self, publish_mock, render_mock):
+    def test_no_number(self, publish_mock):
         """An HTML request with no number displays the search form"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "formatting:phone_sanitize":
                 return [None]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
         self.request("/")
-        self.assertFalse(helpers.html_var(render_mock, "error"))
+        self.assertIsNone(
+            publish_mock.call_args_list[-1].kwargs.get("error"),
+        )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_invalid_number_as_html(self, publish_mock, render_mock):
+    def test_invalid_number_as_html(self, publish_mock):
         """An HTML request with an invalid number redirects with a message"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "formatting:phone_sanitize":
                 return [None]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
         self.request("/", number="invalid-number-html")
-        self.assertTrue(helpers.html_var(render_mock, "error"))
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_invalid_number_as_json(self, publish_mock):
-        """A JSON request with an invalid number returns an error"""
-
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "formatting:phone_sanitize":
-                return [None]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-        response = self.request(
-            "/",
-            number="invalid-number-json",
-            as_json=True
-        )
-        self.assertTrue(helpers.response_is_json(response))
-        self.assertTrue("error" in response.body)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_invalid_number_as_text(self, publish_mock):
-        """A text/plain request with an invalid number returns an error"""
-
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "formatting:phone_sanitize":
-                return [None]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-        response = self.request(
-            "/",
-            number="invalid-number-text",
-            as_text=True
-        )
-        self.assertTrue(helpers.response_is_text(response))
-        self.assertEqual(
-            response.body.strip(),
-            "The number provided was invalid."
+        self.assertNotEqual(
+            publish_mock.call_args_list[-1].kwargs.get("error"),
+            ""
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_valid_number(self, publish_mock, render_mock):
+    def test_valid_number(self, publish_mock):
         """A valid number lookup performs a state abbreviation lookup"""
         def side_effect(*args, **_):
             """Side effects local function"""
@@ -126,19 +91,20 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 "formatting:phone_sanitize": ["1234567890"],
                 "cdr:call_history": [[]],
             }
+            if args[0] == "jinja:render":
+                return [""]
 
             return value_map.get(args[0], mock.DEFAULT)
 
         publish_mock.side_effect = side_effect
         self.request("/", number="1234567890")
         self.assertEqual(
-            helpers.html_var(render_mock, "state_abbreviation"),
+            publish_mock.call_args_list[-1].kwargs.get("state_abbreviation"),
             "XY"
         )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_valid_number_cached(self, publish_mock, render_mock):
+    def test_valid_number_cached(self, publish_mock):
         """Successful number lookups are cached"""
         def side_effect(*args, **_):
             """Side effects local function"""
@@ -154,12 +120,14 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 return ["1234567890"]
             if args[0] == "cdr:call_history":
                 return [[{"clid": "test"}]]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
         self.request("/", number="1234567890")
         self.assertEqual(
-            helpers.html_var(render_mock, "state_abbreviation"),
+            publish_mock.call_args_list[-1].kwargs.get("state_abbreviation"),
             "XY"
         )
 

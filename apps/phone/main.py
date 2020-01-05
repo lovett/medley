@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **kwargs):
         """
         Display information about the specified number, or a search form to
@@ -29,23 +29,17 @@ class Controller:
         error = ""
 
         if not number:
-            return {
-                "html": ("phone.jinja.html", {
-                }),
-            }
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "phone.jinja.html"
+            ).pop()
 
         if not sanitized_number:
-            invalid_message = "The number provided was invalid."
-
-            return {
-                "html": ("phone.jinja.html", {
-                    "error": invalid_message
-                }),
-                "json": {
-                    "error": invalid_message
-                },
-                "text": invalid_message
-            }
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "phone.jinja.html",
+                error="The number provided was invalid."
+            ).pop()
 
         area_code = sanitized_number[:3]
 
@@ -88,14 +82,14 @@ class Controller:
             (state_lookup, state_name_lookup)
         ]
 
-        return {
-            "html": ("phone.jinja.html", {
-                "error": error,
-                "history": call_history,
-                "number": sanitized_number,
-                "state_abbreviation": state_lookup[1],
-                "comment": state_lookup[2],
-                "state_name": state_name_lookup[1],
-                "sparql": sparql,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "phone.jinja.html",
+            error=error,
+            history=call_history,
+            number=sanitized_number,
+            state_abbreviation=state_lookup[1],
+            comment=state_lookup[2],
+            state_name=state_name_lookup[1],
+            sparql=sparql,
+        ).pop()
