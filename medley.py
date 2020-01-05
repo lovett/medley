@@ -47,7 +47,6 @@ import plugins.urlfetch
 import plugins.url
 import tools.capture
 import tools.etag
-import tools.negotiable
 import tools.wants
 
 # pylint: disable=too-many-statements
@@ -123,7 +122,6 @@ def setup() -> None:
         raise SystemExit("No permission to create database directory")
 
     # Tools
-    cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.capture = tools.capture.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
     cherrypy.tools.wants = tools.wants.Tool()

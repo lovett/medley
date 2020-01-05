@@ -5,7 +5,6 @@ import tempfile
 import cherrypy
 import plugins.jinja
 import apps.shared.main
-import tools.negotiable
 import tools.etag
 
 
@@ -45,7 +44,6 @@ def start_server(app):
     )
 
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    cherrypy.tools.negotiable = tools.negotiable.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
     cherrypy.engine.start()
 
