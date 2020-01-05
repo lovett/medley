@@ -52,9 +52,8 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", address="invalid")
         self.assertEqual(response.code, 303)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_valid_address_as_hostname(self, publish_mock, render_mock):
+    def test_valid_address_as_hostname(self, publish_mock):
         """Request lookup of a valid hostname"""
 
         def side_effect(*args, **_):
@@ -67,6 +66,8 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
                 return [None]
             if args[0] == "ip:reverse":
                 return [defaultdict()]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -74,7 +75,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", address="localhost")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "ip_address"),
+            publish_mock.call_args_list[-1].kwargs.get("ip_address"),
             "127.0.0.1"
         )
 
@@ -93,9 +94,8 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", address="333.333.333.333")
         self.assertEqual(response.code, 303)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_address_as_ip(self, publish_mock, render_mock):
+    def test_address_as_ip(self, publish_mock):
         """Request lookup of a cached IP address"""
 
         cache_fake = {"foo": "bar"}
@@ -106,18 +106,26 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
                 return [cache_fake]
             if args[0] == "urlfetch:get":
                 return [None]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/", address="127.0.0.1")
 
-        self.assertEqual(helpers.html_var(render_mock, "whois"), cache_fake)
-        self.assertEqual(helpers.html_var(render_mock, "ip_facts"), cache_fake)
+        self.assertEqual(
+            publish_mock.call_args_list[-1].kwargs.get("whois"),
+            cache_fake
+        )
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
+        self.assertEqual(
+            publish_mock.call_args_list[-1].kwargs.get("ip_facts"),
+            cache_fake
+        )
+
     @mock.patch("cherrypy.engine.publish")
-    def test_address_as_ip_nocache(self, publish_mock, render_mock):
+    def test_address_as_ip_nocache(self, publish_mock):
         """Request lookup of an uncached IP address"""
 
         def side_effect(*args, **_):
@@ -128,6 +136,8 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
                 return [{"hello": "world"}]
             if args[0] == "urlfetch:get":
                 return [{"foo": "bar"}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -135,7 +145,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", address="127.0.0.1")
 
         self.assertEqual(
-            helpers.html_var(render_mock, "ip_facts"),
+            publish_mock.call_args_list[-1].kwargs.get("ip_facts"),
             {"hello": "world"}
         )
 
