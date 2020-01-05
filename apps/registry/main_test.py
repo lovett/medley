@@ -38,58 +38,62 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.registry.main.Controller)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_get_by_uid_success(self, publish_mock, render_mock):
+    def test_get_by_uid_success(self, publish_mock):
         """Searching for a valid uid returns a list"""
         def side_effect(*args, **_):
             """Side effects local function"""
 
             if args[0] == "registry:find_id":
                 return [{"rowid": "test", "key": "mykey", "value": "test"}]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/", uid="test")
 
-        entries = helpers.html_var(render_mock, "entries")
+        entries = publish_mock.call_args_list[-1].kwargs.get("entries")
         self.assertEqual(entries[0]["rowid"], "test")
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_get_by_uid_fail(self, publish_mock, render_mock):
+    def test_get_by_uid_fail(self, publish_mock):
         """Searching for an invalid uid returns an empty list of entries"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:find_id":
                 return []
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/", uid="invalidid")
 
-        entries = helpers.html_var(render_mock, "entries")
+        entries = publish_mock.call_args_list[-1].kwargs.get("entries")
         self.assertEqual(len(entries), 0)
 
-    @mock.patch("cherrypy.tools.negotiable.render_html")
     @mock.patch("cherrypy.engine.publish")
-    def test_get_by_search(self, publish_mock, render_mock):
+    def test_get_by_search(self, publish_mock):
         """Entries can be searched by key"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [(1, [{"key": "abc456", "value": "test"}])]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
         self.request("/", q="test")
 
-        entries = helpers.html_var(render_mock, "entries")
+        entries = publish_mock.call_args_list[-1].kwargs.get("entries")
+
         self.assertEqual(
             entries[0]["key"],
             "abc456"
@@ -118,6 +122,8 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:add":
                 return ["fakeuid"]
+            if args[0] == "jinja:render":
+                return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

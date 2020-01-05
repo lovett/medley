@@ -1,5 +1,6 @@
 """A general-purpose key value store."""
 
+import json
 import cherrypy
 
 
@@ -10,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants()
     def GET(*_args, **kwargs):
         """Display a UI to search for entries and add new ones."""
 
@@ -47,21 +48,23 @@ class Controller:
         for entry in entries:
             entry["value"] = entry["value"].strip()
 
-        return {
-            "html": ("registry.jinja.html", {
-                "q": q,
-                "uid": uid,
-                "total_entries": total_entries,
-                "entries": entries,
-                "view": view,
-                "key": key,
-                "roots": roots,
-            }),
-            "json": [
+        if cherrypy.request.wants == "json":
+            return json.dumps([
                 (entry["key"], entry["value"])
                 for entry in entries
-            ]
-        }
+            ]).encode()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "registry.jinja.html",
+            q=q,
+            uid=uid,
+            total_entries=total_entries,
+            entries=entries,
+            view=view,
+            key=key,
+            roots=roots,
+        ).pop()
 
     @staticmethod
     def PUT(key, value, replace=False):
