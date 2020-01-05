@@ -13,7 +13,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *args, **_kwargs):
         """Display selected parts of the most recent Darksky API query"""
 
@@ -93,14 +93,14 @@ class Controller:
             {"q": "weather:latlong"}
         ).pop()
 
-        return {
-            "html": ("weather.jinja.html", {
-                "forecast": forecast,
-                "other_locations": locations,
-                "location_name": location_name,
-                "edit_url": edit_url
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "weather.jinja.html",
+            forecast=forecast,
+            other_locations=locations,
+            location_name=location_name,
+            edit_url=edit_url
+        ).pop()
 
     @staticmethod
     def shape_forecast(forecast):
