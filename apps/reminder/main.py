@@ -14,7 +14,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(*_args, **_kwargs):
         """Display scheduled reminders, and a form to create new ones."""
 
@@ -54,13 +54,13 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        return {
-            "html": ("reminder.jinja.html", {
-                "registry_url": registry_url,
-                "templates": templates,
-                "upcoming": upcoming
-            }),
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "reminder.jinja.html",
+            registry_url=registry_url,
+            templates=templates,
+            upcoming=upcoming
+        ).pop()
 
     @staticmethod
     def POST(*args, **kwargs):
