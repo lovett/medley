@@ -17,7 +17,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @cherrypy.tools.negotiable()
+    @cherrypy.tools.wants(only="html")
     def GET(self, *_args, **kwargs):
         """Display a search interface, and the results of the default query"""
 
@@ -75,23 +75,23 @@ class Controller:
                 and record["ip"] not in cookies
             }
 
-        return {
-            "html": ("visitors.jinja.html", {
-                "flagless_countries": ("AP", None),
-                "query": query,
-                "query_plan": query_plan,
-                "reversed_ips": reversed_ips,
-                "active_date": self.get_active_date(log_records, query),
-                "results": log_records,
-                "country_names": country_names,
-                "deltas": deltas,
-                "durations": durations,
-                "site_domains": site_domains,
-                "saved_queries": saved_queries,
-                "annotations": annotations,
-                "cookies": cookies
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "visitors.jinja.html",
+            flagless_countries=("AP", None),
+            query=query,
+            query_plan=query_plan,
+            reversed_ips=reversed_ips,
+            active_date=self.get_active_date(log_records, query),
+            results=log_records,
+            country_names=country_names,
+            deltas=deltas,
+            durations=durations,
+            site_domains=site_domains,
+            saved_queries=saved_queries,
+            annotations=annotations,
+            cookies=cookies
+        ).pop()
 
     @staticmethod
     def get_saved_queries(current_query=None):
