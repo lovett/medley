@@ -148,8 +148,8 @@ class Controller:
             "bookmarks:tags:all"
         ).pop()
 
-        return {
-            "html": ("bookmarks-taglist.jinja.html", {
-                "tags": tags,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarks-taglist.jinja.html",
+            tags=tags
+        ).pop()
