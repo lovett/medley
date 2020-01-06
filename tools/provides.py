@@ -34,7 +34,11 @@ class Tool(cherrypy.Tool):
 
         """
 
-        accept = cherrypy.request.headers.get("Accept", "*/*")
+        accept = [
+            value.strip().split(";")[0]
+            for value in
+            cherrypy.request.headers.get("Accept", "*/*").split(",")
+        ]
 
         request_path = pathlib.Path(cherrypy.request.path_info)
 
@@ -42,17 +46,22 @@ class Tool(cherrypy.Tool):
         if request_path.name.startswith("."):
             request_path = pathlib.Path(f"/index{request_path.name}")
 
-        response_headers = cherrypy.response.headers
+        cherrypy.request.wants = ""
+        response_type = ""
 
-        cherrypy.request.wants = "html"
-
-        if request_path.suffix == ".txt" or accept.startswith("text/plain"):
+        if request_path.suffix == ".txt" or "text/plain" in accept:
             cherrypy.request.wants = "text"
-            response_headers["Content-Type"] = "text/plain;charset=utf-8"
+            response_type = "text/plain;charset=utf-8"
 
-        if request_path.suffix == ".json" or accept.startswith("application/json"):  # noqa: E501
+        if request_path.suffix == ".json" or "application/json" in accept:
             cherrypy.request.wants = "json"
-            response_headers["Content-Type"] = "application/json"
+            response_type = "application/json"
+
+        if "text/html" in accept or "*/*" in accept:
+            cherrypy.request.wants = "html"
+            response_type = "text/html"
 
         if cherrypy.request.wants not in formats:
             raise cherrypy.HTTPError(406)
+
+        cherrypy.response.headers["Content-Type"] = response_type
