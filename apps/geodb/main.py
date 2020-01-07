@@ -16,16 +16,23 @@ class Controller:
         if action != "update":
             raise cherrypy.HTTPError(400, "No action specified")
 
-        download_url = cherrypy.engine.publish(
-            "registry:first_value",
-            "geodb:url"
+        config = cherrypy.engine.publish(
+            "registry:search",
+            "geodb",
+            key_slice=1,
+            as_dict=True
         ).pop()
 
-        if not download_url:
-            raise cherrypy.HTTPError(
-                500,
-                "Download URL has not been configured"
-            )
+        if "url" not in config:
+            raise cherrypy.HTTPError(400, "Download URL not configured")
+
+        if "license_key" not in config:
+            raise cherrypy.HTTPError(400, "License key not configured")
+
+        download_url = config["url"].replace(
+            "{LICENSE_KEY}",
+            config["license_key"]
+        )
 
         destination = cherrypy.config.get("database_dir")
 

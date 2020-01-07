@@ -72,13 +72,46 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
+    def test_url_required(self, publish_mock):
+        """The download URL must be defined in the registry."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                return [{}]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/", method="POST", action="update")
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_license_required(self, publish_mock):
+        """The license key must be defined in the registry."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "registry:search":
+                return [{"url": "http://example.com"}]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/", method="POST", action="update")
+        self.assertEqual(response.code, 400)
+
+    @mock.patch("cherrypy.engine.publish")
     def test_success(self, publish_mock):
         """A post request with a valid action returns successfully"""
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
-                return ["http://example.com"]
+            if args[0] == "registry:search":
+                return [{
+                    "url": "http://example.com",
+                    "license_key": "abc123"
+                }]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
