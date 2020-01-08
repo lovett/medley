@@ -31,6 +31,13 @@ var MEDLEY = (function () {
             window.location.href = tag.getAttribute('content');
             return;
         }
+
+        if (!isNaN(parseInt(e.key, 10))) {
+            const tag = document.querySelector(`a[data-numeric-shortcut="${e.key}"]`);
+            if (tag) {
+                window.location.href = tag.getAttribute('href');
+            }
+        }
     };
 
     function preSubmit(e) {

@@ -5,10 +5,6 @@
     {{ macros.staticAsset('bounce', 'bounce.css') }}
 {% endblock %}
 
-{% block scripts %}
-    {{ macros.vueApp('main', ('shortcut-link',)) }}
-{% endblock %}
-
 {% block app_message %}
     {% if invalid == "group" %}
         <section id="app-message" class="error">Invalid group.</section>
@@ -47,11 +43,13 @@
         {% if bounces %}
             {% for url, name in bounces %}
                 <p class="destination">
-                    <shortcut-link
-                        v-bind:index="{{ loop.index }}"
-                        url="{{ url|anonymize }}"
-                        label="{{ name }} @ {{ url|truncate(100) }}"
-                    />
+                    <a class="numeric-shortcut"
+                       data-numeric-shortcut="{{ loop.index }}"
+                       href="{{ url|anonymize }}"
+                    >
+                        <span>{{ loop.index }}</span>
+                        {{ name }} @  {{ url|truncate(100) }}
+                    </a>
                 </p>
             {% endfor %}
 
