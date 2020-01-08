@@ -13,7 +13,7 @@ class Controller:
     exposed = True
     show_on_homepage = False
 
-    def POST(self, *args, **kwargs):
+    def POST(self, *args, **kwargs) -> None:
         """
         Dispatch to a subhandler.
         """

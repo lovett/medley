@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Display the client's local IP, and the server's external IP"""
 
         client_ip = cherrypy.request.headers.get("Remote-Addr")
@@ -46,7 +46,7 @@ class Controller:
             }).encode()
 
         if cherrypy.request.wants == "text":
-            return f"client_ip={client_ip}\nexternal_ip={external_ip}"
+            return f"client_ip={client_ip}\nexternal_ip={external_ip}".encode()
 
         return cherrypy.engine.publish(
             "jinja:render",

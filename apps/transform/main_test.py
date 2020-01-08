@@ -146,15 +146,16 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.body.strip(), val)
 
     def test_params_required(self):
-        """Transform and value parameters are required"""
+        """Transform parameter is required"""
 
         response = self.request(
             "/",
             method="POST",
-            as_text=True
+            as_text=True,
+            value="whatever"
         )
 
-        self.assert_404(response)
+        self.assertEqual(response.code, 400)
 
 
 if __name__ == "__main__":

@@ -10,10 +10,12 @@ class Controller:
     exposed = True
 
     @staticmethod
-    def POST(group=None):
+    def POST(*_args, **kwargs) -> None:
         """
         Schedule maintenance operations.
         """
+
+        group = kwargs.get("group")
 
         if group == "db":
             cherrypy.engine.publish(

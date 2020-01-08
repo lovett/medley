@@ -12,7 +12,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Present a static list of bookmarklets"""
 
         later_url = cherrypy.engine.publish(

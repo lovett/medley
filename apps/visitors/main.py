@@ -18,7 +18,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **kwargs):
+    def GET(self, *_args, **kwargs) -> bytes:
         """Display a search interface, and the results of the default query"""
 
         query = kwargs.get('query')

@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Present a form for specifying a URL to fetch."""
 
         return cherrypy.engine.publish(
@@ -22,10 +22,14 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def POST(url=None, username=None, password=None):
+    def POST(*_args, **kwargs) -> None:
         """Request an HTML page and display its the contents of its head
         section.
         """
+
+        url = kwargs.get("url")
+        username = kwargs.get("username")
+        password = kwargs.get("password")
 
         status_code = None
         request_failed = False

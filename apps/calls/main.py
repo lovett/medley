@@ -11,7 +11,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs):
+    def GET(*_args, **kwargs) -> bytes:
         """Display a list of recent calls"""
 
         offset = int(kwargs.get('offset', 0))

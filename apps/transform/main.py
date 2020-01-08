@@ -50,7 +50,7 @@ class Controller:
         return sorted(self.transforms.keys())
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def GET(self, *_args, **_kwargs):
+    def GET(self, *_args, **_kwargs) -> bytes:
         """The default view presents the available transformation methods"""
 
         if cherrypy.request.wants == "json":
@@ -59,7 +59,7 @@ class Controller:
             ).encode()
 
         if cherrypy.request.wants == "text":
-            return "\n".join(self.list_of_transforms())
+            return "\n".join(self.list_of_transforms()).encode()
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -68,8 +68,17 @@ class Controller:
         ).pop()
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def POST(self, transform, value=''):
+    def POST(self, *_args, **kwargs) -> bytes:
         """Perform a transformation and display the result"""
+
+        transform = kwargs.get("transform")
+        value = kwargs.get("value", "")
+
+        if not transform:
+            raise cherrypy.HTTPError(
+                400,
+                "Missing transform parameter."
+            )
 
         transformer = self.transforms.get(transform, lambda x: x)
 
@@ -79,7 +88,7 @@ class Controller:
             return json.dumps({"result": result}).encode()
 
         if cherrypy.request.wants == "text":
-            return result
+            return result.encode()
 
         return cherrypy.engine.publish(
             "jinja:render",

@@ -13,7 +13,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **kwargs):
+    def GET(self, *_args, **kwargs) -> bytes:
         """Display the list of available grids, or the current grid"""
 
         name = kwargs.get('name', '')
@@ -81,7 +81,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def redirect_to_first_grid(grids):
+    def redirect_to_first_grid(grids) -> None:
         """Identify the first item in the grid collection and redirect to
         it.
 

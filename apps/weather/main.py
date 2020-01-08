@@ -14,7 +14,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **_kwargs):
+    def GET(self, *args, **_kwargs) -> bytes:
         """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(

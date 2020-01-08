@@ -1,6 +1,7 @@
 """Present all the available applications."""
 
 import sys
+import typing
 import cherrypy
 from plugins import decorators
 
@@ -12,7 +13,7 @@ class Controller:
     show_on_homepage = True
 
     @decorators.log_runtime
-    def catalog_apps(self, apps):
+    def catalog_apps(self, apps) -> typing.Tuple[str, ...]:
         """Extract app summaries from module docstrings."""
         catalog = []
         for mount_path, controller in apps.items():
@@ -57,7 +58,7 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(self, *_args, **_kwargs) -> str:
+    def GET(self, *_args, **_kwargs) -> bytes:
         """List all available applications.
 
         Apps can be excluded from this list by setting

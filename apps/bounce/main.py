@@ -74,7 +74,7 @@ class Controller:
         return "live"
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **kwargs):
+    def GET(self, *_args, **kwargs) -> bytes:
         """Display all the URLs in a group."""
 
         host = ''
@@ -145,7 +145,7 @@ class Controller:
             invalid=invalid
         ).pop()
 
-    def POST(self, url, name, group):
+    def POST(self, url, name, group) -> None:
         """Add a new URL to a group."""
 
         host = self.url_to_host(url)

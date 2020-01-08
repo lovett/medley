@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def POST(action=None):
+    def POST(action=None) -> None:
         """Schedule a database download."""
 
         if action != "update":

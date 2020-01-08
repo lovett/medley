@@ -15,7 +15,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
 
         registry_rows = cherrypy.engine.publish(
@@ -63,7 +63,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(*args, **kwargs):
+    def POST(*args, **kwargs) -> None:
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message")
@@ -195,7 +195,7 @@ class Controller:
         raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
-    def DELETE(uid):
+    def DELETE(uid) -> None:
         """Remove a previously-scheduled reminder."""
 
         uid = float(uid)

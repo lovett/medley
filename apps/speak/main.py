@@ -11,7 +11,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         can_speak = cherrypy.engine.publish("speak:can_speak").pop()
@@ -44,7 +44,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.capture()
-    def POST(*_args, **kwargs):
+    def POST(*_args, **kwargs) -> None:
         """Accept a piece of text for text-to-speech conversion"""
 
         statement = kwargs.get("statement")

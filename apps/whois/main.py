@@ -15,7 +15,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_, **kwargs):
+    def GET(*_args, **kwargs) -> bytes:
         """Display a search form and lookup results."""
 
         address = kwargs.get("address")

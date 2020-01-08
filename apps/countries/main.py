@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> None:
         """Request the country code list and populate the registry"""
 
         country_codes = cherrypy.engine.publish(

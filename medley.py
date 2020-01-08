@@ -81,7 +81,7 @@ def setup() -> None:
         "server.socket_host": "127.0.0.1",
         "server.socket_port": 8085,
         "server_root": server_root,
-        "tools.encode.on": True,
+        "tools.encode.on": False,
         "use_service_workers": True,
 
         # Gzipping locally avoids Etag complexity. If a reverse

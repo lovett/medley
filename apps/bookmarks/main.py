@@ -26,7 +26,7 @@ class Controller:
         return json.dumps(closest_snapshot).encode()
 
     @cherrypy.tools.provides(formats=("json", "html"))
-    def GET(self, *args, **kwargs):
+    def GET(self, *args, **kwargs) -> bytes:
         """Display a list of recently bookmarked URLs, or URLs matching a
         search.
 
@@ -101,11 +101,16 @@ class Controller:
             page=page,
             start_index=start_index,
             end_index=end_index
-        )
+        ).pop()
 
     @staticmethod
-    def POST(url, title=None, tags=None, comments=None, added=None):
+    def POST(url, **kwargs) -> None:
         """Add a new bookmark, or update an existing one."""
+
+        title = kwargs.get("title")
+        tags = kwargs.get("tags")
+        comments = kwargs.get("comments")
+        added = kwargs.get("added")
 
         result = cherrypy.engine.publish(
             "scheduler:add",
@@ -124,7 +129,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(url):
+    def DELETE(url) -> None:
         """Discard a previously bookmarked URL."""
 
         deleted_rows = cherrypy.engine.publish(
@@ -138,7 +143,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def taglist():
+    def taglist() -> bytes:
         """Render a list of all known bookmark tags using a dedicated
         template.
 

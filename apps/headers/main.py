@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def GET(*_args, **_kwargs):
+    def GET(*_args, **_kwargs) -> bytes:
         """Display the headers of the current request"""
 
         headers = sorted(
@@ -24,7 +24,7 @@ class Controller:
             return "\n".join([
                 f"{header[0]}: {header[1]}"
                 for header in headers
-            ])
+            ]).encode()
 
         if cherrypy.request.wants == "json":
             return json.dumps(headers).encode()

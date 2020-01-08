@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs):
+    def GET(*_args, **kwargs) -> bytes:
         """Display a UI to search for entries and add new ones."""
 
         entries = ()
@@ -67,7 +67,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def PUT(key, value, replace=False):
+    def PUT(key, value, replace=False) -> None:
         """Store a new entry in the database or replace an existing entry"""
 
         key = key.strip()
@@ -83,7 +83,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(uid=None, key=None):
+    def DELETE(uid=None, key=None) -> None:
         """Remove an existing entry by its key or ID"""
 
         if uid:

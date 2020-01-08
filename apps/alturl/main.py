@@ -13,7 +13,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*args) -> str:
+    def GET(*args, **_kwargs) -> bytes:
         """Dispatch to a site-specific handler."""
 
         bookmarks = cherrypy.engine.publish(

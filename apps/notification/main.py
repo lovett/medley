@@ -12,7 +12,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.capture()
     @cherrypy.tools.json_in()
-    def POST():
+    def POST(*_args, **_kwargs) -> None:
         """Decide whether a notification is speakable."""
 
         notification = cherrypy.request.json

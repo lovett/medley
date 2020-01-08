@@ -12,7 +12,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
-    def POST():
+    def POST() -> None:
         """Transform a deployment notification from Azure to a notification."""
 
         details = cherrypy.request.json

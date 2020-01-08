@@ -140,7 +140,7 @@ class Controller:
         )
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **kwargs):
+    def GET(self, *args, **kwargs) -> bytes:
         """Render a page or present the edit form."""
 
         page_name = None
@@ -226,7 +226,7 @@ class Controller:
         # Render the page
         return self.render_page(page_name, page)
 
-    def POST(self, page_name, page_content):
+    def POST(self, page_name, page_content) -> None:
         """Create or update the INI version of a page."""
 
         registry_key = self.registry_key(

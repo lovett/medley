@@ -34,7 +34,7 @@ class Controller:
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.capture()
-    def POST(self):
+    def POST(self) -> None:
         """Receive a JSON payload from Jenkins"""
 
         payload = self.normalize_payload(cherrypy.request.json)

@@ -85,7 +85,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("lookup-template", self.get_template)
         self.bus.subscribe("jinja:render", self.render)
 
-    def render(self, template_name: str, **kwargs) -> str:
+    def render(self, template_name: str, **kwargs) -> bytes:
         """Populate a Jinja template."""
 
         template = self.env.get_template(template_name)
@@ -108,7 +108,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         rendered_template = typing.cast(str, template.render(**data))
 
-        return rendered_template
+        return rendered_template.encode()
 
     def get_template(self, name: str) -> jinja2.Template:
         """Retrieve a Jinja2 template by name."""
