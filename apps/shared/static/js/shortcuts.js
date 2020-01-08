@@ -4,25 +4,35 @@ MEDLEY.shortcuts = (function () {
         const matches = query.match(/date (.*)/);
 
         if (!matches) {
-            return value;
+            return query;
         }
 
-        let initialDate = new Date();
+        let initialDate = Date.now();
+        const oneDay = 86400000;
 
         if (matches[1] === 'yesterday') {
-            initialDate = new Date(Date.now() - 86400000);
+            initialDate -= oneDay;
         }
 
-        if (matches[1].match(/\d\d\d\d-\d\d-\d\d/)) {
-            initialDate = new Date(matches[1]);
+        const ymd = matches[1].match(/(\d\d\d\d)-(\d\d)-(\d\d)/);
+        if (ymd) {
+            initialDate = new Date(
+                parseInt(ymd[1], 10),
+                parseInt(ymd[2], 10) - 1,
+                parseInt(ymd[3], 10)
+            ).getTime();
         }
 
-        const newDate = new Date(initialDate.getTime() + 86400000 * dayStep);
+        const steppedDate = new Date(initialDate + (oneDay * dayStep));
 
-        const newDateString = newDate.toISOString().replace(/T.*/, '')
+        let steppedDateString = `${steppedDate.getFullYear()}-`;
+        steppedDateString += `${(steppedDate.getMonth() + 1).toString().padStart(2, '0')}-`;
+        steppedDateString += `${steppedDate.getDate().toString().padStart(2, '0')}`;
+
+        console.log(steppedDateString);
 
         query = query.replace(/^\s*date.*\s*/g, '');
-        query = 'date ' + newDateString + '\n' + query;
+        query = `date ${steppedDateString}\n${query}`;
         return query;
     }
 
