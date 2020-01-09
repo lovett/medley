@@ -308,7 +308,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         date_interval = "day"
 
         timezone = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "config:timezone",
             memorize=True
         ).pop()

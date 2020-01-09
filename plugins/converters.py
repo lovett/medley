@@ -68,7 +68,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Convert a local datetime string to a UTC Pendulum instance."""
 
         local_tz = cherrypy.engine.publish(
-            "registry:local_timezone"
+            "registry:timezone"
         ).pop()
 
         return pendulum.from_format(

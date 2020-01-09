@@ -31,7 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Play a wave file provide as raw bytes."""
 
         audio_player = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "config:audio_player",
             memorize=True,
             default="/usr/bin/aplay -q"
@@ -51,7 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         audio_player = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "config:audio_player",
             memorize=True,
             default="/usr/bin/aplay -q"

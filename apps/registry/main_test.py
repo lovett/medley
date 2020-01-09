@@ -44,7 +44,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "registry:find_id":
+            if args[0] == "registry:find":
                 return [{"rowid": "test", "key": "mykey", "value": "test"}]
             if args[0] == "jinja:render":
                 return [""]
@@ -63,7 +63,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:find_id":
+            if args[0] == "registry:find":
                 return []
             if args[0] == "jinja:render":
                 return [""]
@@ -111,7 +111,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """Existing records can be deleted"""
         response = self.request("/", method="DELETE", uid="testid")
 
-        publish_mock.assert_any_call("registry:remove_id", "testid")
+        publish_mock.assert_any_call("registry:remove:id", "testid")
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")

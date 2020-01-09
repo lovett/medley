@@ -65,7 +65,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if not hostname:
             config_url = cherrypy.engine.publish(
-                "registry:first_value",
+                "registry:first:value",
                 "config:base_url"
             ).pop()
 

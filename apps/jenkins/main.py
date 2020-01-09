@@ -127,7 +127,7 @@ class Controller:
         result["jenkins_url"] = build["full_url"].rstrip("/") + "/console"
 
         result["site_url"] = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             f"site_url:{result['name']}:{result['branch']}"
         ).pop()
 

@@ -158,7 +158,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return memorize_value
 
         value: str = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "logindex:root"
         ).pop()
 

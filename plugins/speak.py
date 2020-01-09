@@ -155,7 +155,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Determine whether the application has been muted."""
 
         temporarily_muted = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "speak:mute:temporary"
         ).pop()
 

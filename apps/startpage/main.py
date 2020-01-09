@@ -42,7 +42,7 @@ class Controller:
             is_new_page = True
             registry_key = self.registry_key("template")
             page_content = cherrypy.engine.publish(
-                "registry:first_value",
+                "registry:first:value",
                 registry_key
             ).pop()
 

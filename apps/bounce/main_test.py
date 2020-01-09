@@ -127,7 +127,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "registry:first_key":
+            if args[0] == "registry:first:key":
                 return ["example"]
 
             if args[0] == "registry:search":
@@ -200,7 +200,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "registry:first_key":
+            if args[0] == "registry:first:key":
                 return ["example"]
 
             if args[0] == "registry:search":
@@ -236,7 +236,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "registry:first_key":
+            if args[0] == "registry:first:key":
                 return [None]
 
             if args[0] == "registry:search":
@@ -271,7 +271,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_key":
+            if args[0] == "registry:first:key":
                 return [None]
 
             if args[0] == "registry:search":
@@ -299,7 +299,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_key":
+            if args[0] == "registry:first:key":
                 return ["example"]
 
             if args[0] == "registry:search":

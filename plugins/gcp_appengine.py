@@ -35,7 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Get an absolute path to a file within the storage root."""
 
         storage_root = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "config:storage_root",
             as_path=True
         ).pop()

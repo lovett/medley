@@ -43,7 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         storage_root = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "config:storage_root"
         ).pop()
 

@@ -125,7 +125,7 @@ class Controller:
         """Calculate visit duration per day per IP"""
 
         timezone = cherrypy.engine.publish(
-            "registry:local_timezone"
+            "registry:timezone"
         ).pop()
 
         maximums = defaultdict(int)
@@ -194,7 +194,7 @@ class Controller:
             return log_records[0]["unix_timestamp"]
 
         timezone = cherrypy.engine.publish(
-            "registry:local_timezone"
+            "registry:timezone"
         ).pop()
 
         date_string = None

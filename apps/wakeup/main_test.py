@@ -87,7 +87,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return [None]
             if args[0] == "jinja:render":
                 return [""]
@@ -105,7 +105,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
             if args[0] == "url:internal":
                 return ["/"]
@@ -125,7 +125,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
             if args[0] == "url:internal":
                 return ["/"]

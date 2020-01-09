@@ -88,7 +88,7 @@ class Controller:
         if url:
             host = self.url_to_host(url)
             record = cherrypy.engine.publish(
-                "registry:first_key",
+                "registry:first:key",
                 value=host,
                 key_prefix="bounce*"
             ).pop()

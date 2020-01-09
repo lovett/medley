@@ -34,15 +34,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the registry prefix.
         """
 
-        self.bus.subscribe("registry:remove", self.remove)
-        self.bus.subscribe("registry:remove_id", self.remove_id)
-        self.bus.subscribe("registry:find_id", self.find)
-        self.bus.subscribe("registry:first_key", self.first_key)
-        self.bus.subscribe("registry:first_value", self.first_value)
-        self.bus.subscribe("registry:list_keys", self.list_keys)
         self.bus.subscribe("registry:add", self.add)
+        self.bus.subscribe("registry:find", self.find)
+        self.bus.subscribe("registry:first:key", self.first_key)
+        self.bus.subscribe("registry:first:value", self.first_value)
+        self.bus.subscribe("registry:keys", self.keys)
+        self.bus.subscribe("registry:timezone", self.timezone)
+        self.bus.subscribe("registry:remove:id", self.remove_id)
+        self.bus.subscribe("registry:remove:key", self.remove_key)
         self.bus.subscribe("registry:search", self.search)
-        self.bus.subscribe("registry:local_timezone", self.local_timezone)
 
     def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
@@ -75,7 +75,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("memorize:clear", key)
         if replace:
-            self.remove(key)
+            self.remove_key(key)
 
         return self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
@@ -193,7 +193,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Shape a result set as a list."""
         return [row["value"] for row in rows]
 
-    def remove(self, key: str) -> int:
+    def remove_key(self, key: str) -> int:
         """Delete any records for a key."""
 
         cherrypy.engine.publish("memorize:clear", key)
@@ -262,7 +262,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return value
 
-    def local_timezone(self) -> str:
+    def timezone(self) -> str:
         """Determine the timezone of the application.
 
         The registry is checked first so that the application timezone
@@ -281,7 +281,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return typing.cast(str, timezone)
 
-    def list_keys(
+    def keys(
             self,
             depth: int = 1
     ) -> typing.Generator[typing.Any, None, None]:

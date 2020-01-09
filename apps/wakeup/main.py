@@ -51,7 +51,7 @@ class Controller:
             raise cherrypy.HTTPError(400, "No host specified")
 
         mac_address = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             key=f"wakeup:{host}"
         ).pop()
 

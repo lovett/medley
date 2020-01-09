@@ -28,7 +28,7 @@ class Controller:
 
         if uid:
             entries = cherrypy.engine.publish(
-                "registry:find_id",
+                "registry:find",
                 uid
             )
         elif q:
@@ -40,7 +40,7 @@ class Controller:
             ).pop()
         elif view != "add":
             roots = cherrypy.engine.publish(
-                "registry:list_keys",
+                "registry:keys",
             ).pop()
 
         entries = [dict(entry) for entry in entries]
@@ -87,9 +87,9 @@ class Controller:
         """Remove an existing entry by its key or ID"""
 
         if uid:
-            cherrypy.engine.publish("registry:remove_id", uid)
+            cherrypy.engine.publish("registry:remove:id", uid)
 
         if key:
-            cherrypy.engine.publish("registry:remove", key)
+            cherrypy.engine.publish("registry:remove:key", key)
 
         cherrypy.response.status = 204

@@ -23,7 +23,7 @@ class Controller:
         body = details.get("message", "").split("\n")
 
         azure_portal_url = cherrypy.engine.publish(
-            "registry:first_value",
+            "registry:first:value",
             "azure:portal_url"
         ).pop()
 

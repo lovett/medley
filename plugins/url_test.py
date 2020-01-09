@@ -22,7 +22,7 @@ class TestUrl(unittest.TestCase):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com"]
             return mock.DEFAULT
 
@@ -37,7 +37,7 @@ class TestUrl(unittest.TestCase):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com:12345"]
             return mock.DEFAULT
 
@@ -52,7 +52,7 @@ class TestUrl(unittest.TestCase):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com"]
             return mock.DEFAULT
 

@@ -131,7 +131,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         if args[0] == "registry:search":
             if args[1] == "jenkins:skip":
                 return [["skippable"]]
-        if args[0] == "registry:first_value":
+        if args[0] == "registry:first:value":
             if args[1].startswith("site_url"):
                 return [None]
         return mock.DEFAULT
@@ -168,7 +168,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 if args[1] == "jenkins:skip":
                     return [["skippable"]]
-                if args[0] == "registry:first_value":
+                if args[0] == "registry:first:value":
                     if args[1].startswith("site_url"):
                         return [None]
             return mock.DEFAULT
@@ -202,7 +202,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search":
                 if args[1] == "jenkins:skip":
                     return [["skippable"]]
-                if args[0] == "registry:first_value":
+                if args[0] == "registry:first:value":
                     if args[1].startswith("site_url"):
                         return [None]
             return mock.DEFAULT

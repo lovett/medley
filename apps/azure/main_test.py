@@ -49,7 +49,7 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
             return mock.DEFAULT
 
@@ -84,7 +84,7 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
             return mock.DEFAULT
 
@@ -120,7 +120,7 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
             return mock.DEFAULT
 
@@ -154,7 +154,7 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:first_value":
+            if args[0] == "registry:first:value":
                 return [None]
             return mock.DEFAULT
 

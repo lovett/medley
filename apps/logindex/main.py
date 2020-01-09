@@ -69,7 +69,7 @@ class Controller:
         storage_root = typing.cast(
             pathlib.Path,
             cherrypy.engine.publish(
-                "registry:first_value",
+                "registry:first:value",
                 "config:storage_root",
                 as_path=True
             ).pop()

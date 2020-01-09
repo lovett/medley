@@ -127,7 +127,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if not timezone:
             timezone = cherrypy.engine.publish(
-                "registry:local_timezone"
+                "registry:timezone"
             ).pop()
 
         if isinstance(value, (int, float)):
@@ -238,7 +238,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             date = value
 
         zone = cherrypy.engine.publish(
-            "registry:local_timezone"
+            "registry:timezone"
         ).pop()
 
         return date.in_timezone(zone).diff_for_humans()
