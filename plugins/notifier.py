@@ -58,9 +58,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
-            "registry:search",
-            "notifier:*",
-            as_dict=True
+            "registry:search:dict",
+            "notifier:*"
         ).pop()
 
         if not config:
@@ -86,9 +85,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Send a retraction to Notifier."""
 
         config = cherrypy.engine.publish(
-            "registry:search",
-            "notifier:*",
-            as_dict=True
+            "registry:search:dict",
+            "notifier:*"
         ).pop()
 
         if not config:

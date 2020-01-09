@@ -627,10 +627,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         alert_queries = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "logindex:alert:*",
-            key_slice=2,
-            as_dict=True
+            key_slice=2
         ).pop()
 
         for name, query in alert_queries.items():

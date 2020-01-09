@@ -223,13 +223,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             gender = "Male"
 
         config = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             keys=(
                 "speak:azure_key",
                 "speak:synthesize_url",
                 "speak:token_request_url"
             ),
-            as_dict=True,
             key_slice=1
         ).pop()
 

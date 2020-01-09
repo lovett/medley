@@ -77,7 +77,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{}]
             return mock.DEFAULT
 
@@ -92,7 +92,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{"url": "http://example.com"}]
             return mock.DEFAULT
 
@@ -107,7 +107,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{
                     "url": "http://example.com",
                     "license_key": "abc123"

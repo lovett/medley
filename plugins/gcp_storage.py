@@ -36,9 +36,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         config = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "gcp",
-            as_dict=True,
             key_slice=1
         ).pop()
 

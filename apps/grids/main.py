@@ -20,10 +20,9 @@ class Controller:
         start = kwargs.get('start')
 
         grids = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "grids:*",
-            key_slice=1,
-            as_dict=True
+            key_slice=1
         ).pop()
 
         options = defaultdict(lambda: None)

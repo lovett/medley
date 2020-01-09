@@ -53,9 +53,8 @@ class Controller:
         action = kwargs.get("action", None)
 
         announcements = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "speak:announcement:*",
-            as_dict=True,
             key_slice=2
         ).pop()
 

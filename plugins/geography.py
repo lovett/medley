@@ -145,9 +145,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return typing.cast(
             typing.Dict[str, str],
             cherrypy.engine.publish(
-                "registry:search",
+                "registry:search:dict",
                 keys=tuple(keys),
-                as_dict=True,
                 key_slice=2
             ).pop()
         )

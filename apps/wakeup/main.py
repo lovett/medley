@@ -20,10 +20,9 @@ class Controller:
         sent = kwargs.get('sent', False)
 
         hosts = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "wakeup:*",
-            key_slice=1,
-            as_dict=True
+            key_slice=1
         ).pop()
 
         registry_url = cherrypy.engine.publish(

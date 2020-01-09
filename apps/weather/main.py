@@ -18,10 +18,9 @@ class Controller:
         """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "weather:*",
-            key_slice=1,
-            as_dict=True
+            key_slice=1
         ).pop()
 
         if "darksky_key" not in config:

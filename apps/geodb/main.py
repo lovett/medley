@@ -17,10 +17,9 @@ class Controller:
             raise cherrypy.HTTPError(400, "No action specified")
 
         config = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:dict",
             "geodb",
-            key_slice=1,
-            as_dict=True
+            key_slice=1
         ).pop()
 
         if "url" not in config:

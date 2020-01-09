@@ -45,7 +45,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 value = "Column 1, Column 2, Column 3\nlayout=month"
                 return [{"test1": value}]
             if args[0] == "jinja:render":
@@ -70,7 +70,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 value = "Column A, Column B, Column C"
                 return [{"test_default_layout": value}]
             if args[0] == "jinja:render":
@@ -94,7 +94,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 value = "Column 4, Column 5, Column 6\nlayout=month"
                 return [{"test1": value}]
             if args[0] == "jinja:render":
@@ -116,7 +116,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{"test1": "Column A, Column B"}]
             if args[0] == "jinja:render":
                 return [""]
@@ -137,7 +137,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{"test1": "Column A"}]
             if args[0] == "jinja:render":
                 return [""]
@@ -155,7 +155,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{"test1": "Column A"}]
             if args[0] == "jinja:render":
                 return [""]

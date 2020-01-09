@@ -42,7 +42,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search":
+            if args[0] == "registry:search:dict":
                 return [{"host1": "mac1", "host2": "mac2"}]
 
             if args[0] == "url:internal":

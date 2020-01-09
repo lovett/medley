@@ -43,6 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:remove:id", self.remove_id)
         self.bus.subscribe("registry:remove:key", self.remove_key)
         self.bus.subscribe("registry:search", self.search)
+        self.bus.subscribe("registry:search:dict", self.search_dict)
 
     def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
@@ -90,7 +91,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             value: typing.Any = None,
             limit: int = 25,
             exact: bool = False,
-            as_dict: bool = False,
             as_value_list: bool = False,
             as_multivalue_dict: bool = False,
             key_slice: int = 0,
@@ -143,9 +143,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._select(sql, params)
         )
 
-        if as_dict:
-            result = self.to_dict(result, key_slice)
-
         if as_multivalue_dict:
             result = self.to_multivalue_dict(result, key_slice)
 
@@ -158,12 +155,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result
 
-    @staticmethod
-    def to_dict(
-            rows: typing.Iterable[sqlite3.Row],
-            key_slice: int = 0
-    ) -> typing.Dict[str, typing.Any]:
-        """Shape a result set as a key-value dict."""
+    def search_dict(self, *args, **kwargs) -> typing.Dict[str, typing.Any]:
+        """Shape a search result as a key-value dict."""
+
+        key_slice = kwargs.get("key_slice", 0)
+
+        rows = self.search(*args, **kwargs)
+
         return {
             row["key"].split(":", key_slice).pop():
             row["value"]
