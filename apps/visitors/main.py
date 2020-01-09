@@ -236,8 +236,7 @@ class Controller:
         keys = tuple(f"ip:{ip}" for ip in ips)
 
         return cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:multidict",
             keys=keys,
-            as_multivalue_dict=True,
             key_slice=1
         ).pop()

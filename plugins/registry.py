@@ -44,6 +44,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:remove:key", self.remove_key)
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:search:dict", self.search_dict)
+        self.bus.subscribe("registry:search:multidict", self.search_multidict)
 
     def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
@@ -92,8 +93,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             limit: int = 25,
             exact: bool = False,
             as_value_list: bool = False,
-            as_multivalue_dict: bool = False,
-            key_slice: int = 0,
             include_count: bool = False
     ) -> typing.Any:
         """Search for records by key or value."""
@@ -143,9 +142,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._select(sql, params)
         )
 
-        if as_multivalue_dict:
-            result = self.to_multivalue_dict(result, key_slice)
-
         if as_value_list:
             result = self.to_value_list(result)
 
@@ -168,20 +164,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             for row in rows
         }
 
-    @staticmethod
-    def to_multivalue_dict(
-            rows: typing.Iterable[sqlite3.Row],
-            key_slice: int = 0
+    def search_multidict(
+            self, *args, **kwargs
     ) -> typing.Dict[str, typing.List]:
-        """Shape a result set as a dict whose values are lists."""
+        """Shape a search result as a dict whose values are lists."""
+
+        key_slice = kwargs.get("key_slice", 0)
+
+        rows = self.search(*args, **kwargs)
+
         multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
 
         for row in rows:
-            k = row["key"]
-            if key_slice > 0:
-                sliced_key = k.split(":")[key_slice:]
-                k = ":".join(sliced_key)
-            multi_dict[k].append(row["value"])
+            key = row["key"].split(":", key_slice).pop()
+            multi_dict[key].append(row["value"])
+
         return multi_dict
 
     @staticmethod

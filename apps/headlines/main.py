@@ -41,9 +41,8 @@ class Controller:
             headlines = {}
 
             settings = cherrypy.engine.publish(
-                "registry:search",
+                "registry:search:multidict",
                 key="newsapi:*",
-                as_multivalue_dict=True,
                 key_slice=1
             ).pop()
 
