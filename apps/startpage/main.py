@@ -79,9 +79,8 @@ class Controller:
         """Render INI page content to HTML."""
 
         local_domains = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:valuelist",
             "startpage:local",
-            as_value_list=True
         ).pop()
 
         anonymizer_url = cherrypy.engine.publish(

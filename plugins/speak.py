@@ -104,9 +104,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         adjustments = cherrypy.engine.publish(
-            "registry:search",
-            "speak:adjustment",
-            as_value_list=True
+            "registry:search:valuelist",
+            "speak:adjustment"
         ).pop()
 
         adjustment_pairs = [
@@ -169,10 +168,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Determine whether an automute schedule is active."""
 
         schedules = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:valuelist",
             "speak:mute",
-            exact=True,
-            as_value_list=True
+            exact=True
         ).pop()
 
         if not schedules:

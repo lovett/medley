@@ -140,9 +140,8 @@ class Controller:
 
         # Don't notify if the build is considered skippable.
         skippable_builds = cherrypy.engine.publish(
-            "registry:search",
-            "jenkins:skip",
-            as_value_list=True
+            "registry:search:valuelist",
+            "jenkins:skip"
         ).pop()
 
         if result["name"] in skippable_builds:

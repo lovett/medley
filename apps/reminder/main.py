@@ -77,9 +77,8 @@ class Controller:
         # Server-side template population
         if notification_id and not message:
             templates = cherrypy.engine.publish(
-                "registry:search",
+                "registry:search:valuelist",
                 "reminder:template",
-                as_value_list=True,
                 exact=True
             ).pop()
 

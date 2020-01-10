@@ -23,9 +23,8 @@ class Controller:
             return
 
         skippable_groups = cherrypy.engine.publish(
-            "registry:search",
-            "notification:skip:group",
-            as_value_list=True
+            "registry:search:valuelist",
+            "notification:skip:group"
         ).pop()
 
         if notification.get("group") in skippable_groups:

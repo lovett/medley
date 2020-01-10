@@ -69,7 +69,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args == ("registry:search", "notification:skip:group"):
+            if args[0] == "registry:search:valuelist":
                 return ["reminder"]
             return mock.DEFAULT
 
@@ -92,7 +92,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args == ("registry:search", "notification:skip:group"):
+            if args[0] == "registry:search:valuelist":
                 return [[]]
             return mock.DEFAULT
 

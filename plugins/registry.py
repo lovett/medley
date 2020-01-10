@@ -45,6 +45,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:search:dict", self.search_dict)
         self.bus.subscribe("registry:search:multidict", self.search_multidict)
+        self.bus.subscribe("registry:search:valuelist", self.search_valuelist)
 
     def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
@@ -84,18 +85,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             [(key, value) for value in clean_values]
         )
 
-    # pylint: disable=too-many-arguments
-    def search(
-            self,
-            key: typing.Optional[str] = None,
-            keys: typing.Tuple[typing.Any, ...] = (),
-            value: typing.Any = None,
-            limit: int = 25,
-            exact: bool = False,
-            as_value_list: bool = False,
-            include_count: bool = False
-    ) -> typing.Any:
+    def search(self, key: typing.Optional[str] = None, **kwargs) -> typing.Any:
         """Search for records by key or value."""
+
+        keys = kwargs.get("keys", ())
+        value = kwargs.get("value")
+        limit = kwargs.get("limit", 25)
+        exact = kwargs.get("exact", False)
+        include_count = kwargs.get("include_count", False)
 
         params: typing.Tuple[typing.Any, ...] = ()
 
@@ -142,9 +139,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._select(sql, params)
         )
 
-        if as_value_list:
-            result = self.to_value_list(result)
-
         if include_count:
             count = self._count(sql, params)
             return (count, result)
@@ -181,11 +175,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return multi_dict
 
-    @staticmethod
-    def to_value_list(
-            rows: typing.Iterable[sqlite3.Row],
-    ) -> typing.List:
-        """Shape a result set as a list."""
+    def search_valuelist(self, *args, **kwargs) -> typing.List:
+        """Shape a result set as a list of values."""
+
+        rows = self.search(*args, **kwargs)
+
         return [row["value"] for row in rows]
 
     def remove_key(self, key: str) -> int:

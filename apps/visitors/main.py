@@ -27,9 +27,8 @@ class Controller:
             query = query.strip()
 
         site_domains = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:valuelist",
             "logindex:site_domain",
-            as_value_list=True
         ).pop()
 
         saved_queries = self.get_saved_queries(query)

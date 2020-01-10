@@ -21,10 +21,9 @@ class Controller:
         ).pop()
 
         schedules = cherrypy.engine.publish(
-            "registry:search",
+            "registry:search:valuelist",
             "speak:mute",
             exact=True,
-            as_value_list=True
         ).pop()
 
         registry_url = cherrypy.engine.publish(
