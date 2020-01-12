@@ -33,7 +33,7 @@ class Controller:
             "[section2]"
         ))
 
-    def edit_page(self, page_name, page_content=None):
+    def edit_page(self, page_name="", page_content=None):
         """Present a form for editing the contents of a page."""
 
         if page_content:
@@ -62,15 +62,15 @@ class Controller:
                 trailing_slash=(page_name is None)
             ).pop()
 
-        return {
-            "html": ("edit.jinja.html", {
-                "button_label": button_label,
-                "cancel_url": cancel_url,
-                "page_name": page_name or "",
-                "page_content": page_content or self.new_page_template(),
-                "post_url": post_url,
-            })
-        }
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "edit.jinja.html",
+            button_label=button_label,
+            cancel_url=cancel_url,
+            page_name=page_name,
+            page_content=page_content or self.new_page_template(),
+            post_url=post_url,
+        ).pop()
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
