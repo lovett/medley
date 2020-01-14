@@ -82,7 +82,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the jinja prefix
         """
 
-        self.bus.subscribe("lookup-template", self.get_template)
         self.bus.subscribe("jinja:render", self.render)
 
     def render(self, template_name: str, **kwargs: typing.Any) -> bytes:
@@ -109,11 +108,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         rendered_template = typing.cast(str, template.render(**data))
 
         return rendered_template.encode()
-
-    def get_template(self, name: str) -> jinja2.Template:
-        """Retrieve a Jinja2 template by name."""
-
-        return self.env.get_template(name)
 
     @staticmethod
     def localtime_filter(
