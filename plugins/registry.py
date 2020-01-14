@@ -85,7 +85,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             [(key, value) for value in clean_values]
         )
 
-    def search(self, key: typing.Optional[str] = None, **kwargs) -> typing.Any:
+    def search(
+            self,
+            key: str = "",
+            **kwargs: typing.Any
+    ) -> typing.Any:
         """Search for records by key or value."""
 
         keys = kwargs.get("keys", ())
@@ -145,7 +149,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result
 
-    def search_dict(self, *args, **kwargs) -> typing.Dict[str, typing.Any]:
+    def search_dict(
+            self,
+            *args: typing.Any,
+            **kwargs: typing.Any
+    ) -> typing.Dict[str, typing.Any]:
         """Shape a search result as a key-value dict."""
 
         key_slice = kwargs.get("key_slice", 0)
@@ -159,7 +167,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         }
 
     def search_multidict(
-            self, *args, **kwargs
+            self,
+            *args: typing.Any,
+            **kwargs: typing.Any
     ) -> typing.Dict[str, typing.List]:
         """Shape a search result as a dict whose values are lists."""
 
@@ -175,7 +185,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return multi_dict
 
-    def search_valuelist(self, *args, **kwargs) -> typing.List:
+    def search_valuelist(
+            self,
+            *args: typing.Any,
+            **kwargs: typing.Any
+    ) -> typing.List:
         """Shape a result set as a list of values."""
 
         rows = self.search(*args, **kwargs)
@@ -203,7 +217,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def first_key(
             self,
             value: typing.Any = None,
-            key_prefix: str = None
+            key_prefix: str = ""
     ) -> typing.Optional[str]:
         """Perform a search by value and return the key of the first match.
 

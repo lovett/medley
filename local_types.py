@@ -3,8 +3,6 @@
 import typing
 
 
-NegotiableView = typing.Dict[str, typing.Any]
-
 Args = typing.List[typing.Any]
 
 Kwargs = typing.Dict[str, typing.Any]
