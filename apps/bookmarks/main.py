@@ -81,7 +81,7 @@ class Controller:
         general_query = None
         if query:
             general_query = cherrypy.engine.publish(
-                "bookmarks:generalize_query",
+                "bookmarks:generalize",
                 query
             ).pop()
 

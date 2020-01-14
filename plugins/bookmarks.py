@@ -102,7 +102,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
         self.bus.subscribe("bookmarks:search", self.search)
-        self.bus.subscribe("bookmarks:generalize_query", self.generalize_query)
+        self.bus.subscribe("bookmarks:generalize", self.generalize)
         self.bus.subscribe("bookmarks:prune", self.prune)
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:tags:recent", self.recent_tags)
@@ -126,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @staticmethod
-    def generalize_query(query: str) -> str:
+    def generalize(query: str) -> str:
         """Convert a search query to a more generic form suitable for use with
         external search engines.
 

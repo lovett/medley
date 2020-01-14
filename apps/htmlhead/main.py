@@ -62,7 +62,7 @@ class Controller:
         failure_message = None
         if request_failed:
             failure_message = cherrypy.engine.publish(
-                "applog:get_newest",
+                "applog:newest",
                 source="urlfetch",
                 key="get"
             ).pop()

@@ -14,10 +14,10 @@ class Controller:
     def GET(*_args, **_kwargs) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
-        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
+        muted = cherrypy.engine.publish("speak:muted").pop()
 
         muted_by_schedule = cherrypy.engine.publish(
-            "speak:muted_by_schedule"
+            "speak:muted:scheduled"
         ).pop()
 
         schedules = cherrypy.engine.publish(
@@ -35,7 +35,7 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "speak.jinja.html",
-            can_speak=can_speak,
+            muted=muted,
             muted_by_schedule=muted_by_schedule,
             registry_url=registry_url,
             schedules=schedules
@@ -57,12 +57,12 @@ class Controller:
             key_slice=2
         ).pop()
 
-        can_speak = cherrypy.engine.publish("speak:can_speak").pop()
+        muted = cherrypy.engine.publish("speak:muted").pop()
 
         if action == "toggle":
-            action = "unmute"
-            if can_speak:
-                action = "mute"
+            action = "mute"
+            if muted:
+                action = "unmute"
 
         if action == "mute":
             cherrypy.engine.publish("speak:mute")
@@ -93,7 +93,7 @@ class Controller:
 
             raise cherrypy.HTTPRedirect(app_url)
 
-        if not can_speak:
+        if muted:
             response_status = 202
         else:
             cherrypy.engine.publish("speak", statement, locale, gender)

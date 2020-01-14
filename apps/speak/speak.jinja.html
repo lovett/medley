@@ -10,7 +10,7 @@
         {% endif %}
 
         {% if not muted_by_schedule %}
-            {% if can_speak %}
+            {% if not muted %}
                 <form method="POST" action="{{ app_url }}">
                     <input type="hidden" name="action" value="mute" />
                     <button>Mute now</button>

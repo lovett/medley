@@ -86,8 +86,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the speak prefix.
         """
-        self.bus.subscribe("speak:can_speak", self.can_speak)
-        self.bus.subscribe("speak:muted_by_schedule", self.muted_by_schedule)
+        self.bus.subscribe("speak:muted", self.muted)
+        self.bus.subscribe("speak:muted:scheduled", self.muted_by_schedule)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak", self.speak)
@@ -150,7 +150,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return document.strip().encode("utf-8")
 
-    def can_speak(self) -> bool:
+    def muted(self) -> bool:
         """Determine whether the application has been muted."""
 
         temporarily_muted = cherrypy.engine.publish(
@@ -159,7 +159,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         if temporarily_muted:
-            return False
+            return True
 
         return not self.muted_by_schedule()
 

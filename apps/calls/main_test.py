@@ -49,7 +49,7 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
                     {"key": "dst", "value": "test2"}
                 ]]
 
-            if args[0] == "cdr:call_count":
+            if args[0] == "cdr:count":
                 return [1]
 
             if args[0] == "url:paginate:newer_older":
@@ -65,13 +65,13 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         publish_mock.assert_any_call(
-            "cdr:call_count",
+            "cdr:count",
             dst_exclude=["test2"],
             src_exclude=["test"]
         )
 
         publish_mock.assert_any_call(
-            "cdr:call_log",
+            "cdr:timeline",
             dst_exclude=["test2"],
             limit=50,
             offset=0,

@@ -33,13 +33,13 @@ class Controller:
         ]
 
         total = cherrypy.engine.publish(
-            "cdr:call_count",
+            "cdr:count",
             src_exclude=src_exclusions,
             dst_exclude=dst_exclusions
         ).pop()
 
         calls = cherrypy.engine.publish(
-            "cdr:call_log",
+            "cdr:timeline",
             src_exclude=src_exclusions,
             dst_exclude=dst_exclusions,
             offset=offset,

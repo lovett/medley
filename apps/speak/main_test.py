@@ -45,8 +45,8 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "speak:can_speak":
-                return [False]
+            if args[0] == "speak:muted":
+                return [True]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -66,8 +66,8 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
 
-            if args[0] == "speak:can_speak":
-                return [True]
+            if args[0] == "speak:muted":
+                return [False]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

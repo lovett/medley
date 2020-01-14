@@ -21,7 +21,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the urlfetch prefix.
         """
         self.bus.subscribe("urlfetch:get", self.get)
-        self.bus.subscribe("urlfetch:get_file", self.get_file)
+        self.bus.subscribe("urlfetch:get:file", self.get_file)
         self.bus.subscribe("urlfetch:post", self.post)
 
         cherrypy.engine.publish("urlfetch:ready")

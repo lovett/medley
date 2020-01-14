@@ -38,7 +38,7 @@ class Controller:
         cherrypy.engine.publish(
             "scheduler:add",
             5,
-            "urlfetch:get_file",
+            "urlfetch:get:file",
             download_url,
             destination,
             files_to_extract=('GeoLite2-City.mmdb',)

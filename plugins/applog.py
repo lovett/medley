@@ -40,12 +40,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the applog prefix.
         """
         self.bus.subscribe("applog:add", self.add)
-        self.bus.subscribe("applog:process_queue", self.process_queue)
-        self.bus.subscribe("applog:get_newest", self.get_newest)
+        self.bus.subscribe("applog:pull", self.pull)
+        self.bus.subscribe("applog:newest", self.newest)
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
 
-    def get_newest(
+    def newest(
             self,
             source: str,
             key: str
@@ -61,7 +61,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             )
         )
 
-    def process_queue(self) -> None:
+    def pull(self) -> None:
         """Transfer messages from the queue to the database."""
 
         messages = list(self.queue)
@@ -87,7 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.queue.append((caller, key, str(value)))
 
-        cherrypy.engine.publish("scheduler:add", 1, "applog:process_queue")
+        cherrypy.engine.publish("scheduler:add", 1, "applog:pull")
 
         # Mirror the log message on the cherrypy log for convenience.
         cherrypy.log(f"[{caller}] {key}: {value}")

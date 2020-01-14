@@ -19,11 +19,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the cdr prefix.
         """
-        self.bus.subscribe("cdr:call_count", self.call_count)
-        self.bus.subscribe("cdr:call_log", self.call_log)
-        self.bus.subscribe("cdr:call_history", self.call_history)
+        self.bus.subscribe("cdr:count", self.count)
+        self.bus.subscribe("cdr:timeline", self.timeline)
+        self.bus.subscribe("cdr:history", self.history)
 
-    def call_count(
+    def count(
             self,
             src: str = None,
             src_exclude: typing.Tuple[str, ...] = (),
@@ -60,7 +60,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return int(row["count"])
         return None
 
-    def call_log(self,
+    def timeline(self,
                  src_exclude: typing.Tuple[str, ...] = (),
                  dst_exclude: typing.Tuple[str, ...] = (),
                  offset: int = 0,
@@ -101,11 +101,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             tuple(reversed(reversed_values))
         )
 
-    def call_history(
+    def history(
             self,
             number: str,
             limit: int = 50) -> typing.List[sqlite3.Row]:
-        """An abbreviated version of call_log() for a single number.
+        """An abbreviated version of log() for a single number.
 
         Puts more emphasis on whether a call was placed or received.
 

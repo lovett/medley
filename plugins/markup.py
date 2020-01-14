@@ -17,7 +17,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the markup prefix.
         """
-        self.bus.subscribe("markup:reduce_title", self.reduce_title)
+        self.bus.subscribe("markup:reduce:title", self.reduce_title)
         self.bus.subscribe("markup:plaintext", self.plain_text)
 
     def reduce_title(self, title: str) -> str:

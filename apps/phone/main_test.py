@@ -89,7 +89,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                     (None, "Unabbreviated State")
                 ],
                 "formatting:phone_sanitize": ["1234567890"],
-                "cdr:call_history": [[]],
+                "cdr:history": [[]],
             }
             if args[0] == "jinja:render":
                 return [""]
@@ -118,7 +118,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 }]
             if args[0] == "formatting:phone_sanitize":
                 return ["1234567890"]
-            if args[0] == "cdr:call_history":
+            if args[0] == "cdr:history":
                 return [[{"clid": "test"}]]
             if args[0] == "jinja:render":
                 return [""]

@@ -32,7 +32,7 @@ class Controller:
             ).pop()
 
             title = cherrypy.engine.publish(
-                "markup:reduce_title",
+                "markup:reduce:title",
                 title
             ).pop()
 

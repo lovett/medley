@@ -72,7 +72,7 @@ class Controller:
             )
 
         call_history = cherrypy.engine.publish(
-            "cdr:call_history",
+            "cdr:history",
             sanitized_number
         ).pop()
 
