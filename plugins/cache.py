@@ -69,13 +69,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (prefix,)
         )
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "cache",
-            f"match:{prefix}",
-            len(rows)
-        )
-
         return [row["value"] for row in rows]
 
     def get(self, key: str) -> typing.Any:

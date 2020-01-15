@@ -252,13 +252,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LIMIT 1""")
 
         if not url:
-            cherrypy.engine.publish(
-                "applog:add",
-                "bookmarks",
-                "add_full_text",
-                0
-            )
-
             return
 
         html = cherrypy.engine.publish(
