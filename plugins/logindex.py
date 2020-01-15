@@ -360,9 +360,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         unreversed_ips = records[0]["value"]
 
         cherrypy.engine.publish(
-            "applog:add",
-            "logindex",
-            "unreversed_ips",
+            "metrics:add",
+            "logindex:unreversed_ips",
             unreversed_ips
         )
 
@@ -422,9 +421,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return
 
         cherrypy.engine.publish(
-            "applog:add",
-            "logindex",
-            "unparsed_rows",
+            "metrics:add",
+            "logindex:unparsed_rows",
             records[0]['value']
         )
 

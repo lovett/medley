@@ -14,15 +14,14 @@ def log_runtime(func: Func) -> Func:
 
     @functools.wraps(func)
     def wrapper(*args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-        """Calculate elapsed time and write to the applog."""
+        """Calculate and store elapsed time."""
 
         start = perf_counter()
         result = func(*args, **kwargs)
 
         cherrypy.engine.publish(
-            "applog:add",
-            "runtime",
-            f"{func.__module__}.{func.__name__}",
+            "metrics:add",
+            f"runtime:{func.__module__}:{func.__name__}",
             perf_counter() - start
         )
 

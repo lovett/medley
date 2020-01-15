@@ -1,4 +1,4 @@
-"""Capture log messages to an Sqlite database."""
+"""Storage for log messages."""
 
 from collections import deque
 import sqlite3
@@ -9,7 +9,7 @@ from . import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
-    """A CherryPy plugin for storing application-centric log messages."""
+    """A CherryPy plugin for storing log messages."""
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -22,14 +22,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE TABLE IF NOT EXISTS applog (
             created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             source VARCHAR(255) NOT NULL,
-            key VARCHAR(255) NOT NULL,
-            value VARCHAR(255) NOT NULL
+            message VARCHAR(255) NOT NULL
         );
 
         CREATE INDEX IF NOT EXISTS index_source
             ON applog(source);
 
-        CREATE INDEX IF NOT EXISTS index_created_today
+        CREATE INDEX IF NOT EXISTS index_created
             ON applog(date(created));
 
         """)
@@ -56,7 +55,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             typing.Optional[str],
             self._selectFirst(
                 """SELECT value FROM applog
-                WHERE source=? AND key=? ORDER BY rowid DESC LIMIT 1""",
+                WHERE source=? AND key=? ORDER BY created DESC LIMIT 1""",
                 (source, key)
             )
         )

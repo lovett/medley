@@ -37,6 +37,7 @@ import plugins.mail
 import plugins.maintenance
 import plugins.markup
 import plugins.memorize
+import plugins.metrics
 import plugins.mixins
 import plugins.notifier
 import plugins.parse
@@ -206,6 +207,7 @@ def setup() -> None:
     plugins.maintenance.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()
     plugins.memorize.Plugin(cherrypy.engine).subscribe()
+    plugins.metrics.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.parse.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
