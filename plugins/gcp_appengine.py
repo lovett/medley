@@ -60,11 +60,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.process_application_log(extras_path, batch_size)
 
+        unit = "line" if line_count == 1 else "lines"
+
         cherrypy.engine.publish(
             "applog:add",
             "gcp_appengine",
-            "lines_ingested",
-            line_count
+            f"{line_count} {unit} ingested"
         )
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")

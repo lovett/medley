@@ -234,8 +234,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speak",
-                "config",
+                "speak:config",
                 "Missing azure_key"
             )
 
@@ -243,8 +242,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speak",
-                "config",
+                "speak:config",
                 "Missing synthesize_url"
             )
 
@@ -252,8 +250,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             config = {}
             cherrypy.engine.publish(
                 "applog:add",
-                "speak",
-                "config",
+                "speak:config",
                 "Missing token_request_url"
             )
 

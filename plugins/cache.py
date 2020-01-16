@@ -118,11 +118,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (prefix, rest)
         )
 
+        unit = "row" if deletion_count == 1 else "rows"
+
         cherrypy.engine.publish(
             "applog:add",
-            "cache",
-            f"clear:{key}",
-            deletion_count
+            "cache:clear",
+            f"{deletion_count} {unit} deleted"
         )
 
         return deletion_count
@@ -135,9 +136,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             WHERE expires < datetime()"""
         )
 
+        unit = "row" if deletion_count == 1 else "rows"
+
         cherrypy.engine.publish(
             "applog:add",
-            "cache",
-            "prune",
-            deletion_count
+            "cache:prune",
+            f"{deletion_count} {unit} deleted"
         )

@@ -7,6 +7,10 @@ import cherrypy
 from . import mixins
 from . import decorators
 
+SearchResult = typing.Tuple[
+    typing.List[sqlite3.Row], int, typing.List[str]
+]
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for storing log messages."""
@@ -46,17 +50,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def newest(
             self,
-            source: str,
-            key: str
+            source: str
     ) -> typing.Optional[str]:
         """Retrieve messages by key."""
 
         return typing.cast(
             typing.Optional[str],
             self._selectFirst(
-                """SELECT value FROM applog
-                WHERE source=? AND key=? ORDER BY created DESC LIMIT 1""",
-                (source, key)
+                """SELECT message FROM applog
+                WHERE source=? ORDER BY created DESC LIMIT 1""",
+                (source,)
             )
         )
 
@@ -74,22 +77,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self.queue.popleft()
 
         self._insert(
-            "INSERT INTO applog (source, key, value) VALUES (?, ?, ?)",
+            "INSERT INTO applog (source, message) VALUES (?, ?)",
             messages
         )
 
-    def add(self,
-            caller: str,
-            key: str,
-            value: typing.Union[str, float, int]) -> None:
+    def add(self, source: str, message: str) -> None:
         """Accept a log message for storage."""
 
-        self.queue.append((caller, key, str(value)))
+        self.queue.append((source, message))
 
         cherrypy.engine.publish("scheduler:add", 1, "applog:pull")
-
-        # Mirror the log message on the cherrypy log for convenience.
-        cherrypy.log(f"[{caller}] {key}: {value}")
 
     @decorators.log_runtime
     def prune(self, cutoff_months: int = 3) -> None:
@@ -104,56 +101,50 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         deletion_count = self._delete(
             """DELETE FROM applog
-            WHERE strftime('%s', created) < strftime('%s', 'now', ?)
-            """,
+            WHERE strftime('%s', created) < strftime('%s', 'now', ?)""",
             (f"-{cutoff_months} month",)
         )
 
+        unit = "row" if deletion_count == 1 else "rows"
+
         cherrypy.engine.publish(
             "applog:add",
-            "applog",
-            "prune",
-            deletion_count
+            "applog:prune",
+            f"{deletion_count} {unit} deleted"
         )
 
     @decorators.log_runtime
     def search(
             self,
-            sources: typing.Sequence[str] = (),
-            offset: int = 0,
-            limit: int = 20,
-            exclude: int = 0
-    ) -> typing.Tuple[
-        typing.List[sqlite3.Row], int, typing.List[str]
-    ]:
+            source: str,
+            **kwargs: typing.Any
+    ) -> SearchResult:
         """View records in reverse chronological order."""
 
-        where_sql = "WHERE 1=1"
-        placeholder_values: typing.Tuple[str, ...] = ()
+        offset = kwargs.get("offset", 0)
+        limit = kwargs.get("limit", 0)
 
-        if sources:
-            placeholders = ("?, " * len(sources))[:-2]
-            if exclude == 1:
-                where_sql += f" AND source NOT IN ({placeholders})"
-            else:
-                where_sql += f" AND source IN ({placeholders})"
-
-            placeholder_values += tuple(sources)
-
-        if not sources:
-            where_sql += " AND date(created) = date('now')"
-
-        sql = f"""SELECT key, value, source,
+        sql = f"""SELECT source, message,
         created as 'created [datetime]'
         FROM applog
-        {where_sql}
-        ORDER BY rowid DESC
+        WHERE date(created) = date('now')
+        ORDER BY created DESC
         LIMIT ? OFFSET ?"""
 
-        placeholder_values += (limit, offset)
+        placeholders = (limit, offset)
+
+        if source:
+            sql = f"""SELECT source, message,
+            created as 'created [datetime]'
+            FROM applog
+            WHERE source=?
+            ORDER BY created DESC
+            LIMIT ? OFFSET ?"""
+
+            placeholders = (source, limit, offset)
 
         return (
-            self._select(sql, placeholder_values),
-            self._count(sql, placeholder_values),
-            self._explain(sql, placeholder_values)
+            self._select(sql, placeholders),
+            self._count(sql, placeholders),
+            self._explain(sql, placeholders)
         )

@@ -117,11 +117,12 @@ class Plugin(cherrypy.process.plugins.Monitor):
         if not cached_events:
             return
 
+        unit = "event" if len(cached_events) == 1 else "events"
+
         cherrypy.engine.publish(
             "applog:add",
             "scheduler",
-            "revive",
-            len(cached_events)
+            f"{len(cached_events)} {unit} revived"
         )
 
         for cached_event in cached_events:

@@ -14,24 +14,21 @@ class Controller:
     def GET(*_args, **kwargs) -> bytes:
         """Display a list of recent log entries"""
 
-        offset = int(kwargs.get('offset', 0))
-        exclude = int(kwargs.get('exclude', 0))
-        sources = kwargs.get('sources')
+        offset = int(kwargs.get("offset", 0))
+        source = kwargs.get("source", "")
         per_page = 20
 
         records, total, query_plan = cherrypy.engine.publish(
             "applog:search",
+            source=source,
             offset=offset,
-            sources=sources.split(' ') if sources else None,
-            exclude=exclude,
             limit=per_page
         ).pop()
 
         (newer_url, older_url) = cherrypy.engine.publish(
             "url:paginate:newer_older",
             params={
-                "sources": sources,
-                "exclude": int(exclude)
+                "source": source
             },
             per_page=per_page,
             offset=offset,
@@ -43,8 +40,7 @@ class Controller:
             "applog.jinja.html",
             records=records,
             total=total,
-            sources=sources,
-            exclude=exclude,
+            source=source,
             newer_url=newer_url,
             older_url=older_url,
             query_plan=query_plan

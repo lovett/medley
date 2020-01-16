@@ -6,8 +6,8 @@
     <header class="app-nav">
         <form method="get" action="{{ app_url }}">
             <div class="field">
-                <label for="sources">Sources</label>
-                <input type="search" id="sources" name="sources" value="{{ sources|default('', true)|e }}" autocapitalize="none" />
+                <label for="source">Source</label>
+                <input type="search" id="source" name="source" value="{{ source|default('', true)|e }}" autocapitalize="none" />
             </div>
             <div class="field">
                 <button>
@@ -16,30 +16,7 @@
             </div>
 
             <div class="options">
-                <div class="field">
-                    <label for="exclude-no">
-                        <input type="radio"
-                               id="exclude-no"
-                               name="exclude"
-                               value="0"
-                               {% if exclude == 0 %}checked="checked"{% endif %}
-                        />
-                        Include
-                    </label>
-                </div>
-                <div class="field">
-                    <label for="exclude-yes">
-                        <input type="radio"
-                               id="exclude-yes"
-                               name="exclude"
-                               value="1"
-                               {% if exclude == 1 %}checked="checked"{% endif %}
-                        />
-                        Exclude
-                    </label>
-                </div>
-
-                {% if sources %}
+                {% if source %}
                     <div>{{ macros.cancelLink(app_url) }}</div>
                 {% endif %}
             </div>
@@ -58,8 +35,7 @@
                             <th>Date</th>
                             <th>Time</th>
                             <th>Source</th>
-                            <th>Key</th>
-                            <th>Value</th>
+                            <th>Message</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -72,13 +48,10 @@
                                     {{ record["created"]|localtime|dateformat("h:mm:ss A")}}
                                 </td>
                                 <td nowrap>
-                                    <a href="{{ app_url }}?sources={{ record["source"]|urlencode }}">{{ record["source"] }}</a>
-                                </td>
-                                <td nowrap>
-                                    {{ record["key"] }}
+                                    <a href="{{ app_url }}?source={{ record["source"]|urlencode }}">{{ record["source"] }}</a>
                                 </td>
                                 <td>
-                                    {{ record["value"] }}
+                                    {{ record["message"] }}
                                 </td>
                             </tr>
                         {% endfor %}

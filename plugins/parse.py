@@ -489,9 +489,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except pp.ParseException as exception:
             cherrypy.engine.publish(
                 "applog:add",
-                "parse",
-                f"fail:column:{exception.col}",
-                val
+                "parse:exception",
+                f"Column {exception.col} of {val}"
             )
 
         timestamp_formats = (

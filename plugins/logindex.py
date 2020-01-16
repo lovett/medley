@@ -229,8 +229,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if self.queue.count(period) > 0:
             cherrypy.engine.publish(
                 "applog:add",
-                "logindex",
-                "error",
+                "logindex:error",
                 "Ignoring a request to queue an already-queued range"
             )
             return False
@@ -241,7 +240,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            "enqueue",
             "Queueing complete, processing scheduled"
         )
 
@@ -262,19 +260,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         try:
             period = self.queue[0]
-            cherrypy.engine.publish(
-                "applog:add",
-                "logindex",
-                "process_queue",
-                "Queue is non-empty"
-            )
         except IndexError:
             cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
 
             cherrypy.engine.publish(
                 "applog:add",
                 "logindex",
-                "process_queue",
                 "Queue is empty, parsing scheduled"
             )
 
@@ -329,11 +320,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if batch:
             line_count += self.insert_line(batch)
 
+        unit = "line" if line_count == 1 else "lines"
+
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            "lines_ingested",
-            line_count
+            f"{line_count} {unit} ingested"
         )
 
     @decorators.log_runtime
@@ -718,9 +710,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             row_counter += 1
 
+        unit = "row" if row_counter == 1 else "rows"
+
         cherrypy.engine.publish(
             "applog:add",
-            "logindex",
-            "repair",
-            row_counter
+            "logindex:repair",
+            f"{row_counter} {unit} repaired"
         )

@@ -2,8 +2,8 @@
 
 import glob
 import os
+import os.path
 import time
-import typing
 import cherrypy
 from . import mixins
 from . import decorators
@@ -23,10 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("maintenance:db", self.db_maintenance)
 
     @decorators.log_runtime
-    def db_maintenance(
-            self,
-            file_names: typing.Optional[typing.Sequence[str]] = ()
-    ) -> None:
+    def db_maintenance(self) -> None:
         """Execute database maintenance tasks."""
 
         cherrypy.engine.publish("cache:prune")
@@ -36,29 +33,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("logindex:repair")
 
         pattern = self._path("*.sqlite")
-        file_names = glob.glob(pattern, recursive=False)
+        file_paths = glob.glob(pattern, recursive=False)
 
-        for file_name in file_names:
+        for file_path in file_paths:
             # Skip databases that haven't been changed in the past 24 hours.
-            stat = os.stat(file_name)
+            stat = os.stat(file_path)
             age = time.time() - stat.st_mtime
             if age > 86400:
                 cherrypy.engine.publish(
                     "applog:add",
                     "maintenance",
-                    "db:skip",
-                    file_name
+                    f"Skipped {os.path.basename(file_path)}"
                 )
 
                 continue
 
-            self.db_path = file_name
+            self.db_path = file_path
             self._execute("vacuum")
             self._execute("analyze")
             self._execute("PRAGMA wal_checkpoint(TRUNCATE)")
-            cherrypy.engine.publish(
-                "applog:add",
-                "maintenance",
-                f"db:{self.db_path}",
-                "ok"
-            )

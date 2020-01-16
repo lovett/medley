@@ -489,11 +489,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "DELETE FROM bookmarks WHERE deleted IS NOT NULL"
         )
 
+        unit = "row" if deletion_count == 1 else "rows"
+
         cherrypy.engine.publish(
             "applog:add",
             "bookmarks",
-            "prune",
-            deletion_count
+            f"{deletion_count} {unit} deleted"
         )
 
         if deletion_count > 0:

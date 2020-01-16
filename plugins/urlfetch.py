@@ -62,13 +62,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if headers:
             request_headers.update(headers)
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "urlfetch",
-            "get",
-            url
-        )
-
         try:
             req = requests.get(
                 url,
@@ -83,8 +76,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
                 "applog:add",
-                "exception",
-                "urlfetch:get",
+                "urlfetch:exception",
                 exception
             )
 
@@ -134,13 +126,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if as_json:
             request_headers["Accept"] = "application/json"
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "urlfetch",
-            "get_file",
-            url
-        )
 
         download_path = os.path.join(
             destination,
@@ -209,13 +194,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             data = json.dumps(data)
             request_headers["Content-Type"] = "application/json"
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "urlfetch",
-            "post",
-            url
-        )
-
         try:
             req = requests.post(
                 url,
@@ -241,8 +219,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
                 "applog:add",
-                "urlfetch",
-                "failure",
+                "urlfetch:exception",
                 exception
             )
 

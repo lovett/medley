@@ -52,11 +52,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "Missing gcp:service_account in registry"
             )
 
-        scopes = config.get("scope", "").split("\n")
-
         credentials = Credentials.from_service_account_info(
             json.loads(config["service_account"]),
-            scopes=scopes
+            scopes=config.get("scope", "").split("\n")
         )
 
         storage_client = storage.Client(
@@ -135,14 +133,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except google.auth.exceptions.GoogleAuthError as exception:
             cherrypy.engine.publish(
                 "applog:add",
-                "exception",
-                "gcp_storage:pull_bucket",
+                "gcp_storage:exception",
                 exception
             )
 
+        unit = "file" if files_pulled == 1 else "files"
+
         cherrypy.engine.publish(
             "applog:add",
-            "gcp",
-            "bucket_files_pulled",
-            files_pulled
+            "gcp_storage",
+            f"{files_pulled} {unit} pulled"
         )
