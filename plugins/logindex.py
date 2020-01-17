@@ -354,7 +354,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "metrics:add",
             "logindex:unreversed_ips",
-            unreversed_ips
+            unreversed_ips,
+            "count"
         )
 
         if unreversed_ips == 0:
@@ -415,7 +416,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "metrics:add",
             "logindex:unparsed_rows",
-            records[0]['value']
+            records[0]['value'],
+            "rows"
         )
 
         if records[0]["value"] == 0:
