@@ -1,0 +1,68 @@
+#inventory {
+    column-count: 1;
+    line-height: 1.5;
+    margin-left: 0;
+    flex-grow: 1;
+    padding-left: 0;
+    list-style-type: none;
+}
+
+#inventory LI {
+    padding: .5em 0 0 0;
+    display: block;
+}
+
+.scatter {
+    width: 100%;
+    height: 50vh;
+    /* border-left: 1px solid #ccc; */
+    /* border-bottom: 1px solid #ccc; */
+}
+
+.scatter line {
+    stroke: black;
+    stroke-width: 0.25;
+}
+
+.scatter .labels text {
+    font-size: .2em;
+}
+
+.scatter .label-pair:first-of-type text {
+    text-anchor: end;
+}
+
+.scatter circle {
+    fill: #666;
+}
+
+.scatter circle.best {
+    fill: green;
+}
+
+.scatter circle.worst {
+    fill: red;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    #inventory {
+        column-count: 2;
+        column-gap: 2em;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+    #inventory {
+        column-count: 3;
+    }
+}

@@ -22,7 +22,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE TABLE IF NOT EXISTS metrics (
             created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             key VARCHAR(255) NOT NULL,
-            value NUMERIC NOT NULL,
+            value INTEGER NOT NULL,
             unit VARCHAR(255) NOT NULL
         );
 
@@ -33,7 +33,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON metrics(date(created));
 
         CREATE VIEW IF NOT EXISTS today AS
-            SELECT rowid, key, value, created
+            SELECT rowid, key, value, unit, created
             FROM metrics
             WHERE date('now') = date(created);
 

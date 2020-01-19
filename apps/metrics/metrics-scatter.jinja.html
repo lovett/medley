@@ -1,0 +1,58 @@
+<svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax" class="scatter">
+    <g class="axis">
+        <line x1="15" x2="15" y1="10" y2="110"></line>
+    </g>
+
+    <g class="axis">
+        <line x1="15" x2="300" y1="110" y2="110"></line>
+    </g>
+
+    <g class="labels">
+        {% set y_step = 100 / 4 %}
+        {% set value_step = (y_range[1] - y_range[0]) / 4 %}
+        {% for i in range(5) %}
+            {% set y = 100 - (i * y_step) + 10 %}
+            <text x="12"
+                  y="{{ y }}"
+                  text-anchor="end"
+                  alignment-baseline="middle"
+            >{{ y_range[0] + (i * value_step) }}</text>
+            <line x1="13" x2="15" y1="{{ y }}" y2="{{ y }}" />
+        {% endfor %}
+    </g>
+
+    <g class="labels">
+        {% set step = 285 / 4 %}
+        {% set label_step = (x_range[1] - x_range[0]).in_hours() / 4 %}
+
+        {% for i in range(5) %}
+            {% set x = 285 - (i * step) + 15 %}
+            <g class="label-pair">
+                <text x="{{ x }}" y="115">
+                    {{ x_range[1].subtract(hours=(i * label_step))|localtime|dateformat('LT') }}
+                </text>
+                <text x="{{ x  }}" y="119">
+                    {{ x_range[1].subtract(hours=(i * label_step))|localtime|dateformat('YYYY-MM-DD') }}
+                </text>
+            </g>
+            <line x1="{{ x }}" x2="{{ x }}" y1="110" y2="112" />
+        {% endfor %}
+    </g>
+
+    {% for point in points %}
+        {% set x = ((x_range[1] - point[0]) * 285 / (x_range[1] - x_range[0])) + 15 %}
+        {% set y = ((y_range[1] - point[1]) * 100 / (y_range[1] - y_range[0])) + 10 %}
+        <circle
+            {% if point[1] == y_range[0] %}
+            class="best"
+            {% elif point[1] == y_range[1] %}
+            class="worst"
+            {% endif %}
+            data-value="{{ point[1] }}"
+            data-date="{{ point[0]|localtime }}"
+            cx="{{ x }}"
+            cy="{{ y }}"
+            r="1.5"
+        />
+    {% endfor %}
+</svg>
