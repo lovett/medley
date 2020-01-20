@@ -18,8 +18,12 @@ class Controller:
         source = kwargs.get("source", "")
         per_page = 20
 
+        publish_topic = "applog:view"
+        if source:
+            publish_topic = "applog:search"
+
         records, total, query_plan = cherrypy.engine.publish(
-            "applog:search",
+            publish_topic,
             source=source,
             offset=offset,
             limit=per_page

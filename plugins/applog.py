@@ -47,6 +47,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("applog:newest", self.newest)
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
+        self.bus.subscribe("applog:view", self.view)
 
     def newest(
             self,
@@ -114,34 +115,41 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(
-            self,
-            source: str,
-            **kwargs: typing.Any
-    ) -> SearchResult:
+    def view(self, **kwargs: typing.Any) -> SearchResult:
         """View records in reverse chronological order."""
 
-        offset = kwargs.get("offset", 0)
-        limit = kwargs.get("limit", 0)
+        offset: int = kwargs.get("offset", 0)
+        limit: int = kwargs.get("limit", 0)
 
         sql = f"""SELECT source, message,
         created as 'created [datetime]'
         FROM applog
-        WHERE date(created) = date('now')
         ORDER BY created DESC
         LIMIT ? OFFSET ?"""
 
         placeholders = (limit, offset)
 
-        if source:
-            sql = f"""SELECT source, message,
-            created as 'created [datetime]'
-            FROM applog
-            WHERE source=?
-            ORDER BY created DESC
-            LIMIT ? OFFSET ?"""
+        return (
+            self._select(sql, placeholders),
+            self._count(sql, placeholders),
+            self._explain(sql, placeholders)
+        )
 
-            placeholders = (source, limit, offset)
+    @decorators.log_runtime
+    def search(self, source: str, **kwargs: typing.Any) -> SearchResult:
+        """View records from a source in reverse chronological order."""
+
+        offset: int = kwargs.get("offset", 0)
+        limit: int = kwargs.get("limit", 0)
+
+        sql = f"""SELECT source, message,
+        created as 'created [datetime]'
+        FROM applog
+        WHERE source=?
+        ORDER BY created DESC
+        LIMIT ? OFFSET ?"""
+
+        placeholders = (source, limit, offset)
 
         return (
             self._select(sql, placeholders),
