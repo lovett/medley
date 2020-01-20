@@ -58,4 +58,7 @@ if [[ ! -z "$TESTS_TO_RUN" ]]; then
     make $(echo "$TESTS_TO_RUN" | tr " " "\n" | sort -u | tr "\n" " ")
 fi
 
+# Typecheck
+mypy medley.py
+
 trap "cleanup" EXIT

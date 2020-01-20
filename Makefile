@@ -364,3 +364,8 @@ $(APP_ICONS):
 
 # Generate PNGs for all app icon SVGs.
 app-icons: $(APP_ICONS)
+
+
+# Validate types
+typecheck:
+	mypy medley.py
