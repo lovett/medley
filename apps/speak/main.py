@@ -50,6 +50,13 @@ class Controller:
         locale = kwargs.get("locale", "en-GB")
         gender = kwargs.get("gender", "Male")
         action = kwargs.get("action", None)
+        confirm = kwargs.get("confirm")
+
+        if confirm:
+            cherrypy.engine.publish(
+                "audio:play_sound",
+                "attention"
+            )
 
         announcements = cherrypy.engine.publish(
             "registry:search:dict",

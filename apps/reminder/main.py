@@ -73,6 +73,7 @@ class Controller:
         notification_id = kwargs.get("notification_id")
         url = kwargs.get("url")
         remember = kwargs.get("remember")
+        confirm = kwargs.get("confirm")
 
         # Server-side template population
         if notification_id and not message:
@@ -103,10 +104,11 @@ class Controller:
                 "Invalid notification id"
             )
 
-        cherrypy.engine.publish(
-            "audio:play_sound",
-            "attention"
-        )
+        if confirm:
+            cherrypy.engine.publish(
+                "audio:play_sound",
+                "attention"
+            )
 
         try:
             minutes = int(minutes)
