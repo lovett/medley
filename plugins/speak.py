@@ -161,11 +161,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if temporarily_muted:
             return True
 
-        return not self.muted_by_schedule()
+        return self.muted_by_schedule()
 
     @staticmethod
     def muted_by_schedule() -> bool:
-        """Determine whether an automute schedule is active."""
+        """Determine whether a muting schedule is active."""
 
         schedules = cherrypy.engine.publish(
             "registry:search:valuelist",
@@ -194,7 +194,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     ]
                     break
                 except ValueError:
-                    return True
+                    return False
 
             start = datetime.datetime.combine(today, time_range[0].time())
 
@@ -344,6 +344,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Re-enable text-to-speech."""
 
         cherrypy.engine.publish(
-            "registry:remove",
+            "registry:remove:key",
             "speak:mute:temporary"
         )
