@@ -85,7 +85,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def add(self, source: str, message: str) -> None:
         """Accept a log message for storage."""
 
-        self.queue.append((source, message))
+        self.queue.append((source, str(message)))
 
         cherrypy.engine.publish("scheduler:add", 1, "applog:pull")
 
