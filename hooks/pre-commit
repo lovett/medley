@@ -59,6 +59,6 @@ if [[ ! -z "$TESTS_TO_RUN" ]]; then
 fi
 
 # Typecheck
-mypy medley.py
+./venv/bin/mypy medley.py
 
 trap "cleanup" EXIT
