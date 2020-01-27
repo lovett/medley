@@ -38,15 +38,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         decoded_value = value.decode("utf-8")
 
         try:
-            utc_date = pendulum.from_format(
+            return pendulum.from_format(
+                decoded_value,
+                "YYYY-MM-DD HH:mm:ss.SSS"
+            )
+        except ValueError:
+            pass
+
+        try:
+            return pendulum.from_format(
                 decoded_value,
                 "YYYY-MM-DD HH:mm:ss"
             )
         except ValueError:
-            last_colon_index = decoded_value.rindex(":")
-            date = decoded_value[:last_colon_index] + \
-                decoded_value[last_colon_index + 1:]
-            utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
+            pass
+
+        last_colon_index = decoded_value.rindex(":")
+        date = decoded_value[:last_colon_index] + \
+            decoded_value[last_colon_index + 1:]
+        utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
 
         return utc_date
 

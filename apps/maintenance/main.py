@@ -17,24 +17,20 @@ class Controller:
 
         group = kwargs.get("group")
 
+        topic = ""
         if group == "db":
-            cherrypy.engine.publish(
-                "scheduler:add",
-                2,
-                "maintenance:db"
-            )
-
-            cherrypy.response.status = 204
-            return
+            topic = "maintenance:db"
 
         if group == "filesystem":
-            cherrypy.engine.publish(
-                "scheduler:add",
-                2,
-                "maintenance:filesystem"
-            )
+            topic = "maintenance:filesystem"
 
-            cherrypy.response.status = 204
-            return
+        if not topic:
+            raise cherrypy.HTTPError(400, "Invalid task group")
 
-        raise cherrypy.HTTPError(400, "Invalid task group")
+        cherrypy.engine.publish(
+            "scheduler:add",
+            2,
+            topic
+        )
+
+        cherrypy.response.status = 204

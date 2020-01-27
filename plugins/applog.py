@@ -4,6 +4,7 @@ from collections import deque
 import sqlite3
 import typing
 import cherrypy
+import pendulum
 from . import mixins
 from . import decorators
 
@@ -78,14 +79,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self.queue.popleft()
 
         self._insert(
-            "INSERT INTO applog (source, message) VALUES (?, ?)",
+            "INSERT INTO applog (created, source, message) VALUES (?, ?, ?)",
             messages
         )
 
     def add(self, source: str, message: str) -> None:
         """Accept a log message for storage."""
 
-        self.queue.append((source, str(message)))
+        self.queue.append((
+            pendulum.now('UTC').format('YYYY-MM-DD HH:mm:ss.SSS'),
+            source,
+            str(message)
+        ))
 
         cherrypy.engine.publish("scheduler:add", 1, "applog:pull")
 
@@ -124,7 +129,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = f"""SELECT source, message,
         created as 'created [datetime]'
         FROM applog
-        ORDER BY created DESC
+        ORDER BY created DESC, rowid desc
         LIMIT ? OFFSET ?"""
 
         placeholders = (limit, offset)

@@ -81,8 +81,8 @@ class TestApplog(unittest.TestCase):
             self.plugin.pull()
 
         self.assertEqual(
-            db_mock.call_args_list[0].args[-1][0],
-            ("exception test", "test")
+            db_mock.call_args_list[0].args[-1][-1][-1],
+            "test"
         )
 
 
