@@ -12,8 +12,10 @@
             <ul id="inventory">
                 {% for metric in metrics %}
                     <li>
-                        <svg class="icon icon-chart"><use xlink:href="#icon-chart"></use></svg>
-                        <a href="{{ app_url }}/{{ metric["key"] }}">{{ metric["key"] }}</a>
+                        <a href="{{ app_url }}/{{ metric["key"] }}">
+                            <svg class="icon icon-chart"><use xlink:href="#icon-chart"></use></svg>
+                            {{ metric["key"] }}
+                        </a>
                     </li>
                 {% endfor %}
             </ul>

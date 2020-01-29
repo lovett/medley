@@ -17,8 +17,10 @@
             <ul id="all-tags" class="tag-list">
                 {% for tag in tags %}
                     <li>
-                        <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
-                        <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">{{ tag }}</a>
+                        <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">
+                            <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                            {{ tag }}
+                        </a>
                     </li>
                 {% endfor %}
             </ul>
