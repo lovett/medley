@@ -41,11 +41,17 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
     fi
 
     if [[ "$FILE_EXTENSION" == "py" ]]; then
-        echo "Linting $STAGED_FILE with flake8..."
-        ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
+        LINTABLE=$(curl --no-progress-meter "http://localhost:8085/lintable/$STAGED_FILE")
 
-        echo "Linting $STAGED_FILE with pylint..."
-        ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"
+        if [[ "$LINTABLE" == "yes" ]]; then
+            echo "Linting $STAGED_FILE with flake8..."
+            ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
+
+            echo "Linting $STAGED_FILE with pylint..."
+            ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"
+
+            curl --no-progress-meter -X PUT -d "" "http://localhost:8085/lintable/$STAGED_FILE"
+        fi
     fi
 done
 
