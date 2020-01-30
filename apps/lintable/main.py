@@ -12,6 +12,8 @@ class Controller:
 
     @staticmethod
     def GET(*args, **_kwargs) -> bytes:
+        """Determine if a file should be linted."""
+
         target_path = "/".join(args)
 
         if not os.path.exists(target_path):
@@ -27,8 +29,6 @@ class Controller:
             f"lintable:{target_path}"
         ).pop()
 
-        print(stored_checksum)
-
         if current_checksum == stored_checksum:
             return "no".encode()
 
@@ -36,6 +36,7 @@ class Controller:
 
     @staticmethod
     def PUT(*args, **_kwargs) -> None:
+        """Request storage of a file's current hash."""
         target_path = "/".join(args)
 
         if not os.path.exists(target_path):
