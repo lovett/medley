@@ -1,7 +1,0 @@
-GET http://127.0.0.1:8085/lintable/apps/lintable/main.py
-
-#
-
-PUT http://127.0.0.1:8085/lintable/apps/lintable/main.py
-
-#

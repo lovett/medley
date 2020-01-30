@@ -1,0 +1,79 @@
+#+TITLE: Medley Curl Testbench
+#+PROPERTY: header-args  :var host="http://localhost:8085"
+#+PROPERTY: header-args+ :var json="application/json"
+#+PROPERTY: header-args+ :var text="text/plain"
+#+PROPERTY: header-args+ :results output
+
+This is a suite of code snippets for exercising app URLs with curl.
+
+* Headers
+** GET
+Display the headers of the request.
+
+#+NAME: headers_get_html
+#+BEGIN_SRC sh :wrap EXPORT html
+curl "$host/headers"
+#+END_SRC
+
+#+NAME: headers_get_json
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -H "Accept: $json" "$host/headers" | jq .
+#+END_SRC
+
+#+NAME: headers_get_text
+#+BEGIN_SRC sh :wrap EXPORT text
+curl -H "Accept: $text" "$host/headers"
+#+END_SRC
+
+* Homepage
+** GET
+Display a list of applications
+
+#+NAME: homepage_get_html
+#+BEGIN_SRC sh :wrap export html
+curl "$host/"
+#+END_SRC
+
+#+NAME: homepage_get_json
+#+BEGIN_SRC sh :wrap export json
+curl -H "Accept: $json" "$host/"
+#+END_SRC
+
+#+NAME: homepage_get_text
+#+BEGIN_SRC sh :wrap export text
+curl -H "Accept: $text" "$host/"
+#+END_SRC
+
+** HEAD
+Client-side caching is done via ETags.
+
+#+NAME: homepage_head
+#+BEGIN_SRC sh :wrap export
+curl -i -I "$host/"
+#+END_SRC
+
+#+NAME: homepage_head_if_none_match
+#+BEGIN_SRC sh
+curl -i -I -H "If-None-Match: e3e5f241ef61db2c61aa327dc1c0394c" "$host/"
+#+END_SRC
+
+* Lintable
+** GET
+Ask the server to compare the current hash of a file to the last
+stored value. Returns "yes" if the file should be linted or "no" if it
+should not. The file path is provided on the URL and should be
+relative to the application root.
+
+#+NAME: lintable_get
+#+BEGIN_SRC sh :wrap EXPORT html
+curl -H "Accept: $json" "$host/lintable/apps/lintable/main.py"
+#+END_SRC
+
+** PUT
+Ask the server to store the current hash of a file. Same setup as for
+GET: the file path is provided on the URL.
+
+#+NAME: lintable_put
+#+BEGIN_SRC sh :wrap EXPORT html
+curl -i -X PUT -d" " "$host/lintable/apps/lintable/main.py"
+#+END_SRC
