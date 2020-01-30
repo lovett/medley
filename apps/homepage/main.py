@@ -52,13 +52,20 @@ class Controller:
                 show_on_homepage
             ))
 
+        catalog.append((
+            "homepage",
+            "/",
+            "Present all the available applications.",
+            False
+        ))
+
         catalog.sort(key=lambda tup: tup[0])
 
         return catalog
 
-    @cherrypy.tools.provides(formats=("html",))
+    @cherrypy.tools.provides(formats=("html", "org"))
     @cherrypy.tools.etag()
-    def GET(self, *_args, **_kwargs) -> bytes:
+    def GET(self, *args, **_kwargs) -> bytes:
         """List all available applications.
 
         Apps can be excluded from this list by setting
@@ -66,10 +73,29 @@ class Controller:
 
         """
 
+        show_all = len(args) > 0 and args[0] == "all"
+
         apps = self.catalog_apps(cherrypy.tree.apps)
+
+        if cherrypy.request.wants == "org" and show_all:
+            checklist = (
+                f"- [ ] {name}" for name, _, _, _ in apps
+            )
+
+            return "\n".join(checklist).encode()
+
+        if cherrypy.request.wants == "org" and not show_all:
+            checklist = (
+                f"- [ ] {name}"
+                for name, _, _, show_on_homepage in apps
+                if show_on_homepage
+            )
+
+            return "\n".join(checklist).encode()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "homepage.jinja.html",
-            apps=apps
+            apps=apps,
+            show_all=show_all
         ).pop()

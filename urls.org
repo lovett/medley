@@ -2,6 +2,7 @@
 #+PROPERTY: header-args  :var host="http://localhost:8085"
 #+PROPERTY: header-args+ :var json="application/json"
 #+PROPERTY: header-args+ :var text="text/plain"
+#+PROPERTY: header-args+ :var org="text/x-org"
 #+PROPERTY: header-args+ :results output
 
 This is a suite of code snippets for exercising app URLs with curl.
@@ -42,6 +43,16 @@ curl -H "Accept: $json" "$host/"
 #+NAME: homepage_get_text
 #+BEGIN_SRC sh :wrap export text
 curl -H "Accept: $text" "$host/"
+#+END_SRC
+
+#+NAME: homepage_get_org
+#+BEGIN_SRC sh :wrap export org
+curl -H "Accept: $org" "$host/"
+#+END_SRC
+
+#+NAME: homepage_get_org_all
+#+BEGIN_SRC sh :wrap export org
+curl -H "Accept: $org" "$host/all"
 #+END_SRC
 
 ** HEAD

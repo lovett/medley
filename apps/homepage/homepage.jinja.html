@@ -14,7 +14,7 @@
     <main>
         <section>
             {% for name, url, description, show_on_homepage in apps %}
-                {% if show_on_homepage %}
+                {% if show_all or show_on_homepage %}
                     <p class="item">
                         <a class="name" href="{{ url }}">{{ name }}</a>
                         <span class="description">{{ description }}</span>

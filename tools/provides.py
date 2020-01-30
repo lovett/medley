@@ -57,6 +57,10 @@ class Tool(cherrypy.Tool):
             cherrypy.request.wants = "json"
             response_type = "application/json"
 
+        if request_path.suffix == ".org" or "text/x-org" in accept:
+            cherrypy.request.wants = "org"
+            response_type = "text/x-org"
+
         if "text/html" in accept or "*/*" in accept:
             cherrypy.request.wants = "html"
             response_type = "text/html"

@@ -38,6 +38,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
     def request(request_path='/', method='GET', app_path='',  # noqa:E501 pylint: disable=too-many-arguments,too-many-locals,dangerous-default-value
                 scheme='http', proto='HTTP/1.1', data=None,
                 headers={}, as_json=False, as_text=False,
+                as_org=False,
                 json_body=None, **kwargs):
         """Send a request to the faux server."""
 
@@ -52,6 +53,8 @@ class BaseCherryPyTestCase(unittest.TestCase):
             default_headers["Accept"] = "application/json"
         elif as_text:
             default_headers["Accept"] = "text/plain"
+        elif as_org:
+            default_headers["Accept"] = "text/x-org"
 
         if json_body:
             default_headers["content-type"] = "application/json"

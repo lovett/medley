@@ -69,6 +69,37 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 406)
 
     @mock.patch("cherrypy.engine.publish")
+    def test_returns_org(self, publish_mock):
+        """GET supports text/x-org output."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "memorize:get":
+                return [(True, "abc123")]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/", as_org=True)
+        self.assertEqual(response.code, 200)
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_all_apps(self, publish_mock):
+        """If the first URL path segment is "all", the output includes all
+        apps, not just the ones meant for display on the homepage."""
+
+        def side_effect(*args, **_):
+            """Side effects local function"""
+            if args[0] == "memorize:get":
+                return [(True, "abc123")]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request("/all", as_org=True)
+        self.assertIn("homepage", response.body)
+
+    @mock.patch("cherrypy.engine.publish")
     def test_valid_etag(self, publish_mock):
         """A valid etag produces a 304 response."""
 
@@ -110,19 +141,8 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", as_text=True)
         self.assertEqual(response.code, 406)
 
-    def test_empty_app_list(self):
-        """The empty-app cast is handled gracefully"""
-
-        controller = apps.homepage.main.Controller()
-
-        app_fixture = {}
-
-        result = controller.catalog_apps(app_fixture)
-
-        self.assertEqual(result, [])
-
     def test_app_without_docstring(self):
-        """An app controller with no module docstring is handled gracefully"""
+        """An app controller with no module docstring is handled gracefully."""
 
         target = apps.homepage.main.Controller()
 
@@ -130,7 +150,8 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         result = target.catalog_apps({"/fake_app": fake_controller})
 
-        self.assertEqual(len(result), 1)
+        # The homepage app is always included.
+        self.assertEqual(len(result), 2)
 
 
 if __name__ == "__main__":
