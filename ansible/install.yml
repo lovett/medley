@@ -5,6 +5,196 @@
     project_user: "{{ project_name }}"
     project_group: "{{ project_name }}"
     project_root: /srv/{{ project_name }}
-  roles:
-      - system
-      - application
+
+  tasks:
+    - name: Create application group
+      become: true
+      group:
+        state=present
+        name="{{ project_group }}"
+      tags:
+        - firstrun
+
+    - name: Create application user
+      become: true
+      user:
+        state=present
+        name="{{ project_user }}"
+        home="{{ project_root }}"
+        createhome=no
+        system=yes
+        append=yes
+        groups="{{ project_user }},audio"
+      tags:
+        - firstrun
+
+    - name: Set application user groups
+      become: true
+      user:
+        name="{{ ansible_user }}"
+        group="{{ item }}"
+        append=yes
+      with_items:
+        - "{{ project_user }}"
+        - "systemd-journal"
+      tags:
+        - firstrun
+
+    - name: Create application directories
+      become: true
+      file:
+        path="{{ item }}"
+        state=directory
+        owner="{{ project_user }}"
+        group="{{ project_group }}"
+        mode=0775
+      with_items:
+        - /var/medley
+        - /var/medley/storage
+      tags:
+        - firstrun
+
+    - name: Install system packages
+      become: true
+      apt:
+        name:
+          - alsa-utils
+          - python3
+          - python3-pip
+          - python3-venv
+          - make
+          - nginx-light
+          - rsync
+        state: latest
+      tags:
+        - firstrun
+
+    # The rsync_opts parameter is specified to give special treatment to
+    # files that would otherwise be subject to unwanted removal due to use
+    # of the delete paramter. Although most exclusions are specifed in
+    # .rsync-filter at the application root, the requirements files and
+    # the virtualenv need to be handled as "exclude without delete"
+    # instead of "exlude and delete" like everything else.
+    - name: Rsync application files
+      become: true
+      synchronize:
+        src: "../../"
+        dest: "{{ project_root }}"
+        delete: true
+        recursive: true
+        rsync_opts:
+          - "--exclude=venv"
+          - "--exclude=.cache"
+          - "--exclude=requirements.txt"
+
+    # The shell module is used to create the virtualenv for simplicity.
+    # The pip module could do it, but needs a virtualenv executable which
+    # the Debian python3-virtualenv package somehow doesn't provide. All
+    # of which is a lot of fuss for what could otherwise be a one-liner.
+    - name: Create python3 virtualenv
+      shell: "python3 -m venv {{ project_root }}/venv"
+      args:
+        creates: "{{ project_root }}/venv"
+      become: true
+      register: venv
+      tags:
+        - firstrun
+
+    - name: Install main requirements file
+      become: true
+      copy:
+        src: "../requirements.txt"
+        dest: "{{ project_root }}/requirements.txt"
+
+    - name: Install python application packages
+      become: true
+      become_user: "{{ project_user }}"
+      pip:
+        extra_args: "--disable-pip-version-check"
+        requirements: "{{ project_root }}/requirements.txt"
+        virtualenv: "{{ project_root }}/venv"
+
+    - name: Set permissions on application root
+      become: true
+      file:
+        path: "{{ project_root }}"
+        recurse: yes
+        owner: "{{ project_user }}"
+        group: "{{ project_group }}"
+
+    - name: Install nginx vhost
+      become: true
+      template:
+        src: "templates/medley-vhost.j2"
+        dest: "/etc/nginx/sites-available/medley"
+      notify: Restart Nginx
+
+    - name: Symlink nginx vhost
+      become: true
+      file:
+        src: "/etc/nginx/sites-available/medley"
+        dest: "/etc/nginx/sites-enabled/medley"
+        state: link
+
+    - name: Install primary systemd service
+      become: true
+      template:
+        src: "templates/medley.service.j2"
+        dest: "/etc/systemd/system/medley.service"
+
+    - name: Install systemd failure service
+      become: true
+      template:
+        src: "templates/medley-failure@.service.j2"
+        dest: "/etc/systemd/system/medley-failure@.service"
+
+    - name: Install supplemental systemd services
+      become: true
+      copy: src={{ item }} dest=/etc/systemd/system/
+      with_items:
+        - files/medley-geodb.service
+        - files/medley-geodb.timer
+        - files/medley-db-maintenance.service
+        - files/medley-db-maintenance.timer
+        - files/medley-headlines.service
+        - files/medley-headlines.timer
+        - files/medley-bucketpull.service
+        - files/medley-bucketpull.timer
+
+    - name: Enable medley systemd service
+      become: true
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        masked: no
+        name: medley
+        state: restarted
+
+    - name: Enable medley systemd timers
+      become: true
+      systemd:
+        daemon_reload: yes
+        enabled: yes
+        masked: no
+        name: "{{ item }}"
+        state: started
+      with_items:
+        - medley-geodb.timer
+        - medley-db-maintenance.timer
+        - medley-headlines.timer
+        - medley-bucketpull.timer
+
+    - name: Check server availability
+      uri:
+        url: "http://localhost:8085/"
+        status_code: 200
+      register: this
+      until: this.status == 200
+      retries: 6
+      delay: 10
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
