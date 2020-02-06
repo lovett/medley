@@ -88,3 +88,24 @@ GET: the file path is provided on the URL.
 #+BEGIN_SRC sh :wrap EXPORT html
 curl -i -X PUT -d" " "$host/lintable/apps/lintable/main.py"
 #+END_SRC
+* Logindex
+** POST bucket
+Ask the server to ingest an hourly log file downloaded from a GCP
+storage bucket.
+
+#+NAME: logindex_post_bucket
+#+BEGIN_SRC sh :wrap EXPORT http
+DATE=$(date +"%Y/%m/%d")
+FILE="appengine.googleapis.com/request_log/$DATE/01:00:00_01:59:59_S0.json"
+curl -i -d "path=$FILE" "$host/logindex/bucket/gcp/appengine"
+#+END_SRC
+
+** POST date
+Ask the server to ingest one or more log files by date.
+
+#+NAME: logindex_post_date
+#+BEGIN_SRC sh :wrap EXPORT http
+YESTERDAY=$(date --date yesterday +"%Y-%m-%d")
+TODAY=$(date +"%Y-%m-%d")
+curl -i -d "start=$YESTERDAY" -d "end=$TODAY" "$host/logindex"
+#+END_SRC
