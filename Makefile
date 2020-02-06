@@ -318,17 +318,6 @@ favicon: dummy
 	cd apps/shared/static && optipng -quiet -o 3 *.png
 
 
-# Automation for merging changes from the master branch into the
-# production branch.
-master-to-production: dummy
-	git checkout master
-	git push
-	git checkout production
-	git merge master
-	git push
-	git checkout master
-
-
 # Automation for setting up a tmux session
 workspace:
 # 0: Editor
