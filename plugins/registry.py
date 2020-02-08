@@ -36,6 +36,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:find", self.find)
+        self.bus.subscribe("registry:find:key", self.find_key)
         self.bus.subscribe("registry:first:key", self.first_key)
         self.bus.subscribe("registry:first:value", self.first_value)
         self.bus.subscribe("registry:keys", self.keys)
@@ -57,10 +58,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (uid,)
         )
 
+    def find_key(self, key: str) -> typing.Optional[sqlite3.Row]:
+        """Select a single record by its key."""
+
+        return self._selectOne(
+            """SELECT rowid, key, value, created as 'created [datetime]'
+            FROM registry
+            WHERE key=?""",
+            (key,)
+        )
+
     def add(
             self,
             key: str,
-            values: typing.Iterable[typing.Any] = (),
+            values: typing.Iterable[typing.Any],
             replace: bool = False
     ) -> bool:
         """Add one or more values for the given key, optionally deleting any

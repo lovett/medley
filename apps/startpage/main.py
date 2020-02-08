@@ -1,5 +1,6 @@
 """A page of links for use as a web browser homepage."""
 
+from textwrap import dedent
 import cherrypy
 from parsers.startpage import Parser
 
@@ -13,53 +14,38 @@ class Controller:
     default_page_name = "default"
 
     @staticmethod
-    def registry_key(page_name):
-        """Format the name of a page as a registry key."""
-        return f"startpage:{page_name}"
-
-    @staticmethod
     def new_page_template():
         """The default page content for new pages demonstrating sample
         syntax.
 
         """
 
-        return "\n".join((
-            "[section1]",
-            "http://example.com = Example",
-            "http://example.net = +Continuation"
-            "\n",
-            "[section2]"
-        ))
+        return dedent("""
+        [section1]
+        http://example.com = Example
+        http://example.net = +Continuation
 
-    def edit_page(self, page_name="", page_content=None):
+        [section2]
+        """)
+
+    def edit_page(self, page_name, page_content=None):
         """Present a form for editing the contents of a page."""
 
-        if page_content:
-            is_new_page = False
-        else:
-            is_new_page = True
-            registry_key = self.registry_key("template")
-            page_content = cherrypy.engine.publish(
-                "registry:first:value",
-                registry_key
-            ).pop()
+        post_url = cherrypy.engine.publish(
+            "url:internal"
+        ).pop()
 
-        post_url = cherrypy.engine.publish("url:internal").pop()
+        cancel_url = cherrypy.engine.publish(
+            "url:internal",
+            page_name,
+        ).pop()
 
-        if is_new_page:
+        button_label = "Update"
+
+        if not page_content:
+            page_content = self.new_page_template()
             button_label = "Create"
-        else:
-            button_label = "Update"
-
-        if is_new_page:
             cancel_url = post_url
-        else:
-            cancel_url = cherrypy.engine.publish(
-                "url:internal",
-                page_name,
-                trailing_slash=(page_name is None)
-            ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -67,7 +53,7 @@ class Controller:
             button_label=button_label,
             cancel_url=cancel_url,
             page_name=page_name,
-            page_content=page_content or self.new_page_template(),
+            page_content=page_content,
             post_url=post_url,
         ).pop()
 
@@ -93,8 +79,7 @@ class Controller:
 
         edit_url = cherrypy.engine.publish(
             "url:internal",
-            page_name,
-            {"action": "edit"},
+            f"{page_name}/edit",
             trailing_slash=(page_name is None)
         ).pop()
 
@@ -108,66 +93,44 @@ class Controller:
         ).pop()
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **kwargs) -> bytes:
+    @cherrypy.tools.etag()
+    def GET(self, *args, **_kwargs) -> bytes:
         """Render a page or present the edit form."""
 
-        page_name = None
-        if args:
+        page_name = self.default_page_name
+        if len(args) > 0:
             page_name = args[0]
 
-        action = kwargs.get('action', 'view')
+        action = "view"
+        if len(args) > 1:
+            action = args[1]
 
-        # Display an alternate template after a page has been edited
-        # to remove the newly-stale page from the client's cache.
-        if action == "updated":
-            page_url = cherrypy.engine.publish(
-                "url:internal",
-                page_name,
-                trailing_slash=(page_name is None)
-            ).pop()
-
-            return cherrypy.engine.publish(
-                "jinja:render",
-                "postedit.jinja.html",
-                page_url=page_url
-            ).pop()
-
-        # Prevent the default page name from being exposed. This is
-        # only case where the canonical URL needs special
-        # consideration.
-        if page_name == self.default_page_name:
-            redirect_url = cherrypy.engine.publish(
-                "url:internal",
-                None,
-            ).pop()
-
-            raise cherrypy.HTTPRedirect(redirect_url)
-
-        record = cherrypy.engine.publish(
-            "registry:search",
-            self.registry_key(page_name or self.default_page_name),
-            exact=True,
-            limit=1
+        page = cherrypy.engine.publish(
+            "registry:find:key",
+            f"startpage:{page_name}"
         ).pop()
 
-        # Redirect to the edit form when a non-existent page is requested.
-        if not action == "edit" and not record:
-            redirect_url = cherrypy.engine.publish(
-                "url:internal",
-                page_name,
-                {"action": "edit"}
-            ).pop()
+        if not page:
+            if action == "view":
+                # Redirect to the edit form when a non-existent page
+                # is requested.
+                redirect_url = cherrypy.engine.publish(
+                    "url:internal",
+                    f"{page_name}/edit"
+                ).pop()
 
-            raise cherrypy.HTTPRedirect(redirect_url)
+                raise cherrypy.HTTPRedirect(redirect_url)
 
-        # Display the edit form with a starter template when editing a
-        # non-existent page.
-        if action == "edit" and not record:
-            return self.edit_page(page_name, None)
+            if action == "edit":
+                # Display the edit form with a starter template when
+                # creating a new page.
+                return self.edit_page(page_name)
 
-        # Display the edit form with the existing page.
-        page = record[0]
+            raise cherrypy.HTTPError(404)
+
         if action == "edit":
+            # Display the edit form with the current content when
+            # updating an existing page.
             return self.edit_page(page_name, page["value"])
 
         # Render the page
@@ -176,27 +139,20 @@ class Controller:
     def POST(self, page_name, page_content) -> None:
         """Create or update the INI version of a page."""
 
-        registry_key = self.registry_key(
-            page_name or self.default_page_name
-        )
-
         cherrypy.engine.publish(
             "registry:add",
-            registry_key,
+            f"startpage:{page_name}",
             [page_content],
             replace=True
         )
 
-        cherrypy.engine.publish(
-            "memorize:clear",
-            self.registry_key(page_name)
-        )
+        redirect_path = None
+        if page_name != self.default_page_name:
+            redirect_path = page_name
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
-            page_name,
-            {"action": "updated"},
-            trailing_slash=(page_name is None)
+            redirect_path
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
