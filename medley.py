@@ -83,7 +83,6 @@ def setup() -> None:
         "server.socket_port": 8085,
         "server_root": server_root,
         "tools.encode.on": False,
-        "use_service_workers": True,
 
         # Gzipping locally avoids Etag complexity. If a reverse
         # proxy handles it, the Etag could be dropped.
@@ -143,7 +142,7 @@ def setup() -> None:
 
         # The homepage app is unique. Its app name is not its url, and
         # its static path is not under its app path. It also has additional
-        # configuration for serving the favicon and service worker.
+        # configuration for serving the favicon.
         app_path = f"/{app}"
         static_url = "/static"
         if app == "homepage":
@@ -154,13 +153,6 @@ def setup() -> None:
                 "tools.staticfile.on": True,
                 "tools.staticfile.filename": os.path.realpath(
                     "./apps/shared/static/favicon.ico"
-                ),
-            }
-
-            app_config["/worker.js"] = {
-                "tools.staticfile.on": True,
-                "tools.staticfile.filename": os.path.realpath(
-                    "./apps/shared/static/js/worker.js"
                 ),
             }
 

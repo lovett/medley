@@ -1,6 +1,5 @@
 """A page of links for use as a web browser homepage."""
 
-import os
 import cherrypy
 from parsers.startpage import Parser
 
@@ -99,44 +98,14 @@ class Controller:
             trailing_slash=(page_name is None)
         ).pop()
 
-        # This URL differs from the physical location of the file so
-        # that the worker's scope applies to the whole application,
-        # not just the static directory.
-        worker_url = cherrypy.engine.publish(
-            "url:internal",
-            "worker.js"
-        ).pop()
-
         return cherrypy.engine.publish(
             "jinja:render",
             "startpage.jinja.html",
             created=page_record["created"],
             anonymizer_url=anonymizer_url,
             edit_url=edit_url,
-            page=page,
-            worker_url=worker_url
+            page=page
         ).pop()
-
-    @staticmethod
-    def render_worker():
-        """Serve the service worker from an alternate path.
-
-        Serving the worker from the base URL of the app gives it
-        app-wide scope. If its URL reflected its actual location
-        within the static folder, it would only be able to manage
-        resources in that folder.
-
-        """
-
-        file_path = os.path.join(
-            os.path.dirname(__file__),
-            "static/worker.js"
-        )
-
-        return cherrypy.lib.static.serve_file(
-            file_path,
-            content_type="application/javascript"
-        )
 
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args, **kwargs) -> bytes:
@@ -147,27 +116,6 @@ class Controller:
             page_name = args[0]
 
         action = kwargs.get('action', 'view')
-
-        # Require a trailing slash for the default page.
-        #
-        # This is for the benefit of the service worker, whose scope
-        # is the app root. Without a trailing slash, the worker thinks
-        # the app is a standalone page under the site root and out of
-        # scope. With a trailing slash, the worker sees the app root
-        # as a proper sub-directory.
-        if action == "view":
-            if page_name is None and cherrypy.request.path_info != "/":
-                redirect_url = cherrypy.engine.publish(
-                    "url:internal",
-                    None,
-                    trailing_slash=True
-                ).pop()
-                raise cherrypy.HTTPRedirect(redirect_url)
-
-        # Give the service worker an application-root URI so that
-        # pages are within its scope.
-        if page_name == "worker.js":
-            return self.render_worker()
 
         # Display an alternate template after a page has been edited
         # to remove the newly-stale page from the client's cache.

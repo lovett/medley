@@ -48,17 +48,6 @@
 
         {{ macros.staticAsset('shared', 'js/medley.js') }}
 
-        {% if use_service_workers -%}
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/worker.js').then(registration => {
-                    console.info(`Service worker registered with scope ${registration.scope}`);
-                }).catch(error => console.error(error));
-            } else {
-                console.info('Service workers are not supported here.');
-            }
-        </script>
-        {%- endif %}
         {% block scripts %}{% endblock %}
     </body>
 </html>

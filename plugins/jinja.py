@@ -100,8 +100,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if data["app_url"]:
             data["app_url"] = data["app_url"].pop()
 
-        data["use_service_workers"] = cherrypy.config.get("service_workers")
-
         content_type = f"text/html;charset=utf-8"
         cherrypy.response.headers["Content-Type"] = content_type
 
