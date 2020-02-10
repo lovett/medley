@@ -24,22 +24,16 @@ class Tool(cherrypy.Tool):
         )
 
     @staticmethod
-    def request_url() -> str:
-        """The URL of the request currently being served."""
-        return cherrypy.request.app.script_name or "/"
-
-    def request_key(self) -> str:
-        """The cache key corresponding to the currently URL."""
-
-        url = self.request_url()
-        return f"etag:{url}"
-
-    def check_header(self) -> None:
+    def check_header() -> None:
         """Decide if the If-None-Match header is a valid ETag."""
+
+        url = cherrypy.engine.publish(
+            "url:current"
+        ).pop()
 
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            self.request_key()
+            f"etag:{url}"
         ).pop()
 
         if not cache_hit:
@@ -50,7 +44,8 @@ class Tool(cherrypy.Tool):
         if cache_value == if_none_match:
             raise cherrypy.HTTPRedirect(None, 304)
 
-    def set_header(self) -> None:
+    @staticmethod
+    def set_header() -> None:
         """Add an ETag header to the outgoing response.
 
         This happens during the before_finalize hook point, so the
@@ -67,12 +62,16 @@ class Tool(cherrypy.Tool):
         if not success:
             return
 
+        url = cherrypy.engine.publish(
+            "url:current"
+        ).pop()
+
         # There may not have been an If-None-Match on this request,
         # but maybe there was one in a previous request. Don't
         # generate the hash unnecessarily.
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            self.request_key()
+            f"etag:{url}"
         ).pop()
 
         if cache_hit:
@@ -86,7 +85,7 @@ class Tool(cherrypy.Tool):
 
         cherrypy.engine.publish(
             "memorize:set",
-            self.request_key(),
+            f"etag:{url}",
             content_hash
         )
 

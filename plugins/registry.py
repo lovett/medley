@@ -91,10 +91,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if replace:
             self.remove_key(key)
 
-        return self._insert(
+        result = self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
             [(key, value) for value in clean_values]
         )
+
+        if result:
+            cherrypy.engine.publish("registry:added", key)
+
+        return result
 
     def search(
             self,
@@ -213,15 +218,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("memorize:clear", key)
         deletions = self._delete("DELETE FROM registry WHERE key=?", (key,))
 
+        cherrypy.engine.publish("registry:removed", key)
+
         return deletions
 
-    def remove_id(self, rowid: int) -> int:
+    def remove_id(self, rowid: str) -> int:
         """Delete a record by unique id (sqlite rowid)."""
+
+        row = self.find(rowid)
+
+        if not row:
+            return 0
 
         deletions = self._delete(
             "DELETE FROM registry WHERE rowid=?",
             (rowid,)
         )
+
+        cherrypy.engine.publish("registry:removed", row["key"])
 
         return deletions
 

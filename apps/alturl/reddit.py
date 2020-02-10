@@ -11,15 +11,30 @@ ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 def view(url: str) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
+    json_url = f"https://{url}/.json"
+    app_url = cherrypy.engine.publish(
+        "url:internal",
+        url
+    ).pop()
+
+    cache_lifespan = 900
+
     response = cherrypy.engine.publish(
         "urlfetch:get",
-        f"https://{url}/.json",
+        json_url,
         as_json=True,
-        cache_lifespan=900
+        cache_lifespan=cache_lifespan
     ).pop()
 
     if not response:
         return unavailable()
+
+    cherrypy.engine.publish(
+        "scheduler:add",
+        cache_lifespan,
+        "memorize:clear",
+        f"etag:{app_url}"
+    )
 
     match = re.search(
         "/r/(?P<subreddit>[^/]+)/?(?P<comments>comments)?",

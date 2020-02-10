@@ -17,12 +17,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the url prefix.
         """
+        self.bus.subscribe("url:current", self.current_url)
         self.bus.subscribe("url:internal", self.internal_url)
         self.bus.subscribe("url:alt", self.alt_url)
         self.bus.subscribe("url:readable", self.readable_url)
         self.bus.subscribe(
             "url:paginate:newer_older",
             self.paginate_newer_older
+        )
+
+    def current_url(self) -> str:
+        """The URL of the request currently being served."""
+        return self.internal_url(
+            cherrypy.request.app.script_name or "/"
         )
 
     @staticmethod

@@ -11,8 +11,28 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    def __init__(self):
+        cherrypy.engine.subscribe("registry:added", self.on_registry_changed)
+        cherrypy.engine.subscribe("registry:removed", self.on_registry_changed)
+
+    @staticmethod
+    def on_registry_changed(key):
+        """Clear the cached etag if a URL has been bookmarked."""
+
+        if key == "alturl:bookmark":
+            index_url = cherrypy.engine.publish(
+                "url:internal",
+                "/alturl"
+            ).pop()
+
+            cherrypy.engine.publish(
+                "memorize:clear",
+                f"etag:{index_url}"
+            )
+
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
+    @cherrypy.tools.etag()
     def GET(*args, **_kwargs) -> bytes:
         """Dispatch to a site-specific handler."""
 
