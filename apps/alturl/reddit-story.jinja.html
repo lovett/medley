@@ -50,8 +50,8 @@
 
         <span class="info">
             <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-            <a target="_blank" rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit }}">
-                r/{{ story.subreddit }}
+            <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
+                r/{{ story.subreddit|lower }}
             </a>
         </span>
 
@@ -76,7 +76,7 @@
     <div>
         <a href="{{ subreddit_alturl }}">
             <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            r/{{ story.subreddit}}
+            r/{{ story.subreddit|lower}}
         </a>
     </div>
 {% endblock %}

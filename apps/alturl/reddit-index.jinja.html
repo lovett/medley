@@ -13,8 +13,8 @@
             {% if "r/" not in url %}
             <span class="info">
                 <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                <a href="{{ app_url }}/reddit.com/r/{{ story.subreddit }}">
-                        r/{{ story.subreddit }}
+                <a href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
+                        r/{{ story.subreddit|lower }}
                 </a>
             </span>
             {% endif %}

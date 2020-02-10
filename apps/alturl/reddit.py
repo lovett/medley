@@ -95,7 +95,7 @@ def view_story(response: typing.Any) -> ViewAndData:
 
     subreddit_alturl = cherrypy.engine.publish(
         "url:internal",
-        f"reddit.com/r/{story.get('subreddit')}"
+        f"reddit.com/r/{story.get('subreddit').lower()}"
     ).pop()
 
     return ("reddit-story.jinja.html", {
