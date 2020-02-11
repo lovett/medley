@@ -1,7 +1,0 @@
-# -*- restclient -*-
-
-POST http://127.0.0.1:8085/speak
-Content-Type: application/x-www-form-urlencoded
-
-statement=hello+world
-#
