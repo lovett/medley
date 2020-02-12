@@ -73,6 +73,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
         self.env.filters["unescape"] = self.unescape_filter
         self.env.filters["internal_url"] = self.internal_url_filter
+        self.env.filters["clean_html"] = self.clean_html
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -499,3 +500,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return jinja2.Markup(url)
 
         return url
+
+    @staticmethod
+    @jinja2.contextfilter
+    def clean_html(
+            context: jinja2.runtime.Context,
+            value: str
+    ) -> str:
+        """Remove undesirable markup."""
+
+        replacements = (
+            ("<p>&#x200B;</p>", ""),
+        )
+
+        result = jinja2.Markup(value).unescape()
+
+        for before, after in replacements:
+            result = result.replace(before, after)
+
+        if context.eval_ctx.autoescape:
+            return jinja2.Markup(result)
+
+        return result
