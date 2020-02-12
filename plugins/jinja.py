@@ -73,7 +73,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
         self.env.filters["unescape"] = self.unescape_filter
         self.env.filters["internal_url"] = self.internal_url_filter
-        self.env.filters["clean_html"] = self.clean_html
+        self.env.filters["better_html"] = self.better_html
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -503,14 +503,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.contextfilter
-    def clean_html(
+    def better_html(
             context: jinja2.runtime.Context,
             value: str
     ) -> str:
         """Remove undesirable markup."""
 
+        alturl_base = cherrypy.engine.publish(
+            "url:internal",
+            "/alturl"
+        ).pop()
+
         replacements = (
             ("<p>&#x200B;</p>", ""),
+            ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/')
         )
 
         result = jinja2.Markup(value).unescape()
