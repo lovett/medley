@@ -1,4 +1,4 @@
-"""Generate MD5 hashes."""
+"""Generate hashes of values and files."""
 
 import hashlib
 import typing
@@ -22,10 +22,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def hash_value(
-            value: str,
-            algorithm: str = "sha256",
-            hex_digest: bool = True
-    ) -> typing.Union[str, bytes]:
+            value: typing.Union[str, bytes],
+            algorithm: str = "sha256"
+    ) -> str:
         """Calculate the hash of a value."""
 
         hasher = hashlib.new(algorithm)
@@ -35,25 +34,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         else:
             hasher.update(value.encode())
 
-        if hex_digest:
-            return hasher.hexdigest()
-
-        return hasher.digest()
+        return hasher.hexdigest()
 
     @staticmethod
     def hash_file(
             path: str,
             algorithm: str = "sha256",
-            hex_digest: bool = True
-    ) -> typing.Union[str, bytes]:
+            memorize: bool = True
+    ) -> str:
         """Calculate the hash of a file."""
+
+        _, memorized_value = cherrypy.engine.publish(
+            "memorize:get",
+            f"{algorithm}:{path}"
+        ).pop()
+
+        if memorized_value:
+            return typing.cast(str, memorized_value)
 
         hasher = hashlib.new(algorithm)
 
-        with open(path, "rb") as file_handle:
-            hasher.update(file_handle.read())
+        with open(path, "rb") as handle:
+            for line in handle:
+                hasher.update(line)
 
-        if hex_digest:
-            return hasher.hexdigest()
+        if memorize and cherrypy.config.get("memorize_hashes"):
+            cherrypy.engine.publish(
+                "memorize:set",
+                f"{algorithm}:{path}",
+                hasher.hexdigest()
+            )
 
-        return hasher.digest()
+        return hasher.hexdigest()
