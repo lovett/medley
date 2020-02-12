@@ -262,7 +262,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ssml_string = self.ssml(adjusted_statement, locale, gender)
 
         hash_digest = cherrypy.engine.publish(
-            "hasher:sha256",
+            "hasher:value",
             ssml_string
         ).pop()
 

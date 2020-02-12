@@ -79,7 +79,7 @@ class Tool(cherrypy.Tool):
             return
 
         content_hash = cherrypy.engine.publish(
-            "hasher:md5",
+            "hasher:value",
             cherrypy.response.collapse_body()
         ).pop()
 

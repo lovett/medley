@@ -305,10 +305,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 if not line:
                     break
 
+                line_hash = cherrypy.engine.publish(
+                    "hasher:value",
+                    line,
+                    algorithm="md5"
+                ).pop()
+
                 values = (
                     self.file_path_to_source(file_path),
                     offset,
-                    cherrypy.engine.publish("hasher:md5", line).pop(),
+                    line_hash,
                     line
                 )
 

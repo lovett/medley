@@ -22,7 +22,6 @@ import plugins.bookmarks
 import plugins.cache
 import plugins.capture
 import plugins.cdr
-import plugins.checksum
 import plugins.converters
 import plugins.decorators
 import plugins.formatting
@@ -76,7 +75,7 @@ def setup() -> None:
         "log.screen_access": False,
         "log.access_file": "",
         "log.error_file": "",
-        "memorize_checksums": True,
+        "memorize_hashes": True,
         "request.show_tracebacks": False,
         "server.daemonize": False,
         "server.socket_host": "127.0.0.1",
@@ -186,7 +185,6 @@ def setup() -> None:
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.capture.Plugin(cherrypy.engine).subscribe()
     plugins.cdr.Plugin(cherrypy.engine).subscribe()
-    plugins.checksum.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.gcp_appengine.Plugin(cherrypy.engine).subscribe()

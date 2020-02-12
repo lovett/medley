@@ -17,30 +17,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the hasher prefix.
         """
 
-        self.bus.subscribe("hasher:md5", self.md5_hash)
-        self.bus.subscribe("hasher:sha256", self.sha256_hash)
-
-    def md5_hash(self, value: str, hex_digest: bool = True) -> str:
-        """Calculate the MD5 digest of a value."""
-        return typing.cast(
-            str,
-            self._hash('md5', value, hex_digest)
-        )
-
-    def sha256_hash(self, value: str, hex_digest: bool = True) -> str:
-        """Calculate the SHA256 digest of a value."""
-        return typing.cast(
-            str,
-            self._hash('sha256', value, hex_digest)
-        )
+        self.bus.subscribe("hasher:value", self.hash_value)
+        self.bus.subscribe("hasher:file", self.hash_file)
 
     @staticmethod
-    def _hash(
-            algorithm: str,
+    def hash_value(
             value: str,
+            algorithm: str = "sha256",
             hex_digest: bool = True
     ) -> typing.Union[str, bytes]:
-        """Calculate the digest of a value using the specified algorithm."""
+        """Calculate the hash of a value."""
 
         hasher = hashlib.new(algorithm)
 
@@ -48,6 +34,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             hasher.update(value)
         else:
             hasher.update(value.encode())
+
+        if hex_digest:
+            return hasher.hexdigest()
+
+        return hasher.digest()
+
+    @staticmethod
+    def hash_file(
+            path: str,
+            algorithm: str = "sha256",
+            hex_digest: bool = True
+    ) -> typing.Union[str, bytes]:
+        """Calculate the hash of a file."""
+
+        hasher = hashlib.new(algorithm)
+
+        with open(path, "rb") as file_handle:
+            hasher.update(file_handle.read())
 
         if hex_digest:
             return hasher.hexdigest()

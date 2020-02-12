@@ -19,17 +19,17 @@ class Controller:
         if not os.path.exists(target_path):
             raise cherrypy.HTTPError(404)
 
-        current_checksum = cherrypy.engine.publish(
-            "checksum:file",
+        current_hash = cherrypy.engine.publish(
+            "hasher:file",
             target_path
         ).pop()
 
-        stored_checksum = cherrypy.engine.publish(
+        stored_hash = cherrypy.engine.publish(
             "cache:get",
             f"lintable:{target_path}"
         ).pop()
 
-        if current_checksum == stored_checksum:
+        if current_hash == stored_hash:
             return "no".encode()
 
         return "yes".encode()
@@ -42,15 +42,15 @@ class Controller:
         if not os.path.exists(target_path):
             raise cherrypy.HTTPError(400)
 
-        current_checksum = cherrypy.engine.publish(
-            "checksum:file",
+        current_hash = cherrypy.engine.publish(
+            "hasher:file",
             target_path
         ).pop()
 
         cherrypy.engine.publish(
             "cache:set",
             f"lintable:{target_path}",
-            current_checksum,
+            current_hash,
             86400 * 365
         )
 

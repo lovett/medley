@@ -343,11 +343,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         abs_path = cherrypy.config.get("app_root") + url
 
-        try:
-            checksum = cherrypy.engine.publish("checksum:file", abs_path).pop()
-        except IndexError:
-            checksum = ""
-        return f"{url}?{checksum}"
+        file_hash = cherrypy.engine.publish("hasher:file", abs_path).pop()
+
+        return f"{url}?{file_hash}"
 
     @staticmethod
     @jinja2.contextfilter

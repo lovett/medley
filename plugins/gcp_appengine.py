@@ -175,8 +175,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 record_hash = payload.get("traceId")
                 if not record_hash:
                     record_hash = cherrypy.engine.publish(
-                        "hasher:md5",
-                        line
+                        "hasher:value",
+                        line,
+                        algorithm="md5"
                     ).pop()
 
                 batch.append((

@@ -62,7 +62,7 @@ tty running the server process. Default: `True`
 `MEDLEY__log__screen_access`: Whether access logs should be written to stdout
 when `log.screen` is enabled. Default: `False`
 
-`MEDLEY__memorize_checksums`: Whether the server should keep static asset file
+`MEDLEY__memorize_hashes`: Whether the server should keep static asset file
 hashes in memory for use with HTTP cache control. Useful in production
 but counterproductive in development. Default: `True`
 
