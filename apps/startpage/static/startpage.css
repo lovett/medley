@@ -30,7 +30,6 @@ section:last-of-type li:last-of-type {
 }
 
 section a {
-    padding: .25em;
     color: var(--alert);
 }
 
@@ -40,6 +39,8 @@ section a:focus {
     color: var(--white);
     border-bottom-color: transparent;
     text-decoration: none;
+    padding: .25em;
+
 }
 
 section h1 {
