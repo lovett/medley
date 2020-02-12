@@ -30,15 +30,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> typing.Tuple[bool, str]:
         """Retrieve a value from the cache."""
 
+        lowercase_key = key.lower()
         return (
-            key in self.cache,
-            self.cache.get(key, default)
+            lowercase_key in self.cache,
+            self.cache.get(lowercase_key, default)
         )
 
     def set(self, key: str, value: typing.Any) -> None:
         """Store a value in the cache."""
-        self.cache[key] = value
+        lowercase_key = key.lower()
+
+        self.cache[lowercase_key] = value
 
     def clear(self, key: str) -> None:
         """Remove a value from the cache."""
-        self.cache.pop(key, None)
+
+        lowercase_key = key.lower()
+
+        self.cache.pop(lowercase_key, None)

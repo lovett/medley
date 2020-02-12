@@ -28,8 +28,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def current_url(self) -> str:
         """The URL of the request currently being served."""
+
         return self.internal_url(
-            cherrypy.request.app.script_name or "/"
+            cherrypy.request.script_name +
+            cherrypy.request.path_info,
+            cherrypy.request.params
         )
 
     @staticmethod
