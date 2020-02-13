@@ -109,6 +109,15 @@ YESTERDAY=$(date --date yesterday +"%Y-%m-%d")
 TODAY=$(date +"%Y-%m-%d")
 curl -i -d "start=$YESTERDAY" -d "end=$TODAY" "$host/logindex"
 #+END_SRC
+* Maintenance
+** POST
+Start maintenance tasks.
+
+#+NAME: maintenance_post
+#+BEGIN_SRC sh :wrap export http
+curl -i -d "group=db" "$host/maintenance"
+#+END_SRC
+
 * Speak
 ** GET
 Display the current mute status.
