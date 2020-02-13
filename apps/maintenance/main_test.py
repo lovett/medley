@@ -73,12 +73,12 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         fs_response = self.request(
             "/",
             method="POST",
-            group="filesystem"
+            group="db"
         )
 
         self.assertEqual(fs_response.code, 204)
         publish_mock.assert_called_with(
-            "scheduler:add", 2, "maintenance:filesystem"
+            "scheduler:add", 2, "maintenance:db"
         )
 
 

@@ -21,9 +21,6 @@ class Controller:
         if group == "db":
             topic = "maintenance:db"
 
-        if group == "filesystem":
-            topic = "maintenance:filesystem"
-
         if not topic:
             raise cherrypy.HTTPError(400, "Invalid task group")
 
