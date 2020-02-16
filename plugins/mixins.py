@@ -84,18 +84,21 @@ class Sqlite:
             self,
             queries: typing.Sequence[typing.Tuple[str, typing.Any]]
     ) -> bool:
-        """Issue several queries."""
+        """Issue several queries within a transaction."""
 
         result = True
         con = self._open()
+        con.isolation_level = None
 
         try:
-            with con:
-                for query, params in queries:
-                    con.execute(query, params)
+            con.execute("BEGIN")
+            for query, params in queries:
+                con.execute(query, params)
+            con.execute("COMMIT")
         except sqlite3.DatabaseError as err:
             result = False
             self._logError(err)
+            con.execute("rollback")
         finally:
             con.close()
 
