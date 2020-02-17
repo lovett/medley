@@ -35,6 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("cache:prune")
         cherrypy.engine.publish("applog:prune")
         cherrypy.engine.publish("bookmarks:prune")
+        cherrypy.engine.publish("recipes:prune")
         cherrypy.engine.publish("bookmarks:repair")
         cherrypy.engine.publish("logindex:repair")
 

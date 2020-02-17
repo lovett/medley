@@ -118,6 +118,43 @@ Start maintenance tasks.
 curl -i -d "group=db" "$host/maintenance"
 #+END_SRC
 
+* Recipes
+** DELETE
+Mark a recipe for deletion.
+
+#+NAME: recipe_delete
+#+BEGIN_SRC sh :wrap export http
+curl -i -X DELETE "$host/recipes/1"
+#+END_SRC
+
+** GET
+Retrieve a single recipe, a list of a recipes with a given tag, or a
+list of tags.
+
+#+NAME: recipe_get_recipe
+#+BEGIN_SRC sh :wrap export http
+curl -i "$host/recipes/1"
+#+END_SRC
+
+#+NAME: recipe_get_tag
+#+BEGIN_SRC sh :wrap export http
+curl -i "$host/recipes/tag/one"
+#+END_SRC
+
+** POST
+Store a new recipe in the database or update an existing recipe.
+
+#+NAME: recipe_post_new
+#+BEGIN_SRC sh :wrap export http
+curl -i -d "title=My recipe" -d "url=http://example.com" -d "body=hello world" -d "tags=one,two,three" "$host/recipes"
+#+END_SRC
+
+#+NAME: recipe_post_update
+#+BEGIN_SRC sh :wrap export http
+curl -i -X PUT -d "title=Edited title" -d "url=http://example.com" -d "body=Edited body" -d "tags=one,nine,eight"  "$host/recipes/1"
+#+END_SRC
+
+
 * Speak
 ** GET
 Display the current mute status.

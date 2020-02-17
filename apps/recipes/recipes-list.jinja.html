@@ -1,0 +1,64 @@
+{% extends "recipes.jinja.html" %}
+
+{% block main_toolbar_links %}
+    <li>
+        <a href="{{ app_url }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            All tags
+        </a>
+    </li>
+{% endblock %}
+
+{% block scripts %}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("add-item", "arrow-left", "delete", "globe", "book", "search", "tag") }}
+
+    <main id="collection">
+        <header>
+            <h2>
+                {% if tag %}
+                    <svg class="icon"><use xlink:href="#icon-tag"></use></svg>{{ tag|capitalize }}
+                {% endif %}
+
+                {% if query %}
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>Search Results
+                {% endif %}
+            </h2>
+        </header>
+
+        {% set ns = namespace(recipes_found=False) %}
+        <ul>
+            {% for recipe in recipes %}
+                {% set ns.recipes_found = True %}
+                <discardable-record inline-template url="/recipes/{{ recipe["rowid"] }}">
+                    <li v-bind:style="styles">
+                        <div class="actions"><discard-button tooltip="Delete this recipe" /></div>
+                        <div>
+                            <p class="title">
+                                <a href="/recipes/{{ recipe["rowid"] }}">
+                                    {{ recipe["title"] }}
+                                </a>
+                            </p>
+                            <p class="tags">
+                                {% for tag in recipe["tags"] %}
+                                    <a href="/recipes/tag/{{ tag|urlencode }}">
+                                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                                        {{ tag }}
+                                    </a>
+                                {% endfor %}
+                            </p>
+                        </div>
+                    </li>
+                </discardable-record>
+            {% endfor %}
+        </ul>
+
+        {% if not ns.recipes_found %}
+            <p>No recipes found.</p>
+        {% endif %}
+    </main>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "recipes.jinja.html" %}
+
+{% block main_toolbar_links %}
+    <li>
+        <a href="/recipes/new">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            Add
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("add-item", "arrow-let", "tag") }}
+    <main id="tagset">
+        <header>
+            <h2>Tags</h2>
+        </header>
+
+        {% set ns = namespace(tags_found=False) %}
+        <ul>
+            {% for tag in tags %}
+                {% set ns.tags_found = True %}
+                <li>
+                    <a href="/recipes/tag/{{ tag["name"]|urlencode }}">
+                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                        {{ tag["name"] }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if not ns.tags_found %}
+            <p>No tags found.</p>
+        {% endif %}
+    </main>
+{% endblock %}

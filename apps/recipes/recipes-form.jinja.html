@@ -1,0 +1,64 @@
+{% extends "recipes.jinja.html" %}
+
+{% block main_toolbar_links %}
+    <li>
+        <a href="{{ cancel_url }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            Cancel
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("arrow-left") }}
+
+    <main id="editor">
+        <form method="post" action="{{ submit_url }}">
+            <div class="field">
+                <label for="title">Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value="{{ title|default('', true)|e }}"
+                    required
+                />
+            </div>
+            <div class="field-group">
+                <div class="field">
+                    <label for="tags">Tags</label>
+                    <input
+                        type="text"
+                        id="tags"
+                        name="tags"
+                        value="{{ ", ".join(tags)|e }}"
+                    />
+                </div>
+                <div class="field">
+                    <label for="url">URL</label>
+                    <input
+                        type="text"
+                        id="url"
+                        name="url"
+                        value="{{ url|default('', true)|e }}"
+                    />
+                </div>
+            </div>
+
+            <div class="field stretch">
+                <label for="body">Ingredients, Directions, and Notes</label>
+                <textarea
+                    id="body"
+                    name="body"
+                >{{ body }}</textarea>
+            </div>
+
+            <div class="field">
+                <button>Save</button>
+
+            </div>
+
+        </form>
+
+    </main>
+{% endblock %}

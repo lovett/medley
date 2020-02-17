@@ -1,0 +1,50 @@
+{% extends "recipes.jinja.html" %}
+
+{% block main_toolbar_links %}
+    <li>
+        <a href="/recipes">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            All tags
+        </a>
+    </li>
+    <li>
+        <a href="/recipes/{{ rowid }}/edit">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </li>
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("add-item", "arrow-left", "book", "calendar", "edit", "globe", "tag") }}
+
+    <main id="recipe" class="{% if ingredients %}with-ingredients{% endif %}">
+        <header>
+            <h2>{{ title }}</h2>
+
+            <ul>
+                {% for tag in tags %}
+                    <li>
+                        <a href="/recipes/tag/{{ tag|urlencode }}">
+                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                            {{ tag }}
+                        </a>
+                    </li>
+                {% endfor %}
+
+                <li>
+                    <time datetime="{{ updated|localtime }}">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        {{ display_date|localtime|dateformat("MMMM D, YYYY") }}
+                    </time>
+                </li>
+            </ul>
+        </header>
+
+        <section>
+            <div>{{ ingredients|safe }}</div>
+
+            <div>{{ body|safe }}</div>
+        </section>
+    </main>
+{% endblock %}

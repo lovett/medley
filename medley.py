@@ -40,6 +40,7 @@ import plugins.metrics
 import plugins.mixins
 import plugins.notifier
 import plugins.parse
+import plugins.recipes
 import plugins.registry
 import plugins.scheduler
 import plugins.speak
@@ -200,6 +201,7 @@ def setup() -> None:
     plugins.metrics.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.parse.Plugin(cherrypy.engine).subscribe()
+    plugins.recipes.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
