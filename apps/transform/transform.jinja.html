@@ -10,16 +10,15 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("copy") }}
+    {{ macros.svgSymbols("copy", "link") }}
     <main>
         <form method="post" action="/transform">
             <div class="field">
                 <label for="value">Input</label>
                 <textarea id="value" name="value">{{ value|default('', true) }}</textarea>
             </div>
-            <div class="field">
-                <p>Transformation</p>
 
+            <div class="field">
                 <div id="transformations" class="field">
                     {% for transform in transforms %}
                         <div class="transform">
@@ -43,14 +42,24 @@
         </form>
 
         {% if result %}
-            <section id="transform-result">
-                <header class="app-nav">
-                    <div class="actions">
-                        <div><clipboard-button target-id="copy-target" label="Copy" /></div>
-                    </div>
+            <div id="transform-result">
+                <header>
+                    <h2>Result</h2>
+                    <div><clipboard-button target-id="copy-target" label="Copy" /></div>
+                    {% if result.startswith("http") %}
+                        <div>
+                            <div class="action-button link-button">
+
+                                <a href="{{ result|anonymize}}" rel="noopener noreferrer">
+                                    <svg><use xlink:href="#icon-link"></use></svg>
+                                </a>
+                                <span class="label">Link</span>
+                            </div>
+                        </div>
+                    {% endif %}
                 </header>
                 <div id="copy-target">{{ result|escape() }}</div>
-            </section>
+            </div>
         {% endif %}
     </main>
 {% endblock %}

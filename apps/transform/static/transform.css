@@ -5,11 +5,29 @@ MAIN {
 }
 
 #transform-result {
-    flex-grow: 1;
-    background-color: var(--secondary);
-    margin: 1em -1em 0;
+    overflow-wrap: break-word;
+    background-color: var(--tertiary);
+    margin: 0 -1em -1em -1em;
     padding: 1em;
+    flex-grow: 1;
 }
+
+#transform-result header {
+    display: flex;
+    flex-flow: row;
+    margin: .5em 0;
+    align-items: center;
+}
+
+#transform-result header h2 {
+    margin-right: 3em;
+}
+
+
+#transform-result header > div {
+    margin-right: 2em;
+}
+
 
 #copy-target {
     white-space: pre-line;

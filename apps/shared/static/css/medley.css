@@ -422,6 +422,15 @@ TEXTAREA {
     color: var(--white);
 }
 
+.link-button a:hover {
+    fill: white;
+    background-color: var(--success);
+}
+
+.link-button a.clicked {
+    animation: clipboard-button .5s 1;
+}
+
 .notice {
     background-color: var(--secondary);
 }
