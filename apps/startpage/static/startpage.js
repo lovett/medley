@@ -3,8 +3,6 @@ MEDLEY.startpage = (function () {
 
     let anonymizerUrl = null;
     let pageLinks = [];
-    let offlineOnly = [];
-    let onlineOnly = []
 
     /**
      * Show the last-modified time of the data file as a date-and-time
@@ -76,32 +74,6 @@ MEDLEY.startpage = (function () {
         }
     }
 
-    /**
-     * Toggle element visibility when the page goes to the offline state.
-     */
-    function whenOffline() {
-        for (let i=0; i < onlineOnly.length; i++) {
-            onlineOnly[i].classList.add('hidden');
-        }
-
-        for (let i=0; i < offlineOnly.length; i++) {
-            offlineOnly[i].classList.remove('hidden');
-        }
-    }
-
-    /**
-     * Toggle element visibility when the page goes to the online stage.
-     */
-    function whenOnline() {
-        for (let i=0; i < onlineOnly.length; i++) {
-            onlineOnly[i].classList.remove('hidden');
-        }
-
-        for (let i=0; i < offlineOnly.length; i++) {
-            offlineOnly[i].classList.add('hidden');
-        }
-    }
-
     return {
         init: function () {
             displayLastModified();
@@ -145,16 +117,7 @@ MEDLEY.startpage = (function () {
                 }
             }
 
-            // Hide the edit link when offline
-            onlineOnly = document.querySelectorAll('.online-only');
-            offlineOnly = document.querySelectorAll('.offline-only');
-            if (navigator.onLine === false) {
-                whenOffline();
-            }
-
             document.addEventListener('click', openLinkGroup);
-            window.addEventListener('offline', whenOffline);
-            window.addEventListener('online', whenOnline);
 
             MEDLEY.focusAsYouType('SECTION A');
         }
