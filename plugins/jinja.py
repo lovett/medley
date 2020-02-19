@@ -246,14 +246,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Pretty-print a JSON value."""
         return json.dumps(value, sort_keys=True, indent=2)
 
-    @staticmethod
     @jinja2.contextfilter
     def websearch_filter(
+            self,
             context: jinja2.runtime.Context,
             value: str,
             engine: str = "",
             url_only: bool = False,
-            target: str = "_blank",
             with_icon: bool = True
     ) -> str:
         """Construct an offsite search URL for a term."""
@@ -269,6 +268,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not url:
             raise jinja2.TemplateError("Unrecognized search engine")
 
+        url = self.anonymize_filter(context, url)
+
         if url_only:
             return url
 
@@ -279,7 +280,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             </svg>"""
 
         result = f"""<a href="{url}"
-        target="{target}" rel="noopener noreferer"
+        target="_blank" rel="noopener noreferer"
         >{icon} {engine.capitalize()}</a>"""
 
         if context.eval_ctx.autoescape:
