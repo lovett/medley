@@ -7,32 +7,35 @@
 
 
 {% block scripts %}
-    {{ macros.vueApp('nav.secondary', ('discardable-record', 'discard-button')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
     {{ macros.staticAsset('alturl', 'alturl.js') }}
 {% endblock %}
 
-{% block page_body %}
-    {{ macros.svgSymbols("globe", "close", "arrow-left", "info", "link", "bookmark", "delete") }}
-    <header class="app-nav">
-        <form method="post" action="{{ app_url }}">
-            <div class="field">
-                <label for="url">URL:</label>
-                <input type="search" id="url" name="url" value="{{ url }}" autocapitalize="none" autocomplete="off" />
-            </div>
-            <div class="field">
-                <button>
-                    <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                </button>
-            </div>
-        </form>
-    </header>
-
-    <nav class="secondary">
-        {% if url %}
-            <div>{{ macros.cancelLink(app_url) }}</div>
-            {% block secondary_nav %}{% endblock %}
-        {% endif %}
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <ul>
+            {% block main_toolbar_links %}{% endblock %}
+            <li class="rest">
+                <form method="post" action="{{ app_url }}">
+                    <fieldset>
+                        <input
+                            type="search"
+                            id="url"
+                            name="url"
+                            value="{{ url }}"
+                            autocapitalize="none"
+                            autocomplete="off"
+                            placeholder="URL"
+                        />
+                        <button>Visit</button>
+                    </fieldset>
+                </form>
+            </li>
     </nav>
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("globe", "arrow-left", "calendar", "info", "link", "bookmark", "delete") }}
 
     <main>
         {% if unrecognized %}
@@ -40,13 +43,33 @@
         {% endif %}
 
         {% block content %}
-            {% if bookmarks %}
-                Bookmarked URLs
+            <header>
+                <h2>Bookmarks</h2>
+            </header>
 
-                {% for (bookmark_url, alt_url) in bookmark_pairs %}
-                    <p><a href="{{ alt_url }}">{{ bookmark_url }}</a></p>
-                {% endfor %}
-            {% endif %}
+            {% set ns = namespace(bookmarks_found=False) %}
+
+            <div id="collection">
+                <ul>
+                    {% for (id, bookmark_url, alt_url) in bookmarks %}
+                        {% set ns.recipes_found = True %}
+                        <discardable-record inline-template url="/registry?uid={{ id }}">
+                            <li v-bind:style="styles">
+                                <div class="actions"><discard-button tooltip="Delete this bookmark" /></div>
+                                <div>
+                                    <p class="title">
+                                        <a href="{{ alt_url }}">{{ bookmark_url }}</a>
+                                    </p>
+                                </div>
+                            </li>
+                        </discardable-record>
+                    {% endfor %}
+
+                    {% if not ns.recipes_found %}
+                        <p>No URLs have been bookmarked yet.</p>
+                    {% endif %}
+                </ul>
+            </div>
         {% endblock %}
     </main>
 

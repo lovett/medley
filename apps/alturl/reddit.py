@@ -44,7 +44,7 @@ def view(url: str) -> ViewAndData:
     if match and match.group("comments"):
         return view_story(response)
 
-    return view_index(response)
+    return view_index(url, response)
 
 
 def unavailable() -> ViewAndData:
@@ -64,7 +64,7 @@ def unavailable() -> ViewAndData:
     })
 
 
-def view_index(response: typing.Any) -> ViewAndData:
+def view_index(url: str, response: typing.Any) -> ViewAndData:
     """Render a list of story links."""
 
     stories = (
@@ -73,7 +73,8 @@ def view_index(response: typing.Any) -> ViewAndData:
     )
 
     return ("reddit-index.jinja.html", {
-        "stories": stories
+        "stories": stories,
+        "url": url
     })
 
 
@@ -101,5 +102,6 @@ def view_story(response: typing.Any) -> ViewAndData:
     return ("reddit-story.jinja.html", {
         "story": story,
         "comments": comments,
-        "subreddit_alturl": subreddit_alturl
+        "subreddit_alturl": subreddit_alturl,
+        "subreddit": story.get("subreddit")
     })

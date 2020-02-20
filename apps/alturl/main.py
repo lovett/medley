@@ -36,40 +36,32 @@ class Controller:
     def GET(*args, **_kwargs) -> bytes:
         """Dispatch to a site-specific handler."""
 
-        bookmarks = cherrypy.engine.publish(
+        bookmark_records = cherrypy.engine.publish(
             "registry:search",
             "alturl:bookmark",
             exact=True,
         ).pop()
 
-        bookmark_pairs = ((
-            cherrypy.engine.publish("url:readable", bookmark["value"]).pop(),
-            cherrypy.engine.publish("url:alt", bookmark["value"]).pop()
-        ) for bookmark in bookmarks)
+        bookmarks = ((
+            record["rowid"],
+            cherrypy.engine.publish("url:readable", record["value"]).pop(),
+            cherrypy.engine.publish("url:alt", record["value"]).pop()
+        ) for record in bookmark_records)
 
         if not args:
             return cherrypy.engine.publish(
                 "jinja:render",
                 "alturl.jinja.html",
-                bookmarks=bookmarks,
-                bookmark_pairs=bookmark_pairs
+                bookmarks=bookmarks
             ).pop()
 
         target_url = "/".join(args)
 
         bookmark_id = next((
             bookmark["rowid"]
-            for bookmark in bookmarks
+            for bookmark in bookmark_records
             if target_url == bookmark["value"]
         ), None)
-
-        bookmark_delete_url = None
-        if bookmark_id:
-            bookmark_delete_url = cherrypy.engine.publish(
-                "url:internal",
-                "/registry",
-                {"uid": bookmark_id}
-            ).pop()
 
         parsed_url = urlparse(f"//{target_url}")
 
@@ -81,7 +73,7 @@ class Controller:
 
         if site_specific_template:
             view_vars["url"] = target_url
-            view_vars["bookmark_delete_url"] = bookmark_delete_url
+            view_vars["bookmark_id"] = bookmark_id
             view_vars["bookmarks"] = bookmarks
 
             return cherrypy.engine.publish(

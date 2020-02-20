@@ -1,6 +1,26 @@
 {% extends "alturl.jinja.html" %}
 
+{% block main_toolbar_links %}
+    <li>
+        <a href="{{ app_url }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            Bookmarks
+        </a>
+    </li>
+    {% if not bookmark_id %}
+        <li>
+            <a href="#" id="save-bookmark">
+                <svg class="icon"><use xlink:href="#icon-bookmark"></use></svg>
+                Bookmark
+            </a>
+        </li>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
+    <header>
+        <h2>{{ url }}</h2>
+    </header>
     {% for story in stories %}
         <div class="headline">
             <h2 class="title"><a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">{{ story.title|safe }}</a></h2>
@@ -33,24 +53,4 @@
             </span>
         </div>
     {% endfor %}
-{% endblock %}
-
-{% block secondary_nav %}
-    {% if bookmark_delete_url %}
-        <discardable-record inline-template url="{{ bookmark_delete_url }}">
-            <div class="unbookmark">
-                <div><discard-button tooltip="Delete this bookmark" /></div>
-                Unbookmark
-            </div>
-        </discardable-record>
-    {% endif %}
-
-    {% if not bookmark_delete_url %}
-    <div>
-        <a href="#" id="save-bookmark">
-            <svg class="icon"><use xlink:href="#icon-bookmark"></use></svg>
-            Bookmark
-        </a>
-    </div>
-    {% endif %}
 {% endblock %}
