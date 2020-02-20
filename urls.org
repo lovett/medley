@@ -7,6 +7,15 @@
 
 This is a suite of code snippets for exercising app URLs with curl.
 
+* Countries
+** GET
+Download the latest dataset and store in registry.
+
+#+NAME: countires_get
+#+BEGIN_SRC sh :wrap export html
+curl -i "$host/countries"
+#+END_SRC
+
 * Headers
 ** GET
 Display the headers of the request.
@@ -153,7 +162,6 @@ curl -i -d "title=My recipe" -d "url=http://example.com" -d "body=hello world" -
 #+BEGIN_SRC sh :wrap export http
 curl -i -X PUT -d "title=Edited title" -d "url=http://example.com" -d "body=Edited body" -d "tags=one,nine,eight"  "$host/recipes/1"
 #+END_SRC
-
 
 * Speak
 ** GET
