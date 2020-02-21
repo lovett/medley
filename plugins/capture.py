@@ -53,11 +53,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "headers": request.headers,
             "params": request.body.params,
             "json": request.json
-        }, use_bin_type=True)
+        })
 
         response_bin = msgpack.packb({
             "status": response.status
-        }, use_bin_type=True)
+        })
 
         request_uri_parts = request.request_line.split(' ')
 

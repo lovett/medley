@@ -141,7 +141,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         try:
-            return msgpack.unpackb(blob, encoding='utf-8')
+            return msgpack.unpackb(blob)
         except msgpack.exceptions.ExtraData:
             return None
 

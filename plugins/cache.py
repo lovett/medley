@@ -100,7 +100,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 prefix,
                 rest,
-                msgpack.packb(value, use_bin_type=True),
+                msgpack.packb(value),
                 f"{lifespan_seconds} seconds"
             )
         )
