@@ -13,15 +13,17 @@
     {% endif %}
 {% endblock %}
 
-{% block page_body %}
-    {{ macros.svgSymbols("add-item") }}
-
-    <header class="app-nav">
+{% block main_toolbar %}
+    <nav id="main-toolbar">
         <a href="{{ registry_url }}">
             <svg class="icon"><use xlink:href="#add-item"></use></svg>
             Add host
         </a>
-    </header>
+    </nav>
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("add-item") }}
 
     {% if not hosts %}
         <nav class="secondary">

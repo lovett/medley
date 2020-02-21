@@ -5,41 +5,28 @@
     {{ macros.staticAsset('grids', 'grids.css') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% if name and options["layout"] == "month" %}
+            {{ macros.svgSymbols("calendar") }}
+
+            <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
+                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                Previous month
+            </a>
+            <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
+                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                Next month
+            </a>
+            <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
+                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                Now
+            </a>
+        {% endif %}
+    </nav>
+{% endblock %}
+
 {% block page_body %}
-    <header class="app-nav">
-        <p>Available grids:</p>
-        <ul class="inline-list">
-            {% for name in names %}
-                <li><a href="?name={{ name }}">{{ name }}</a></li>
-            {% endfor %}
-        </ul>
-    </header>
-
-    {% if name and options["layout"] == "month" %}
-        {{ macros.svgSymbols("calendar") }}
-
-        <nav class="secondary">
-            <div>
-                <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
-                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                    Previous month
-                </a>
-            </div>
-            <div>
-                <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
-                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                    Next month
-                </a>
-            </div>
-            <div>
-                <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
-                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                    Now
-                </a>
-            </div>
-        </nav>
-    {% endif %}
-
     <main>
         {% if rows %}
             <div class="table-sleeve">

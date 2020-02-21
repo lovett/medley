@@ -1,19 +1,15 @@
 {% extends "alturl.jinja.html" %}
 
 {% block main_toolbar_links %}
-    <li>
-        <a href="{{ app_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            Bookmarks
-        </a>
-    </li>
+    <a href="{{ app_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        Bookmarks
+    </a>
     {% if not bookmark_id %}
-        <li>
-            <a href="#" id="save-bookmark">
-                <svg class="icon"><use xlink:href="#icon-bookmark"></use></svg>
-                Bookmark
-            </a>
-        </li>
+        <a href="#" id="save-bookmark">
+            <svg class="icon"><use xlink:href="#icon-bookmark"></use></svg>
+            Bookmark
+        </a>
     {% endif %}
 {% endblock %}
 

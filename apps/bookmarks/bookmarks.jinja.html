@@ -9,95 +9,59 @@
     {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'wayback-link')) }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <form method="get" action="{{ app_url }}">
+            <fieldset>
+                <input
+                    type="search"
+                    id="query"
+                    name="query"
+                    value="{{ query|default('', true)|e }}"
+                    autocapitalize="none"
+                />
+                <button>Search</button>
+            </fieldset>
+        </form>
+
+        {% if query %}
+            {{ macros.cancelLink(app_url) }}
+        {% endif %}
+
+        <a href="{{ app_url }}/taglist">
+            <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
+            tag list
+        </a>
+
+        {% if general_query %}
+            {{ general_query|websearch("google") }}
+            {{ general_query|websearch("bing") }}
+        {% endif %}
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
 
-    <header class="app-nav">
-        <form method="get" action="{{ app_url }}">
-            <div class="field">
-                <label for="address">Keyword</label>
-                <input type="search" id="query" name="query" value="{{ query|default('', true)|e }}" autocapitalize="none" />
-            </div>
-            <div class="field">
-                <button>
+    <main>
+        <header>
+            {% if count %}
+                <h2>
                     <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                </button>
-            </div>
-
-            <div class="options">
-                <div class="field">
-                    <label for="order-rank">
-                        <input type="radio"
-                               id="order-rank"
-                               name="order"
-                               value="rank"
-                               {% if order == "rank" %}checked="checked"{% endif %}
-                        />
-                        Ranked
-                    </label>
-                </div>
-                <div class="field">
-                    <label for="order-date-desc">
-                        <input type="radio"
-                               id="order-date-desc"
-                               name="order"
-                               value="date-desc"
-                               {% if order == "date-desc" %}checked="checked"{% endif %}
-                        />
-                        Newest
-                    </label>
-                </div>
-                <div class="field">
-                    <label for="order-date-asc">
-                        <input type="radio"
-                               id="order-date-asc"
-                               name="order"
-                               value="date-asc"
-                               {% if order == "date-asc" %}checked="checked"{% endif %}
-                        />
-                        Oldest
-                    </label>
-                </div>
-            </div>
-
-        </form>
-    </header>
-
-    <nav class="secondary">
-        {% if count %}
-            <div>
-                Showing {{ start_index }} – {{ end_index }}
-                of {{ count|pluralize('bookmark', 'bookmarks') }}
-                {%- if max_days %}
-                    added in the past {{ max_days // 30 }} months.
-                {%- else -%}
-                    .
-                {% endif %}
-            </div>
-        {% endif %}
+                    Found {{ count|pluralize('bookmark', 'bookmarks') }}
+                    {%- if max_days %}
+                        added in the past {{ max_days // 30 }} months.
+                    {%- else -%}
+                        .
+                    {% endif %}
+                </h2>
+            {% endif %}
+        </header>
 
         {% if not bookmarks %}
-            <div class="warning">Nothing found.</div>
+            <p>Nothing found.</p>
         {% endif %}
 
-        {% if query %}
-            <div>{{ macros.cancelLink(app_url) }}</div>
-        {% endif %}
-
-        {% if general_query %}
-            <div>{{ general_query|websearch("google") }}</div>
-            <div>{{ general_query|websearch("bing") }}</div>
-        {% endif %}
-    </nav>
-
-    <nav class="secondary">
-        <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
-        <a href="{{ app_url }}/taglist">
-            tag list
-        </a>
-    </nav>
-
-    <main>
         <section class="bookmarks">
             {% for bookmark in bookmarks %}
 

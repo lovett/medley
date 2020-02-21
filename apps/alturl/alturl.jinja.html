@@ -13,24 +13,21 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <ul>
-            {% block main_toolbar_links %}{% endblock %}
-            <li class="rest">
-                <form method="post" action="{{ app_url }}">
-                    <fieldset>
-                        <input
-                            type="search"
-                            id="url"
-                            name="url"
-                            value="{{ url }}"
-                            autocapitalize="none"
-                            autocomplete="off"
-                            placeholder="URL"
-                        />
-                        <button>Visit</button>
-                    </fieldset>
-                </form>
-            </li>
+        <form method="post" action="{{ app_url }}">
+            <fieldset>
+                <input
+                    type="search"
+                    id="url"
+                    name="url"
+                    value="{{ url }}"
+                    autocapitalize="none"
+                    autocomplete="off"
+                    placeholder="URL"
+                />
+                <button>Visit</button>
+            </fieldset>
+        </form>
+        {% block main_toolbar_links %}{% endblock %}
     </nav>
 {% endblock %}
 

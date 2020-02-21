@@ -25,65 +25,54 @@
 {%- endmacro -%}
 
 {% block main_toolbar_links %}
-    <li>
-        <a href="{{ app_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            Bookmarks
-        </a>
-    </li>
-    <li>
-        <a href="{{ subreddit_alturl }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            r/{{ subreddit }}
-        </a>
-    </li>
+    <a href="{{ app_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        Bookmarks
+    </a>
+    <a href="{{ subreddit_alturl }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        r/{{ subreddit }}
+    </a>
+
+    <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
+        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+        u/{{ story.author }}
+    </a>
+
+    <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
+        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+        r/{{ story.subreddit|lower }}
+    </a>
+    <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
+        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+        {% if "self." not in story.domain %}
+            {{ story.domain }}
+        {% else %}
+            original
+        {% endif %}
+    </a>
 {% endblock %}
 
 {% block content %}
     <header class="intro">
         <h2>{{ story.title|safe }}</h2>
 
+        <time class="info">
+            <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+            {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
+        </time>
+
+        {% if story.num_comments > 0 %}
+            <span class="info">
+                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                {{ story.num_comments|pluralize("comment", "comments") }}
+            </span>
+        {% endif %}
         <div>
             {% if story.selftext %}
                 {{ story.selftext|unescape }}
             {% endif %}
 
-            <time class="info">
-                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
-            </time>
-
-            <span class="info">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
-                    u/{{ story.author }}
-                </a>
-            </span>
-
-            <span class="info">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
-                    r/{{ story.subreddit|lower }}
-                </a>
-            </span>
-
-            <span class="info">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
-                    {% if "self." not in story.domain %}
-                        {{ story.domain }}
-                    {% else %}
-                        original
-                    {% endif %}
-                </a>
-            </span>
-
-            {% if story.num_comments > 0 %}
-                <span class="info">
-                    <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                    {{ story.num_comments|pluralize("comment", "comments") }}
-                </span>
-            {% endif %}
         </div>
     </header>
 

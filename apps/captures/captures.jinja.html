@@ -9,34 +9,35 @@
     {{ macros.vueApp('main', ('clipboard-button',)) }}
 {% endblock %}
 
-{% block page_body %}
-    {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "search", "close") }}
-
-    <header class="app-nav">
+{% block main_toolbar %}
+    <nav id="main-toolbar">
         <form method="get" action="{{ app_url }}">
-            <div class="field">
-                <label for="number">Request URI</label>
-                <input type="search" id="path" name="path" value="{{ path if path }}" autocapitalize="none" />
-            </div>
-            <div class="field">
-                <button>
-                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                </button>
-            </div>
+            <fieldset>
+                <input
+                    type="search"
+                    id="path"
+                    name="path"
+                    value="{{ path or "" }}"
+                    autocapitalize="none"
+                    placeholder="URL"
+                />
+                <button>Search</button>
+            </fieldset>
         </form>
-    </header>
-
-    <nav class="secondary">
-        {% if not captures %}
-            <div class="warning">No captures found.</div>
-        {% endif %}
-
         {% if path %}
-            <div>{{ macros.cancelLink(app_url) }}</div>
+            {{ macros.cancelLink(app_url) }}
         {% endif %}
     </nav>
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "close") }}
 
     <main>
+        {% if not captures %}
+            <p>No captures found.</p>
+        {% endif %}
+
         {% for capture in captures %}
             <section>
                 <div class="capture">

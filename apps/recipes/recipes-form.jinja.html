@@ -1,12 +1,10 @@
 {% extends "recipes.jinja.html" %}
 
 {% block main_toolbar_links %}
-    <li>
-        <a href="{{ cancel_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            Cancel
-        </a>
-    </li>
+    <a href="{{ cancel_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        Cancel
+    </a>
 {% endblock %}
 
 {% block content %}

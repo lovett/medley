@@ -11,25 +11,21 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <ul>
-            {% block main_toolbar_links %}{% endblock %}
-            <li class="rest">
-                <form method="get" action="/recipes/search">
-                    <fieldset>
-                        <input
-                            type="search"
-                            id="q"
-                            name="q"
-                            value="{{ query }}"
-                            autocapitalize="none"
-                        />
-                        <button>
-                            Search
-                        </button>
-                    </fieldset>
-                </form>
-            </li>
-        </ul>
+        <form method="get" action="/recipes/search">
+            <fieldset>
+                <input
+                    type="search"
+                    id="q"
+                    name="q"
+                    value="{{ query }}"
+                    autocapitalize="none"
+                />
+                <button>
+                    Search
+                </button>
+            </fieldset>
+        </form>
+        {% block main_toolbar_links %}{% endblock %}
     </nav>
 {% endblock %}
 

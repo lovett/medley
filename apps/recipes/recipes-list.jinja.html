@@ -1,12 +1,10 @@
 {% extends "recipes.jinja.html" %}
 
 {% block main_toolbar_links %}
-    <li>
-        <a href="{{ app_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            All tags
-        </a>
-    </li>
+    <a href="{{ app_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        All tags
+    </a>
 {% endblock %}
 
 {% block scripts %}

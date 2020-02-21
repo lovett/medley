@@ -9,23 +9,24 @@
     {{ macros.staticAsset('headlines', 'headlines.js') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <form action="#">
+            <button
+                data-limit="{{ limit }}"
+                data-offset="{{ offset }}"
+            >Walk links {{ offset }} to {{ offset + limit - 1}}</button>
+        </form>
+        <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            Bing.com
+        </a>
+    </nav>
+{% endblock %}
+
+
 {% block page_body %}
     {{ macros.svgSymbols("globe") }}
-    <header class="app-nav">
-        <button
-            data-limit="{{ limit }}"
-            data-offset="{{ offset }}"
-        >Walk</button>
-        <span class="label">from {{ offset }} to {{ offset + limit - 1}}</span>
-    </header>
-
-    <nav class="secondary">
-        <div>
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">Bing.com</a>
-        </div>
-    </nav>
-
     <main>
         <section id="headlines">
             {% set ns = namespace(loop_count=1) %}

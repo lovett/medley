@@ -1,6 +1,29 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% if not muted_by_schedule %}
+            {% if not muted %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="mute" />
+                    <button>Mute now</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button>Unmute</button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        <a class="template-edit" href="{{ registry_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit schedule
+        </a>
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("edit") }}
 
@@ -11,17 +34,9 @@
 
         {% if not muted_by_schedule %}
             {% if not muted %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="mute" />
-                    <button>Mute now</button>
-                    <span class="label">Not currently muted.</span>
-                </form>
+                <p>Not currently muted.</p>
             {% else %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="unmute" />
-                    <button>Unmute</button>
-                    <span class="label">Currently muted.</span>
-                </form>
+                <p>Currently muted.</p>
             {% endif %}
         {% endif %}
 
@@ -36,12 +51,5 @@
                 {% endfor %}
             </p>
         {% endif %}
-
-        <p>
-            <a class="template-edit" href="{{ registry_url }}">
-                <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                Edit schedule
-            </a>
-        </p>
     </main>
 {% endblock %}

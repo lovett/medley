@@ -9,32 +9,30 @@
     {{ macros.staticAsset('weather', 'weather.css') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% for latitude, longitude, label in other_locations %}
+            {% if label != location_name %}
+                <a href="{{ app_url }}/{{ latitude }},{{ longitude }}">
+                    <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                    {{ label }}
+                </a>
+            {% endif %}
+        {% endfor %}
+        <a class="template-edit" href="{{ edit_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit locations
+        </a>
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("globe", "edit") }}
 
-    <header class="app-nav">
-        <ul class="inline-list">
-            {% for latitude, longitude, label in other_locations %}
-                {% if label != location_name %}
-                    <li>
-                        <a href="{{ app_url }}/{{ latitude }},{{ longitude }}">
-                            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                            {{ label }}
-                        </a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-        <p>
-            <a class="template-edit" href="{{ edit_url }}">
-                <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                Edit locations
-            </a>
-        </p>
-    </header>
-
     <main>
-        <h2>{{ location_name }} as of {{ forecast.current_time|dateformat('LT') }}</h2>
+        <header>
+            <h2>{{ location_name }} as of {{ forecast.current_time|dateformat('LT') }}</h2>
+        </header>
 
         {% for alert in forecast.alerts  %}
             <div class="alert">{{ alert }}</div>
