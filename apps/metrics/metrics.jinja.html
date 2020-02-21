@@ -4,11 +4,24 @@
     {{ macros.staticAsset("metrics", "metrics.css") }}
 {% endblock %}
 
-{% block page_body %}
-    {{ macros.svgSymbols("chart") }}
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% if metric %}
+        <a href="{{ app_url }}">
+            <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
+            All metrics
+        </a>
+        {% endif %}
 
-    {% if metrics %}
-        <main>
+        {% block secondary_nav %}{% endblock %}
+    </nav>
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("chart", "arrow-left") }}
+
+    <main>
+        {% if metrics %}
             <ul id="inventory">
                 {% for metric in metrics %}
                     <li>
@@ -19,18 +32,12 @@
                     </li>
                 {% endfor %}
             </ul>
-    {% endif %}
+        {% endif %}
 
-    {% if metric %}
-        {{ macros.svgSymbols("close") }}
-
-        <header class="app-nav">
-            <div>{{ macros.cancelLink(app_url) }}</div>
-            {% block secondary_nav %}{% endblock %}
-        </header>
-
-        <main>
-            <h2>{{ metric }}</h2>
+        {% if metric %}
+            <header>
+                <h2>{{ metric }}</h2>
+            </header>
 
             {% if points %}
                 <p>
@@ -44,7 +51,6 @@
                     Δ {{ y_range[1] - y_range[0] }} {{ unit }}.
                 </p>
             {% endif %}
-
 
             {% if not points %}
                 <p>Not enough data to plot.</p>

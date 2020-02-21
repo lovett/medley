@@ -6,6 +6,20 @@
     --visitors-moved: LightCyan;
 }
 
+#saved-queries {
+    margin-right: 3em;
+    font-size: 1em;
+}
+
+#saved-queries label {
+    display: inline-block;
+    padding-right: 1em;
+}
+
+#saved-queries select {
+    font-size: 1em;
+}
+
 .app-nav form {
     grid-template-columns: auto;
 }

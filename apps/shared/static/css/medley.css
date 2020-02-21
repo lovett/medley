@@ -383,10 +383,10 @@ TEXTAREA {
 
 .app-nav {
     margin-bottom: 1em;
-    padding: 0 1em;
 }
 
 .app-nav > form {
+    width: 100%;
     display: grid;
     grid-template-columns: 1fr auto;
     grid-column-gap: 1em;

@@ -22,6 +22,8 @@
 {% block page_body %}
     {{ macros.svgSymbols("search", "close", "globe") }}
 
+    <main>
+
     <header class="app-nav">
         <form method="post" action="{{ app_url }}">
             <div class="field">
@@ -30,9 +32,7 @@
             </div>
 
             <div class="field">
-                <button>
-                    <svg class="icon icon-globe"><use xlink:href="#icon-globe"></use></svg>
-                </button>
+                <button>View</button>
             </div>
 
             {% if not tags %}
@@ -68,7 +68,6 @@
         {% endif %}
     </nav>
 
-    <main>
         {% if tags %}
             <div class="table-sleeve">
                 <table id="tags" class="key-value">

@@ -15,33 +15,27 @@
 {% block page_body %}
     {{ macros.svgSymbols("binoculars", "search", "close") }}
 
-    <header class="app-nav">
-        <form id="search-form" method="get" action="/whois">
-            <div class="field">
-                <label for="address">IP or host</label>
-                <input
-                    type="search"
-                    id="address"
-                    name="address"
-                    value="{{ address }}"
-                    autocapitalize="none"
-                />
-            </div>
-            <div class="field">
-                <button>
-                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                </button>
-            </div>
-        </form>
-    </header>
-
-    {% if address %}
-    <nav class="secondary">
-        <div>{{ macros.cancelLink(app_url) }}</div>
-    </nav>
-    {% endif %}
-
     <main>
+        <header class="app-nav">
+            <form id="search-form" method="get" action="/whois">
+                <div class="field">
+                    <label for="address">IP or host</label>
+                    <input
+                        type="search"
+                        id="address"
+                        name="address"
+                        value="{{ address }}"
+                        autocapitalize="none"
+                    />
+                </div>
+                <div class="field">
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    </button>
+                </div>
+            </form>
+        </header>
+
         {% if address %}
             <section id="ip-report">
                 <dl>

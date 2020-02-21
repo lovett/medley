@@ -108,21 +108,6 @@ MEDLEY.visitors = (function () {
     }
 
     /**
-     * Show or hide the delete icon next to the saved queries dropdown.
-     */
-    function toggleQueryDelete(e) {
-        console.log('ok');
-        const menu = document.getElementById('saved');
-        const deleteTrigger = document.getElementById('delete-saved-query');
-
-        if (menu.value === '') {
-            deleteTrigger.setAttribute('hidden', true)
-        } else {
-            deleteTrigger.removeAttribute('hidden');
-        }
-    }
-
-    /**
      * Present a saved query.
      */
     function displaySavedQuery(e) {
@@ -267,11 +252,6 @@ MEDLEY.visitors = (function () {
             document.getElementById('save').addEventListener(
                 'click',
                 saveQuery
-            );
-
-            document.getElementById('delete-saved-query').addEventListener(
-                'click',
-                deleteSavedQuery
             );
 
             document.getElementById('saved').addEventListener(

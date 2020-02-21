@@ -15,60 +15,55 @@
     {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <form id="search-form">
+            <fieldset>
+                <input type="search" id="q" name="q" value="{{ q|default('', true) }}" autocapitalize="none" />
+                <button>Search</button>
+            </fieldset>
+        </form>
+
+        <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            Add
+        </a>
+
+        {% if q or view == "add"%}
+            {{ macros.cancelLink(app_url) }}
+        {% endif %}
+
+        {% if q and entries %}
+            <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
+                <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+                Export
+            </a>
+        {% endif %}
+
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("copy", "delete", "download", "new-item", "add-item", "close", "search") }}
-    {% if view == "search" %}
-        <header class="app-nav">
-            <form id="search-form">
-                <div class="field-group">
-                    <div class="field">
-                        <label for="q">Key</label>
-                        <input type="search" id="q" name="q" value="{{ q|default('', true) }}" autocapitalize="none" />
-                    </div>
-                </div>
-                <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
-                </div>
-            </form>
-        </header>
-
-        <nav class="secondary">
-            {% if q and entries %}
-                <div>
-                    {% if total_entries != entries|length %}
-                        Showing the first {{ entries|length }} of
-                    {% else %}
-                        Found
-                    {% endif %}
-                    {{ total_entries|pluralize('entry', 'entries') }}.
-                </div>
-                {% endif %}
-
-            {% if q or view == "add"%}
-                <div>{{ macros.cancelLink(app_url) }}</div>
-            {% endif %}
-
-            <div>
-                <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
-                    <svg class="icon"><use xlink:href="#add-item"></use></svg>
-                    Add
-                </a>
-            </div>
-
-            {% if q and entries %}
-                <div>
-                    <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
-                        <svg class="icon"><use xlink:href="#icon-download"></use></svg>
-                        Export
-                    </a>
-                </div>
-            {% endif %}
-        </nav>
-    {% endif %}
 
     <main>
+        {% if q %}
+            <header>
+                <h2>{{ q }}</h2>
+
+                {% if q and entries %}
+                    <div>
+                        {% if total_entries != entries|length %}
+                            Showing the first {{ entries|length }} of
+                        {% else %}
+                            Found
+                        {% endif %}
+                        {{ total_entries|pluralize('entry', 'entries') }}
+                    </div>
+                {% endif %}
+            </header>
+        {% endif %}
+
         {% if view == "add" %}
             <form id="insert-form" action="{{ app_url }}">
                 <div class="field">
@@ -86,9 +81,7 @@
         {% endif %}
 
         {% if (uid or q) and not entries %}
-            <section>
-                <p>No entries found.</p>
-            </section>
+            <p>No entries found.</p>
         {% endif %}
 
         {% if roots %}
