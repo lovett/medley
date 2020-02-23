@@ -47,6 +47,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:search:dict", self.search_dict)
         self.bus.subscribe("registry:search:multidict", self.search_multidict)
         self.bus.subscribe("registry:search:valuelist", self.search_valuelist)
+        self.bus.subscribe("registry:update", self.update)
 
     def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
@@ -68,32 +69,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (key,)
         )
 
-    def add(
-            self,
-            key: str,
-            values: typing.Iterable[typing.Any],
-            replace: bool = False
-    ) -> bool:
-        """Add one or more values for the given key, optionally deleting any
-        existing values.
+    def add(self, **kwargs: typing.Any) -> bool:
+        """Add one or more records.
+
+        Multiple recods with the same key are allowed, so values must
+        always be provided as a collection.
 
         CRLF newlines will be converted to Unix-style LF to make
         things easier for apps that use multi-line values.
 
         """
 
-        clean_values = [
+        key = kwargs.get("key")
+
+        values = [
             value.replace("\r", "")
-            for value in values
+            for value in kwargs.get("values", ())
         ]
 
         cherrypy.engine.publish("memorize:clear", key)
-        if replace:
-            self.remove_key(key)
 
         result = self._insert(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
-            [(key, value) for value in clean_values]
+            [(key, value) for value in values]
         )
 
         if result:
@@ -156,7 +154,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         result = typing.cast(
             typing.Any,
-            self._select(sql, params)
+            self._select_generator(sql, params)
         )
 
         if include_count:
@@ -348,3 +346,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         result = self._select(sql, [depth])
 
         return (row["val"] for row in result)
+
+    def update(self, **kwargs: typing.Any) -> bool:
+        """Update a single record by its ID."""
+
+        key = kwargs.get("key")
+        values = [
+            value.replace("\r", "")
+            for value in kwargs.get("values", ())
+        ]
+
+        rowid = kwargs.get("rowid")
+
+        cherrypy.engine.publish("memorize:clear", key)
+
+        self._execute(
+            "UPDATE registry SET key=?, value=? WHERE rowid=?",
+            (key, values[0], rowid)
+        )
+
+        cherrypy.engine.publish("registry:updated", key)
+
+        return True

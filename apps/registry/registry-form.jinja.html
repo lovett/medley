@@ -1,0 +1,37 @@
+{% extends "registry.jinja.html" %}
+
+{% block main_toolbar_links %}
+    <a href="{{ cancel_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        Cancel
+    </a>
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("arrow-left") }}
+
+    <main id="editor">
+        <form method="post" action="{{ submit_url }}">
+            <div class="field">
+                <label for="key">Key</label>
+                <input
+                    type="text"
+                    id="key"
+                    name="key"
+                    value="{{ key }}"
+                    required
+                />
+            </div>
+            <div class="field stretch">
+                <label for="value">Value</label>
+                <textarea
+                    id="value"
+                    name="value"
+                >{{ value }}</textarea>
+            </div>
+            <div class="field">
+                <button>Save</button>
+            </div>
+        </form>
+    </main>
+{% endblock %}

@@ -163,6 +163,35 @@ curl -i -d "title=My recipe" -d "url=http://example.com" -d "body=hello world" -
 curl -i -X PUT -d "title=Edited title" -d "url=http://example.com" -d "body=Edited body" -d "tags=one,nine,eight"  "$host/recipes/1"
 #+END_SRC
 
+* Registry
+** GET
+*** Key groups
+Retrieve a list of key groups.
+
+#+NAME: registry_get_groups
+#+BEGIN_SRC sh :wrap export http
+curl -i "$host/registry"
+#+END_SRC
+
+#+NAME: registry_get_groups_json
+#+BEGIN_SRC sh :wrap export http
+curl -i -H "Accept: $json" "$host/registry"
+#+END_SRC
+
+*** Search
+Search for records by key.
+
+#+NAME: registry_search
+#+BEGIN_SRC sh :wrap export http
+curl -i "$host/registry?q=config"
+#+END_SRC
+
+#+NAME: registry_search_json
+#+BEGIN_SRC sh :wrap export json
+curl -H "Accept: $json" "$host/registry?q=config"
+#+END_SRC
+
+
 * Speak
 ** GET
 Display the current mute status.

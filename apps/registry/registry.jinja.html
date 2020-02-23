@@ -2,117 +2,69 @@
 {% import "macros.jinja.html" as macros %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('registry', 'registry.css') }}
+    {{ macros.staticAsset("registry", "registry.css") }}
 {% endblock %}
 
 {% block scripts %}
-    {% if roots %}
-        {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
-    {% endif %}
-
-    {{ macros.staticAsset('registry', 'registry.js') }}
-
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
+    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
+    {{ macros.staticAsset("registry", "registry.js") }}
 {% endblock %}
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <form id="search-form">
+        <form id="search-form" action="{{ app_url }}">
             <fieldset>
-                <input type="search" id="q" name="q" value="{{ q|default('', true) }}" autocapitalize="none" />
+                <input
+                    type="search"
+                    id="q"
+                    name="q"
+                    value="{{ query|default('', true) }}"
+                    autocapitalize="none"
+                />
                 <button>Search</button>
             </fieldset>
         </form>
 
-        <a href="{{ app_url}}?view=add&key={{ q|default('', true) }}" class="{{ "active" if view == "add" }}">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
-            Add
-        </a>
+        {% block main_toolbar_links %}
+            <a href="{{ app_url }}/new">
+                <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                Add
+            </a>
 
-        {% if q or view == "add"%}
-            {{ macros.cancelLink(app_url) }}
-        {% endif %}
-
-        {% if q and entries %}
-            <a href="{{ app_url }}/.json?q={{ q }}" target="_blank">
+            <a href="{{ app_url }}/.json" target="_blank">
                 <svg class="icon"><use xlink:href="#icon-download"></use></svg>
                 Export
             </a>
-        {% endif %}
 
+        {% endblock %}
     </nav>
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("copy", "delete", "download", "new-item", "add-item", "close", "search") }}
-
-    <main>
-        {% if q %}
+    {% block content %}
+        {{ macros.svgSymbols("add-item", "arrow-let", "download", "tag") }}
+        <main id="tagset">
             <header>
-                <h2>{{ q }}</h2>
-
-                {% if q and entries %}
-                    <div>
-                        {% if total_entries != entries|length %}
-                            Showing the first {{ entries|length }} of
-                        {% else %}
-                            Found
-                        {% endif %}
-                        {{ total_entries|pluralize('entry', 'entries') }}
-                    </div>
-                {% endif %}
+                <h2>Groups</h2>
             </header>
-        {% endif %}
 
-        {% if view == "add" %}
-            <form id="insert-form" action="{{ app_url }}">
-                <div class="field">
-                    <label for="key">Key:</label>
-                    <input type="text" id="key" name="key" value="{{ key|default('', true) }}" required/>
-                </div>
-                <div class="field">
-                    <label for="comments">Value:</label>
-                    <textarea id="value" name="value" required>{{ value|default('', true) }}</textarea>
-                </div>
-
-                <button>Add</button>
-                {{ macros.cancelLink(app_url, False) }}
-            </form>
-        {% endif %}
-
-        {% if (uid or q) and not entries %}
-            <p>No entries found.</p>
-        {% endif %}
-
-        {% if roots %}
-            <section>
-                <ul class="roots">
+            <div id="collection">
+                {% set ns = namespace(roots_found=False) %}
+                <ul>
                     {% for root in roots %}
-                        <li><a href="{{ app_url}}?q={{root}}">{{ root }}</a></li>
+                        {% set ns.roots_found = True %}
+                        <li>
+                            <a href="/registry?q={{ root|urlencode }}">
+                                {{ root }}
+                            </a>
+                        </li>
                     {% endfor %}
                 </ul>
-            </section>
-        {% endif %}
+            </div>
 
-        <section>
-            {% for entry in entries %}
-                <discardable-record inline-template url="{{ app_url }}?uid={{ entry.rowid }}">
-                    <div class="entry" v-bind:style="styles">
-                        <header>
-                            {{ entry.key }}
-                            <div class="toolbar">
-                                <div><new-item-button target-url="{{ app_url}}?view=add&key={{ entry.key|e}}" tooltip="New record with this key" /></div>
-                                <div><clipboard-button target-id="value-{{ loop.index }}" tooltip="Copy value" /></div>
-                                <div><discard-button tooltip="Delete this entry" /></div>
-                            </div>
-                        </header>
-
-                        <div>
-                            <div id="value-{{ loop.index }}" class="value">{{ entry.value }}</div>
-                        </div>
-                    </div>
-                </discardable-record>
-            {% endfor %}
-        </section>
-    </main>
+            {% if not ns.roots_found %}
+                <p>No groups found.</p>
+            {% endif %}
+        </main>
+    {% endblock %}
 {% endblock %}

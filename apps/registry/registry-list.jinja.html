@@ -1,0 +1,87 @@
+{% extends "registry.jinja.html" %}
+
+{% block scripts %}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
+{% endblock %}
+
+{% block main_toolbar_links %}
+    <div class="focus-buffer-display"></div>
+
+    {% if ":" in query %}
+        <a href="{{ app_url }}?q={{ parent_key|urlencode }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            Parent
+        </a>
+    {% endif %}
+
+    {% if ":" not in query %}
+    <a href="{{ app_url }}">
+        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+        Groups
+    </a>
+    {% endif %}
+
+    <a href="{{ app_url }}/new">
+        <svg class="icon"><use xlink:href="#add-item"></use></svg>
+        Add
+    </a>
+
+    <a href="{{ app_url }}/.json?q={{ query|urlencode }}" target="_blank">
+        <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+        Export
+    </a>
+
+{% endblock %}
+
+{% block content %}
+    {{ macros.svgSymbols("copy", "delete", "new-item", "add-item", "arrow-left", "download") }}
+    <main id="tagset">
+        <header>
+            <h2> {{ query }}</h2>
+
+            <div>
+                {{ record_count|pluralize('record', 'records') }} found
+            </div>
+        </header>
+
+        <section>
+            {% set ns = namespace(records_found=False) %}
+
+            {% for record in records %}
+                {% set ns.records_found = True %}
+                <discardable-record inline-template url="{{ app_url }}?uid={{ record.rowid }}">
+                    <div class="record" v-bind:style="styles">
+                        <header>
+                            {{ record.key }}
+                            <div class="toolbar">
+                                <div><new-item-button
+                                         target-url="{{ app_url}}/new?key={{ record.key|e}}"
+                                         tooltip="New record with this key"
+                                     /></div>
+                                <div><clipboard-button
+                                         target-id="value-{{ loop.index }}"
+                                         tooltip="Copy value"
+                                     /></div>
+                                <div><discard-button tooltip="Delete this record" /></div>
+                                <div>
+                                    <a href="{{ app_url}}/{{ record.rowid}}/edit">
+                                        Edit
+                                    </a>
+                                </div>
+                            </div>
+                        </header>
+
+                        <div>
+                            <div id="value-{{ loop.index }}" class="value">{{ record.value }}</div>
+                        </div>
+                    </div>
+                </discardable-record>
+            {% endfor %}
+
+            {% if not ns.records_found %}
+                <p>No records found.</p>
+            {% endif %}
+
+        </section>
+    </main>
+{% endblock %}
