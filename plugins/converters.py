@@ -92,6 +92,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Convert a number of seconds into a human-readable string."""
 
         seconds = int(value)
+
+        if seconds == 1:
+            return f"{seconds} second"
+
+        if 60 < seconds <= 90:
+            return f"{seconds} seconds"
+
         hours_label = "hour"
         minutes_label = "minute"
         seconds_label = "second"
@@ -111,6 +118,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             seconds_label += "s"
 
         result = []
+
         if hours > 0:
             result.append(f"{hours} {hours_label}")
 

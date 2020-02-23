@@ -29,7 +29,7 @@ class TestConverters(unittest.TestCase):
         self.assertEqual(result, "1 minute")
 
         result = self.plugin.duration(61)
-        self.assertEqual(result, "1 minute, 1 second")
+        self.assertEqual(result, "61 seconds")
 
         result = self.plugin.duration(3600)
         self.assertEqual(result, "1 hour")
