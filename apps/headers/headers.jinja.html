@@ -1,14 +1,16 @@
 {% extends "base.jinja.html" %}
 
+{% block stylesheets %}
+    {{ macros.staticAsset('headers', 'headers.css') }}
+{% endblock %}
+
 {% block page_body %}
     <main>
-        <table>
+        <dl>
             {% for key, value in headers %}
-                <tr>
-                    <th>{{ key }}</th>
-                    <td>{{ value }}</td>
-                </tr>
+                <dt>{{ key }}</dt>
+                <dd>{{ value }}</dd>
             {% endfor %}
-        </table>
+        </dl>
     </main>
 {% endblock %}

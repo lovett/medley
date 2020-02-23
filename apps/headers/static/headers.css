@@ -1,0 +1,42 @@
+DT {
+    margin-bottom: .5em;
+}
+
+DD {
+    word-break: break-word;
+    margin-bottom: 1.5em;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    DL {
+        display: grid;
+        grid-template-columns: auto 1fr;
+    }
+
+    DT {
+        background-color: var(--black);
+        color: var(--white);
+        font-weight: normal;
+        margin: 0;
+        padding: 0.75em;
+        text-align: right;
+    }
+
+    DD {
+        margin: 0;
+        padding: 0.75em;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}
