@@ -1,17 +1,13 @@
-BUTTON {
-    width: 100%;
-    font-size: .75em;
-}
-
-SECTION {
+#hosts {
     display: grid;
-    grid-template-columns: auto 1fr;
-    grid-gap: 1.5em;
-    align-items: center;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    grid-gap: 2em;
+    padding-top: 1em;
 }
 
-.mac-address {
-    font-family: monospace;
+#hosts BUTTON {
+    min-width: 10em;
 }
 
 /* Small devices */
@@ -20,9 +16,6 @@ SECTION {
 
 /* Medium devices */
 @media (min-width: 768px) {
-    BUTTON {
-        font-size: 1em;
-    }
 }
 
 /* Large devices */

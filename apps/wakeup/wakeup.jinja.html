@@ -16,14 +16,14 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a href="{{ registry_url }}">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
-            Add host
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit hosts
         </a>
     </nav>
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("add-item") }}
+    {{ macros.svgSymbols("edit") }}
 
     {% if not hosts %}
         <nav class="secondary">
@@ -32,14 +32,13 @@
     {% endif %}
 
     <main>
-        <section>
+        <div id="hosts">
             {% for host, mac_address in hosts.items() %}
                 <form class="host" method="POST" action="{{ app_url }}">
                     <input type="hidden" name="host" value="{{ host }}" />
                     <button>{{ host }}</button>
                 </form>
-                <span class="mac-address">{{ mac_address }}</span>
             {% endfor %}
-        </section>
+        </div>
     </main>
 {% endblock %}
