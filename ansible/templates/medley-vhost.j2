@@ -16,7 +16,7 @@ server {
     access_log /var/log/nginx/medley-access.log;
     error_log /var/log/nginx/medley-error.log;
 
-    location ~ \.(css|js|svg) {
+    location ~ \.(css|js|svg)$ {
         root {{ project_root }}/apps;
         sendfile on;
     }
