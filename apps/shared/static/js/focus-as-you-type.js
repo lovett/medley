@@ -95,7 +95,7 @@ MEDLEY.focusAsYouType = (function () {
         }
 
         // Take no action when the control or alt keys are being pressed.
-        if (e.ctrlKey || e.altKey) {
+        if (e.ctrlKey || e.altKey || e.shiftKey) {
             return;
         }
 
