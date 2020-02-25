@@ -17,6 +17,9 @@ class Tool(cherrypy.Tool):
     def _setup(self) -> None:
         cherrypy.Tool._setup(self)
 
+        if not cherrypy.config.get("etags"):
+            return
+
         cherrypy.request.hooks.attach(
             "before_finalize",
             self.set_header,

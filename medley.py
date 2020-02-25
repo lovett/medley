@@ -70,6 +70,7 @@ def setup() -> None:
         "app_root": app_root,
         "cache_static_assets": True,
         "database_dir": "./db",
+        "etags": True,
         "engine.autoreload.on": False,
         "local_maintenance": True,
         "log.screen": True,
