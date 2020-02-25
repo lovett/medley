@@ -37,6 +37,8 @@
                 {%- endif %}
             </h1>
 
+            <span class="focus-buffer-display"></span>
+
             {% block main_toolbar %}
             {% endblock %}
         </header>
@@ -44,8 +46,6 @@
         {% block app_message -%}
             <div id="app-message" hidden></div>
         {%- endblock %}
-
-        <div class="focus-buffer-display"></div>
 
         {% block page_body %}{% endblock %}
 

@@ -3,38 +3,22 @@ SECTION {
     grid-row-gap: 1.25em;
 }
 
-.description {
+.item:hover {
+    text-decoration: none;
+}
+
+.item .description {
     font-size: .85em;
     display: block;
     color: var(--black);
 }
 
-.focus-candidate {
-    margin-left: -1em;
-}
-
-.item:hover {
-    text-decoration: none;
-}
-
-.item:hover .name {
-    color: var(--success);
-}
-
-.item {
-    margin: 0;
-}
-
-.name {
+.item .name {
     font-weight: bold;
 }
 
 /* Small devices */
 @media (min-width: 576px) {
-    MAIN {
-        padding-top: 2em;
-    }
-
     SECTION {
         grid-template-columns: repeat(2, 1fr);
         grid-column-gap: 3em;

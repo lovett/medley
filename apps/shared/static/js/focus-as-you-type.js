@@ -60,13 +60,13 @@ MEDLEY.focusAsYouType = (function () {
 
         if (matchCount == 1) {
             elements[matches.indexOf(1)].focus();
-        } else {
-            matches.forEach(function (match, index) {
-                if (match === 1) {
-                    elements[index].classList.add(options.candidateClass);
-                }
-            });
         }
+
+        matches.forEach(function (match, index) {
+            if (match === 1) {
+                elements[index].classList.add(options.candidateClass);
+            }
+        });
     }
 
     // Chrome won't send keypress events for non-printable

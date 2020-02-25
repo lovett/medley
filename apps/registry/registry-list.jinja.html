@@ -5,8 +5,6 @@
 {% endblock %}
 
 {% block main_toolbar_links %}
-    <div class="focus-buffer-display"></div>
-
     {% if ":" in query %}
         <a href="{{ app_url }}?q={{ parent_key|urlencode }}">
             <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>

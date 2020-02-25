@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("add-item", "delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
+    {{ macros.svgSymbols("add-item", "arrow-left", "arrow-right", "delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
 
     <main>
         <header class="app-nav">
@@ -48,15 +48,13 @@
                         {% endif %}
 
                         <div>
-                            <button
-                                data-field="query"
-                                data-shortcut="query-date-backward"
-                            >Day before</button>
+                            <button data-field="query" data-shortcut="query-date-backward">
+                                <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+                            </button>
 
-                            <button
-                                data-field="query"
-                                data-shortcut="query-date-forward"
-                            >Day after</button>
+                            <button data-field="query" data-shortcut="query-date-forward">
+                                <svg class="icon"><use xlink:href="#icon-arrow-right"></use></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
