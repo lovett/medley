@@ -10,25 +10,44 @@
 {% block content %}
     {{ macros.svgSymbols("add-item", "arrow-let", "tag") }}
     <main id="tagset">
-        <header>
-            <h2>Tags</h2>
+        <header class="app-nav">
+            <form method="get" action="/recipes/search">
+                <div class="field">
+                    <input
+                        type="search"
+                        id="q"
+                        name="q"
+                        value="{{ query }}"
+                        autocapitalize="none"
+                    />
+                </div>
+                <div class="field">
+                    <button>
+                        Search
+                    </button>
+                </div>
+            </form>
         </header>
 
-        {% set ns = namespace(tags_found=False) %}
-        <ul>
-            {% for tag in tags %}
-                {% set ns.tags_found = True %}
-                <li>
-                    <a href="/recipes/tag/{{ tag["name"]|urlencode }}">
-                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                        {{ tag["name"] }}
-                    </a>
-                </li>
-            {% endfor %}
-        </ul>
+        <section>
+            <h2>Tags</h2>
 
-        {% if not ns.tags_found %}
-            <p>No tags found.</p>
-        {% endif %}
+            {% set ns = namespace(tags_found=False) %}
+            <ul>
+                {% for tag in tags %}
+                    {% set ns.tags_found = True %}
+                    <li>
+                        <a href="/recipes/tag/{{ tag["name"]|urlencode }}">
+                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                            {{ tag["name"] }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            {% if not ns.tags_found %}
+                <p>No tags found.</p>
+            {% endif %}
+        </section>
     </main>
 {% endblock %}

@@ -5,12 +5,6 @@
         <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
         All tags
     </a>
-    {% for tag in tags %}
-        <a href="/recipes/tag/{{ tag|urlencode }}">
-            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-            {{ tag }}
-        </a>
-    {% endfor %}
 
     <a href="/recipes/{{ rowid }}/edit">
         <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
@@ -26,6 +20,14 @@
             <h2>{{ title }}</h2>
 
             <ul>
+                {% for tag in tags %}
+                    <li>
+                        <a href="/recipes/tag/{{ tag|urlencode }}">
+                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                            {{ tag }}
+                        </a>
+                    </li>
+                {% endfor %}
                 <li>
                     <time datetime="{{ updated|localtime }}">
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>

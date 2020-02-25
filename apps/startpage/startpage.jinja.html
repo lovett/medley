@@ -1,8 +1,6 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
-{% set body_id = 'startpage-display' %}
-
 {% block stylesheets %}
     {{ macros.staticAsset('startpage', 'startpage.css') }}
 
@@ -29,7 +27,7 @@
 
 
 {% block page_body %}
-    <main>
+    <main id="display">
         {% for section in page.sections() if not section.startswith("-") %}
             <section>
                 <h1>

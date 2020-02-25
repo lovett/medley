@@ -3,6 +3,11 @@
     grid-gap: 2em;
 }
 
+.app-nav form {
+    width: auto;
+}
+
+
 ol {
     margin-top: 0;
     padding-left: 0;

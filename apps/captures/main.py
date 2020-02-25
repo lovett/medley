@@ -11,22 +11,26 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*args, **kwargs) -> bytes:
         """Display a list of recent captures, or captures matching a URI path.
+
         """
 
+        rowid = None
+        if args:
+            rowid = args[0]
+
         path = kwargs.get('path')
-        cid = kwargs.get('cid')
         offset = int(kwargs.get('offset', 0))
         per_page = 5
 
         if path:
             path = path.strip()
 
-        if cid:
+        if rowid:
             captures = cherrypy.engine.publish(
                 "capture:get",
-                int(cid)
+                int(rowid)
             ).pop()
             newer_url = None
             older_url = None

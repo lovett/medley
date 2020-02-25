@@ -6,16 +6,6 @@
     --visitors-moved: LightCyan;
 }
 
-#saved-queries {
-    margin-right: 3em;
-    font-size: 1em;
-}
-
-#saved-queries label {
-    display: inline-block;
-    padding-right: 1em;
-}
-
 #saved-queries select {
     font-size: 1em;
 }
@@ -87,6 +77,17 @@ input[type=range] {
 
 .expandable.expanded {
     display: table-row;
+}
+
+.shortcuts {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: .5em;
+}
+
+.shortcuts button {
+    margin-top: 0;
 }
 
 .table-top {

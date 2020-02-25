@@ -1,33 +1,17 @@
-#ip-report > *:nth-child(1) {
-    order: 2;
-}
-
-#ip-report > *:nth-child(2) {
-    order: 1;
-}
-
-#ip-report {
-    display: grid;
-    grid-gap: 1.5em;
-    align-items: start;
-}
-
 /* Small devices */
 @media (min-width: 576px) {
 }
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #ip-report > *:nth-child(1) {
-        order: 1;
-    }
-
-    #ip-report > *:nth-child(2) {
-        order: 2;
-    }
-
     #ip-report {
-        grid-template-columns: 1fr 1fr;
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 1em;
+        max-width: 48em;
+        margin: auto;
+        justify-content: space-between;
+        align-items: center;
     }
 }
 

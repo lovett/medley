@@ -1,22 +1,10 @@
-#inventory {
-    column-count: 1;
-    line-height: 1.5;
-    margin-left: 0;
-    flex-grow: 1;
-    padding-left: 0;
-    list-style-type: none;
-}
-
-#inventory LI {
-    padding: .5em 0 0 0;
-    display: block;
+#collection ul {
+    grid-template-columns: 1fr;
 }
 
 .scatter {
     width: 100%;
     height: 50vh;
-    /* border-left: 1px solid #ccc; */
-    /* border-bottom: 1px solid #ccc; */
 }
 
 .scatter line {
@@ -50,19 +38,18 @@
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #inventory {
-        column-count: 2;
-        column-gap: 2em;
-    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
+    #collection ul {
+        grid-template-columns: repeat(2, auto);
+    }
 }
 
 /* Extra large devices */
 @media (min-width: 1200px) {
-    #inventory {
-        column-count: 3;
+    #collection ul {
+        grid-template-columns: repeat(3, auto);
     }
 }

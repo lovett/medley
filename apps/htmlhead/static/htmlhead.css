@@ -1,3 +1,7 @@
+NAV.secondary {
+    justify-content: center;
+}
+
 TABLE.key-value TD {
     padding: 0;
 }
@@ -12,10 +16,6 @@ TABLE.key-value CAPTION {
 DL {
     margin: 0;
     padding: 1em;
-}
-
-DT {
-    color: var(--success);
 }
 
 DD {

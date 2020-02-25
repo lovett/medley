@@ -15,6 +15,15 @@
     {{ macros.staticAsset('reminder', 'reminder.js') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a href="{{ registry_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit templates
+        </a>
+    </nav>
+{% endblock %}
+
 {% block app_message %}
     {% if error %}
         <section id="app-message" class="error">{{ error }}</section>
@@ -78,13 +87,6 @@
                         </div>
                     </discardable-record>
                 {% endfor %}
-
-                {% if registry_url %}
-                    <a class="template-edit" href="{{ registry_url }}">
-                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                        Edit templates
-                    </a>
-                {% endif %}
             </div>
             <div>
                 <div class="field">

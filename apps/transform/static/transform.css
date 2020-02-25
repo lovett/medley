@@ -1,13 +1,12 @@
 MAIN {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
 }
 
 #transform-result {
     overflow-wrap: break-word;
     background-color: var(--tertiary);
-    margin: 0 -1em -1em -1em;
+    margin: 0 -1em;
     padding: 1em;
     flex-grow: 1;
 }
@@ -15,8 +14,7 @@ MAIN {
 #transform-result header {
     display: flex;
     flex-flow: row;
-    margin: .5em 0;
-    align-items: center;
+    justify-content: flex-end;
 }
 
 #transform-result header h2 {
@@ -25,7 +23,7 @@ MAIN {
 
 
 #transform-result header > div {
-    margin-right: 2em;
+    margin-left: 2em;
 }
 
 
@@ -34,7 +32,8 @@ MAIN {
 }
 
 #transformations {
-    column-count: 2;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
 };
 
 /* Small devices */
@@ -44,17 +43,20 @@ MAIN {
 /* Medium devices */
 @media (min-width: 768px) {
     #transformations {
-        column-count: 4;
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
     #transformations {
-        column-count: 6;
+        grid-template-columns: repeat(6, 1fr);
     }
 }
 
 /* Extra large devices */
 @media (min-width: 1200px) {
+    #transformations {
+        grid-template-columns: repeat(8, 1fr);
+    }
 }

@@ -1,22 +1,28 @@
 SECTION {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(15em, 1fr));
-    grid-gap: 1em;
+    grid-row-gap: 1.25em;
 }
 
 .description {
     font-size: .85em;
     display: block;
-    margin-top: .5em;
+    color: var(--black);
+}
+
+.focus-candidate {
+    margin-left: -1em;
+}
+
+.item:hover {
+    text-decoration: none;
+}
+
+.item:hover .name {
+    color: var(--success);
 }
 
 .item {
     margin: 0;
-    padding-bottom: 1em;
-}
-
-.item A.focus-candidate {
-    margin-left: -1em;
 }
 
 .name {
@@ -25,16 +31,35 @@ SECTION {
 
 /* Small devices */
 @media (min-width: 576px) {
+    MAIN {
+        padding-top: 2em;
+    }
+
+    SECTION {
+        grid-template-columns: repeat(2, 1fr);
+        grid-column-gap: 3em;
+        grid-row-gap: 3em;
+    }
+
 }
 
 /* Medium devices */
 @media (min-width: 768px) {
+    SECTION {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
+    SECTION {
+        grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 /* Extra large devices */
 @media (min-width: 1200px) {
+    SECTION {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }

@@ -76,7 +76,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", cid="1")
+        self.request("/1")
 
         self.assertIsNone(
             publish_mock.call_args_list[-1].kwargs.get("newer_url"),

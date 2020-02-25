@@ -1,0 +1,36 @@
+SECTION {
+    max-width: 60em;
+    margin: auto;
+    margin-top: 2em;
+}
+
+TABLE {
+    margin-top: 1.5em;
+}
+
+TH {
+    white-space: nowrap;
+}
+
+TD {
+    white-space: nowrap;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    SECTION {
+        margin-top: 3em;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}

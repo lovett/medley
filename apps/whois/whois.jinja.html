@@ -13,25 +13,23 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("binoculars", "search", "close") }}
+    {{ macros.svgSymbols("binoculars", "close") }}
 
     <main>
         <header class="app-nav">
             <form id="search-form" method="get" action="/whois">
                 <div class="field">
-                    <label for="address">IP or host</label>
                     <input
                         type="search"
                         id="address"
                         name="address"
                         value="{{ address }}"
                         autocapitalize="none"
+                        placeholder="IP or host"
                     />
                 </div>
                 <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
+                    <button>Search</button>
                 </div>
             </form>
         </header>
@@ -84,18 +82,15 @@
                         <dd>{{ ip_facts.geo.metro_code }}</dd>
                     {% endif %}
 
-                    <dt>Activity</dt>
-                    {% if visit_days_count == 0 %}
-                        <dd>None</dd>
-                    {% endif %}
-
                     {% if visit_days_count == 1 %}
+                        <dt>Activity</dt>
                         <dd>
                             1 visit on {{ earliest_visit|localtime|dateformat('LL') }}
                         </dd>
                     {% endif %}
 
                     {% if visit_days_count > 1 %}
+                        <dt>Activity</dt>
                         <dd>
                             {{ visit_days_count|pluralize('visit', 'visits') }}
                             since {{ earliest_visit|localtime|dateformat("LL") }}.

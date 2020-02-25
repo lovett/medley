@@ -13,20 +13,6 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <form method="post" action="{{ app_url }}">
-            <fieldset>
-                <input
-                    type="search"
-                    id="url"
-                    name="url"
-                    value="{{ url }}"
-                    autocapitalize="none"
-                    autocomplete="off"
-                    placeholder="URL"
-                />
-                <button>Visit</button>
-            </fieldset>
-        </form>
         {% block main_toolbar_links %}{% endblock %}
     </nav>
 {% endblock %}
@@ -35,11 +21,30 @@
     {{ macros.svgSymbols("globe", "arrow-left", "calendar", "info", "link", "bookmark", "delete") }}
 
     <main>
-        {% if unrecognized %}
-            <p>That URL isn't supported here.</p>
-        {% endif %}
-
         {% block content %}
+            <header class="app-nav">
+                <form method="post" action="{{ app_url }}">
+                    <div class="field">
+                        <input
+                            type="search"
+                            id="url"
+                            name="url"
+                            value="{{ url }}"
+                            autocapitalize="none"
+                            autocomplete="off"
+                            placeholder="URL"
+                        />
+                    </div>
+                    <div class="field">
+                        <button>Visit</button>
+                    </div>
+                </form>
+            </header>
+
+            {% if unrecognized %}
+                <p>That URL isn't supported here.</p>
+            {% endif %}
+
             <header>
                 <h2>Bookmarks</h2>
             </header>

@@ -256,11 +256,6 @@ MEDLEY.visitors = (function () {
 
             document.getElementById('saved').addEventListener(
                 'change',
-                toggleQueryDelete
-            );
-
-            document.getElementById('saved').addEventListener(
-                'change',
                 displaySavedQuery
             );
 

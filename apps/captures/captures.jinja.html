@@ -9,31 +9,28 @@
     {{ macros.vueApp('main', ('clipboard-button',)) }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        <form method="get" action="{{ app_url }}">
-            <fieldset>
-                <input
-                    type="search"
-                    id="path"
-                    name="path"
-                    value="{{ path or "" }}"
-                    autocapitalize="none"
-                    placeholder="URL"
-                />
-                <button>Search</button>
-            </fieldset>
-        </form>
-        {% if path %}
-            {{ macros.cancelLink(app_url) }}
-        {% endif %}
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "close") }}
 
     <main>
+        <header class="app-nav">
+            <form method="get" action="{{ app_url }}">
+                <div class="field">
+                    <input
+                        type="search"
+                        id="path"
+                        name="path"
+                        value="{{ path or "" }}"
+                        autocapitalize="none"
+                        placeholder="URL"
+                    />
+                </div>
+                <div>
+                    <button>Search</button>
+                </div>
+            </form>
+        </header>
+
         {% if not captures %}
             <p>No captures found.</p>
         {% endif %}
@@ -46,7 +43,7 @@
                             #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
                         </div>
 
-                        <a href="{{ app_url }}?cid={{ capture.rowid }}">
+                        <a href="{{ app_url }}/{{ capture.rowid }}">
                             <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
                         </a>
                     </header>

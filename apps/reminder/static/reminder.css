@@ -84,11 +84,6 @@
     color: currentColor;
 }
 
-.template-edit {
-    display: block;
-    padding: 2em 0;
-}
-
 /* Small devices */
 @media (min-width: 576px) {
 }

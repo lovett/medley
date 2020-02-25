@@ -14,35 +14,29 @@ class Controller:
 
     def __init__(self):
         self.transforms = {
+            "as-is": lambda x: x,
             "capitalize": lambda x: x.capitalize(),
+            "flatten": lambda x: re.sub("[\r\n]+", "", x),
             "lower": lambda x: x.lower(),
             "title": lambda x: x.title(),
             "upper": lambda x: x.upper(),
             "urldecode": urllib.parse.unquote_plus,
-            "urlencode": urllib.parse.quote_plus,
-            "flatten": lambda x: re.sub("[\r\n]+", "", x),
+            "urlencode": urllib.parse.quote_plus
         }
 
     def list_of_transforms(self):
         """Shape the list of transforms into a list of keys"""
         return sorted(self.transforms.keys())
 
-    @cherrypy.tools.provides(formats=("json", "text", "html"))
+    @cherrypy.tools.provides(formats=("html",))
     def GET(self, *_args, **_kwargs) -> bytes:
         """The default view presents the available transformation methods"""
-
-        if cherrypy.request.wants == "json":
-            return json.dumps(
-                {"transforms": self.list_of_transforms()}
-            ).encode()
-
-        if cherrypy.request.wants == "text":
-            return "\n".join(self.list_of_transforms()).encode()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "transform.jinja.html",
-            transforms=self.list_of_transforms()
+            transforms=self.list_of_transforms(),
+            current_transform="as-is"
         ).pop()
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))

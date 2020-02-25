@@ -25,17 +25,27 @@
 
 
 {% block page_body %}
-    <main>
-        {{ inline_bookmarklet("location='" + bounce_url + "?u='+encodeURIComponent(location.href)", "bounce") }}
-        <p>Send the current URL to the Bounce app for redirection</p>
+    <main id="collection">
+        <ul>
+            <li>
+                {{ inline_bookmarklet("location='" + bounce_url + "?u='+encodeURIComponent(location.href)", "bounce") }}
+                <p>Send the current URL to the Bounce app for redirection</p>
+            </li>
 
-        {{ inline_bookmarklet("e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('" + later_url + "/?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))", "later") }}
-        <p>Send the current page to the Later app for bookmarking</p>
+            <li>
+                {{ inline_bookmarklet("e=encodeURIComponent;m=document.querySelectorAll('META[name=description]');void(window.open('" + later_url + "/?comments=' + e(window.getSelection().toString()||(m.length>0?m[0].getAttribute('content'):'')) + '&url='+e(window.location.href) + '&title='+e(document.title), 'later'))", "later") }}
+                <p>Send the current page to the Later app for bookmarking</p>
+            </li>
 
-        {{ inline_bookmarklet("location='https://www.google.com/#' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}
-        <p>Retry a web search on Google</p>
+            <li>
+                {{ inline_bookmarklet("location='https://www.google.com/#' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}
+                <p>Retry a web search on Google</p>
+            </li>
 
-        {{ bookmarklet_url("validate.js", "validate") }}
-        <p>Submit the current page to the W3C HTML validator</p>
+            <li>
+                {{ bookmarklet_url("validate.js", "validate") }}
+                <p>Submit the current page to the W3C HTML validator</p>
+            </li>
+        </ul>
     </main>
 {% endblock %}

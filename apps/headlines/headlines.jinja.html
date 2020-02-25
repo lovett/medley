@@ -10,24 +10,25 @@
 {% endblock %}
 
 {% block main_toolbar %}
-    <nav id="main-toolbar">
-        <form action="#">
-            <button
-                data-limit="{{ limit }}"
-                data-offset="{{ offset }}"
-            >Walk links {{ offset }} to {{ offset + limit - 1}}</button>
-        </form>
-        <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            Bing.com
-        </a>
-    </nav>
 {% endblock %}
 
 
 {% block page_body %}
     {{ macros.svgSymbols("globe") }}
     <main>
+        <header class="app-nav">
+            <form action="#">
+                <button
+                    data-limit="{{ limit }}"
+                    data-offset="{{ offset }}"
+                >Walk links {{ offset }} to {{ offset + limit - 1}}</button>
+            </form>
+            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
+                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                Bing.com
+            </a>
+        </header>
+
         <section id="headlines">
             {% set ns = namespace(loop_count=1) %}
             {% for category in headlines %}

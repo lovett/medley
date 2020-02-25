@@ -1,6 +1,11 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros with context -%}
 
+
+{% block stylesheets %}
+    {{ macros.staticAsset('phone', 'phone.css') }}
+{% endblock %}
+
 {% block app_message %}
     {% if error %}
         <section id="app-message" class="error">{{ error }}</section>
@@ -12,85 +17,79 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
     {% if number %}
-        {{ number|websearch("google") }}
-        {{ number|websearch("bing") }}
+        {{ number|websearch("google", label="Web search") }}
     </nav>
     {% endif %}
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("search", "close", "globe") }}
+    {{ macros.svgSymbols("close", "globe") }}
     <main>
         <header class="app-nav">
             <form method="get" action="/phone">
                 <div class="field">
-                    <label for="number">Phone number or area code</label>
                     <input
                         type="search"
                         id="number"
                         name="number"
                         value="{{ number }}"
                         autocapitalize="none"
+                        placeholder="Phone number or area code"
                     />
                 </div>
                 <div class="field">
-                    <button>
-                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    </button>
+                    <button>Search</button>
                 </div>
             </form>
         </header>
 
         {% if number %}
             <section>
-                <h2>{{ number|phonenumber }}</h2>
-
                 {% if comment %}
                     <p>{{ comment }}</p>
                 {% endif %}
             </section>
+        {% endif %}
 
+        {% if history %}
             <section>
+                <h2>Call History</h2>
 
-                {% if history %}
-                    <h2>History</h2>
-
+                <div class="table-sleeve">
                     <table>
                         <thead>
                             <tr>
                                 <th>Date</th>
                                 <th>Time</th>
-                                <th>Duration</th>
                                 <th>Direction</th>
+                                <th>Duration</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for entry in history %}
                                 <tr>
-                                    <td nowrap>{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
-                                    <td nowrap>{{ entry["date"]|localtime|dateformat("LT")}}</td>
-                                    <td>{{ entry["duration"] }}</td>
+                                    <td>{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
+                                    <td>{{ entry["date"]|localtime|dateformat("LT")}}</td>
                                     <td>{{ entry["direction"] }}</td>
+                                    <td>{{ entry["duration"] }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
             </section>
-                {% endif %}
+        {% endif %}
 
-                {% if number %}
-                    <section>
-                        <details>
-                            <summary>SPARQL</summary>
-                            {% for query in sparql %}
-                                <pre>{{ query|unindent|escape }}</pre>
-                                <p><a href="{{ query|snorql }}" rel="noreferrer" target="_blank">run</a></p>
-                            {% endfor %}
-                        </details>
-                    </section>
-                {% endif %}
-
-
+        {% if number %}
+            <section>
+                <details>
+                    <summary>SPARQL</summary>
+                    {% for query in sparql %}
+                        <pre>{{ query|unindent|escape }}</pre>
+                        <p><a href="{{ query|snorql }}" rel="noreferrer" target="_blank">run</a></p>
+                    {% endfor %}
+                </details>
+            </section>
         {% endif %}
     </main>
 {% endblock %}

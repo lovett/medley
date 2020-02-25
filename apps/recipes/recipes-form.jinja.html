@@ -1,12 +1,5 @@
 {% extends "recipes.jinja.html" %}
 
-{% block main_toolbar_links %}
-    <a href="{{ cancel_url }}">
-        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-        Cancel
-    </a>
-{% endblock %}
-
 {% block content %}
     {{ macros.svgSymbols("arrow-left") }}
 
@@ -53,7 +46,7 @@
 
             <div class="field">
                 <button>Save</button>
-
+                {{ macros.cancelLink(cancel_url, False) }}
             </div>
 
         </form>

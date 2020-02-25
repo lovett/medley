@@ -14,10 +14,15 @@
 {% endblock %}
 
 {% block content %}
-    <header>
-        <h2>{{ url }}</h2>
-    </header>
+
+
     {% for story in stories %}
+        {% if loop.first %}
+            <header>
+                <h2>/r/{{ story.subreddit|lower }}</h2>
+            </header>
+        {% endif %}
+
         <div class="headline">
             <h2 class="title"><a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">{{ story.title|safe }}</a></h2>
             <time class="info">

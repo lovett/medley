@@ -1,20 +1,19 @@
 {% extends "base.jinja.html" %}
 {% import "macros.jinja.html" as macros -%}
 
-{% set body_id = 'startpage-edit' %}
-
 {% block stylesheets %}
     {{ macros.staticAsset('startpage', 'startpage.css') }}
 {% endblock %}
 
 {% block page_body %}
-    <main>
+    <main id="editor">
         <form method="post" action="{{ post_url }}">
             <input type="hidden" name="page_name" value="{{ page_name }}" />
 
-            <div class="field">
+            <div class="field stretch">
                 <textarea name="page_content">{{ page_content }}</textarea>
             </div>
+
             <div class="field">
                 <button>{{ button_label }}</button>
                 {{ macros.cancelLink(cancel_url, False) }}

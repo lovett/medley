@@ -252,8 +252,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             context: jinja2.runtime.Context,
             value: str,
             engine: str = "",
-            url_only: bool = False,
-            with_icon: bool = True
+            label: str = "",
     ) -> str:
         """Construct an offsite search URL for a term."""
 
@@ -270,18 +269,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         url = self.anonymize_filter(context, url)
 
-        if url_only:
-            return url
+        icon = """<svg class="icon icon-globe">
+        <use xlink:href="#icon-globe"></use>
+        </svg>"""
 
-        icon = ""
-        if with_icon:
-            icon = """<svg class="icon icon-globe">
-            <use xlink:href="#icon-globe"></use>
-            </svg>"""
+        if not label:
+            label = engine.capitalize()
 
         result = f"""<a href="{url}"
         target="_blank" rel="noopener noreferer"
-        >{icon} {engine.capitalize()}</a>"""
+        >{icon} {label}</a>"""
 
         if context.eval_ctx.autoescape:
             return jinja2.Markup(result)
@@ -429,7 +426,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return value
 
-    @jinja2.contextfilter
     def autolink_filter(
             self,
             value: str

@@ -13,26 +13,20 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        {% if saved_queries %}
-            <div id="saved-queries">
-                <label for="saved">Saved searches:</label>
-                <select id="saved">
-                    <option value=""></option>
-                    {% for query in saved_queries %}
-                        <option data-id="{{ query[0] }}" value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}>{{ query[1] }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        {% endif %}
+        <a id="save" class="secondary-action" href="#save">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            Save query
+        </a>
+
         <a href="/registry/?q=visitors">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-            Edit
+            Edit queries
         </a>
     </nav>
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
+    {{ macros.svgSymbols("add-item", "delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
 
     <main>
         <header class="app-nav">
@@ -40,21 +34,35 @@
                 <div class="field">
                     <textarea id="query" name="query">{{ query|default('', true) }}</textarea>
                     <div class="shortcuts">
-                        <button
-                            data-field="query"
-                            data-shortcut="query-date-backward"
-                        >Day before</button>
+                        {% if saved_queries %}
+                            <div id="saved-queries">
+                                <select id="saved">
+                                    <option value=""></option>
+                                    {% for query in saved_queries %}
+                                        <option data-id="{{ query[0] }}"
+                                                value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}
+                                        >{{ query[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        {% endif %}
 
-                        <button
-                            data-field="query"
-                            data-shortcut="query-date-forward"
-                        >Day after</button>
+                        <div>
+                            <button
+                                data-field="query"
+                                data-shortcut="query-date-backward"
+                            >Day before</button>
+
+                            <button
+                                data-field="query"
+                                data-shortcut="query-date-forward"
+                            >Day after</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="field">
                     <button id="search">Search</button>
-                    <a id="save" class="secondary-action" href="#save">Save</a>
                 </div>
             </form>
         </header>

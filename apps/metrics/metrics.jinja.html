@@ -22,16 +22,18 @@
 
     <main>
         {% if metrics %}
-            <ul id="inventory">
-                {% for metric in metrics %}
-                    <li>
-                        <a href="{{ app_url }}/{{ metric["key"] }}">
-                            <svg class="icon icon-chart"><use xlink:href="#icon-chart"></use></svg>
-                            {{ metric["key"] }}
-                        </a>
+            <div id="collection">
+                <ul>
+                    {% for metric in metrics %}
+                        <li>
+                            <a href="{{ app_url }}/{{ metric["key"] }}">
+                                <svg class="icon icon-chart"><use xlink:href="#icon-chart"></use></svg>
+                                {{ metric["key"] }}
+                            </a>
                     </li>
-                {% endfor %}
-            </ul>
+                    {% endfor %}
+                </ul>
+            </div>
         {% endif %}
 
         {% if metric %}

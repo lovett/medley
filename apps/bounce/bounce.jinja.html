@@ -5,6 +5,15 @@
     {{ macros.staticAsset('bounce', 'bounce.css') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a href="{{ registry_url }}" target="_blank">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </nav>
+{% endblock %}
+
 {% block app_message %}
     {% if invalid == "group" %}
         <section id="app-message" class="error">Invalid group.</section>
@@ -22,16 +31,19 @@
         {% if not bounces %}
             <form method="post" action="/bounce">
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input required type="text" id="name" name="name" value="{{ name }}"/>
-                </div>
-                <div class="field">
-                    <label for="group">Group</label>
-                    <input required type="text" id="group" name="group" value="{{ group }}"/>
-                </div>
-                <div class="field">
                     <label for="url">URL</label>
                     <input required type="text" id="url" name="url" value="{{ url }}"/>
+                </div>
+                <div class="field-group">
+                    <div class="field">
+                        <label for="name">Name</label>
+                        <input required type="text" id="name" name="name" value="{{ name }}"/>
+                    </div>
+
+                    <div class="field">
+                        <label for="group">Group</label>
+                        <input required type="text" id="group" name="group" value="{{ group }}"/>
+                    </div>
                 </div>
 
                 <div class="field">
@@ -52,15 +64,6 @@
                     </a>
                 </p>
             {% endfor %}
-
-            {% if registry_url %}
-                <p>
-                    <a href="{{ registry_url }}" target="_blank">
-                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                        Edit
-                    </a>
-                </p>
-            {% endif %}
         {% endif %}
     </main>
 {% endblock %}

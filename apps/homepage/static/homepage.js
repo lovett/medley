@@ -3,7 +3,7 @@ MEDLEY.homepage = (function () {
 
     return {
         init: function () {
-            MEDLEY.focusAsYouType('.item a');
+            MEDLEY.focusAsYouType('.item');
         }
     };
 })();

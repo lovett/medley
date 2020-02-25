@@ -13,15 +13,12 @@
 
 #recipe header ul li {
     display: inline-block;
-    margin-bottom: 0;
-    margin-right: 1em;
-    line-height: 2;
+    margin-right: 3em;
 }
 
 #recipe header ul li:last-of-type {
     margin-right: 0;
 }
-
 
 #recipe UL {
     margin: 0;

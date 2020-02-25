@@ -25,36 +25,14 @@
 {%- endmacro -%}
 
 {% block main_toolbar_links %}
-    <a href="{{ app_url }}">
-        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-        Bookmarks
-    </a>
     <a href="{{ subreddit_alturl }}">
         <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
         r/{{ subreddit }}
     </a>
-
-    <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
-        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-        u/{{ story.author }}
-    </a>
-
-    <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
-        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-        r/{{ story.subreddit|lower }}
-    </a>
-    <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
-        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-        {% if "self." not in story.domain %}
-            {{ story.domain }}
-        {% else %}
-            original
-        {% endif %}
-    </a>
 {% endblock %}
 
 {% block content %}
-    <header class="intro">
+    <section class="intro">
         <h2>{{ story.title|safe }}</h2>
 
         <time class="info">
@@ -68,13 +46,29 @@
                 {{ story.num_comments|pluralize("comment", "comments") }}
             </span>
         {% endif %}
+
+        <a class="info" rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            u/{{ story.author }}
+        </a>
+
+        <a class="info" target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            {% if "self." not in story.domain %}
+                {{ story.domain }}
+            {% else %}
+                original
+            {% endif %}
+        </a>
+
+
         <div>
             {% if story.selftext %}
                 {{ story.selftext|unescape }}
             {% endif %}
-
         </div>
-    </header>
+
+    </section>
 
     {% if not comments %}
         <p>No comments.</p>

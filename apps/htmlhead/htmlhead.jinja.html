@@ -8,6 +8,10 @@
     {{ macros.staticAsset('htmlhead', 'htmlhead.js') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar"></nav>
+{% endblock %}
+
 {% block app_message %}
     {% if failure_message %}
         <section id="app-message" class="error">{{ failure_message }}</section>
@@ -50,23 +54,19 @@
         </form>
     </header>
 
+    {% if tags %}
     <nav class="secondary">
-        {% if tags %}
-            <div>
-                <form id="filter">
-                    <div class="field">
-                        <input type="text" class="inline" name="filter" value="" />
-                        <button>Filter</button>
-                        <input type="reset" value="Reset" />
-                    </div>
-                </form>
-            </div>
-        {% endif %}
-
-        {% if url %}
-            <div>{{ macros.cancelLink(app_url) }}</div>
-        {% endif %}
+        <div>
+            <form id="filter">
+                <div class="field">
+                    <input type="text" class="inline" name="filter" value="" />
+                    <button>Filter</button>
+                    <input type="reset" value="Reset" />
+                </div>
+            </form>
+        </div>
     </nav>
+    {% endif %}
 
         {% if tags %}
             <div class="table-sleeve">

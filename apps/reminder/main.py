@@ -24,13 +24,11 @@ class Controller:
             exact=True,
         ).pop()
 
-        registry_url = ''
-        if registry_rows:
-            registry_url = cherrypy.engine.publish(
-                "url:internal",
-                "/registry",
-                {"q": "reminder:template"}
-            ).pop()
+        registry_url = cherrypy.engine.publish(
+            "url:internal",
+            "/registry",
+            {"q": "reminder:template"}
+        ).pop()
 
         templates = {
             row["rowid"]: {k: v[-1] for k, v in parse_qs(row["value"]).items()}

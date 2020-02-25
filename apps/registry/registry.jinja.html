@@ -12,19 +12,6 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <form id="search-form" action="{{ app_url }}">
-            <fieldset>
-                <input
-                    type="search"
-                    id="q"
-                    name="q"
-                    value="{{ query|default('', true) }}"
-                    autocapitalize="none"
-                />
-                <button>Search</button>
-            </fieldset>
-        </form>
-
         {% block main_toolbar_links %}
             <a href="{{ app_url }}/new">
                 <svg class="icon"><use xlink:href="#add-item"></use></svg>
@@ -44,6 +31,23 @@
     {% block content %}
         {{ macros.svgSymbols("add-item", "arrow-let", "download", "tag") }}
         <main id="tagset">
+            <header class="app-nav">
+                <form id="search-form" action="{{ app_url }}">
+                    <div class="field">
+                        <input
+                            type="search"
+                            id="q"
+                            name="q"
+                            value="{{ query|default('', true) }}"
+                            autocapitalize="none"
+                        />
+                    </div>
+                    <div class="field">
+                        <button>Search</button>
+                    </div>
+                </form>
+            </header>
+
             <header>
                 <h2>Groups</h2>
             </header>

@@ -11,26 +11,13 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <form method="get" action="{{ app_url }}">
-            <fieldset>
-                <input
-                    type="search"
-                    id="query"
-                    name="query"
-                    value="{{ query|default('', true)|e }}"
-                    autocapitalize="none"
-                />
-                <button>Search</button>
-            </fieldset>
-        </form>
-
         {% if query %}
             {{ macros.cancelLink(app_url) }}
         {% endif %}
 
         <a href="{{ app_url }}/taglist">
             <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
-            tag list
+            All tags
         </a>
 
         {% if general_query %}
@@ -44,72 +31,85 @@
     {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
 
     <main>
-        <header>
-            {% if count %}
-                <h2>
-                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
-                    Found {{ count|pluralize('bookmark', 'bookmarks') }}
-                    {%- if max_days %}
-                        added in the past {{ max_days // 30 }} months.
-                    {%- else -%}
-                        .
-                    {% endif %}
-                </h2>
-            {% endif %}
+        <header class="app-nav">
+            <form method="get" action="{{ app_url }}">
+                <div class="field">
+                    <input
+                        type="search"
+                        id="query"
+                        name="query"
+                        value="{{ query|default('', true)|e }}"
+                        autocapitalize="none"
+                    />
+                </div>
+                <div class="field">
+                    <button>Search</button>
+                </div>
+            </form>
         </header>
+
+        {% if count and not max_days %}
+            <h2>
+                <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                Found {{ count|pluralize('bookmark', 'bookmarks') }}
+                added in the past {{ max_days // 30 }} months.
+            </h2>
+        {% endif %}
 
         {% if not bookmarks %}
             <p>Nothing found.</p>
         {% endif %}
 
-        <section class="bookmarks">
-            {% for bookmark in bookmarks %}
-
-                <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
-                    <div class="bookmark" v-bind:style="styles">
-                        <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
-                            {{ bookmark.title }}
-                        </a>
-
-                        {% if bookmark.tags %}
-                        <div class="tags">
-                            {% for tag in bookmark.tags %}
-                                <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
-                                    <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
-                                    {{ tag }}
+        <div id="collection">
+            <ul>
+                {% for bookmark in bookmarks %}
+                    <li>
+                        <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
+                            <div class="bookmark" v-bind:style="styles">
+                                <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
+                                    {{ bookmark.title }}
                                 </a>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
 
-                        <div class="details">
-                            <div><discard-button tooltip="Delete this bookmark" /></div>
+                                {% if bookmark.tags %}
+                                    <div class="tags">
+                                        {% for tag in bookmark.tags %}
+                                            <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
+                                                <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                                                {{ tag }}
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
 
-                            <div>
-                                <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
-                            </div>
+                                <div class="details">
+                                    <div><discard-button tooltip="Delete this bookmark" /></div>
 
-                            {% if bookmark.domain %}
-                                <div>
-                                    <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                    <div>
+                                        <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                                    </div>
+
+                                    {% if bookmark.domain %}
+                                        <div>
+                                            <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                        </div>
+                                    {% endif %}
+
+                                    <div>
+                                        <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                                    </div>
                                 </div>
-                            {% endif %}
 
-                            <div>
-                                <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                                {% if bookmark.comments %}
+                                    <p class="comments">
+                                        {{ bookmark.comments }}
+                                    </p>
+                                {% endif %}
                             </div>
-                        </div>
-
-                        {% if bookmark.comments %}
-                            <p class="comments">
-                                {{ bookmark.comments }}
-                            </p>
-                        {% endif %}
-                    </div>
-                </discardable-record>
-
-            {% endfor %}
-        </section>
+                        </discardable-record>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
         <section class="pagination">
             {% if bookmarks %}

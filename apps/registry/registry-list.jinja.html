@@ -35,9 +35,9 @@
 
 {% block content %}
     {{ macros.svgSymbols("copy", "delete", "new-item", "add-item", "arrow-left", "download") }}
-    <main id="tagset">
+    <main>
         <header>
-            <h2> {{ query }}</h2>
+            <h2>{{ query }}</h2>
 
             <div>
                 {{ record_count|pluralize('record', 'records') }} found

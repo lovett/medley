@@ -250,10 +250,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
         result = self.search(key=key_prefix, value=value, limit=1)
 
-        if not result:
+        try:
+            return typing.cast(str, next(result)["key"])
+        except StopIteration:
             return None
-
-        return typing.cast(str, result[0]["key"])
 
     def first_value(
             self,
@@ -273,11 +273,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if memorize_hit:
                 return memorize_value
 
-        result = self.search(key=key, exact=True, limit=1)
+        record_generator = self.search(key=key, exact=True, limit=1)
 
         try:
-            value = result[0]["value"]
-        except IndexError:
+            result = next(record_generator)
+            value = result["value"]
+        except StopIteration:
             value = default
 
         if as_path:

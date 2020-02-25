@@ -16,6 +16,10 @@ code {
     white-space: pre-wrap;
 }
 
+#collection ul {
+    display: block;
+}
+
 .comment a {
     word-break: break-all;
 }
@@ -23,7 +27,7 @@ code {
 .comment h1, .comment h2, .comment h3, .comment h4, .comment h5, .comment h6,
 .intro h1, .intro h2, .intro h3, .intro h4, .intro h5, .intro h6 {
     font-size: 1.1em;
-    margin: 0;
+    margin: 0 0 .5em 0;
 }
 
 .comment summary {
@@ -88,6 +92,7 @@ MAIN > HEADER:nth-of-type(1) {
     display: inline-flex;
     align-items: center;
     margin-right: 1em;
+    margin-bottom: .5em;
 }
 
 .unbookmark > * {

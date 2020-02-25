@@ -39,35 +39,26 @@
         {% endfor %}
 
         <p>
-            {{ forecast.current_summary|capitalize }},
-            {{ forecast.current_temperature }}° F
+            {{ forecast.current_summary|capitalize }}.
+            {{ forecast.current_temperature }}° F,
+            {{ forecast.humidity|percentage }} humidity.
         </p>
 
+        <p>
+            {{ forecast.summary }}
+            High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.
+            Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.
+        </p>
 
-        <p>{{ forecast.summary }}</p>
-
-        {% if forecast.high %}
-            <p>High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.</p>
-        {% endif %}
-
-        {% if forecast.low %}
-            <p>Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.</p>
-        {% endif %}
-
-        <p>{{ forecast.humidity|percentage }} humidity.</p>
-
-        {% if forecast.sunrise %}
-            <p>Sunrise at {{ forecast.sunrise|dateformat('LT') }}</p>
-        {% endif %}
-
-        {% if forecast.sunset %}
-            <p>Sunset at {{ forecast.sunset|dateformat('LT') }}</p>
-        {% endif %}
+        <p>
+            Sunrise at {{ forecast.sunrise|dateformat('LT') }}.
+            Sunset at {{ forecast.sunset|dateformat('LT') }}
+        </p>
 
         <div class="panels">
             <div>
                 {% if forecast.hourly %}
-                    <h3>Today</h3>
+                    <h2>Today</h2>
 
                     <table>
                         <colgroup>
@@ -89,7 +80,7 @@
             </div>
             <div>
                 {% if forecast.upcoming %}
-                    <h3>Upcoming</h3>
+                    <h2>Upcoming</h2>
                     <table>
                         <colgroup>
                             <col>

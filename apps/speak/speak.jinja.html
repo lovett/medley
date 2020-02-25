@@ -3,20 +3,6 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        {% if not muted_by_schedule %}
-            {% if not muted %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="mute" />
-                    <button>Mute now</button>
-                </form>
-            {% else %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="unmute" />
-                    <button>Unmute</button>
-                </form>
-            {% endif %}
-        {% endif %}
-
         <a class="template-edit" href="{{ registry_url }}">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
             Edit schedule
@@ -32,6 +18,18 @@
             <p>Automuted by schedule.</p>
         {% endif %}
 
+        {% if schedules %}
+            <p>
+                Auto muting occurs between
+
+                {% for schedule in schedules %}
+                    {{ schedule|replace("\n", " and ") }}
+
+                    {%- if not loop.last %} and between {% endif %}
+                {%- endfor -%}.
+            </p>
+        {% endif %}
+
         {% if not muted_by_schedule %}
             {% if not muted %}
                 <p>Not currently muted.</p>
@@ -40,16 +38,20 @@
             {% endif %}
         {% endif %}
 
-        {% if schedules %}
-            <p>
-                Muting occurs automatically from
-
-                {% for schedule in schedules %}
-                    {{ schedule|replace("\n", " → ") }}
-
-                    {% if not loop.last %}and{% endif %}
-                {% endfor %}
-            </p>
+        {% if not muted_by_schedule %}
+            {% if not muted %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="mute" />
+                    <button>Mute now</button>
+                </form>
+            {% else %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button>Unmute</button>
+                </form>
+            {% endif %}
         {% endif %}
+
+
     </main>
 {% endblock %}
