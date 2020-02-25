@@ -2,9 +2,9 @@
 
 import re
 import typing
+from urllib.parse import urlparse
 import cherrypy
 import mistletoe
-
 ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 
 
@@ -72,8 +72,13 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
         for story in response.get("data").get("children")
     )
 
+    parsed_url = urlparse(url)
+
+    subreddit = f"{parsed_url.netloc}{parsed_url.path}"
+
     return ("reddit-index.jinja.html", {
         "stories": stories,
+        "subreddit": subreddit,
         "url": url
     })
 
@@ -94,14 +99,16 @@ def view_story(response: typing.Any) -> ViewAndData:
         if child.get("data", {}).get("author") != "AutoModerator"
     )
 
+    subreddit = story.get("subreddit").lower()
+
     subreddit_alturl = cherrypy.engine.publish(
         "url:internal",
-        f"reddit.com/r/{story.get('subreddit').lower()}"
+        f"reddit.com/r/{subreddit}"
     ).pop()
 
     return ("reddit-story.jinja.html", {
         "story": story,
         "comments": comments,
-        "subreddit_alturl": subreddit_alturl,
-        "subreddit": story.get("subreddit")
+        "subreddit": subreddit,
+        "subreddit_alturl": subreddit_alturl
     })
