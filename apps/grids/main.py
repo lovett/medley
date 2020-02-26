@@ -76,7 +76,8 @@ class Controller:
             name=name,
             names=grids.keys(),
             options=options,
-            rows=rows
+            rows=rows,
+            subview_title=name
         ).pop()
 
     @staticmethod

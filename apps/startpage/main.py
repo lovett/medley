@@ -55,6 +55,7 @@ class Controller:
             page_name=page_name,
             page_content=page_content,
             post_url=post_url,
+            subview_title="Edit"
         ).pop()
 
     @staticmethod

@@ -102,5 +102,6 @@ class Controller:
             visitors_url=visitors_url,
             earliest_visit=visit_days.get("earliest"),
             latest_visit=visit_days.get("latest"),
-            visit_days_count=visit_days.get("count", 0)
+            visit_days_count=visit_days.get("count", 0),
+            subview_title=address_clean
         ).pop()

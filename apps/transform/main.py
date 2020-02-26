@@ -68,5 +68,5 @@ class Controller:
             result=result,
             current_transform=transform,
             transforms=self.list_of_transforms(),
-            value=value,
+            value=value
         ).pop()

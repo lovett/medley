@@ -23,6 +23,7 @@ class Controller:
         path = kwargs.get('path')
         offset = int(kwargs.get('offset', 0))
         per_page = 5
+        subview_title = ""
 
         if path:
             path = path.strip()
@@ -34,6 +35,7 @@ class Controller:
             ).pop()
             newer_url = None
             older_url = None
+            subview_title = rowid
         else:
             total, captures = cherrypy.engine.publish(
                 "capture:search",
@@ -57,4 +59,5 @@ class Controller:
             captures=captures,
             newer_url=newer_url,
             older_url=older_url,
+            subview_title=subview_title
         ).pop()

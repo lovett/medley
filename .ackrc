@@ -10,3 +10,4 @@
 --ignore-file=ext:pyc
 --ignore-file=is:.coverage
 --type-set=test:match:/_test.py/
+--type-set=controller:match:/main.py/

@@ -79,7 +79,8 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
     return ("reddit-index.jinja.html", {
         "stories": stories,
         "subreddit": subreddit,
-        "url": url
+        "url": url,
+        "subview_title": subreddit
     })
 
 
@@ -110,5 +111,6 @@ def view_story(response: typing.Any) -> ViewAndData:
         "story": story,
         "comments": comments,
         "subreddit": subreddit,
-        "subreddit_alturl": subreddit_alturl
+        "subreddit_alturl": subreddit_alturl,
+        "subview_title": story["title"]
     })

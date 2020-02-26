@@ -38,7 +38,8 @@ class Controller:
             return cherrypy.engine.publish(
                 "jinja:render",
                 "phone.jinja.html",
-                error="The number provided was invalid."
+                error="The number provided was invalid.",
+                subview_title="Error"
             ).pop()
 
         area_code = sanitized_number[:3]
@@ -92,4 +93,5 @@ class Controller:
             comment=state_lookup[2],
             state_name=state_name_lookup[1],
             sparql=sparql,
+            subview_title=sanitized_number
         ).pop()

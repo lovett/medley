@@ -71,8 +71,9 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "bookmarks-taglist.jinja.html",
-            tags=tags
-            ).pop()
+            tags=tags,
+            subview_title="Tags"
+        ).pop()
 
     @staticmethod
     def search(**kwargs) -> bytes:
@@ -106,7 +107,8 @@ class Controller:
             per_page=per_page,
             query=query,
             query_plan=query_plan,
-            total_records=total_records
+            total_records=total_records,
+            subview_title=query
         ).pop()
 
     @staticmethod

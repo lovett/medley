@@ -103,7 +103,8 @@ class Controller:
             "jinja:render",
             "recipes-list.jinja.html",
             recipes=recipe_generator,
-            tag=tag
+            tag=tag,
+            subview_title=tag
         ).pop()
 
     @staticmethod
@@ -156,7 +157,8 @@ class Controller:
             "jinja:render",
             "recipes-list.jinja.html",
             recipes=recipe_generator,
-            query=query
+            query=query,
+            subview_title=query
         ).pop()
 
     @staticmethod
@@ -197,4 +199,5 @@ class Controller:
             tags=recipe["tags"],
             display_date=recipe["updated"] or recipe["created"],
             url=recipe["url"],
+            subview_title=recipe["title"]
         ).pop()

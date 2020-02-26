@@ -83,7 +83,8 @@ class Controller:
             query=query.strip(),
             parent_key=parent_key,
             record_count=record_count,
-            records=record_generator
+            records=record_generator,
+            subview_title=query
         ).pop()
 
     @staticmethod
@@ -94,6 +95,7 @@ class Controller:
         value = ""
         submit_url = "/registry"
         cancel_url = "/registry"
+        subview_title = "New"
 
         if key:
             cancel_url = f"/registry?q={key}"
@@ -114,6 +116,7 @@ class Controller:
             value = record["value"]
             submit_url = f"/registry/{rowid}"
             cancel_url = f"/registry?q={key}"
+            subview_title = "Update"
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -122,7 +125,8 @@ class Controller:
             key=key,
             value=value,
             submit_url=submit_url,
-            cancel_url=cancel_url
+            cancel_url=cancel_url,
+            subview_title=subview_title
         ).pop()
 
     @staticmethod

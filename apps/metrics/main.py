@@ -64,7 +64,8 @@ class Controller:
             x_range=x_range,
             y_range=y_range,
             points=points,
-            unit=unit
+            unit=unit,
+            subview_title=metric
         ).pop()
 
     @staticmethod

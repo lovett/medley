@@ -98,7 +98,8 @@ class Controller:
             forecast=forecast,
             other_locations=locations,
             location_name=location_name,
-            edit_url=edit_url
+            edit_url=edit_url,
+            subview_title=location_name
         ).pop()
 
     @staticmethod

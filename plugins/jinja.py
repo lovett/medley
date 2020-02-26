@@ -98,6 +98,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "url:internal"
         )
 
+        data["page_title"] = "Medley"
+
+        if data["app_name"]:
+            data["page_title"] += f": {data['app_name'].capitalize()}"
+
+        if "subview_title" in data:
+            data["page_title"] += f": {data['subview_title']}"
+
         if data["app_url"]:
             data["app_url"] = data["app_url"].pop()
 
