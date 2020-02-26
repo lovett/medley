@@ -9,6 +9,15 @@
     {{ macros.vueApp("main", ("discardable-record", "discard-button", "wayback-link")) }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a href="{{ app_url }}/taglist">
+            <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
+            Tags
+        </a>
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
 

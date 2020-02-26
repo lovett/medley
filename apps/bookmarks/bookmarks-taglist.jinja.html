@@ -5,18 +5,9 @@
     {{ macros.staticAsset('bookmarks', 'bookmarks.css') }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        <a href="{{ app_url }}">
-            <svg class="icon icon-tag"><use xlink:href="#icon-arrow-left"></use></svg>
-            Recent
-        </a>
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("icon-tag", "arrow-left") }}
+        {{ macros.svgSymbols("icon-tag") }}
 
         {% if not tags %}
             <p>No tags found.</p>

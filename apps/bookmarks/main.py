@@ -32,6 +32,7 @@ class Controller:
         max_days = 180
         per_page = 20
         offset = int(kwargs.get("offset", "0"))
+        order = "rank"
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
             "bookmarks:recent",
@@ -52,6 +53,7 @@ class Controller:
             bookmarks=bookmarks,
             max_days=max_days,
             total_records=total_records,
+            order=order,
             per_page=per_page,
             query_plan=query_plan,
             offset=offset,
