@@ -8,7 +8,7 @@
 {% block page_body %}
     <main>
         {% if name and options["layout"] == "month" %}
-            <header class="app-nav">
+            <header id="app-nav">
                 {{ macros.svgSymbols("calendar") }}
                 <a href="{{ app_url }}?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
                     <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>

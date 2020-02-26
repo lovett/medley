@@ -29,7 +29,7 @@
     {{ macros.svgSymbols("add-item", "arrow-left", "arrow-right", "delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
 
     <main>
-        <header class="app-nav">
+        <header id="app-nav">
             <form id="visitors-form" method="get" action="{{ app_url }}">
                 <div class="field">
                     <textarea id="query" name="query">{{ query|default('', true) }}</textarea>

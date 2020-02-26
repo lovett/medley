@@ -390,13 +390,13 @@ TEXTAREA {
     transition: all .25s;
 }
 
-.app-nav {
+#app-nav {
     margin: auto;
     margin-bottom: 1em;
     max-width: 40em;
 }
 
-.app-nav > form {
+#app-nav > form {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr auto;
@@ -405,34 +405,34 @@ TEXTAREA {
     align-items: end;
 }
 
-.app-nav .field {
+#app-nav .field {
     padding-bottom: 0;
 }
 
-.app-nav .options {
+#app-nav .options {
     grid-column: span 2;
     display: flex;
     flex-flow: row wrap;
     align-items: center;
 }
 
-.app-nav .options input[type=text],
-.app-nav .options input[type=search],
-.app-nav .options input[type=password] {
+#app-nav .options input[type=text],
+#app-nav .options input[type=search],
+#app-nav .options input[type=password] {
     width: auto;
 }
 
-.app-nav .options .field {
+#app-nav .options .field {
     margin-right: 1.5em;
     padding-bottom: 0;
 }
 
-.app-nav .options .field:last-of-type {
+#app-nav .options .field:last-of-type {
     margin-right: 0;
 }
 
 
-.app-nav .options label {
+#app-nav .options label {
     display: inline-block;
     padding-right: .5em;
 }

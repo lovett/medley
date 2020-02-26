@@ -10,7 +10,7 @@
     font-size: 1em;
 }
 
-.app-nav form {
+#app-nav form {
     grid-template-columns: auto;
 }
 

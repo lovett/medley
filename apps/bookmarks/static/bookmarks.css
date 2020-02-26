@@ -1,9 +1,9 @@
-.app-nav FORM {
+#app-nav FORM {
     grid-row-gap: .5em;
     margin-bottom: 1em;
 }
 
-.app-nav .options {
+#app-nav .options {
     padding: 0;
     grid-column: span 2;
     margin-bottom: 1em;

@@ -1,4 +1,4 @@
-.app-nav p {
+#app-nav p {
     margin-bottom: 0;
 }
 
@@ -24,7 +24,7 @@
 
 /* Print layout */
 @media print {
-    HEADER.app-nav, NAV.secondary {
+    #app-nav, NAV.secondary {
         display: none;
     }
 
