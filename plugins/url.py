@@ -39,6 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url(
             path: typing.Optional[str] = None,
             query: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            force_querystring: bool = False,
             trailing_slash: bool = False
     ) -> str:
         """Create an absolute internal URL.
@@ -104,6 +105,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 for (key, value) in query.items()
                 if value
             }
+
+        if force_querystring:
+            url = f"{url}?"
 
         if query:
             url = f"{url}?{urlencode(query)}"

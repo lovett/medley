@@ -10,6 +10,106 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    @cherrypy.tools.provides(formats=("json", "html"))
+    def GET(self, *args, **kwargs) -> bytes:
+        """Dispatch to a subhandler based on the URL path."""
+
+        if "query" in kwargs:
+            return self.search(**kwargs)
+
+        if "wayback" in kwargs:
+            return self.check_wayback_availability(kwargs.get('wayback'))
+
+        if args and args[0] == "taglist":
+            return self.taglist()
+
+        return self.index(**kwargs)
+
+    @staticmethod
+    def index(*_args, **kwargs) -> bytes:
+        """Display recently-added bookmarks."""
+
+        max_days = 180
+        per_page = 20
+        offset = int(kwargs.get("offset", "0"))
+
+        (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
+            "bookmarks:recent",
+            limit=per_page,
+            offset=offset,
+            max_days=max_days
+        ).pop()
+
+        pagination_url = cherrypy.engine.publish(
+            "url:internal",
+            "/bookmarks",
+            force_querystring=True
+        ).pop()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarks.jinja.html",
+            bookmarks=bookmarks,
+            max_days=max_days,
+            total_records=total_records,
+            per_page=per_page,
+            query_plan=query_plan,
+            offset=offset,
+            pagination_url=pagination_url
+        ).pop()
+
+    @staticmethod
+    def taglist() -> bytes:
+        """List all known bookmark tags."""
+
+        tags = cherrypy.engine.publish(
+            "bookmarks:tags:all"
+            ).pop()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarks-taglist.jinja.html",
+            tags=tags
+            ).pop()
+
+    @staticmethod
+    def search(**kwargs) -> bytes:
+        """Find bookmarks matching a search query."""
+        per_page = 20
+        offset = int(kwargs.get("offset", "0"))
+        query = kwargs.get("query", "").strip()
+
+        (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
+            "bookmarks:search",
+            query,
+            limit=per_page,
+            offset=offset,
+        ).pop()
+
+        pagination_url = cherrypy.engine.publish(
+            "url:internal",
+            "/bookmarks",
+            {"query": query}
+        ).pop()
+
+        general_query = cherrypy.engine.publish(
+            "bookmarks:generalize",
+            query
+        ).pop()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "bookmarks.jinja.html",
+            bookmarks=bookmarks,
+            general_query=general_query,
+            offset=offset,
+            pagination_url=pagination_url,
+            per_page=per_page,
+            query=query,
+            query_plan=query_plan,
+            total_records=total_records
+        ).pop()
+
     @staticmethod
     def check_wayback_availability(url):
         """See if an archived copy of the URL is available."""
@@ -19,89 +119,11 @@ class Controller:
             "http://archive.org/wayback/available",
             params={"url": url},
             as_json=True
-        ).pop() or {}
+            ).pop() or {}
 
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})
         return json.dumps(closest_snapshot).encode()
-
-    @cherrypy.tools.provides(formats=("json", "html"))
-    def GET(self, *args, **kwargs) -> bytes:
-        """Display a list of recently bookmarked URLs, or URLs matching a
-        search.
-
-        """
-
-        order = kwargs.get('order', 'rank')
-        query = kwargs.get('query')
-        page = int(kwargs.get('page', 1))
-        per_page = 20
-        offset = (page - 1) * per_page
-
-        if query:
-            query = query.strip()
-
-        if args == ('taglist',):
-            return self.taglist()
-
-        if kwargs.get('wayback'):
-            return self.check_wayback_availability(kwargs.get('wayback'))
-
-        if query:
-            max_days = None
-            (bookmarks, count, query_plan) = cherrypy.engine.publish(
-                "bookmarks:search",
-                query,
-                order=order,
-                limit=per_page,
-                offset=offset,
-            ).pop()
-        else:
-            max_days = 180
-            (bookmarks, count, query_plan) = cherrypy.engine.publish(
-                "bookmarks:recent",
-                limit=per_page,
-                offset=offset,
-                max_days=max_days
-            ).pop()
-
-        start_index = offset + 1
-        end_index = offset + len(bookmarks)
-
-        total_pages = count // per_page + 1
-
-        next_page = page + 1
-        if next_page > total_pages:
-            next_page = None
-
-        previous_page = page - 1
-        if previous_page < 1:
-            previous_page = None
-
-        general_query = None
-        if query:
-            general_query = cherrypy.engine.publish(
-                "bookmarks:generalize",
-                query
-            ).pop()
-
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarks.jinja.html",
-            bookmarks=bookmarks,
-            max_days=max_days,
-            count=count,
-            query=query,
-            general_query=general_query,
-            query_plan=query_plan,
-            order=order,
-            next_page=next_page,
-            previous_page=previous_page,
-            total_pages=total_pages,
-            page=page,
-            start_index=start_index,
-            end_index=end_index
-        ).pop()
 
     @staticmethod
     def POST(url, **kwargs) -> None:
@@ -135,26 +157,9 @@ class Controller:
         deleted_rows = cherrypy.engine.publish(
             "bookmarks:remove",
             url
-        ).pop()
+            ).pop()
 
         if not deleted_rows:
             raise cherrypy.HTTPError(404, "Invalid url")
 
         cherrypy.response.status = 204
-
-    @staticmethod
-    def taglist() -> bytes:
-        """Render a list of all known bookmark tags using a dedicated
-        template.
-
-        """
-
-        tags = cherrypy.engine.publish(
-            "bookmarks:tags:all"
-        ).pop()
-
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarks-taglist.jinja.html",
-            tags=tags
-        ).pop()

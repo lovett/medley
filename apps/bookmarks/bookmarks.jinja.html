@@ -2,11 +2,11 @@
 {% import "macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('bookmarks', 'bookmarks.css') }}
+    {{ macros.staticAsset("bookmarks", "bookmarks.css") }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'wayback-link')) }}
+    {{ macros.vueApp("main", ("discardable-record", "discard-button", "wayback-link")) }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -74,7 +74,7 @@
                                     <div class="tags">
                                         {% for tag in bookmark.tags %}
                                             <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
-                                                <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                                                <svg class="icon icon-tag"><use xlink:href="#Icon-tag"></use></svg>
                                                 {{ tag }}
                                             </a>
                                         {% endfor %}
@@ -111,38 +111,7 @@
             </ul>
         </div>
 
-        <section class="pagination">
-            {% if bookmarks %}
-                <p>Page {{ page }} of {{ total_pages }}</p>
-            {% endif %}
-
-            {% if page > 1 %}
-                <a href="{{ app_url }}?page=1{{ query|optional_qs_param("query") }}" class="next">
-                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                    First
-                </a>
-            {% endif %}
-
-            {% if previous_page %}
-                <a href="{{ app_url }}?page={{ previous_page }}{{ query|optional_qs_param("query") }}" class="next">
-                    <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                    Previous
-                </a>
-            {% endif %}
-            {% if next_page %}
-                <a href="{{ app_url }}?page={{ next_page }}{{ query|optional_qs_param("query") }}" class="previous">
-                    Next
-                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                </a>
-            {% endif %}
-
-            {% if page < total_pages %}
-                <a href="{{ app_url }}?page={{ total_pages }}{{ query|optional_qs_param("query") }}" class="previous">
-                    Last
-                    <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-                </a>
-            {% endif %}
-        </section>
+        {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
 
         {{ macros.queryPlan(query_plan) }}
     </main>
