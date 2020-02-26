@@ -294,7 +294,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search(
             self,
             query: str,
-            order: str = "date-desc",
+            order: str = "rank",
             limit: int = 20,
             offset: int = 0
     ) -> typing.Tuple[
@@ -330,11 +330,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 query = query.replace(match.group(0), "")
 
         if query:
-            # The query is sanitized to prevent FTS5 syntax errors
+            # The query is sanitized to prevent FTS5 syntax errors.
             query = re.sub(r"[^\w ]", "_", query)
 
-            # Semicolons are allowed after column names
-            query = re.sub(r"\b(tags|comments|domain)_\s*", r"\g<1>:", query)
+            # Semicolons are allowed after column names.
+            query = re.sub(
+                r"\b(title|tags|comments|domain)_\s*", r"\g<1>:",
+                query
+            )
 
             from_sql = "bookmarks_fts, bookmarks b"
             where_sql += """ AND bookmarks_fts.rowid=b.rowid
