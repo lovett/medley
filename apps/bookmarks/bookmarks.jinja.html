@@ -27,6 +27,41 @@
                 <div class="field">
                     <button>Search</button>
                 </div>
+                <div class="options">
+                    <div class="field">
+                        <label for="order-rank">
+                            <input type="radio"
+                                   id="order-rank"
+                                   name="order"
+                                   value="rank"
+                                   {% if order == "rank" %}checked="checked"{% endif %}
+                            />
+                            Ranked
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label for="order-date-desc">
+                            <input type="radio"
+                                   id="order-date-desc"
+                                   name="order"
+                                   value="date-desc"
+                                   {% if order == "date-desc" %}checked="checked"{% endif %}
+                            />
+                            Newest
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label for="order-date-asc">
+                            <input type="radio"
+                                   id="order-date-asc"
+                                   name="order"
+                                   value="date-asc"
+                                   {% if order == "date-asc" %}checked="checked"{% endif %}
+                            />
+                            Oldest
+                        </label>
+                    </div>
+                </div>
             </form>
         </header>
 

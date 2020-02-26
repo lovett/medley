@@ -1,5 +1,13 @@
+.app-nav FORM {
+    grid-row-gap: .5em;
+    margin-bottom: 1em;
+}
+
 .app-nav .options {
-    grid-column: span 2
+    padding: 0;
+    grid-column: span 2;
+    margin-bottom: 1em;
+    font-size: .85em;
 }
 
 .bookmark {

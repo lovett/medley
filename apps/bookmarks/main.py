@@ -78,12 +78,14 @@ class Controller:
         per_page = 20
         offset = int(kwargs.get("offset", "0"))
         query = kwargs.get("query", "").strip()
+        order = kwargs.get("order", "rank")
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
             "bookmarks:search",
             query,
             limit=per_page,
             offset=offset,
+            order=order
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -97,6 +99,7 @@ class Controller:
             "bookmarks.jinja.html",
             bookmarks=bookmarks,
             offset=offset,
+            order=order,
             pagination_url=pagination_url,
             per_page=per_page,
             query=query,
