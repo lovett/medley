@@ -44,19 +44,9 @@ Display a list of applications
 curl "$host/"
 #+END_SRC
 
-#+NAME: homepage_get_json
-#+BEGIN_SRC sh :wrap export json
-curl -H "Accept: $json" "$host/"
-#+END_SRC
-
-#+NAME: homepage_get_text
-#+BEGIN_SRC sh :wrap export text
-curl -H "Accept: $text" "$host/"
-#+END_SRC
-
 #+NAME: homepage_get_org
 #+BEGIN_SRC sh :wrap export org
-curl -H "Accept: $org" "$host/"
+curl -H "Accept: $org" "$host"
 #+END_SRC
 
 #+NAME: homepage_get_org_all

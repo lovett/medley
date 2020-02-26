@@ -13,13 +13,11 @@
 {% block page_body %}
     <main>
         <section>
-            {% for name, url, description, show_on_homepage in apps %}
-                {% if show_all or show_on_homepage %}
-                    <a class="item" href="{{ url }}">
-                        <span class="name">{{ name }}</span>
-                        <span class="description">{{ description }}</span>
-                    </a>
-                {% endif %}
+            {% for name, url, description in apps %}
+                <a class="item" href="{{ url }}">
+                    <span class="name">{{ name }}</span>
+                    <span class="description">{{ description }}</span>
+                </a>
             {% endfor %}
         </section>
     </main>

@@ -2,8 +2,8 @@
 Test suite for the homepage app
 """
 
+import types
 import unittest
-from types import SimpleNamespace
 import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -46,9 +46,9 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """The application is publicly available."""
         self.assert_exposed(apps.homepage.main.Controller)
 
-    def test_show_on_homepage(self):
-        """The application is displayed in the homepage app."""
-        self.assert_show_on_homepage(apps.homepage.main.Controller)
+    def test_not_show_on_homepage(self):
+        """The application is not displayed in the homepage app."""
+        self.assert_not_show_on_homepage(apps.homepage.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
     def test_returns_html(self, publish_mock):
@@ -146,12 +146,11 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         target = apps.homepage.main.Controller()
 
-        fake_controller = SimpleNamespace(root=None)
+        fake_controller = types.new_class("fake")
 
         result = target.catalog_apps({"/fake_app": fake_controller})
 
-        # The homepage app is always included.
-        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result), 1)
 
 
 if __name__ == "__main__":
