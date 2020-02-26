@@ -42,7 +42,7 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._insert")
+    @mock.patch("plugins.applog.Plugin._execute")
     def test_pull(self, db_mock):
         """Queued messages are written to storage."""
 
@@ -70,7 +70,7 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._insert")
+    @mock.patch("plugins.applog.Plugin._execute")
     def test_exception_message(self, db_mock):
         """Messages can be provided as exceptions."""
 

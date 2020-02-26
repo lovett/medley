@@ -78,7 +78,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for _ in range(len(messages)):
             self.queue.popleft()
 
-        self._insert(
+        self._execute(
             "INSERT INTO applog (created, source, message) VALUES (?, ?, ?)",
             messages
         )

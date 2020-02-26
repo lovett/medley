@@ -104,31 +104,6 @@ class Sqlite:
 
         return result
 
-    def _insert(
-            self,
-            query: str,
-            values: typing.Sequence[typing.Any]
-    ) -> bool:
-        """Issue an insert query to create one or more records.
-
-        Cannot return lastrowid because it is not populated
-        during executemany().
-        """
-
-        result = True
-        con = self._open()
-
-        try:
-            with con:
-                con.executemany(query, values)
-        except sqlite3.DatabaseError as err:
-            result = False
-            self._logError(err)
-        finally:
-            con.close()
-
-        return result
-
     def _delete(
             self,
             query: str,

@@ -63,7 +63,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for _ in range(len(messages)):
             self.queue.popleft()
 
-        self._insert(
+        self._execute(
             "INSERT INTO metrics (key, value, unit) VALUES (?, ?, ?)",
             messages
         )

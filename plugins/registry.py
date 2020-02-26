@@ -89,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("memorize:clear", key)
 
-        result = self._insert(
+        result = self._execute(
             "INSERT INTO registry (key, value) VALUES (?, ?)",
             [(key, value) for value in values]
         )
