@@ -92,16 +92,10 @@ class Controller:
             {"query": query}
         ).pop()
 
-        general_query = cherrypy.engine.publish(
-            "bookmarks:generalize",
-            query
-        ).pop()
-
         return cherrypy.engine.publish(
             "jinja:render",
             "bookmarks.jinja.html",
             bookmarks=bookmarks,
-            general_query=general_query,
             offset=offset,
             pagination_url=pagination_url,
             per_page=per_page,

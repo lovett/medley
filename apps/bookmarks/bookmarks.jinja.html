@@ -9,24 +9,6 @@
     {{ macros.vueApp("main", ("discardable-record", "discard-button", "wayback-link")) }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        {% if query %}
-            {{ macros.cancelLink(app_url) }}
-        {% endif %}
-
-        <a href="{{ app_url }}/taglist">
-            <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
-            All tags
-        </a>
-
-        {% if general_query %}
-            {{ general_query|websearch("google") }}
-            {{ general_query|websearch("bing") }}
-        {% endif %}
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
 
@@ -74,7 +56,7 @@
                                     <div class="tags">
                                         {% for tag in bookmark.tags %}
                                             <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
-                                                <svg class="icon icon-tag"><use xlink:href="#Icon-tag"></use></svg>
+                                                <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
                                                 {{ tag }}
                                             </a>
                                         {% endfor %}
