@@ -97,7 +97,8 @@
                 {% else %}
                     <button data-default-label="Save" data-progress-label="Please wait">Save</button>
                 {% endif %}
-                {{ macros.cancelLink(bookmarks_url, False) }}
+
+                <a class="cancel" href="{{ cancel_url }}">Cancel</a>
             </div>
         </form>
     </main>

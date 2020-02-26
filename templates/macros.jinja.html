@@ -243,15 +243,6 @@ in the argument list are returned.  #}
     {% endif %}
 {%- endmacro -%}
 
-{% macro cancelLink(url, withIcon=True) -%}
-    <a class="cancel" href="{{ url }}">
-        {%- if withIcon -%}
-            <svg class="icon"><use xlink:href="#icon-close"></use></svg>
-        {%- endif -%}
-        Cancel
-    </a>
-{%- endmacro -%}
-
 {% macro pagination(url, offset, per_page, total) -%}
     {% set at_start = offset <= 0 %}
     {% set at_end = offset + per_page >= total %}

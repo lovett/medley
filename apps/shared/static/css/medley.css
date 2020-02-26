@@ -81,6 +81,7 @@ BUTTON + .label {
 BUTTON + .secondary-action, BUTTON + .cancel {
     display: inline-block;
     margin-left: 2em;
+    color: var(--alert);
 }
 
 BUTTON.small {
