@@ -147,7 +147,7 @@ MAIN > HEADER:nth-of-type(1) {
     flex-flow: row wrap;
     justify-content: space-between;
     align-items: center;
-    margin: 0 auto 1.5em auto;
+    margin: 0 auto 1em auto;
 }
 
 MAIN > HEADER:nth-of-type(1) H2 {

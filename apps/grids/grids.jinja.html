@@ -5,29 +5,26 @@
     {{ macros.staticAsset('grids', 'grids.css') }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        {% if name and options["layout"] == "month" %}
-            {{ macros.svgSymbols("calendar") }}
-
-            <a href="?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
-                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                Previous month
-            </a>
-            <a href="?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
-                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                Next month
-            </a>
-            <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
-                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                Now
-            </a>
-        {% endif %}
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     <main>
+        {% if name and options["layout"] == "month" %}
+            <header class="app-nav">
+                {{ macros.svgSymbols("calendar") }}
+                <a href="{{ app_url }}?name={{ name }}&start={{ options["last_month"]|yearmonth }}">
+                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                    {{ options.last_month.format("MMMM") }}
+                </a>
+                <a href="{{ app_url }}?name={{ name }}&start={{ options["next_month"]|yearmonth }}">
+                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                    {{ options.next_month.format("MMMM") }}
+                </a>
+                <a href="?name={{ name }}&start={{ options["this_month"]|yearmonth }}">
+                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                    Now
+                </a>
+            </header>
+        {% endif %}
+
         {% if rows %}
             <div class="table-sleeve">
                 <table class="grid">
