@@ -63,10 +63,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for _ in range(len(messages)):
             self.queue.popleft()
 
-        self._execute(
-            "INSERT INTO metrics (key, value, unit) VALUES (?, ?, ?)",
-            messages
-        )
+        self._multi([
+            ("INSERT INTO metrics (key, value, unit) VALUES (?, ?, ?)",
+             message)
+            for message in messages
+        ])
 
     def add(self, key: str, value: float, unit: str) -> None:
         """Accept a message for storage."""
