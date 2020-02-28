@@ -6,12 +6,14 @@
 {% endblock %}
 
 {% block main_toolbar %}
+    {% if registry_url %}
     <nav id="main-toolbar">
         <a href="{{ registry_url }}" target="_blank">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
             Edit
         </a>
     </nav>
+    {% endif %}
 {% endblock %}
 
 {% block app_message %}

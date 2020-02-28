@@ -3,8 +3,13 @@
     grid-gap: 2em;
 }
 
-#app-nav form {
-    width: auto;
+#app-nav {
+    max-width: inherit;
+}
+
+#app-nav FORM {
+    display: block;
+    margin-bottom: 2em;
 }
 
 

@@ -1,14 +1,5 @@
 {% extends "recipes.jinja.html" %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        <a href="{{ app_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            All tags
-        </a>
-    </nav>
-{% endblock %}
-
 {% block scripts %}
     {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
 {% endblock %}

@@ -2,14 +2,10 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a href="{{ app_url }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            Bookmarks
-        </a>
         {% if not bookmark_id %}
-            <a href="#" id="save-bookmark">
-                <svg class="icon"><use xlink:href="#icon-bookmark"></use></svg>
-                Bookmark
+            <a id="add-record" href="#" data-url="{{ subreddit }}">
+                <svg class="icon"><use xlink:href="#add-item"></use></svg>
+                Add bookmark
             </a>
         {% endif %}
     </nav>
@@ -25,7 +21,11 @@
         <ul>
             {% for story in stories %}
                 <li class="headline">
-                    <h2 class="title"><a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">{{ story.title|safe }}</a></h2>
+                    <h2 class="title">
+                        <a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">
+                            {{ story.title|truncate(80) }}
+                        </a>
+                    </h2>
                     <time class="info">
                         <svg class="icon"><use xlink:href="#icon-info"></use></svg>
                         {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}

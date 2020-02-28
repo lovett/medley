@@ -4,19 +4,6 @@
     {{ macros.staticAsset("metrics", "metrics.css") }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        {% if metric %}
-        <a href="{{ app_url }}">
-            <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-            All metrics
-        </a>
-        {% endif %}
-
-        {% block secondary_nav %}{% endblock %}
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     {{ macros.svgSymbols("chart", "arrow-left") }}
 

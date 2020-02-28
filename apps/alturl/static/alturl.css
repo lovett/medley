@@ -21,6 +21,11 @@ code {
     margin-bottom: 1em;
 }
 
+#comments {
+    border-top: 1px solid var(--grey);
+    margin-top: 1em;
+}
+
 .comment a {
     word-break: break-all;
 }

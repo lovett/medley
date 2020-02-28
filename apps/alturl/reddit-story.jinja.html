@@ -34,7 +34,7 @@
 {% endblock %}
 
 {% block content %}
-    <section class="intro">
+    <div class="intro">
         <h2>{{ story.title|safe }}</h2>
 
         <time class="info">
@@ -64,28 +64,22 @@
         </a>
 
 
-        <div>
-            {% if story.selftext %}
-                {{ story.selftext|unescape }}
-            {% endif %}
-        </div>
+        {% if story.selftext %}
+            {{ story.selftext|better_html|unescape }}
+        {% endif %}
 
-    </section>
+    </div>
 
-    {% if not comments %}
-        <p>No comments.</p>
-    {% endif %}
+    <div id="comments">
+        {% set ns = namespace(comment_count=0) %}
 
-    {% for comment in comments %}
-        {{ commentBlock(comment) }}
-    {% endfor %}
-{% endblock %}
+        {% for comment in comments %}
+            {% set ns.comment_count = ns.comment_count + 1 %}
+            {{ commentBlock(comment) }}
+        {% endfor %}
 
-{% block secondary_nav %}
-    <div>
-        <a href="{{ subreddit_alturl }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            r/{{ story.subreddit|lower}}
-        </a>
+        {% if ns.comment_count == 0 %}
+            <p><em>No comments.</em></p>
+        {% endif %}
     </div>
 {% endblock %}

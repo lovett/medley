@@ -60,28 +60,6 @@ MEDLEY.visitors = (function () {
     };
 
     /**
-     * Discard a previosly-saved query.
-     */
-    async function deleteSavedQuery(e) {
-        e.preventDefault();
-
-        const menu = document.getElementById('saved');
-        const id = menu.selectedOptions[0].dataset.id;
-        const endpoint = `/registry/?uid=${id}`;
-
-        const response = await fetch(endpoint, {
-            method: 'DELETE',
-            mode: 'same-origin',
-        });
-
-        if (response.ok) {
-            MEDLEY.setSuccessMessage('Query deleted.');
-        } else {
-            MEDLEY.setErrorMessage('The query could not be deleted.');
-        }
-    }
-
-    /**
      * Show or hide a table row containing the full log line.
      */
     function toggleNextRowVisibility(e) {
@@ -249,7 +227,7 @@ MEDLEY.visitors = (function () {
 
     return {
         init: function () {
-            document.getElementById('save').addEventListener(
+            document.getElementById('add-record').addEventListener(
                 'click',
                 saveQuery
             );

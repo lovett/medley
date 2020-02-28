@@ -10,6 +10,10 @@
 {% endblock %}
 
 {% block main_toolbar %}
+    <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
+        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+        Bing.com
+    </a>
 {% endblock %}
 
 
@@ -23,10 +27,6 @@
                     data-offset="{{ offset }}"
                 >Walk links {{ offset }} to {{ offset + limit - 1}}</button>
             </form>
-            <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                Bing.com
-            </a>
         </header>
 
         <section id="headlines">

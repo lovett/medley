@@ -130,7 +130,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(*args, key: str = "", value: str = "") -> None:
+    def POST(*args, key: str = "", value: str = "", **kwargs) -> None:
         """Store a new entry in the database or update an existing entry"""
 
         rowid = 0
@@ -150,7 +150,10 @@ class Controller:
             rowid=rowid
         )
 
-        raise cherrypy.HTTPRedirect(f"/registry?q={key}")
+        if not kwargs.get("skip_redirect"):
+            raise cherrypy.HTTPRedirect(f"/registry?q={key}")
+
+        cherrypy.response.status = 204
 
     @staticmethod
     def DELETE(uid=None, key=None) -> None:

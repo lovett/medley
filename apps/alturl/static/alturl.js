@@ -3,23 +3,22 @@ MEDLEY.alturl = (function () {
 
     async function saveFavorite(e) {
         e.preventDefault();
-        const url = document.getElementById('url').value.trim();
-        if (!url) {
-            return;
-        }
+        const url = e.target.dataset.url;
 
         let payload = new FormData();
         payload.set('key', 'alturl:bookmark');
         payload.set('value', url);
+        payload.set('skip_redirect', true);
 
         const response = await fetch('/registry', {
-            method: 'PUT',
+            method: 'POST',
             mode: 'same-origin',
             body: payload
         })
 
         if (response.ok) {
             MEDLEY.setSuccessMessage('URL bookmarked');
+            e.target.hidden = true;
         } else {
             MEDLEY.setErrorMessage('The URL could not be bookmarked');
         }
@@ -27,7 +26,7 @@ MEDLEY.alturl = (function () {
 
     return {
         init: function () {
-            const saveLink = document.getElementById('save-bookmark');
+            const saveLink = document.getElementById('add-record');
             if (saveLink) {
                 saveLink.addEventListener('click', saveFavorite)
             }
