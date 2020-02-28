@@ -14,6 +14,18 @@ MEDLEY.focusAsYouType = (function () {
     let options = {}
     let matchCount = 0;
 
+    function ignorable(e) {
+        if (e.target.nodeName === 'INPUT') {
+            return true;
+        }
+
+        if (e.target.nodeName === 'TEXTAREA') {
+            return true;
+        }
+
+        return false;
+    }
+
     function clearBuffer() {
         buffer = '';
         matchCount = 0;
@@ -72,6 +84,14 @@ MEDLEY.focusAsYouType = (function () {
     // Chrome won't send keypress events for non-printable
     // keys. Handle them on keyup instead.
     function onKeyUp(e) {
+        if (ignorable(e)) {
+            return;
+        }
+
+        if (e.target.nodeName === 'TEXTAREA') {
+            return;
+        }
+
         if (e.which === 13) { // enter key
             return;
         }
@@ -88,6 +108,10 @@ MEDLEY.focusAsYouType = (function () {
     }
 
     function onKeyPress(e) {
+        if (ignorable(e)) {
+            return;
+        }
+
         // Backspace, delete, and escape will be handled on keyup
         // to accommodate Chrome.
         if (e.which === 8 || e.which === 46 || e.which === 27) {

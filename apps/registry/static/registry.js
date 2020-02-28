@@ -4,7 +4,6 @@ MEDLEY.registry = (function () {
     return {
         init: function () {
             if (MEDLEY.focusAsYouType) {
-                console.log('yes');
                 MEDLEY.focusAsYouType('#collection A');
             }
         }
