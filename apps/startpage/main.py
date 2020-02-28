@@ -140,11 +140,17 @@ class Controller:
     def POST(self, page_name, page_content) -> None:
         """Create or update the INI version of a page."""
 
+        registry_key = f"startpage:{page_name}"
+
+        cherrypy.engine.publish(
+            "registry:remove:key",
+            registry_key
+        )
+
         cherrypy.engine.publish(
             "registry:add",
-            f"startpage:{page_name}",
-            [page_content],
-            replace=True
+            key=registry_key,
+            values=[page_content]
         )
 
         redirect_path = None
