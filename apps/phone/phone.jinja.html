@@ -8,15 +8,15 @@
 
 {% block app_message %}
     {% if error %}
-        <section id="app-message" class="error">{{ error }}</section>
+        <div id="app-message" class="error">{{ error }}</div>
     {% else %}
         {{ super() }}
     {% endif %}
 {% endblock %}
 
 {% block main_toolbar %}
-    <nav id="main-toolbar">
     {% if number %}
+    <nav id="main-toolbar">
         {{ number|websearch("google", label="Web search") }}
     </nav>
     {% endif %}

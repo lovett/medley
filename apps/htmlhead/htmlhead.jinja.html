@@ -14,9 +14,9 @@
 
 {% block app_message %}
     {% if failure_message %}
-        <section id="app-message" class="error">{{ failure_message }}</section>
+        <div id="app-message" class="error">{{ failure_message }}</div>
     {% elif status_code and status_code != 200 %}
-        <section id="app-message" class="error">The URL returned a {{ status_code }}</section>
+        <div id="app-message" class="error">The URL returned a {{ status_code }}</div>
     {% else %}
         {{ super() }}
     {% endif %}

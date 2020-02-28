@@ -140,7 +140,7 @@ INPUT[type=search] {
 MAIN {
     flex: 1;
     padding: 0 0.75em;
-
+    margin-top: 1em;
 }
 
 MAIN > HEADER:nth-of-type(1) {
@@ -312,7 +312,6 @@ TEXTAREA {
     box-shadow: 0px 2px 2px 0px var(--black);
     align-items: center;
     line-height: 1;
-    margin-bottom: 1em;
     min-height: 3.25em;
 }
 
@@ -695,8 +694,8 @@ TEXTAREA {
         margin-top: 0;
     }
 
-    #page-header {
-        margin-bottom: 1.5em;
+    MAIN {
+        margin-top: 1.5em;
     }
 }
 
@@ -716,7 +715,6 @@ TEXTAREA {
     #collection ul {
         grid-template-columns: repeat(3, 1fr);
     }
-
 }
 
 /* Print layout */

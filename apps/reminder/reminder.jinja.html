@@ -26,7 +26,7 @@
 
 {% block app_message %}
     {% if error %}
-        <section id="app-message" class="error">{{ error }}</section>
+        <div id="app-message" class="error">{{ error }}</div>
     {% else %}
         {{ super() }}
     {% endif %}

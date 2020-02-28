@@ -16,9 +16,9 @@
 
 {% block app_message %}
     {% if invalid == "group" %}
-        <section id="app-message" class="error">Invalid group.</section>
+        <div id="app-message" class="error">Invalid group.</div>
     {% elif invalid == "name" %}
-        <section id="app-message" class="error">Invalid name.</section>
+        <div id="app-message" class="error">Invalid name.</div>
     {% else %}
         {{ super() }}
     {% endif %}

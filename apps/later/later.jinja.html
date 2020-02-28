@@ -8,11 +8,11 @@
 
 {% block app_message %}
     {% if bookmark.deleted %}
-        <section id="app-message" class="error">
+        <div id="app-message" class="error">
             <p>
                 This URL was marked for removal at {{ bookmark.deleted|localtime|dateformat('LT') }}
             </p>
-        </section>
+        </div>
     {% elif bookmark.rowid and not bookmark.deleted  %}
         <section id="app-message" class="notice">
             <p>
