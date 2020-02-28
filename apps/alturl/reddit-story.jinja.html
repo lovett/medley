@@ -24,11 +24,13 @@
     {%- endif -%}
 {%- endmacro -%}
 
-{% block main_toolbar_links %}
-    <a href="{{ subreddit_alturl }}">
-        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-        r/{{ subreddit }}
-    </a>
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a href="{{ subreddit_alturl }}">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            r/{{ subreddit }}
+        </a>
+    </nav>
 {% endblock %}
 
 {% block content %}

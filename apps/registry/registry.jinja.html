@@ -12,12 +12,10 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        {% block main_toolbar_links %}
-            <a id="add-record" href="{{ app_url }}/new">
-                <svg class="icon"><use xlink:href="#add-item"></use></svg>
-                Add
-            </a>
-        {% endblock %}
+        <a id="add-record" href="{{ app_url }}/new">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            Add
+        </a>
     </nav>
 {% endblock %}
 

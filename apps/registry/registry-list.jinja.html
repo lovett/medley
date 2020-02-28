@@ -4,24 +4,25 @@
     {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
 {% endblock %}
 
-{% block main_toolbar_links %}
-    {% if ":" in query %}
-        <a href="{{ app_url }}?q={{ parent_key|urlencode }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            Parent
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% if ":" in query %}
+            <a href="{{ app_url }}?q={{ parent_key|urlencode }}">
+                <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+                Parent
+            </a>
+        {% endif %}
+
+        <a id="add-record" href="{{ app_url }}/new">
+            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            Add
         </a>
-    {% endif %}
 
-    <a id="add-record" href="{{ app_url }}/new">
-        <svg class="icon"><use xlink:href="#add-item"></use></svg>
-        Add
-    </a>
-
-    <a href="{{ app_url }}/.json?q={{ query|urlencode }}" target="_blank">
-        <svg class="icon"><use xlink:href="#icon-download"></use></svg>
-        Export
-    </a>
-
+        <a href="{{ app_url }}/.json?q={{ query|urlencode }}" target="_blank">
+            <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+            Export
+        </a>
+    </nav>
 {% endblock %}
 
 {% block content %}

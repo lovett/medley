@@ -1,15 +1,17 @@
 {% extends "recipes.jinja.html" %}
 
-{% block main_toolbar_links %}
-    <a href="/recipes">
-        <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-        All tags
-    </a>
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a href="/recipes">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            All tags
+        </a>
 
-    <a href="/recipes/{{ rowid }}/edit">
-        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-        Edit
-    </a>
+        <a href="/recipes/{{ rowid }}/edit">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </nav>
 {% endblock %}
 
 {% block content %}

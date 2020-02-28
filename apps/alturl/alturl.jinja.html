@@ -11,12 +11,6 @@
     {{ macros.staticAsset('alturl', 'alturl.js') }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        {% block main_toolbar_links %}{% endblock %}
-    </nav>
-{% endblock %}
-
 {% block page_body %}
     {{ macros.svgSymbols("globe", "arrow-left", "calendar", "info", "link", "bookmark", "delete") }}
 
