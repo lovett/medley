@@ -143,18 +143,6 @@ MAIN {
     margin-top: 1em;
 }
 
-MAIN > HEADER:nth-of-type(1) {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
-    margin: 0 auto 1em auto;
-}
-
-MAIN > HEADER:nth-of-type(1) H2 {
-    font-size: 1.5em;
-}
-
 NAV.secondary {
     display: flex;
     flex-flow: row wrap;
@@ -323,6 +311,23 @@ TEXTAREA {
     font-size: 1em;
     margin: 0;
     font-weight: normal;
+}
+
+#page-title {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+}
+
+#page-title H2 {
+    font-size: 1.5em;
+}
+
+#page-title UL LI{
+    margin: 0;
+    padding: 0;
 }
 
 #main-toolbar BUTTON {

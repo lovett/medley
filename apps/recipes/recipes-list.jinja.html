@@ -17,7 +17,7 @@
     {{ macros.svgSymbols("add-item", "arrow-left", "delete", "globe", "book", "search", "tag") }}
 
     <main id="collection">
-        <header>
+        <header id="page-title">
             <h2>
                 {% if tag %}
                     <svg class="icon"><use xlink:href="#icon-tag"></use></svg>{{ tag|capitalize }}

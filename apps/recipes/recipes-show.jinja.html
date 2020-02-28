@@ -18,7 +18,8 @@
     {{ macros.svgSymbols("add-item", "arrow-left", "book", "calendar", "edit", "globe", "tag") }}
 
     <main id="recipe" class="{% if ingredients %}with-ingredients{% endif %}">
-        <header>
+
+        <header id="page-title">
             <h2>{{ title }}</h2>
 
             <ul>
