@@ -650,8 +650,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 url = cherrypy.engine.publish(
                     "url:internal",
                     "/visitors",
-                    {"query": f"ip {record['ip']}\n{query}"},
-                    trailing_slash=True
+                    {"query": f"ip {record['ip']}\n{query}"}
                 ).pop()
 
                 local_id = f"logindex-{name}-{record['ip']}"

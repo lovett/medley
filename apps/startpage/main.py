@@ -80,8 +80,7 @@ class Controller:
 
         edit_url = cherrypy.engine.publish(
             "url:internal",
-            f"{page_name}/edit",
-            trailing_slash=(page_name is None)
+            f"{page_name}/edit"
         ).pop()
 
         return cherrypy.engine.publish(

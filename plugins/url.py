@@ -39,8 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url(
             path: typing.Optional[str] = None,
             query: typing.Optional[typing.Dict[str, typing.Any]] = None,
-            force_querystring: bool = False,
-            trailing_slash: bool = False
+            force_querystring: bool = False
     ) -> str:
         """Create an absolute internal URL.
 
@@ -96,8 +95,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         url = f"{scheme}{hostname}{path or cherrypy.request.script_name}"
 
-        if trailing_slash and not url.endswith("/"):
-            url += "/"
+        if url.endswith("/"):
+            url = url.strip("/")
 
         if query:
             query = {

@@ -481,16 +481,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url_filter(
             context: jinja2.runtime.Context,
             value: str,
-            query: typing.Dict[str, typing.Any] = None,
-            trailing_slash: bool = False
+            query: typing.Dict[str, typing.Any] = None
     ) -> str:
         """Generate an application URL via the URL plugin."""
 
         publish_response = cherrypy.engine.publish(
             "url:internal",
             path=value,
-            query=query,
-            trailing_slash=trailing_slash
+            query=query
         )
 
         if not publish_response:
