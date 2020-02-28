@@ -20,6 +20,14 @@ var MEDLEY = (function () {
             return;
         }
 
+        if (e.key === 'A') {
+            const tag = document.getElementById('add-record');
+            if (tag) {
+                tag.click();
+            }
+            return;
+        }
+
         if (e.key === 'H') {
             const tag = document.querySelector('meta[name=medley-home]');
             window.location.href = tag.getAttribute('content');
