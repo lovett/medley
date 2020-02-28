@@ -1,4 +1,4 @@
-"""A general-purpose key-value store."""
+"""General-purpose key-value store"""
 
 import json
 import cherrypy

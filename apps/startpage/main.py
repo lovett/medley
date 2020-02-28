@@ -1,4 +1,4 @@
-"""A page of links for use as a web browser homepage."""
+"""Browser homepage"""
 
 from textwrap import dedent
 import cherrypy

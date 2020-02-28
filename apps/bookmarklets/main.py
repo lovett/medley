@@ -1,4 +1,4 @@
-"""Display a collection of bookmarklets."""
+"""Webpage utilities"""
 
 import cherrypy
 

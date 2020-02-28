@@ -1,4 +1,4 @@
-"""Display call history by date."""
+"""Phone call metadata"""
 
 import cherrypy
 

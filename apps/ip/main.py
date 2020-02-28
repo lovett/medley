@@ -1,4 +1,4 @@
-"""Determine the internal and external IP address."""
+"""Internal and external addressess"""
 
 import json
 import cherrypy

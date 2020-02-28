@@ -1,4 +1,4 @@
-"""Display the tags in the head section of a web page."""
+"""Webpage tag viewer"""
 
 import cherrypy
 import parsers.htmlhead

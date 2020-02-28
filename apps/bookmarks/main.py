@@ -1,4 +1,4 @@
-"""Manage a collection of bookmarked URLs."""
+"""Saved webpages"""
 
 import json
 import cherrypy

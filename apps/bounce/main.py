@@ -1,4 +1,4 @@
-"""Redirect to an equivalent page on a different domain."""
+"""Redirection between domains"""
 
 from urllib.parse import urlparse
 import cherrypy

@@ -1,4 +1,4 @@
-"""Display Medley's test coverage report."""
+"""Aggregate coverage.py report"""
 
 import cherrypy
 

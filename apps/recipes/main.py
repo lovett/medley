@@ -1,4 +1,4 @@
-"""Manage a collection of recipes."""
+"""Favorite dishes and cooking notes"""
 
 import cherrypy
 import mistletoe

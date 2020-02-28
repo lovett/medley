@@ -1,4 +1,4 @@
-"""Display a form for bookmarking a URL."""
+"""Bookmark a webpage"""
 
 import re
 import cherrypy

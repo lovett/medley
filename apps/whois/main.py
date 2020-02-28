@@ -1,4 +1,4 @@
-"""Look up whois and geoip details for an IP address or hostname."""
+"""IP and domain metadata"""
 
 import ipaddress
 import re

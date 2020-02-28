@@ -1,4 +1,4 @@
-"""Send a Wake-on-LAN packet to a sleeping host on the local network."""
+"""Wake-on-LAN dispatcher"""
 
 import socket
 import struct

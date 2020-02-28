@@ -1,4 +1,4 @@
-"""Geographic location and call history for a phone number."""
+"""Phone number metadata"""
 
 import cherrypy
 

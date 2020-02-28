@@ -1,4 +1,4 @@
-"""Text-to-speech."""
+"""Text-to-speech service"""
 
 import cherrypy
 

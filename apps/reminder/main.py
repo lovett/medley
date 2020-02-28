@@ -1,4 +1,4 @@
-"""Schedule a notification for future delivery."""
+"""Scheduled notifications"""
 
 import random
 import string

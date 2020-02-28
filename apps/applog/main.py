@@ -1,4 +1,4 @@
-"""Display the contents of the applog database."""
+"""Site-wide status and activity"""
 
 import cherrypy
 

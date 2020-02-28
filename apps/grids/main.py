@@ -1,4 +1,4 @@
-"""Printable pages for data entry."""
+"""Printable data-entry pages"""
 
 from collections import defaultdict
 from itertools import islice

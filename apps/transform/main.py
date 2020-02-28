@@ -1,4 +1,4 @@
-"""Convert a string to a different format."""
+"""Text converters"""
 
 import json
 import urllib

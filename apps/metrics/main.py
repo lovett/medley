@@ -1,4 +1,4 @@
-"""Visualize application performance over time."""
+"""Application performance graphs"""
 
 import cherrypy
 

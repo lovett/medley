@@ -1,4 +1,4 @@
-"""Search website access logs"""
+"""Website traffic viewer"""
 
 import re
 from collections import namedtuple, defaultdict

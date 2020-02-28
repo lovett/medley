@@ -1,4 +1,4 @@
-"""Display current and upcoming weather conditions."""
+"""Current and upcoming forecasts"""
 
 import copy
 import math

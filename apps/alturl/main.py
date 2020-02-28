@@ -1,4 +1,4 @@
-"""Display a URL in an alternate format."""
+"""Webpages without annoyances"""
 
 from urllib.parse import urlparse
 import cherrypy

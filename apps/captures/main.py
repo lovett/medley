@@ -1,4 +1,4 @@
-"""Display previously-captured requests."""
+"""HTTP requests and responses"""
 
 import cherrypy
 
