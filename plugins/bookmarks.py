@@ -104,7 +104,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:prune", self.prune)
         self.bus.subscribe("bookmarks:recent", self.recent)
-        self.bus.subscribe("bookmarks:tags:recent", self.recent_tags)
         self.bus.subscribe("bookmarks:tags:all", self.all_tags)
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
@@ -398,32 +397,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._count(sql, (cutoff_date,)),
             self._explain(sql, (cutoff_date, limit, offset))
         )
-
-    @decorators.log_runtime
-    def recent_tags(
-            self,
-            limit: int = 50,
-            max_days: int = 180
-    ) -> typing.Set[str]:
-        """Get a list of tags used on recently-added bookmarks."""
-
-        sql = """SELECT tags as 'tags [comma_delimited]'
-        FROM bookmarks
-        WHERE added_date >= ?
-        AND tags IS NOT NULL
-        AND tags <> ''
-        LIMIT ?"""
-
-        cutoff_date = pendulum.now().subtract(
-            days=max_days
-        ).to_date_string()
-
-        generator = self._select_generator(sql, (cutoff_date, limit))
-
-        tag_set: typing.Set[str] = set()
-        for row in generator:
-            tag_set.update(row["tags"])
-        return tag_set
 
     @decorators.log_runtime
     def all_tags(
