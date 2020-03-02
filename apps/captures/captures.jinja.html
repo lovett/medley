@@ -20,7 +20,7 @@
                         type="search"
                         id="path"
                         name="path"
-                        value="{{ path or "" }}"
+                        value="{{ path }}"
                         autocapitalize="none"
                         placeholder="URL"
                     />
@@ -103,7 +103,9 @@
             </section>
         {% endfor %}
 
-        {{ macros.newerOlderPagination(newer_url, older_url) }}
+        {% if pagination_url %}
+            {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
+        {% endif %}
 
     </main>
 {% endblock %}

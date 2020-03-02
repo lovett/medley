@@ -109,7 +109,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (count, result)
 
-    def get(self, capture_id: int) -> List[sqlite3.Row]:
+    def get(self, rowid: int) -> Optional[sqlite3.Row]:
         """Locate previously stored requests by ID."""
 
         sql = """SELECT rowid, request_line, request as 'request [binary]',
@@ -118,7 +118,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM captures
         WHERE rowid=?"""
 
-        return self._select(sql, (capture_id,))
+        row: Optional[sqlite3.Row] = self._selectOne(sql, (rowid,))
+        return row
 
     def prune(self, cutoff_months: int = 3) -> None:
         """Delete old records.
