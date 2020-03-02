@@ -42,8 +42,7 @@ class Controller:
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",
-            "/calls",
-            force_querystring=True
+            "/calls"
         ).pop()
 
         response: bytes = cherrypy.engine.publish(

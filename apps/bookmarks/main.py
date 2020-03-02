@@ -43,8 +43,7 @@ class Controller:
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",
-            "/bookmarks",
-            force_querystring=True
+            "/bookmarks"
         ).pop()
 
         return cherrypy.engine.publish(

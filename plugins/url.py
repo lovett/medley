@@ -39,7 +39,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url(
             path: typing.Optional[str] = None,
             query: typing.Optional[typing.Dict[str, typing.Any]] = None,
-            force_querystring: bool = False
     ) -> str:
         """Create an absolute internal URL.
 
@@ -105,9 +104,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 if value
             }
             url = f"{url}?{urlencode(query)}"
-
-        if force_querystring and "?" not in url:
-            url = f"{url}?"
 
         request_headers = cherrypy.request.headers
         use_https = request_headers.get("X-Https", "") == "On"

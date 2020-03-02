@@ -56,11 +56,9 @@
                     </tbody>
                 </table>
             </section>
-
-            {{ macros.newerOlderPagination(newer_url, older_url) }}
+            {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
         {% endif %}
 
-        {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
     </main>
 
 {% endblock %}

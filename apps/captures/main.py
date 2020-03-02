@@ -36,8 +36,7 @@ class Controller:
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",
-            "/captures",
-            force_querystring=True
+            "/captures"
         ).pop()
 
         response: bytes = cherrypy.engine.publish(

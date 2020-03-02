@@ -249,43 +249,41 @@ in the argument list are returned.  #}
     {% set previous_page_offset = offset - per_page - 1 %}
     {% set next_page_offset = offset + per_page + 1 %}
 
-    {% if not url.endswith("?") %}
-        {% set url = url + "&" %}
+    {% set previous_page = "" %}
+    {% if previous_page_offset > 0 %}
+        {% set previous_page = "offset=" ~ previous_page_offset %}
+        {% if "?" not in url %}
+            {% set previous_page = "?" ~ previous_page %}
+        {% else %}
+            {% set previous_page = "&" ~ previous_page %}
+        {% endif %}
     {% endif %}
 
+    {% set next_page = "" %}
+    {% if next_page_offset > 0 %}
+        {% set next_page = "offset=" ~ next_page_offset %}
+        {% if "?" not in url %}
+            {% set next_page = "?" ~ next_page %}
+        {% else %}
+            {% set next_page = "&" ~ next_page %}
+        {% endif %}
+    {% endif %}
 
     <footer class="pagination">
         {% if not at_start %}
-            <a href="{{ url }}offset={{ previous_page_offset }}" class="previous">
+            <a href="{{ url }}{{ previous_page }}" class="previous">
                 <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-left"></use></svg>
                 Previous
             </a>
         {% endif %}
 
         {% if not at_end %}
-            <a href="{{ url }}offset={{ next_page_offset }}" class="previous">
+            <a href="{{ url }}{{ next_page }}" class="previous">
                 Next
                 <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
             </a>
         {% endif %}
     </footer>
-{%- endmacro -%}
-
-{% macro newerOlderPagination(newer_url, older_url) -%}
-    <section class="pagination">
-        {% if newer_url %}
-            <a href="{{ newer_url }}" rel="noreferrer" class="next">
-                <svg class="icon icon-arrow-left"><use xlink:href="#icon-arrow-left"></use></svg>
-                Newer
-            </a>
-        {% endif %}
-        {% if older_url %}
-            <a href="{{ older_url }}" rel="noreferrer" class="previous">
-                Older
-                <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
-            </a>
-        {% endif %}
-    </section>
 {%- endmacro -%}
 
 {% macro appSpecificIcon(app_url) -%}
