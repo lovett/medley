@@ -26,7 +26,7 @@ class Controller:
         """List captures in reverse-chronological order."""
 
         per_page = 20
-        offset = int(kwargs.get("offset", "0"))
+        offset = int(kwargs.get("offset", 0))
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
@@ -56,7 +56,7 @@ class Controller:
         """Locate captures by request path."""
 
         per_page = 20
-        offset = int(kwargs.get("offset", "0"))
+        offset = int(kwargs.get("offset", 0))
         path = kwargs.get("path", "").strip()
         subview_title = path
 

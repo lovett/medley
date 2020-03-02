@@ -31,7 +31,7 @@ class Controller:
 
         max_days = 180
         per_page = 20
-        offset = int(kwargs.get("offset", "0"))
+        offset = int(kwargs.get("offset", 0))
         order = "rank"
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
@@ -78,7 +78,7 @@ class Controller:
     def search(**kwargs) -> bytes:
         """Find bookmarks matching a search query."""
         per_page = 20
-        offset = int(kwargs.get("offset", "0"))
+        offset = int(kwargs.get("offset", 0))
         query = kwargs.get("query", "").strip()
         order = kwargs.get("order", "rank")
 
