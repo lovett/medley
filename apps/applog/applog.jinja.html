@@ -11,7 +11,7 @@
                         type="search"
                         id="source"
                         name="source"
-                        value="{{ source|default('', true)|e }}"
+                        value="{{ source }}"
                         autocapitalize="none"
                         placeholder="Source"
                     />
@@ -60,7 +60,7 @@
             {{ macros.newerOlderPagination(newer_url, older_url) }}
         {% endif %}
 
-        {{ macros.queryPlan(query_plan) }}
+        {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
     </main>
 
 {% endblock %}

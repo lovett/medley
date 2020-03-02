@@ -29,14 +29,11 @@ class Controller:
             limit=per_page
         ).pop()
 
-        (newer_url, older_url) = cherrypy.engine.publish(
-            "url:paginate:newer_older",
-            params={
-                "source": source
-            },
-            per_page=per_page,
-            offset=offset,
-            total=total
+        pagination_url = cherrypy.engine.publish(
+            "url:internal",
+            "/applog",
+            {"source": source},
+            force_querystring=True
         ).pop()
 
         return cherrypy.engine.publish(
@@ -45,7 +42,9 @@ class Controller:
             records=records,
             total=total,
             source=source,
-            newer_url=newer_url,
-            older_url=older_url,
-            query_plan=query_plan
+            query_plan=query_plan,
+            pagination_url=pagination_url,
+            offset=offset,
+            total_records=total,
+            per_page=per_page
         ).pop()

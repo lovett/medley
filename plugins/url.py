@@ -104,12 +104,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 for (key, value) in query.items()
                 if value
             }
-
-        if force_querystring:
-            url = f"{url}?"
-
-        if query:
             url = f"{url}?{urlencode(query)}"
+
+        if force_querystring and "?" not in url:
+            url = f"{url}?"
 
         request_headers = cherrypy.request.headers
         use_https = request_headers.get("X-Https", "") == "On"

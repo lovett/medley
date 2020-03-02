@@ -249,16 +249,21 @@ in the argument list are returned.  #}
     {% set previous_page_offset = offset - per_page - 1 %}
     {% set next_page_offset = offset + per_page + 1 %}
 
+    {% if not url.endswith("?") %}
+        {% set url = url + "&" %}
+    {% endif %}
+
+
     <footer class="pagination">
         {% if not at_start %}
-            <a href="{{ url }}&offset={{ previous_page_offset }}" class="previous">
+            <a href="{{ url }}offset={{ previous_page_offset }}" class="previous">
                 <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-left"></use></svg>
                 Previous
             </a>
         {% endif %}
 
         {% if not at_end %}
-            <a href="{{ url }}&offset={{ next_page_offset }}" class="previous">
+            <a href="{{ url }}offset={{ next_page_offset }}" class="previous">
                 Next
                 <svg class="icon icon-arrow-right"><use xlink:href="#icon-arrow-right"></use></svg>
             </a>
