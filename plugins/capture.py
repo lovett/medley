@@ -36,6 +36,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("capture:add", self.add)
         self.bus.subscribe("capture:search", self.search)
         self.bus.subscribe("capture:get", self.get)
+        self.bus.subscribe("capture:prune", self.prune)
 
     def add(self,
             request: Any,
@@ -118,3 +119,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         WHERE rowid=?"""
 
         return self._select(sql, (capture_id,))
+
+    def prune(self, cutoff_months: int = 3) -> None:
+        """Delete old records.
+
+        This is normally invoked from the maintenance plugin, and
+        restricts the growth of the captures database since old
+        records are unlikely to be useful.
+
+        """
+
+        deletion_count = self._delete(
+            """DELETE FROM captures
+            WHERE strftime('%s', created) < strftime('%s', 'now', ?)""",
+            (f"-{cutoff_months} month",)
+        )
+
+        unit = "row" if deletion_count == 1 else "rows"
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "capture:prune",
+            f"{deletion_count} {unit} deleted"
+        )
