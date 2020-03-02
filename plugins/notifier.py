@@ -2,7 +2,6 @@
 
 import typing
 import cherrypy
-import local_types
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -26,9 +25,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("notifier:build", self.build)
 
     @staticmethod
-    def build(
-            **kwargs: local_types.Kwargs
-    ) -> typing.Dict[str, typing.Any]:
+    def build(**kwargs: str) -> typing.Dict[str, typing.Any]:
         """Populate a dict with key value pairs.
 
         This dict can be provided to send() for immediate delivery, or
