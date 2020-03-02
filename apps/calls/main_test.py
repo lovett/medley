@@ -49,9 +49,6 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
                     {"key": "dst", "value": "test2"}
                 ]]
 
-            if args[0] == "cdr:count":
-                return [1]
-
             if args[0] == "url:paginate:newer_older":
                 return [(None, None)]
 
@@ -63,12 +60,6 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
 
         self.request("/")
-
-        publish_mock.assert_any_call(
-            "cdr:count",
-            dst_exclude=["test2"],
-            src_exclude=["test"]
-        )
 
         publish_mock.assert_any_call(
             "cdr:timeline",

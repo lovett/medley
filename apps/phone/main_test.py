@@ -80,6 +80,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         """A valid number lookup performs a state abbreviation lookup"""
         def side_effect(*args, **_):
             """Side effects local function"""
+            print(args)
             value_map = {
                 "cache:get": [None],
                 "geography:state_by_area_code": [
@@ -89,7 +90,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                     (None, "Unabbreviated State")
                 ],
                 "formatting:phone_sanitize": ["1234567890"],
-                "cdr:history": [[]],
+                "cdr:history": [([], 0)],
             }
             if args[0] == "jinja:render":
                 return [""]
@@ -119,7 +120,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "formatting:phone_sanitize":
                 return ["1234567890"]
             if args[0] == "cdr:history":
-                return [[{"clid": "test"}]]
+                return [[{"clid": "test"}, 1]]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

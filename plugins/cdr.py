@@ -19,52 +19,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the cdr prefix.
         """
-        self.bus.subscribe("cdr:count", self.count)
         self.bus.subscribe("cdr:timeline", self.timeline)
         self.bus.subscribe("cdr:history", self.history)
 
-    def count(
+    def timeline(
             self,
-            src: str = None,
             src_exclude: typing.Tuple[str, ...] = (),
-            dst_exclude: typing.Tuple[str, ...] = ()
-    ) -> typing.Optional[int]:
-        """Get the number of calls made or received by a number."""
-
-        src_target = ""
-        src_filter = ""
-        dst_filter = ""
-        values = []
-
-        if src:
-            src_target = "AND src=?"
-            values.append(src)
-
-        if src_exclude:
-            exclusions = ",".join("?" * len(src_exclude))
-            src_filter = f"AND src NOT IN ({exclusions})"
-            values.extend(src_exclude)
-
-        if dst_exclude:
-            exclusions = ",".join("?" * len(dst_exclude))
-            dst_filter = f"AND dst NOT IN ({exclusions})"
-            values.extend(dst_exclude)
-
-        sql = f"""
-        SELECT count(*) as count FROM cdr
-        WHERE 1=1 {src_target} {src_filter} {dst_filter}"""
-
-        row = self._selectOne(sql, values)
-
-        if row:
-            return int(row["count"])
-        return None
-
-    def timeline(self,
-                 src_exclude: typing.Tuple[str, ...] = (),
-                 dst_exclude: typing.Tuple[str, ...] = (),
-                 offset: int = 0,
-                 limit: int = 50) -> typing.List[sqlite3.Row]:
+            dst_exclude: typing.Tuple[str, ...] = (),
+            offset: int = 0,
+            limit: int = 50
+    ) -> typing.Tuple[typing.List[sqlite3.Row], int]:
         """Get a list of calls in reverse-chronological order."""
 
         reversed_values = [str(offset), str(limit)]
@@ -96,15 +60,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY calldate DESC
         LIMIT ? OFFSET ?"""
 
-        return self._select(
-            sql,
-            tuple(reversed(reversed_values))
+        return (
+            self._select(sql, tuple(reversed(reversed_values))),
+            self._count(sql, tuple(reversed(reversed_values))),
         )
 
     def history(
             self,
             number: str,
-            limit: int = 50) -> typing.List[sqlite3.Row]:
+            limit: int = 50
+    ) -> typing.Tuple[typing.List[sqlite3.Row], int]:
         """An abbreviated version of log() for a single number.
 
         Puts more emphasis on whether a call was placed or received.
@@ -126,7 +91,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         wildcard_number = f"%{number}"
 
-        return self._select(
-            sql,
-            (wildcard_number, wildcard_number, limit)
+        return (
+            self._select(sql, (wildcard_number, wildcard_number, limit)),
+            self._count(sql, (wildcard_number, wildcard_number, limit))
         )

@@ -11,7 +11,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """
         Display information about the specified number, or a search form to
         look up a number
@@ -29,18 +29,20 @@ class Controller:
         error = ""
 
         if not number:
-            return cherrypy.engine.publish(
+            default_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "phone.jinja.html"
             ).pop()
+            return default_response
 
         if not sanitized_number:
-            return cherrypy.engine.publish(
+            search_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "phone.jinja.html",
                 error="The number provided was invalid.",
                 subview_title="Error"
             ).pop()
+            return search_response
 
         area_code = sanitized_number[:3]
 
@@ -72,7 +74,7 @@ class Controller:
                 }
             )
 
-        call_history = cherrypy.engine.publish(
+        call_history, _ = cherrypy.engine.publish(
             "cdr:history",
             sanitized_number
         ).pop()
@@ -83,7 +85,7 @@ class Controller:
             (state_lookup, state_name_lookup)
         ]
 
-        return cherrypy.engine.publish(
+        response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "phone.jinja.html",
             error=error,
@@ -95,3 +97,5 @@ class Controller:
             sparql=sparql,
             subview_title=sanitized_number
         ).pop()
+
+        return response

@@ -11,10 +11,10 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of recent calls"""
 
-        offset = int(kwargs.get('offset', 0))
+        offset = int(kwargs.get("offset", 0))
         per_page = 50
 
         exclusions = cherrypy.engine.publish(
@@ -32,13 +32,7 @@ class Controller:
             if ex["key"].endswith("dst")
         ]
 
-        total = cherrypy.engine.publish(
-            "cdr:count",
-            src_exclude=src_exclusions,
-            dst_exclude=dst_exclusions
-        ).pop()
-
-        calls = cherrypy.engine.publish(
+        calls, total_records = cherrypy.engine.publish(
             "cdr:timeline",
             src_exclude=src_exclusions,
             dst_exclude=dst_exclusions,
@@ -46,19 +40,20 @@ class Controller:
             limit=per_page
         ).pop()
 
-        (newer_url, older_url) = cherrypy.engine.publish(
-            "url:paginate:newer_older",
-            params={},
-            per_page=per_page,
-            offset=offset,
-            total=total
+        pagination_url = cherrypy.engine.publish(
+            "url:internal",
+            "/calls",
+            force_querystring=True
         ).pop()
 
-        return cherrypy.engine.publish(
+        response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "calls.jinja.html",
             calls=calls,
-            total=total,
-            newer_url=newer_url,
-            older_url=older_url,
+            total_records=total_records,
+            offset=offset,
+            per_page=per_page,
+            pagination_url=pagination_url
         ).pop()
+
+        return response
