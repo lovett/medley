@@ -45,45 +45,19 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                value = "Column 1, Column 2, Column 3\nlayout=month"
-                return [{"test1": value}]
+            if args[0] == "registry:first:value":
+                return ["Column 1, Column 2, Column 3\nlayout=month"]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", name="test1")
+        self.request("/test1")
 
         self.assertCountEqual(
             publish_mock.call_args_list[-1].kwargs.get("headers"),
             ['Date', 'Day', 'Column 1', 'Column 2', 'Column 3']
-        )
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_default_layout(self, publish_mock):
-        """The columns of a default layout are specified entirely by the
-        template.
-
-        """
-
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                value = "Column A, Column B, Column C"
-                return [{"test_default_layout": value}]
-            if args[0] == "jinja:render":
-                return [""]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", name="test_default_layout")
-
-        self.assertCountEqual(
-            publish_mock.call_args_list[-1].kwargs.get("headers"),
-            ['Column A', 'Column B', 'Column C']
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -94,41 +68,19 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                value = "Column 4, Column 5, Column 6\nlayout=month"
-                return [{"test1": value}]
+            if args[0] == "registry:first:value":
+                return ["Column 4, Column 5, Column 6\nlayout=month"]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        self.request("/", name="test1", start="1234-56")
+        self.request("/test1", start="1234-56")
 
         self.assertEqual(
             publish_mock.call_args_list[-1].kwargs.get("rows")[0][0],
             first_of_current_month.strftime("%b %-d, %Y")
-        )
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_plain_layout(self, publish_mock):
-        """No additional columns are added to a plain-layout template"""
-
-        def side_effect(*args, **_):
-            """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                return [{"test1": "Column A, Column B"}]
-            if args[0] == "jinja:render":
-                return [""]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", name="test1")
-
-        self.assertCountEqual(
-            publish_mock.call_args_list[-1].kwargs.get("headers"),
-            ['Column A', 'Column B']
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -137,8 +89,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                return [{"test1": "Column A"}]
+            if args[0] == "registry:first:value":
+                return ["Column A"]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -155,8 +107,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args, **_):
             """Side effects local function"""
-            if args[0] == "registry:search:dict":
-                return [{"test1": "Column A"}]
+            if args[0] == "registry:first:value":
+                return ["Column A"]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
