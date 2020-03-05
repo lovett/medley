@@ -13,7 +13,7 @@
             </a>
         {% endif %}
 
-        <a id="add-record" href="{{ app_url }}/new">
+        <a id="add-record" href="{{ app_url }}/new?key={{ query|urlencode }}">
             <svg class="icon"><use xlink:href="#add-item"></use></svg>
             Add
         </a>
