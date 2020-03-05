@@ -1,5 +1,6 @@
 """Redirection between domains"""
 
+import typing
 from urllib.parse import urlparse
 import cherrypy
 
@@ -19,14 +20,14 @@ class Controller:
     }
 
     @staticmethod
-    def url_to_host(url=None):
+    def url_to_host(url: str = "") -> str:
         """Reduce a URL to its hostname"""
         parsed_url = urlparse(url)
         if not parsed_url.netloc:
             return url
         return parsed_url.netloc
 
-    def host_to_group(self, host):
+    def host_to_group(self, host: str = "") -> str:
         """Reduce a host to a word that describes the project
         or entity it is related to.
 
@@ -50,7 +51,7 @@ class Controller:
 
         return filtered_segments[-1]
 
-    def host_to_keyword(self, host):
+    def host_to_keyword(self, host: str = "") -> str:
         """Reduce a host to a word that distinguishes it from
         others in the same group."""
 
@@ -74,37 +75,43 @@ class Controller:
         return "live"
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **kwargs) -> bytes:
+    def GET(self, *_args: str, **kwargs: str) -> bytes:
         """Display all the URLs in a group."""
 
-        host = ''
-        bounces = ''
-        name = ''
-        group = kwargs.get('group', '')
-        url = kwargs.get('u', '')
-        invalid = kwargs.get('invalid')
-        registry_url = ''
+        host = ""
+        name = ""
+        group = kwargs.get("group", "")
+        url = kwargs.get("u", "")
+        invalid = kwargs.get("invalid")
+        registry_url = ""
+        bounces: typing.List[typing.Tuple[str, str]] = []
 
         if url:
             host = self.url_to_host(url)
-            record = cherrypy.engine.publish(
+            key = cherrypy.engine.publish(
                 "registry:first:key",
                 value=host,
                 key_prefix="bounce*"
             ).pop()
 
             try:
-                _, group, name = record.split(":")
+                _, group, name = key.split(":")
             except (AttributeError, ValueError):
                 group = self.host_to_group(host)
                 name = self.host_to_keyword(host)
 
         if group:
-            search_key = f"bounce:{group}:"
-            bounces = cherrypy.engine.publish(
+            rows = cherrypy.engine.publish(
                 "registry:search",
-                search_key
+                f"bounce:{group}"
             ).pop()
+
+            if rows:
+                bounces = [
+                    (url.replace(host, row["value"]),
+                     row["key"].split(":").pop())
+                    for row in rows
+                ]
 
             registry_url = cherrypy.engine.publish(
                 "url:internal",
@@ -112,30 +119,12 @@ class Controller:
                 {"q": f"bounce:{group}"}
             ).pop()
 
-        departing_from = None
-        if bounces:
-            # Match the current URL to a known site.
-            for bounce in bounces:
-                if bounce["value"] == host:
-                    departing_from = bounce["key"].split(":").pop()
-                    break
+        if not any(host in bounce[0] for bounce in bounces):
+            bounces = []
 
-            # If the departing site can't be determined, the
-            # list of bounces isn't viable.
-            if not departing_from:
-                bounces = []
-
-            # Re-scope the current URL to each known destination.
-            bounces = [
-                (url.replace(host, bounce["value"]),
-                 bounce["key"].split(":").pop())
-                for bounce in bounces
-            ]
-
-        return cherrypy.engine.publish(
+        response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "bounce.jinja.html",
-            departing_from=departing_from,
             url=url,
             site=host,
             group=group,
@@ -145,7 +134,9 @@ class Controller:
             invalid=invalid
         ).pop()
 
-    def POST(self, url, name, group) -> None:
+        return response
+
+    def POST(self, url: str, name: str, group: str) -> None:
         """Add a new URL to a group."""
 
         host = self.url_to_host(url)
@@ -181,10 +172,9 @@ class Controller:
         key = f"bounce:{group}:{name}"
 
         cherrypy.engine.publish(
-            "registry:add",
-            key,
-            [host],
-            replace=True
+            "registry:replace",
+            key=key,
+            value=host
         )
 
         redirect_url = cherrypy.engine.publish(

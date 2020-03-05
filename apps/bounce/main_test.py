@@ -261,8 +261,9 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             "unrecognized"
         )
 
-        self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("bounces")
+        self.assertEqual(
+            len(publish_mock.call_args_list[-1].kwargs.get("bounces")),
+            0
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -329,8 +330,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("departing_from"),
-            "othersite"
+            len(publish_mock.call_args_list[-1].kwargs.get("bounces")),
+            2
         )
 
     @mock.patch("cherrypy.engine.publish")

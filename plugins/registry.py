@@ -43,6 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:timezone", self.timezone)
         self.bus.subscribe("registry:remove:id", self.remove_id)
         self.bus.subscribe("registry:remove:key", self.remove_key)
+        self.bus.subscribe("registry:replace", self.replace)
         self.bus.subscribe("registry:search", self.search)
         self.bus.subscribe("registry:search:dict", self.search_dict)
         self.bus.subscribe("registry:search:multidict", self.search_multidict)
@@ -68,6 +69,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             WHERE key=?""",
             (key,)
         )
+
+    def replace(self, **kwargs: typing.Any) -> bool:
+        """Update or insert a record by key.
+
+        This is for situations where a key should correspond to only
+        one record and the record ID is not otherwise used.
+
+        """
+
+        key = kwargs.get("key")
+        value = kwargs.get("value")
+
+        if value:
+            value = value.replace("\r", "")
+
+        cherrypy.engine.publish("memorize:clear", key)
+
+        result = self._multi([
+            ("DELETE FROM registry WHERE key=?",
+             (key,)),
+            ("INSERT INTO registry (key, value) VALUES (?, ?)",
+             (key, value))
+        ])
+
+        if result:
+            cherrypy.engine.publish("registry:added", key)
+
+        return result
 
     def add(self, **kwargs: typing.Any) -> bool:
         """Add one or more records.
