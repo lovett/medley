@@ -6,6 +6,7 @@ See https://googleapis.dev/python/storage/latest/client.html
 
 import json
 import pathlib
+import urllib3
 import cherrypy
 from google.cloud import storage
 from google.oauth2.service_account import Credentials
@@ -130,12 +131,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     )
 
                 files_pulled += 1
-        except google.auth.exceptions.GoogleAuthError as exception:
+        except (
+                google.auth.exceptions.GoogleAuthError,
+                urllib3.exceptions.NewConnectionError
+        ) as exception:
             cherrypy.engine.publish(
                 "applog:add",
                 "gcp_storage:exception",
                 exception
             )
+
+            return
 
         unit = "file" if files_pulled == 1 else "files"
 
