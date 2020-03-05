@@ -27,6 +27,7 @@
 
 
 {% block page_body %}
+    {{ macros.svgSymbols("edit") }}
     <main id="display">
         {% for section in page.sections() if not section.startswith("-") %}
             <section>
@@ -78,7 +79,10 @@
                     </li>
                 {% endif %}
                 <li>
-                    <a href="{{ edit_url }}">Edit this page</a>
+                    <a href="{{ edit_url }}">
+                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                        Edit
+                    </a>
                 </li>
             </ul>
         </section>
