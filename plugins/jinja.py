@@ -450,7 +450,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             value = value.replace(link, anchor)
 
-        return value
+        return jinja2.Markup(value)
 
     def optional_qs_param_filter(self, value: str, key: str) -> str:
         """Return a URL querystring key-value pair if the value exists."""
