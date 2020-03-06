@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("binoculars", "close") }}
+    {{ macros.svgSymbols("search") }}
 
     <main>
         <header id="app-nav">
@@ -101,8 +101,8 @@
 
                     {% if visit_days_count > 0 %}
                         <dd>
-                            <svg class="icon icon-binoculars">
-                                <use xlink:href="#icon-binoculars"></use>
+                            <svg class="icon">
+                                <use xlink:href="#icon-search"></use>
                             </svg>
                             <a href="{{ visitors_url }}" rel="noreferrer">
                                 view

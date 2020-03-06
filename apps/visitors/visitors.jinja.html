@@ -14,8 +14,8 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a id="add-record" class="secondary-action" href="#save">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
-            Save query
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Save
         </a>
 
         <a href="/registry/?q=visitors">
@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("add-item", "arrow-left", "arrow-right", "delete", "edit", "database", "flag", "clock", "binoculars", "bookmark", "tag", "search") }}
+    {{ macros.svgSymbols("arrow-left", "arrow-right", "delete", "edit", "database", "flag", "clock", "new-item", "bookmark", "tag", "search") }}
 
     <main>
         <header id="app-nav">
@@ -166,21 +166,21 @@
                                                 <a href="/visitors?query=cookie+{{ cookies.get(result.ip) }}"
                                                    title="Search for visits with this cookie"
                                                    rel="noreferrer"
-                                                ><svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg></a>
+                                                ><svg class="icon"><use xlink:href="#icon-tag"></use></svg></a>
                                             {% else %}
-                                                <span title="No cookie on request"><svg class="icon icon-tag inactive"><use xlink:href="#icon-tag"></use></svg></span>
+                                                <span title="No cookie on request"><svg class="icon inactive"><use xlink:href="#icon-tag"></use></svg></span>
                                             {% endif %}
 
                                             <a href="/whois?address={{ result.ip }}"
                                                target="_blank"
                                                title="View whois details for this address"
                                                rel="noreferrer"
-                                            ><svg class="icon icon-binoculars"><use xlink:href="#icon-binoculars"></use></svg></a>
+                                            ><svg class="icon"><use xlink:href="#icon-search"></use></svg></a>
 
                                             <a href="#annotate" data-ip="{{ result.ip }}"
                                                class="annotate-ip"
                                                title="Annotate this ip"
-                                            ><svg class="icon icon-bookmark"><use xlink:href="#icon-bookmark"></use></svg></a>
+                                            ><svg class="icon"><use xlink:href="#icon-bookmark"></use></svg></a>
                                         </div>
                                     </td>
                                 {% else %}
@@ -190,7 +190,7 @@
                                 <td nowrap="nowrap">
                                     <p>
                                         <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
-                                            <svg class="icon icon-flag"><use xlink:href="#icon-flag"></use></svg>
+                                            <svg class="icon"><use xlink:href="#icon-flag"></use></svg>
                                         </a>
                                         {{ year_month_day }}
                                         at
@@ -242,7 +242,7 @@
                             <tr class="expandable">
                                 <td colspan="6">
                                     <p class="meta">
-                                        <svg class="icon icon-clock"><use xlink:href="#icon-clock"></use></svg>
+                                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
                                         {{ result.unix_timestamp|ago() }}
                                         {% if result.time_zone %}
                                             at {{ result.unix_timestamp|localtime(result.time_zone)|dateformat('LTS') }} local time

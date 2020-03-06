@@ -3,7 +3,7 @@ Vue.component('discard-button', {
         svgSymbol: {
             type: String,
             required: false,
-            default: "#delete"
+            default: "#icon-delete"
         },
 
         emitEvent: {
@@ -25,7 +25,7 @@ Vue.component('discard-button', {
     template: `
     <div class="action-button discard-button">
         <a href="#" v-on:click.stop.prevent="click" v-bind:title="tooltip">
-            <svg><use v-bind:xlink:href="svgSymbol"></use></svg>
+            <svg class="icon"><use v-bind:xlink:href="svgSymbol"></use></svg>
         </a>
     </div>
     `

@@ -34,7 +34,7 @@ Vue.component('new-item-button', {
     template: `
     <div class="action-button clipboard-button">
         <a href="#" v-on:click.prevent="click" v-bind:class="{ clicked: clicked }" v-bind:title="tooltip">
-            <svg><use xlink:href="#new-item"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
        </a>
        <span class="label">{{ this.label }}</span>
        <form>

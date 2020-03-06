@@ -12,14 +12,14 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a href="{{ app_url }}/taglist">
-            <svg class="icon icon-tag-stack"><use xlink:href="#icon-tag-stack"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-list"></use></svg>
             Tags
         </a>
     </nav>
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("search", "delete", "icon-tag", "icon-tag-stack", "arrow-right", "arrow-left", "close", "globe") }}
+    {{ macros.svgSymbols("search", "delete", "tag", "list", "arrow-right", "arrow-left", "globe") }}
 
     <main>
         <header id="app-nav">
@@ -100,7 +100,7 @@
                                     <div class="tags">
                                         {% for tag in bookmark.tags %}
                                             <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
-                                                <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                                                <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                                                 {{ tag }}
                                             </a>
                                         {% endfor %}

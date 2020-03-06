@@ -7,7 +7,7 @@
 
 {% block page_body %}
     <main>
-        {{ macros.svgSymbols("icon-tag") }}
+        {{ macros.svgSymbols("tag") }}
 
         {% if not tags %}
             <p>No tags found.</p>
@@ -18,7 +18,7 @@
                 {% for tag in tags %}
                     <li>
                         <a href="{{ app_url }}?query=tag:{{ tag }}&order=date-desc">
-                            <svg class="icon icon-tag"><use xlink:href="#icon-tag"></use></svg>
+                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                             {{ tag }}
                         </a>
                     </li>

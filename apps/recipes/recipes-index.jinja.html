@@ -3,14 +3,14 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a id="add-record" href="/recipes/new">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
             Add
         </a>
     </nav>
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("add-item", "arrow-let", "tag") }}
+    {{ macros.svgSymbols("new-item", "arrow-let", "tag") }}
     <main id="tagset">
         <header id="app-nav">
             <form method="get" action="/recipes/search">

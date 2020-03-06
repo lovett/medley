@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("chart", "arrow-left") }}
+    {{ macros.svgSymbols("activity", "arrow-left") }}
 
     <main>
         {% if metrics %}
@@ -14,7 +14,7 @@
                     {% for metric in metrics %}
                         <li>
                             <a href="{{ app_url }}/{{ metric["key"] }}">
-                                <svg class="icon icon-chart"><use xlink:href="#icon-chart"></use></svg>
+                                <svg class="icon"><use xlink:href="#icon-activity"></use></svg>
                                 {{ metric["key"] }}
                             </a>
                     </li>

@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link", "close") }}
+    {{ macros.svgSymbols("copy", "delete", "arrow-right", "arrow-left", "link") }}
 
     <main>
         <header id="app-nav">
@@ -44,7 +44,7 @@
                         </div>
 
                         <a href="{{ app_url }}/{{ capture.rowid }}">
-                            <svg class="icon icon-link"><use xlink:href="#icon-link"></use></svg>
+                            <svg class="icon"><use xlink:href="#icon-link"></use></svg>
                         </a>
                     </header>
 

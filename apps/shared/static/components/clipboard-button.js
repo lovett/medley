@@ -50,7 +50,7 @@ Vue.component('clipboard-button', {
     template: `
     <div class="action-button clipboard-button">
         <a href="#" v-on:click.prevent="click" v-bind:class="{ clicked: clicked }" v-bind:title="tooltip">
-            <svg><use xlink:href="#copy"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
        </a>
        <span class="label">{{ this.label }}</span>
        <form>

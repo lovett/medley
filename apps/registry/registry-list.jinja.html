@@ -14,7 +14,7 @@
         {% endif %}
 
         <a id="add-record" href="{{ app_url }}/new?key={{ query|urlencode }}">
-            <svg class="icon"><use xlink:href="#add-item"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
             Add
         </a>
 
@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("copy", "delete", "new-item", "add-item", "arrow-left", "download") }}
+    {{ macros.svgSymbols("copy", "delete", "new-item", "arrow-left", "download", "edit") }}
     <main>
         <header id="page-title">
             <h2>{{ query }}</h2>
@@ -55,8 +55,9 @@
                                          tooltip="Copy value"
                                      /></div>
                                 <div><discard-button tooltip="Delete this record" /></div>
-                                <div>
+                                <div class="action-button clipboard-button">
                                     <a href="{{ app_url}}/{{ record.rowid}}/edit">
+                                        <svg class="icon"><use xlink:href="#icon-edit"></use></sv>
                                         Edit
                                     </a>
                                 </div>

@@ -87,6 +87,10 @@ code {
     margin-bottom: .5em;
 }
 
+.info svg {
+    margin-right: .5em;
+}
+
 .unbookmark > * {
     display: inline-block;
 }

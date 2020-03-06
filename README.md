@@ -91,3 +91,4 @@ including but not limited to:
 * [Pendulum](https://pendulum.eustace.io)
 * [Sqlite](https://sqlite.org/)
 * [Vue.js](https://vuejs.org/)
+* [Feather icons](https://feathericons.com)
