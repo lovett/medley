@@ -1,6 +1,5 @@
 """Store arbitrary values in an SQLite database."""
 
-import sqlite3
 import typing
 import cherrypy
 import msgpack
@@ -59,7 +58,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return ("_", key)
 
-    def match(self, prefix: str) -> typing.List[sqlite3.Row]:
+    def match(self, prefix: str) -> typing.List[typing.Any]:
         """Retrieve multiple values based on a common prefix."""
 
         rows = self._select(

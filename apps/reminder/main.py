@@ -15,7 +15,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **_kwargs) -> bytes:
+    def GET(*_args: str, **_kwargs: str) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
 
         registry_rows = cherrypy.engine.publish(
@@ -52,7 +52,7 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        return cherrypy.engine.publish(
+        result: bytes = cherrypy.engine.publish(
             "jinja:render",
             "reminder.jinja.html",
             registry_url=registry_url,
@@ -60,8 +60,10 @@ class Controller:
             upcoming=upcoming
         ).pop()
 
+        return result
+
     @staticmethod
-    def POST(*args, **kwargs) -> None:
+    def POST(*args: str, **kwargs: str) -> None:
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message")
