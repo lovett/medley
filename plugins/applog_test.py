@@ -42,7 +42,7 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._execute")
+    @mock.patch("plugins.applog.Plugin._multi")
     def test_pull(self, db_mock):
         """Queued messages are written to storage."""
 
@@ -70,7 +70,7 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._execute")
+    @mock.patch("plugins.applog.Plugin._multi")
     def test_exception_message(self, db_mock):
         """Messages can be provided as exceptions."""
 
@@ -81,7 +81,7 @@ class TestApplog(unittest.TestCase):
             self.plugin.pull()
 
         self.assertEqual(
-            db_mock.call_args_list[0].args[-1][-1][-1],
+            db_mock.call_args_list[0][0][0][0][1][2],
             "test"
         )
 

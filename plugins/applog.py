@@ -78,10 +78,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for _ in range(len(messages)):
             self.queue.popleft()
 
-        self._execute(
-            "INSERT INTO applog (created, source, message) VALUES (?, ?, ?)",
-            messages
-        )
+        queries = [
+            ("INSERT INTO applog (created, source, message) VALUES (?, ?, ?)",
+             message)
+            for message in messages
+        ]
+
+        self._multi(queries)
 
     def add(self, source: str, message: str) -> None:
         """Accept a log message for storage."""
