@@ -21,7 +21,7 @@ class ScheduledEvent():
         """Map an event to a string for use with the cache plugin.
         """
 
-        return f"scheduleder:{round(self.event.time, 3)}"
+        return f"scheduler:{round(self.event.time, 3)}"
 
     @property
     def time_remaining(self) -> float:
@@ -89,7 +89,6 @@ class Plugin(cherrypy.process.plugins.Monitor):
         self.bus.subscribe("scheduler:persist", self.persist)
         self.bus.subscribe("scheduler:remove", self.remove)
         self.bus.subscribe("scheduler:upcoming", self.upcoming)
-        self.bus.subscribe("scheduler:revive", self.revive)
         self.scheduler = sched.scheduler(time.time, time.sleep)
         cherrypy.process.plugins.Monitor.start(self)
 
