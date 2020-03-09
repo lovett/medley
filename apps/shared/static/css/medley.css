@@ -442,8 +442,11 @@ TEXTAREA {
 }
 
 .clipboard-button a:hover {
-    fill: white;
     background-color: var(--success);
+}
+
+.clipboard-button a:hover .icon use {
+    stroke: var(--white);
 }
 
 .clipboard-button a.clicked {
@@ -464,7 +467,11 @@ TEXTAREA {
 
 .discard-button a:hover {
     background-color: var(--alert);
-    fill: var(--white);
+}
+
+.discard-button a:hover .icon use {
+    stroke: var(--white);
+
 }
 
 .error {
@@ -473,8 +480,11 @@ TEXTAREA {
 }
 
 .link-button a:hover {
-    fill: white;
     background-color: var(--success);
+}
+
+.link-button a:hover .icon use {
+    stroke: var(--white);
 }
 
 .link-button a.clicked {
