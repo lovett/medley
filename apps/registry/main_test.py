@@ -64,9 +64,9 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.engine.publish")
     def test_delete(self, publish_mock):
         """Existing records can be deleted"""
-        response = self.request("/", method="DELETE", uid="testid")
+        response = self.request("/", method="DELETE", uid=1)
 
-        publish_mock.assert_any_call("registry:remove:id", "testid")
+        publish_mock.assert_any_call("registry:remove:id", 1)
         self.assertEqual(response.code, 204)
 
 

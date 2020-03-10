@@ -169,12 +169,10 @@ class Controller:
 
             raise cherrypy.HTTPRedirect(redirect_url)
 
-        key = f"bounce:{group}:{name}"
-
         cherrypy.engine.publish(
             "registry:replace",
-            key=key,
-            value=host
+            f"bounce:{group}:{name}",
+            host
         )
 
         redirect_url = cherrypy.engine.publish(

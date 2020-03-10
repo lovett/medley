@@ -130,25 +130,25 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(*args, key: str = "", value: str = "", **kwargs) -> None:
+    def POST(*args: str, **kwargs: str) -> None:
         """Store a new entry in the database or update an existing entry"""
 
-        rowid = 0
-        topic = "registry:add"
+        key = kwargs.get("key", "").strip()
+        value = kwargs.get("value", "").strip()
 
         if args:
-            rowid = int(args[0])
-            topic = "registry:update"
-
-        key = key.strip()
-        value = value.strip()
-
-        cherrypy.engine.publish(
-            topic,
-            key=key,
-            values=[value],
-            rowid=rowid
-        )
+            cherrypy.engine.publish(
+                "registry:update",
+                int(args[0]),
+                key,
+                value
+            )
+        else:
+            cherrypy.engine.publish(
+                "registry:add",
+                key,
+                value
+            )
 
         if not kwargs.get("skip_redirect"):
             raise cherrypy.HTTPRedirect(f"/registry?q={key}")
@@ -156,13 +156,12 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(uid=None, key=None) -> None:
-        """Remove an existing entry by its key or ID"""
+    def DELETE(uid: str) -> None:
+        """Remove an existing entry by its ID"""
 
-        if uid:
-            cherrypy.engine.publish("registry:remove:id", uid)
-
-        if key:
-            cherrypy.engine.publish("registry:remove:key", key)
+        cherrypy.engine.publish(
+            "registry:remove:id",
+            int(uid)
+        )
 
         cherrypy.response.status = 204

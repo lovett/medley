@@ -180,13 +180,13 @@ class Controller:
             cherrypy.engine.publish(
                 "registry:add",
                 "reminder:template",
-                [urlencode({
+                urlencode({
                     "message": message.strip(),
                     "minutes": total_minutes,
                     "comments": comments.strip(),
                     "notification_id": notification_id,
                     "url": url.strip()
-                })]
+                })
             )
 
         redirect_url = cherrypy.engine.publish(

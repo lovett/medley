@@ -36,7 +36,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:find", self.find)
-        self.bus.subscribe("registry:find:key", self.find_key)
         self.bus.subscribe("registry:first:key", self.first_key)
         self.bus.subscribe("registry:first:value", self.first_value)
         self.bus.subscribe("registry:keys", self.keys)
@@ -60,29 +59,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (uid,)
         )
 
-    def find_key(self, key: str) -> typing.Optional[sqlite3.Row]:
-        """Select a single record by its key."""
+    def replace(self, key: str, value: typing.Any) -> bool:
+        """Create or replace a record.
 
-        return self._selectOne(
-            """SELECT rowid, key, value, created as 'created [datetime]'
-            FROM registry
-            WHERE key=?""",
-            (key,)
-        )
+        Use this when a key should only be associated with a single
+        record.
 
-    def replace(self, **kwargs: typing.Any) -> bool:
-        """Update or insert a record by key.
-
-        This is for situations where a key should correspond to only
-        one record and the record ID is not otherwise used.
+        For multi-record keys, use registry:add instead.
 
         """
 
-        key = kwargs.get("key")
-        value = kwargs.get("value")
-
-        if value:
+        try:
             value = value.replace("\r", "")
+        except AttributeError:
+            pass
 
         cherrypy.engine.publish("memorize:clear", key)
 
@@ -98,31 +88,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return result
 
-    def add(self, **kwargs: typing.Any) -> bool:
-        """Add one or more records.
+    def add(self, key: str, value: typing.Any) -> bool:
+        """Create a new record.
 
-        Multiple recods with the same key are allowed, so values must
-        always be provided as a collection.
+        Use this when a key is allowed to be used by multiple records.
 
-        CRLF newlines will be converted to Unix-style LF to make
-        things easier for apps that use multi-line values.
+        For single-record keys, use registry:replace instead.
 
         """
 
-        key = kwargs.get("key")
-
-        values = [
-            value.replace("\r", "")
-            for value in kwargs.get("values", ())
-        ]
+        try:
+            value = value.replace("\r", "")
+        except AttributeError:
+            pass
 
         cherrypy.engine.publish("memorize:clear", key)
 
-        result = self._multi([
-            ("INSERT INTO registry (key, value) VALUES (?, ?)",
-             (key, value))
-            for value in values
-        ])
+        result = self._execute(
+            "INSERT INTO registry (key, value) VALUES (?, ?)",
+            (key, value)
+        )
 
         if result:
             cherrypy.engine.publish("registry:added", key)
@@ -378,22 +363,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (row["val"] for row in result)
 
-    def update(self, **kwargs: typing.Any) -> bool:
-        """Update a single record by its ID."""
-
-        key = kwargs.get("key")
-        values = [
-            value.replace("\r", "")
-            for value in kwargs.get("values", ())
-        ]
-
-        rowid = kwargs.get("rowid")
+    def update(self, rowid: int, key: str, value: typing.Any) -> bool:
+        """Modify an existing record."""
 
         cherrypy.engine.publish("memorize:clear", key)
 
         self._execute(
             "UPDATE registry SET key=?, value=? WHERE rowid=?",
-            (key, values[0], rowid)
+            (key, value, rowid)
         )
 
         cherrypy.engine.publish("registry:updated", key)

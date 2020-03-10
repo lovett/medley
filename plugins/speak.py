@@ -333,10 +333,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Disable text-to-speech."""
 
         cherrypy.engine.publish(
-            "registry:add",
+            "registry:replace",
             "speak:mute:temporary",
-            ["1"],
-            False
+            1
         )
 
     @staticmethod

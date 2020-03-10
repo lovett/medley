@@ -85,10 +85,9 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
         publish_mock.assert_called_with(
-            "registry:add",
+            "registry:replace",
             "country_code:alpha2:US",
-            ("US",),
-            True
+            "US"
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -112,7 +111,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
         # There is no assert_not_called_with() method,
-        # so make sure the last one wasn't registry:add
+        # so make sure the last one wasn't registry:replace
         last_call = publish_mock.call_args[0][0]
 
         self.assertEqual(last_call, "cache:get")
@@ -142,10 +141,9 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         publish_mock.assert_any_call(
-            "registry:add",
+            "registry:replace",
             "country_code:alpha2:US",
-            ("US",),
-            True
+            "US"
         )
 
     @mock.patch("cherrypy.engine.publish")

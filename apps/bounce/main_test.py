@@ -342,7 +342,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function."""
             if args[0] == "formatting:string_sanitize":
                 return [args[1]]
-            if args[0] == "registry:add":
+            if args[0] == "registry:replace":
                 return [{"uid": 1, "group": "example"}]
             if args[0] == "url:internal":
                 return ["http://example.com"]
