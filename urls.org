@@ -208,7 +208,6 @@ curl -i "$host/registry"
 #+BEGIN_SRC sh :wrap export http
 curl -i -H "Accept: $json" "$host/registry"
 #+END_SRC
-
 *** Search
 Search for records by key.
 
@@ -220,6 +219,20 @@ curl -i "$host/registry?q=config"
 #+NAME: registry_search_json
 #+BEGIN_SRC sh :wrap export json
 curl -H "Accept: $json" "$host/registry?q=config"
+#+END_SRC
+
+** POST
+*** Create
+
+#+NAME: registry_post_create
+#+BEGIN_SRC sh :wrap export html
+curl -i -d "key=test" -d "value=text" "$host/registry"
+#+END_SRC
+
+*** Update
+#+NAME: registry_post_update
+#+BEGIN_SRC sh :wrap export html
+curl -i -d "key=test UPDATED" -d "value=test UPDATED"  "$host/registry/1728"
 #+END_SRC
 
 * Speak
