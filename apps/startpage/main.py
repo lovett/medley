@@ -105,12 +105,16 @@ class Controller:
         if len(args) > 1:
             action = args[1]
 
-        page = cherrypy.engine.publish(
-            "registry:find:key",
-            f"startpage:{page_name}"
+        _, record_iterator = cherrypy.engine.publish(
+            "registry:search",
+            f"startpage:{page_name}",
+            limit=1,
+            exact=True
         ).pop()
 
-        if not page:
+        try:
+            page = next(record_iterator)
+        except StopIteration:
             if action == "view":
                 # Redirect to the edit form when a non-existent page
                 # is requested.
@@ -139,17 +143,10 @@ class Controller:
     def POST(self, page_name, page_content) -> None:
         """Create or update the INI version of a page."""
 
-        registry_key = f"startpage:{page_name}"
-
         cherrypy.engine.publish(
-            "registry:remove:key",
-            registry_key
-        )
-
-        cherrypy.engine.publish(
-            "registry:add",
-            key=registry_key,
-            values=[page_content]
+            "registry:replace",
+            f"startpage:{page_name}",
+            page_content
         )
 
         redirect_path = None

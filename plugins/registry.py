@@ -133,7 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             key: str = "",
             **kwargs: typing.Any
-    ) -> typing.Any:
+    ) -> typing.Tuple[int, typing.Iterator[sqlite3.Row]]:
         """Search for records by key or value."""
 
         keys = kwargs.get("keys", ())
@@ -191,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             count = self._count(sql, params)
             return (count, result)
 
-        return result
+        return (-1, result)
 
     def search_dict(
             self,
@@ -202,7 +202,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         key_slice = kwargs.get("key_slice", 0)
 
-        rows = self.search(*args, **kwargs)
+        _, rows = self.search(*args, **kwargs)
 
         return {
             row["key"].split(":", key_slice).pop():
@@ -219,7 +219,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         key_slice = kwargs.get("key_slice", 0)
 
-        rows = self.search(*args, **kwargs)
+        _, rows = self.search(*args, **kwargs)
 
         multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
 
@@ -236,7 +236,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.List:
         """Shape a result set as a list of values."""
 
-        rows = self.search(*args, **kwargs)
+        _, rows = self.search(*args, **kwargs)
 
         return [row["value"] for row in rows]
 
@@ -278,10 +278,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         key, the key_prefix argument provides additional specificity.
 
         """
-        result = self.search(key=key_prefix, value=value, limit=1)
+        _, rows = self.search(key=key_prefix, value=value, limit=1)
 
         try:
-            return typing.cast(str, next(result)["key"])
+            return typing.cast(str, next(rows)["key"])
         except StopIteration:
             return None
 
@@ -303,10 +303,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if memorize_hit:
                 return memorize_value
 
-        record_generator = self.search(key=key, exact=True, limit=1)
+        _, rows = self.search(key=key, exact=True, limit=1)
 
         try:
-            result = next(record_generator)
+            result = next(rows)
             value = result["value"]
         except StopIteration:
             value = default
