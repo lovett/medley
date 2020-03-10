@@ -73,7 +73,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._execute("""INSERT INTO captures
         (request_uri, request_line, request, response)
-        VALUES (?, ?, ?, ?)""", [placeholder_values])
+        VALUES (?, ?, ?, ?)""", placeholder_values)
 
         return True
 
