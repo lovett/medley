@@ -64,16 +64,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         request_uri = " ".join(request_uri_parts[1:-1])
 
-        placeholder_values = (
-            request_uri,
-            request.request_line,
-            sqlite3.Binary(request_bin),
-            sqlite3.Binary(response_bin)
+        self._execute(
+            """INSERT INTO captures
+            (request_uri, request_line, request, response)
+            VALUES (?, ?, ?, ?)""",
+            (
+                request_uri,
+                request.request_line,
+                sqlite3.Binary(request_bin),
+                sqlite3.Binary(response_bin)
+            )
         )
-
-        self._execute("""INSERT INTO captures
-        (request_uri, request_line, request, response)
-        VALUES (?, ?, ?, ?)""", placeholder_values)
 
         return True
 

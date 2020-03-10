@@ -507,9 +507,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if batch:
             self._multi(batch)
 
-        self._execute(
-            """INSERT OR IGNORE INTO reverse_ip (ip) VALUES (?)""",
-            tuple({(ip,) for ip in ips})
+        self._multi(
+            [("""INSERT OR IGNORE INTO reverse_ip (ip) VALUES (?)""",
+              (ip,))
+             for ip in ips]
         )
 
         cherrypy.engine.publish(
@@ -538,9 +539,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not records:
             return 0
 
-        self._execute("""INSERT OR IGNORE INTO logs
-        (source_file, source_offset, hash, logline)
-        VALUES (?, ?, ?, ?)""", records)
+        self._execute(
+            """INSERT OR IGNORE INTO logs
+            (source_file, source_offset, hash, logline)
+            VALUES (?, ?, ?, ?)""",
+            records
+        )
 
         return len(records)
 

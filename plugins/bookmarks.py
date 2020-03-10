@@ -168,42 +168,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         bookmark = self.find(url=url)
 
         if bookmark:
-            sql = """UPDATE bookmarks SET title=?, tags=?, comments=?,
-            updated=CURRENT_TIMESTAMP, deleted=NULL WHERE rowid=?"""
-
-            update_values = (
-                title,
-                tags,
-                comments,
-                bookmark["rowid"]
+            self._execute(
+                """UPDATE bookmarks
+                SET title=?, tags=?, comments=?,
+                updated=CURRENT_TIMESTAMP,
+                deleted=NULL WHERE rowid=?""",
+                (
+                    title,
+                    tags,
+                    comments,
+                    bookmark["rowid"]
+                )
             )
 
-            self._execute(sql, update_values)
             return True
-
-        sql = """INSERT INTO bookmarks
-        (domain, url, added, added_date, title, tags, comments)
-        VALUES (?, ?, ?, ?, ?, ?, ?)"""
 
         (domain, url) = self.domain_and_url(url)
 
+        add_date = pendulum.now()
         if added and added.isnumeric():
             numeric_timestamp = int(added)
             add_date = pendulum.from_timestamp(numeric_timestamp)
-        else:
-            add_date = pendulum.now()
 
-        insert_values = (
-            domain,
-            url,
-            add_date.format('YYYY-MM-DD HH:mm:ss'),
-            add_date.to_date_string(),
-            title,
-            tags,
-            comments
+        self._execute(
+            """INSERT INTO bookmarks
+            (domain, url, added, added_date, title, tags, comments)
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (
+                domain,
+                url,
+                add_date.format('YYYY-MM-DD HH:mm:ss'),
+                add_date.to_date_string(),
+                title,
+                tags,
+                comments
+            )
         )
-
-        self._execute(sql, [insert_values])
 
         if tags:
             cherrypy.engine.publish(
@@ -256,7 +256,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """UPDATE bookmarks
             SET fulltext=?, retrieved=CURRENT_TIMESTAMP
             WHERE url=?""",
-            [(text, url)]
+            (text, url)
         )
 
         cherrypy.engine.publish(
