@@ -16,6 +16,23 @@ Download the latest dataset and store in registry.
 curl -i "$host/countries"
 #+END_SRC
 
+* Geodb
+** HEAD
+#+NAME: geodb_head
+#+BEGIN_SRC sh :wrap export http
+curl -I "$host/geodb"
+#+END_SRC
+
+** POST
+#+NAME: geodb_post
+#+BEGIN_SRC sh :wrap export http
+curl -i -d "action=update" "$host/geodb"
+#+END_SRC
+
+#+RESULTS: geodb_post
+#+BEGIN_export http
+#+END_export
+
 * Headers
 ** GET
 Display the headers of the request.
