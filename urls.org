@@ -7,11 +7,20 @@
 
 This is a suite of code snippets for exercising app URLs with curl.
 
+* Bucketpull
+Download files from a storage bucket.
+
+** POST
+#+NAME: bucketpull_gcp
+#+BEGIN_SRC sh :wrap export html
+curl -i -d "service=gcp" "$host/bucketpull"
+#+END_SRC
+
 * Countries
 ** GET
 Download the latest dataset and store in registry.
 
-#+NAME: countires_get
+#+NAME: countries_get
 #+BEGIN_SRC sh :wrap export html
 curl -i "$host/countries"
 #+END_SRC
