@@ -131,7 +131,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return ["example"]
 
             if args[0] == "registry:search":
-                return [[
+                return [(3, (
                     {
                         "rowid": 1,
                         "key": "bounce:example:stage",
@@ -147,8 +147,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                         "key": "bounce:example:dev",
                         "value": "dev.example.com"
                     }
-
-                ]]
+                ))]
             if args[0] == "jinja:render":
                 return [""]
 
@@ -204,7 +203,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return ["example"]
 
             if args[0] == "registry:search":
-                return [[
+                return [(2, (
                     {
                         "rowid": 1,
                         "key": "bounce:example:stage",
@@ -215,7 +214,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                         "key": "bounce:example:othersite",
                         "value": "othersite.example.com"
                     }
-                ]]
+                ))]
+
             if args[0] == "jinja:render":
                 return [""]
 
@@ -240,7 +240,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [None]
 
             if args[0] == "registry:search":
-                return [None]
+                return [(0, None)]
 
             if args[0] == "jinja:render":
                 return [""]
@@ -276,7 +276,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [None]
 
             if args[0] == "registry:search":
-                return [None]
+                return [0, None]
 
             if args[0] == "jinja:render":
                 return [""]
@@ -304,7 +304,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return ["example"]
 
             if args[0] == "registry:search":
-                return [[
+                return [(2, (
                     {
                         "rowid": 1,
                         "key": "bounce:example:stage",
@@ -315,7 +315,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                         "key": "bounce:example:othersite",
                         "value": "othersite.example.com"
                     }
-                ]]
+                ))]
 
             if args[0] == "jinja:render":
                 return [""]
@@ -329,6 +329,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             u="http://othersite.example.com"
         )
 
+        print(publish_mock.call_args_list)
         self.assertEqual(
             len(publish_mock.call_args_list[-1].kwargs.get("bounces")),
             2
