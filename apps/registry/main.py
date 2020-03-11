@@ -37,19 +37,19 @@ class Controller:
     def index(*_args, **_kwargs) -> bytes:
         """Display the application homepage."""
 
-        roots_generator = cherrypy.engine.publish(
+        roots = cherrypy.engine.publish(
             "registry:keys",
         ).pop()
 
         if cherrypy.request.wants == "json":
             return json.dumps({
-                "groups": list(roots_generator)
+                "groups": list(roots)
             }).encode()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "registry.jinja.html",
-            roots=roots_generator
+            roots=roots
         ).pop()
 
     @staticmethod
@@ -61,7 +61,7 @@ class Controller:
             key_segments = query.split(":")[0:-1]
             parent_key = ":".join(key_segments)
 
-        record_count, record_generator = cherrypy.engine.publish(
+        count, rows = cherrypy.engine.publish(
             "registry:search",
             key=query,
             include_count=True
@@ -69,11 +69,11 @@ class Controller:
 
         if cherrypy.request.wants == "json":
             return json.dumps({
-                "record_count": record_count,
+                "record_count": count,
                 "records": [
-                    {key: record[key] for key in record.keys()
+                    {key: row[key] for key in row.keys()
                      if key not in ("created",)}
-                    for record in record_generator
+                    for row in rows
                 ]
             }).encode()
 
@@ -82,8 +82,8 @@ class Controller:
             "registry-list.jinja.html",
             query=query.strip(),
             parent_key=parent_key,
-            record_count=record_count,
-            records=record_generator,
+            record_count=count,
+            records=rows,
             subview_title=query
         ).pop()
 

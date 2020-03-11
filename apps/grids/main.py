@@ -23,15 +23,15 @@ class Controller:
     def index() -> bytes:
         "List available grids."""
 
-        grids = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             "grids:*",
         ).pop()
 
         grid_names = [
-            grid["key"].split(":").pop()
-            for grid
-            in grids
+            row["key"].split(":").pop()
+            for row
+            in rows
         ]
 
         result: bytes = cherrypy.engine.publish(

@@ -72,12 +72,12 @@ class Controller:
     def list_metrics() -> bytes:
         """Display a list of metrics."""
 
-        metrics_generator = cherrypy.engine.publish(
+        metrics = cherrypy.engine.publish(
             "metrics:inventory"
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "metrics.jinja.html",
-            metrics=metrics_generator
+            metrics=metrics
         ).pop()

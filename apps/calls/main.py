@@ -17,20 +17,18 @@ class Controller:
         offset = int(kwargs.get("offset", 0))
         per_page = 50
 
-        exclusions = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             "calls:exclude",
         ).pop()
 
-        src_exclusions = [
-            ex["value"] for ex in exclusions
-            if ex["key"].endswith("src")
-        ]
-
-        dst_exclusions = [
-            ex["value"] for ex in exclusions
-            if ex["key"].endswith("dst")
-        ]
+        src_exclusions = []
+        dst_exclusions = []
+        for row in rows:
+            if row["key"].endswith("src"):
+                src_exclusions.append(row["value"])
+            if row["key"].endswith("dst"):
+                dst_exclusions.append(row["value"])
 
         calls, total_records = cherrypy.engine.publish(
             "cdr:timeline",

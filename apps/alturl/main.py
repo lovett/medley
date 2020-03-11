@@ -36,17 +36,17 @@ class Controller:
     def GET(*args, **_kwargs) -> bytes:
         """Dispatch to a site-specific handler."""
 
-        bookmark_records = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             "alturl:bookmark",
             exact=True,
         ).pop()
 
         bookmarks = ((
-            record["rowid"],
-            cherrypy.engine.publish("url:readable", record["value"]).pop(),
-            cherrypy.engine.publish("url:alt", record["value"]).pop()
-        ) for record in bookmark_records)
+            row["rowid"],
+            cherrypy.engine.publish("url:readable", row["value"]).pop(),
+            cherrypy.engine.publish("url:alt", row["value"]).pop()
+        ) for row in rows)
 
         if not args:
             return cherrypy.engine.publish(
@@ -58,9 +58,9 @@ class Controller:
         target_url = "/".join(args)
 
         bookmark_id = next((
-            bookmark["rowid"]
-            for bookmark in bookmark_records
-            if target_url == bookmark["value"]
+            row["rowid"]
+            for row in rows
+            if target_url == row["value"]
         ), None)
 
         parsed_url = urlparse(f"//{target_url}")

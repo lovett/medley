@@ -28,17 +28,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def facts(ip_address: str) -> typing.Dict[str, str]:
         """Look up geographic information for an IP address."""
 
-        annotations = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             f"ip:{ip_address}"
         ).pop()
 
         facts: typing.Dict[str, typing.Any] = defaultdict()
 
-        if annotations:
+        if rows:
             facts["annotations"] = [
-                (a["value"], a["rowid"])
-                for a in annotations
+                (row["value"], row["rowid"])
+                for row in rows
             ]
 
         geodb_path = os.path.join(

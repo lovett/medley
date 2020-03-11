@@ -105,7 +105,7 @@ class Controller:
         if len(args) > 1:
             action = args[1]
 
-        _, record_iterator = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             f"startpage:{page_name}",
             limit=1,
@@ -113,7 +113,7 @@ class Controller:
         ).pop()
 
         try:
-            page = next(record_iterator)
+            page = next(rows)
         except StopIteration:
             if action == "view":
                 # Redirect to the edit form when a non-existent page

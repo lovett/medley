@@ -80,21 +80,21 @@ class Controller:
     def index(*_args, **_kwargs) -> bytes:
         """Display the application homepage."""
 
-        tag_generator = cherrypy.engine.publish(
+        tags = cherrypy.engine.publish(
             "recipes:tags:all"
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "recipes-index.jinja.html",
-            tags=tag_generator,
+            tags=tags,
         ).pop()
 
     @staticmethod
     def by_tag(tag: str, **_kwargs) -> bytes:
         """Display recipes associated with a tag."""
 
-        recipe_generator = cherrypy.engine.publish(
+        recipes = cherrypy.engine.publish(
             "recipes:find:tag",
             tag
         ).pop()
@@ -102,7 +102,7 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "recipes-list.jinja.html",
-            recipes=recipe_generator,
+            recipes=recipes,
             tag=tag,
             subview_title=tag
         ).pop()
@@ -148,18 +148,20 @@ class Controller:
     def search(query: str = "") -> bytes:
         """Display recipes and tags matching a search."""
 
-        recipe_generator = cherrypy.engine.publish(
+        recipes = cherrypy.engine.publish(
             "recipes:search:recipe",
             query
         ).pop()
 
-        return cherrypy.engine.publish(
+        result: bytes = cherrypy.engine.publish(
             "jinja:render",
             "recipes-list.jinja.html",
-            recipes=recipe_generator,
+            recipes=recipes,
             query=query,
             subview_title=query
         ).pop()
+
+        return result
 
     @staticmethod
     def show(rowid: int) -> bytes:

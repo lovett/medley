@@ -11,7 +11,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **_kwargs) -> bytes:
+    def GET(*_args: str, **_kwargs: str) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         muted = cherrypy.engine.publish("speak:muted").pop()
@@ -32,7 +32,7 @@ class Controller:
             {"q": "speak:mute"}
         ).pop()
 
-        return cherrypy.engine.publish(
+        result: bytes = cherrypy.engine.publish(
             "jinja:render",
             "speak.jinja.html",
             muted=muted,
@@ -41,9 +41,11 @@ class Controller:
             schedules=schedules
         ).pop()
 
+        return result
+
     @staticmethod
     @cherrypy.tools.capture()
-    def POST(*_args, **kwargs) -> None:
+    def POST(*_args: str, **kwargs: str) -> None:
         """Accept a piece of text for text-to-speech conversion"""
 
         statement = kwargs.get("statement")

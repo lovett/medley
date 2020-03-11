@@ -96,21 +96,21 @@ class Controller:
     def get_saved_queries(current_query=None):
         """Fetch and restructure saved search queries"""
 
-        records = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             "visitors*"
         ).pop()
 
         queries = []
 
-        for record in records:
-            record_id = record["rowid"]
-            key = record["key"].replace("visitors:", "")
-            value = record["value"]
+        for row in rows:
+            record_id = row["rowid"]
+            key = row["key"].replace("visitors:", "")
+            value = row["value"]
             active = False
 
             if current_query:
-                active = record["value"].split() == current_query.split()
+                active = row["value"].split() == current_query.split()
 
             if key == "default" and not current_query:
                 active = True

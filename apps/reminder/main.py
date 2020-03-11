@@ -18,7 +18,7 @@ class Controller:
     def GET(*_args: str, **_kwargs: str) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
 
-        registry_rows = cherrypy.engine.publish(
+        _, rows = cherrypy.engine.publish(
             "registry:search",
             "reminder:template",
             exact=True,
@@ -32,7 +32,7 @@ class Controller:
 
         templates = {
             row["rowid"]: {k: v[-1] for k, v in parse_qs(row["value"]).items()}
-            for row in registry_rows
+            for row in rows
         }
 
         for template_id, template in templates.items():

@@ -44,10 +44,10 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args, **_):
             """Side effects local function"""
             if args[0] == "registry:search":
-                return [[
+                return [(2, (
                     {"key": "src", "value": "test"},
                     {"key": "dst", "value": "test2"}
-                ]]
+                ))]
 
             if args[0] == "url:paginate:newer_older":
                 return [(None, None)]
