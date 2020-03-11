@@ -1,8 +1,8 @@
 """Store arbitrary values in an SQLite database."""
 
+import pickle
 import typing
 import cherrypy
-import msgpack
 from . import mixins
 
 
@@ -99,7 +99,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 prefix,
                 rest,
-                msgpack.packb(value),
+                pickle.dumps(value),
                 f"{lifespan_seconds} seconds"
             )
         )

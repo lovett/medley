@@ -1,9 +1,9 @@
 """Store HTTP requests and responses for later review"""
 
+import pickle
 import sqlite3
 from typing import Any, List, Optional, Tuple
 import cherrypy
-import msgpack
 from . import mixins
 
 
@@ -50,13 +50,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not hasattr(request, "json"):
             request.json = None
 
-        request_bin = msgpack.packb({
+        request_bin = pickle.dumps({
             "headers": request.headers,
             "params": request.body.params,
             "json": request.json
         })
 
-        response_bin = msgpack.packb({
+        response_bin = pickle.dumps({
             "status": response.status
         })
 

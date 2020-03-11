@@ -1,11 +1,11 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
+import pickle
 import re
 import typing
 import urllib
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
-import msgpack
 import pendulum
 
 
@@ -148,10 +148,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        try:
-            return msgpack.unpackb(blob)
-        except msgpack.exceptions.ExtraData:
-            return None
+        return pickle.loads(blob)
 
     @staticmethod
     def querystring(value: bytes) -> typing.Dict[str, typing.List[str]]:
