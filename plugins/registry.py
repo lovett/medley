@@ -122,6 +122,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Search for records by key or value."""
 
         keys = kwargs.get("keys", ())
+        value = kwargs.get("value")
         limit = kwargs.get("limit", 25)
         exact = kwargs.get("exact", False)
         include_count = kwargs.get("include_count", False)
@@ -152,6 +153,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 sql += "AND key LIKE ? "
 
             params = params + (key,)
+
+        if value:
+            fuzzy = "*" in value
+            value = value.replace("*", "%")
+
+            if fuzzy:
+                sql += "AND VALUE LIKE ?"
+            else:
+                sql += "AND value=?"
+
+            params = params + (value,)
 
         sql += f"ORDER BY key LIMIT {limit}"
 
