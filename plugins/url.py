@@ -21,10 +21,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("url:internal", self.internal_url)
         self.bus.subscribe("url:alt", self.alt_url)
         self.bus.subscribe("url:readable", self.readable_url)
-        self.bus.subscribe(
-            "url:paginate:newer_older",
-            self.paginate_newer_older
-        )
 
     def current_url(self) -> str:
         """The URL of the request currently being served."""
@@ -136,31 +132,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         readable_url = readable_url.replace("http://", "")
         readable_url = readable_url.split('#', 1)[0]
         return readable_url
-
-    def paginate_newer_older(
-            self,
-            params: typing.Dict[str, typing.Any],
-            per_page: int = 10,
-            offset: int = 0,
-            total: int = 0
-    ) -> typing.Tuple[typing.Optional[str], typing.Optional[str]]:
-        """Determine the next-page and previous-page URLs for paginated
-        records presented in reverse chronological order.
-
-        """
-
-        newer_url = None
-        older_url = None
-
-        older_offset = per_page + offset
-        newer_offset = offset - per_page
-
-        if older_offset < total:
-            params["offset"] = older_offset
-            older_url = self.internal_url(query=params)
-
-        if newer_offset >= 0:
-            params["offset"] = newer_offset
-            newer_url = self.internal_url(query=params)
-
-        return (newer_url, older_url)

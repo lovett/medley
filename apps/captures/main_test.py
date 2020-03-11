@@ -46,8 +46,6 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "capture:search":
                 return [(1, [{}])]
-            if args[0] == "url:paginate:newer_older":
-                return [(None, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

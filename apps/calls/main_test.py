@@ -49,9 +49,6 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
                     {"key": "dst", "value": "test2"}
                 ))]
 
-            if args[0] == "url:paginate:newer_older":
-                return [(None, None)]
-
             if args[0] == "jinja:render":
                 return [""]
 
