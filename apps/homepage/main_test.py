@@ -65,7 +65,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = self.default_side_effect_callback
 
-        response = self.request("/", as_json=True)
+        response = self.request("/", accept="json")
         self.assertEqual(response.code, 406)
 
     @mock.patch("cherrypy.engine.publish")
@@ -80,7 +80,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", as_org=True)
+        response = self.request("/", accept="org")
         self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
@@ -96,7 +96,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/all", as_org=True)
+        response = self.request("/all", accept="org")
         self.assertIn("homepage", response.body)
 
     @mock.patch("cherrypy.engine.publish")
@@ -138,7 +138,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = self.default_side_effect_callback
 
-        response = self.request("/", as_text=True)
+        response = self.request("/", accept="text")
         self.assertEqual(response.code, 406)
 
     def test_app_without_docstring(self):

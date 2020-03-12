@@ -1,6 +1,4 @@
-"""
-Test suite for the whois app
-"""
+"""Test suite for the whois app."""
 
 import unittest
 import mock
@@ -61,14 +59,13 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_returns_json(self):
         """GET returns application/json if requested"""
-        response = self.request("/", as_json=True)
+        response = self.request("/", accept="json")
         self.assertEqual(response.code, 200)
         self.assert_json(response)
 
     def test_returns_text(self):
         """GET returns text/plain if requested"""
-        response = self.request("/", as_text=True)
-        self.assertEqual(response.code, 200)
+        response = self.request("/", accept="text")
         self.assert_text(response)
 
     def test_custom_header(self):
@@ -77,7 +74,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request(
             "/",
             headers={"Special_Header": "Special Value"},
-            as_json=True
+            accept="json"
         )
 
         _, value = next(

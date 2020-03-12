@@ -1,13 +1,16 @@
 """Extra assertions to reduce testing boilerplate."""
+
 import re
+import typing
 import unittest
+from testing.response import Response
 
 
 class ResponseAssertions(unittest.TestCase):
     """A container for additional test assertions."""
 
     @staticmethod
-    def assert_type(response, expected_type):
+    def assert_type(response: Response, expected_type: str) -> None:
         """The response contains the given content type header."""
         actual_type = response.headers.get("Content-Type")
         if actual_type != expected_type:
@@ -16,32 +19,30 @@ class ResponseAssertions(unittest.TestCase):
             )
 
     @staticmethod
-    def assert_value_in_body(response, value):
+    def assert_value_in_body(response: Response, value: str) -> None:
         """The given value appears in the response body."""
         if value not in response.body:
             raise AssertionError(
                 f'Did not find expected "{value}" in response body'
             )
 
-    def assert_json(self, response):
+    def assert_json(self, response: Response) -> None:
         """The response is JSON."""
         self.assert_type(response, "application/json")
 
-    def assert_html(self, response, value=None):
+    def assert_html(self, response: Response) -> None:
         """The restponse is HTML."""
         self.assert_type(response, "text/html;charset=utf-8")
 
-        if value:
-            self.assert_value_in_body(response, value)
-
-    def assert_text(self, response, value=None):
+    def assert_text(self, response: Response) -> None:
         """The response is plain text."""
         self.assert_type(response, "text/plain;charset=utf-8")
 
-        if value:
-            self.assert_value_in_body(response, value)
-
-    def assert_allowed(self, response, expected_verbs=()):
+    def assert_allowed(
+            self,
+            response: Response,
+            expected_verbs: typing.Tuple[str, ...] = ()
+    ) -> None:
         """The Allow header shouldn't contain any unexpected verbs
 
         Support for the HEAD method is provided by the framework.
@@ -59,7 +60,7 @@ class ResponseAssertions(unittest.TestCase):
         self.assertEqual(set(expected_verbs), set(allowed_verbs))
 
     @staticmethod
-    def assert_expires(response):
+    def assert_expires(response: Response) -> None:
         """The value of the Expires header should match a standard format."""
 
         value = response.headers.get("Expires")
@@ -76,18 +77,25 @@ class ResponseAssertions(unittest.TestCase):
                 f"Expires header has unexpected format: {value}"
             )
 
-    def assert_exposed(self, controller):
+    def assert_exposed(self, controller: object) -> None:
         """The application controller's exposed attribute is set."""
-        self.assertTrue(controller.exposed)
 
-    def assert_show_on_homepage(self, controller):
+        self.assertTrue(
+            getattr(controller, "exposed")
+        )
+
+    def assert_show_on_homepage(self, controller: object) -> None:
         """The application is presented on the homepge."""
-        self.assertTrue(controller.show_on_homepage)
+        self.assertTrue(
+            getattr(controller, "show_on_homepage")
+        )
 
-    def assert_not_show_on_homepage(self, controller):
+    def assert_not_show_on_homepage(self, controller: object) -> None:
         """The application is not presented on the homepge."""
-        self.assertFalse(controller.show_on_homepage)
+        self.assertFalse(
+            getattr(controller, "show_on_homepage")
+        )
 
-    def assert_404(self, response):
+    def assert_404(self, response: Response) -> None:
         """The response code is 404."""
         self.assertEqual(response.code, 404)

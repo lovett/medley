@@ -12,13 +12,15 @@ Originally from https://bitbucket.org/Lawouach/cherrypy-recipes/
 """
 
 from io import BytesIO
+import typing
 import unittest
-import urllib
+import urllib.parse
 import json
 import cherrypy
 import tools.capture
 import tools.provides
 import tools.etag
+import testing.response
 
 cherrypy.config.update({'environment': "test_suite"})
 cherrypy.tools.capture = tools.capture.Tool()
@@ -35,46 +37,46 @@ class BaseCherryPyTestCase(unittest.TestCase):
     """The parent for all test suites."""
 
     @staticmethod
-    def request(request_path='/', method='GET', app_path='',  # noqa:E501 pylint: disable=too-many-arguments,too-many-locals,dangerous-default-value
-                scheme='http', proto='HTTP/1.1', data=None,
-                headers={}, as_json=False, as_text=False,
-                as_org=False,
-                json_body=None, **kwargs):
+    def request(
+            request_path: str = "/",
+            method: str = "GET",
+            data: typing.Optional[bytes] = None,
+            headers: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            accept: str = "*/*",
+            json_body: typing.Optional[object] = None,
+            **kwargs: str
+    ) -> testing.response.Response:
         """Send a request to the faux server."""
 
         # Default headers
-        default_headers = {
+        request_headers = {
             "Host": "127.0.0.1",
             "Remote-Addr": "127.0.0.1",
             "Accept": "text/html"
         }
 
-        if as_json:
-            default_headers["Accept"] = "application/json"
-        elif as_text:
-            default_headers["Accept"] = "text/plain"
-        elif as_org:
-            default_headers["Accept"] = "text/x-org"
+        if accept == "json":
+            request_headers["Accept"] = "application/json"
+
+        if accept == "text":
+            request_headers["Accept"] = "text/plain"
+
+        if accept == "org":
+            request_headers["Accept"] = "text/x-org"
 
         if json_body:
-            default_headers["content-type"] = "application/json"
+            request_headers["Content-Type"] = "application/json"
 
-        # Allow default headers to be removed
-        headers = {**default_headers, **headers}
+        if headers:
+            request_headers = {**request_headers, **headers}
 
-        # If we have a POST/PUT request but no data
-        # we urlencode the named arguments in **kwargs
-        # and set the content-type header
-        if method in ('POST', 'PUT') and not data:
-            data = urllib.parse.urlencode(kwargs).encode('utf-8')
-            kwargs = None
-            if "content-type" not in headers:
-                headers["content-type"] = "application/x-www-form-urlencoded"
-
-        # If we have named arguments, use them as a querystring
-        query = None
-        if kwargs:
-            query = urllib.parse.urlencode(kwargs)
+        if method in ("POST", "PUT") and not data:
+            data = urllib.parse.urlencode(kwargs).encode("utf-8")
+            kwargs = {}
+            if "Content-Type" not in request_headers:
+                request_headers["Content-Type"] = (
+                    "application/x-www-form-urlencoded"
+                )
 
         # If we had some data passed as the request entity
         # make sure a content length is specified
@@ -83,12 +85,10 @@ class BaseCherryPyTestCase(unittest.TestCase):
             if json_body:
                 data = json.dumps(json_body).encode("utf-8")
             byte_stream = BytesIO(data)
-            headers['content-length'] = '%d' % len(data)
+            request_headers['content-length'] = '%d' % len(data)
 
         # Get our application and run the request against it
-        app = cherrypy.tree.apps.get(app_path)
-        if not app:
-            raise AssertionError("No application mounted at '%s'" % app_path)
+        app = cherrypy.tree.apps.get("")
 
         # Cleanup any previously-returned responses
         app.release_serving()
@@ -97,17 +97,17 @@ class BaseCherryPyTestCase(unittest.TestCase):
         request, response = app.get_serving(
             cherrypy.lib.httputil.Host('127.0.0.1', 50000, ""),
             cherrypy.lib.httputil.Host('127.0.0.1', 50001, ""),
-            scheme,
-            proto
+            "http",
+            "HTTP/1.1"
         )
 
         try:
-            header_tuples = [(k, v) for k, v in headers.items() if v]
+            header_tuples = [(k, v) for k, v in request_headers.items() if v]
             response = request.run(
                 method,
                 request_path,
-                query,
-                proto,
+                urllib.parse.urlencode(kwargs),
+                "HTTP/1.1",
                 header_tuples,
                 byte_stream
             )
@@ -116,34 +116,23 @@ class BaseCherryPyTestCase(unittest.TestCase):
                 byte_stream.close()
                 byte_stream = None
 
-        # A generic object is easier to work and customize than the
-        # CherryPy response
-        result = Result()
-
         # The response body is not usable as-is, and with json,
         # may need additional parsing.
-        result.body = response.collapse_body().decode("UTF-8")
+        response_body = response.collapse_body().decode("UTF-8")
 
-        if "json" in headers.get("Accept"):
+        if "json" in request_headers.get("Accept", ""):
             try:
-                result.body = json.loads(result.body)
+                response_body = json.loads(response_body)
             except ValueError:
                 pass
 
         # Allow the status code of the reponse to be considered
         # separately from its message
         code, message = response.status.split(" ", 1)
-        result.headers = response.headers
-        result.code = int(code)
-        result.status = message
 
-        return result
-
-
-class Result():
-    """A simplified version of Cherrypy's response object."""
-
-    headers = None
-    code = 0
-    status = 0
-    body = None
+        return testing.response.Response(
+            response.headers,
+            int(code),
+            message,
+            response_body
+        )

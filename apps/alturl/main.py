@@ -1,5 +1,6 @@
-"""Webpages without annoyances"""
+"""Webpage reformatting"""
 
+import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
@@ -11,12 +12,12 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    def __init__(self):
+    def __init__(self) -> None:
         cherrypy.engine.subscribe("registry:added", self.on_registry_changed)
         cherrypy.engine.subscribe("registry:removed", self.on_registry_changed)
 
     @staticmethod
-    def on_registry_changed(key):
+    def on_registry_changed(key: str) -> None:
         """Clear the cached etag if a URL has been bookmarked."""
 
         if key == "alturl:bookmark":
@@ -33,7 +34,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(*args, **_kwargs) -> bytes:
+    def GET(*args: str, **_kwargs: str) -> bytes:
         """Dispatch to a site-specific handler."""
 
         _, rows = cherrypy.engine.publish(
@@ -49,11 +50,14 @@ class Controller:
         ) for row in rows)
 
         if not args:
-            return cherrypy.engine.publish(
-                "jinja:render",
-                "alturl.jinja.html",
-                bookmarks=bookmarks
-            ).pop()
+            return typing.cast(
+                bytes,
+                cherrypy.engine.publish(
+                    "jinja:render",
+                    "alturl.jinja.html",
+                    bookmarks=bookmarks
+                ).pop()
+            )
 
         target_url = "/".join(args)
 
@@ -76,18 +80,24 @@ class Controller:
             view_vars["bookmark_id"] = bookmark_id
             view_vars["bookmarks"] = bookmarks
 
-            return cherrypy.engine.publish(
-                "jinja:render",
-                site_specific_template,
-                **view_vars
-            ).pop()
+            return typing.cast(
+                bytes,
+                cherrypy.engine.publish(
+                    "jinja:render",
+                    site_specific_template,
+                    **view_vars
+                ).pop()
+            )
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "alturl.jinja.html",
-            unrecognized=True,
-            url=target_url
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "alturl.jinja.html",
+                unrecognized=True,
+                url=target_url
+            ).pop()
+        )
 
     @staticmethod
     def POST(url: str) -> None:

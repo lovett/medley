@@ -133,7 +133,12 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", method="POST", as_text=True, host="host1")
+        response = self.request(
+            "/",
+            method="POST",
+            accept="text",
+            host="host1"
+        )
 
         self.assertEqual(response.code, 200)
         self.assertEqual(response.body, "WoL packet sent.")

@@ -77,7 +77,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", as_json=True)
+        response = self.request("/", accept="json")
 
         self.assert_json(response)
 
@@ -99,9 +99,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", as_text=True)
-
-        self.assertIn("external_ip=1.1.1.1", response.body)
+        response = self.request("/", accept="text")
+        self.assert_text(response)
 
     @mock.patch("cherrypy.engine.publish")
     def test_honors_xreal_ip(self, publish_mock):
