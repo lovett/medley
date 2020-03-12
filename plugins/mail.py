@@ -1,7 +1,7 @@
 """Send email."""
 
 import smtplib
-from typing import Dict
+import typing
 from email.mime.text import MIMEText
 import cherrypy
 import jinja2
@@ -22,8 +22,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("mail:send", self.send_message)
 
     @staticmethod
-    def send_message(message_data: Dict[str, str],
-                     template_data: Dict[str, str]) -> None:
+    def send_message(message_data: typing.Dict[str, str],
+                     template_data: typing.Dict[str, str]) -> None:
         """Render an email template and send via SMTP"""
 
         loader = jinja2.FileSystemLoader(message_data["template_dir"])

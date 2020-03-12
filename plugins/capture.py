@@ -2,7 +2,7 @@
 
 import pickle
 import sqlite3
-from typing import Any, List, Optional, Tuple
+import typing
 import cherrypy
 from . import mixins
 
@@ -39,8 +39,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("capture:prune", self.prune)
 
     def add(self,
-            request: Any,
-            response: Any) -> bool:
+            request: typing.Any,
+            response: typing.Any) -> bool:
         """Store a single HTTP request and response pair.
 
         This is usually invoked from the capture Cherrypy tool.
@@ -78,10 +78,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
-    def search(self,
-               path: Optional[str] = None,
-               offset: int = 0,
-               limit: int = 10) -> Tuple[int, List[sqlite3.Row]]:
+    def search(
+            self,
+            path: typing.Optional[str] = None,
+            offset: int = 0,
+            limit: int = 10
+    ) -> typing.Tuple[int, typing.List[sqlite3.Row]]:
         """Locate previously stored requests by path."""
 
         search_clause = ""
@@ -110,7 +112,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (count, result)
 
-    def get(self, rowid: int) -> Optional[sqlite3.Row]:
+    def get(self, rowid: int) -> typing.Optional[sqlite3.Row]:
         """Locate previously stored requests by ID."""
 
         sql = """SELECT rowid, request_line, request as 'request [binary]',
@@ -119,8 +121,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM captures
         WHERE rowid=?"""
 
-        row: Optional[sqlite3.Row] = self._selectOne(sql, (rowid,))
-        return row
+        return typing.cast(
+            typing.Optional[sqlite3.Row],
+            self._selectOne(sql, (rowid,))
+        )
 
     def prune(self, cutoff_months: int = 3) -> None:
         """Delete old records.
