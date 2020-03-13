@@ -44,6 +44,9 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         LINTABLE=$(curl --no-progress-meter "http://localhost:8085/lintable/$STAGED_FILE")
 
         if [[ "$LINTABLE" == "yes" ]]; then
+            echo "Linting $STAGED_FILE with mypy..."
+            ./venv/bin/mypy "$WORK_DIR/$STAGED_FILE"
+
             echo "Linting $STAGED_FILE with flake8..."
             ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
 
@@ -64,7 +67,5 @@ if [[ ! -z "$TESTS_TO_RUN" ]]; then
     make $(echo "$TESTS_TO_RUN" | tr " " "\n" | sort -u | tr "\n" " ")
 fi
 
-# Typecheck
-./venv/bin/mypy medley.py
 
 trap "cleanup" EXIT
