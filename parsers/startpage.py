@@ -72,7 +72,7 @@ class Parser():
 
     @staticmethod
     def postprocess(text: str) -> str:
-        """ Remove the placeholders added during preprocessing."""
+        """Remove the placeholders added during preprocessing."""
 
         return re.sub("@@EQUAL@@", "=", text)
 

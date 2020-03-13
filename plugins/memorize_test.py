@@ -1,6 +1,4 @@
-"""
-Test suite for the memorize plugin
-"""
+"""Test suite for the memorize plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.memorize
 
 
 class TestMemorize(unittest.TestCase):
-    """
-    Tests for the memorize plugin.
-    """
+    """Tests for the memorize plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.memorize.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

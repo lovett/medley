@@ -1,6 +1,4 @@
-"""
-Test suite for the converters plugin
-"""
+"""Test suite for the converters plugin."""
 
 import unittest
 import cherrypy
@@ -9,50 +7,48 @@ import plugins.converters
 
 
 class TestConverters(unittest.TestCase):
-    """
-    Tests for the converters plugin.
-    """
+    """Tests for the converters plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.converters.Plugin(cherrypy.engine)
 
-    def test_duration(self):
+    def test_duration(self) -> None:
         """A integer number of seconds is converted to a string phrase"""
 
-        result = self.plugin.duration(0)
+        result = self.plugin.duration(b"0")
         self.assertEqual(result, "0 seconds")
 
-        result = self.plugin.duration(1)
+        result = self.plugin.duration(b"1")
         self.assertEqual(result, "1 second")
 
-        result = self.plugin.duration(60)
+        result = self.plugin.duration(b"60")
         self.assertEqual(result, "1 minute")
 
-        result = self.plugin.duration(61)
+        result = self.plugin.duration(b"61")
         self.assertEqual(result, "61 seconds")
 
-        result = self.plugin.duration(3600)
+        result = self.plugin.duration(b"3600")
         self.assertEqual(result, "1 hour")
 
-        result = self.plugin.duration(3660)
+        result = self.plugin.duration(b"3660")
         self.assertEqual(result, "1 hour, 1 minute")
 
-        result = self.plugin.duration(3661)
+        result = self.plugin.duration(b"3661")
         self.assertEqual(result, "1 hour, 1 minute, 1 second")
 
-        result = self.plugin.duration(3601)
+        result = self.plugin.duration(b"3601")
         self.assertEqual(result, "1 hour, 1 second")
 
-        result = self.plugin.duration(7200)
+        result = self.plugin.duration(b"7200")
         self.assertEqual(result, "2 hours")
 
-        result = self.plugin.duration(121)
+        result = self.plugin.duration(b"121")
         self.assertEqual(result, "2 minutes, 1 second")
 
-        result = self.plugin.duration(86400 * 7)
+        result = self.plugin.duration(b"604800")
         self.assertEqual(result, "168 hours")
 
-    def test_datetime(self):
+    def test_datetime(self) -> None:
         """An ISO date string is parsed into a datetime object"""
         result = self.plugin.datetime(b"2013-03-16 20:04:40")
         self.assertEqual(
@@ -60,7 +56,7 @@ class TestConverters(unittest.TestCase):
             pendulum.datetime(2013, 3, 16, 20, 4, 40)
         )
 
-    def test_callerid(self):
+    def test_callerid(self) -> None:
         """The callerid name is correctly extracted from a callerid string"""
         result = self.plugin.callerid(b'"Name" <123>')
         self.assertEqual(result, "Name")

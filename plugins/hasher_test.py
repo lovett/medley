@@ -1,6 +1,4 @@
-"""
-Test suite for the hasher plugin
-"""
+"""Test suite for the hasher plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.hasher
 
 
 class TestHasher(unittest.TestCase):
-    """
-    Tests for the hasher plugin.
-    """
+    """Tests for the hasher plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.hasher.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

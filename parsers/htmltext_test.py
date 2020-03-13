@@ -5,23 +5,16 @@ import parsers.htmltext
 
 
 class TestHtmlTextParser(unittest.TestCase):
-    """
-    Tests for the html-to-text parser.
-    """
+    """Tests for the html-to-text parser."""
 
-    parser = None
+    parser: parsers.htmltext.Parser
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Create the parser instance."""
         cls.parser = parsers.htmltext.Parser()
 
-    @classmethod
-    def tearDownClass(cls):
-        """Shut down the faux server"""
-        cls.parser = None
-
-    def test_constructor(self):
+    def test_constructor(self) -> None:
         """The constructor optionally overrides the whitelist and sets the
         blacklist."""
 
@@ -29,14 +22,14 @@ class TestHtmlTextParser(unittest.TestCase):
         self.assertTrue(self.parser.whitelist)
 
         blacklist = ("tag1", "tag2")
-        whitelist = ("tag3")
+        whitelist = ("tag3",)
 
         parser = parsers.htmltext.Parser(blacklist, whitelist)
 
         self.assertIn(blacklist[0], parser.blacklist)
         self.assertEqual(parser.whitelist, whitelist)
 
-    def test_preserves_plain_input(self):
+    def test_preserves_plain_input(self) -> None:
         """If the input is already plain text, it is preserved."""
 
         initial = "Hello world"
@@ -44,7 +37,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(initial, final)
 
-    def test_preserve_text_prepost(self):
+    def test_preserve_text_prepost(self) -> None:
         """If there is plain text before or after a whitelisted tag, it is
         preserved.
 
@@ -55,7 +48,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Hello world hello")
 
-    def test_ignore_title_tag(self):
+    def test_ignore_title_tag(self) -> None:
         """If there is plain text before or after a whitelisted tag, it is
         preserved.
 
@@ -72,7 +65,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Hello world")
 
-    def test_malformed_markup(self):
+    def test_malformed_markup(self) -> None:
         """If the markup is malformed, parsing still works."""
 
         initial = """
@@ -85,7 +78,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Test")
 
-    def test_blacklist_class_selector(self):
+    def test_blacklist_class_selector(self) -> None:
         """Blacklisted tags can be expressed with class selectors."""
 
         custom_parser = parsers.htmltext.Parser(
@@ -100,7 +93,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Orange")
 
-    def test_blacklist_id_selector(self):
+    def test_blacklist_id_selector(self) -> None:
         """Blacklisted tags can be expressed with selectors."""
 
         custom_parser = parsers.htmltext.Parser(
@@ -115,7 +108,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Orange")
 
-    def test_blacklist_plain(self):
+    def test_blacklist_plain(self) -> None:
         """Blacklisted tags can be expressed as plain tags."""
 
         custom_parser = parsers.htmltext.Parser(
@@ -128,7 +121,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "Blue")
 
-    def test_blacklisted_tag(self):
+    def test_blacklisted_tag(self) -> None:
         """Text within a blacklisted tag is ignored."""
 
         custom_parser = parsers.htmltext.Parser(
@@ -146,7 +139,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "")
 
-    def test_blacklist_descendant(self):
+    def test_blacklist_descendant(self) -> None:
         """Plain text is ignored if it is a descendant of a blacklisted tag."""
 
         custom_parser = parsers.htmltext.Parser(
@@ -169,7 +162,7 @@ class TestHtmlTextParser(unittest.TestCase):
 
         self.assertEqual(final, "")
 
-    def test_blacklist_whitelisted_tag(self):
+    def test_blacklist_whitelisted_tag(self) -> None:
         """A descendant of a whitelisted tag is ignored if it is
         blacklisted.
 

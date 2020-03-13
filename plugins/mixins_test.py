@@ -1,19 +1,15 @@
-"""
-Test suite for the mixins plugin
-"""
+"""Test suite for the mixins plugin."""
 
 import unittest
 
 
 class TestMixins(unittest.TestCase):
-    """
-    Tests for the mixins plugin.
-    """
+    """Tests for the mixins plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

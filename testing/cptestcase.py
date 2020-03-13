@@ -126,15 +126,16 @@ class BaseCherryPyTestCase(unittest.TestCase):
 
         if "json" in request_headers.get("Accept", ""):
             try:
-                json_body = json.loads(response_body)
+                json_response = json.loads(response_body)
             except json.decoder.JSONDecodeError:
-                json_body = {}
+                json_response = {}
+
             return testing.response.Response(
                 response.headers,
                 int(code),
                 message,
                 "",
-                json_body
+                json_response
             )
 
         return testing.response.Response(

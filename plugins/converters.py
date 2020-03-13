@@ -88,6 +88,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def duration(value: bytes) -> str:
         """Convert a number of seconds into a human-readable string."""
 
+        print(type(value))
+
         seconds = int(value)
 
         if seconds == 1:

@@ -1,6 +1,4 @@
-"""
-Test suite for the urlfetch plugin
-"""
+"""Test suite for the urlfetch plugin."""
 
 import unittest
 import cherrypy
@@ -12,10 +10,10 @@ class TestUrlfetch(unittest.TestCase):
     Tests for the urlfetch plugin.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.urlfetch.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

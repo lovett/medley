@@ -1,6 +1,4 @@
-"""
-Test suite for the ip plugin
-"""
+"""Test suite for the ip plugin."""
 
 import unittest
 import cherrypy
@@ -12,10 +10,10 @@ class TestIp(unittest.TestCase):
     Tests for the ip plugin.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.ip.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

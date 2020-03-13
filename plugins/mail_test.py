@@ -1,6 +1,4 @@
-"""
-Test suite for the mail plugin
-"""
+"""Test suite for the mail plugin"""
 
 import unittest
 import cherrypy
@@ -12,10 +10,10 @@ class TestMail(unittest.TestCase):
     Tests for the mail plugin.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.mail.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

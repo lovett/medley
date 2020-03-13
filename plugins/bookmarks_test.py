@@ -1,6 +1,4 @@
-"""
-Test suite for the bookmarks plugin
-"""
+"""Test suite for the bookmarks plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.bookmarks
 
 
 class TestBookmarks(unittest.TestCase):
-    """
-    Tests for the bookmarks plugin.
-    """
+    """Tests for the bookmarks plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.bookmarks.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

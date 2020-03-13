@@ -1,6 +1,4 @@
-"""
-Test suite for the scheduler plugin
-"""
+"""Test suite for the scheduler plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.scheduler
 
 
 class TestScheduler(unittest.TestCase):
-    """
-    Tests for the scheduler plugin.
-    """
+    """Tests for the scheduler plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.scheduler.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

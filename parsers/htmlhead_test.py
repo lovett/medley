@@ -5,23 +5,16 @@ import parsers.htmlhead
 
 
 class TestHtmlHeadParser(unittest.TestCase):
-    """
-    Tests for the html-to-text parser.
-    """
+    """Tests for the html-to-text parser."""
 
-    parser = None
+    parser: parsers.htmlhead.Parser
 
     @classmethod
-    def setUp(cls):
+    def setUp(cls) -> None:
         """Create the parser instance."""
         cls.parser = parsers.htmlhead.Parser()
 
-    @classmethod
-    def tearDown(cls):
-        """Destroy the parser."""
-        cls.parser = None
-
-    def test_simple_parse(self):
+    def test_simple_parse(self) -> None:
         """A reasonably-structured document is parsed successfully."""
 
         initial = """
@@ -41,7 +34,7 @@ class TestHtmlHeadParser(unittest.TestCase):
         self.assertEqual(len(final[0]), 3)
         self.assertEqual(len(final), 2)
 
-    def test_no_head(self):
+    def test_no_head(self) -> None:
         """A document with no head is parsed successfully."""
 
         initial = """
@@ -51,7 +44,7 @@ class TestHtmlHeadParser(unittest.TestCase):
 
         self.assertEqual(len(final), 0)
 
-    def test_entity(self):
+    def test_entity(self) -> None:
         """Entities are converted during parsing."""
 
         initial = """
@@ -61,7 +54,7 @@ class TestHtmlHeadParser(unittest.TestCase):
 
         self.assertEqual(final[0][2], "hello > world")
 
-    def test_only_head(self):
+    def test_only_head(self) -> None:
         """Tags outside the head are ignored."""
 
         initial = """
@@ -76,7 +69,7 @@ class TestHtmlHeadParser(unittest.TestCase):
 
         self.assertEqual(len(final), 1)
 
-    def test_malformed(self):
+    def test_malformed(self) -> None:
         """A malformed document is parsed successfully."""
 
         initial = """

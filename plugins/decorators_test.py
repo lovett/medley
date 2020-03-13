@@ -1,19 +1,15 @@
-"""
-Test suite for the decorators plugin
-"""
+"""Test suite for the decorators plugin."""
 
 import unittest
 
 
 class TestDecorators(unittest.TestCase):
-    """
-    Tests for the decorators plugin.
-    """
+    """Tests for the decorators plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         pass
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

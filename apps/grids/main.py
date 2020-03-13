@@ -48,7 +48,7 @@ class Controller:
     def show(name: str, **kwargs: str) -> bytes:
         """Display a grid."""
 
-        start = kwargs.get("start")
+        start = kwargs.get("start", "")
 
         grid = cherrypy.engine.publish(
             "registry:first:value",

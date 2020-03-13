@@ -1,6 +1,4 @@
-"""
-Test suite for the gcp_appengine plugin
-"""
+"""Test suite for the gcp_appengine plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.gcp_appengine
 
 
 class TestGcpApengine(unittest.TestCase):
-    """
-    Tests for the gcp_appengine plugin.
-    """
+    """Tests for the gcp_appengine plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.gcp_appengine.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

@@ -167,26 +167,23 @@ class Controller:
     @staticmethod
     def get_deltas(
             log_records: typing.List[sqlite3.Row]
-    ) -> typing.List[int]:
+    ) -> typing.List[str]:
         """Calculate elapsed time intervals between records"""
 
         deltas = []
         for index, row in enumerate(log_records):
-            try:
-                current_timestamp = pendulum.from_timestamp(
-                    row["unix_timestamp"]
-                )
+            current_timestamp = pendulum.from_timestamp(
+                row["unix_timestamp"]
+            )
 
-                previous_timestamp = pendulum.from_timestamp(
-                    log_records[index + 1]["unix_timestamp"]
-                )
+            previous_timestamp = pendulum.from_timestamp(
+                log_records[index + 1]["unix_timestamp"]
+            )
 
-                delta = current_timestamp.diff_for_humans(
-                    previous_timestamp,
-                    True
-                )
-            except (KeyError, IndexError):
-                delta = 0
+            delta = current_timestamp.diff_for_humans(
+                previous_timestamp,
+                True
+            )
 
             deltas.append(delta)
 
@@ -196,45 +193,57 @@ class Controller:
     def get_active_date(
             log_records: typing.List[sqlite3.Row],
             query: str
-    ) -> pendulum:
+    ) -> pendulum.DateTime:
         """Figure out which date the query pertains to."""
 
         if log_records:
-            return log_records[0]["unix_timestamp"]
+            return pendulum.from_timestamp(
+                log_records[0]["unix_timestamp"]
+            )
 
         timezone = cherrypy.engine.publish(
             "registry:timezone"
         ).pop()
 
-        date_string = None
+        query_date = ""
 
-        matches = re.match(
-            r"date\s+(\d{4}-\d{2})",
-            query
-        )
+        if re.match(r"date\s+yesterday", query):
+            query_date = "yesterday"
 
-        if matches:
-            date_string = matches.group(1) + "-01"
-
-        matches = re.match(
-            r"date\s+(\d{4}-\d{2}-\d{2})",
-            query
-        )
-
-        if matches:
-            date_string = matches.group(1)
-
-        if date_string:
-            active_date = pendulum.parse(
-                date_string,
-                tz=timezone
+        if not query_date:
+            # Look for YYYY-MM-DD.
+            matches = re.match(
+                r"date\s+(\d{4}-\d{2}-\d{2})",
+                query
             )
-        elif re.match(r"date\s+yesterday", query):
-            active_date = pendulum.yesterday(tz=timezone)
-        else:
-            active_date = pendulum.today(tz=timezone)
 
-        return active_date.start_of('day')
+            if matches:
+                query_date = matches.group(1)
+
+        if not query_date:
+            # Look for YYYY-MM
+            matches = re.match(
+                r"date\s+(\d{4}-\d{2})",
+                query
+            )
+
+            if matches:
+                query_date = matches.group(1) + "-01"
+
+        if query_date == "":
+            active_date = pendulum.today()
+        elif query_date == "yesterday":
+            active_date = pendulum.yesterday()
+        else:
+            active_date = typing.cast(
+                pendulum.DateTime,
+                pendulum.parse(query_date)
+            )
+
+        return typing.cast(
+            pendulum.DateTime,
+            active_date.in_tz(timezone).start_of('day')
+        )
 
     @staticmethod
     def get_annotations(

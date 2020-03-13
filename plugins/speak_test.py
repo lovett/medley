@@ -1,6 +1,4 @@
-"""
-Test suite for the speak plugin
-"""
+"""Test suite for the speak plugin."""
 
 import unittest
 import cherrypy
@@ -8,14 +6,12 @@ import plugins.speak
 
 
 class TestSpeak(unittest.TestCase):
-    """
-    Tests for the speak plugin.
-    """
+    """Tests for the speak plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.speak.Plugin(cherrypy.engine)
 
-    def test_placeholder(self):
+    def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
         pass   # pylint: disable=unnecessary-pass
 

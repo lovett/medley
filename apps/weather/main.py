@@ -114,7 +114,7 @@ class Controller:
 
         result: Forecast = defaultdict()
 
-        timezone = forecast.get("timezone")
+        timezone = forecast.get("timezone", "")
 
         daily_block = forecast.get("daily", {})
         days = daily_block.get("data", [{}, {}])
