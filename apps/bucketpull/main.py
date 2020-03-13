@@ -1,6 +1,4 @@
-"""
-Download files from a storage bucket.
-"""
+"""Download files from a storage bucket."""
 
 import cherrypy
 
@@ -12,7 +10,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def POST(*_args, **kwargs) -> None:
+    def POST(*_args: str, **kwargs: str) -> None:
         """
         Dispatch to a service-specific plugin.
         """

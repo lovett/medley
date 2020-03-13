@@ -1,8 +1,7 @@
-"""
-Test suite for the homepage app
-"""
+"""Test suite for the homepage app."""
 
 import types
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -12,20 +11,18 @@ import apps.homepage.main
 
 
 class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
+    """Tests for the application controller."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         helpers.start_server(apps.homepage.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         helpers.stop_server()
 
     @staticmethod
-    def default_side_effect_callback(*args, **_):
+    def default_side_effect_callback(*args: str, **_: str) -> typing.Any:
         """
         The standard mock side effect function used by all tests
         """
@@ -37,21 +34,21 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
 
         return mock.DEFAULT
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.homepage.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.homepage.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_returns_html(self, publish_mock):
+    def test_returns_html(self, publish_mock: mock.Mock) -> None:
         """GET returns text/html by default"""
         publish_mock.side_effect = self.default_side_effect_callback
 
@@ -60,7 +57,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assert_html(response)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_refuses_json(self, publish_mock):
+    def test_refuses_json(self, publish_mock: mock.Mock) -> None:
         """This endpoint does not support JSON responses"""
 
         publish_mock.side_effect = self.default_side_effect_callback
@@ -69,10 +66,10 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 406)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_returns_org(self, publish_mock):
+    def test_returns_org(self, publish_mock: mock.Mock) -> None:
         """GET supports text/x-org output."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -84,11 +81,11 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_all_apps(self, publish_mock):
+    def test_all_apps(self, publish_mock: mock.Mock) -> None:
         """If the first URL path segment is "all", the output includes all
         apps, not just the ones meant for display on the homepage."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -100,10 +97,10 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertIn("homepage", response.body)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_valid_etag(self, publish_mock):
+    def test_valid_etag(self, publish_mock: mock.Mock) -> None:
         """A valid etag produces a 304 response."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -116,10 +113,10 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.body, "")
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invalid_etag(self, publish_mock):
+    def test_invalid_etag(self, publish_mock: mock.Mock) -> None:
         """An invalid etag produces a 200 response."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc456")]
@@ -133,7 +130,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 200)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_refuses_text(self, publish_mock):
+    def test_refuses_text(self, publish_mock: mock.Mock) -> None:
         """This endpoint does not support text responses"""
 
         publish_mock.side_effect = self.default_side_effect_callback
@@ -141,7 +138,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", accept="text")
         self.assertEqual(response.code, 406)
 
-    def test_app_without_docstring(self):
+    def test_app_without_docstring(self) -> None:
         """An app controller with no module docstring is handled gracefully."""
 
         target = apps.homepage.main.Controller()

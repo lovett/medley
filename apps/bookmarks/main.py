@@ -1,6 +1,7 @@
 """Saved webpages"""
 
 import json
+import typing
 import cherrypy
 
 
@@ -11,14 +12,16 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("json", "html"))
-    def GET(self, *args, **kwargs) -> bytes:
+    def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         if "query" in kwargs:
             return self.search(**kwargs)
 
         if "wayback" in kwargs:
-            return self.check_wayback_availability(kwargs.get('wayback'))
+            return self.check_wayback_availability(
+                kwargs.get("wayback", "")
+            )
 
         if args and args[0] == "taglist":
             return self.taglist()
@@ -26,7 +29,7 @@ class Controller:
         return self.index(**kwargs)
 
     @staticmethod
-    def index(*_args, **kwargs) -> bytes:
+    def index(*_args: str, **kwargs: str) -> bytes:
         """Display recently-added bookmarks."""
 
         max_days = 180
@@ -46,18 +49,21 @@ class Controller:
             "/bookmarks"
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarks.jinja.html",
-            bookmarks=bookmarks,
-            max_days=max_days,
-            total_records=total_records,
-            order=order,
-            per_page=per_page,
-            query_plan=query_plan,
-            offset=offset,
-            pagination_url=pagination_url
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "bookmarks.jinja.html",
+                bookmarks=bookmarks,
+                max_days=max_days,
+                total_records=total_records,
+                order=order,
+                per_page=per_page,
+                query_plan=query_plan,
+                offset=offset,
+                pagination_url=pagination_url
+            ).pop()
+        )
 
     @staticmethod
     def taglist() -> bytes:
@@ -67,15 +73,18 @@ class Controller:
             "bookmarks:tags:all"
             ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarks-taglist.jinja.html",
-            tags=tags,
-            subview_title="Tags"
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "bookmarks-taglist.jinja.html",
+                tags=tags,
+                subview_title="Tags"
+            ).pop()
+        )
 
     @staticmethod
-    def search(**kwargs) -> bytes:
+    def search(**kwargs: str) -> bytes:
         """Find bookmarks matching a search query."""
         per_page = 20
         offset = int(kwargs.get("offset", 0))
@@ -96,22 +105,25 @@ class Controller:
             {"query": query}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarks.jinja.html",
-            bookmarks=bookmarks,
-            offset=offset,
-            order=order,
-            pagination_url=pagination_url,
-            per_page=per_page,
-            query=query,
-            query_plan=query_plan,
-            total_records=total_records,
-            subview_title=query
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "bookmarks.jinja.html",
+                bookmarks=bookmarks,
+                offset=offset,
+                order=order,
+                pagination_url=pagination_url,
+                per_page=per_page,
+                query=query,
+                query_plan=query_plan,
+                total_records=total_records,
+                subview_title=query
+            ).pop()
+        )
 
     @staticmethod
-    def check_wayback_availability(url):
+    def check_wayback_availability(url: str) -> bytes:
         """See if an archived copy of the URL is available."""
 
         response = cherrypy.engine.publish(
@@ -126,7 +138,7 @@ class Controller:
         return json.dumps(closest_snapshot).encode()
 
     @staticmethod
-    def POST(url, **kwargs) -> None:
+    def POST(url: str, **kwargs: str) -> None:
         """Add a new bookmark, or update an existing one."""
 
         title = kwargs.get("title")
@@ -151,7 +163,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def DELETE(url) -> None:
+    def DELETE(url: str) -> None:
         """Discard a previously bookmarked URL."""
 
         deleted_rows = cherrypy.engine.publish(

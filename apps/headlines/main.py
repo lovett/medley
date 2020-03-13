@@ -1,5 +1,6 @@
 """News headlines via News API"""
 
+import typing
 import cherrypy
 import pendulum
 
@@ -12,21 +13,11 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of headlines."""
 
-        limit = kwargs.get('limit')
-        offset = kwargs.get('offset')
-
-        try:
-            limit = int(limit)
-        except (ValueError, TypeError):
-            limit = 40
-
-        try:
-            offset = int(offset)
-        except (ValueError, TypeError):
-            offset = 1
+        limit = int(kwargs.get("limit", 40))
+        offset = int(kwargs.get("offset", 1))
 
         now = pendulum.now()
 
@@ -73,10 +64,13 @@ class Controller:
         cache_control = f"private, max-age={cache_lifespan}"
         cherrypy.response.headers["Cache-Control"] = cache_control
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "headlines.jinja.html",
-            headlines=headlines,
-            limit=limit,
-            offset=offset,
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "headlines.jinja.html",
+                headlines=headlines,
+                limit=limit,
+                offset=offset,
+            ).pop()
+        )

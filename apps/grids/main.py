@@ -1,5 +1,6 @@
 """Printable data-entry pages"""
 
+import typing
 import pendulum
 import cherrypy
 
@@ -34,13 +35,14 @@ class Controller:
             in rows
         ]
 
-        result: bytes = cherrypy.engine.publish(
-            "jinja:render",
-            "grids-index.jinja.html",
-            grid_names=grid_names
-        ).pop()
-
-        return result
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "grids-index.jinja.html",
+                grid_names=grid_names
+            ).pop()
+        )
 
     @staticmethod
     def show(name: str, **kwargs: str) -> bytes:
@@ -96,14 +98,15 @@ class Controller:
                 row[1] = day.format("dddd")
                 rows.append(row)
 
-        result: bytes = cherrypy.engine.publish(
-            "jinja:render",
-            "grids.jinja.html",
-            headers=headers,
-            name=name,
-            options=options,
-            rows=rows,
-            subview_title=name
-        ).pop()
-
-        return result
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "grids.jinja.html",
+                headers=headers,
+                name=name,
+                options=options,
+                rows=rows,
+                subview_title=name
+            ).pop()
+        )

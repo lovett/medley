@@ -3,6 +3,7 @@
 import ipaddress
 import re
 import socket
+import typing
 import urllib.parse
 import cherrypy
 
@@ -15,16 +16,19 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a search form and lookup results."""
 
         address = kwargs.get("address")
 
         if not address:
-            return cherrypy.engine.publish(
-                "jinja:render",
-                "whois.jinja.html"
-            ).pop()
+            return typing.cast(
+                bytes,
+                cherrypy.engine.publish(
+                    "jinja:render",
+                    "whois.jinja.html"
+                ).pop()
+            )
 
         address_unquoted = urllib.parse.unquote_plus(address.strip()).lower()
 
@@ -33,7 +37,7 @@ class Controller:
             address_clean = re.sub(r"[^\w.-\/:?]", "", address_unquoted)
             ip_address = str(ipaddress.ip_address(address_clean))
         except ValueError:
-            ip_address = None
+            ip_address = ""
 
         if not ip_address:
             address_parsed = urllib.parse.urlparse(address_unquoted)
@@ -92,16 +96,19 @@ class Controller:
             {"query": f"ip {ip_address}"}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "whois.jinja.html",
-            address=address_clean,
-            ip_address=ip_address,
-            whois=whois,
-            ip_facts=facts,
-            visitors_url=visitors_url,
-            earliest_visit=visit_days.get("earliest"),
-            latest_visit=visit_days.get("latest"),
-            visit_days_count=visit_days.get("count", 0),
-            subview_title=address_clean
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "whois.jinja.html",
+                address=address_clean,
+                ip_address=ip_address,
+                whois=whois,
+                ip_facts=facts,
+                visitors_url=visitors_url,
+                earliest_visit=visit_days.get("earliest"),
+                latest_visit=visit_days.get("latest"),
+                visit_days_count=visit_days.get("count", 0),
+                subview_title=address_clean
+            ).pop()
+        )

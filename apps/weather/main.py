@@ -2,9 +2,12 @@
 
 import copy
 import math
+import typing
 from collections import defaultdict
 import cherrypy
 import pendulum
+
+Forecast = typing.Dict[str, typing.Any]
 
 
 class Controller:
@@ -14,7 +17,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **_kwargs) -> bytes:
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
         """Display selected parts of the most recent Darksky API query"""
 
         config = cherrypy.engine.publish(
@@ -32,26 +35,26 @@ class Controller:
             if key.startswith("latlong")
         )
 
-        latitude = 0
-        longitude = 0
-        location_name = None
+        latitude = ""
+        longitude = ""
+        location_name = ""
 
         if "latlong:default" in config:
             defaults = config["latlong:default"].split(",", 2)
-            latitude = float(defaults[0])
-            longitude = float(defaults[1])
+            latitude = defaults[0]
+            longitude = defaults[1]
             location_name = defaults[2]
 
         if len(args) == 1:
             params = args[0].split(",", 1)
-            latitude = float(params[0])
-            longitude = float(params[1])
+            latitude = params[0]
+            longitude = params[1]
             location_name = next((
                 location[2]
                 for location in locations
                 if location[0] == latitude
                 and location[1] == longitude
-            ), None)
+            ), "")
 
         cache_key = f"darksky_{latitude},{longitude}"
 
@@ -92,21 +95,24 @@ class Controller:
             {"q": "weather:latlong"}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "weather.jinja.html",
-            forecast=forecast,
-            other_locations=locations,
-            location_name=location_name,
-            edit_url=edit_url,
-            subview_title=location_name
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "weather.jinja.html",
+                forecast=forecast,
+                other_locations=locations,
+                location_name=location_name,
+                edit_url=edit_url,
+                subview_title=location_name
+            ).pop()
+        )
 
     @staticmethod
-    def shape_forecast(forecast):
+    def shape_forecast(forecast: Forecast) -> Forecast:
         """Reduce an API response object to wanted values"""
 
-        result = defaultdict()
+        result: Forecast = defaultdict()
 
         timezone = forecast.get("timezone")
 

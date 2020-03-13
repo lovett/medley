@@ -14,7 +14,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display the list of hosts eligible for wakeup."""
 
         sent = kwargs.get('sent', False)
@@ -31,17 +31,20 @@ class Controller:
             {"key": "wakeup", "view": "add", "q": "wakeup"}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "wakeup.jinja.html",
-            hosts=hosts,
-            registry_url=registry_url,
-            sent=sent
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "wakeup.jinja.html",
+                hosts=hosts,
+                registry_url=registry_url,
+                sent=sent
+            ).pop()
+        )
 
     @staticmethod
     @cherrypy.tools.provides(formats=("text", "html"))
-    def POST(*_args, **kwargs) -> typing.Optional[bytes]:
+    def POST(*_args: str, **kwargs: str) -> typing.Optional[bytes]:
         """Send a WoL packet to the mac address of the specified host."""
 
         host = kwargs.get('host')

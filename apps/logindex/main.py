@@ -13,7 +13,7 @@ class Controller:
     exposed = True
     show_on_homepage = False
 
-    def POST(self, *args, **kwargs) -> None:
+    def POST(self, *args: str, **kwargs: str) -> None:
         """
         Dispatch to a subhandler.
         """
@@ -89,7 +89,7 @@ class Controller:
         cherrypy.engine.publish(channel, storage_path)
 
     @staticmethod
-    def parse_log_date(val, default: typing.Any) -> typing.Any:
+    def parse_log_date(val: str, default: typing.Any) -> typing.Any:
 
         """
         Convert a date string in either date or filename format

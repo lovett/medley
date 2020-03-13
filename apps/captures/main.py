@@ -1,4 +1,4 @@
-"""HTTP requests and responses"""
+"""Review HTTP requests and responses"""
 
 import cherrypy
 

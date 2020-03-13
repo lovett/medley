@@ -1,11 +1,15 @@
 """Website traffic viewer"""
 
 import re
+import sqlite3
+import typing
 from collections import namedtuple, defaultdict
 import cherrypy
 import pendulum
 
 SavedQuery = namedtuple('SavedQuery', ['id', 'key', 'value', 'active'])
+DurationBag = typing.Dict[typing.Tuple[str, str], int]
+Durations = typing.Dict[typing.Tuple[str, str], pendulum.Duration]
 
 
 class Controller:
@@ -18,10 +22,10 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **kwargs) -> bytes:
+    def GET(self, *_args: str, **kwargs: str) -> bytes:
         """Display a search interface, and the results of the default query"""
 
-        query = kwargs.get('query')
+        query = kwargs.get("query", "")
 
         if query:
             query = query.strip()
@@ -49,7 +53,7 @@ class Controller:
         durations = {}
         country_names = None
         annotations = None
-        cookies = {}
+        cookies: typing.Dict[str, str] = {}
 
         if log_records:
             reversed_ips = cherrypy.engine.publish(
@@ -74,26 +78,29 @@ class Controller:
                 and record["ip"] not in cookies
             }
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "visitors.jinja.html",
-            flagless_countries=("AP", None),
-            query=query,
-            query_plan=query_plan,
-            reversed_ips=reversed_ips,
-            active_date=self.get_active_date(log_records, query),
-            results=log_records,
-            country_names=country_names,
-            deltas=deltas,
-            durations=durations,
-            site_domains=site_domains,
-            saved_queries=saved_queries,
-            annotations=annotations,
-            cookies=cookies
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "visitors.jinja.html",
+                flagless_countries=("AP", None),
+                query=query,
+                query_plan=query_plan,
+                reversed_ips=reversed_ips,
+                active_date=self.get_active_date(log_records, query),
+                results=log_records,
+                country_names=country_names,
+                deltas=deltas,
+                durations=durations,
+                site_domains=site_domains,
+                saved_queries=saved_queries,
+                annotations=annotations,
+                cookies=cookies
+            ).pop()
+        )
 
     @staticmethod
-    def get_saved_queries(current_query=None):
+    def get_saved_queries(current_query: str = "") -> typing.List[SavedQuery]:
         """Fetch and restructure saved search queries"""
 
         _, rows = cherrypy.engine.publish(
@@ -120,15 +127,17 @@ class Controller:
         return queries
 
     @staticmethod
-    def get_durations(log_records):
+    def get_durations(
+            log_records: sqlite3.Row
+    ) -> Durations:
         """Calculate visit duration per day per IP"""
 
         timezone = cherrypy.engine.publish(
             "registry:timezone"
         ).pop()
 
-        maximums = defaultdict(int)
-        minimums = defaultdict(int)
+        maximums: DurationBag = defaultdict(int)
+        minimums: DurationBag = defaultdict(int)
 
         for row in log_records:
             timestamp = row["unix_timestamp"]
@@ -145,7 +154,7 @@ class Controller:
             if lookup_key not in minimums or timestamp < minimums[lookup_key]:
                 minimums[lookup_key] = timestamp
 
-        durations = {
+        durations: Durations = {
             lookup_key: pendulum.duration(
                 seconds=(maximums[lookup_key] - minimums[lookup_key])
             )
@@ -156,7 +165,9 @@ class Controller:
         return durations
 
     @staticmethod
-    def get_deltas(log_records):
+    def get_deltas(
+            log_records: typing.List[sqlite3.Row]
+    ) -> typing.List[int]:
         """Calculate elapsed time intervals between records"""
 
         deltas = []
@@ -182,12 +193,11 @@ class Controller:
         return deltas
 
     @staticmethod
-    def get_active_date(log_records, query):
-        """Figure out which date the query pertains to.
-
-        This value is used by the calender widget in the UI.
-
-        """
+    def get_active_date(
+            log_records: typing.List[sqlite3.Row],
+            query: str
+    ) -> pendulum:
+        """Figure out which date the query pertains to."""
 
         if log_records:
             return log_records[0]["unix_timestamp"]
@@ -227,15 +237,20 @@ class Controller:
         return active_date.start_of('day')
 
     @staticmethod
-    def get_annotations(log_records):
+    def get_annotations(
+            log_records: typing.List[sqlite3.Row]
+    ) -> typing.Dict[str, str]:
         """Get IP address custom labels from the registry"""
 
         ips = {record["ip"] for record in log_records}
 
         keys = tuple(f"ip:{ip}" for ip in ips)
 
-        return cherrypy.engine.publish(
-            "registry:search:multidict",
-            keys=keys,
-            key_slice=1
-        ).pop()
+        return typing.cast(
+            typing.Dict[str, str],
+            cherrypy.engine.publish(
+                "registry:search:multidict",
+                keys=keys,
+                key_slice=1
+            ).pop()
+        )

@@ -142,7 +142,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             for abbreviation in abbreviations
         )
 
-        _, rows = cherrypy.engine.publish(
+        rows = cherrypy.engine.publish(
             "registry:search:dict",
             keys=tuple(keys),
             key_slice=2

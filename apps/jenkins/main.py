@@ -22,6 +22,7 @@ post-processing them."
 
 """
 
+import typing
 from collections import defaultdict
 import cherrypy
 
@@ -54,7 +55,9 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def build_notification(payload):
+    def build_notification(
+            payload: typing.Dict[str, typing.Any]
+    ) -> typing.Dict[str, typing.Any]:
         """
         Transform a normalized Jenkins payload into a notification.
         """
@@ -86,21 +89,26 @@ class Controller:
             group = "sysdown"
             title = f"Jenkins had trouble {action} {name}"
 
-        return cherrypy.engine.publish(
-            "notifier:build",
-            group=group,
-            badge="jenkins.svg",
-            url=url,
-            localId=f"jenkins.{payload['name']}",
-            title=title,
-            body=f"Build #{build_number}, {branch}"
-        ).pop()
+        return typing.cast(
+            typing.Dict[str, typing.Any],
+            cherrypy.engine.publish(
+                "notifier:build",
+                group=group,
+                badge="jenkins.svg",
+                url=url,
+                localId=f"jenkins.{payload['name']}",
+                title=title,
+                body=f"Build #{build_number}, {branch}"
+            ).pop()
+        )
 
     @staticmethod
-    def normalize_payload(raw_payload):
+    def normalize_payload(
+            raw_payload: typing.Dict[str, typing.Any]
+    ) -> typing.Dict[str, typing.Any]:
         """Reshape an incoming payload to a flatter structure."""
 
-        def empty_string():
+        def empty_string() -> str:
             """Initial value for defaultdict default_factory."""
             return ""
 
@@ -114,9 +122,9 @@ class Controller:
             build.get("scm", ())
         )
 
-        result = defaultdict(empty_string)
+        result: typing.Dict[str, typing.Any] = defaultdict(empty_string)
 
-        result["name"] = raw_payload.get("name").lower()
+        result["name"] = raw_payload.get("name", "").lower()
         result["build_number"] = build["number"]
         result["phase"] = build["phase"].lower()
         result["status"] = build["status"].lower()
@@ -131,7 +139,7 @@ class Controller:
             f"site_url:{result['name']}:{result['branch']}"
         ).pop()
 
-        if "mirror" in build.get("full_url").lower():
+        if "mirror" in build.get("full_url", "").lower():
             result["action"] = "mirroring"
         else:
             result["action"] = "building"

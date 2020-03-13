@@ -1,5 +1,6 @@
 """Text converters"""
 
+import typing
 import json
 import urllib
 import re
@@ -12,7 +13,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.transforms = {
             "as-is": lambda x: x,
             "capitalize": lambda x: x.capitalize(),
@@ -24,23 +25,26 @@ class Controller:
             "urlencode": urllib.parse.quote_plus
         }
 
-    def list_of_transforms(self):
+    def list_of_transforms(self) -> typing.List[str]:
         """Shape the list of transforms into a list of keys"""
         return sorted(self.transforms.keys())
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args, **_kwargs) -> bytes:
+    def GET(self, *_args: str, **_kwargs: str) -> bytes:
         """The default view presents the available transformation methods"""
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "transform.jinja.html",
-            transforms=self.list_of_transforms(),
-            current_transform="as-is"
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "transform.jinja.html",
+                transforms=self.list_of_transforms(),
+                current_transform="as-is"
+            ).pop()
+        )
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def POST(self, *_args, **kwargs) -> bytes:
+    def POST(self, *_args: str, **kwargs: str) -> bytes:
         """Perform a transformation and display the result"""
 
         transform = kwargs.get("transform")
@@ -52,7 +56,13 @@ class Controller:
                 "Missing transform parameter."
             )
 
-        transformer = self.transforms.get(transform, lambda x: x)
+        transformer = typing.cast(
+            typing.Callable[[str], str],
+            self.transforms.get(
+                transform,
+                lambda x: x
+            )
+        )
 
         result = transformer(value.strip())
 
@@ -60,13 +70,16 @@ class Controller:
             return json.dumps({"result": result}).encode()
 
         if cherrypy.request.wants == "text":
-            return result.encode()
+            return typing.cast(bytes, result.encode())
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "transform.jinja.html",
-            result=result,
-            current_transform=transform,
-            transforms=self.list_of_transforms(),
-            value=value
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "transform.jinja.html",
+                result=result,
+                current_transform=transform,
+                transforms=self.list_of_transforms(),
+                value=value
+            ).pop()
+        )

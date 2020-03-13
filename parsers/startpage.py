@@ -6,6 +6,7 @@ used as keys.
 
 """
 
+import typing
 from urllib.parse import quote, urlparse
 import configparser
 import re
@@ -14,14 +15,18 @@ import re
 class Parser():
     """A small wrapper for Python's standard ConfigParser class."""
 
-    anonymizer = None
-    local_domains = ()
+    anonymizer: str = ""
+    local_domains: typing.Tuple[str, ...] = ()
 
-    def __init__(self, anonymizer=None, local_domains=()):
+    def __init__(
+            self,
+            anonymizer: str = "",
+            local_domains: typing.Tuple[str, ...] = ()
+    ) -> None:
         self.anonymizer = anonymizer
         self.local_domains = local_domains
 
-    def anonymize(self, url):
+    def anonymize(self, option: str) -> str:
         """Prepend a URL with the anonymizer URL.
 
         Return the URL as-is if the URL matches a value in the local
@@ -29,20 +34,20 @@ class Parser():
 
         """
 
-        parsed_url = urlparse(url)
+        parsed_url = urlparse(option)
 
         # Skip non-http URLs.
         if parsed_url.scheme not in ('http', 'https'):
-            return self.postprocess(url)
+            return self.postprocess(option)
 
         # Skip URLs in local domains.
-        if any([d for d in self.local_domains if d in url]):
-            return self.postprocess(url)
+        if ([d for d in self.local_domains if d in option]):
+            return self.postprocess(option)
 
-        return self.anonymizer + quote(self.postprocess(url))
+        return self.anonymizer + quote(self.postprocess(option))
 
     @staticmethod
-    def preprocess(text):
+    def preprocess(text: str) -> str:
         """Temporarily convert delimiters in option names.
 
         URLs are used as option names. URLs can contain "=", but this
@@ -66,12 +71,12 @@ class Parser():
         return "\n".join(processed_text)
 
     @staticmethod
-    def postprocess(text):
+    def postprocess(text: str) -> str:
         """ Remove the placeholders added during preprocessing."""
 
         return re.sub("@@EQUAL@@", "=", text)
 
-    def parse(self, text):
+    def parse(self, text: str) -> configparser.ConfigParser:
         """Pass some text to the parser."""
 
         config = configparser.ConfigParser(
@@ -81,7 +86,7 @@ class Parser():
         )
 
         if self.anonymizer:
-            config.optionxform = self.anonymize
+            setattr(config, "optionxform", self.anonymize)
 
         processed_text = self.preprocess(text)
 

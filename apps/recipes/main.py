@@ -1,5 +1,6 @@
 """Favorite dishes and cooking notes"""
 
+import typing
 import cherrypy
 import mistletoe
 
@@ -11,7 +12,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **kwargs) -> bytes:
+    def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         if not args:
@@ -21,19 +22,19 @@ class Controller:
             return self.by_tag(args[1], **kwargs)
 
         if args[0] == "new":
-            return self.form(**kwargs)
+            return self.form(-1, **kwargs)
 
         if args[-1] == "edit":
-            return self.form(args[-2], **kwargs)
+            return self.form(int(args[-2]), **kwargs)
 
         if args[0] == "search":
-            return self.search(kwargs.get("q"))
+            return self.search(kwargs.get("q", ""))
 
-        return self.show(args[0])
+        return self.show(int(args[0]))
 
     @staticmethod
     def POST(
-            *args,
+            *args: str,
             title: str,
             body: str,
             url: str = "",
@@ -77,21 +78,24 @@ class Controller:
         raise cherrypy.HTTPError(404)
 
     @staticmethod
-    def index(*_args, **_kwargs) -> bytes:
+    def index(*_args: str, **_kwargs: str) -> bytes:
         """Display the application homepage."""
 
         tags = cherrypy.engine.publish(
             "recipes:tags:all"
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "recipes-index.jinja.html",
-            tags=tags,
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "recipes-index.jinja.html",
+                tags=tags,
+            ).pop()
+        )
 
     @staticmethod
-    def by_tag(tag: str, **_kwargs) -> bytes:
+    def by_tag(tag: str, **_kwargs: str) -> bytes:
         """Display recipes associated with a tag."""
 
         recipes = cherrypy.engine.publish(
@@ -99,16 +103,19 @@ class Controller:
             tag
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "recipes-list.jinja.html",
-            recipes=recipes,
-            tag=tag,
-            subview_title=tag
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "recipes-list.jinja.html",
+                recipes=recipes,
+                tag=tag,
+                subview_title=tag
+            ).pop()
+        )
 
     @staticmethod
-    def form(rowid: int = 0, **_kwargs) -> bytes:
+    def form(rowid: int = 0, **_kwargs: str) -> bytes:
         """Display a form for adding or updating a recipe."""
 
         title = ""
@@ -132,17 +139,20 @@ class Controller:
             url = recipe["url"]
             submit_url = f"/recipes/{rowid}"
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "recipes-form.jinja.html",
-            rowid=rowid,
-            title=title,
-            body=body,
-            tags=tags,
-            url=url,
-            submit_url=submit_url,
-            cancel_url=submit_url
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "recipes-form.jinja.html",
+                rowid=rowid,
+                title=title,
+                body=body,
+                tags=tags,
+                url=url,
+                submit_url=submit_url,
+                cancel_url=submit_url
+            ).pop()
+        )
 
     @staticmethod
     def search(query: str = "") -> bytes:
@@ -153,15 +163,16 @@ class Controller:
             query
         ).pop()
 
-        result: bytes = cherrypy.engine.publish(
-            "jinja:render",
-            "recipes-list.jinja.html",
-            recipes=recipes,
-            query=query,
-            subview_title=query
-        ).pop()
-
-        return result
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "recipes-list.jinja.html",
+                recipes=recipes,
+                query=query,
+                subview_title=query
+            ).pop()
+        )
 
     @staticmethod
     def show(rowid: int) -> bytes:
@@ -191,15 +202,18 @@ class Controller:
             ingredients = ""
             rest = body_html
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "recipes-show.jinja.html",
-            title=recipe["title"],
-            rowid=recipe["rowid"],
-            ingredients=ingredients,
-            body=rest,
-            tags=recipe["tags"],
-            display_date=recipe["updated"] or recipe["created"],
-            url=recipe["url"],
-            subview_title=recipe["title"]
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "recipes-show.jinja.html",
+                title=recipe["title"],
+                rowid=recipe["rowid"],
+                ingredients=ingredients,
+                body=rest,
+                tags=recipe["tags"],
+                display_date=recipe["updated"] or recipe["created"],
+                url=recipe["url"],
+                subview_title=recipe["title"]
+            ).pop()
+        )

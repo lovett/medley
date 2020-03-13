@@ -1,5 +1,6 @@
 """Site-wide status and activity"""
 
+import typing
 import cherrypy
 
 
@@ -11,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of recent log entries"""
 
         offset = int(kwargs.get("offset", 0))
@@ -35,15 +36,18 @@ class Controller:
             {"source": source}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "applog.jinja.html",
-            records=records,
-            total=total,
-            source=source,
-            query_plan=query_plan,
-            pagination_url=pagination_url,
-            offset=offset,
-            total_records=total,
-            per_page=per_page
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "applog.jinja.html",
+                records=records,
+                total=total,
+                source=source,
+                query_plan=query_plan,
+                pagination_url=pagination_url,
+                offset=offset,
+                total_records=total,
+                per_page=per_page
+            ).pop()
+        )

@@ -1,7 +1,6 @@
-"""
-Test suite for the later app
-"""
+"""Test suite for the later app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -11,32 +10,30 @@ import apps.later.main
 
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
+    """Tests for the application controller."""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         helpers.start_server(apps.later.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         helpers.stop_server()
 
-    def xtest_allow(self):
+    def xtest_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def xtest_exposed(self):
+    def xtest_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.later.main.Controller)
 
-    def xtest_show_on_homepage(self):
+    def xtest_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.later.main.Controller)
 
-    def xtest_populates_title(self):
+    def xtest_populates_title(self) -> None:
         """The title field is prepopulated if provided via querystring"""
 
         samples = (
@@ -48,10 +45,10 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             self.assertTrue(sample[1] in response.body)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_populates_tags(self, publish_mock):
+    def test_populates_tags(self, publish_mock: mock.Mock) -> None:
         """The tags field is prepopulated if provided via querystring"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["abc123"]
@@ -71,12 +68,12 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_populates_comments(self, publish_mock):
+    def test_populates_comments(self, publish_mock: mock.Mock) -> None:
         """The comments field is prepopulated if provided via querystring
 
         A period is also added to make the populated value a sentence.
         """
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["This is sentence 1. this is sentence 2"]
@@ -94,11 +91,11 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_ignores_reddit_comment(self, publish_mock):
+    def test_ignores_reddit_comment(self, publish_mock: mock.Mock) -> None:
         """The comments field of a reddit.com URL is discarded if it came from
         a meta tag."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
@@ -125,13 +122,13 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_url_lookup(self, publish_mock):
+    def test_url_lookup(self, publish_mock: mock.Mock) -> None:
         """An existing bookmark is fetched by url, overwriting querystring
         values
 
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]

@@ -1,7 +1,6 @@
-"""
-Test suite for the captures app
-"""
+"""Test suite for the captures app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -16,33 +15,33 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.captures.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.captures.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.captures.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_search_by_path(self, publish_mock):
+    def test_search_by_path(self, publish_mock: mock.Mock) -> None:
         """Captures can be searched by path"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "capture:search":
                 return [(1, [{}])]
@@ -60,10 +59,10 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_view_single_capture(self, publish_mock):
+    def test_view_single_capture(self, publish_mock: mock.Mock) -> None:
         """A single capture can be viewed by its ID."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "capture:get":

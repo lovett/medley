@@ -1,7 +1,6 @@
-"""
-Test suite for the whois app
-"""
+"""Test suite for the whois app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -16,34 +15,34 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.bounce.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Use a separate controller instance for testing helper methods."""
 
         self.controller = apps.bounce.main.Controller()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST"))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.bounce.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the bounce app."""
         self.assert_show_on_homepage(apps.bounce.main.Controller)
 
-    def test_host_reduction(self):
+    def test_host_reduction(self) -> None:
         """An incoming URL is reduced to its host name."""
 
         candidates = (
@@ -75,7 +74,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             result = self.controller.url_to_host(pair[0])
             self.assertEqual(result, pair[1])
 
-    def test_group_reduction(self):
+    def test_group_reduction(self) -> None:
         """Hostnames are associated with one another by subtracting known
         keywords from the hostname.
 
@@ -97,7 +96,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             result = self.controller.host_to_group(pair[0])
             self.assertEqual(result, pair[1])
 
-    def test_keyword_redution(self):
+    def test_keyword_redution(self) -> None:
         """Site environment keywords are identified by isolating common names.
 
         """
@@ -119,12 +118,12 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             self.assertEqual(result, pair[1])
 
     @mock.patch("cherrypy.engine.publish")
-    def test_site_in_group(self, publish_mock):
+    def test_site_in_group(self, publish_mock: mock.Mock) -> None:
         """A request with a URL that belongs to known group returns
         equivalent URLs for other members of the group
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -190,13 +189,13 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_site_not_in_group(self, publish_mock):
+    def test_site_not_in_group(self, publish_mock: mock.Mock) -> None:
         """A request with a URL that belongs to known group but does not match
         an existing record does not offer a list of bounces.
 
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -230,10 +229,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(len(bounces), 0)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_unrecognized_site(self, publish_mock):
+    def test_unrecognized_site(self, publish_mock: mock.Mock) -> None:
         """A  URL that does not belong to known group returns a form."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -267,10 +266,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_bookmarklet_url_https(self, publish_mock):
+    def test_bookmarklet_url_https(self, publish_mock: mock.Mock) -> None:
         """The bookmarklet URL respects HTTPS."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:key":
                 return [None]
@@ -292,13 +291,13 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_departing_site(self, publish_mock):
+    def test_departing_site(self, publish_mock: mock.Mock) -> None:
         """If the given URL matches a record in the registry, it is considered
          the departing site.
 
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:key":
                 return ["example"]
@@ -336,10 +335,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_add_site(self, publish_mock):
+    def test_add_site(self, publish_mock: mock.Mock) -> None:
         """A new site can be added to a group"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
             if args[0] == "formatting:string_sanitize":
                 return [args[1]]
@@ -365,10 +364,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_add_site_invalid_group(self, publish_mock):
+    def test_add_site_invalid_group(self, publish_mock: mock.Mock) -> None:
         """A POST is rejected if the provided group is non-alphanumeric."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
             if args[0] == "formatting:string_sanitize":
                 if args[1] == "???":
@@ -394,10 +393,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_add_site_invalid_name(self, publish_mock):
+    def test_add_site_invalid_name(self, publish_mock: mock.Mock) -> None:
         """A POST is rejected if the provided name is non-alphanumeric."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
             if args[0] == "formatting:string_sanitize":
                 if args[1] == "???":

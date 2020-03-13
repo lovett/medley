@@ -1,5 +1,6 @@
 """Application performance graphs"""
 
+import typing
 import cherrypy
 
 
@@ -10,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args, **_kwargs) -> bytes:
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
         """Dispatch to a sub-handler."""
 
         if args:
@@ -57,16 +58,19 @@ class Controller:
         if y_range[0] == y_range[1]:
             points = []
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "metrics.jinja.html",
-            metric=metric,
-            x_range=x_range,
-            y_range=y_range,
-            points=points,
-            unit=unit,
-            subview_title=metric
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "metrics.jinja.html",
+                metric=metric,
+                x_range=x_range,
+                y_range=y_range,
+                points=points,
+                unit=unit,
+                subview_title=metric
+            ).pop()
+        )
 
     @staticmethod
     def list_metrics() -> bytes:
@@ -76,8 +80,11 @@ class Controller:
             "metrics:inventory"
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "metrics.jinja.html",
-            metrics=metrics
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "metrics.jinja.html",
+                metrics=metrics
+            ).pop()
+        )

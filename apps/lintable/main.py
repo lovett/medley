@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def GET(*args, **_kwargs) -> bytes:
+    def GET(*args: str, **_kwargs: str) -> bytes:
         """Determine if a file should be linted."""
 
         target_path = "/".join(args)
@@ -35,7 +35,7 @@ class Controller:
         return "yes".encode()
 
     @staticmethod
-    def PUT(*args, **_kwargs) -> None:
+    def PUT(*args: str, **_kwargs: str) -> None:
         """Request storage of a file's current hash."""
         target_path = "/".join(args)
 

@@ -1,6 +1,7 @@
 """Bookmark a webpage"""
 
 import re
+import typing
 import cherrypy
 
 
@@ -12,14 +13,14 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args, **kwargs) -> bytes:
+    def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a form for for bookmarking a URL"""
 
         error = None
-        url = kwargs.get('url')
-        title = kwargs.get('title')
-        tags = kwargs.get('tags')
-        comments = kwargs.get('comments')
+        url = kwargs.get("url", "")
+        title = kwargs.get("title", "")
+        tags = kwargs.get("tags", "")
+        comments = kwargs.get("comments", "")
 
         if url:
             url = url.strip()
@@ -45,7 +46,7 @@ class Controller:
         # Discard comment if it came from a meta description tag on Reddit,
         # since it isn't specific to the URL being bookmarked.
         if comments and comments.startswith("r/") and "reddit.com" in url:
-            comments = None
+            comments = ""
 
         if comments:
             comments = cherrypy.engine.publish(
@@ -54,10 +55,9 @@ class Controller:
             ).pop()
             comments = re.sub(r"\s+", " ", comments).strip()
             comments = re.sub(r",(\w)", ", \\1", comments)
-            comments = comments.split(". ")
             comments = ". ".join([
                 sentence[0].capitalize() + sentence[1:]
-                for sentence in comments
+                for sentence in comments.split(". ")
             ])
 
         if comments and not comments.endswith("."):
@@ -81,14 +81,17 @@ class Controller:
             {"query": title, "order": "date-desc"}
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "later.jinja.html",
-            bookmarks_url=bookmarks_url,
-            error=error,
-            bookmark=bookmark,
-            title=title,
-            url=url,
-            tags=tags,
-            comments=comments,
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "later.jinja.html",
+                bookmarks_url=bookmarks_url,
+                error=error,
+                bookmark=bookmark,
+                title=title,
+                url=url,
+                tags=tags,
+                comments=comments,
+            ).pop()
+        )

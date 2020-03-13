@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 import unittest
+import typing
 import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -15,33 +16,33 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.whois.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.whois.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.whois.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invalid_address_hostname(self, publish_mock):
+    def test_invalid_address_hostname(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an invalid hostname"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "url:internal":
@@ -53,10 +54,10 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_valid_address_as_hostname(self, publish_mock):
+    def test_valid_address_as_hostname(self, publish_mock: mock.Mock) -> None:
         """Request lookup of a valid hostname"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "url:internal":
                 return ["/"]
@@ -80,10 +81,10 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invalid_address_as_ip(self, publish_mock):
+    def test_invalid_address_as_ip(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an invalid IP address"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "url:internal":
                 return ["/"]
@@ -95,12 +96,12 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_address_as_ip(self, publish_mock):
+    def test_address_as_ip(self, publish_mock: mock.Mock) -> None:
         """Request lookup of a cached IP address"""
 
         cache_fake = {"foo": "bar"}
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Overrides to be returned by the mock"""
             if args[0] == "cache:get":
                 return [cache_fake]
@@ -125,10 +126,10 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_address_as_ip_nocache(self, publish_mock):
+    def test_address_as_ip_nocache(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an uncached IP address"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [None]

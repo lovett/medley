@@ -1,5 +1,6 @@
 """Webpage utilities"""
 
+import typing
 import cherrypy
 
 
@@ -12,7 +13,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(*_args, **_kwargs) -> bytes:
+    def GET(*_args: str, **_kwargs: str) -> bytes:
         """Present a static list of bookmarklets"""
 
         later_url = cherrypy.engine.publish(
@@ -25,9 +26,12 @@ class Controller:
             "/bounce"
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "bookmarklets.jinja.html",
-            bounce_url=bounce_url,
-            later_url=later_url
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "bookmarklets.jinja.html",
+                bounce_url=bounce_url,
+                later_url=later_url
+            ).pop()
+        )

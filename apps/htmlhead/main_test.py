@@ -1,7 +1,6 @@
-"""
-Test suite for the htmlhead app
-"""
+"""Test suite for the htmlhead app."""
 
+import typing
 import unittest
 import mock
 import requests
@@ -18,34 +17,34 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.htmlhead.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST"))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.htmlhead.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.htmlhead.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
-    def test_with_url(self, publish_mock):
+    def test_with_url(self, publish_mock: mock.Mock) -> None:
         """When a URL is provided, it is parsed for tags in the head."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":
@@ -75,10 +74,10 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
 
     @mock.patch("cherrypy.engine.publish")
     @responses.activate
-    def test_404(self, publish_mock):
+    def test_404(self, publish_mock: mock.Mock) -> None:
         """When a URL is provided, it is parsed for tags in the head."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":

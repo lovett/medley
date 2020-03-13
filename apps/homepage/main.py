@@ -14,20 +14,24 @@ class Controller:
 
     @staticmethod
     @decorators.log_runtime
-    def catalog_apps(apps, show_all=True) -> typing.Tuple[str, ...]:
+    def catalog_apps(
+            apps: typing.Dict[str, cherrypy.Application],
+            show_all: bool = True
+    ) -> typing.List[typing.Tuple[str, str, str]]:
         """Extract app summaries from module docstrings."""
         catalog = []
         for mount_path, controller in apps.items():
             try:
-                full_name = sys.modules.get(
+                module = sys.modules.get(
                     controller.root.__module__
-                ).__name__
+                )
 
-                name = full_name.split(".")[1]
+                if not module:
+                    continue
 
-                doc = sys.modules.get(
-                    controller.root.__module__
-                ).__doc__
+                name = module.__name__.split(".")[1]
+
+                doc = str(module.__doc__)
             except AttributeError:
                 name = ""
                 doc = ""
@@ -64,7 +68,7 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html", "org"))
     @cherrypy.tools.etag()
-    def GET(self, *args, **_kwargs) -> bytes:
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
         """List all available applications.
 
         Apps can be excluded from this list by setting
@@ -85,8 +89,11 @@ class Controller:
 
             return "\n".join(checklist).encode()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "homepage.jinja.html",
-            apps=apps,
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "homepage.jinja.html",
+                apps=apps,
+            ).pop()
+        )

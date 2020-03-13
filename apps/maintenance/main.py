@@ -10,7 +10,7 @@ class Controller:
     exposed = True
 
     @staticmethod
-    def POST(*_args, **kwargs) -> None:
+    def POST(*_args: str, **kwargs: str) -> None:
         """
         Schedule maintenance operations.
         """

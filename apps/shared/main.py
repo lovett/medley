@@ -10,6 +10,6 @@ class Controller:
     exposed = True
 
     @staticmethod
-    def GET(*_args, **_kwargs) -> None:
+    def GET(*_args: str, **_kwargs: str) -> None:
         """Redirect requests for non-static assets"""
         raise cherrypy.HTTPRedirect("/")

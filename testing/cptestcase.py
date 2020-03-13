@@ -116,23 +116,31 @@ class BaseCherryPyTestCase(unittest.TestCase):
                 byte_stream.close()
                 byte_stream = None
 
+        # Allow the status code of the reponse to be considered
+        # separately from its message
+        code, message = response.status.split(" ", 1)
+
         # The response body is not usable as-is, and with json,
         # may need additional parsing.
         response_body = response.collapse_body().decode("UTF-8")
 
         if "json" in request_headers.get("Accept", ""):
             try:
-                response_body = json.loads(response_body)
-            except ValueError:
-                pass
-
-        # Allow the status code of the reponse to be considered
-        # separately from its message
-        code, message = response.status.split(" ", 1)
+                json_body = json.loads(response_body)
+            except json.decoder.JSONDecodeError:
+                json_body = {}
+            return testing.response.Response(
+                response.headers,
+                int(code),
+                message,
+                "",
+                json_body
+            )
 
         return testing.response.Response(
             response.headers,
             int(code),
             message,
-            response_body
+            response_body,
+            {}
         )

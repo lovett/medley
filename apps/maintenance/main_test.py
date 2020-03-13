@@ -1,6 +1,4 @@
-"""
-Test suite for the maintenance app
-"""
+"""Test suite for the maintenance app."""
 
 import unittest
 import mock
@@ -16,29 +14,29 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.maintenance.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("POST",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.maintenance.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is not_displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.maintenance.main.Controller)
 
-    def test_group_required(self):
+    def test_group_required(self) -> None:
         """The group parameter must be specified."""
         response = self.request(
             "/",
@@ -46,7 +44,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
         self.assertEqual(response.code, 400)
 
-    def test_group_valid(self):
+    def test_group_valid(self) -> None:
         """The group parameter must be valid."""
         response = self.request(
             "/",
@@ -56,7 +54,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_invokes_scheduler(self, publish_mock):
+    def test_invokes_scheduler(self, publish_mock: mock.Mock) -> None:
         """The maintenance plug is invoked via the scheduler."""
 
         db_response = self.request(

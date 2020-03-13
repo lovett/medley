@@ -1,7 +1,6 @@
-"""
-Test suite for the registry app
-"""
+"""Test suite for the registry app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -16,33 +15,33 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.registry.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET", "POST", "DELETE"))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.registry.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.registry.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_get_by_search(self, publish_mock):
+    def test_get_by_search(self, publish_mock: mock.Mock) -> None:
         """Records can be searched by key"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [(1, [{"key": "abc456", "value": "test"}])]
@@ -62,9 +61,9 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_delete(self, publish_mock):
+    def test_delete(self, publish_mock: mock.Mock) -> None:
         """Existing records can be deleted"""
-        response = self.request("/", method="DELETE", uid=1)
+        response = self.request("/", method="DELETE", uid="1")
 
         publish_mock.assert_any_call("registry:remove:id", 1)
         self.assertEqual(response.code, 204)

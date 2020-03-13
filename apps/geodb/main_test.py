@@ -1,11 +1,10 @@
-"""
-Test suite for the geodb app
-"""
+"""Test suite for the geodb app."""
 
 import os
 import os.path
 import shutil
 import tempfile
+import typing
 import unittest
 import mock
 import cherrypy
@@ -20,22 +19,22 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
     Tests for the application controller.
     """
 
-    temp_dir = None
-    temp_file = None
-    empty_temp_dir = None
-    download_url = None
+    temp_dir = ""
+    temp_file = ""
+    empty_temp_dir = ""
+    download_url = ""
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.geodb.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up a mock download area"""
         self.temp_dir = tempfile.mkdtemp(prefix="geodb-test")
         temp_file = tempfile.mkstemp(dir=self.temp_dir)
@@ -46,36 +45,36 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         self.download_url = f"http://example.com/{basename}.gz"
         cherrypy.config["database_dir"] = self.temp_dir
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         """Clean up the mock download area"""
         shutil.rmtree(self.temp_dir)
         shutil.rmtree(self.empty_temp_dir)
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """This app does not support HEAD or GET requests."""
         for method in ("HEAD", "GET", "DELETE"):
             response = self.request("/", method=method)
             self.assertEqual(response.code, 405)
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.geodb.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.geodb.main.Controller)
 
-    def test_action_required(self):
+    def test_action_required(self) -> None:
         """A post request without a valid action fails."""
 
         response = self.request("/", method="POST")
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_url_required(self, publish_mock):
+    def test_url_required(self, publish_mock: mock.Mock) -> None:
         """The download URL must be defined in the registry."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{}]
@@ -87,10 +86,10 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_license_required(self, publish_mock):
+    def test_license_required(self, publish_mock: mock.Mock) -> None:
         """The license key must be defined in the registry."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{"url": "http://example.com"}]
@@ -102,10 +101,10 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_success(self, publish_mock):
+    def test_success(self, publish_mock: mock.Mock) -> None:
         """A post request with a valid action returns successfully"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{

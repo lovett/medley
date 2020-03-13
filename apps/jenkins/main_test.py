@@ -1,7 +1,6 @@
-"""
-Test suite for the jenkins app
-"""
+"""Test suite for the jenkins app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -9,27 +8,31 @@ from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
 import apps.jenkins.main
 
+Fixture = typing.Dict[str, typing.Any]
+
 
 class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
     """
     Tests for the application controller.
     """
 
+    controller: apps.jenkins.main.Controller
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.jenkins.main.Controller)
         cls.controller = apps.jenkins.main.Controller()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Fixtures available to all tests"""
 
-        self.started_fixture = {
+        self.started_fixture: Fixture = {
             "name": "testjob",
             "url": "job/testjob/",
             "build": {
@@ -51,7 +54,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             "display_name": "testjob",
         }
 
-        self.queued_fixture = {
+        self.queued_fixture: Fixture = {
             "name": "testjob",
             "url": "job/testjob/",
             "build": {
@@ -73,7 +76,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             "display_name": "testjob",
         }
 
-        self.plugin_fixture = {
+        self.plugin_fixture: Fixture = {
             "name": "testjob",
             "url": "job/testjob/",
             "build": {
@@ -90,7 +93,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             }
         }
 
-        self.plugin_mirror_fixture = {
+        self.plugin_mirror_fixture: Fixture = {
             "name": "test",
             "url": "job/mirror/test/",
             "build": {
@@ -107,23 +110,32 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
             }
         }
 
-    def get_fixture(self, kind, phase=None, status=None):
-        """
-        Select of the available fixtures based on its structure and
-        values
+    def get_fixture(
+            self,
+            kind: str,
+            phase: str = "",
+            status: str = ""
+    ) -> typing.Dict[str, typing.Any]:
+        """Select of the available fixtures based on its structure and
+        values.
+
         """
 
         if kind == "plugin":
             fixture = self.plugin_fixture
-            fixture["build"]["phase"] = phase.upper()
-            fixture["build"]["status"] = status.upper()
+            if phase:
+                fixture["build"]["phase"] = phase.upper()
+
+            if status:
+                fixture["build"]["status"] = status.upper()
+
         if kind == "plugin_mirror":
             fixture = self.plugin_mirror_fixture
 
         return fixture
 
     @staticmethod
-    def default_side_effect_callback(*args, **_):
+    def default_side_effect_callback(*args: str, **_: str) -> typing.Any:
         """
         The standard mock side effect function used by all tests
         """
@@ -136,32 +148,32 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
                 return [None]
         return mock.DEFAULT
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("POST",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.jenkins.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.jenkins.main.Controller)
 
-    def test_rejects_html(self):
+    def test_rejects_html(self) -> None:
         """The request body must contain JSON"""
 
         response = self.request("/", method="POST")
         self.assertEqual(response.code, 415)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_plugin_finalized_success(self, publish_mock):
+    def test_plugin_finalized_success(self, publish_mock: mock.Mock) -> None:
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("plugin", "finalized", "success")
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "notifier:build":
                 return [{"title": "test"}]
@@ -190,12 +202,12 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_plugin_finalized_skip_send(self, publish_mock):
+    def test_plugin_finalized_skip_send(self, publish_mock: mock.Mock) -> None:
         """A notification is not sent if the title is missing."""
 
         payload_fixture = self.get_fixture("plugin", "finalized", "success")
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "notifier:build":
                 return [{}]
@@ -223,7 +235,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_plugin_completed_success(self, publish_mock):
+    def test_plugin_completed_success(self, publish_mock: mock.Mock) -> None:
         """JSON bodies from the Jenkins Notification plugin are accepted"""
 
         payload_fixture = self.get_fixture("plugin", "completed", "success")
@@ -239,7 +251,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippable_by_status(self, publish_mock):
+    def test_skippable_by_status(self, publish_mock: mock.Mock) -> None:
         """Skip logic considers project name and status"""
 
         payload_fixture = self.get_fixture("plugin", "completed", "success")
@@ -252,7 +264,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 202)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skippable_but_not_on_fail(self, publish_mock):
+    def test_skippable_but_not_on_fail(self, publish_mock: mock.Mock) -> None:
         """Failure status supersedes skip logic"""
 
         payload_fixture = self.get_fixture("plugin", "started", "failure")
@@ -265,7 +277,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_build_action(self, publish_mock):
+    def test_build_action(self, publish_mock: mock.Mock) -> None:
         """Payload normalization looks for keywords in the URL to describe the
         action that best fits the job.
 
@@ -281,7 +293,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(normalized_payload.get("action"), "mirroring")
 
     @mock.patch("cherrypy.engine.publish")
-    def test_queued(self, publish_mock):
+    def test_queued(self, publish_mock: mock.Mock) -> None:
         """A notification is sent when the build is queued."""
 
         publish_mock.side_effect = self.default_side_effect_callback
@@ -300,7 +312,7 @@ class TestJenkins(BaseCherryPyTestCase, ResponseAssertions):
         self.assertIn("for building", notification_call[1].get("title"))
 
     @mock.patch("cherrypy.engine.publish")
-    def test_started(self, publish_mock):
+    def test_started(self, publish_mock: mock.Mock) -> None:
         """A notification is sent when the build is started."""
 
         publish_mock.side_effect = self.default_side_effect_callback

@@ -1,6 +1,7 @@
 """General-purpose key-value store"""
 
 import json
+import typing
 import cherrypy
 
 
@@ -11,7 +12,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html", "json"))
-    def GET(self, *args, **kwargs) -> bytes:
+    def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         query = kwargs.get("q", "").strip()
@@ -26,15 +27,15 @@ class Controller:
             return self.index()
 
         if args[0] == "new":
-            return self.form(**kwargs)
+            return self.form(-1, **kwargs)
 
         if args[-1] == "edit":
-            return self.form(args[-2], **kwargs)
+            return self.form(int(args[-2]), **kwargs)
 
         raise cherrypy.HTTPError(404)
 
     @staticmethod
-    def index(*_args, **_kwargs) -> bytes:
+    def index(*_args: str, **_kwargs: str) -> bytes:
         """Display the application homepage."""
 
         roots = cherrypy.engine.publish(
@@ -46,11 +47,14 @@ class Controller:
                 "groups": list(roots)
             }).encode()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "registry.jinja.html",
-            roots=roots
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "registry.jinja.html",
+                roots=roots
+            ).pop()
+        )
 
     @staticmethod
     def search(query: str = "") -> bytes:
@@ -77,18 +81,21 @@ class Controller:
                 ]
             }).encode()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "registry-list.jinja.html",
-            query=query.strip(),
-            parent_key=parent_key,
-            record_count=count,
-            records=rows,
-            subview_title=query
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "registry-list.jinja.html",
+                query=query.strip(),
+                parent_key=parent_key,
+                record_count=count,
+                records=rows,
+                subview_title=query
+            ).pop()
+        )
 
     @staticmethod
-    def form(rowid: int = 0, **kwargs) -> bytes:
+    def form(rowid: int = 0, **kwargs: str) -> bytes:
         """Display a form for adding or updating a record."""
 
         key = kwargs.get("key", "")
@@ -118,16 +125,19 @@ class Controller:
             cancel_url = f"/registry?q={key}"
             subview_title = "Update"
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "registry-form.jinja.html",
-            rowid=rowid,
-            key=key,
-            value=value,
-            submit_url=submit_url,
-            cancel_url=cancel_url,
-            subview_title=subview_title
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "registry-form.jinja.html",
+                rowid=rowid,
+                key=key,
+                value=value,
+                submit_url=submit_url,
+                cancel_url=cancel_url,
+                subview_title=subview_title
+            ).pop()
+        )
 
     @staticmethod
     def POST(*args: str, **kwargs: str) -> None:

@@ -1,7 +1,6 @@
-"""
-Test suite for the countries app
-"""
+"""Test suite for the countries app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -16,14 +15,14 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         helpers.start_server(apps.countries.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         helpers.stop_server()
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.fixture = [{
             "CLDR display name": "US",
             "Capital": "Washington",
@@ -55,24 +54,24 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
             "official_name_fr": "États-Unis d'Amérique"
         }]
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.countries.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.countries.main.Controller)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_registry_save(self, publish_mock):
+    def test_registry_save(self, publish_mock: mock.Mock) -> None:
         """Country codes are saved to the registry"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [self.fixture]
@@ -91,10 +90,10 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skip_record_without_name(self, publish_mock):
+    def test_skip_record_without_name(self, publish_mock: mock.Mock) -> None:
         """A record without a name field is skipped."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
 
             if args[0] == "cache:get":
@@ -117,10 +116,10 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(last_call, "cache:get")
 
     @mock.patch("cherrypy.engine.publish")
-    def test_url_fetched_if_not_cached(self, publish_mock):
+    def test_url_fetched_if_not_cached(self, publish_mock: mock.Mock) -> None:
         """The JSON file is fetched if it is not already in the cache"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [None]
@@ -147,13 +146,13 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_url_fetch_failure(self, publish_mock):
+    def test_url_fetch_failure(self, publish_mock: mock.Mock) -> None:
         """
         An error is returned if the list of country codes cannot be
         fetched
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]

@@ -1,5 +1,6 @@
 """Test suite for the azure app"""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -14,29 +15,29 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
         helpers.start_server(apps.azure.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server"""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("POST",))
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.azure.main.Controller)
 
-    def test_not_show_on_homepage(self):
+    def test_not_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.azure.main.Controller)
 
-    def test_requires_site_name(self):
+    def test_requires_site_name(self) -> None:
         """The request body must specify a site name"""
         response = self.request("/", method="POST", json_body={
             "status": "success"
@@ -44,10 +45,13 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 400)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_sends_success_notification(self, publish_mock):
+    def test_sends_success_notification(
+            self,
+            publish_mock: mock.Mock
+    ) -> None:
         """A success status triggers a success notification"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
@@ -79,10 +83,13 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_sends_failure_notification(self, publish_mock):
+    def test_sends_failure_notification(
+            self,
+            publish_mock: mock.Mock
+    ) -> None:
         """A failed status triggers a failure notification"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
@@ -113,12 +120,15 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_sends_unknown_status(self, publish_mock):
+    def test_sends_unknown_status(
+            self,
+            publish_mock: mock.Mock
+    ) -> None:
         """A status that is neither failed nor success triggers sends an
         unknown status notification
         """
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com/{}"]
@@ -149,10 +159,13 @@ class TestAzure(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_skips_url_if_no_portal(self, publish_mock):
+    def test_skips_url_if_no_portal(
+            self,
+            publish_mock: mock.Mock
+    ) -> None:
         """A failed status triggers a failure notification"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]

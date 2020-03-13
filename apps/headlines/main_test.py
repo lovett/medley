@@ -1,7 +1,6 @@
-"""
-Test suite for the headlines app.
-"""
+"""Test suite for the headlines app."""
 
+import typing
 import unittest
 import mock
 from testing.assertions import ResponseAssertions
@@ -16,23 +15,23 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Start a faux cherrypy server."""
         helpers.start_server(apps.headlines.main.Controller)
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         """Shut down the faux server."""
         helpers.stop_server()
 
-    def test_allow(self):
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
 
-    def test_exposed(self):
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.headlines.main.Controller)
 
-    def test_show_on_homepage(self):
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.headlines.main.Controller)
 
@@ -40,10 +39,10 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.assert_allowed(response, ("GET",))
 
     @mock.patch("cherrypy.engine.publish")
-    def test_cache_hit_bypasses_fetch(self, publish_mock):
+    def test_cache_hit_bypasses_fetch(self, publish_mock: mock.Mock) -> None:
         """If headlines have been cached, urlfetch does not occur."""
 
-        def side_effect(*args, **_kwargs):
+        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [{"foo": "bar"}]
@@ -70,10 +69,10 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_cache_miss_triggers_fetch(self, publish_mock):
+    def test_cache_miss_triggers_fetch(self, publish_mock: mock.Mock) -> None:
         """A urlfetch occurs when a cached value is not present"""
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args: str, **kwargs: str) -> typing.Any:
             """Side effects local function"""
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
                 return [{
@@ -107,10 +106,10 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_fetch_failure(self, publish_mock):
+    def test_fetch_failure(self, publish_mock: mock.Mock) -> None:
         """An error is returned if the url fetch fails."""
 
-        def side_effect(*args, **kwargs):
+        def side_effect(*args: str, **kwargs: str) -> typing.Any:
             """Side effects local function"""
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
                 return [{
@@ -130,10 +129,10 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 503)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_cache_header(self, publish_mock):
+    def test_cache_header(self, publish_mock: mock.Mock) -> None:
         """The response sends a Cache-Control header."""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]

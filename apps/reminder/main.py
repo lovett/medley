@@ -2,6 +2,7 @@
 
 import random
 import string
+import typing
 from urllib.parse import urlencode, parse_qs
 import cherrypy
 import pendulum
@@ -38,7 +39,7 @@ class Controller:
         for template_id, template in templates.items():
             template["duration_in_words"] = cherrypy.engine.publish(
                 "formatting:time_duration",
-                minutes=int(template["minutes"])
+                minutes=int(template.get("minutes", 0))
             ).pop()
 
             template["delete_url"] = cherrypy.engine.publish(
@@ -52,28 +53,29 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        result: bytes = cherrypy.engine.publish(
-            "jinja:render",
-            "reminder.jinja.html",
-            registry_url=registry_url,
-            templates=templates,
-            upcoming=upcoming
-        ).pop()
-
-        return result
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "reminder.jinja.html",
+                registry_url=registry_url,
+                templates=templates,
+                upcoming=upcoming
+            ).pop()
+        )
 
     @staticmethod
     def POST(*args: str, **kwargs: str) -> None:
         """Queue a new reminder for delivery."""
 
-        message = kwargs.get("message")
-        minutes = kwargs.get("minutes")
-        hours = kwargs.get("hours")
-        comments = kwargs.get("comments")
-        notification_id = kwargs.get("notification_id")
-        url = kwargs.get("url")
-        remember = kwargs.get("remember")
-        confirm = kwargs.get("confirm")
+        message = kwargs.get("message", "")
+        minutes = int(kwargs.get("minutes", 0))
+        hours = int(kwargs.get("hours", 0))
+        comments = kwargs.get("comments", "")
+        notification_id = kwargs.get("notification_id", "")
+        url = kwargs.get("url", "")
+        remember = int(kwargs.get("remember", 0))
+        confirm = int(kwargs.get("confirm", 0))
 
         # Server-side template population
         if notification_id and not message:
@@ -84,18 +86,18 @@ class Controller:
             ).pop()
 
             for template in templates:
-                parsed_template = {
+                values = {
                     k: v[-1]
                     for k, v
                     in parse_qs(template).items()
                 }
 
-                if parsed_template.get("notification_id") == notification_id:
-                    message = parsed_template.get("message")
-                    minutes = parsed_template.get("minutes")
-                    hours = parsed_template.get("hours")
-                    comments = parsed_template.get("comments")
-                    url = parsed_template.get("url")
+                if notification_id == values.get("notification_id", ""):
+                    message = values.get("message", "")
+                    minutes = int(values.get("minutes", 0))
+                    hours = int(values.get("hours", 0))
+                    comments = values.get("comments", "")
+                    url = values.get("url", "")
                     break
 
         if notification_id and not message:
@@ -109,21 +111,6 @@ class Controller:
                 "audio:play_sound",
                 "attention"
             )
-
-        try:
-            minutes = int(minutes)
-        except (ValueError, TypeError):
-            minutes = 0
-
-        try:
-            hours = int(hours)
-        except (ValueError, TypeError):
-            hours = 0
-
-        try:
-            remember = int(remember)
-        except (ValueError, TypeError):
-            remember = 0
 
         total_minutes = minutes + (hours * 60)
 
@@ -196,10 +183,10 @@ class Controller:
         raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
-    def DELETE(uid) -> None:
+    def DELETE(uid: str) -> None:
         """Remove a previously-scheduled reminder."""
 
-        uid = float(uid)
+        uid_float = float(uid)
 
         scheduled_events = cherrypy.engine.publish(
             "scheduler:upcoming",
@@ -208,7 +195,7 @@ class Controller:
 
         wanted_events = [
             event for event in scheduled_events
-            if event.time == uid
+            if event.time == uid_float
         ]
 
         if not wanted_events:

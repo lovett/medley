@@ -1,5 +1,7 @@
 """Browser homepage"""
 
+import sqlite3
+import typing
 from textwrap import dedent
 import cherrypy
 from parsers.startpage import Parser
@@ -14,7 +16,7 @@ class Controller:
     default_page_name = "default"
 
     @staticmethod
-    def new_page_template():
+    def new_page_template() -> str:
         """The default page content for new pages demonstrating sample
         syntax.
 
@@ -28,7 +30,7 @@ class Controller:
         [section2]
         """)
 
-    def edit_page(self, page_name, page_content=None):
+    def edit_page(self, page_name: str, page_content: str = "") -> bytes:
         """Present a form for editing the contents of a page."""
 
         post_url = cherrypy.engine.publish(
@@ -47,21 +49,22 @@ class Controller:
             button_label = "Create"
             cancel_url = post_url
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "edit.jinja.html",
-            button_label=button_label,
-            cancel_url=cancel_url,
-            page_name=page_name,
-            page_content=page_content,
-            post_url=post_url,
-            subview_title="Edit"
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "edit.jinja.html",
+                button_label=button_label,
+                cancel_url=cancel_url,
+                page_name=page_name,
+                page_content=page_content,
+                post_url=post_url,
+                subview_title="Edit"
+            ).pop()
+        )
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("html",))
-    @cherrypy.tools.etag()
-    def render_page(page_name, page_record):
+    def render_page(page_name: str, page_record: sqlite3.Row) -> bytes:
         """Render INI page content to HTML."""
 
         local_domains = cherrypy.engine.publish(
@@ -83,18 +86,21 @@ class Controller:
             f"{page_name}/edit"
         ).pop()
 
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "startpage.jinja.html",
-            created=page_record["created"],
-            anonymizer_url=anonymizer_url,
-            edit_url=edit_url,
-            page=page
-        ).pop()
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "startpage.jinja.html",
+                created=page_record["created"],
+                anonymizer_url=anonymizer_url,
+                edit_url=edit_url,
+                page=page
+            ).pop()
+        )
 
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(self, *args, **_kwargs) -> bytes:
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
         """Render a page or present the edit form."""
 
         page_name = self.default_page_name
@@ -140,7 +146,7 @@ class Controller:
         # Render the page
         return self.render_page(page_name, page)
 
-    def POST(self, page_name, page_content) -> None:
+    def POST(self, page_name: str, page_content: str) -> None:
         """Create or update the INI version of a page."""
 
         cherrypy.engine.publish(

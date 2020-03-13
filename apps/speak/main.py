@@ -1,5 +1,6 @@
 """Text-to-speech service"""
 
+import typing
 import cherrypy
 
 
@@ -32,16 +33,17 @@ class Controller:
             {"q": "speak:mute"}
         ).pop()
 
-        result: bytes = cherrypy.engine.publish(
-            "jinja:render",
-            "speak.jinja.html",
-            muted=muted,
-            muted_by_schedule=muted_by_schedule,
-            registry_url=registry_url,
-            schedules=schedules
-        ).pop()
-
-        return result
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "speak.jinja.html",
+                muted=muted,
+                muted_by_schedule=muted_by_schedule,
+                registry_url=registry_url,
+                schedules=schedules
+            ).pop()
+        )
 
     @staticmethod
     @cherrypy.tools.capture()
