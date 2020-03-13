@@ -31,7 +31,7 @@ PLUGINS := $(subst _test,,$(PLUGINS))
 PLUGINS := $(addprefix plugins., $(PLUGINS))
 
 # A list of requirements files for use with pip.
-REQUIREMENTS_PATHS := $(APP_DIR)/requirements*
+REQUIREMENTS_PATHS := requirements*
 REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
 REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
 PIP_OUTDATED_TEMP := temp-pip-outdated.txt
@@ -113,7 +113,7 @@ $(REQUIREMENTS_FILES): dummy
 	@rm $(REQUIREMENTS_TEMP)
 
 
-# Quietly rename coverage files to comply with coverage utility's
+# Rename coverage files to comply with coverage utility's
 # expectations.
 #
 # Coverage files start out with a .cov suffix, but the coverage
@@ -122,7 +122,8 @@ $(REQUIREMENTS_FILES): dummy
 	@-cp $(COVERAGE_DIR)/$*.cov $(COVERAGE_DIR)/.coverage.$*
 
 
-# Save pip's list of outdated packages to a temp file.
+# Save pip's list of outdated packages to a temp file so that they can
+# be more easily matched with the right requirements file.
 .pip-outdated: dummy
 	pip --disable-pip-version-check list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
 
@@ -235,8 +236,9 @@ $(PLUGINS):
 # These commands are also present in the Git pre-commit hook, but
 # are only applied to changed files.
 lint: dummy
-	flake8 --builtins=ModuleNotFoundError $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
-	pylint --rcfile=.pylintrc $(APP_DIR) $(PLUGIN_DIR) $(PARSER_DIR) medley.py
+	mypy apps parsers plugins scripts testing tools medley.py
+	flake8 --builtins=ModuleNotFoundError apps parsers plugins scripts testing tools medley.py
+	pylint --rcfile=.pylintrc apps parsers plugins scripts testing tools medley.py
 
 
 # Empty the logindex database and re-index
@@ -353,8 +355,3 @@ $(APP_ICONS):
 
 # Generate PNGs for all app icon SVGs.
 app-icons: $(APP_ICONS)
-
-
-# Validate types
-typecheck:
-	mypy medley.py
