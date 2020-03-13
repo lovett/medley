@@ -78,9 +78,9 @@ outdated: .pip-outdated $(REQUIREMENTS_FILES)
 
 # Install third-party Python libraries
 setup: dummy
-	pip install --upgrade pip setuptools
-	pip --disable-pip-version-check install -r requirements.txt
-	pip --disable-pip-version-check install -r requirements-dev.txt
+	pip install --progress-bar off --upgrade pip setuptools
+	pip install --progress-bar off --disable-pip-version-check -r requirements.txt
+	pip install --progress-bar off --disable-pip-version-check -r requirements-dev.txt
 
 
 # Run a local development webserver
