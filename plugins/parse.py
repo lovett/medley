@@ -314,7 +314,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         if not timezone:
-            timezone = pendulum.now().timezone.name
+            timezone = pendulum.now().timezone_name
 
         sql = []
 

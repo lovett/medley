@@ -319,7 +319,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         if not timezone:
-            timezone = pendulum.now().timezone.name
+            timezone = pendulum.now().timezone_name
 
         return typing.cast(str, timezone)
 

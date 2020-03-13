@@ -190,7 +190,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return 0
 
-    def file_for_date(self, log_date: pendulum) -> typing.Optional[str]:
+    def file_for_date(
+            self,
+            log_date: pendulum.DateTime
+    ) -> typing.Optional[str]:
         """The filesystem path of the log file for the given date"""
 
         root = self.get_root()
@@ -211,7 +214,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return os.path.splitext(basename)[0]
 
     @decorators.log_runtime
-    def enqueue(self, start_date: pendulum, end_date: pendulum) -> bool:
+    def enqueue(
+            self,
+            start_date: pendulum.DateTime,
+            end_date: pendulum.DateTime
+    ) -> bool:
         """Schedule logfile processing.
 
         This is the start of the indexing process. The time period

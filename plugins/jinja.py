@@ -119,8 +119,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def localtime_filter(
             value: pendulum.DateTime,
-            timezone: str = None
-    ) -> pendulum:
+            timezone: str = ""
+    ) -> typing.Union[str, pendulum.DateTime]:
         """Switch a datetime to the local timezone, then format it"""
 
         if not value:
@@ -140,7 +140,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def dateformat_filter(
-            value: pendulum,
+            value: pendulum.DateTime,
             format_string: str
     ) -> str:
         """Format a datetime instance to a string."""
@@ -224,7 +224,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return urllib.parse.quote(value)
 
     @staticmethod
-    def ago_filter(value: typing.Union[int, pendulum.DateTime]) -> pendulum:
+    def ago_filter(
+            value: typing.Union[int, pendulum.DateTime]
+    ) -> str:
         """Calculate a human-readable time delta between a date in the past
         and now.
 
@@ -245,7 +247,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return date.in_timezone(zone).diff_for_humans()
 
     @staticmethod
-    def yearmonth_filter(value: pendulum) -> str:
+    def yearmonth_filter(value: pendulum.DateTime) -> str:
         """Format a datetime to a year-month string."""
         return typing.cast(str, value.strftime("%Y-%m"))
 

@@ -29,11 +29,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         self.bus.subscribe(
-            "formatting:time_duration",
-            self.time_duration
-        )
-
-        self.bus.subscribe(
             "formatting:phone_sanitize",
             self.phone_sanitize
         )
@@ -94,20 +89,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return typing.cast(
             str,
             instance.format('ddd, DD MMM YYYY HH:mm:ss zz')
-        )
-
-    @staticmethod
-    def time_duration(**kwargs: typing.Dict[str, typing.Any]) -> str:
-        """Convert a time interval expressed in one or more units to a human
-        readable string.
-
-        This is a wrapper for the Pendulum Duration class, so kwargs
-        should match the keywords supported there.
-
-        """
-        return typing.cast(
-            str,
-            pendulum.duration(**kwargs).in_words()
         )
 
     @staticmethod

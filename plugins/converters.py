@@ -3,7 +3,7 @@
 import pickle
 import re
 import typing
-import urllib
+import urllib.parse
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
 import pendulum
@@ -64,14 +64,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def date_with_hour(value: bytes) -> typing.Optional[pendulum.DateTime]:
         """Convert a date-and-hour string to a Pendulum instance."""
 
-        decoded_value = value.decode("utf-8")
-
         try:
-            utc_date = pendulum.from_format(decoded_value, "YYYY-MM-DD-HH")
+            decoded_value = value.decode("utf-8")
+            return pendulum.from_format(decoded_value, "YYYY-MM-DD-HH")
         except ValueError:
-            utc_date = None
-
-        return utc_date
+            return None
 
     @staticmethod
     def calldate_to_utc(value: bytes) -> pendulum.DateTime:

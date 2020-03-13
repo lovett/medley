@@ -37,10 +37,9 @@ class Controller:
         }
 
         for template_id, template in templates.items():
-            template["duration_in_words"] = cherrypy.engine.publish(
-                "formatting:time_duration",
+            template["duration_in_words"] = pendulum.duration(
                 minutes=int(template.get("minutes", 0))
-            ).pop()
+            ).in_words()
 
             template["delete_url"] = cherrypy.engine.publish(
                 "url:internal",
