@@ -3,8 +3,7 @@
 import pathlib
 import tempfile
 import typing
-import unittest
-import unittest.mock
+from unittest import mock
 import cherrypy
 import plugins.jinja
 import apps.shared.main
@@ -81,22 +80,21 @@ def header_is(
     return expected_value == header_value
 
 
-def html_var(mock: unittest.mock.Mock, key: str) -> typing.Any:
-    """Retrieve a template variable from the HTML portion of a response."""
-    return mock.call_args[0][0]["html"][1].get(key)
+def template_var(publish_mock: mock.Mock, key: str) -> typing.Any:
+    """Retrieve a template variable passed to jinja:render."""
 
-
-def text_var(mock: unittest.mock.Mock) -> typing.Any:
-    """Retrieve a template variable from the text portion of a response."""
-    return mock.call_args[0][0]["text"]
+    for call in publish_mock.call_args_list:
+        if call[0][0] != "jinja:render":
+            continue
+        return call[1].get(key)
 
 
 def find_publish_call(
-        mock: unittest.mock.Mock,
+        publish_mock: mock.Mock,
         subscription_topic: str
 ) -> typing.Any:
     """Find a topic in the call list of a mock of cherrypy.engine.publish."""
-    for call in mock.call_args_list:
+    for call in publish_mock.call_args_list:
         if call[0][0] == subscription_topic:
             return call
     return None

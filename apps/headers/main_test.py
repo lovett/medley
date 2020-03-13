@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -55,7 +55,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertIn(
             ("X-Test", "Hello"),
-            publish_mock.call_args_list[-1].kwargs.get("headers")
+            helpers.template_var(publish_mock, "headers")
         )
 
     def test_returns_json(self) -> None:

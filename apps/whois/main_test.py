@@ -3,7 +3,7 @@
 from collections import defaultdict
 import unittest
 import typing
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -76,7 +76,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", address="localhost")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("ip_address"),
+            helpers.template_var(publish_mock, "ip_address"),
             "127.0.0.1"
         )
 
@@ -116,12 +116,12 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", address="127.0.0.1")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("whois"),
+            helpers.template_var(publish_mock, "whois"),
             cache_fake
         )
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("ip_facts"),
+            helpers.template_var(publish_mock, "ip_facts"),
             cache_fake
         )
 
@@ -146,7 +146,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", address="127.0.0.1")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("ip_facts"),
+            helpers.template_var(publish_mock, "ip_facts"),
             {"hello": "world"}
         )
 

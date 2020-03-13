@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 import requests
 import responses
 from testing.assertions import ResponseAssertions
@@ -68,7 +68,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("tags"),
+            helpers.template_var(publish_mock, "tags"),
             [('title', [], 'Hello world')]
         )
 
@@ -97,7 +97,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", url="http://example.com", method="post")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("status_code"),
+            helpers.template_var(publish_mock, "status_code"),
             404
         )
 

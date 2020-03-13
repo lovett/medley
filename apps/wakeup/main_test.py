@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -57,21 +57,21 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("registry_url"),
+            helpers.template_var(publish_mock, "registry_url"),
             "/registry"
         )
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("hosts").get("host1"),
+            helpers.template_var(publish_mock, "hosts").get("host1"),
             "mac1"
         )
 
         self.assertNotIn(
             "host3",
-            publish_mock.call_args_list[-1].kwargs.get("hosts")
+            helpers.template_var(publish_mock, "hosts")
         )
 
         self.assertFalse(
-            publish_mock.call_args_list[-1].kwargs.get("send")
+            helpers.template_var(publish_mock, "send")
         )
 
     def test_post_rejects_missing_host(self) -> None:

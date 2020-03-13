@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import typing
 import unittest
-import mock
+from unittest import mock
 import cherrypy
 from testing.assertions import ResponseAssertions
 from testing import helpers

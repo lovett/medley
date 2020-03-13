@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -54,11 +54,11 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("bookmarks"),
+            helpers.template_var(publish_mock, "bookmarks"),
             []
         )
         self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("query"),
+            helpers.template_var(publish_mock, "query")
         )
 
     @mock.patch("cherrypy.engine.publish")

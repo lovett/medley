@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -10,9 +10,7 @@ import apps.bounce.main
 
 
 class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
+    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -157,16 +155,16 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", u="http://dev.example.com/with/subpath")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("group"),
+            helpers.template_var(publish_mock, "group"),
             "example"
         )
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("name"),
+            helpers.template_var(publish_mock, "name"),
             "dev",
         )
 
-        bounces = publish_mock.call_args_list[-1].kwargs.get("bounces")
+        bounces = helpers.template_var(publish_mock, "bounces")
 
         self.assertEqual(
             bounces[0][0],
@@ -224,9 +222,10 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", u="http://dev.example.com/with/subpath")
 
-        bounces = publish_mock.call_args_list[-1].kwargs.get("bounces")
-
-        self.assertEqual(len(bounces), 0)
+        self.assertEqual(
+            len(helpers.template_var(publish_mock, "bounces")),
+            0
+        )
 
     @mock.patch("cherrypy.engine.publish")
     def test_unrecognized_site(self, publish_mock: mock.Mock) -> None:
@@ -251,17 +250,17 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", u="http://unrecognized.example.com")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("group"),
+            helpers.template_var(publish_mock, "group"),
             "example"
         )
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("name"),
+            helpers.template_var(publish_mock, "name"),
             "unrecognized"
         )
 
         self.assertEqual(
-            len(publish_mock.call_args_list[-1].kwargs.get("bounces")),
+            len(helpers.template_var(publish_mock, "bounces")),
             0
         )
 
@@ -328,9 +327,8 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             u="http://othersite.example.com"
         )
 
-        print(publish_mock.call_args_list)
         self.assertEqual(
-            len(publish_mock.call_args_list[-1].kwargs.get("bounces")),
+            len(helpers.template_var(publish_mock, "bounces")),
             2
         )
 

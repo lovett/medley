@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -63,7 +63,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", tags="hello")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("tags"),
+            helpers.template_var(publish_mock, "tags"),
             "abc123"
         )
 
@@ -86,7 +86,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", comments="hello")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("comments"),
+            helpers.template_var(publish_mock, "comments"),
             "This is sentence 1. This is sentence 2."
         )
 
@@ -118,7 +118,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("comments")
+            helpers.template_var(publish_mock, "comments")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -147,7 +147,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", url="http://example.com", title="my title")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("title"),
+            helpers.template_var(publish_mock, "title"),
             "existing title"
         )
 

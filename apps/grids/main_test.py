@@ -2,8 +2,8 @@
 
 import typing
 import unittest
+from unittest import mock
 import cherrypy
-import mock
 import pendulum
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -55,7 +55,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/test1")
 
         self.assertCountEqual(
-            publish_mock.call_args_list[-1].kwargs.get("headers"),
+            helpers.template_var(publish_mock, "headers"),
             ['Date', 'Day', 'Column 1', 'Column 2', 'Column 3']
         )
 
@@ -78,7 +78,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/test1", start="1234-56")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("rows")[0][0],
+            helpers.template_var(publish_mock, "rows")[0][0],
             first_of_current_month.strftime("%b %-d, %Y")
         )
 

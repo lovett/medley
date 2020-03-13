@@ -3,7 +3,7 @@ Test suite for the url plugin
 """
 
 import unittest
-import mock
+from unittest import mock
 import cherrypy
 import plugins.url
 

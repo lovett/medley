@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -54,11 +54,11 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("external_ip"),
+            helpers.template_var(publish_mock, "external_ip"),
             "1.1.1.1"
         )
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("client_ip"),
+            helpers.template_var(publish_mock, "client_ip"),
             "127.0.0.1"
         )
 
@@ -120,7 +120,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("client_ip"),
+            helpers.template_var(publish_mock, "client_ip"),
             "2.2.2.2"
         )
 

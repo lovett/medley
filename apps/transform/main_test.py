@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -58,7 +58,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("result"),
+            helpers.template_var(publish_mock, "result"),
             "test"
         )
 

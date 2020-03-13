@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -54,7 +54,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/", path="test")
 
         self.assertEqual(
-            len(publish_mock.call_args_list[-1].kwargs.get("captures")),
+            len(helpers.template_var(publish_mock, "captures")),
             1
         )
 
@@ -76,11 +76,11 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/1")
 
         self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("newer_url"),
+            helpers.template_var(publish_mock, "newer_url")
         )
 
         self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("older_url"),
+            helpers.template_var(publish_mock, "older_url")
         )
 
 

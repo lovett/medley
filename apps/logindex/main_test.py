@@ -1,8 +1,8 @@
 """Test suite for the logindex app."""
 
 import unittest
+from unittest import mock
 import pendulum
-import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase

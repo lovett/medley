@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -52,7 +52,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
         self.request("/")
         self.assertIsNone(
-            publish_mock.call_args_list[-1].kwargs.get("error"),
+            helpers.template_var(publish_mock, "error"),
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -70,7 +70,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
         self.request("/", number="invalid-number-html")
         self.assertNotEqual(
-            publish_mock.call_args_list[-1].kwargs.get("error"),
+            helpers.template_var(publish_mock, "error"),
             ""
         )
 
@@ -99,7 +99,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
         self.request("/", number="1234567890")
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("state_abbreviation"),
+            helpers.template_var(publish_mock, "state_abbreviation"),
             "XY"
         )
 
@@ -127,7 +127,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
         self.request("/", number="1234567890")
         self.assertEqual(
-            publish_mock.call_args_list[-1].kwargs.get("state_abbreviation"),
+            helpers.template_var(publish_mock, "state_abbreviation"),
             "XY"
         )
 

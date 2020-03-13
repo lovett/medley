@@ -1,10 +1,9 @@
-"""
-Test suite for the geography plugin
-"""
+"""Test suite for the geography plugin."""
 
 import json
+import typing
 import unittest
-import mock
+from unittest import mock
 import cherrypy
 from testing import helpers
 import plugins.geography
@@ -15,14 +14,14 @@ class TestGeography(unittest.TestCase):
     Tests for the geography plugin.
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.geography.Plugin(cherrypy.engine)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_area_code_valid(self, publish_mock):
+    def test_area_code_valid(self, publish_mock: mock.Mock) -> None:
         """A triple is returned if the area code is valid"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":
@@ -40,10 +39,10 @@ class TestGeography(unittest.TestCase):
         self.assertEqual(result[1], "NY")
 
     @mock.patch("cherrypy.engine.publish")
-    def test_area_code_invalid(self, publish_mock):
+    def test_area_code_invalid(self, publish_mock: mock.Mock) -> None:
         """A triple is returned if the area code is valid"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":
@@ -62,10 +61,10 @@ class TestGeography(unittest.TestCase):
         self.assertIsNone(result[2])
 
     @mock.patch("cherrypy.engine.publish")
-    def test_state_name_invalid(self, publish_mock):
+    def test_state_name_invalid(self, publish_mock: mock.Mock) -> None:
         """An invalid state abbreviation returns Unknown for the state name"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":
@@ -82,10 +81,10 @@ class TestGeography(unittest.TestCase):
         self.assertIsNone(result)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_state_name_valid(self, publish_mock):
+    def test_state_name_valid(self, publish_mock: mock.Mock) -> None:
         """A valid state abbreviation returns the correct state name"""
 
-        def side_effect(*args, **_):
+        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":

@@ -2,7 +2,7 @@
 
 import typing
 import unittest
-import mock
+from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -53,7 +53,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", q="test")
 
-        records = publish_mock.call_args_list[-1].kwargs.get("records")
+        records = helpers.template_var(publish_mock, "records")
 
         self.assertEqual(
             records[0]["key"],

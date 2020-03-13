@@ -86,7 +86,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._multi(queries)
 
-    def add(self, source: str, message: str) -> None:
+    def add(self, source: str, message: typing.Any) -> None:
         """Accept a log message for storage."""
 
         self.queue.append((

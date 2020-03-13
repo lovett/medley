@@ -1,30 +1,27 @@
-"""
-Test suite for the applog plugin
-"""
+"""Test suite for the applog plugin."""
 
 import unittest
-import mock
+from unittest import mock
 import cherrypy
 import plugins.applog
 
 
 class TestApplog(unittest.TestCase):
-    """
-    Tests for the applog plugin.
-    """
+    """Tests for the applog plugin."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.plugin = plugins.applog.Plugin(cherrypy.engine)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_add(self, publish_mock):
+    def test_add(self, publish_mock: mock.Mock) -> None:
         """A newly-added message is queued for storage."""
 
         self.plugin.add("foo", "bar")
 
-        self.assertEqual(
-            publish_mock.call_args_list[-1].args,
-            ("scheduler:add", 1, "applog:pull")
+        publish_mock.assert_called_with(
+            "scheduler:add",
+            1,
+            "applog:pull"
         )
 
         self.assertEqual(
@@ -32,7 +29,7 @@ class TestApplog(unittest.TestCase):
             1
         )
 
-    def test_pull_empty_queue(self):
+    def test_pull_empty_queue(self) -> None:
         """Calling pull when the queue is empty exits cleanly."""
 
         self.plugin.pull()
@@ -43,25 +40,22 @@ class TestApplog(unittest.TestCase):
         )
 
     @mock.patch("plugins.applog.Plugin._multi")
-    def test_pull(self, db_mock):
+    def test_pull(self, db_mock: mock.Mock) -> None:
         """Queued messages are written to storage."""
 
         self.plugin.add("foo", "bar")
         self.plugin.add("hello", "world")
         self.plugin.pull()
 
-        self.assertTrue(
-            len(db_mock.call_args_list),
-            1
-        )
+        db_mock.assert_called_once()
 
         self.assertTrue(
-            db_mock.call_args_list[0].args[-1][0],
+            db_mock.call_args_list[0][0],
             ("foo", "bar")
         )
 
         self.assertTrue(
-            db_mock.call_args_list[0].args[-1][1],
+            db_mock.call_args_list[0][0],
             ("hello", "world")
         )
 
@@ -71,7 +65,7 @@ class TestApplog(unittest.TestCase):
         )
 
     @mock.patch("plugins.applog.Plugin._multi")
-    def test_exception_message(self, db_mock):
+    def test_exception_message(self, db_mock: mock.Mock) -> None:
         """Messages can be provided as exceptions."""
 
         try:
