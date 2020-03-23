@@ -54,15 +54,11 @@ print-%:
 
 
 # Set up a virtualenv
-venv: dummy
+venv:
 	@echo -n "Creating a new virtual environment..."
-	@rm -rf venv
 	@python3 -m venv --system-site-packages venv
 	@echo  "done."
 	@echo "Now run: source $(VENV_ACTIVATE)"
-	@echo "After that, run: make setup"
-	@echo "Also consider running: make hooks"
-
 
 # Filter the list of outdated Python packages to direct dependencies
 #
@@ -77,10 +73,11 @@ outdated: .pip-outdated $(REQUIREMENTS_FILES)
 
 
 # Install third-party Python libraries
-setup: dummy
-	pip install --progress-bar off --upgrade pip setuptools
-	pip install --progress-bar off --disable-pip-version-check -r requirements.txt
-	pip install --progress-bar off --disable-pip-version-check -r requirements-dev.txt
+setup: venv
+	@test -d "$$VIRTUAL_ENV" || (echo "Virtualenv is not active" && false)
+	python3 -m pip install --progress-bar off --upgrade pip setuptools
+	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements.txt
+	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements-dev.txt
 
 
 # Run a local development webserver
@@ -125,7 +122,7 @@ $(REQUIREMENTS_FILES): dummy
 # Save pip's list of outdated packages to a temp file so that they can
 # be more easily matched with the right requirements file.
 .pip-outdated: dummy
-	pip --disable-pip-version-check list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
+	python3 -m pip --disable-pip-version-check list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report for all available coverage files.
