@@ -27,7 +27,7 @@ class Controller:
             return self.index()
 
         if args[0] == "new":
-            return self.form(-1, **kwargs)
+            return self.form(0, **kwargs)
 
         if args[-1] == "edit":
             return self.form(int(args[-2]), **kwargs)
