@@ -1,7 +1,7 @@
 {% extends "registry.jinja.html" %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button', 'new-item-button')) }}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button')) }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -46,15 +46,21 @@
                         <header>
                             {{ record.key }}
                             <div class="toolbar">
-                                <div><new-item-button
-                                         target-url="{{ app_url}}/new?key={{ record.key|e}}"
-                                         tooltip="New record with this key"
-                                     /></div>
-                                <div><clipboard-button
-                                         target-id="value-{{ loop.index }}"
-                                         tooltip="Copy value"
-                                     /></div>
+                                <div class="action-button clipboard-button">
+                                    <a href="{{ app_url }}/new?key={{ record.key|e }}" title="New record with this key">
+                                        <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <clipboard-button
+                                        target-id="value-{{ loop.index }}"
+                                        tooltip="Copy value"
+                                    />
+                                </div>
+
                                 <div><discard-button tooltip="Delete this record" /></div>
+
                                 <div class="action-button clipboard-button">
                                     <a href="{{ app_url}}/{{ record.rowid}}/edit">
                                         <svg class="icon"><use xlink:href="#icon-edit"></use></sv>
