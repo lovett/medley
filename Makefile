@@ -77,8 +77,7 @@ outdated: .pip-outdated $(REQUIREMENTS_FILES)
 
 
 # Install third-party Python libraries
-setup: venv
-	@test -d "$$VIRTUAL_ENV" || (echo "Virtualenv is not active" && false)
+setup:
 	python3 -m pip install --progress-bar off --upgrade pip setuptools
 	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements.txt
 	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements-dev.txt
