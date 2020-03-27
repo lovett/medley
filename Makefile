@@ -54,11 +54,15 @@ print-%:
 
 
 # Set up a virtualenv
+#
+# The sed command fixes an error with fish shell diring sourcing.
+#
+# See https://github.com/pypa/virtualenv/pull/1379/commits
 venv:
-	@echo -n "Creating a new virtual environment..."
+	@echo "Creating a new virtual environment..."
 	@python3 -m venv --system-site-packages venv
-	@echo  "done."
-	@echo "Now run: source $(VENV_ACTIVATE)"
+	@sed -i'' 's/$$_OLD_FISH_PROMPT_OVERRIDE"$$/$$_OLD_FISH_PROMPT_OVERRIDE" \&\& functions -q _old_fish_prompt/' venv/bin/activate.fish
+	@echo "Done. Now run: source $(VENV_ACTIVATE)"
 
 # Filter the list of outdated Python packages to direct dependencies
 #
