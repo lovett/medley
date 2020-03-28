@@ -48,6 +48,7 @@ import plugins.urlfetch
 import plugins.url
 import tools.capture
 import tools.etag
+import tools.whitespace
 import tools.provides
 
 # pylint: disable=too-many-statements
@@ -125,6 +126,7 @@ def setup() -> None:
     # Tools
     cherrypy.tools.capture = tools.capture.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
+    cherrypy.tools.whitespace = tools.whitespace.Tool()
     cherrypy.tools.provides = tools.provides.Tool()
 
     # Mount the apps
@@ -137,7 +139,8 @@ def setup() -> None:
 
         app_config = {
             "/": {
-                "request.dispatch": cherrypy.dispatch.MethodDispatcher()
+                "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
+                "tools.whitespace.on": True
             },
         }
 

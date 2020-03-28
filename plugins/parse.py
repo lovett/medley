@@ -557,7 +557,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        val = val.replace("\r", "").strip().replace("\n", "|")
+        val = val.replace("\n", "|")
 
         result = self.logquery_grammar.parseString(val).asList()
 

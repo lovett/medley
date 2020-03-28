@@ -69,11 +69,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        try:
-            value = value.replace("\r", "")
-        except AttributeError:
-            pass
-
         cherrypy.engine.publish("memorize:clear", key)
 
         result = self._multi([
@@ -96,11 +91,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         For single-record keys, use registry:replace instead.
 
         """
-
-        try:
-            value = value.replace("\r", "")
-        except AttributeError:
-            pass
 
         cherrypy.engine.publish("memorize:clear", key)
 
