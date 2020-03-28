@@ -78,24 +78,22 @@ class Controller:
         if action == "mute":
             cherrypy.engine.publish("speak:mute")
 
-            if "mute" in announcements:
-                cherrypy.engine.publish(
-                    "speak",
-                    announcements["mute"],
-                    locale,
-                    gender
-                )
+            cherrypy.engine.publish(
+                "speak",
+                announcements.get("mute", "Announcements off"),
+                locale,
+                gender
+            )
 
         if action == "unmute":
             cherrypy.engine.publish("speak:unmute")
 
-            if "unmute" in announcements:
-                cherrypy.engine.publish(
-                    "speak",
-                    announcements["unmute"],
-                    locale,
-                    gender
-                )
+            cherrypy.engine.publish(
+                "speak",
+                announcements.get("unmute", "Announcements on"),
+                locale,
+                gender
+            )
 
         if action:
             app_url = cherrypy.engine.publish(
