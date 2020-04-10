@@ -30,12 +30,6 @@ PLUGINS := $(basename $(PLUGINS))
 PLUGINS := $(subst _test,,$(PLUGINS))
 PLUGINS := $(addprefix plugins., $(PLUGINS))
 
-# A list of requirements files for use with pip.
-REQUIREMENTS_PATHS := requirements*
-REQUIREMENTS_FILES := $(notdir $(REQUIREMENTS_PATHS))
-REQUIREMENTS_TEMP := $(CURDIR)/temp-requirements.txt
-PIP_OUTDATED_TEMP := temp-pip-outdated.txt
-
 SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
 
 TMUX_SESSION_NAME := medley
@@ -64,18 +58,6 @@ venv:
 	@sed -i'' 's/$$_OLD_FISH_PROMPT_OVERRIDE"$$/$$_OLD_FISH_PROMPT_OVERRIDE" \&\& functions -q _old_fish_prompt/' venv/bin/activate.fish
 	@echo "Done. Now run: source $(VENV_ACTIVATE)"
 
-# Filter the list of outdated Python packages to direct dependencies
-#
-# By default, pip returns a list of all outdated packages. It can be
-# annoying to reconcile this list to the contents of requirements.txt
-# to separate direct dependencies (things this application uses) from
-# indirect dependencies (other things used by direct dependencies).
-#
-# This setup also handles multiple requirements files.
-outdated: .pip-outdated $(REQUIREMENTS_FILES)
-	rm $(PIP_OUTDATED_TEMP)
-
-
 # Install third-party Python libraries
 setup:
 	python3 -m pip install --progress-bar off --upgrade pip setuptools
@@ -95,26 +77,6 @@ serve:
 	ls apps/**/main.py plugins/*.py tools/*.py medley.py | entr -r python medley.py
 
 
-# Filter the list of outdated packages based on the contents of a requirements file
-#
-# This is normally called from the outdated target. It greps the temp file produced
-# by the .pip-outdated target to avoid slowdown across multiple calls.
-#
-# The package names are extracted to a temporary file to facilitate grepping. There is
-# some sed fiddling with this file to improve the readability of the grep.
-#
-# Don't invoke directly.
-$(REQUIREMENTS_FILES): dummy
-	@echo ""
-	@echo "Outdated packages from $@:"
-	@cut -d'=' -f 1 $@ > $(REQUIREMENTS_TEMP)
-	@echo "Package" >> $(REQUIREMENTS_TEMP)
-	@echo "-------" >> $(REQUIREMENTS_TEMP)
-	@-grep -f $(REQUIREMENTS_TEMP) $(PIP_OUTDATED_TEMP)
-	@echo ""
-	@rm $(REQUIREMENTS_TEMP)
-
-
 # Rename coverage files to comply with coverage utility's
 # expectations.
 #
@@ -122,12 +84,6 @@ $(REQUIREMENTS_FILES): dummy
 # reporter needs a different naming convention.
 .coverage.%:
 	@-cp $(COVERAGE_DIR)/$*.cov $(COVERAGE_DIR)/.coverage.$*
-
-
-# Save pip's list of outdated packages to a temp file so that they can
-# be more easily matched with the right requirements file.
-.pip-outdated: dummy
-	python3 -m pip --disable-pip-version-check list --format=columns --outdated > $(PIP_OUTDATED_TEMP)
 
 
 # Build a coverage report for all available coverage files.
@@ -292,14 +248,6 @@ assets-flags: dummy
 # development version of Vue to the production version.
 build: dummy
 	mv $(SHARED_JS_DIR)/vue.min.js $(SHARED_JS_DIR)/vue.js
-
-
-# Create a package upgrade commit.
-#
-puc: dummy
-	git checkout master
-	git add requirements.txt requirements-dev.txt
-	git commit -m "Upgrade third-party libraries"
 
 
 # Set up git hooks
