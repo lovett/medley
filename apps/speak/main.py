@@ -62,12 +62,6 @@ class Controller:
                 "attention"
             )
 
-        announcements = cherrypy.engine.publish(
-            "registry:search:dict",
-            "speak:announcement:*",
-            key_slice=2
-        ).pop()
-
         muted = cherrypy.engine.publish("speak:muted").pop()
 
         if action == "toggle":
@@ -78,22 +72,8 @@ class Controller:
         if action == "mute":
             cherrypy.engine.publish("speak:mute")
 
-            cherrypy.engine.publish(
-                "speak",
-                announcements.get("mute", "Announcements off"),
-                locale,
-                gender
-            )
-
         if action == "unmute":
             cherrypy.engine.publish("speak:unmute")
-
-            cherrypy.engine.publish(
-                "speak",
-                announcements.get("unmute", "Announcements on"),
-                locale,
-                gender
-            )
 
         if action:
             app_url = cherrypy.engine.publish(
