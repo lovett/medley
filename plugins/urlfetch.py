@@ -82,6 +82,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             return None
 
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch:get",
+            f"{req.status_code} {url}"
+        )
+
         if as_object:
             return req
 
@@ -170,6 +176,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             os.unlink(download_path)
 
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch:file",
+                f"{req.status_code} url"
+            )
+
     @staticmethod
     def post(
             url: str,
@@ -204,6 +216,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
 
             req.raise_for_status()
+
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch:post",
+                f"{req.status_code} {url}"
+            )
 
             if req.status_code == 204:
                 return True
