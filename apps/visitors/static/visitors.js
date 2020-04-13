@@ -158,73 +158,6 @@ MEDLEY.visitors = (function () {
         }
     }
 
-    function calculateDelta (e) {
-        const trigger = e.target.closest('.calc-delta')
-
-        if (!trigger) {
-            return;
-        }
-
-        e.preventDefault();
-
-        const tbody = e.target.closest('tbody');
-        const referenceTimestamp = parseFloat(trigger.dataset.timestampUnix);
-
-        trigger.classList.toggle('active');
-
-        tbody.querySelectorAll('.calc-delta').forEach(el => {
-            if (el !== trigger) {
-                el.classList.remove('active')
-            }
-        });
-
-        if (trigger.classList.contains('active') === false) {
-            Array.from(tbody.querySelectorAll('.delta')).forEach(el => {
-                el.removeAttribute('hidden');
-                el.querySelector('.value').innerHTML = el.dataset.defaultDelta;
-            });
-            return;
-        }
-
-        Array.from(tbody.querySelectorAll('.delta')).forEach(el => {
-            el.removeAttribute('hidden');
-        });
-
-        trigger.closest('td').querySelector('.delta').setAttribute('hidden', true);
-
-        Array.from(tbody.querySelectorAll('.calc-delta')).forEach(el => {
-            const timestamp = parseFloat(el.dataset.timestampUnix);
-
-            let delta = timestamp - referenceTimestamp;
-            const label = (delta < 0)? 'earlier' : 'later';
-            delta = Math.abs(delta);
-
-            let units = [3600, 60, 1].reduce((acc, unit, index, arr) => {
-                var div;
-                if (index === arr.length - 1) {
-                    acc.push(delta);
-                } else if (delta > unit) {
-                    div = Math.floor(delta / unit);
-                    delta -= unit * div;
-                }
-                return acc;
-            }, []);
-
-            units = units.map(val => String(val).padStart(2, '0'));
-
-            let result = '';
-            if (units.length == 1) {
-                result = '0:' + units[0];
-            } else {
-                result = units.join(':').replace(/^0/, '');
-            }
-
-            el.closest('TD').querySelector('.delta .value').innerHTML = result;
-            el.closest('TD').querySelector('.delta .label').innerHTML = label;
-        });
-
-    }
-
     return {
         init: function () {
             document.getElementById('add-record').addEventListener(
@@ -245,11 +178,6 @@ MEDLEY.visitors = (function () {
             document.addEventListener(
                 'click',
                 annotateIp
-            );
-
-            document.addEventListener(
-                'click',
-                calculateDelta
             );
 
             document.addEventListener(

@@ -598,7 +598,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             query
         ).pop()
 
-        sql = f"""SELECT unix_timestamp, logs.ip,
+        sql = f"""SELECT unix_timestamp, datestamp, logs.ip,
         host, uri, query as "query [querystring]",
         statusCode, method, agent_domain, classification, country,
         region, city, latitude, longitude, cookie,

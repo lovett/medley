@@ -83,20 +83,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for result in results %}
+                        {% set ns = namespace(previous=None) %}
 
-                            {% set new_ip = loop.changed(result.ip) %}
-                            {% set year_month_day = result.unix_timestamp|localtime|dateformat('YYYY-MM-DD') %}
-                            {% set new_day = False %}
-                            {% if loop.previtem is defined %}
-                                {% set prev_year_month_day = loop.previtem.unix_timestamp|localtime|dateformat("YYYY-MM-DD") %}
-                                {% set new_day = year_month_day != prev_year_month_day %}
+                        {% for result in results %}
+                            {% if loop.first %}
+                                {% set is_new_ip = True %}
+                                {% set is_new_datestamp = True %}
+                            {% else %}
+                                {% set is_new_ip = result.ip != ns.previous.ip %}
+                                {% set is_new_datestamp = result.datestamp != ns.previous.datestamp %}
                             {% endif %}
 
                             {% set reverse_domain = reversed_ips.get(result.ip) %}
-                            {% set duration = durations.get((result.ip, result.unix_timestamp|localtime|dateformat("YYYY-MM-DD"))) %}
+                            {% set ns.previous = result %}
+
                             <tr class="result code-{{ result.statusCode }}">
-                                {% if new_ip or new_day %}
+                                {% if is_new_ip or is_new_datestamp %}
                                     <td nowrap>
                                         {% if result.country not in flagless_countries %}
                                             <div class="flag-icon flag-icon-{{ result.country|lower()}}"></div>
@@ -125,22 +127,6 @@
                                                rel="noreferrer"
                                             >{{ result.ip|truncate(20, True)  }}</a>
                                         </p>
-
-
-                                        {% if duration  %}
-                                            <p class="smaller">Active
-                                                {% if duration.in_hours() > 1 %}
-                                                    {{ duration.in_hours() }} hours
-                                                {% elif duration.in_minutes() > 1 %}
-                                                    {{ duration.in_minutes() }} minutes
-                                                {% elif duration.in_seconds() > 1 %}
-                                                    {{ duration.in_seconds() }} seconds
-                                                {% else %}
-                                                    {{ duration.in_seconds() }} second
-                                                {% endif %}
-                                            </p>
-                                        {% endif %}
-
 
                                         {% if reverse_domain %}
                                             <p class="smaller">
@@ -189,21 +175,11 @@
 
                                 <td nowrap="nowrap">
                                     <p>
-                                        <a class="calc-delta" data-timestamp-unix="{{ result.unix_timestamp }}" href="#" rel="noreferrer">
-                                            <svg class="icon"><use xlink:href="#icon-flag"></use></svg>
-                                        </a>
-                                        {{ year_month_day }}
+                                        {{ result.datestamp[:-2] }}
                                         at
                                         {{ result.unix_timestamp|localtime|dateformat("LTS") }}
                                     </p>
 
-                                    <p class="delta smaller"
-                                       {% if loop.last %}hidden{% endif %}
-                                       data-default-delta="{{ deltas[loop.index]}}"
-                                    >
-                                        Δ <span class="value">{{ deltas[loop.index0] }}</span>
-                                        <span class="label"></span>
-                                    </p>
                                 </td>
                                 <td nowrap="nowrap">
                                     <p>

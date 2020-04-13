@@ -3,13 +3,11 @@
 import re
 import sqlite3
 import typing
-from collections import namedtuple, defaultdict
+from collections import namedtuple
 import cherrypy
 import pendulum
 
 SavedQuery = namedtuple('SavedQuery', ['id', 'key', 'value', 'active'])
-DurationBag = typing.Dict[typing.Tuple[str, str], int]
-Durations = typing.Dict[typing.Tuple[str, str], pendulum.Duration]
 
 
 class Controller:
@@ -49,8 +47,6 @@ class Controller:
         ).pop() or []
 
         reversed_ips = None
-        deltas = None
-        durations = {}
         country_names = None
         annotations = None
         cookies: typing.Dict[str, str] = {}
@@ -60,9 +56,6 @@ class Controller:
                 "logindex:query:reverse_ip",
                 {record["ip"] for record in log_records}
             ).pop() or {}
-
-            deltas = self.get_deltas(log_records)
-            durations = self.get_durations(log_records)
 
             country_names = cherrypy.engine.publish(
                 "geography:country_by_abbreviation",
@@ -90,8 +83,6 @@ class Controller:
                 active_date=self.get_active_date(log_records, query),
                 results=log_records,
                 country_names=country_names,
-                deltas=deltas,
-                durations=durations,
                 site_domains=site_domains,
                 saved_queries=saved_queries,
                 annotations=annotations,
@@ -125,69 +116,6 @@ class Controller:
             queries.append(SavedQuery(record_id, key, value, active))
 
         return queries
-
-    @staticmethod
-    def get_durations(
-            log_records: sqlite3.Row
-    ) -> Durations:
-        """Calculate visit duration per day per IP"""
-
-        timezone = cherrypy.engine.publish(
-            "registry:timezone"
-        ).pop()
-
-        maximums: DurationBag = defaultdict(int)
-        minimums: DurationBag = defaultdict(int)
-
-        for row in log_records:
-            timestamp = row["unix_timestamp"]
-            formatted_timestamp = pendulum.from_timestamp(
-                timestamp
-            ).in_timezone(timezone).format('YYYY-MM-DD')
-
-            lookup_key = (row["ip"], formatted_timestamp)
-
-            if lookup_key not in maximums or timestamp > maximums[lookup_key]:
-                maximums[lookup_key] = timestamp
-                continue
-
-            if lookup_key not in minimums or timestamp < minimums[lookup_key]:
-                minimums[lookup_key] = timestamp
-
-        durations: Durations = {
-            lookup_key: pendulum.duration(
-                seconds=(maximums[lookup_key] - minimums[lookup_key])
-            )
-            for lookup_key in maximums
-            if minimums[lookup_key] > 0
-        }
-
-        return durations
-
-    @staticmethod
-    def get_deltas(
-            log_records: typing.List[sqlite3.Row]
-    ) -> typing.List[str]:
-        """Calculate elapsed time intervals between records"""
-
-        deltas = []
-        for index, row in enumerate(log_records):
-            current_timestamp = pendulum.from_timestamp(
-                row["unix_timestamp"]
-            )
-
-            previous_timestamp = pendulum.from_timestamp(
-                log_records[index + 1]["unix_timestamp"]
-            )
-
-            delta = current_timestamp.diff_for_humans(
-                previous_timestamp,
-                True
-            )
-
-            deltas.append(delta)
-
-        return deltas
 
     @staticmethod
     def get_active_date(
