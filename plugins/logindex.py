@@ -327,7 +327,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
                 batch.append(values)
                 if len(batch) > batch_size:
-                    line_count += self.insert_line(batch)
+                    self.insert_line(batch)
+                    line_count += len(batch)
                     batch = []
 
         if batch:
@@ -537,23 +538,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def insert_line(
             self,
             records: typing.List[typing.Tuple[str, int, str, str]]
-    ) -> int:
+    ) -> bool:
         """Write a batch of log lines to the database.
 
         This is the initial insert, where the line is added in its
         entirety. Parsing occurs at the next stage of processing."""
 
         if not records:
-            return 0
+            return False
 
-        self._execute(
-            """INSERT OR IGNORE INTO logs
-            (source_file, source_offset, hash, logline)
-            VALUES (?, ?, ?, ?)""",
-            records
-        )
+        sql = """INSERT OR IGNORE INTO logs
+        (source_file, source_offset, hash, logline)
+        VALUES (?, ?, ?, ?)"""
 
-        return len(records)
+        queries = [
+            (sql, (records[0], records[1], records[2], records[3]))
+            for record in records
+        ]
+
+        return self._multi(queries)
 
     def append_line(
             self,
