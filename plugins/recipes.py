@@ -123,6 +123,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         tags = [
             item.strip()
             for item in kwargs.get("tags", "").split(",")
+            if item
         ]
 
         queries = [

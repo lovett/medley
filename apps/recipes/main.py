@@ -22,7 +22,7 @@ class Controller:
             return self.by_tag(args[1], **kwargs)
 
         if args[0] == "new":
-            return self.form(-1, **kwargs)
+            return self.form(0, **kwargs)
 
         if args[-1] == "edit":
             return self.form(int(args[-2]), **kwargs)
@@ -211,7 +211,7 @@ class Controller:
                 rowid=recipe["rowid"],
                 ingredients=ingredients,
                 body=rest,
-                tags=recipe["tags"],
+                tags=recipe["tags"] or [],
                 display_date=recipe["updated"] or recipe["created"],
                 url=recipe["url"],
                 subview_title=recipe["title"]
