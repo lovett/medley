@@ -43,11 +43,11 @@ class Controller:
         """Save changes to an existing recipe, or add a new one."""
 
         topic = "recipes:add"
-        rowid = None
+        rowid = 0
 
         if args:
             topic = "recipes:update"
-            rowid = args[0]
+            rowid = typing.cast(int, args[0])
 
         cherrypy.engine.publish(
             topic,
@@ -58,10 +58,12 @@ class Controller:
             tags=tags
         ).pop()
 
-        if rowid:
-            raise cherrypy.HTTPRedirect(f"/recipes/{rowid}")
+        if not rowid:
+            rowid = cherrypy.engine.publish(
+                "recipes:find:newest_id",
+            ).pop()
 
-        raise cherrypy.HTTPRedirect("/recipes")
+        raise cherrypy.HTTPRedirect(f"/recipes/{rowid}")
 
     @staticmethod
     def DELETE(rowid: int) -> None:

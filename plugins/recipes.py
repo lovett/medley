@@ -83,19 +83,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             WHERE rowid NOT IN (SELECT DISTINCT tag_id FROM recipe_tag);
         END;
 
-        CREATE VIEW IF NOT EXISTS undeleted_recipes_view AS
-            SELECT rowid, title, body, url, created, updated
-            FROM recipes
-            WHERE deleted IS NULL;
-
         CREATE VIEW IF NOT EXISTS extended_recipes_view AS
-            SELECT undeleted_recipes_view.rowid, title, body, url,
+            SELECT recipes.rowid, title, body, url,
                 created, updated, GROUP_CONCAT(tags.name) as tags
-            FROM undeleted_recipes_view
+            FROM recipes
             LEFT JOIN recipe_tag
-                ON undeleted_recipes_view.rowid=recipe_tag.recipe_id
+                ON recipes.rowid=recipe_tag.recipe_id
             LEFT JOIN tags
-                ON recipe_tag.tag_id=tags.rowid;
+                ON recipe_tag.tag_id=tags.rowid
+            WHERE recipes.deleted IS NULL
+            GROUP BY recipes.rowid;
         """)
 
     def start(self) -> None:
@@ -108,6 +105,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:tags:all", self.all_tags)
         self.bus.subscribe("recipes:find", self.find)
         self.bus.subscribe("recipes:find:tag", self.find_by_tag)
+        self.bus.subscribe("recipes:find:newest_id", self.find_newest_id)
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
         self.bus.subscribe("recipes:search:recipe", self.search_recipes)
@@ -212,6 +210,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 AND tags.name=?
             )""",
             (tag,)
+        )
+
+    def find_newest_id(self) -> int:
+        """Locate the most recently inserted recipe."""
+        return typing.cast(
+            int,
+            self._selectFirst("SELECT MAX(rowid) FROM recipes")
         )
 
     @decorators.log_runtime
