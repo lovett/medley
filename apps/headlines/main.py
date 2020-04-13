@@ -16,8 +16,8 @@ class Controller:
     def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of headlines."""
 
-        limit = int(kwargs.get("limit", 40))
-        offset = int(kwargs.get("offset", 1))
+        walk_start = int(kwargs.get("start", 1))
+        walk_stop = walk_start + int(kwargs.get("count", 40)) - 1
 
         now = pendulum.now()
 
@@ -70,7 +70,7 @@ class Controller:
                 "jinja:render",
                 "headlines.jinja.html",
                 headlines=headlines,
-                limit=limit,
-                offset=offset,
+                walk_start=walk_start,
+                walk_stop=walk_stop,
             ).pop()
         )

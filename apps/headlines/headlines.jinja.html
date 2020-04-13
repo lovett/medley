@@ -23,9 +23,9 @@
         <header id="app-nav">
             <form action="#">
                 <button
-                    data-limit="{{ limit }}"
-                    data-offset="{{ offset }}"
-                >Walk links {{ offset }} to {{ offset + limit - 1}}</button>
+                    data-walk-start="{{ walk_start }}"
+                    data-walk-stop="{{ walk_stop }}"
+                >Walk links {{ walk_start }} – {{ walk_stop }}</button>
             </form>
         </header>
 

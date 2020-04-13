@@ -10,11 +10,13 @@ MEDLEY.headlines = (function () {
             return;
         }
 
-        const limit = parseInt(e.target.dataset.limit, 10);
-        const offset = parseInt(e.target.dataset.offset, 10);
+        e.preventDefault();
+
+        const start = parseInt(e.target.dataset.walkStart, 10);
+        const stop = parseInt(e.target.dataset.walkStop, 10);
 
         childWindow = window.open('about:blank');
-        worker.postMessage(`start:${limit}:${offset}`);
+        worker.postMessage(`${start}:${stop}`);
     }
 
     return {
@@ -24,9 +26,11 @@ MEDLEY.headlines = (function () {
             worker = new Worker('/headlines/static/headlines-worker.js');
 
             worker.addEventListener('message', function (e) {
+                console.log(e.data);
                 const fields = e.data.split(':');
                 if (fields[0] === 'visit') {
                     const linkIndex = parseInt(fields[1], 10);
+                    console.log(linkIndex);
                     const link = links[linkIndex];
 
                     childWindow.location = link.dataset.searchHref;
