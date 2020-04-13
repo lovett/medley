@@ -69,12 +69,13 @@ setup:
 #
 # Uses entr to restart the server when appliation files change.
 # This is an alternative to using MEDLEY__engine__autoreload__on=True
+serve: export MEDLEY__engine__autoreload__on=True
 serve: export MEDLEY__memorize_hashes=False
 serve: export MEDLEY__etags=False
 serve: export MEDLEY__request__show_tracebacks=True
 serve: export MEDLEY__cache_static_assets=True
 serve:
-	ls apps/**/main.py plugins/*.py tools/*.py medley.py | entr -r python medley.py
+	ls apps/**/main.py plugins/*.py tools/*.py medley.py | entr python medley.py
 
 
 # Rename coverage files to comply with coverage utility's
