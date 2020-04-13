@@ -126,6 +126,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if item
         ]
 
+        if not tags:
+            tags = ["untagged"]
+
         queries = [
             (
                 """CREATE TEMP TABLE IF NOT EXISTS tmp
@@ -263,7 +266,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         tags = [
             item.strip()
             for item in kwargs.get("tags", "").split(",")
+            if item
         ]
+
+        if not tags:
+            tags = ["untagged"]
 
         queries = [
             (
