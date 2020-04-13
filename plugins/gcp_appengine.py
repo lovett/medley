@@ -188,10 +188,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 ))
 
                 if len(batch) > batch_size:
-                    line_count += self.publish_lines(batch)
+                    self.publish_lines(batch)
+                    line_count += len(batch)
                     batch = []
         if batch:
-            line_count += self.publish_lines(batch)
+            self.publish_lines(batch)
+            line_count += len(batch)
             batch = []
 
         return line_count
@@ -259,23 +261,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return " ".join(quoted_pairs)
 
     @staticmethod
-    def publish_lines(batch: typing.Iterable[str]) -> int:
+    def publish_lines(batch: typing.Iterable[str]) -> None:
         """Send a batch of request logs in combined format to the logindex
         plugin.
 
         """
-        result = cherrypy.engine.publish(
+        cherrypy.engine.publish(
             "logindex:insert_line",
             batch
-        ).pop()
-
-        return typing.cast(int, result)
+        )
 
     @staticmethod
     def publish_extras(batch: typing.List[typing.Tuple[str, str]]) -> None:
         """Append extra name-value fields a previously-saved combined log."""
 
         cherrypy.engine.publish(
-            "logindex:append_line",
+            "logindex:append_lineg",
             batch
         )
