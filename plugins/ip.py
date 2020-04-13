@@ -3,7 +3,6 @@
 import os.path
 import socket
 import typing
-from collections import defaultdict
 import cherrypy
 import geoip2.database
 import geoip2.errors
@@ -28,12 +27,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def facts(ip_address: str) -> typing.Dict[str, str]:
         """Look up geographic information for an IP address."""
 
+        facts: typing.Dict[str, typing.Any] = {
+            "annotations": [],
+            "geo": {
+                "city": "",
+                "country_code": "",
+                "country_name": "",
+                "region_code": "",
+                "latitude": "",
+                "longitude": "",
+                "metro_code": "",
+                "map_region": ""
+            }
+        }
+
         _, rows = cherrypy.engine.publish(
             "registry:search",
             f"ip:{ip_address}"
         ).pop()
-
-        facts: typing.Dict[str, typing.Any] = defaultdict()
 
         if rows:
             facts["annotations"] = [
@@ -54,8 +65,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             pass
         except geoip2.errors.AddressNotFoundError:
             pass
-
-        facts["geo"] = defaultdict(lambda: None)
 
         if result:
             try:
@@ -107,7 +116,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        facts: typing.Dict[str, typing.Any] = defaultdict()
+        facts: typing.Dict[str, typing.Any] = {
+            "reverse_host": "",
+            "reverse_domain": ""
+        }
 
         reverse_host = socket.getfqdn(ip_address)
 
