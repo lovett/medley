@@ -11,11 +11,13 @@
         <header id="page-title">
             <h2>
                 {% if tag %}
-                    <svg class="icon"><use xlink:href="#icon-tag"></use></svg>{{ tag|capitalize }}
+                    <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                    {{ tag|capitalize }}
                 {% endif %}
 
                 {% if query %}
-                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>Search Results
+                    <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                    Search Results
                 {% endif %}
             </h2>
         </header>
