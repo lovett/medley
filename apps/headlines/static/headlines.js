@@ -26,11 +26,9 @@ MEDLEY.headlines = (function () {
             worker = new Worker('/headlines/static/headlines-worker.js');
 
             worker.addEventListener('message', function (e) {
-                console.log(e.data);
                 const fields = e.data.split(':');
                 if (fields[0] === 'visit') {
                     const linkIndex = parseInt(fields[1], 10);
-                    console.log(linkIndex);
                     const link = links[linkIndex];
 
                     childWindow.location = link.dataset.searchHref;
