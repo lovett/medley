@@ -171,11 +171,10 @@ def setup() -> None:
                 "tools.staticdir.dir": os.path.realpath(static_path),
             }
 
-            if cherrypy.config.get("cache_static_assets"):
-                app_config[static_url].update({
-                    "tools.expires.on": True,
-                    "tools.expires.secs": 86400 * 7
-                })
+            app_config[static_url].update({
+                "tools.expires.on": True,
+                "tools.expires.secs": 86400 * 7
+            })
 
         cherrypy.tree.mount(
             app_module.Controller(),  # type: ignore
