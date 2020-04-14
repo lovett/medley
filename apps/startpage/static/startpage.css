@@ -3,7 +3,7 @@ BODY {
 }
 
 #display {
-    padding: 0.5em;
+    padding: 0 0.5em;
 }
 
 #editor {
@@ -108,7 +108,7 @@ li.group:hover .all {
     #display {
         column-count: 3;
         column-gap: 2em;
-        padding: 0.75em;
+        padding: 0 0.75em;
     }
 
     section {
