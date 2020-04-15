@@ -22,9 +22,13 @@
             {% for story in stories %}
                 <li class="headline">
                     <h2 class="title">
-                        <a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">
-                            {{ story.title|truncate(80) }}
-                        </a>
+                        {% if story.num_comments == 0 and not story.selftext %}
+                            {{ story.title }}
+                        {% else %}
+                            <a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">
+                                {{ story.title|safe|truncate(80) }}
+                            </a>
+                        {% endif %}
                     </h2>
                     <time class="info">
                         <svg class="icon"><use xlink:href="#icon-info"></use></svg>
