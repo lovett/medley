@@ -2,10 +2,6 @@ BODY {
     background-color: var(--white);
 }
 
-#display {
-    padding: 0 0.5em;
-}
-
 #editor {
     display: flex;
 }
