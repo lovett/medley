@@ -257,6 +257,7 @@ TEXTAREA {
     list-style-type: none;
     display: grid;
     grid-row-gap: 1em;
+    grid-column-gap: 4em;
 }
 
 #collection li {
@@ -669,7 +670,6 @@ TEXTAREA {
 @media (min-width: 576px) {
     #collection ul {
         grid-template-columns: repeat(2, 1fr);
-        grid-column-gap: 2em;
     }
 
     #page-header {
@@ -682,11 +682,6 @@ TEXTAREA {
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #collection ul {
-        grid-template-columns: repeat(3, 1fr);
-        grid-column-gap: 4em;
-    }
-
     #main-toolbar FORM {
         order: 1;
         margin-left: 3em;
@@ -707,7 +702,7 @@ TEXTAREA {
 /* Extra large devices */
 @media (min-width: 1200px) {
     #collection ul {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
     }
 }
 
