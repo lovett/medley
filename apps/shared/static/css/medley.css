@@ -592,29 +592,33 @@ TEXTAREA {
     content: '';
 }
 
-.pagination .next {
-    padding: 0 1em;
-}
-
-.pagination .previous {
-    padding: 0 1em;
-}
-
 .pagination {
     margin: auto;
-    text-align: center;
     padding: 1em 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pagination A {
     text-decoration: none;
     color: inherit;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5em 1em;
 }
 
-.pagination .icon {
-    height: .75em;
-    padding: 0;
-    margin-top: -.1em;
+.pagination A:hover {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.pagination .next .icon {
+    margin-left: 0.5em;
+}
+
+.pagination .previous .icon {
+    margin-right: 0.5em;
 }
 
 .shortcuts {
