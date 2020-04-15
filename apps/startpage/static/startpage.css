@@ -53,8 +53,17 @@ section a:focus {
     border-bottom-color: transparent;
     text-decoration: none;
     padding: .25em;
-
 }
+
+section a.focus-candidate {
+    outline: 0;
+    background-color: var(--primary);
+    color: var(--white);
+    box-shadow: none;
+    text-decoration: none;
+    padding: .25em;
+}
+
 
 section h1 {
     font-size: 1em;
@@ -93,7 +102,6 @@ li.group:hover .all {
     visibility: visible;
     color: var(--primary);
 }
-
 
 /* Small devices */
 @media (min-width: 576px) {
