@@ -41,6 +41,7 @@ class Controller:
             "registry:search",
             "alturl:bookmark",
             exact=True,
+            sort_by_value=True
         ).pop()
 
         bookmarks = ((

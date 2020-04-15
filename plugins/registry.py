@@ -115,6 +115,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         value = kwargs.get("value")
         limit = kwargs.get("limit", 25)
         exact = kwargs.get("exact", False)
+        sort_by_value = kwargs.get("sort_by_value", False)
         include_count = kwargs.get("include_count", False)
 
         params: typing.Tuple[typing.Any, ...] = ()
@@ -138,7 +139,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 key = f"%{key}%"
 
             if exact:
-                sql += "AND key = ?"
+                sql += "AND key = ? "
             else:
                 sql += "AND key LIKE ? "
 
@@ -149,13 +150,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             value = value.replace("*", "%")
 
             if fuzzy:
-                sql += "AND VALUE LIKE ?"
+                sql += "AND VALUE LIKE ? "
             else:
-                sql += "AND value=?"
+                sql += "AND value=? "
 
             params = params + (value,)
 
-        sql += f"ORDER BY key LIMIT {limit}"
+        if sort_by_value:
+            sql += "ORDER BY value "
+        else:
+            sql += "ORDER BY key "
+
+        sql += f" LIMIT {limit}"
 
         result = typing.cast(
             typing.Any,
