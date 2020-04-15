@@ -27,8 +27,7 @@ code {
 }
 
 #comments {
-    border-top: 1px solid var(--grey);
-    margin-top: 1em;
+    margin: 1em auto 0 auto;
 }
 
 .comment a {
@@ -100,6 +99,15 @@ code {
     margin-right: .5em;
 }
 
+.intro {
+    padding: 0.5em 0 1em 0;
+    margin: auto;
+}
+
+.intro .title {
+    font-size: 1.25em;
+}
+
 .unbookmark > * {
     display: inline-block;
 }
@@ -110,13 +118,19 @@ code {
 
 /* Medium devices */
 @media (min-width: 768px) {
+    .intro .title {
+        font-size: 1.5em;
+    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
     .intro, #comments {
         max-width: 60em;
-        margin: auto;
+    }
+
+    .comment summary {
+        margin: 0;
     }
 
     .comment blockquote {
