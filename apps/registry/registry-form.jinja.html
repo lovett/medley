@@ -1,10 +1,16 @@
 {% extends "registry.jinja.html" %}
 
 {% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a class="cancel" href="{{ cancel_url }}">
+            <svg class="icon"><use xlink:href="#icon-triangle"></use></svg>
+            Cancel
+        </a>
+    </nav>
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("arrow-left") }}
+    {{ macros.svgSymbols("arrow-left", "triangle") }}
 
     <main id="editor">
         <form method="post" action="{{ submit_url }}">
@@ -27,8 +33,6 @@
             </div>
             <div class="field">
                 <button>Save</button>
-
-                <a class="cancel" href="{{ cancel_url }}">Cancel</a>
             </div>
         </form>
     </main>

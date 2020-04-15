@@ -330,25 +330,6 @@ TEXTAREA {
     padding: 0;
 }
 
-#main-toolbar BUTTON {
-    background-color: var(--grey);
-    color: var(--black);
-    border: 0;
-    border-radius: 0;
-}
-
-#main-toolbar FIELDSET {
-    margin-top: .5em;
-    display: flex;
-}
-
-#main-toolbar FIELDSET INPUT {
-    flex-grow: 1;
-    padding: .25em;
-    border-radius: 0;
-    border: 0;
-}
-
 #main-toolbar A {
     color: inherit;
     display: inline-flex;

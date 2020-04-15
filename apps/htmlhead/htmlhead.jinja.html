@@ -8,10 +8,6 @@
     {{ macros.staticAsset('htmlhead', 'htmlhead.js') }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar"></nav>
-{% endblock %}
-
 {% block app_message %}
     {% if failure_message %}
         <div id="app-message" class="error">{{ failure_message }}</div>

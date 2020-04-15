@@ -5,7 +5,18 @@
     {{ macros.staticAsset('startpage', 'startpage.css') }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a class="cancel" href="{{ cancel_url }}">
+            <svg class="icon"><use xlink:href="#icon-triangle"></use></svg>
+            Cancel
+        </a>
+    </nav>
+{% endblock %}
+
+
 {% block page_body %}
+    {{ macros.svgSymbols("triangle") }}
     <main id="editor">
         <form method="post" action="{{ post_url }}">
             <input type="hidden" name="page_name" value="{{ page_name }}" />
@@ -16,7 +27,6 @@
 
             <div class="field">
                 <button>{{ button_label }}</button>
-                <a class="cancel" href="{{ cancel_url }}">Cancel</a>
             </div>
         </form>
     </main>
