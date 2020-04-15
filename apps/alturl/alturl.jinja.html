@@ -52,11 +52,7 @@
                         <discardable-record inline-template url="/registry?uid={{ id }}">
                             <li v-bind:style="styles">
                                 <div class="actions"><discard-button tooltip="Delete this bookmark" /></div>
-                                <div>
-                                    <p class="title">
-                                        <a href="{{ alt_url }}">{{ bookmark_url }}</a>
-                                    </p>
-                                </div>
+                                <a href="{{ alt_url }}">{{ bookmark_url }}</a>
                             </li>
                         </discardable-record>
                     {% endfor %}

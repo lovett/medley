@@ -21,6 +21,11 @@ code {
     margin-bottom: 1em;
 }
 
+#collection li {
+    display: inline-flex;
+    align-items: center;
+}
+
 #comments {
     border-top: 1px solid var(--grey);
     margin-top: 1em;
@@ -79,6 +84,10 @@ code {
     line-height: inherit;
 }
 
+.discard-button {
+    background-color: var(--grey);
+}
+
 .info {
     font-size: .85em;
     display: inline-flex;
@@ -105,6 +114,11 @@ code {
 
 /* Large devices */
 @media (min-width: 992px) {
+    .intro, #comments {
+        max-width: 60em;
+        margin: auto;
+    }
+
     .comment blockquote {
         font-size: 1em;
     }

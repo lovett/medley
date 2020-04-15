@@ -273,7 +273,7 @@ TEXTAREA {
 #collection .actions {
     display: flex;
     justify-content: flex-start;
-    padding-right: 1em;
+    padding-right: .5em;
 }
 
 #collection .title {
@@ -686,6 +686,11 @@ TEXTAREA {
 
 /* Small devices */
 @media (min-width: 576px) {
+    #collection ul {
+        grid-template-columns: repeat(2, 1fr);
+        grid-column-gap: 2em;
+    }
+
     #page-header {
         display: flex;
         flex-flow: row wrap;
@@ -697,7 +702,7 @@ TEXTAREA {
 /* Medium devices */
 @media (min-width: 768px) {
     #collection ul {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         grid-column-gap: 4em;
     }
 
@@ -721,7 +726,7 @@ TEXTAREA {
 /* Extra large devices */
 @media (min-width: 1200px) {
     #collection ul {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 
