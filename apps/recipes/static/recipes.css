@@ -1,23 +1,24 @@
-#recipe section:nth-of-type(1) {
-    flex-grow: 1;
+#recipe {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+#recipe H1 {
+    font-size: 1.15em;
+    margin: 2em .5em 0;
+    border-bottom: 1px solid currentColor;
+}
+
+#recipe SECTION:nth-of-type(1) {
     display: grid;
     grid-template-columns: 1fr;
-    grid-column-gap: 1em;
-    align-content: stretch;
+    grid-column-gap: 0.5em;
+    margin-bottom: 0;
 }
 
-#recipe.with-ingredients section:nth-of-type(1) div:nth-child(1) {
+#recipe.with-ingredients SECTION:nth-of-type(1) DIV:nth-child(1) {
     background-color: var(--tertiary);
     padding: 1em;
-}
-
-#recipe header ul li {
-    display: inline-block;
-    margin-right: 3em;
-}
-
-#recipe header ul li:last-of-type {
-    margin-right: 0;
 }
 
 #recipe SECTION UL {
@@ -26,16 +27,23 @@
     list-style-type: none;
 }
 
-#recipe SECTION UL LI {
-    margin-bottom: 1em;
+#recipe SECTION P, #recipe SECTION LI {
+    padding: .5em;
+    margin: 0;
 }
 
-#recipe P {
-    padding: .25em;
-}
-
-#recipe P:hover {
+#recipe SECTION P:hover, #recipe SECTION LI:hover {
     background-color: var(--secondary);
+}
+
+#recipe FOOTER {
+    font-size: .85em;
+    padding: 1em 0;
+}
+
+#recipe FOOTER TIME {
+    display: block;
+    margin-bottom: 1em;
 }
 
 #editor {
@@ -53,7 +61,7 @@
     grid-template-rows: auto 1fr;
 }
 
-#editor textarea {
+#editor TEXTAREA {
     height: 100%;
 }
 
@@ -62,7 +70,7 @@
     list-style-type: none;
 }
 
-#tagset li {
+#tagset LI {
     display: inline;
     margin-right: 2em;
     white-space: nowrap;
@@ -74,14 +82,32 @@
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #recipe.with-ingredients section:nth-of-type(1) {
-        grid-template-columns: 22em 1fr;
+    #recipe {
+        margin-bottom: 2.25em;
     }
 
+    #recipe.with-ingredients SECTION:nth-of-type(1) {
+        grid-template-columns: 20em 1fr;
+    }
+
+    #recipe FOOTER {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #recipe FOOTER TIME {
+        display: inline-block;
+        margin-right: 2em;
+        margin-bottom: 0;
+    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
+    #recipe FOOTER TIME:last-of-type {
+        margin-right: 0;
+    }
 }
 
 /* Extra large devices */

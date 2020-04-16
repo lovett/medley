@@ -1,5 +1,6 @@
 """Favorite dishes and cooking notes"""
 
+import re
 import typing
 import cherrypy
 import mistletoe
@@ -193,6 +194,7 @@ class Controller:
         body_html = body_html.replace("3/4", "¾")
         body_html = body_html.replace("1/2", "½")
         body_html = body_html.replace("1/4", "¼")
+        body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html)
 
         if "</ul>" in body_html:
             end_of_first_list = body_html.index("</ul>") + 5
@@ -204,6 +206,13 @@ class Controller:
             ingredients = ""
             rest = body_html
 
+        url_domain = None
+        if recipe["url"]:
+            url_domain = cherrypy.engine.publish(
+                "url:readable",
+                recipe["url"]
+            ).pop()
+
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
@@ -214,8 +223,10 @@ class Controller:
                 ingredients=ingredients,
                 body=rest,
                 tags=recipe["tags"] or [],
-                display_date=recipe["updated"] or recipe["created"],
+                updated=recipe["updated"],
+                added=recipe["created"],
                 url=recipe["url"],
+                url_domain=url_domain,
                 subview_title=recipe["title"]
             ).pop()
         )

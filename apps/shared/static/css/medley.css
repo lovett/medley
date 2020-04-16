@@ -315,10 +315,6 @@ TEXTAREA {
 }
 
 #page-title {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-between;
-    align-items: center;
     margin-bottom: 1em;
 }
 
@@ -326,10 +322,21 @@ TEXTAREA {
     font-size: 1.5em;
 }
 
-#page-title UL LI {
-    margin: 0;
-    padding: 0;
+#page-title UL {
+    padding-left: 0;
 }
+
+#page-title LI {
+    display: inline-block;
+    margin-right: 2em;
+    margin-bottom: 1em;
+}
+
+#page-title LI:last-of-type {
+    margin-right: 0;
+}
+
+
 
 #main-toolbar A {
     color: inherit;
@@ -698,6 +705,18 @@ TEXTAREA {
 
 /* Large devices */
 @media (min-width: 992px) {
+    #page-title {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+
+    #page-title LI {
+        margin-bottom: 0;
+    }
+
     .table-sleeve {
         overflow: inherit;
     }

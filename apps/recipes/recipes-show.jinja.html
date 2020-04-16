@@ -18,7 +18,6 @@
     {{ macros.svgSymbols("new-item", "arrow-left", "calendar", "edit", "globe", "tag") }}
 
     <main id="recipe" class="{% if ingredients %}with-ingredients{% endif %}">
-
         <header id="page-title">
             <h2>{{ title }}</h2>
 
@@ -31,19 +30,37 @@
                         </a>
                     </li>
                 {% endfor %}
-                <li>
-                    <time datetime="{{ updated|localtime }}">
-                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                        {{ display_date|localtime|dateformat("MMMM D, YYYY") }}
-                    </time>
-                </li>
             </ul>
         </header>
 
         <section>
             <div>{{ ingredients|safe }}</div>
-
             <div>{{ body|safe }}</div>
         </section>
+
+        <footer>
+            <div>
+                {% if updated %}
+                    <time datetime="{{ updated|localtime }}">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Updated on {{ updated|localtime|dateformat("MMMM D, YYYY") }}
+                    </time>
+                {% endif  %}
+
+                <time datetime="{{ added|localtime }}">
+                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                    Added on {{ added|localtime|dateformat("MMMM D, YYYY") }}
+                </time>
+            </div>
+            {% if url %}
+                <div>
+                    <a href="{{ url|anonymize }}" target="_blank">
+                        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                        {{ url_domain }}
+                    </a>
+                </div>
+            {% endif %}
+        </footer>
+        </div>
     </main>
 {% endblock %}
