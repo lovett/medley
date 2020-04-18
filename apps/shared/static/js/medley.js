@@ -28,6 +28,24 @@ var MEDLEY = (function () {
             return;
         }
 
+        if (e.key === 'C') {
+            const tags = document.getElementsByClassName('cancel');
+            if (tags.length === 0) {
+                return;
+            }
+
+            tags[0].click();
+            return;
+        }
+
+        if (e.key === 'E') {
+            const tag = document.getElementById('edit-record');
+            if (tag) {
+                tag.click();
+            }
+            return;
+        }
+
         if (e.key === 'H') {
             const tag = document.querySelector('meta[name=medley-home]');
             window.location.href = tag.getAttribute('content');
