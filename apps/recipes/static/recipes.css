@@ -1,3 +1,9 @@
+#collection time {
+    margin-right: 1em;
+    margin-bottom: 0.75em;
+    display: block;
+}
+
 #recipe {
     display: grid;
     grid-template-rows: auto 1fr auto;

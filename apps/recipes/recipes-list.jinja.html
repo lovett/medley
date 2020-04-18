@@ -5,14 +5,14 @@
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("new-item", "arrow-left", "delete", "globe", "search", "tag") }}
+    {{ macros.svgSymbols("new-item", "calendar", "delete", "search", "tag") }}
 
     <main id="collection">
         <header id="page-title">
             <h2>
                 {% if tag %}
                     <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                    {{ tag|capitalize }}
+                    {{ tag|capitalize }} Recipes
                 {% endif %}
 
                 {% if query %}
@@ -35,7 +35,14 @@
                                     {{ recipe["title"] }}
                                 </a>
                             </p>
+
                             <p class="tags">
+                                {% if recipe["last_made"] %}
+                                    <time datetime="{{ recipe["last_made"] }}">
+                                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                                        Made on {{ recipe["last_made"]|dateformat("MMMM D, YYYY") }}
+                                    </time>
+                                {% endif %}
                                 {% for tag in recipe["tags"] %}
                                     <a href="/recipes/tag/{{ tag|urlencode }}">
                                         <svg class="icon"><use xlink:href="#icon-tag"></use></svg>

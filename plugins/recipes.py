@@ -3,6 +3,7 @@
 import sqlite3
 import typing
 import cherrypy
+import pendulum
 from . import mixins
 from . import decorators
 
@@ -25,7 +26,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url TEXT DEFAULT NULL,
             created DEFAULT CURRENT_TIMESTAMP,
             updated DEFAULT NULL,
-            deleted DEFAULT NULL
+            deleted DEFAULT NULL,
+            last_made DEFAULT NULL
         );
 
         CREATE TABLE IF NOT EXISTS recipe_tag (
@@ -85,7 +87,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE VIEW IF NOT EXISTS extended_recipes_view AS
             SELECT recipes.rowid, title, body, url,
-                created, updated, GROUP_CONCAT(tags.name) as tags
+                created, updated, last_made,
+                GROUP_CONCAT(tags.name) as tags
             FROM recipes
             LEFT JOIN recipe_tag
                 ON recipes.rowid=recipe_tag.recipe_id
@@ -118,6 +121,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         body = kwargs.get("body")
         url = kwargs.get("url") or None
 
+        try:
+            last_made = pendulum.from_format(
+                kwargs.get("last_made", ""),
+                "YYYY-MM-DD",
+            ).format('YYYY-MM-DD')
+        except (TypeError, ValueError):
+            last_made = None
+
         tags = [
             item.strip()
             for item in kwargs.get("tags", "").split(",")
@@ -135,9 +146,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ),
 
             (
-                """INSERT INTO recipes (title, body, url)
-                VALUES (?, ?, ?)""",
-                (title, body, url)
+                """INSERT INTO recipes (title, body, url, last_made)
+                VALUES (?, ?, ?, ?)""",
+                (title, body, url, last_made)
             ),
 
             (
@@ -189,6 +200,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT rowid, title, body, url,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
+            last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
             WHERE rowid=?""",
@@ -201,6 +213,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT rowid, title, url,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
+            last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
             WHERE rowid IN (
@@ -253,6 +266,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT r.rowid, r.title, r.body, r.url,
             r.created as 'created [datetime]',
             r.updated as 'updated [datetime]',
+            r.last_made as 'last_made [datetime]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r, recipes_fts
             WHERE r.rowid=recipes_fts.rowid
@@ -268,6 +282,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         body = kwargs.get("body")
         url = kwargs.get("url") or None
 
+        try:
+            last_made = pendulum.from_format(
+                kwargs.get("last_made", ""),
+                "YYYY-MM-DD",
+            ).format('YYYY-MM-DD')
+        except (TypeError, ValueError):
+            last_made = None
+
         tags = [
             item.strip()
             for item in kwargs.get("tags", "").split(",")
@@ -280,9 +302,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         queries = [
             (
                 """UPDATE recipes
-                SET title=?, body=?, url=?
+                SET title=?, body=?, url=?, last_made=?
                 WHERE rowid=?""",
-                (title, body, url, rowid)
+                (title, body, url, last_made, rowid)
             ),
             (
                 """DELETE FROM recipe_tag WHERE recipe_id=?""",

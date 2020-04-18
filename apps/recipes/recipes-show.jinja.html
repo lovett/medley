@@ -40,17 +40,24 @@
 
         <footer>
             <div>
+                {% if last_made %}
+                    <time datetime="{{ last_made }}">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Last made on {{ last_made|dateformat("MMMM D, YYYY") }}
+                    </time>
+                {% endif %}
+
                 {% if updated %}
                     <time datetime="{{ updated|localtime }}">
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
                         Updated on {{ updated|localtime|dateformat("MMMM D, YYYY") }}
                     </time>
+                {% else %}
+                    <time datetime="{{ added|localtime }}">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Added on {{ added|localtime|dateformat("MMMM D, YYYY") }}
+                    </time>
                 {% endif  %}
-
-                <time datetime="{{ added|localtime }}">
-                    <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                    Added on {{ added|localtime|dateformat("MMMM D, YYYY") }}
-                </time>
             </div>
             {% if url %}
                 <div>

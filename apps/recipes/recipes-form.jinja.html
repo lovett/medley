@@ -43,6 +43,16 @@
                         value="{{ url|default('', true)|e }}"
                     />
                 </div>
+                <div class="field">
+                    <label for="last_made">Last made</label>
+                    <input
+                        type="text"
+                        id="last_made"
+                        name="last_made"
+                        placeholder="yyyy-mm-dd"
+                        value="{{ last_made|e }}"
+                    />
+                </div>
             </div>
 
             <div class="field stretch">

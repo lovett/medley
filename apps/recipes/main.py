@@ -1,4 +1,4 @@
-"""Favorite dishes and cooking notes"""
+"""A collection of recipes"""
 
 import re
 import typing
@@ -39,7 +39,8 @@ class Controller:
             title: str,
             body: str,
             url: str = "",
-            tags: str = ""
+            tags: str = "",
+            last_made: str = ""
     ) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
@@ -56,7 +57,8 @@ class Controller:
             title=title,
             body=body,
             url=url,
-            tags=tags
+            tags=tags,
+            last_made=last_made
         ).pop()
 
         if not rowid:
@@ -126,6 +128,7 @@ class Controller:
         tags = ""
         url = ""
         submit_url = "/recipes"
+        last_made = ""
 
         if rowid:
             recipe = cherrypy.engine.publish(
@@ -142,6 +145,9 @@ class Controller:
             url = recipe["url"]
             submit_url = f"/recipes/{rowid}"
 
+            if recipe["last_made"]:
+                last_made = recipe["last_made"].format("YYYY-MM-DD")
+
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
@@ -153,7 +159,8 @@ class Controller:
                 tags=tags,
                 url=url,
                 submit_url=submit_url,
-                cancel_url=submit_url
+                cancel_url=submit_url,
+                last_made=last_made
             ).pop()
         )
 
@@ -227,6 +234,7 @@ class Controller:
                 added=recipe["created"],
                 url=recipe["url"],
                 url_domain=url_domain,
+                last_made=recipe["last_made"],
                 subview_title=recipe["title"]
             ).pop()
         )

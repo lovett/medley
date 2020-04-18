@@ -22,6 +22,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self) -> None:
         """Register converters."""
+        register_converter("date", self.date)
         register_converter("datetime", self.datetime)
         register_converter("date_with_hour", self.date_with_hour)
         register_converter("binary", self.binary)
@@ -30,6 +31,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
         register_converter("comma_delimited", self.comma_delimited)
+
+    @staticmethod
+    def date(value: bytes) -> pendulum.DateTime:
+        """Convert a date string to a Pendulum instance."""
+
+        decoded_value = value.decode("utf-8")
+
+        return pendulum.from_format(
+            decoded_value,
+            "YYYY-MM-DD"
+        )
 
     @staticmethod
     def datetime(value: bytes) -> pendulum.DateTime:
