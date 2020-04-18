@@ -227,7 +227,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
         deletion_count = self._delete(
-            "DELETE FROM bookmarks WHERE deleted IS NOT NULL"
+            "DELETE FROM recipes WHERE deleted IS NOT NULL"
         )
 
         unit = "row" if deletion_count == 1 else "rows"
