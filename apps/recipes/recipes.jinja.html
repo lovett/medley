@@ -5,6 +5,15 @@
     {{ macros.staticAsset("recipes", "recipes.css") }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a id="add-record" href="/recipes/new">
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Add
+        </a>
+    </nav>
+{% endblock %}
+
 {% block page_body %}
     {% block content %}
     {% endblock %}
