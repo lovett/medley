@@ -50,6 +50,10 @@
 }
 
 #recipe SECTION P:hover, #recipe SECTION LI:hover {
+    cursor: pointer;
+}
+
+#recipe SECTION P:hover, #recipe SECTION LI:hover {
     background-color: var(--secondary);
 }
 
@@ -91,6 +95,11 @@
     display: inline;
     margin-right: 2em;
     white-space: nowrap;
+}
+
+.done {
+    text-decoration: line-through;
+    opacity: 0.6;
 }
 
 /* Small devices */
