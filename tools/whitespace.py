@@ -19,4 +19,15 @@ class Tool(cherrypy.Tool):
         for key, value in cherrypy.request.params.items():
             if not value:
                 continue
-            cherrypy.request.params[key] = value.replace("\r", "").strip()
+
+            if isinstance(cherrypy.request.params[key], list):
+                for index, val in enumerate(cherrypy.request.params[key]):
+                    if not isinstance(val, str):
+                        continue
+
+                    cherrypy.request.params[key][index] = val.replace(
+                        "\r", ""
+                    ).strip()
+
+            if isinstance(cherrypy.request.params[key], str):
+                cherrypy.request.params[key] = value.replace("\r", "").strip()
