@@ -13,7 +13,7 @@
     {{ macros.svgSymbols("arrow-left", "triangle") }}
 
     <main id="editor">
-        <form method="post" action="{{ submit_url }}">
+        <form enctype="multipart/form-data" method="post" action="{{ submit_url }}">
             <div class="field">
                 <label for="title">Title</label>
                 <input
@@ -61,6 +61,11 @@
                     id="body"
                     name="body"
                 >{{ body }}</textarea>
+            </div>
+
+            <div class="field">
+                <label for="attachments_input">Attachments</label>
+                <input type="file" id="attachments_input" name="attachments" multiple />
             </div>
 
             <div class="field">

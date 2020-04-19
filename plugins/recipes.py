@@ -40,6 +40,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS attachments (
+            recipe_id INT NOT NULL,
+            filename TEXT NOT NULL,
+            mime_type TEXT NOT NULL,
+            content BLOB NOT NULL,
+            FOREIGN KEY (recipe_id) REFERENCES recipes(rowid)
+                ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS index_attachment_recipe_id
+            ON attachments (recipe_id);
+
         CREATE TABLE IF NOT EXISTS tags (
             name TEXT NOT NULL
         );
@@ -105,6 +117,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("recipes:add", self.add)
+        self.bus.subscribe("recipes:attachment:add", self.attach)
+        self.bus.subscribe("recipes:attachment:list", self.list_attachments)
+        self.bus.subscribe("recipes:attachment:view", self.view_attachment)
+        self.bus.subscribe("recipes:attachment:remove", self.remove_attachment)
         self.bus.subscribe("recipes:tags:all", self.all_tags)
         self.bus.subscribe("recipes:find", self.find)
         self.bus.subscribe("recipes:find:tag", self.find_by_tag)
@@ -174,6 +190,61 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ))
 
         return self._multi(queries)
+
+    # pylint: disable=protected-access
+    def attach(
+            self,
+            recipe_id: int,
+            filename: str,
+            mime_type: str,
+            content: bytes
+    ) -> None:
+        """Store one or more uploaded files associated with a recipe."""
+
+        self._execute(
+            """INSERT INTO attachments (recipe_id, filename, mime_type, content)
+            VALUES (?, ?, ?, ?)""",
+            (recipe_id, filename.lower(), mime_type, content)
+        )
+
+    def remove_attachment(
+            self,
+            recipe_id: int,
+            attachment_id: int
+    ) -> bool:
+        """Discard an attachment."""
+        return self._execute(
+            "DELETE FROM attachments WHERE recipe_id=? AND rowid=?",
+            (recipe_id, attachment_id)
+        )
+
+    def list_attachments(
+            self,
+            recipe_id: int
+    ) -> typing.List[sqlite3.Row]:
+        """List the files currently associated with a recipe."""
+
+        return self._select(
+            """SELECT rowid, filename, mime_type
+            FROM attachments
+            WHERE recipe_id=?
+            ORDER BY filename""",
+            (recipe_id,)
+        )
+
+    def view_attachment(self, recipe_id: int, filename: str) -> bytes:
+        """Get the bytes of an attachment."""
+
+        return typing.cast(
+            bytes,
+            self._selectOne(
+                """SELECT filename, mime_type, content
+                FROM attachments
+                WHERE recipe_id=?
+                AND filename=?""",
+                (recipe_id, filename)
+            )
+        )
 
     def all_tags(self) -> typing.Iterator[sqlite3.Row]:
         """List all known tags.

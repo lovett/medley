@@ -1,5 +1,9 @@
 {% extends "recipes.jinja.html" %}
 
+{% block scripts %}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+{% endblock %}
+
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a id="edit-record" href="/recipes/{{ rowid }}/edit">
@@ -15,7 +19,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("new-item", "arrow-left", "calendar", "edit", "globe", "tag") }}
+    {{ macros.svgSymbols("new-item", "arrow-left", "calendar", "edit", "globe", "tag", "delete") }}
 
     <main id="recipe" class="{% if ingredients %}with-ingredients{% endif %}">
         <header id="page-title">
@@ -34,9 +38,24 @@
         </header>
 
         <section>
-            <div>{{ ingredients|safe }}</div>
-            <div>{{ body|safe }}</div>
+            <div id="ingredients">{{ ingredients|safe }}</div>
+            <div id="directions">{{ body|safe }}</div>
         </section>
+
+        {% if attachments  %}
+            <ul id="attachments">
+                {% for attachment in attachments %}
+                    <discardable-record inline-template url="/recipes/{{ rowid }}/attachments/{{ attachment["rowid"] }}">
+                        <li v-bind:style="styles">
+                            <div class="actions"><discard-button tooltip="Delete this attachment" /></div>
+                            <a href="/recipes/{{ rowid }}/{{ attachment["filename"] }}" target="_blank">
+                                {{ attachment["filename"] }}
+                            </a>
+                        </li>
+                    </discardable-record>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
         <footer>
             <div>

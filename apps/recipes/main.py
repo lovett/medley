@@ -5,6 +5,13 @@ import typing
 import cherrypy
 import mistletoe
 
+# pylint: disable=protected-access
+Attachment = typing.Union[
+    None,
+    cherrypy._cpreqbody.Part,
+    typing.List[cherrypy._cpreqbody.Part]
+]
+
 
 class Controller:
     """Dispatch application requests based on HTTP verb."""
@@ -12,6 +19,7 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    # pylint: disable=too-many-return-statements
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
@@ -31,6 +39,9 @@ class Controller:
         if args[0] == "search":
             return self.search(kwargs.get("q", ""))
 
+        if len(args) == 2:
+            return self.attachment(int(args[0]), args[1])
+
         return self.show(int(args[0]))
 
     @staticmethod
@@ -40,7 +51,8 @@ class Controller:
             body: str,
             url: str = "",
             tags: str = "",
-            last_made: str = ""
+            last_made: str = "",
+            attachments: Attachment = None
     ) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
@@ -66,21 +78,61 @@ class Controller:
                 "recipes:find:newest_id",
             ).pop()
 
+        if not attachments:
+            attachments = []
+
+        if attachments and not isinstance(attachments, list):
+            attachments = [attachments]
+
+        for attachment in attachments:
+            cherrypy.engine.publish(
+                "recipes:attachment:add",
+                recipe_id=rowid,
+                filename=attachment.filename,
+                mime_type=attachment.content_type.value,
+                content=attachment.file.read()
+            )
+
         raise cherrypy.HTTPRedirect(f"/recipes/{rowid}")
 
-    @staticmethod
-    def DELETE(rowid: int) -> None:
-        """Remove a recipe from the database."""
-        result = cherrypy.engine.publish(
-            "recipes:remove",
-            rowid
-        ).pop()
+    def DELETE(self, *args: str) -> None:
+        """Dispatch to a subhandler based on the URL path."""
 
-        if result:
+        deleted = False
+
+        if len(args) == 1:
+            recipe_id = int(args[0])
+            deleted = self.delete_recipe(recipe_id)
+
+        if len(args) == 3 and args[1] == "attachments":
+            recipe_id = int(args[0])
+            attachment_id = int(args[2])
+            deleted = self.delete_attachment(recipe_id, attachment_id)
+
+        if deleted:
             cherrypy.response.status = 204
             return
 
         raise cherrypy.HTTPError(404)
+
+    @staticmethod
+    def delete_recipe(recipe_id: int) -> bool:
+        """Remove a recipe from the database."""
+
+        return typing.cast(bool, cherrypy.engine.publish(
+            "recipes:remove",
+            recipe_id
+        ).pop())
+
+    @staticmethod
+    def delete_attachment(recipe_id: int, attachment_id: int) -> bool:
+        """Remove an attachment from the database."""
+
+        return typing.cast(bool, cherrypy.engine.publish(
+            "recipes:attachment:remove",
+            recipe_id=recipe_id,
+            attachment_id=attachment_id,
+        ).pop())
 
     @staticmethod
     def index(*_args: str, **_kwargs: str) -> bytes:
@@ -185,6 +237,22 @@ class Controller:
         )
 
     @staticmethod
+    def attachment(recipe_id: int, filename: str) -> bytes:
+        """Display a single attachment."""
+
+        row = cherrypy.engine.publish(
+            "recipes:attachment:view",
+            recipe_id=recipe_id,
+            filename=filename
+        ).pop()
+
+        if not row:
+            raise cherrypy.HTTPError(404)
+
+        cherrypy.response.headers["Content-Type"] = row["mime_type"]
+        return typing.cast(bytes, row["content"])
+
+    @staticmethod
     def show(rowid: int) -> bytes:
         """Display a single recipe."""
 
@@ -195,6 +263,11 @@ class Controller:
 
         if not recipe:
             raise cherrypy.HTTPError(404)
+
+        attachments = cherrypy.engine.publish(
+            "recipes:attachment:list",
+            recipe_id=rowid
+        ).pop()
 
         body_html = mistletoe.markdown(recipe["body"])
 
@@ -235,6 +308,7 @@ class Controller:
                 url=recipe["url"],
                 url_domain=url_domain,
                 last_made=recipe["last_made"],
-                subview_title=recipe["title"]
+                subview_title=recipe["title"],
+                attachments=attachments
             ).pop()
         )
