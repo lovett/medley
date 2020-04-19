@@ -314,15 +314,12 @@ TEXTAREA {
     font-weight: normal;
 }
 
-#page-title {
-    margin-bottom: 1em;
-}
-
 #page-title H2 {
     font-size: 1.5em;
 }
 
 #page-title UL {
+    margin: 1em 0 0 0;
     padding-left: 0;
 }
 
@@ -485,21 +482,6 @@ TEXTAREA {
 .notice {
     background-color: var(--secondary);
 }
-
-.field-group {
-    display: flex;
-    justify-content: space-between;
-}
-
-.field-group .field {
-    flex: 1;
-    margin-right: 1em;
-}
-
-.field-group .field:last-of-type {
-    margin-right: 0;
-}
-
 
 .field .inline {
     display: inline-block;
@@ -701,6 +683,20 @@ TEXTAREA {
     #main-toolbar FIELDSET {
         margin-top: 0;
     }
+
+    .field-group {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .field-group .field {
+        flex: 1;
+        margin-right: 1em;
+    }
+
+    .field-group .field:last-of-type {
+        margin-right: 0;
+    }
 }
 
 /* Large devices */
@@ -712,6 +708,13 @@ TEXTAREA {
         align-items: center;
     }
 
+    #page-title {
+        margin-bottom: 1em;
+    }
+
+    #page-title UL {
+        margin-top: 0;
+    }
 
     #page-title LI {
         margin-bottom: 0;
