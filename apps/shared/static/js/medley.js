@@ -28,7 +28,7 @@ var MEDLEY = (function () {
             return;
         }
 
-        if (e.key === 'C') {
+        if (e.key === 'Escape') {
             const tags = document.getElementsByClassName('cancel');
             if (tags.length === 0) {
                 return;
