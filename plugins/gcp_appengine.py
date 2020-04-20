@@ -65,7 +65,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.engine.publish(
             "applog:add",
             "gcp_appengine",
-            f"{line_count} {unit} ingested"
+            f"{line_count} {unit} ingested from {storage_path}"
         )
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")

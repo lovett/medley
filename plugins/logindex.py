@@ -340,7 +340,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "logindex",
-            f"{line_count} {unit} ingested"
+            f"{line_count} {unit} ingested from {file_path}"
         )
 
     @decorators.log_runtime
