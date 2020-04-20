@@ -172,13 +172,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 combined_line = self.json_to_combined(payload)
 
-                record_hash = payload.get("traceId")
-                if not record_hash:
-                    record_hash = cherrypy.engine.publish(
-                        "hasher:value",
-                        line,
-                        algorithm="md5"
-                    ).pop()
+                record_hash = cherrypy.engine.publish(
+                    "hasher:value",
+                    line,
+                    algorithm="md5"
+                ).pop()
 
                 batch.append((
                     str(storage_path),
