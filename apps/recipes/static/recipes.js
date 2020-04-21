@@ -1,6 +1,8 @@
 MEDLEY.recipes = (function () {
     function toggleStrike(e) {
-        e.target.classList.toggle('done');
+        if (e.target.nodeName === 'P' || e.target.nodeName === 'LI') {
+            e.target.classList.toggle('done');
+        }
     }
 
     return {
