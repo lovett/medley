@@ -16,6 +16,8 @@ server {
     access_log /var/log/nginx/medley-access.log;
     error_log /var/log/nginx/medley-error.log;
 
+    client_max_body_size 50M;
+
     location ~ \.(css|js|svg)$ {
         root {{ project_root }}/apps;
         sendfile on;
