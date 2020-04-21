@@ -85,6 +85,9 @@ class Controller:
             attachments = [attachments]
 
         for attachment in attachments:
+            if not attachment.file:
+                continue
+
             cherrypy.engine.publish(
                 "recipes:attachment:add",
                 recipe_id=rowid,
