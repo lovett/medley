@@ -39,7 +39,9 @@
         </header>
 
         <section>
-            <div id="ingredients">{{ ingredients|safe }}</div>
+            {% if ingredients %}
+                <div id="ingredients">{{ ingredients|safe }}</div>
+            {% endif %}
             <div id="directions">{{ body|safe }}</div>
         </section>
 

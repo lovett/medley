@@ -20,14 +20,9 @@
     display: block;
 }
 
-#recipe {
-    display: grid;
-    grid-template-rows: auto 1fr;
-}
-
 #recipe H1 {
     font-size: 1.15em;
-    margin: 2em .5em 0;
+    margin: 2em 0 0.5em 0;
     border-bottom: 1px solid currentColor;
 }
 
@@ -36,6 +31,7 @@
     grid-template-columns: 1fr;
     grid-column-gap: 1em;
     margin-bottom: 0;
+    border-top: 1px solid var(--grey);
 }
 
 #recipe SECTION UL {
@@ -45,8 +41,19 @@
 }
 
 #recipe SECTION P, #recipe SECTION LI {
-    padding: .5em 0;
+    break-inside: avoid;
+    padding: 0 0 .5em 0;
     margin: 0;
+}
+
+#directions {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+#ingredients {
+    padding-top: 1em;
+    margin-bottom: 1em;
 }
 
 #recipe SECTION P:hover, #recipe SECTION LI:hover {
@@ -114,20 +121,24 @@
 
     #ingredients {
         border-right: 1px solid var(--grey);
-        padding-top: 1em;
     }
 
     #directions {
         padding-top: 1em;
+        columns: 28em;
+        column-fill: auto;
+        column-gap: 3em;
+        margin: 0 auto;
     }
 
     #recipe {
+        display: grid;
+        grid-template-rows: auto 1fr;
         margin-bottom: 2.25em;
     }
 
     #recipe.with-ingredients SECTION:nth-of-type(1) {
-        grid-template-columns: 20em 1fr;
-        border-top: 1px solid var(--grey);
+        grid-template-columns: 16em 1fr;
     }
 
     #recipe FOOTER {
@@ -142,15 +153,14 @@
         margin-right: 2em;
         margin-bottom: 0;
     }
-
-    #recipe SECTION P, #recipe SECTION LI {
-        padding: .5em;
-    }
-
 }
 
 /* Large devices */
 @media (min-width: 992px) {
+    #directions {
+        column-fill: balance;
+    }
+
     #recipe FOOTER TIME:last-of-type {
         margin-right: 0;
     }
