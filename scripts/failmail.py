@@ -1,4 +1,4 @@
-"""Send an email when one of the application's systemd services failes."""
+"""Send an email when one of Medley's systemd services failes."""
 
 import email.mime.text
 import subprocess
@@ -15,7 +15,7 @@ except IndexError:
     sys.exit(2)
 
 JOURNAL_PROCESS = subprocess.run(
-    ("/usr/bin/env", "journalctl", "-u", "medley", "--since", "-12 hours"),
+    ("/usr/bin/env", "journalctl", "-u", SERVICE, "--since", "-1 hours"),
     capture_output=True,
     text=True,
     check=True
