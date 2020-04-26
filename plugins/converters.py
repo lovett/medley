@@ -65,6 +65,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except ValueError:
             pass
 
+        try:
+            return pendulum.from_format(
+                decoded_value,
+                "YYYY-MM-DD"
+            )
+        except ValueError:
+            pass
+
         last_colon_index = decoded_value.rindex(":")
         date = decoded_value[:last_colon_index] + \
             decoded_value[last_colon_index + 1:]
