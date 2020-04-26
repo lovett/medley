@@ -274,9 +274,25 @@ class Controller:
 
         body_html = mistletoe.markdown(recipe["body"])
 
-        body_html = body_html.replace("3/4", "¾")
         body_html = body_html.replace("1/2", "½")
+        body_html = body_html.replace("1/3", "⅓")
+        body_html = body_html.replace("2/3", "⅔")
         body_html = body_html.replace("1/4", "¼")
+        body_html = body_html.replace("3/4", "¾")
+        body_html = body_html.replace("1/5", "⅕")
+        body_html = body_html.replace("2/5", "⅖")
+        body_html = body_html.replace("3/5", "⅗")
+        body_html = body_html.replace("4/5", "⅘")
+        body_html = body_html.replace("1/6", "⅙")
+        body_html = body_html.replace("5/6", "⅚")
+        body_html = body_html.replace("1/7", "⅐")
+        body_html = body_html.replace("1/8", "⅛")
+        body_html = body_html.replace("3/8", "⅜")
+        body_html = body_html.replace("5/8", "⅝")
+        body_html = body_html.replace("7/8", "⅞")
+        body_html = body_html.replace("1/9", "⅑")
+        body_html = body_html.replace("1/10", "⅒")
+
         body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html)
 
         if "</ul>" in body_html:
