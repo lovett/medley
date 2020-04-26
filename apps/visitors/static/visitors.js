@@ -2,31 +2,6 @@ MEDLEY.visitors = (function () {
     'use strict';
 
     /**
-     * Change the date keyword of the current query.
-     */
-    function adjustQueryDate(e) {
-        const queryField = document.getElementById('query');
-        const days = parseInt(e.target.value, 10);
-
-        let dateString = 'today'
-
-        if (days === -1) {
-            dateString = 'yesterday'
-        }
-
-        if (days < -1) {
-            const newDate = new Date(Date.now() + 86400000 * days);
-            dateString = newDate.toISOString().replace(/T.*/, '')
-        }
-
-        let query = queryField.value.trim();
-
-        query = query.replace(/^\s*date.*\s*/g, '');
-        query = 'date ' + dateString + '\n' + query;
-        queryField.value = query;
-    }
-
-    /**
      * Store a query in the registry.
      */
     async function saveQuery (e) {

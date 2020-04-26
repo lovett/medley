@@ -29,8 +29,6 @@ MEDLEY.shortcuts = (function () {
         steppedDateString += `${(steppedDate.getMonth() + 1).toString().padStart(2, '0')}-`;
         steppedDateString += `${steppedDate.getDate().toString().padStart(2, '0')}`;
 
-        console.log(steppedDateString);
-
         query = query.replace(/^\s*date.*\s*/g, '');
         query = `date ${steppedDateString}\n${query}`;
         return query;

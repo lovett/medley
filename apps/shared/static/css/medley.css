@@ -72,6 +72,7 @@ BUTTON[disabled] .icon {
 BUTTON .icon {
     fill: var(--white);
     margin: 0 1em;
+    pointer-events: none;
 }
 
 BUTTON + .label {
