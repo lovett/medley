@@ -21,7 +21,6 @@
 - *.pyc
 - /requirements*.txt
 - /node_modules
-- /Jenkinsfile
 - package.json
 - package-lock.json
 - Makefile
