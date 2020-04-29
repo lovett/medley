@@ -74,6 +74,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["unescape"] = self.unescape_filter
         self.env.filters["internal_url"] = self.internal_url_filter
         self.env.filters["better_html"] = self.better_html
+        self.env.filters["is_today"] = self.is_today
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -533,3 +534,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return jinja2.Markup(result)
 
         return result
+
+    @staticmethod
+    @jinja2.contextfilter
+    def is_today(
+            _: jinja2.runtime.Context,
+            value: pendulum.DateTime
+    ) -> bool:
+        """Deterime if a unix timestamp falls on the current date."""
+
+        diff = pendulum.now().diff(value)
+
+        return typing.cast(bool, diff.in_days() < 1)

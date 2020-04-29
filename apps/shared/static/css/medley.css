@@ -352,6 +352,11 @@ TEXTAREA {
     text-decoration: none;
 }
 
+#main-toolbar A.active {
+    color: var(--secondary);
+    text-decoration: none;
+}
+
 #main-toolbar svg {
     fill: currentColor;
     margin-right: .5em;

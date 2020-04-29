@@ -24,12 +24,49 @@ MEDLEY.alturl = (function () {
         }
     }
 
+    function filterStories(e) {
+        if (!e.target.dataset.filter) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const datePart = (date) => date.toISOString().split('T')[0];
+
+        let targetDate = '';
+
+        if (e.target.dataset.filter === 'today') {
+            targetDate = datePart(new Date());
+        }
+
+        let visibleCount = 0;
+        document.querySelectorAll('#collection LI.headline').forEach((node) => {
+            node.hidden = (targetDate && node.dataset.date !== targetDate);
+            if (node.hidden === false) {
+                visibleCount++;
+            }
+        });
+
+        document.querySelectorAll('#main-toolbar .date-filter').forEach((node) => {
+            node.classList.remove('active');
+            if (node.dataset.filter === e.target.dataset.filter) {
+                node.classList.add('active');
+            }
+        });
+
+        console.log(visibleCount);
+        document.getElementById('no-matches').hidden = (visibleCount > 0);
+
+    }
+
     return {
         init: function () {
             const saveLink = document.getElementById('add-record');
             if (saveLink) {
                 saveLink.addEventListener('click', saveFavorite)
             }
+
+            document.addEventListener('click', filterStories);
         }
     }
 })();
