@@ -12,7 +12,7 @@
                 {{ comment.replies|length|pluralize('reply', 'replies') }}
             {%- endif -%}
         </summary>
-        <div class="body">
+        <div class="body" v-pre>
             {{ comment.body_html|better_html|unescape }}
         </div>
         {% if comment.replies %}
@@ -35,7 +35,7 @@
 
 {% block content %}
     <div class="intro">
-        <h2 class="title">{{ story.title|safe }}</h2>
+        <h2 class="title" v-pre>{{ story.title|safe }}</h2>
 
         <time class="info">
             <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
