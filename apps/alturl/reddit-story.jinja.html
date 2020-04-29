@@ -8,8 +8,8 @@
             <time>{{ comment.created_utc|localtime|dateformat('YYYY-MM-DD h:MM A') }}</time>
             by {{ comment.author }}
 
-            {%- if comment.replies -%} ,
-                {{ comment.replies|length|pluralize('reply', 'replies') }}
+            {%- if comment.replies.data -%} ,
+                {{ comment.replies.data.children|length|pluralize('reply', 'replies') }}
             {%- endif -%}
         </summary>
         <div class="body" v-pre>
