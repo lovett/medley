@@ -20,12 +20,6 @@
     display: block;
 }
 
-#recipe H1 {
-    font-size: 1.15em;
-    margin: 2em 0 0.5em 0;
-    border-bottom: 1px solid currentColor;
-}
-
 #recipe SECTION:nth-of-type(1) {
     display: grid;
     grid-template-columns: 1fr;
@@ -59,6 +53,25 @@
     padding-top: 1em;
     padding-bottom: 1em;
 }
+
+#directions H1 {
+    font-size: 1.15em;
+    margin-top: 2em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid currentColor;
+}
+
+#directions H1:first-child {
+    margin-top: 0;
+}
+
+#directions H2 {
+    break-after: avoid;
+    font-size: 1.05em;
+    margin: 2em 0 0 0;
+}
+
+
 
 #ingredients {
     padding-top: 1em;
