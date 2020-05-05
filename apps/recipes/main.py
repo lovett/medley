@@ -57,15 +57,15 @@ class Controller:
         """Save changes to an existing recipe, or add a new one."""
 
         topic = "recipes:add"
-        rowid = 0
+        recipe_id = 0
 
         if args:
             topic = "recipes:update"
-            rowid = typing.cast(int, args[0])
+            recipe_id = typing.cast(int, args[0])
 
         cherrypy.engine.publish(
             topic,
-            rowid=rowid,
+            recipe_id=recipe_id,
             title=title,
             body=body,
             url=url,
@@ -73,8 +73,8 @@ class Controller:
             last_made=last_made
         ).pop()
 
-        if not rowid:
-            rowid = cherrypy.engine.publish(
+        if not recipe_id:
+            recipe_id = cherrypy.engine.publish(
                 "recipes:find:newest_id",
             ).pop()
 
@@ -90,13 +90,13 @@ class Controller:
 
             cherrypy.engine.publish(
                 "recipes:attachment:add",
-                recipe_id=rowid,
+                recipe_id=recipe_id,
                 filename=attachment.filename,
                 mime_type=attachment.content_type.value,
                 content=attachment.file.read()
             )
 
-        raise cherrypy.HTTPRedirect(f"/recipes/{rowid}")
+        raise cherrypy.HTTPRedirect(f"/recipes/{recipe_id}")
 
     def DELETE(self, *args: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
@@ -175,7 +175,7 @@ class Controller:
         )
 
     @staticmethod
-    def form(rowid: int = 0, **_kwargs: str) -> bytes:
+    def form(recipe_id: int = 0, **_kwargs: str) -> bytes:
         """Display a form for adding or updating a recipe."""
 
         title = ""
@@ -185,10 +185,10 @@ class Controller:
         submit_url = "/recipes"
         last_made = ""
 
-        if rowid:
+        if recipe_id:
             recipe = cherrypy.engine.publish(
                 "recipes:find",
-                rowid
+                recipe_id
             ).pop()
 
             if not recipe:
@@ -198,7 +198,7 @@ class Controller:
             body = recipe["body"]
             tags = recipe["tags"]
             url = recipe["url"]
-            submit_url = f"/recipes/{rowid}"
+            submit_url = f"/recipes/{recipe_id}"
 
             if recipe["last_made"]:
                 last_made = recipe["last_made"].format("YYYY-MM-DD")
@@ -208,7 +208,7 @@ class Controller:
             cherrypy.engine.publish(
                 "jinja:render",
                 "recipes-form.jinja.html",
-                rowid=rowid,
+                recipe_id=recipe_id,
                 title=title,
                 body=body,
                 tags=tags,
@@ -256,12 +256,12 @@ class Controller:
         return typing.cast(bytes, row["content"])
 
     @staticmethod
-    def show(rowid: int) -> bytes:
+    def show(recipe_id: int) -> bytes:
         """Display a single recipe."""
 
         recipe = cherrypy.engine.publish(
             "recipes:find",
-            rowid
+            recipe_id
         ).pop()
 
         if not recipe:
@@ -269,7 +269,7 @@ class Controller:
 
         attachments = cherrypy.engine.publish(
             "recipes:attachment:list",
-            recipe_id=rowid
+            recipe_id=recipe_id
         ).pop()
 
         body_html = mistletoe.markdown(recipe["body"])
@@ -318,7 +318,7 @@ class Controller:
                 "jinja:render",
                 "recipes-show.jinja.html",
                 title=recipe["title"],
-                rowid=recipe["rowid"],
+                recipe_id=recipe["id"],
                 ingredients=ingredients,
                 body=rest,
                 tags=recipe["tags"] or [],

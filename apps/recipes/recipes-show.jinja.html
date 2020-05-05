@@ -7,7 +7,7 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a id="edit-record" href="/recipes/{{ rowid }}/edit">
+        <a id="edit-record" href="/recipes/{{ recipe_id }}/edit">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
             Edit
         </a>
@@ -48,10 +48,10 @@
         {% if attachments  %}
             <ul id="attachments">
                 {% for attachment in attachments %}
-                    <discardable-record inline-template url="/recipes/{{ rowid }}/attachments/{{ attachment["rowid"] }}">
+                    <discardable-record inline-template url="/recipes/{{ recipe_id }}/attachments/{{ attachment["recipe_id"] }}">
                         <li v-bind:style="styles">
                             <div class="actions"><discard-button tooltip="Delete this attachment" /></div>
-                            <a href="/recipes/{{ rowid }}/{{ attachment["filename"] }}" target="_blank">
+                            <a href="/recipes/{{ recipe_id }}/{{ attachment["filename"] }}" target="_blank">
                                 {{ attachment["filename"] }}
                             </a>
                         </li>

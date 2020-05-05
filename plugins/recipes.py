@@ -21,6 +21,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA foreign_keys=ON;
 
         CREATE TABLE IF NOT EXISTS recipes (
+            id INTEGER PRIMARY KEY,
             title NOT NULL,
             body TEXT NOT NULL,
             url TEXT DEFAULT NULL,
@@ -34,18 +35,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             recipe_id INT NOT NULL,
             tag_id INT NOT NULL,
             PRIMARY KEY (recipe_id, tag_id),
-            FOREIGN KEY (recipe_id) REFERENCES recipes(rowid)
+            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
                 ON DELETE CASCADE,
-            FOREIGN KEY (tag_id) REFERENCES tags(rowid)
+            FOREIGN KEY (tag_id) REFERENCES tags(id)
                 ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS attachments (
+            id INTEGER PRIMARY KEY,
             recipe_id INT NOT NULL,
             filename TEXT NOT NULL,
             mime_type TEXT NOT NULL,
             content BLOB NOT NULL,
-            FOREIGN KEY (recipe_id) REFERENCES recipes(rowid)
+            FOREIGN KEY (recipe_id) REFERENCES recipes(id)
                 ON DELETE CASCADE
         );
 
@@ -53,6 +55,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON attachments (recipe_id);
 
         CREATE TABLE IF NOT EXISTS tags (
+            id INTEGER PRIMARY KEY,
             name TEXT NOT NULL
         );
 
@@ -76,7 +79,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE TRIGGER IF NOT EXISTS recipes_after_update
         AFTER UPDATE OF title, body ON recipes
         BEGIN
-        UPDATE recipes SET updated=CURRENT_TIMESTAMP WHERE rowid=new.rowid;
+        UPDATE recipes SET updated=CURRENT_TIMESTAMP WHERE id=new.rowid;
         INSERT INTO recipes_fts (recipes_fts, rowid, title, body)
             VALUES ('delete', old.rowid, old.title, old.body);
         INSERT INTO recipes_fts (rowid, title, body)
@@ -94,20 +97,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         AFTER DELETE ON recipe_tag
         BEGIN
         DELETE FROM tags
-            WHERE rowid NOT IN (SELECT DISTINCT tag_id FROM recipe_tag);
+            WHERE id NOT IN (SELECT DISTINCT tag_id FROM recipe_tag);
         END;
 
         CREATE VIEW IF NOT EXISTS extended_recipes_view AS
-            SELECT recipes.rowid, title, body, url,
+            SELECT recipes.id, title, body, url,
                 created, updated, last_made,
                 GROUP_CONCAT(tags.name) as tags
             FROM recipes
             LEFT JOIN recipe_tag
-                ON recipes.rowid=recipe_tag.recipe_id
+                ON recipes.id=recipe_tag.recipe_id
             LEFT JOIN tags
-                ON recipe_tag.tag_id=tags.rowid
+                ON recipe_tag.tag_id=tags.id
             WHERE recipes.deleted IS NULL
-            GROUP BY recipes.rowid;
+            GROUP BY recipes.id;
         """)
 
     def start(self) -> None:
@@ -157,7 +160,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         queries = [
             (
                 """CREATE TEMP TABLE IF NOT EXISTS tmp
-                (name TEXT, value TEXT)""",
+                (key TEXT, value TEXT)""",
                 ()
             ),
 
@@ -168,7 +171,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ),
 
             (
-                """INSERT INTO tmp (name, value)
+                """INSERT INTO tmp (key, value)
                 VALUES ("recipe_id", last_insert_rowid())""",
                 ()
             )
@@ -183,8 +186,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             queries.append((
                 """INSERT INTO recipe_tag (recipe_id, tag_id)
                 VALUES (
-                    (SELECT value FROM tmp WHERE name="recipe_id"),
-                    (SELECT rowid FROM tags WHERE name=?)
+                    (SELECT value FROM tmp WHERE key="recipe_id"),
+                    (SELECT id FROM tags WHERE name=?)
                 )""",
                 (tag, )
             ))
@@ -214,7 +217,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> bool:
         """Discard an attachment."""
         return self._execute(
-            "DELETE FROM attachments WHERE recipe_id=? AND rowid=?",
+            "DELETE FROM attachments WHERE recipe_id=? AND id=?",
             (recipe_id, attachment_id)
         )
 
@@ -225,7 +228,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """List the files currently associated with a recipe."""
 
         return self._select(
-            """SELECT rowid, filename, mime_type
+            """SELECT id, filename, mime_type
             FROM attachments
             WHERE recipe_id=?
             ORDER BY filename""",
@@ -257,40 +260,40 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT name, count(*) as count
-            FROM tags JOIN recipe_tag ON tags.rowid=recipe_tag.tag_id
-            JOIN recipes ON recipe_tag.recipe_id=recipes.rowid
+            FROM tags JOIN recipe_tag ON tags.id=recipe_tag.tag_id
+            JOIN recipes ON recipe_tag.recipe_id=recipes.id
             WHERE recipes.deleted IS NULL
             GROUP BY recipe_tag.tag_id
             ORDER BY name"""
         )
 
-    def find(self, rowid: int) -> typing.Optional[sqlite3.Row]:
+    def find(self, recipe_id: int) -> typing.Optional[sqlite3.Row]:
         """Locate a recipe by its ID."""
 
         return self._selectOne(
-            """SELECT rowid, title, body, url,
+            """SELECT id, title, body, url,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
-            WHERE rowid=?""",
-            (rowid,)
+            WHERE id=?""",
+            (recipe_id,)
         )
 
     def find_by_tag(self, tag: str) -> typing.Iterator[sqlite3.Row]:
         """List all recipes associated with a tag."""
         return self._select_generator(
-            """SELECT rowid, title, url,
+            """SELECT id, title, url,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
-            WHERE rowid IN (
+            WHERE id IN (
                 SELECT recipe_id
                 FROM recipe_tag, tags
-                WHERE recipe_tag.tag_id=tags.rowid
+                WHERE recipe_tag.tag_id=tags.id
                 AND tags.name=?
             )""",
             (tag,)
@@ -300,7 +303,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate the most recently inserted recipe."""
         return typing.cast(
             int,
-            self._selectFirst("SELECT MAX(rowid) FROM recipes")
+            self._selectFirst("SELECT MAX(id) FROM recipes")
         )
 
     @decorators.log_runtime
@@ -323,30 +326,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def remove(self, rowid: int) -> bool:
+    def remove(self, recipe_id: int) -> bool:
         """Mark a recipe for future deletion."""
 
         return self._execute(
-            "UPDATE recipes SET deleted=CURRENT_TIMESTAMP WHERE rowid=?",
-            (rowid,)
+            "UPDATE recipes SET deleted=CURRENT_TIMESTAMP WHERE id=?",
+            (recipe_id,)
         )
 
     def search_recipes(self, query: str) -> typing.Iterator[sqlite3.Row]:
         """Locate recipes that match a keyword search."""
         return self._select_generator(
-            """SELECT r.rowid, r.title, r.body, r.url,
+            """SELECT r.id, r.title, r.body, r.url,
             r.created as 'created [datetime]',
             r.updated as 'updated [datetime]',
             r.last_made as 'last_made [datetime]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r, recipes_fts
-            WHERE r.rowid=recipes_fts.rowid
+            WHERE r.id=recipes_fts.rowid
             AND recipes_fts MATCH ?
             ORDER BY recipes_fts.rank DESC""",
             (query,)
         )
 
-    def update(self, rowid: int, **kwargs: typing.Any) -> bool:
+    def update(self, recipe_id: int, **kwargs: typing.Any) -> bool:
         """Replace an existing recipe with new values."""
 
         title = kwargs.get("title")
@@ -374,12 +377,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 """UPDATE recipes
                 SET title=?, body=?, url=?, last_made=?
-                WHERE rowid=?""",
-                (title, body, url, last_made, rowid)
+                WHERE id=?""",
+                (title, body, url, last_made, recipe_id)
             ),
             (
                 """DELETE FROM recipe_tag WHERE recipe_id=?""",
-                (rowid,)
+                (recipe_id,)
             )
         ]
 
@@ -393,9 +396,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 """INSERT INTO recipe_tag (recipe_id, tag_id)
                 VALUES (
                     ?,
-                    (SELECT rowid FROM tags WHERE name=?)
+                    (SELECT id FROM tags WHERE name=?)
                 )""",
-                (rowid, tag, )
+                (recipe_id, tag, )
             ))
 
         return self._multi(queries)
