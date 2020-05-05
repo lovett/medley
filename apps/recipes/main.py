@@ -151,12 +151,17 @@ class Controller:
             "recipes:tags:all"
         ).pop()
 
+        recently_added = cherrypy.engine.publish(
+            "recipes:find:recent"
+        ).pop()
+
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
                 "recipes-index.jinja.html",
                 tags=tags,
+                recently_added=recently_added
             ).pop()
         )
 

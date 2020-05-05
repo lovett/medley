@@ -126,6 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:tags:all", self.all_tags)
         self.bus.subscribe("recipes:find", self.find)
         self.bus.subscribe("recipes:find:tag", self.find_by_tag)
+        self.bus.subscribe("recipes:find:recent", self.find_recent)
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
         self.bus.subscribe("recipes:search:recipe", self.search_recipes)
@@ -191,8 +192,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (recipe_id,)
         )
 
+    def find_recent(self, limit: int = 10) -> typing.Iterator[sqlite3.Row]:
+        """Locate recently-added recipes."""
+
+        return self._select_generator(
+            """SELECT id, title, url,
+            created as 'created [datetime]',
+            updated as 'updated [datetime]',
+            last_made as 'last_made [date]',
+            tags as 'tags [comma_delimited]'
+            FROM extended_recipes_view
+            ORDER BY created DESC LIMIT ?
+            """,
+            (limit,)
+        )
+
     def find_by_tag(self, tag: str) -> typing.Iterator[sqlite3.Row]:
         """List all recipes associated with a tag."""
+
         return self._select_generator(
             """SELECT id, title, url,
             created as 'created [datetime]',

@@ -1,8 +1,12 @@
 {% extends "recipes.jinja.html" %}
 
+{% block scripts %}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+{% endblock %}
+
 {% block content %}
-    {{ macros.svgSymbols("new-item", "arrow-let", "tag") }}
-    <main id="tagset">
+    {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete") }}
+    <main>
         <header id="app-nav">
             <form method="get" action="/recipes/search">
                 <div class="field">
@@ -22,7 +26,23 @@
             </form>
         </header>
 
-        <section>
+        <section id="collection">
+            <h2>Recently Added</h2>
+            {% set ns = namespace(recipes_found=False) %}
+            <ul>
+                {% for recipe in recently_added %}
+                    {% set ns.recipes_found = True %}
+                    {% include "recipe-listing.jinja.html" %}
+                {% endfor %}
+            </ul>
+
+            {% if not ns.recipes_found %}
+                <p>No recipes found.</p>
+            {% endif %}
+            <ul>
+        </section>
+
+        <section id="tagset">
             <h2>Tags</h2>
 
             {% set ns = namespace(tags_found=False) %}

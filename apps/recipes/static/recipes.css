@@ -120,9 +120,9 @@
 }
 
 #tagset LI {
-    display: inline;
-    margin-right: 2em;
     white-space: nowrap;
+    margin-bottom: 1em;
+    padding-bottom: 1em;
 }
 
 .done {
@@ -172,6 +172,10 @@
         display: inline-block;
         margin-right: 2em;
         margin-bottom: 0;
+    }
+
+    #tagset ul {
+        columns: 16em;
     }
 }
 

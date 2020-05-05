@@ -22,37 +22,12 @@
             </h2>
         </header>
 
+
         {% set ns = namespace(recipes_found=False) %}
         <ul>
             {% for recipe in recipes %}
                 {% set ns.recipes_found = True %}
-                <discardable-record inline-template url="/recipes/{{ recipe["id"] }}">
-                    <li v-bind:style="styles">
-                        <div class="actions"><discard-button tooltip="Delete this recipe" /></div>
-                        <div>
-                            <p class="title">
-                                <a href="/recipes/{{ recipe["id"] }}">
-                                    {{ recipe["title"] }}
-                                </a>
-                            </p>
-
-                            <p class="tags">
-                                {% if recipe["last_made"] %}
-                                    <time datetime="{{ recipe["last_made"] }}">
-                                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                                        Made on {{ recipe["last_made"]|dateformat("MMMM D, YYYY") }}
-                                    </time>
-                                {% endif %}
-                                {% for tag in recipe["tags"] %}
-                                    <a href="/recipes/tag/{{ tag|urlencode }}">
-                                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                                        {{ tag }}
-                                    </a>
-                                {% endfor %}
-                            </p>
-                        </div>
-                    </li>
-                </discardable-record>
+                {% include "recipe-listing.jinja.html" %}
             {% endfor %}
         </ul>
 
