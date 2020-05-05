@@ -46,7 +46,7 @@ class Controller:
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",
-            "/bookmarks"
+            "/bookmarks",
         ).pop()
 
         return typing.cast(
@@ -102,7 +102,10 @@ class Controller:
         pagination_url = cherrypy.engine.publish(
             "url:internal",
             "/bookmarks",
-            {"query": query}
+            {
+                "query": query,
+                "order": order
+            }
         ).pop()
 
         return typing.cast(
