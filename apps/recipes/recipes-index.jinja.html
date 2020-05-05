@@ -7,24 +7,7 @@
 {% block content %}
     {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete") }}
     <main>
-        <header id="app-nav">
-            <form method="get" action="/recipes/search">
-                <div class="field">
-                    <input
-                        type="search"
-                        id="q"
-                        name="q"
-                        value="{{ query }}"
-                        autocapitalize="none"
-                    />
-                </div>
-                <div class="field">
-                    <button>
-                        Search
-                    </button>
-                </div>
-            </form>
-        </header>
+        {% include "recipe-search.jinja.html" %}
 
         <section id="collection">
             <h2>Recently Added</h2>

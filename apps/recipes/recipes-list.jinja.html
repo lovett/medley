@@ -8,6 +8,8 @@
     {{ macros.svgSymbols("new-item", "calendar", "delete", "search", "tag") }}
 
     <main id="collection">
+        {% include "recipe-search.jinja.html" %}
+
         <header id="page-title">
             <h2>
                 {% if tag %}
