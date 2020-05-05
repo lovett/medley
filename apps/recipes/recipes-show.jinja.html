@@ -48,7 +48,7 @@
         {% if attachments  %}
             <ul id="attachments">
                 {% for attachment in attachments %}
-                    <discardable-record inline-template url="/recipes/{{ recipe_id }}/attachments/{{ attachment["recipe_id"] }}">
+                    <discardable-record inline-template url="/recipes/{{ recipe_id }}/attachments/{{ attachment["id"] }}">
                         <li v-bind:style="styles">
                             <div class="actions"><discard-button tooltip="Delete this attachment" /></div>
                             <a href="/recipes/{{ recipe_id }}/{{ attachment["filename"] }}" target="_blank">

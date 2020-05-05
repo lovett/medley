@@ -3,7 +3,6 @@
 import sqlite3
 import typing
 import cherrypy
-import pendulum
 from . import mixins
 from . import decorators
 
@@ -47,6 +46,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             filename TEXT NOT NULL,
             mime_type TEXT NOT NULL,
             content BLOB NOT NULL,
+            created DEFAULT CURRENT_TIMESTAMP,
+            deleted DEFAULT NULL,
             FOREIGN KEY (recipe_id) REFERENCES recipes(id)
                 ON DELETE CASCADE
         );
@@ -119,8 +120,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the recipes prefix.
         """
 
-        self.bus.subscribe("recipes:add", self.add)
-        self.bus.subscribe("recipes:attachment:add", self.attach)
         self.bus.subscribe("recipes:attachment:list", self.list_attachments)
         self.bus.subscribe("recipes:attachment:view", self.view_attachment)
         self.bus.subscribe("recipes:attachment:remove", self.remove_attachment)
@@ -131,95 +130,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
         self.bus.subscribe("recipes:search:recipe", self.search_recipes)
-        self.bus.subscribe("recipes:update", self.update)
-
-    def add(self, **kwargs: typing.Any) -> bool:
-        """Add a new recipe to the database."""
-
-        title = kwargs.get("title")
-        body = kwargs.get("body")
-        url = kwargs.get("url") or None
-
-        try:
-            last_made = pendulum.from_format(
-                kwargs.get("last_made", ""),
-                "YYYY-MM-DD",
-            ).format('YYYY-MM-DD')
-        except (TypeError, ValueError):
-            last_made = None
-
-        tags = [
-            item.strip()
-            for item in kwargs.get("tags", "").split(",")
-            if item
-        ]
-
-        if not tags:
-            tags = ["untagged"]
-
-        queries = [
-            (
-                """CREATE TEMP TABLE IF NOT EXISTS tmp
-                (key TEXT, value TEXT)""",
-                ()
-            ),
-
-            (
-                """INSERT INTO recipes (title, body, url, last_made)
-                VALUES (?, ?, ?, ?)""",
-                (title, body, url, last_made)
-            ),
-
-            (
-                """INSERT INTO tmp (key, value)
-                VALUES ("recipe_id", last_insert_rowid())""",
-                ()
-            )
-        ]
-
-        for tag in tags:
-            queries.append((
-                """INSERT OR IGNORE INTO tags (name) VALUES (LOWER(?))""",
-                (tag,)
-            ))
-
-            queries.append((
-                """INSERT INTO recipe_tag (recipe_id, tag_id)
-                VALUES (
-                    (SELECT value FROM tmp WHERE key="recipe_id"),
-                    (SELECT id FROM tags WHERE name=?)
-                )""",
-                (tag, )
-            ))
-
-        return self._multi(queries)
-
-    # pylint: disable=protected-access
-    def attach(
-            self,
-            recipe_id: int,
-            filename: str,
-            mime_type: str,
-            content: bytes
-    ) -> None:
-        """Store one or more uploaded files associated with a recipe."""
-
-        self._execute(
-            """INSERT INTO attachments (recipe_id, filename, mime_type, content)
-            VALUES (?, ?, ?, ?)""",
-            (recipe_id, filename.lower(), mime_type, content)
-        )
-
-    def remove_attachment(
-            self,
-            recipe_id: int,
-            attachment_id: int
-    ) -> bool:
-        """Discard an attachment."""
-        return self._execute(
-            "DELETE FROM attachments WHERE recipe_id=? AND id=?",
-            (recipe_id, attachment_id)
-        )
+        self.bus.subscribe("recipes:upsert", self.upsert)
 
     def list_attachments(
             self,
@@ -308,22 +219,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @decorators.log_runtime
     def prune(self) -> None:
-        """Delete rows that have been marked for removal.
+        """Delete recipe and attachment rows that have been marked for removal.
 
         This is normally invoked from the maintenance plugin.
 
         """
-        deletion_count = self._delete(
-            "DELETE FROM recipes WHERE deleted IS NOT NULL"
-        )
 
-        unit = "row" if deletion_count == 1 else "rows"
+        for table in ("recipe", "attachment"):
+            deletion_count = self._delete(
+                f"DELETE FROM {table} WHERE deleted IS NOT NULL"
+            )
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "recipes",
-            f"{deletion_count} {unit} deleted"
-        )
+            unit = "row" if deletion_count == 1 else "rows"
+
+            cherrypy.engine.publish(
+                "applog:add",
+                "recipes",
+                f"{deletion_count} {table} {unit} deleted"
+            )
 
     @decorators.log_runtime
     def remove(self, recipe_id: int) -> bool:
@@ -332,6 +245,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return self._execute(
             "UPDATE recipes SET deleted=CURRENT_TIMESTAMP WHERE id=?",
             (recipe_id,)
+        )
+
+    def remove_attachment(self, recipe_id: int, attachment_id: int) -> bool:
+        """Mark an attachment for future deletion."""
+        return self._execute(
+            """UPDATE attachments
+            SET deleted=CURRENT_TIMESTAMP
+            WHERE recipe_id=? AND id=?""",
+            (recipe_id, attachment_id)
         )
 
     def search_recipes(self, query: str) -> typing.Iterator[sqlite3.Row]:
@@ -349,42 +271,58 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (query,)
         )
 
-    def update(self, recipe_id: int, **kwargs: typing.Any) -> bool:
-        """Replace an existing recipe with new values."""
+    def upsert(
+            self,
+            recipe_id: int,
+            **kwargs: typing.Any
+    ) -> typing.Union[bool, int]:
+        """Insert or update a recipe."""
 
         title = kwargs.get("title")
         body = kwargs.get("body")
-        url = kwargs.get("url") or None
+        url = kwargs.get("url")
+        last_made = kwargs.get("last_made")
+        tags = kwargs.get("tags", [])
+        attachments = kwargs.get("attachments", [])
 
-        try:
-            last_made = pendulum.from_format(
-                kwargs.get("last_made", ""),
-                "YYYY-MM-DD",
-            ).format('YYYY-MM-DD')
-        except (TypeError, ValueError):
-            last_made = None
+        queries: typing.List[typing.Tuple[str, typing.Tuple]] = []
 
-        tags = [
-            item.strip()
-            for item in kwargs.get("tags", "").split(",")
-            if item
-        ]
+        queries.append((
+            """CREATE TEMP TABLE IF NOT EXISTS tmp
+            (key TEXT, value TEXT)""",
+            ()
+        ))
 
-        if not tags:
-            tags = ["untagged"]
+        queries.append((
+            """INSERT INTO recipes (id, title, body, url, last_made)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (id) DO UPDATE SET
+            title=excluded.title,
+            body=excluded.body,
+            url=excluded.url,
+            last_made=excluded.url,
+            updated=CURRENT_TIMESTAMP""",
+            (recipe_id, title, body, url, last_made)
+        ))
 
-        queries = [
-            (
-                """UPDATE recipes
-                SET title=?, body=?, url=?, last_made=?
-                WHERE id=?""",
-                (title, body, url, last_made, recipe_id)
-            ),
-            (
+        if recipe_id:
+            queries.append((
+                """INSERT INTO tmp (key, value)
+                VALUES ("recipe_id", ?)""",
+                (recipe_id,)
+            ))
+        else:
+            queries.append((
+                """INSERT INTO tmp (key, value)
+                VALUES ("recipe_id", last_insert_rowid())""",
+                ()
+            ))
+
+        if recipe_id:
+            queries.append((
                 """DELETE FROM recipe_tag WHERE recipe_id=?""",
                 (recipe_id,)
-            )
-        ]
+            ))
 
         for tag in tags:
             queries.append((
@@ -395,10 +333,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             queries.append((
                 """INSERT INTO recipe_tag (recipe_id, tag_id)
                 VALUES (
-                    ?,
+                    (SELECT value FROM tmp WHERE key="recipe_id"),
                     (SELECT id FROM tags WHERE name=?)
                 )""",
-                (recipe_id, tag, )
+                (tag,)
             ))
 
-        return self._multi(queries)
+        for attachment in attachments:
+            queries.append((
+                """INSERT INTO attachments (recipe_id, filename, mime_type, content)
+                VALUES (
+                    (SELECT value FROM tmp WHERE key="recipe_id"),
+                    ?, ?, ?
+                )""",
+                (attachment[0], attachment[1], attachment[2])
+            ))
+
+        after_commit = ("SELECT value FROM tmp WHERE key='recipe_id'", ())
+
+        result = self._multi(queries, after_commit)
+
+        if isinstance(result, bool):
+            return result
+
+        return typing.cast(int, next(result)["value"])

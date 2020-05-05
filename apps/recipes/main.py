@@ -49,54 +49,60 @@ class Controller:
             *args: str,
             title: str,
             body: str,
-            url: str = "",
+            url: typing.Optional[str],
             tags: str = "",
             last_made: str = "",
             attachments: Attachment = None
     ) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
-        topic = "recipes:add"
-        recipe_id = 0
-
+        recipe_id = None
         if args:
-            topic = "recipes:update"
-            recipe_id = typing.cast(int, args[0])
+            recipe_id = int(args[0])
 
-        cherrypy.engine.publish(
-            topic,
+        if not url:
+            url = None
+
+        tag_list = [
+            item.strip()
+            for item in tags.split(",")
+            if item
+        ]
+
+        if not tag_list:
+            tag_list = ["untagged"]
+
+        last_made_date = None
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_made.strip()):
+            last_made_date = last_made.strip()
+
+        attachment_list = []
+        if attachments and not isinstance(attachments, list):
+            attachments = [attachments]
+
+        if attachments:
+            attachment_list = [
+                (
+                    attachment.filename.lower(),
+                    attachment.content_type.value,
+                    attachment.file.read()
+                )
+                for attachment in attachments
+                if attachment.file
+            ]
+
+        upsert_id = cherrypy.engine.publish(
+            "recipes:upsert",
             recipe_id=recipe_id,
             title=title,
             body=body,
             url=url,
-            tags=tags,
-            last_made=last_made
+            tags=tag_list,
+            last_made=last_made_date,
+            attachments=attachment_list
         ).pop()
 
-        if not recipe_id:
-            recipe_id = cherrypy.engine.publish(
-                "recipes:find:newest_id",
-            ).pop()
-
-        if not attachments:
-            attachments = []
-
-        if attachments and not isinstance(attachments, list):
-            attachments = [attachments]
-
-        for attachment in attachments:
-            if not attachment.file:
-                continue
-
-            cherrypy.engine.publish(
-                "recipes:attachment:add",
-                recipe_id=recipe_id,
-                filename=attachment.filename,
-                mime_type=attachment.content_type.value,
-                content=attachment.file.read()
-            )
-
-        raise cherrypy.HTTPRedirect(f"/recipes/{recipe_id}")
+        raise cherrypy.HTTPRedirect(f"/recipes/{upsert_id}")
 
     def DELETE(self, *args: str) -> None:
         """Dispatch to a subhandler based on the URL path."""

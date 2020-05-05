@@ -82,8 +82,9 @@ class Sqlite:
 
     def _multi(
             self,
-            queries: typing.Sequence[typing.Tuple[str, typing.Any]]
-    ) -> bool:
+            queries: typing.Sequence[typing.Tuple[str, typing.Any]],
+            after_commit: typing.Tuple[str, typing.Any] = None
+    ) -> typing.Union[bool, typing.Iterator[sqlite3.Row]]:
         """Issue several queries within a transaction."""
 
         result = True
@@ -95,11 +96,20 @@ class Sqlite:
             for query, params in queries:
                 con.execute(query, params)
             con.execute("COMMIT")
+
+            if after_commit:
+                return self._select_generator(
+                    query=after_commit[0],
+                    values=after_commit[1],
+                    con=con
+                )
+
+            con.close()
+
         except sqlite3.DatabaseError as err:
             result = False
             self._logError(err)
             con.execute("rollback")
-        finally:
             con.close()
 
         return result
@@ -178,7 +188,8 @@ class Sqlite:
             self,
             query: str,
             values: typing.Sequence[typing.Any] = (),
-            arraysize: int = 1
+            arraysize: int = 1,
+            con: typing.Optional[sqlite3.Connection] = None
     ) -> typing.Iterator[sqlite3.Row]:
         """Issue a select query and return results as a generator.
 
@@ -187,7 +198,9 @@ class Sqlite:
 
         """
 
-        con = self._open()
+        if not con:
+            con = self._open()
+
         con.row_factory = sqlite3.Row
         cur = con.cursor()
 

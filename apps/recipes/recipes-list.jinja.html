@@ -26,12 +26,12 @@
         <ul>
             {% for recipe in recipes %}
                 {% set ns.recipes_found = True %}
-                <discardable-record inline-template url="/recipes/{{ recipe["recipe_id"] }}">
+                <discardable-record inline-template url="/recipes/{{ recipe["id"] }}">
                     <li v-bind:style="styles">
                         <div class="actions"><discard-button tooltip="Delete this recipe" /></div>
                         <div>
                             <p class="title">
-                                <a href="/recipes/{{ recipe["recipe_id"] }}">
+                                <a href="/recipes/{{ recipe["id"] }}">
                                     {{ recipe["title"] }}
                                 </a>
                             </p>
