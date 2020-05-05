@@ -64,9 +64,9 @@ class Controller:
             url = None
 
         tag_list = [
-            item.strip()
+            re.sub(r"\s+", "-", item.strip().lower())
             for item in tags.split(",")
-            if item
+            if item.strip()
         ]
 
         if not tag_list:
