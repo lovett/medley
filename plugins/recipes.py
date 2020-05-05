@@ -126,7 +126,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:tags:all", self.all_tags)
         self.bus.subscribe("recipes:find", self.find)
         self.bus.subscribe("recipes:find:tag", self.find_by_tag)
-        self.bus.subscribe("recipes:find:newest_id", self.find_newest_id)
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
         self.bus.subscribe("recipes:search:recipe", self.search_recipes)
@@ -208,13 +207,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 AND tags.name=?
             )""",
             (tag,)
-        )
-
-    def find_newest_id(self) -> int:
-        """Locate the most recently inserted recipe."""
-        return typing.cast(
-            int,
-            self._selectFirst("SELECT MAX(id) FROM recipes")
         )
 
     @decorators.log_runtime
