@@ -3,6 +3,7 @@
 import sqlite3
 import typing
 import cherrypy
+import pendulum
 from . import mixins
 from . import decorators
 
@@ -134,7 +135,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:find:recent", self.find_recent)
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
-        self.bus.subscribe("recipes:search:recipe", self.search_recipes)
+        self.bus.subscribe("recipes:search:date", self.search_by_date)
+        self.bus.subscribe("recipes:search:keyword", self.search_by_keyword)
         self.bus.subscribe("recipes:upsert", self.upsert)
 
     def list_attachments(
@@ -270,7 +272,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (recipe_id, attachment_id)
         )
 
-    def search_recipes(self, query: str) -> typing.Iterator[sqlite3.Row]:
+    def search_by_date(
+            self,
+            field: str,
+            query_date: pendulum.DateTime
+    ) -> typing.Iterator[sqlite3.Row]:
+        """Locate recipes that match a date search."""
+
+        month_start = query_date.start_of("month").to_date_string()
+        month_end = query_date.end_of("month").to_date_string()
+
+        return self._select_generator(
+            f"""SELECT r.id, r.title, r.body, r.url, r.domain,
+            r.created as 'created [datetime]',
+            r.updated as 'updated [datetime]',
+            r.last_made as 'last_made [datetime]',
+            r.tags as 'tags [comma_delimited]'
+            FROM extended_recipes_view AS r
+            WHERE (r.{field} BETWEEN ? and ?)
+            ORDER BY r.{field} DESC""",
+            (month_start, month_end)
+        )
+
+    def search_by_keyword(self, query: str) -> typing.Iterator[sqlite3.Row]:
         """Locate recipes that match a keyword search."""
 
         return self._select_generator(

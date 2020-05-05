@@ -4,6 +4,7 @@ import re
 import typing
 import cherrypy
 import mistletoe
+import pendulum
 
 # pylint: disable=protected-access
 Attachment = typing.Union[
@@ -234,15 +235,36 @@ class Controller:
     def search(query: str = "") -> bytes:
         """Display recipes and tags matching a search."""
 
-        query = query.lower()
+        query = query.lower().strip()
+
+        query_date = None
+
+        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", query):
+            query_date = pendulum.from_format(
+                query,
+                "YYYY-MM-DD"
+            )
+
+        if re.fullmatch(r"\d{4}-\d{2}", query):
+            query_date = pendulum.from_format(
+                query,
+                "YYYY-MM"
+            )
 
         if "." in query:
             query = re.sub(r"\b(\w+)\.(\w+)\b", r"NEAR(\g<1> \g<2>)", query)
 
-        recipes = cherrypy.engine.publish(
-            "recipes:search:recipe",
-            query
-        ).pop()
+        if query_date:
+            recipes = cherrypy.engine.publish(
+                "recipes:search:date",
+                field="last_made",
+                query_date=query_date
+            ).pop()
+        else:
+            recipes = cherrypy.engine.publish(
+                "recipes:search:keyword",
+                query
+            ).pop()
 
         return typing.cast(
             bytes,

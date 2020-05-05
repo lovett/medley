@@ -27,6 +27,7 @@
         <ul>
             {% for recipe in recipes %}
                 {% set ns.recipes_found = True %}
+
                 {% include "recipe-listing.jinja.html" %}
             {% endfor %}
         </ul>
