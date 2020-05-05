@@ -234,6 +234,11 @@ class Controller:
     def search(query: str = "") -> bytes:
         """Display recipes and tags matching a search."""
 
+        query = query.lower()
+
+        if "." in query:
+            query = re.sub(r"\b(\w+)\.(\w+)\b", r"NEAR(\g<1> \g<2>)", query)
+
         recipes = cherrypy.engine.publish(
             "recipes:search:recipe",
             query

@@ -21,6 +21,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("url:internal", self.internal_url)
         self.bus.subscribe("url:alt", self.alt_url)
         self.bus.subscribe("url:readable", self.readable_url)
+        self.bus.subscribe("url:domain", self.url_domain)
 
     def current_url(self) -> str:
         """The URL of the request currently being served."""
@@ -132,3 +133,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         readable_url = readable_url.replace("http://", "")
         readable_url = readable_url.split('#', 1)[0]
         return readable_url
+
+    @staticmethod
+    def url_domain(url: typing.Optional[str]) -> typing.Optional[str]:
+        """Parse the domain from a URL."""
+
+        if not url:
+            return None
+
+        return urlparse(url).hostname

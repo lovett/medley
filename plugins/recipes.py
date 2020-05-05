@@ -24,11 +24,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             title NOT NULL,
             body TEXT NOT NULL,
             url TEXT DEFAULT NULL,
+            domain TEXT default NULL,
             created DEFAULT CURRENT_TIMESTAMP,
             updated DEFAULT NULL,
             deleted DEFAULT NULL,
             last_made DEFAULT NULL
         );
+
+        CREATE INDEX IF NOT EXISTS index_recipe_last_made
+            ON recipes (last_made) WHERE last_made IS NOT NULL;
 
         CREATE TABLE IF NOT EXISTS recipe_tag (
             recipe_id INT NOT NULL,
@@ -66,6 +70,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE VIRTUAL TABLE IF NOT EXISTS recipes_fts USING fts5 (
             title,
             body,
+            domain,
             content=recipes,
             tokenize=porter
         );
@@ -73,25 +78,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE TRIGGER IF NOT EXISTS recipes_after_insert
         AFTER INSERT ON recipes
         BEGIN
-        INSERT INTO recipes_fts (rowid, title, body)
-        VALUES (new.rowid, new.title, new.body);
+        INSERT INTO recipes_fts (rowid, title, body, domain)
+        VALUES (new.rowid, new.title, new.body, new.domain);
         END;
 
         CREATE TRIGGER IF NOT EXISTS recipes_after_update
         AFTER UPDATE OF title, body ON recipes
         BEGIN
         UPDATE recipes SET updated=CURRENT_TIMESTAMP WHERE id=new.rowid;
-        INSERT INTO recipes_fts (recipes_fts, rowid, title, body)
-            VALUES ('delete', old.rowid, old.title, old.body);
-        INSERT INTO recipes_fts (rowid, title, body)
-            VALUES (new.rowid, new.title, new.body);
+        INSERT INTO recipes_fts (recipes_fts, rowid, title, body, domain)
+            VALUES ('delete', old.rowid, old.title, old.body, old.domain);
+        INSERT INTO recipes_fts (rowid, title, body, domain)
+            VALUES (new.rowid, new.title, new.body, new.domain);
         END;
 
         CREATE TRIGGER IF NOT EXISTS recipes_after_delete
         AFTER DELETE ON recipes
         BEGIN
-        INSERT INTO recipes_fts(recipes_fts, rowid, title, body)
-            VALUES ('delete', old.rowid, old.title, old.body);
+        INSERT INTO recipes_fts(recipes_fts, rowid, title, body, domain)
+            VALUES ('delete', old.rowid, old.title, old.body, old.domain);
         END;
 
         CREATE TRIGGER IF NOT EXISTS recipe_tag_after_delete
@@ -102,7 +107,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         END;
 
         CREATE VIEW IF NOT EXISTS extended_recipes_view AS
-            SELECT recipes.id, title, body, url,
+            SELECT recipes.id, title, body, url, domain,
                 created, updated, last_made,
                 GROUP_CONCAT(tags.name) as tags
             FROM recipes
@@ -182,7 +187,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate a recipe by its ID."""
 
         return self._selectOne(
-            """SELECT id, title, body, url,
+            """SELECT id, title, body, url, domain,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
             last_made as 'last_made [date]',
@@ -196,7 +201,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate recently-added recipes."""
 
         return self._select_generator(
-            """SELECT id, title, url,
+            """SELECT id, title, url, domain,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
             last_made as 'last_made [date]',
@@ -211,7 +216,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """List all recipes associated with a tag."""
 
         return self._select_generator(
-            """SELECT id, title, url,
+            """SELECT id, title, url, domain,
             created as 'created [datetime]',
             updated as 'updated [datetime]',
             last_made as 'last_made [date]',
@@ -267,8 +272,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search_recipes(self, query: str) -> typing.Iterator[sqlite3.Row]:
         """Locate recipes that match a keyword search."""
+
         return self._select_generator(
-            """SELECT r.id, r.title, r.body, r.url,
+            """SELECT r.id, r.title, r.body, r.url, r.domain,
             r.created as 'created [datetime]',
             r.updated as 'updated [datetime]',
             r.last_made as 'last_made [datetime]',
@@ -293,6 +299,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         last_made = kwargs.get("last_made")
         tags = kwargs.get("tags", [])
         attachments = kwargs.get("attachments", [])
+        domain = cherrypy.engine.publish("url:domain", url).pop()
 
         queries: typing.List[typing.Tuple[str, typing.Tuple]] = []
 
@@ -303,15 +310,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ))
 
         queries.append((
-            """INSERT INTO recipes (id, title, body, url, last_made)
-            VALUES (?, ?, ?, ?, ?)
+            """INSERT INTO recipes (id, title, body, domain, url, last_made)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
             title=excluded.title,
             body=excluded.body,
+            domain=excluded.domain,
             url=excluded.url,
-            last_made=excluded.url,
+            last_made=excluded.last_made,
             updated=CURRENT_TIMESTAMP""",
-            (recipe_id, title, body, url, last_made)
+            (recipe_id, title, body, domain, url, last_made)
         ))
 
         if recipe_id:
