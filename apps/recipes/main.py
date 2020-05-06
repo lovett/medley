@@ -331,9 +331,9 @@ class Controller:
         body_html = body_html.replace("1/9", "⅑")
         body_html = body_html.replace("1/10", "⅒")
 
-        body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html)
+        body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html).strip()
 
-        if "</ul>" in body_html:
+        if body_html.startswith("<ul>"):
             end_of_first_list = body_html.index("</ul>") + 5
 
             ingredients = body_html[0:end_of_first_list]

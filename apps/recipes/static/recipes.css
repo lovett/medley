@@ -28,12 +28,6 @@
     border-top: 1px solid var(--grey);
 }
 
-#recipe SECTION UL {
-    margin: 0;
-    padding: 0;
-    list-style-type: none;
-}
-
 #recipe SECTION P, #recipe SECTION LI {
     break-inside: avoid;
     padding: 0.5em 0;
@@ -71,10 +65,24 @@
     margin: 2em 0 0 0;
 }
 
+#directions UL {
+    list-style-type: square;
+    padding-left: 0;
+}
 
+#directions UL LI {
+    margin-left: 1.25em;
+    padding-left: 0;
+}
 
 #ingredients {
     padding-top: 1em;
+}
+
+#ingredients UL {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
 }
 
 #recipe SECTION P:hover, #recipe SECTION LI:hover {
