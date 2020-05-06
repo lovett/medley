@@ -149,6 +149,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT id, filename, mime_type
             FROM attachments
             WHERE recipe_id=?
+            AND deleted IS NULL
             ORDER BY filename""",
             (recipe_id,)
         )
