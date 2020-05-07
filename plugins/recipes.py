@@ -200,7 +200,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (recipe_id,)
         )
 
-    def find_recent(self, limit: int = 10) -> typing.Iterator[sqlite3.Row]:
+    def find_recent(self, limit: int = 12) -> typing.Iterator[sqlite3.Row]:
         """Locate recently-added recipes."""
 
         return self._select_generator(
