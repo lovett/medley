@@ -31,8 +31,6 @@
 #recipe SECTION P, #recipe SECTION LI {
     break-inside: avoid;
     padding: 0.5em 0;
-    margin: 0 -1em 0 -1em;
-    padding-left: 1em;
 }
 
 #recipe SECTION LI {
@@ -64,6 +62,11 @@
     font-size: 1.05em;
     margin: 2em 0 0 0;
 }
+
+#directions H2 + P {
+    margin-top: 0;
+}
+
 
 #directions UL {
     list-style-type: square;
