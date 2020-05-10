@@ -1,11 +1,7 @@
 {% extends "recipes.jinja.html" %}
 
-{% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
-{% endblock %}
-
 {% block content %}
-    {{ macros.svgSymbols("new-item", "calendar", "delete", "search", "tag") }}
+    {{ macros.svgSymbols("new-item", "calendar", "search", "tag") }}
 
     <main id="collection">
         {% include "recipe-search.jinja.html" %}
