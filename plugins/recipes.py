@@ -322,6 +322,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         body = kwargs.get("body")
         url = kwargs.get("url")
         last_made = kwargs.get("last_made")
+        created = kwargs.get("created")
         tags = kwargs.get("tags", [])
         attachments = kwargs.get("attachments", [])
         domain = cherrypy.engine.publish("url:domain", url).pop()
@@ -335,16 +336,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ))
 
         queries.append((
-            """INSERT INTO recipes (id, title, body, domain, url, last_made)
-            VALUES (?, ?, ?, ?, ?, ?)
+            """INSERT INTO recipes (id, title, body, domain, url, created, last_made)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
             title=excluded.title,
             body=excluded.body,
             domain=excluded.domain,
             url=excluded.url,
-            last_made=excluded.last_made,
-            updated=CURRENT_TIMESTAMP""",
-            (recipe_id, title, body, domain, url, last_made)
+            created=excluded.created,
+            last_made=excluded.last_made""",
+            (recipe_id, title, body, domain, url, created, last_made)
         ))
 
         if recipe_id:

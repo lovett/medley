@@ -53,6 +53,7 @@ class Controller:
             url: typing.Optional[str],
             tags: str = "",
             last_made: str = "",
+            created: str = "",
             attachments: Attachment = None
     ) -> None:
         """Save changes to an existing recipe, or add a new one."""
@@ -77,6 +78,10 @@ class Controller:
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_made.strip()):
             last_made_date = last_made.strip()
 
+        created_date = pendulum.now().format("YYYY-MM-DD HH:mm:ss")
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created.strip()):
+            created_date = f"{created.strip()} 00:00:00"
+
         attachment_list = []
         if attachments and not isinstance(attachments, list):
             attachments = [attachments]
@@ -100,6 +105,7 @@ class Controller:
             url=url,
             tags=tag_list,
             last_made=last_made_date,
+            created=created_date,
             attachments=attachment_list
         ).pop()
 
@@ -196,6 +202,7 @@ class Controller:
         url = ""
         submit_url = "/recipes"
         last_made = ""
+        created = ""
         attachments = ()
 
         if recipe_id:
@@ -211,6 +218,7 @@ class Controller:
             body = recipe["body"]
             tags = recipe["tags"]
             url = recipe["url"]
+            created = recipe["created"].format("YYYY-MM-DD")
             submit_url = f"/recipes/{recipe_id}"
 
             if recipe["last_made"]:
@@ -234,7 +242,8 @@ class Controller:
                 url=url,
                 submit_url=submit_url,
                 cancel_url=submit_url,
-                last_made=last_made
+                last_made=last_made,
+                created=created
             ).pop()
         )
 
