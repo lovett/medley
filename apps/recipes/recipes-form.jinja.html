@@ -2,6 +2,7 @@
 
 {% block scripts %}
     {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
     {{ macros.staticAsset('shared', 'js/delete.js') }}
 {% endblock %}
 
@@ -88,6 +89,14 @@
                     id="body"
                     name="body"
                 >{{ body }}</textarea>
+                <div class="shortcuts">
+                    <a href="#" data-field="body" data-shortcut="markdown-list">
+                        Selection to list
+                    </a>
+                    <a href="#" data-field="body" data-shortcut="spaced-sentences">
+                        Spaced sentences
+                    </a>
+                </div>
             </div>
 
             <div class="field">

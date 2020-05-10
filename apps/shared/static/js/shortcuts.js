@@ -34,6 +34,18 @@ MEDLEY.shortcuts = (function () {
         return query;
     }
 
+    function replaceSelection(value, selectionStart, selectionEnd, search, replace) {
+        let selection = value.substring(selectionStart, selectionEnd);
+
+        if (selection.length === 0) {
+            return value;
+        }
+
+        replacement = selection.replace(search, replace);
+
+        return value.replace(selection, replacement);
+    }
+
     function urlRemovePath(value) {
         const node = document.createElement('a');
         node.href = value.trim()
@@ -111,6 +123,26 @@ MEDLEY.shortcuts = (function () {
 
         if (shortcut === 'query-date-backward') {
             field.value = adjustQueryDate(field.value, -1);
+        }
+
+        if (shortcut === 'markdown-list') {
+            field.value = replaceSelection(
+                field.value,
+                field.selectionStart,
+                field.selectionEnd,
+                /^[\s-]*/gm,
+                "- "
+            );
+        }
+
+        if (shortcut === 'spaced-sentences') {
+            field.value = replaceSelection(
+                field.value,
+                field.selectionStart,
+                field.selectionEnd,
+                /(\w)\.\s*(\w)/gm,
+                "$1.\n\n$2"
+            );
         }
 
         if (e.target.nodeName === 'BUTTON') {
