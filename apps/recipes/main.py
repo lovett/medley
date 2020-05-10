@@ -71,6 +71,9 @@ class Controller:
             if item.strip()
         ]
 
+        title = re.sub(r"\s*&\s*", " and ", title)
+        title = title.title()
+
         if not tag_list:
             tag_list = ["untagged"]
 
