@@ -20,6 +20,27 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    fractions = (
+        ("1/2", "½"),
+        ("1/3", "⅓"),
+        ("2/3", "⅔"),
+        ("1/4", "¼"),
+        ("3/4", "¾"),
+        ("1/5", "⅕"),
+        ("2/5", "⅖"),
+        ("3/5", "⅗"),
+        ("4/5", "⅘"),
+        ("1/6", "⅙"),
+        ("5/6", "⅚"),
+        ("1/7", "⅐"),
+        ("1/8", "⅛"),
+        ("3/8", "⅜"),
+        ("5/8", "⅝"),
+        ("7/8", "⅞"),
+        ("1/9", "⅑"),
+        ("1/10", "⅒"),
+    )
+
     # pylint: disable=too-many-return-statements
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args: str, **kwargs: str) -> bytes:
@@ -45,8 +66,8 @@ class Controller:
 
         return self.show(int(args[0]))
 
-    @staticmethod
     def POST(
+            self,
             *args: str,
             title: str,
             body: str,
@@ -73,6 +94,11 @@ class Controller:
 
         title = re.sub(r"\s*&\s*", " and ", title)
         title = title.title()
+
+        for replace, search in self.fractions:
+            body = body.replace(search, replace)
+
+        body = re.sub(r"(\d+)\s*°\s*F", r"\g<1>F", body)
 
         if not tag_list:
             tag_list = ["untagged"]
@@ -312,8 +338,7 @@ class Controller:
         cherrypy.response.headers["Content-Type"] = row["mime_type"]
         return typing.cast(bytes, row["content"])
 
-    @staticmethod
-    def show(recipe_id: int) -> bytes:
+    def show(self, recipe_id: int) -> bytes:
         """Display a single recipe."""
 
         recipe = cherrypy.engine.publish(
@@ -331,24 +356,8 @@ class Controller:
 
         body_html = mistletoe.markdown(recipe["body"])
 
-        body_html = body_html.replace("1/2", "½")
-        body_html = body_html.replace("1/3", "⅓")
-        body_html = body_html.replace("2/3", "⅔")
-        body_html = body_html.replace("1/4", "¼")
-        body_html = body_html.replace("3/4", "¾")
-        body_html = body_html.replace("1/5", "⅕")
-        body_html = body_html.replace("2/5", "⅖")
-        body_html = body_html.replace("3/5", "⅗")
-        body_html = body_html.replace("4/5", "⅘")
-        body_html = body_html.replace("1/6", "⅙")
-        body_html = body_html.replace("5/6", "⅚")
-        body_html = body_html.replace("1/7", "⅐")
-        body_html = body_html.replace("1/8", "⅛")
-        body_html = body_html.replace("3/8", "⅜")
-        body_html = body_html.replace("5/8", "⅝")
-        body_html = body_html.replace("7/8", "⅞")
-        body_html = body_html.replace("1/9", "⅑")
-        body_html = body_html.replace("1/10", "⅒")
+        for search, replace in self.fractions:
+            body_html = body_html.replace(search, replace)
 
         body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html).strip()
 
