@@ -45,20 +45,7 @@
             <div id="directions">{{ body|safe }}</div>
         </section>
 
-        {% if attachments  %}
-            <ul id="attachments">
-                {% for attachment in attachments %}
-                    <discardable-record inline-template url="/recipes/{{ recipe_id }}/attachments/{{ attachment["id"] }}">
-                        <li v-bind:style="styles">
-                            <div class="actions"><discard-button tooltip="Delete this attachment" /></div>
-                            <a href="/recipes/{{ recipe_id }}/{{ attachment["filename"] }}" target="_blank">
-                                {{ attachment["filename"] }}
-                            </a>
-                        </li>
-                    </discardable-record>
-                {% endfor %}
-            </ul>
-        {% endif %}
+        {% include "recipe-attachments.jinja.html" %}
 
         <footer>
             <div>

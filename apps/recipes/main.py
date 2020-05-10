@@ -196,6 +196,7 @@ class Controller:
         url = ""
         submit_url = "/recipes"
         last_made = ""
+        attachments = ()
 
         if recipe_id:
             recipe = cherrypy.engine.publish(
@@ -215,6 +216,11 @@ class Controller:
             if recipe["last_made"]:
                 last_made = recipe["last_made"].format("YYYY-MM-DD")
 
+            attachments = cherrypy.engine.publish(
+                "recipes:attachment:list",
+                recipe_id=recipe_id
+            ).pop()
+
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
@@ -222,6 +228,7 @@ class Controller:
                 "recipes-form.jinja.html",
                 recipe_id=recipe_id,
                 title=title,
+                attachments=attachments,
                 body=body,
                 tags=tags,
                 url=url,

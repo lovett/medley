@@ -1,16 +1,33 @@
 {% extends "recipes.jinja.html" %}
 
+{% block scripts %}
+    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
+    {{ macros.staticAsset('shared', 'js/delete.js') }}
+{% endblock %}
+
+
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a class="cancel" href="{{ cancel_url }}">
             <svg class="icon"><use xlink:href="#icon-triangle"></use></svg>
             Cancel
         </a>
+
+        {% if recipe_id > 0 %}
+            <a class="delete"
+               href="#"
+               data-delete-url="/recipes/{{ recipe_id }}"
+               data-delete-redirect="/recipes"
+               data-delete-resource-name="recipe">
+                <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                Delete
+            </a>
+        {% endif %}
     </nav>
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("arrow-left", "triangle") }}
+    {{ macros.svgSymbols("arrow-left", "triangle", "delete") }}
 
     <main id="editor">
         <form enctype="multipart/form-data" method="post" action="{{ submit_url }}">
@@ -68,11 +85,12 @@
                 <input type="file" id="attachments_input" name="attachments" multiple />
             </div>
 
+            {% include "recipe-attachments.jinja.html" %}
+
             <div class="field">
                 <button>Save</button>
             </div>
 
         </form>
-
     </main>
 {% endblock %}
