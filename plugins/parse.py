@@ -14,7 +14,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
-        # Parsing primitives
+    def start(self) -> None:
+        """Define the CherryPy messages to listen for.
+
+        This plugin owns the parse prefix.
+        """
+
+        self.bus.subscribe("parse:grammar:appengine", self.appengine_grammar)
+        self.bus.subscribe("parse:grammar:log_query", self.log_query_grammar)
+        self.bus.subscribe("parse:appengine", self.parse_appengine)
+        self.bus.subscribe("parse:log_query", self.parse_log_query)
+
+    def appengine_grammar(self) -> pp.And:
+        """Generate the grammar used to parse Appengine logs.
+
+        Field order is documented at:
+        https://cloud.google.com/appengine/docs/python/logs/
+        """
         integer = pp.Word(pp.nums)
 
         ipv4 = pp.Combine(
@@ -27,17 +43,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             string.ascii_uppercase,
             string.ascii_lowercase,
             exact=3
-        )
-
-        date10 = pp.Group(
-            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
-            pp.Word(pp.nums, exact=2) + pp.Suppress("-") +
-            pp.Word(pp.nums, exact=2)
-        )
-
-        date7 = pp.Group(
-            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
-            pp.Word(pp.nums, exact=2)
         )
 
         tzoffset = pp.Word("+-", pp.nums)
@@ -58,15 +63,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ]) +
             pp.Suppress("]")
         )
-
-        optional_not = pp.Optional(pp.Literal("not"))
-
-        # Appengine Combined Log Grammar
-        # Field order is documented at:
-        # https://cloud.google.com/appengine/docs/python/logs/
-        #
-        # This is heavily based on:
-        # http://pyparsing.wikispaces.com/file/view/httpServerLogParser.py/30166005/httpServerLogParser.py
 
         # ip
         appengine_fields = (ipv4 | ipv6).setResultsName("ip")
@@ -131,12 +127,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).setResultsName("extras")
         )
 
-        self.appengine_grammar = appengine_fields
+        return appengine_fields
 
-        # Custom grammar for querying the logindex database
-        # Converts a list key-value pairs to SQL
+    def log_query_grammar(self) -> pp.And:
+        """Generate the grammar used to query the logindex database."""
 
-        self.logquery_grammar = pp.delimitedList(
+        date10 = pp.Group(
+            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2)
+        )
+
+        date7 = pp.Group(
+            pp.Word(pp.nums, exact=4) + pp.Suppress("-") +
+            pp.Word(pp.nums, exact=2)
+        )
+
+        optional_not = pp.Optional(pp.Literal("not"))
+
+        return pp.delimitedList(
             pp.Or([
                 # relative date
                 (
@@ -154,7 +163,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 (
                     pp.oneOf("statusCode") +
                     optional_not +
-                    pp.OneOrMore(integer)
+                    pp.OneOrMore(pp.Word(pp.nums))
                 ).setParseAction(self.log_query_numeric),
 
                 # url
@@ -194,15 +203,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ]),
             "|"
         )
-
-    def start(self) -> None:
-        """Define the CherryPy messages to listen for.
-
-        This plugin owns the parse prefix.
-        """
-
-        self.bus.subscribe('parse:appengine', self.parse_appengine)
-        self.bus.subscribe('parse:log_query', self.parse_log_query)
 
     @staticmethod
     def request_fields(
@@ -463,7 +463,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return result
 
-    def parse_appengine(self, val: str) -> typing.Dict[str, typing.Any]:
+    @staticmethod
+    def parse_appengine(
+            grammar: typing.Any,
+            val: str
+    ) -> typing.Dict[str, typing.Any]:
         """Parse a log line in combined-plus-Appengine-extras format
 
         App Engine extras consist of additional key=value pairs after
@@ -484,7 +488,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         try:
             fields = typing.cast(
                 typing.Dict[str, typing.Any],
-                self.appengine_grammar.parseString(val).asDict()
+                grammar.parseString(val).asDict()
             )
         except pp.ParseException as exception:
             cherrypy.engine.publish(
@@ -543,7 +547,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         del fields["extras"]
         return fields
 
-    def parse_log_query(self, val: str) -> str:
+    @staticmethod
+    def parse_log_query(grammar: pp.And, val: str) -> str:
         """Convert a logindex query to sql
 
         The query is used to build the WHERE clause of an SQL query,
@@ -559,7 +564,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         val = val.replace("\n", "|")
 
-        result = self.logquery_grammar.parseString(val).asList()
+        result = grammar.parseString(val).asList()
 
         # Force usage of the datestamp index.
         #

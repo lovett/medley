@@ -439,6 +439,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
 
+        grammar = cherrypy.engine.publish(
+            "parse:grammar:appengine",
+        )
+
         batch: typing.List[typing.Tuple[str, typing.Sequence[typing.Any]]] = []
         ips = set()
         cache: typing.Dict[str, defaultdict] = {
@@ -449,6 +453,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         for record in records[1:]:
             fields = cherrypy.engine.publish(
                 "parse:appengine",
+                grammar,
                 record["value"]
             ).pop()
 
@@ -597,8 +602,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
         """Perform a search against parsed log lines."""
 
+        grammar = cherrypy.engine.publish(
+            "parse:grammar:log_query"
+        ).pop()
+
         parsed_query = cherrypy.engine.publish(
             "parse:log_query",
+            grammar,
             query
         ).pop()
 
