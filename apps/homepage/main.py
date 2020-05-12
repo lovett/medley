@@ -93,7 +93,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "homepage.jinja.html",
+                "apps/homepage/homepage.jinja.html",
                 apps=apps,
             ).pop()
         )

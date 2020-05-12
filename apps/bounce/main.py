@@ -124,7 +124,7 @@ class Controller:
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
-            "bounce.jinja.html",
+            "apps/bounce/bounce.jinja.html",
             url=url,
             site=host,
             group=group,

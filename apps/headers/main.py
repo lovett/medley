@@ -34,7 +34,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "headers.jinja.html",
+                "apps/headers/headers.jinja.html",
                 headers=headers,
             ).pop()
         )

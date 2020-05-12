@@ -2,7 +2,7 @@
 
 import typing
 import json
-import urllib
+import urllib.parse
 import re
 import cherrypy
 
@@ -37,7 +37,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "transform.jinja.html",
+                "apps/transform/transform.jinja.html",
                 transforms=self.list_of_transforms(),
                 current_transform="as-is"
             ).pop()
@@ -76,7 +76,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "transform.jinja.html",
+                "apps/transformt/ransform.jinja.html",
                 result=result,
                 current_transform=transform,
                 transforms=self.list_of_transforms(),

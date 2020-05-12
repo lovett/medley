@@ -85,7 +85,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "later.jinja.html",
+                "apps/later/later.jinja.html",
                 bookmarks_url=bookmarks_url,
                 error=error,
                 bookmark=bookmark,

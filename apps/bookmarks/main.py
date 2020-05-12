@@ -53,7 +53,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "bookmarks.jinja.html",
+                "apps/bookmarks/bookmarks.jinja.html",
                 bookmarks=bookmarks,
                 max_days=max_days,
                 total_records=total_records,
@@ -77,7 +77,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "bookmarks-taglist.jinja.html",
+                "apps/bookmarks/bookmarks-taglist.jinja.html",
                 tags=tags,
                 subview_title="Tags"
             ).pop()
@@ -112,7 +112,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "bookmarks.jinja.html",
+                "apps/bookmarks/bookmarks.jinja.html",
                 bookmarks=bookmarks,
                 offset=offset,
                 order=order,

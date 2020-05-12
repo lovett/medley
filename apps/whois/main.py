@@ -26,7 +26,7 @@ class Controller:
                 bytes,
                 cherrypy.engine.publish(
                     "jinja:render",
-                    "whois.jinja.html"
+                    "apps/whois/whois.jinja.html"
                 ).pop()
             )
 
@@ -100,7 +100,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "whois.jinja.html",
+                "apps/whois/whois.jinja.html",
                 address=address_clean,
                 ip_address=ip_address,
                 whois=whois,

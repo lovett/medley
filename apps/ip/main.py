@@ -53,7 +53,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "ip.jinja.html",
+                "apps/ip/ip.jinja.html",
                 client_ip=client_ip,
                 external_ip=external_ip,
             ).pop()

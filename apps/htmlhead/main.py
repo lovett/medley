@@ -20,7 +20,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "htmlhead.jinja.html",
+                "apps/htmlhead/htmlhead.jinja.html",
             ).pop()
         )
 
@@ -75,7 +75,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "htmlhead.jinja.html",
+                "apps/htmlhead/htmlhead.jinja.html",
                 failure_message=failure_message,
                 status_code=status_code,
                 url=url,

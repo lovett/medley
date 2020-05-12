@@ -67,7 +67,7 @@ class Controller:
             forecast = self.shape_forecast(cached_api_response)
 
         if not cached_api_response:
-            endpoint = f"https://api.darksky.net/forecast/"
+            endpoint = "https://api.darksky.net/forecast/"
             endpoint += config['darksky_key']
             endpoint += f"/{latitude},{longitude}"
             endpoint += "?lang=en&units=us&exclude=minutely"
@@ -99,7 +99,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "weather.jinja.html",
+                "apps/weather/weather.jinja.html",
                 forecast=forecast,
                 other_locations=locations,
                 location_name=location_name,

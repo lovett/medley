@@ -59,7 +59,7 @@ def unavailable() -> ViewAndData:
         }
     ).pop()
 
-    return ("unavailable.jinja.html", {
+    return ("apps/alturl/unavailable.jinja.html", {
         "applog_url": applog_url
     })
 
@@ -76,7 +76,7 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
 
     subreddit = f"{parsed_url.netloc}{parsed_url.path}"
 
-    return ("reddit-index.jinja.html", {
+    return ("apps/alturl/reddit-index.jinja.html", {
         "stories": stories,
         "subreddit": subreddit,
         "url": url,
@@ -107,7 +107,7 @@ def view_story(response: typing.Any) -> ViewAndData:
         f"reddit.com/r/{subreddit}"
     ).pop()
 
-    return ("reddit-story.jinja.html", {
+    return ("apps/alturl/reddit-story.jinja.html", {
         "story": story,
         "comments": comments,
         "subreddit": subreddit,

@@ -39,7 +39,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "grids-index.jinja.html",
+                "apps/grids/grids-index.jinja.html",
                 grid_names=grid_names
             ).pop()
         )
@@ -102,7 +102,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "grids.jinja.html",
+                "apps/grids/grids.jinja.html",
                 headers=headers,
                 name=name,
                 options=options,

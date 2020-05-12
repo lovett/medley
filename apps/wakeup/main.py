@@ -35,7 +35,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "wakeup.jinja.html",
+                "apps/wakeup/wakeup.jinja.html",
                 hosts=hosts,
                 registry_url=registry_url,
                 sent=sent

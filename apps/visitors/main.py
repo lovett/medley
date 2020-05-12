@@ -75,7 +75,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "visitors.jinja.html",
+                "apps/visitors/visitors.jinja.html",
                 flagless_countries=("AP", None),
                 query=query,
                 query_plan=query_plan,

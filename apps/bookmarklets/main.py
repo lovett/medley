@@ -30,7 +30,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "bookmarklets.jinja.html",
+                "apps/bookmarklets/bookmarklets.jinja.html",
                 bounce_url=bounce_url,
                 later_url=later_url
             ).pop()

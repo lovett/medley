@@ -68,7 +68,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "headlines.jinja.html",
+                "apps/headlines/headlines.jinja.html",
                 headlines=headlines,
                 walk_start=walk_start,
                 walk_stop=walk_stop,

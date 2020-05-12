@@ -40,7 +40,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "applog.jinja.html",
+                "apps/applog/applog.jinja.html",
                 records=records,
                 total=total,
                 source=source,

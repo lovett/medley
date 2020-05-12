@@ -53,7 +53,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "edit.jinja.html",
+                "apps/startpage/edit.jinja.html",
                 button_label=button_label,
                 cancel_url=cancel_url,
                 page_name=page_name,
@@ -90,7 +90,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "startpage.jinja.html",
+                "apps/startpage/startpage.jinja.html",
                 created=page_record["created"],
                 anonymizer_url=anonymizer_url,
                 edit_url=edit_url,

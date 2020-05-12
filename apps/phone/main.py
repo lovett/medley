@@ -31,14 +31,14 @@ class Controller:
         if not number:
             default_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
-                "phone.jinja.html"
+                "apps/phone/phone.jinja.html"
             ).pop()
             return default_response
 
         if not sanitized_number:
             search_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
-                "phone.jinja.html",
+                "apps/phone/phone.jinja.html",
                 error="The number provided was invalid.",
                 subview_title="Error"
             ).pop()
@@ -87,7 +87,7 @@ class Controller:
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
-            "phone.jinja.html",
+            "apps/phone/phone.jinja.html",
             error=error,
             history=call_history,
             number=sanitized_number,

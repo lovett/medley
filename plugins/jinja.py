@@ -16,36 +16,22 @@ import re
 import cherrypy
 import jinja2
 import pendulum
-from . import jinja_cache
+import plugins.jinja_cache
 
 
 # pylint: disable=too-many-public-methods
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for rendering Jinja2 templates."""
 
+    env: jinja2.Environment
+
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
-        server_root = cherrypy.config.get("server_root", "./")
-
-        paths = [os.path.join(server_root, "templates")]
-
-        apps = [
-            os.path.join(server_root, "apps", app)
-            for app in os.listdir(os.path.join(server_root, "apps"))
-            if os.path.isdir(os.path.join(server_root, "apps", app))
-            and not app.startswith("__")
-        ]
-
-        paths.extend(apps)
-
-        loader = jinja2.FileSystemLoader(paths)
-
-        cache = jinja_cache.Cache()
 
         self.env = jinja2.Environment(
-            loader=loader,
+            loader=jinja2.FunctionLoader(self.load_template),
             autoescape=True,
             auto_reload=cherrypy.config.get("engine.autoreload.on"),
-            bytecode_cache=cache
+            bytecode_cache=plugins.jinja_cache.Cache()
         )
 
         self.env.filters["dateformat"] = self.dateformat_filter
@@ -78,7 +64,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
+    @staticmethod
+    def load_template(
+            name: str
+    ) -> typing.Optional[typing.Tuple[str, str, typing.Callable]]:
+        """Load the specified template from the filesystem.
+
+        This is used instead of Jinja's FileSystemLoader in an attempt
+        to do less work at plugin startup."""
+
+        template_path = os.path.join(
+            cherrypy.config.get("server_root", "./"),
+            name
+        )
+
+        try:
+            mtime = os.path.getmtime(template_path)
+
+            def uptodate() -> bool:
+                """Determine whether a template has changed."""
+                return os.path.getmtime(template_path) == mtime
+
+            with open(template_path, "r") as handle:
+                return (handle.read(), template_path, uptodate)
+
+        except FileNotFoundError:
+            return None
+
     def start(self) -> None:
+
         """Define the CherryPy messages to listen for.
 
         This plugin owns the jinja prefix
@@ -110,8 +124,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if data["app_url"]:
             data["app_url"] = data["app_url"].pop()
 
-        content_type = f"text/html;charset=utf-8"
-        cherrypy.response.headers["Content-Type"] = content_type
+        cherrypy.response.headers["Content-Type"] = "text/html;charset=utf-8"
 
         rendered_template = typing.cast(str, template.render(**data))
 

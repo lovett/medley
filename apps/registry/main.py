@@ -51,7 +51,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "registry.jinja.html",
+                "apps/registry/registry.jinja.html",
                 roots=roots
             ).pop()
         )
@@ -85,7 +85,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "registry-list.jinja.html",
+                "apps/registry/registry-list.jinja.html",
                 query=query.strip(),
                 parent_key=parent_key,
                 record_count=count,
@@ -129,7 +129,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "registry-form.jinja.html",
+                "apps/registry/registry-form.jinja.html",
                 rowid=rowid,
                 key=key,
                 value=value,

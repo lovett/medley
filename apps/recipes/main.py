@@ -195,7 +195,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "recipes-index.jinja.html",
+                "apps/recipes/recipes-index.jinja.html",
                 tags=tags,
                 recently_added=recently_added
             ).pop()
@@ -214,7 +214,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "recipes-list.jinja.html",
+                "apps/recipes/recipes-list.jinja.html",
                 recipes=recipes,
                 tag=tag,
                 subview_title=tag
@@ -262,7 +262,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "recipes-form.jinja.html",
+                "apps/recipes/recipes-form.jinja.html",
                 recipe_id=recipe_id,
                 title=title,
                 attachments=attachments,
@@ -315,7 +315,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "recipes-list.jinja.html",
+                "apps/recipes/recipes-list.jinja.html",
                 recipes=recipes,
                 query=query,
                 subview_title=query
@@ -382,7 +382,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "recipes-show.jinja.html",
+                "apps/recipes/recipes-show.jinja.html",
                 title=recipe["title"],
                 recipe_id=recipe["id"],
                 ingredients=ingredients,

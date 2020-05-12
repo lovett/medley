@@ -62,7 +62,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "metrics.jinja.html",
+                "apps/metrics/metrics.jinja.html",
                 metric=metric,
                 x_range=x_range,
                 y_range=y_range,
@@ -84,7 +84,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "metrics.jinja.html",
+                "apps/metrics/metrics.jinja.html",
                 metrics=metrics
             ).pop()
         )

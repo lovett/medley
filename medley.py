@@ -130,12 +130,15 @@ def setup() -> None:
     cherrypy.tools.provides = tools.provides.Tool()
 
     # Mount the apps
-    for app in os.listdir(app_root):
+    for entry in os.scandir(app_root):
 
-        if not os.path.isfile(os.path.join(app_root, app, "main.py")):
+        if not entry.is_dir():
             continue
 
-        app_module = importlib.import_module(f"apps.{app}.main")
+        if entry.name.startswith("__"):
+            continue
+
+        app_module = importlib.import_module(f"apps.{entry.name}.main")
 
         app_config = {
             "/": {
@@ -147,9 +150,9 @@ def setup() -> None:
         # The homepage app is unique. Its app name is not its url, and
         # its static path is not under its app path. It also has additional
         # configuration for serving the favicon.
-        app_path = f"/{app}"
+        app_path = f"/{entry.name}"
         static_url = "/static"
-        if app == "homepage":
+        if entry.name == "homepage":
             app_path = "/"
             static_url = "/homepage/static"
 
@@ -161,7 +164,7 @@ def setup() -> None:
             }
 
         # An app can optionally have a dedicated directory for static assets
-        static_path = os.path.join(app_root, app, "static")
+        static_path = os.path.join(app_root, entry.name, "static")
         if os.path.isdir(static_path):
 
             app_config[static_url] = {

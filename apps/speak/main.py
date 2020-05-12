@@ -37,7 +37,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "speak.jinja.html",
+                "apps/speak/speak.jinja.html",
                 muted=muted,
                 muted_by_schedule=muted_by_schedule,
                 registry_url=registry_url,

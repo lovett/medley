@@ -56,7 +56,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "reminder.jinja.html",
+                "apps/reminder/reminder.jinja.html",
                 registry_url=registry_url,
                 templates=templates,
                 upcoming=upcoming
@@ -64,7 +64,7 @@ class Controller:
         )
 
     @staticmethod
-    def POST(*args: str, **kwargs: str) -> None:
+    def POST(*_args: str, **kwargs: str) -> None:
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message", "")

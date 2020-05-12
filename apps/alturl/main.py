@@ -55,7 +55,7 @@ class Controller:
                 bytes,
                 cherrypy.engine.publish(
                     "jinja:render",
-                    "alturl.jinja.html",
+                    "apps/alturl/alturl.jinja.html",
                     bookmarks=bookmarks
                 ).pop()
             )
@@ -94,7 +94,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "alturl.jinja.html",
+                "apps/alturl/alturl.jinja.html",
                 unrecognized=True,
                 url=target_url
             ).pop()

@@ -22,6 +22,6 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "redirect.jinja.html",
+                "apps/redirect/redirect.jinja.html",
             ).pop()
         )
