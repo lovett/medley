@@ -10,6 +10,7 @@ from collections import deque
 from collections import defaultdict
 import cherrypy
 import pendulum
+import parsers.logindex_query
 from . import mixins
 from . import decorators
 
@@ -602,15 +603,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
         """Perform a search against parsed log lines."""
 
-        grammar = cherrypy.engine.publish(
-            "parse:grammar:log_query"
-        ).pop()
+        parser = parsers.logindex_query.Parser()
 
-        parsed_query = cherrypy.engine.publish(
-            "parse:log_query",
-            grammar,
-            query
-        ).pop()
+        parsed_query = parser.parse(query)
 
         sql = f"""SELECT unix_timestamp, datestamp, logs.ip,
         host, uri, query as "query [querystring]",
