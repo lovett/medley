@@ -138,8 +138,6 @@ def setup() -> None:
         if entry.name.startswith("__"):
             continue
 
-        app_module = importlib.import_module(f"apps.{entry.name}.main")
-
         app_config = {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
@@ -179,8 +177,10 @@ def setup() -> None:
                 "tools.expires.secs": 86400 * 7
             })
 
+        main = importlib.import_module(f"apps.{entry.name}.main")
+
         cherrypy.tree.mount(
-            app_module.Controller(),  # type: ignore
+            main.Controller(),  # type: ignore
             app_path,
             app_config
         )
