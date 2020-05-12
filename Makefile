@@ -127,7 +127,7 @@ test: $(APPS) $(PARSERS) $(PLUGINS) coverage
 apps.%.cov: apps/%/main.py apps/%/main_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
-	python -m pytest -x --cov=apps.$* --cov-branch apps/$* \
+	python -m pytest --cov-config=.coveragerc --cov=apps.$* apps/$* \
 	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 
@@ -145,7 +145,7 @@ apps.%.cov: apps/%/main.py apps/%/main_test.py
 parsers.%.cov: parsers/%.py parsers/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
-	python -m pytest -x --cov=parsers.$* --cov-branch parsers/$*_test.py \
+	python -m pytest  --cov-config=.coveragerc --cov=parsers.$* parsers/$*_test.py \
 	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 
@@ -163,7 +163,7 @@ parsers.%.cov: parsers/%.py parsers/%_test.py
 plugins.%.cov: plugins/%.py plugins/%_test.py
 	mkdir -p $(COVERAGE_DIR)
 	COVERAGE_FILE=coverage/$@ \
-	python -m pytest -x --cov=plugins.$* --cov-branch plugins/$*_test.py \
+	python -m pytest --cov-config=.coveragerc --cov=plugins.$* plugins/$*_test.py \
 	|| (rm $(COVERAGE_DIR)/$@ && exit 1)
 
 

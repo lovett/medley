@@ -1,0 +1,5 @@
+[run]
+branch = True
+omit =
+     *_test.py
+     */__init__.py
