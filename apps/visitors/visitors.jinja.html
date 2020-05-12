@@ -185,7 +185,7 @@
                                 </td>
                                 <td nowrap="nowrap">
                                     <p>
-                                        <a href="/visitors?query=date+{{ year_month_day }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                        <a href="/visitors?query=date+{{ active_date|dateformat('YYYY-MM-DD') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                             {{ result.method }} {{ result.uri|truncate(30, True) }}
                                         </a>
                                     </p>
@@ -200,7 +200,7 @@
 
                                     {% if result.referrer_domain and result.referrer_domain not in site_domains %}
                                         <p>
-                                            Referrer: <a href="/visitors?query=date+{{ year_month_day }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                            Referrer: <a href="/visitors?query=date+{{ active_date|dateformat('YYYY-MM-DD') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                                         </p>
                                     {% endif %}
                                 </td>
