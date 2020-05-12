@@ -49,7 +49,7 @@ print-%:
 
 # Set up a virtualenv
 #
-# The sed command fixes an error with fish shell diring sourcing.
+# The sed command fixes an error with fish shell during sourcing.
 #
 # See https://github.com/pypa/virtualenv/pull/1379/commits
 venv:
@@ -67,14 +67,14 @@ setup:
 
 # Run a local development webserver.
 #
-# Uses entr to restart the server when appliation files change.
-# This is an alternative to using MEDLEY__engine__autoreload__on=True
+# The entr utility ensures the server can be restarted if there is a
+# fatal error like bad syntax. It is a backup for CherryPy's autoreload.
 serve: export MEDLEY__engine__autoreload__on=True
 serve: export MEDLEY__memorize_hashes=False
 serve: export MEDLEY__etags=False
 serve: export MEDLEY__request__show_tracebacks=True
 serve:
-	ls apps/**/main.py plugins/*.py tools/*.py medley.py | entr python medley.py
+	ls apps/**/main.py plugins/*.py tools/*.py parsers/*.py medley.py | entr python medley.py
 
 # Run the server under a profiler.
 profile:
