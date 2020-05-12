@@ -15,7 +15,7 @@ ignore-patterns=
 
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
-#init-hook=
+init-hook='import sys; import os; sys.path.append(os.getcwd())'
 
 # Use multiple processes to speed up Pylint.
 jobs=1
@@ -151,7 +151,7 @@ inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
 method-name-hint=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*))$
 
 # Regular expression matching correct method names
-method-rgx=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*)|(GET)|(POST)|(DELETE)|(PUT))$
+method-rgx=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*)|(setUpClass|tearDownClass|GET|POST|DELETE|PUT))$
 
 # Naming hint for module names
 module-name-hint=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$

@@ -10,7 +10,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def GET():
+    def GET(*_args: str) -> None:
         """Redirect to the coverage report.
 
         The coverage report is the index.html file in this apps's

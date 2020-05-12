@@ -5,6 +5,7 @@
 .Python
 .\#*
 ._*
+.coverage
 .mypy_cache
 .pytest_cache
 /apps/coverage/static
