@@ -177,11 +177,8 @@
 
                                 <td nowrap="nowrap">
                                     <p>
-                                        {{ result.datestamp[:-2] }}
-                                        at
-                                        {{ result.unix_timestamp|localtime|dateformat("LTS") }}
+                                        {{ result.unix_timestamp|localtime|dateformat("YYYY-MM-DD [at] LTS") }}
                                     </p>
-
                                 </td>
                                 <td nowrap="nowrap">
                                     <p>
