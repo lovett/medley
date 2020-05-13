@@ -56,6 +56,10 @@ class Parser():
             if not field:
                 continue
 
+            if field and word == "not":
+                field = f"{field}_not"
+                continue
+
             if field not in terms:
                 terms[field] = (word,)
                 continue
@@ -90,8 +94,19 @@ class Parser():
 
         return operator
 
+    @staticmethod
+    def non_negated_field(field: str) -> str:
+        """Remove the negation suffix from a field."""
+
+        if field.endswith("_not"):
+            return field[:-4]
+
+        return field
+
     def get_transformer(self, field: str) -> Transformer:
         """Match a field to a transform function."""
+
+        field = self.non_negated_field(field)
 
         if field in self.date_fields:
             return self.transform_date
@@ -122,8 +137,8 @@ class Parser():
 
         return qualified_terms
 
-    @staticmethod
     def transform(
+            self,
             field: str,
             terms: PhraseTuple,
             transformer: Transformer
@@ -131,9 +146,9 @@ class Parser():
         """Transform a set of values to an SQL phrase."""
 
         negated = False
-        if terms[0] == "not":
+        if field.endswith("_not"):
             negated = True
-            terms = terms[1:]
+            field = self.non_negated_field(field)
 
         phrases = tuple(
             transformer(field, term, negated)

@@ -101,6 +101,17 @@ class TestLogindexQueryParser(unittest.TestCase):
 
         self.parse_and_assert(query, expected)
 
+    def test_mixed_negation(self) -> None:
+        """Queries can specify wanted and unwanted terms for the same field."""
+
+        query = "uri /hello% uri not /unwanted"
+
+        expected = ("(uri LIKE '/hello%')"
+                    " AND "
+                    "(uri <> '/unwanted')")
+
+        self.parse_and_assert(query, expected)
+
 
 if __name__ == "__main__":
     unittest.main()
