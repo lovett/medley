@@ -1,0 +1,1 @@
+100.200.300.400 - fakeuser [01/Jan/1999:01:01:01 -0700] "GET /hello/world.html?param1=value1&param2=value2 HTTP/1.1" 302 0 "http://example.com/page.html" "Mozilla/5.0 (+http://www.example.com/bot.html)" "example.com" latency="0.123" end_time="123456789.99" version="999" request_id="abcdefg" city="New York" region="?" latlong="123,456"
