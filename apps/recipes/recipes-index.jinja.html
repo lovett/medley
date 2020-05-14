@@ -7,7 +7,7 @@
 {% block content %}
     {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete", "calendar") }}
     <main>
-        {% include "recipe-search.jinja.html" %}
+        {% include "apps/recipes/recipe-search.jinja.html" %}
 
         <section id="collection">
             <h2>Recently Added</h2>
@@ -15,7 +15,7 @@
             <ul>
                 {% for recipe in recently_added %}
                     {% set ns.recipes_found = True %}
-                    {% include "recipe-listing.jinja.html" %}
+                    {% include "apps/recipes/recipe-listing.jinja.html" %}
                 {% endfor %}
             </ul>
 

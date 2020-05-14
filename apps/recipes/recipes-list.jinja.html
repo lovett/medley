@@ -4,7 +4,7 @@
     {{ macros.svgSymbols("new-item", "calendar", "search", "tag") }}
 
     <main id="collection">
-        {% include "recipe-search.jinja.html" %}
+        {% include "apps/recipes/recipe-search.jinja.html" %}
 
         <header id="page-title">
             <h2>
@@ -26,7 +26,7 @@
             {% for recipe in recipes %}
                 {% set ns.recipes_found = True %}
 
-                {% include "recipe-listing.jinja.html" %}
+                {% include "apps/recipes/recipe-listing.jinja.html" %}
             {% endfor %}
         </ul>
 
