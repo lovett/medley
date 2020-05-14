@@ -120,7 +120,7 @@ class Controller:
     @staticmethod
     def get_active_date(
             log_records: typing.List[sqlite3.Row],
-            query: str
+            query: str,
     ) -> pendulum.DateTime:
         """Figure out which date the query pertains to."""
 
@@ -128,10 +128,6 @@ class Controller:
             return pendulum.from_timestamp(
                 log_records[0]["unix_timestamp"]
             )
-
-        timezone = cherrypy.engine.publish(
-            "registry:timezone"
-        ).pop()
 
         query_date = ""
 
@@ -167,6 +163,13 @@ class Controller:
                 pendulum.DateTime,
                 pendulum.parse(query_date)
             )
+
+        timezone = typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "registry:timezone"
+            ).pop()
+        )
 
         return typing.cast(
             pendulum.DateTime,

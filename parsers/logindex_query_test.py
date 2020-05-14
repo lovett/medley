@@ -17,7 +17,7 @@ class TestLogindexQueryParser(unittest.TestCase):
     def parse_and_assert(self, query: str, expected: str) -> None:
         """Submit a query to the parser and assert its result."""
 
-        result = self.parser.parse(query)
+        result = self.parser.parse(query, "US/Eastern")
         self.assertEqual(result, expected)
 
     def test_invalid_keyword(self) -> None:

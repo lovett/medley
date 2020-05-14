@@ -598,9 +598,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
         """Perform a search against parsed log lines."""
 
+        timezone = typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "registry:timezone"
+            ).pop()
+        )
+
         parser = parsers.logindex_query.Parser()
 
-        parsed_query = parser.parse(query)
+        parsed_query = parser.parse(query, timezone)
 
         sql = f"""SELECT unix_timestamp, datestamp, logs.ip,
         host, uri, query as "query [querystring]",
@@ -633,11 +640,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return {row["ip"]: row["reverse_domain"] for row in result}
 
     @decorators.log_runtime
-    def alert(self, earliest_id: int, count: int) -> None:
+    def alert(self, earliest_id: int, count: int, timezone: str) -> None:
         """Send a notification for newly-parsed records that match
         previously-stored queries.
 
         """
+
+        timezone = typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "registry:timezone"
+            ).pop()
+        )
 
         parser = parsers.logindex_query.Parser()
 
@@ -648,7 +662,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ).pop()
 
         for name, query in alert_queries.items():
-            parsed_query = parser.parse(query)
+            parsed_query = parser.parse(query, timezone)
 
             sql = f"""SELECT distinct ip, uri
             FROM logs

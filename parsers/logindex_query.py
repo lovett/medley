@@ -12,6 +12,8 @@ TermDict = typing.Dict[str, PhraseTuple]
 class Parser():
     """Convert a logindex search query to a SQL WHERE clause."""
 
+    timezone: str
+
     # A mapping between search keywords and the corresponding database column
     # that allows for aliasing.
     keywords = {
@@ -41,8 +43,10 @@ class Parser():
     numeric_fields = ("statusCode",)
     subquery_fields = ("reverse_domain")
 
-    def parse(self, query: str) -> str:
+    def parse(self, query: str, timezone: str) -> str:
         """Convert a search query to an SQL phrase."""
+
+        self.timezone = timezone
 
         terms: TermDict = {}
         sql_phrases: PhraseTuple = ()
@@ -160,16 +164,13 @@ class Parser():
             boolean = " AND "
         return ("(" + boolean.join(phrases) + ")",)
 
-    @staticmethod
-    def transform_date(field: str, term: str, _: bool = False) -> str:
+    def transform_date(self, field: str, term: str, _: bool = False) -> str:
         """Convert a date value to an SQL phrase.
 
         Dates in YYYY-MM-DD and YYYY-MM format are recognized, as are
         the keywords "today" and "yesterday".
 
         """
-
-        timezone = "US/Eastern"
 
         reference_date = None
 
@@ -181,13 +182,13 @@ class Parser():
             reference_date = pendulum.from_format(
                 term,
                 "YYYY-MM-DD",
-                tz=timezone
+                tz=self.timezone
             )
         elif re.match(r"\d{4}-\d{2}", term):
             reference_date = pendulum.from_format(
                 term,
                 "YYYY-MM",
-                tz=timezone
+                tz=self.timezone
             )
 
         if not reference_date:
