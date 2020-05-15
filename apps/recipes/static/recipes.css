@@ -15,30 +15,23 @@
 }
 
 #collection time {
-    margin-right: 1em;
-    margin-bottom: 0.75em;
+    margin-top: 0.5em;
+    font-size: 0.75em;
     display: block;
 }
 
 #recipe SECTION:nth-of-type(1) {
     display: grid;
     grid-template-columns: 1fr;
-    grid-column-gap: 1em;
+    grid-column-gap: 0.75em;
     margin-bottom: 0;
     border-top: 1px solid var(--grey);
 }
 
 #recipe SECTION P, #recipe SECTION LI {
     break-inside: avoid;
-    padding: 0.5em 0;
-}
-
-#recipe SECTION LI {
-    break-inside: avoid;
-    padding: 0.5em 0;
-    margin: 0 0 0 -0.75em;
-    padding-left: 0.75em;
-
+    padding: 0.5em 0.75em;
+    margin: 0 -0.75em;
 }
 
 #directions {
@@ -152,10 +145,10 @@
 
     #ingredients {
         border-right: 1px solid var(--grey);
+        padding-right: 0.75em;
     }
 
     #directions {
-        padding-top: 1em;
         columns: 32em;
         column-fill: auto;
         column-gap: 3em;
@@ -191,10 +184,6 @@
 
 /* Large devices */
 @media (min-width: 992px) {
-    #directions {
-        column-fill: balance;
-    }
-
     #recipe FOOTER TIME:last-of-type {
         margin-right: 0;
     }

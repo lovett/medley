@@ -257,7 +257,7 @@ TEXTAREA {
     padding-left: 0;
     list-style-type: none;
     display: grid;
-    grid-row-gap: 1em;
+    grid-row-gap: 3em;
     grid-column-gap: 4em;
 }
 
