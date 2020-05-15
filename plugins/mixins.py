@@ -33,31 +33,21 @@ class Sqlite:
             detect_types=sqlite3.PARSE_COLNAMES
         )
 
-    def _create(self, sql: str) -> bool:
-        """Establish a schema by executing a series of SQL statements.
+    def _create(self, sql: str) -> None:
+        """Establish a schema by executing a series of SQL statements."""
 
-        The statements should be re-runnable so that new objects will
-        be created automatically. This can be accomplished with "IF
-        NOT EXISTS" statements when creating tables and triggers.
+        if os.path.exists(self.db_path):
+            return
 
-        This approach is geared toward new objects. It won't account
-        for modifications to existing objects such as ALTER TABLE.
-
-        """
-
-        result = True
         con = self._open()
 
         try:
             with con:
                 con.executescript(sql)
         except sqlite3.DatabaseError as err:
-            result = False
             self._logError(err)
         finally:
             con.close()
-
-        return result
 
     def _execute(
             self,
