@@ -179,7 +179,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch:file",
-                f"{req.status_code} url"
+                f"{req.status_code} {url}"
             )
 
     @staticmethod
