@@ -48,6 +48,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("applog:newest", self.newest)
         self.bus.subscribe("applog:prune", self.prune)
         self.bus.subscribe("applog:search", self.search)
+        self.bus.subscribe("applog:sources", self.list_sources)
         self.bus.subscribe("applog:view", self.view)
 
     def newest(
@@ -129,7 +130,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         offset: int = kwargs.get("offset", 0)
         limit: int = kwargs.get("limit", 0)
 
-        sql = f"""SELECT source, message,
+        sql = """SELECT source, message,
         created as 'created [datetime]'
         FROM applog
         ORDER BY created DESC, rowid desc
@@ -150,7 +151,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         offset: int = kwargs.get("offset", 0)
         limit: int = kwargs.get("limit", 0)
 
-        sql = f"""SELECT source, message,
+        sql = """SELECT source, message,
         created as 'created [datetime]'
         FROM applog
         WHERE source=?
@@ -164,3 +165,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._count(sql, placeholders),
             self._explain(sql, placeholders)
         )
+
+    def list_sources(self) -> typing.Iterator[sqlite3.Row]:
+        """List all available sources."""
+
+        sql = """SELECT distinct source
+        FROM applog
+        ORDER BY source"""
+
+        return self._select_generator(sql)

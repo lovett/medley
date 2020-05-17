@@ -576,15 +576,8 @@ TEXTAREA {
 }
 
 .inline-list LI {
-    display: inline;
-}
-
-.inline-list LI:after {
-    content: ', ';
-}
-
-.inline-list LI:last-of-type:after {
-    content: '';
+    display: inline-block;
+    padding: 0.5em 1em 0.5em 0;
 }
 
 .pagination {

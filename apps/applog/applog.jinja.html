@@ -22,6 +22,16 @@
             </form>
         </header>
 
+        {% if sources %}
+            <section>
+                <ul class="inline-list">
+                    {% for row in sources %}
+                        <li><a href="{{ app_url }}?source={{ row["source"]|urlencode }}">{{ row["source"] }}</a></li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
         {% if not records %}
             <p>No records.</p>
         {% else %}
