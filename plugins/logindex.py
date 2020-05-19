@@ -640,7 +640,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return {row["ip"]: row["reverse_domain"] for row in result}
 
     @decorators.log_runtime
-    def alert(self, earliest_id: int, count: int, timezone: str) -> None:
+    def alert(self, earliest_id: int, count: int) -> None:
         """Send a notification for newly-parsed records that match
         previously-stored queries.
 
