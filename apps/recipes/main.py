@@ -93,7 +93,6 @@ class Controller:
         ]
 
         title = re.sub(r"\s*&\s*", " and ", title)
-        title = title.title()
 
         for replace, search in self.fractions:
             body = body.replace(search, replace)
