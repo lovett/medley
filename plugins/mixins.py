@@ -155,7 +155,7 @@ class Sqlite:
             query: str,
             values: typing.Sequence[typing.Any] = ()
     ) -> typing.List[sqlite3.Row]:
-        """Issue a select query."""
+        """Execute a select query."""
 
         result = None
         con = self._open()
@@ -178,35 +178,21 @@ class Sqlite:
             self,
             query: str,
             values: typing.Sequence[typing.Any] = (),
-            arraysize: int = 1,
             con: typing.Optional[sqlite3.Connection] = None
     ) -> typing.Iterator[sqlite3.Row]:
-        """Issue a select query and return results as a generator.
-
-        Nearly the same as _select(), but standalone so that _select()
-        can remain a regular function.
-
-        """
+        """Execute a select query and return results as a generator."""
 
         if not con:
             con = self._open()
 
         con.row_factory = sqlite3.Row
-        cur = con.cursor()
 
         try:
-            cur.execute(query, values)
+            yield from con.execute(query, values)
         except sqlite3.DatabaseError as err:
-            con.close()
             self._logError(err)
-            return None
-
-        while True:
-            result = cur.fetchmany(size=arraysize)
-            if not result:
-                con.close()
-                break
-            yield from result
+        finally:
+            con.close()
 
     def _explain(
             self,
@@ -241,9 +227,8 @@ class Sqlite:
         con.row_factory = sqlite3.Row
 
         try:
-            with con:
-                for row in con.execute(query, values):
-                    break
+            for row in con.execute(query, values):
+                break
         except sqlite3.DatabaseError as err:
             self._logError(err)
         finally:
