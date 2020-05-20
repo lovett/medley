@@ -139,7 +139,7 @@ class Sqlite:
             flags=re.MULTILINE | re.DOTALL | re.IGNORECASE
         )
 
-        placeholder_count = count_query.count('?')
+        placeholder_count = count_query.count("?")
         placeholder_values = values[0:placeholder_count]
 
         return typing.cast(

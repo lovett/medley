@@ -130,18 +130,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.parse)
-        self.bus.subscribe('logindex:parse', self.parse)
-        self.bus.subscribe('logindex:reversal', self.reversal)
-        self.bus.subscribe('logindex:alert', self.alert)
-        self.bus.subscribe('logindex:enqueue', self.enqueue)
-        self.bus.subscribe('logindex:insert_line', self.insert_line)
-        self.bus.subscribe('logindex:append_line', self.append_line)
-        self.bus.subscribe('logindex:count_lines', self.count_lines)
-        self.bus.subscribe('logindex:process_queue', self.process_queue)
-        self.bus.subscribe('logindex:query', self.query)
-        self.bus.subscribe('logindex:query:reverse_ip', self.query_reverse_ip)
-        self.bus.subscribe('logindex:count_visit_days', self.count_visit_days)
-        self.bus.subscribe('logindex:repair', self.repair)
+        self.bus.subscribe("logindex:parse", self.parse)
+        self.bus.subscribe("logindex:reversal", self.reversal)
+        self.bus.subscribe("logindex:alert", self.alert)
+        self.bus.subscribe("logindex:enqueue", self.enqueue)
+        self.bus.subscribe("logindex:insert_line", self.insert_line)
+        self.bus.subscribe("logindex:append_line", self.append_line)
+        self.bus.subscribe("logindex:count_lines", self.count_lines)
+        self.bus.subscribe("logindex:process_queue", self.process_queue)
+        self.bus.subscribe("logindex:query", self.query)
+        self.bus.subscribe("logindex:query:reverse_ip", self.query_reverse_ip)
+        self.bus.subscribe("logindex:count_visit_days", self.count_visit_days)
+        self.bus.subscribe("logindex:repair", self.repair)
 
     @staticmethod
     def get_root() -> str:
@@ -200,8 +200,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         root = self.get_root()
 
-        subdir = log_date.strftime('%Y-%m')
-        file = log_date.strftime('%Y-%m-%d.log')
+        subdir = log_date.strftime("%Y-%m")
+        file = log_date.strftime("%Y-%m-%d.log")
         log_file = f"{root}/{subdir}/{file}"
 
         if not os.path.isfile(log_file):
@@ -280,7 +280,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             return
 
-        for day in period.range('days'):
+        for day in period.range("days"):
             log_file = self.file_for_date(day)
             if log_file:
                 self.ingest_file(log_file)

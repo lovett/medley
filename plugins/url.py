@@ -131,7 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         readable_url = url.replace("https://", "")
         readable_url = readable_url.replace("http://", "")
-        readable_url = readable_url.split('#', 1)[0]
+        readable_url = readable_url.split("#", 1)[0]
         return readable_url
 
     @staticmethod

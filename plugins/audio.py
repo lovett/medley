@@ -22,8 +22,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the audio prefix.
         """
 
-        self.bus.subscribe('audio:play_bytes', self.play_bytes)
-        self.bus.subscribe('audio:play_sound', self.play_sound)
+        self.bus.subscribe("audio:play_bytes", self.play_bytes)
+        self.bus.subscribe("audio:play_sound", self.play_sound)
 
     @staticmethod
     @decorators.log_runtime

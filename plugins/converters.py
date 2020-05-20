@@ -102,7 +102,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             value.decode("utf-8"),
             "YYYY-MM-DD HH:mm:ss",
             tz=local_tz,
-        ).in_timezone('utc')
+        ).in_timezone("utc")
 
     @staticmethod
     def duration(value: bytes) -> str:
@@ -184,5 +184,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return [
             word.strip()
-            for word in value.decode("utf-8").split(',')
+            for word in value.decode("utf-8").split(",")
         ]

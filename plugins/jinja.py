@@ -219,7 +219,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         parsed_url = urlparse(url)
 
-        if parsed_url.scheme not in ('http', 'https'):
+        if parsed_url.scheme not in ("http", "https"):
             return url
 
         return typing.cast(
@@ -378,8 +378,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        val = val.replace('\n', '%0A')
-        val = re.sub(r'\s', ' ', val)
+        val = val.replace("\n", "%0A")
+        val = re.sub(r"\s", " ", val)
 
         return str(val).translate({
             ord('\\'): '\\u005C',

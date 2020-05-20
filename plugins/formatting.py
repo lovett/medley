@@ -88,7 +88,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         return typing.cast(
             str,
-            instance.format('ddd, DD MMM YYYY HH:mm:ss zz')
+            instance.format("ddd, DD MMM YYYY HH:mm:ss zz")
         )
 
     @staticmethod

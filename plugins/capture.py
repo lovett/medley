@@ -60,7 +60,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "status": response.status
         })
 
-        request_uri_parts = request.request_line.split(' ')
+        request_uri_parts = request.request_line.split(" ")
 
         request_uri = " ".join(request_uri_parts[1:-1])
 

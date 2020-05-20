@@ -6,7 +6,7 @@ import typing
 import cherrypy
 
 FuncType = typing.Callable[..., typing.Any]
-Func = typing.TypeVar('Func', bound=FuncType)
+Func = typing.TypeVar("Func", bound=FuncType)
 
 
 def log_runtime(func: Func) -> Func:

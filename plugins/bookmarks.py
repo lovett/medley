@@ -113,8 +113,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Parse the domain from a normalized URL."""
 
         parsed_url = urlparse(
-            url.split('#', 1)[0],
-            scheme='http',
+            url.split("#", 1)[0],
+            scheme="http",
             allow_fragments=False
         )
 
