@@ -235,12 +235,21 @@ class Sqlite:
             values: typing.Sequence[typing.Any] = ()
     ) -> typing.Optional[sqlite3.Row]:
         """Issue a select query and return the first row."""
-        generator = self._select_generator(query, values)
+
+        row = None
+        con = self._open()
+        con.row_factory = sqlite3.Row
 
         try:
-            return next(generator)
-        except StopIteration:
-            return None
+            with con:
+                for row in con.execute(query, values):
+                    break
+        except sqlite3.DatabaseError as err:
+            self._logError(err)
+        finally:
+            con.close()
+
+        return row
 
     def _selectFirst(
             self,
