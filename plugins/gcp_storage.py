@@ -1,18 +1,12 @@
-"""
-Interact with Google Cloud Storage.
-
-See https://googleapis.dev/python/storage/latest/client.html
-"""
+"""Interact with Google Cloud Storage."""
 
 import json
 import pathlib
-import urllib3
+import typing
 import cherrypy
-from google.cloud import storage
-from google.oauth2.service_account import Credentials
-import google.api_core.exceptions
-import google.auth.exceptions
-from . import decorators
+import pendulum
+import jwt
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -25,16 +19,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Define the CherryPy messages to listen for.
 
         This plugin owns the gcp prefix.
+
         """
 
         self.bus.subscribe("gcp:storage:pull", self.pull_bucket)
 
-    @staticmethod
     @decorators.log_runtime
-    def pull_bucket() -> None:
-        """
-        Download files from a Google Cloud Storage bucket.
-        """
+    def pull_bucket(self) -> None:
+        """Download files from a Google Cloud Storage bucket."""
 
         config = cherrypy.engine.publish(
             "registry:search:dict",
@@ -53,95 +45,97 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "Missing gcp:service_account in registry"
             )
 
-        credentials = Credentials.from_service_account_info(
-            json.loads(config["service_account"]),
-            scopes=config.get("scope", "").split("\n")
-        )
+        service_account = json.loads(config["service_account"])
 
-        storage_client = storage.Client(
-            credentials=credentials,
-            project=config.get("project")
-        )
+        token = jwt.encode({
+            "iss": service_account.get("client_email"),
+            "scope": config.get("scope"),
+            "aud": service_account.get("token_uri"),
+            "exp": pendulum.now().add(hours=1).int_timestamp,
+            "iat": pendulum.now().int_timestamp
+        }, service_account.get("private_key"), algorithm="RS256")
 
-        blobs = storage_client.list_blobs(config.get("bucket"))
+        grant_response = cherrypy.engine.publish(
+            "urlfetch:post",
+            service_account.get("token_uri"),
+            data={
+                "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                "assertion": token
+            },
+            as_object=True
+        ).pop()
+
+        access_token = grant_response.json().get("access_token")
+
+        bucket = cherrypy.engine.publish(
+            "urlfetch:get",
+            (
+                "https://storage.googleapis.com/storage/v1/b/"
+                f"{config.get('bucket')}/o"
+            ),
+            headers=self.standard_headers(access_token),
+            as_json=True
+        ).pop()
 
         files_pulled = 0
 
-        download_root = pathlib.Path(storage_root)
+        for item in bucket.get("items"):
+            item_path = pathlib.Path(item.get("name"))
+            destination_path = pathlib.Path(storage_root) / item_path
+            should_delete = False
 
-        try:
-            for blob in blobs:
-                blob_path = pathlib.Path(blob.name)
+            if destination_path.exists():
+                should_delete = True
 
-                destination_path = download_root / blob_path
+                if int(item.get("size", 0)) != destination_path.stat().st_size:
+                    should_delete = False
 
-                should_delete = False
+            if should_delete and "request_log" in destination_path.parts:
+                lines_in_blob = 0
+                with open(destination_path) as handle:
+                    for lines_in_blob, _ in enumerate(handle):
+                        pass
 
-                if destination_path.exists():
-                    should_delete = True
+                # Add one to account for the last line.
+                lines_in_blob += 1
 
-                    if blob.size != destination_path.stat().st_size:
-                        should_delete = False
+                lines_in_database = cherrypy.engine.publish(
+                    "logindex:count_lines",
+                    item_path
+                ).pop()
 
-                    if should_delete and "request_log" in blob_path.parts:
-                        lines_in_blob = 0
-                        with open(destination_path) as handle:
-                            for lines_in_blob, _ in enumerate(handle):
-                                pass
+                if lines_in_database != lines_in_blob:
+                    should_delete = False
 
-                        # Add one to account for the last line.
-                        lines_in_blob += 1
+            if should_delete:
+                print("should delete", destination_path)
+                # self.delete_item(
+                #     item.get("mediaLink"),
+                #     access_token
+                # )
+                continue
 
-                        lines_in_database = cherrypy.engine.publish(
-                            "logindex:count_lines",
-                            blob_path
-                        ).pop()
+            if not destination_path.parent.is_dir():
+                destination_path.parent.mkdir(parents=True)
 
-                        if lines_in_database != lines_in_blob:
-                            should_delete = False
-
-                if should_delete:
-                    try:
-                        blob.delete()
-                    except google.api_core.exceptions.GoogleAPIError:
-                        bucket_name = config.get("bucket")
-                        cherrypy.log(
-                            f"Cannot delete GCP blob in {bucket_name}"
-                        )
-                    continue
-
-                if not destination_path.parent.is_dir():
-                    destination_path.parent.mkdir(parents=True)
-
-                blob.download_to_filename(destination_path)
-
-                request_top_path = ("appengine.googleapis.com", "request_log")
-
-                publish_event = None
-
-                if blob_path.parts[0:2] == request_top_path:
-                    publish_event = "gcp:appengine:ingest_file"
-
-                if publish_event:
-                    cherrypy.engine.publish(
-                        "scheduler:add",
-                        1,
-                        publish_event,
-                        blob_path
-                    )
-
-                files_pulled += 1
-        except (
-                google.auth.exceptions.GoogleAuthError,
-                urllib3.exceptions.NewConnectionError
-        ) as exception:
             cherrypy.engine.publish(
-                "applog:add",
-                "gcp_storage:exception",
-                exception
+                "urlfetch:get:file",
+                item.get("mediaLink"),
+                destination_path,
+                headers=self.standard_headers(access_token)
             )
 
-            return
+            request_top_path = ("appengine.googleapis.com", "request_log")
+
+            if item_path.parts[0:2] == request_top_path:
+                cherrypy.engine.publish(
+                    "scheduler:add",
+                    1,
+                    "gcp:appengine:ingest_file",
+                    item_path
+                )
+
+            files_pulled += 1
 
         unit = "file" if files_pulled == 1 else "files"
 
@@ -150,3 +144,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "gcp_storage",
             f"{files_pulled} {unit} pulled"
         )
+
+    def delete_item(self, url: str, access_token: str) -> bool:
+        """Delete a file from a bucket."""
+
+        return typing.cast(
+            bool,
+            cherrypy.engine.publish(
+                "urlfetch:delete",
+                url,
+                headers=self.standard_headers(access_token)
+            ).pop()
+        )
+
+    @staticmethod
+    def standard_headers(access_token: str) -> typing.Dict[str, str]:
+        """Wrap an access token in a headers dict."""
+
+        return {
+            "Authorization": f"Bearer {access_token}"
+        }
