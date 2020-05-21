@@ -473,7 +473,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             agent = fields.get("agent", "")
             if agent in cache["agent"]:
                 fields["agent_domain"] = cache["agent"][agent]["agent_domain"]
-            else:
+            elif agent:
                 agent_url_matches = re.search(
                     r"https?://(www\.)?(.*?)[/; ]",
                     agent
