@@ -8,6 +8,8 @@ import typing
 import requests
 import cherrypy
 
+Kwargs = typing.Dict[str, typing.Any]
+
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for making HTTP requests."""
@@ -20,58 +22,95 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the urlfetch prefix.
         """
+        self.bus.subscribe("urlfetch:delete", self.delete)
         self.bus.subscribe("urlfetch:get", self.get)
         self.bus.subscribe("urlfetch:get:file", self.get_file)
         self.bus.subscribe("urlfetch:post", self.post)
 
-        cherrypy.engine.publish("urlfetch:ready")
-
     @staticmethod
+    def headers(
+            additions: typing.Optional[typing.Dict[str, str]]
+    ) -> typing.Dict[str, str]:
+        """Add headers to a default set."""
+
+        headers = {
+            "User-Agent": "Mozilla/5.0 (compatible; python)"
+        }
+
+        if additions:
+            headers.update(additions)
+
+        return headers
+
+    def delete(self, url: str, **kwargs: Kwargs) -> bool:
+        """Send a DELETE request."""
+
+        headers = self.headers(kwargs.get("headers"))
+
+        try:
+            res = requests.delete(
+                url,
+                headers=headers
+            )
+
+            res.raise_for_status()
+
+        except requests.exceptions.RequestException as exception:
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch:exception",
+                exception
+            )
+
+            return False
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch:delete",
+            f"{res.status_code} {url}"
+        )
+
+        return True
+
     def get(
+            self,
             url: str,
             as_json: bool = False,
             as_object: bool = False,
-            **kwargs: typing.Dict[str, typing.Any]
+            **kwargs: Kwargs
     ) -> typing.Any:
         """Send a GET request"""
 
         auth = kwargs.get("auth")
-        headers = kwargs.get("headers")
+        headers = self.headers(kwargs.get("headers"))
         params = kwargs.get("params")
         cache_lifespan = typing.cast(int, kwargs.get("cache_lifespan", 0))
 
         if cache_lifespan > 0:
-            response = cherrypy.engine.publish(
+            cached_response = cherrypy.engine.publish(
                 "cache:get",
                 url
             ).pop()
 
-            if response:
+            if cached_response:
                 return typing.cast(
                     requests.models.Response,
-                    response
+                    cached_response
                 )
 
-        request_headers = {
-            "User-Agent": "Mozilla/5.0 (compatible; python)",
-        }
-
         if as_json:
-            request_headers["Accept"] = "application/json"
-
-        if headers:
-            request_headers.update(headers)
+            headers["Accept"] = "application/json"
 
         try:
-            req = requests.get(
+            res = requests.get(
                 url,
                 auth=auth,
                 timeout=15,
-                headers=request_headers,
+                headers=headers,
                 params=params
             )
 
-            req.raise_for_status()
+            res.raise_for_status()
 
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
@@ -85,74 +124,65 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.engine.publish(
             "applog:add",
             "urlfetch:get",
-            f"{req.status_code} {url}"
+            f"{res.status_code} {url}"
         )
 
         if as_object:
-            return req
+            return res
 
-        if req.status_code == 204:
+        if res.status_code == 204:
             return True
 
-        if as_json:
+        if "application/json" in res.headers.get("content-type", ""):
             if cache_lifespan > 0:
                 cherrypy.engine.publish(
                     "cache:set",
                     url,
-                    req.json(),
+                    res.json(),
                     lifespan_seconds=cache_lifespan
                 )
-            return req.json()
+            return res.json()
 
-        return req.text
+        return res.text
 
-    @staticmethod
-    def get_file(url: str,
-                 destination: str,
-                 as_json: bool = False,
-                 **kwargs: str) -> None:
-        """Send a GET request and save the response to the local filesystem."""
+    def get_file(
+            self,
+            url: str,
+            destination: str,
+            as_json: bool = False,
+            **kwargs: typing.Dict[str, typing.Any]
+    ) -> None:
+        """Send a GET request and save the response to the filesystem."""
 
-        auth = kwargs.get("auth")
-
-        headers = typing.cast(
-            typing.Dict[str, str],
-            kwargs.get("headers")
-        )
+        headers = self.headers(kwargs.get("headers"))
 
         params = kwargs.get("params")
         files_to_extract = kwargs.get("files_to_extract")
 
-        request_headers = {
-            "User-Agent": "python",
-        }
-
-        if headers:
-            request_headers.update(headers)
-
         if as_json:
-            request_headers["Accept"] = "application/json"
+            headers["Accept"] = "application/json"
 
-        download_path = os.path.join(
-            destination,
-            os.path.basename(url)
-        )
+        if os.path.isdir(destination):
+            destination = os.path.join(
+                destination,
+                os.path.basename(url)
+            )
 
-        req = requests.get(
+        res = requests.get(
             url,
-            auth=auth,
-            headers=request_headers,
+            auth=kwargs.get("auth"),
+            headers=headers,
             params=params,
             stream=True
         )
 
-        req.raise_for_status()
+        res.raise_for_status()
 
-        with open(download_path, "wb") as downloaded_file:
-            shutil.copyfileobj(req.raw, downloaded_file)
+        with open(destination, "wb") as downloaded_file:
+            shutil.copyfileobj(res.raw, downloaded_file)
 
-        if files_to_extract and tarfile.is_tarfile(download_path):
-            with tarfile.open(download_path) as tar_file:
+        if files_to_extract and tarfile.is_tarfile(destination):
+            with tarfile.open(destination) as tar_file:
                 file_names = [
                     name for name in tar_file.getnames()
                     if os.path.basename(name) in files_to_extract
@@ -174,18 +204,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                             extracted_file
                         )
 
-            os.unlink(download_path)
+            if os.path.isfile(destination):
+                os.unlink(destination)
 
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch:file",
-                f"{req.status_code} {url}"
+                f"{res.status_code} {url}"
             )
 
-    @staticmethod
     def post(
+            self,
             url: str,
             data: typing.Any,
+            as_object: bool = False,
             as_json: bool = False,
             as_bytes: bool = False,
             **kwargs: typing.Any
@@ -193,46 +225,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Send a POST request."""
 
         auth = kwargs.get("auth")
-        headers = kwargs.get("headers")
-
-        request_headers = {
-            "User-Agent": "python",
-        }
-
-        if headers:
-            request_headers.update(headers)
+        headers = self.headers(kwargs.get("headers"))
 
         if as_json:
             data = json.dumps(data)
-            request_headers["Content-Type"] = "application/json"
+            headers["Content-Type"] = "application/json"
 
         try:
-            req = requests.post(
+            res = requests.post(
                 url,
                 auth=auth,
                 timeout=5,
-                headers=request_headers,
+                headers=headers,
                 data=data
             )
 
-            req.raise_for_status()
+            res.raise_for_status()
 
             cherrypy.engine.publish(
                 "applog:add",
                 "urlfetch:post",
-                f"{req.status_code} {url}"
+                f"{res.status_code} {url}"
             )
 
-            if req.status_code == 204:
+            if res.status_code == 204:
                 return True
 
+            if as_object:
+                return res
+
             if as_json:
-                return req.json()
+                return res.json()
 
             if as_bytes:
-                return req.content
+                return res.content
 
-            return req.text
+            return res.text
 
         except requests.exceptions.RequestException as exception:
             cherrypy.engine.publish(
