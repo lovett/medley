@@ -3,7 +3,7 @@ Jinja2==2.11.2
 PyJWT==1.7.1
 cryptography==2.9.2
 geoip2==3.0.0
-httplib2==0.17.3
+httplib2==0.18.1
 mistletoe==0.7.2
 pendulum==2.1.0
 pytz==2020.1
