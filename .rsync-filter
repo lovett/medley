@@ -14,11 +14,12 @@
 - /.rsync-filter
 - medley.conf
 - .DS_Store
-- samples.http
 - /.Python
 - /.gitignore
 - /venv
 - *.pyc
+- /urls.org
+- /mypy.ini
 - /requirements*.txt
 - /node_modules
 - package.json
