@@ -108,11 +108,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     should_delete = False
 
             if should_delete:
-                print("should delete", destination_path)
-                # self.delete_item(
-                #     item.get("mediaLink"),
-                #     access_token
-                # )
+                self.delete_item(
+                    item.get("mediaLink"),
+                    access_token
+                )
                 continue
 
             if not destination_path.parent.is_dir():
