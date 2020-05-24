@@ -109,7 +109,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             if should_delete:
                 self.delete_item(
-                    item.get("mediaLink"),
+                    item.get("selfLink"),
                     access_token
                 )
                 continue
