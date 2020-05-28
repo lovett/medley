@@ -1,5 +1,12 @@
 MEDLEY.shortcuts = (function () {
 
+    function standardDateString(d) {
+        result = `${d.getFullYear()}-`;
+        result += `${(d.getMonth() + 1).toString().padStart(2, '0')}-`;
+        result += `${d.getDate().toString().padStart(2, '0')}`;
+        return result;
+    }
+
     function adjustQueryDate(query, dayStep) {
         const matches = query.match(/date (.*)/);
 
@@ -25,10 +32,7 @@ MEDLEY.shortcuts = (function () {
 
         const steppedDate = new Date(initialDate + (oneDay * dayStep));
 
-        let steppedDateString = `${steppedDate.getFullYear()}-`;
-        steppedDateString += `${(steppedDate.getMonth() + 1).toString().padStart(2, '0')}-`;
-        steppedDateString += `${steppedDate.getDate().toString().padStart(2, '0')}`;
-
+        let steppedDateString = standardDateString(steppedDate);
         query = query.replace(/^\s*date.*\s*/g, '');
         query = `date ${steppedDateString}\n${query}`;
         return query;
@@ -143,6 +147,10 @@ MEDLEY.shortcuts = (function () {
                 /(\w)\.\s*(\w)/gm,
                 "$1.\n\n$2"
             );
+        }
+
+        if (shortcut === 'today') {
+            field.value = standardDateString(new Date());
         }
 
         if (e.target.nodeName === 'BUTTON') {
