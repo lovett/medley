@@ -72,7 +72,6 @@ BUTTON[disabled] .icon {
 BUTTON .icon {
     fill: var(--white);
     margin: 0 1em;
-    pointer-events: none;
 }
 
 BUTTON + .label {
@@ -334,8 +333,6 @@ TEXTAREA {
     margin-right: 0;
 }
 
-
-
 #main-toolbar A {
     color: inherit;
     display: inline-flex;
@@ -459,13 +456,16 @@ TEXTAREA {
     padding-right: .5em;
 }
 
-.discard-button a:hover {
+.delete-button {
+    background-color: var(--grey);
+}
+
+.delete-button a:hover {
     background-color: var(--alert);
 }
 
-.discard-button a:hover .icon use {
+.delete-button a:hover .icon use {
     stroke: var(--white);
-
 }
 
 .error {
@@ -555,6 +555,7 @@ TEXTAREA {
     width: 1.2em;
     height: 1.2em;
     vertical-align: bottom;
+    pointer-events: none;
 }
 
 .icon use {

@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp("main", ("discardable-record", "discard-button", "wayback-link")) }}
+    {{ macros.staticAsset('shared', 'js/delete.js') }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -90,42 +90,49 @@
             <ul>
                 {% for bookmark in bookmarks %}
                     <li>
-                        <discardable-record inline-template url="{{ app_url }}?url={{ bookmark.url|urlencode }}">
-                            <div class="bookmark" v-bind:style="styles">
-                                <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
-                                    {{ bookmark.title }}
-                                </a>
+                        <div class="bookmark" v-bind:style="styles">
+                            <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
+                                {{ bookmark.title }}
+                            </a>
 
-                                {% if bookmark.tags %}
-                                    <div class="tags">
-                                        {% for tag in bookmark.tags %}
-                                            <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
-                                                <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                                                {{ tag }}
-                                            </a>
-                                        {% endfor %}
+                            {% if bookmark.tags %}
+                                <div class="tags">
+                                    {% for tag in bookmark.tags %}
+                                        <a class="tag" href="{{ app_url }}?query=tags:{{ tag|urlencode }}">
+                                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                                            {{ tag }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="details">
+                                <div class="action-button delete-button">
+                                    <a href="#"
+                                       class="delete"
+                                       tooltip="Delete this bookmark"
+                                       data-hide-closest="li"
+                                       data-delete-url="{{ app_url }}?url={{ bookmark.url|urlencode }}"
+                                    >
+                                        <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                                    </a>
+                                </div>
+
+                                <div>
+                                    <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                                </div>
+
+                                {% if bookmark.domain %}
+                                    <div>
+                                        <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
                                     </div>
                                 {% endif %}
 
-                                <div class="details">
-                                    <div><discard-button tooltip="Delete this bookmark" /></div>
-
-                                    <div>
-                                        <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
-                                    </div>
-
-                                    {% if bookmark.domain %}
-                                        <div>
-                                            <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
-                                        </div>
-                                    {% endif %}
-
-                                    <div>
-                                        <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
-                                    </div>
+                                <div>
+                                    <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
                                 </div>
                             </div>
-                        </discardable-record>
+                        </div>
                     </li>
                 {% endfor %}
             </ul>

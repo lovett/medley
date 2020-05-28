@@ -1,7 +1,6 @@
 {% extends "apps/recipes/recipes.jinja.html" %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
     {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
     {{ macros.staticAsset('shared', 'js/delete.js') }}
 {% endblock %}

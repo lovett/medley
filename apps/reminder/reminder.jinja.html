@@ -10,7 +10,8 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('countdown', 'discardable-record', 'discard-button')) }}
+    {{ macros.vueApp('main', ('countdown',)) }}
+    {{ macros.staticAsset('shared', 'js/delete.js') }}
     {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
     {{ macros.staticAsset('reminder', 'reminder.js') }}
 {% endblock %}
@@ -40,24 +41,33 @@
         {% if upcoming %}
             <div id="upcoming">
                 {% for event in upcoming %}
-                    <discardable-record inline-template url="{{ app_url }}?uid={{ event.time }}">
-                        <div class="upcoming-reminder" v-bind:style="styles">
-                            <div><discard-button tooltip="Delete this reminder" /></div>
-                            <div class="summary">
-                                <time datetime="{{ event.time * 1000 }}">
-                                    {{ event.time|localtime|dateformat("LT") }}
-                                </time>
-                                {{ event.argument[1].title }}
-
-                                {% if event.argument[1].body %}
-                                    <p>{{ event.argument[1].body }}</p>
-                                {% endif %}
-                                <p class="remaining smaller">
-                                    <countdown end-event="hide" v-bind:expiration-seconds="{{ event.time }}" />
-                                </p>
+                    <div class="upcoming-reminder">
+                        <div class="actions">
+                            <div class="action-button delete-button">
+                                <a href="#"
+                                   class="delete"
+                                   tooltip="Delete this reminder"
+                                   data-hide-closest=".upcoming-reminder"
+                                   data-delete-url="{{ app_url }}?uid={{ event.time }}">
+                                    <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                                </a>
                             </div>
                         </div>
-                    </discardable-record>
+
+                        <div class="summary">
+                            <time datetime="{{ event.time * 1000 }}">
+                                {{ event.time|localtime|dateformat("LT") }}
+                            </time>
+                            {{ event.argument[1].title }}
+
+                            {% if event.argument[1].body %}
+                                <p>{{ event.argument[1].body }}</p>
+                            {% endif %}
+                            <p class="remaining smaller">
+                                <countdown end-event="hide" v-bind:expiration-seconds="{{ event.time }}" />
+                            </p>
+                        </div>
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
@@ -65,7 +75,7 @@
         <form id="reminder-form" method="post" action="{{ app_url }}">
             <div id="template">
                 {% for id, template in templates.items() %}
-                    <discardable-record inline-template url="{{ template.delete_url }}">
+                    <div>
                         <div class="template"
                              data-message="{{ template.message }}"
                              data-minutes="{{ template.minutes }}"
@@ -85,7 +95,7 @@
                                 </div>
                             </a>
                         </div>
-                    </discardable-record>
+                    </div>
                 {% endfor %}
             </div>
             <div>

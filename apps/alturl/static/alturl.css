@@ -83,10 +83,6 @@ code {
     line-height: inherit;
 }
 
-.discard-button {
-    background-color: var(--grey);
-}
-
 .info {
     font-size: .85em;
     display: inline-flex;

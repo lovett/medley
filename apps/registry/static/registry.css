@@ -45,6 +45,10 @@
     display: flex;
 }
 
+.toolbar .delete-button {
+    background-color: var(--white);
+}
+
 /* Small devices */
 @media (min-width: 576px) {
 }

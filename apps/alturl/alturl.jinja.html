@@ -7,8 +7,7 @@
 
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
-    {{ macros.staticAsset('alturl', 'alturl.js') }}
+    {{ macros.staticAsset('shared', 'js/delete.js') }}
 {% endblock %}
 
 {% block page_body %}
@@ -49,12 +48,22 @@
                 <ul>
                     {% for (id, bookmark_url, alt_url) in bookmarks %}
                         {% set ns.recipes_found = True %}
-                        <discardable-record inline-template url="/registry?uid={{ id }}">
-                            <li v-bind:style="styles">
-                                <div class="actions"><discard-button tooltip="Delete this bookmark" /></div>
-                                <a href="{{ alt_url }}">{{ bookmark_url }}</a>
-                            </li>
-                        </discardable-record>
+
+                        <li>
+                            <div class="actions">
+                                <div class="action-button delete-button">
+                                    <a href="#"
+                                       class="delete"
+                                       tooltip="Delete this bookmark"
+                                       data-hide-closest="li"
+                                       data-delete-url="/registry?uid={{ id }}">
+                                        <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <a href="{{ alt_url }}">{{ bookmark_url }}</a>
+                        </li>
+
                     {% endfor %}
 
                     {% if not ns.recipes_found %}

@@ -1,7 +1,7 @@
 {% extends "apps/registry/registry.jinja.html" %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button', 'clipboard-button')) }}
+    {{ macros.staticAsset('shared', 'js/delete.js') }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -41,40 +41,46 @@
 
             {% for record in records %}
                 {% set ns.records_found = True %}
-                <discardable-record inline-template url="{{ app_url }}/{{ record.rowid }}">
-                    <div class="record" v-bind:style="styles">
-                        <header>
-                            {{ record.key }}
-                            <div class="toolbar">
-                                <div class="action-button clipboard-button">
-                                    <a href="{{ app_url }}/new?key={{ record.key|e }}" title="New record with this key">
-                                        <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-                                    </a>
-                                </div>
-
-                                <div>
-                                    <clipboard-button
-                                        target-id="value-{{ loop.index }}"
-                                        tooltip="Copy value"
-                                    />
-                                </div>
-
-                                <div><discard-button tooltip="Delete this record" /></div>
-
-                                <div class="action-button clipboard-button">
-                                    <a id="edit-record" href="{{ app_url}}/{{ record.rowid}}/edit">
-                                        <svg class="icon"><use xlink:href="#icon-edit"></use></sv>
-                                        Edit
-                                    </a>
-                                </div>
+                <div class="record">
+                    <header>
+                        {{ record.key }}
+                        <div class="toolbar">
+                            <div class="action-button clipboard-button">
+                                <a href="{{ app_url }}/new?key={{ record.key|e }}" title="New record with this key">
+                                    <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+                                </a>
                             </div>
-                        </header>
 
-                        <div>
-                            <div id="value-{{ loop.index }}" class="value">{{ record.value }}</div>
+                            <div>
+                                <clipboard-button
+                                    target-id="value-{{ loop.index }}"
+                                    tooltip="Copy value"
+                                />
+                            </div>
+
+                            <div class="action-button delete-button">
+                                <a href="#"
+                                   class="delete"
+                                   tooltip="Delete this record"
+                                   data-hide-closest=".record"
+                                   data-delete-url="{{ app_url }}/{{ record.rowid }}">
+                                    <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                                </a>
+                            </div>
+
+                            <div class="action-button clipboard-button">
+                                <a id="edit-record" href="{{ app_url}}/{{ record.rowid}}/edit">
+                                    <svg class="icon"><use xlink:href="#icon-edit"></use></sv>
+                                        Edit
+                                </a>
+                            </div>
                         </div>
+                    </header>
+
+                    <div>
+                        <div id="value-{{ loop.index }}" class="value">{{ record.value }}</div>
                     </div>
-                </discardable-record>
+                </div>
             {% endfor %}
 
             {% if not ns.records_found %}

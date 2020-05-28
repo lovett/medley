@@ -1,9 +1,5 @@
 {% extends "apps/recipes/recipes.jinja.html" %}
 
-{% block scripts %}
-    {{ macros.vueApp('main', ('discardable-record', 'discard-button')) }}
-{% endblock %}
-
 {% block content %}
     {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete", "calendar") }}
     <main>

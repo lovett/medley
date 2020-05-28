@@ -1,4 +1,12 @@
 MEDLEY.delete = (function () {
+
+    function hideClosest(source, selector) {
+        const target = source.closest(selector);
+        if (target) {
+            target.setAttribute('hidden', true);
+        }
+    }
+
     function deleteResource(e) {
         if (!e.target.classList.contains('delete')) {
             return;
@@ -6,6 +14,8 @@ MEDLEY.delete = (function () {
 
         const deleteUrl = e.target.dataset.deleteUrl;
         const deleteRedirect = e.target.dataset.deleteRedirect;
+        const hideSelector = e.target.dataset.hideClosest;
+
         if (!deleteUrl) {
             return;
         }
@@ -14,6 +24,9 @@ MEDLEY.delete = (function () {
             method: 'DELETE'
         }).then(res => {
             if (res.ok) {
+                if (hideSelector) {
+                    hideClosest(e.target, hideSelector);
+                }
                 if (deleteRedirect) {
                     window.location.assign(deleteRedirect);
                 }

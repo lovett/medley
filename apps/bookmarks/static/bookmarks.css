@@ -17,6 +17,7 @@
 .bookmark .title {
     font-size: 1.1em;
     font-weight: bold;
+    display: block;
 }
 
 .bookmark .tags {
@@ -25,7 +26,7 @@
 }
 
 .bookmark .details {
-    padding-bottom: 0.5em;
+    padding: 0.5em;
     display: flex;
     flex-flow: row wrap;
     align-items: center;
