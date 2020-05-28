@@ -65,6 +65,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             as_object=True
         ).pop()
 
+        if not grant_response:
+            return
+
         access_token = grant_response.json().get("access_token")
 
         bucket = cherrypy.engine.publish(
@@ -76,6 +79,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             headers=self.standard_headers(access_token),
             as_json=True
         ).pop()
+
+        if not bucket:
+            return
 
         files_pulled = 0
 
@@ -144,17 +150,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             f"{files_pulled} {unit} pulled"
         )
 
-    def delete_item(self, url: str, access_token: str) -> bool:
+    def delete_item(self, url: str, access_token: str) -> None:
         """Delete a file from a bucket."""
 
-        return typing.cast(
-            bool,
-            cherrypy.engine.publish(
-                "urlfetch:delete",
-                url,
-                headers=self.standard_headers(access_token)
-            ).pop()
-        )
+        cherrypy.engine.publish(
+            "urlfetch:delete",
+            url,
+            headers=self.standard_headers(access_token)
+        ).pop()
 
     @staticmethod
     def standard_headers(access_token: str) -> typing.Dict[str, str]:
