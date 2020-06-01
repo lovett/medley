@@ -22,6 +22,7 @@ import plugins.bookmarks
 import plugins.cache
 import plugins.capture
 import plugins.cdr
+import plugins.clock
 import plugins.converters
 import plugins.decorators
 import plugins.formatting
@@ -49,6 +50,7 @@ import tools.capture
 import tools.etag
 import tools.whitespace
 import tools.provides
+
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
@@ -137,6 +139,9 @@ def setup() -> None:
         if entry.name.startswith("__"):
             continue
 
+        if entry.name.startswith("."):
+            continue
+
         app_config = {
             "/": {
                 "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
@@ -191,6 +196,7 @@ def setup() -> None:
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.capture.Plugin(cherrypy.engine).subscribe()
     plugins.cdr.Plugin(cherrypy.engine).subscribe()
+    plugins.clock.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.gcp_appengine.Plugin(cherrypy.engine).subscribe()

@@ -3,7 +3,19 @@
 import re
 import typing
 import unittest
+from unittest import mock
 from testing.response import Response
+
+
+class Subscriber(unittest.TestCase):
+    """Custom assertions related to CherryPy pubsub subscription."""
+
+    def assert_prefix(self, subscribe_mock: mock.Mock, prefix: str) -> None:
+        """All subscribe calls have an expected prefix."""
+
+        for args, _ in subscribe_mock.call_args_list:
+            segments = args[0].split(":", 1)
+            self.assertEqual(segments[0], prefix)
 
 
 class ResponseAssertions(unittest.TestCase):

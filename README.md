@@ -74,7 +74,6 @@ This project gratefully makes use of other open-source projects:
 
 * [CherryPy](https://cherrypy.org/)
 * [flag-icon-css](http://flag-icon-css.lip.is/)
-* [Pendulum](https://pendulum.eustace.io)
 * [Sqlite](https://sqlite.org/)
 * [Vue.js](https://vuejs.org/)
 * [Feather icons](https://feathericons.com)
