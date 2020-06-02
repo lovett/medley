@@ -76,7 +76,7 @@ class Controller:
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "apps/transformt/ransform.jinja.html",
+                "apps/transform/transform.jinja.html",
                 result=result,
                 current_transform=transform,
                 transforms=self.list_of_transforms(),
