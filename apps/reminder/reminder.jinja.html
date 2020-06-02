@@ -6,14 +6,14 @@
 {%- endblock %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('reminder', 'reminder.css') }}
+    {{ macros.asset("css/reminder.css") }}
 {% endblock %}
 
 {% block scripts %}
     {{ macros.vueApp('main', ('countdown',)) }}
-    {{ macros.staticAsset('shared', 'js/delete.js') }}
-    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
-    {{ macros.staticAsset('reminder', 'reminder.js') }}
+    {{ macros.asset("js/delete.js") }}
+    {{ macros.asset("js/shortcuts.js") }}
+    {{ macros.asset("js/reminder.js") }}
 {% endblock %}
 
 {% block main_toolbar %}

@@ -30,7 +30,7 @@ PLUGINS := $(basename $(PLUGINS))
 PLUGINS := $(subst _test,,$(PLUGINS))
 PLUGINS := $(addprefix plugins., $(PLUGINS))
 
-SHARED_JS_DIR := $(CURDIR)/apps/shared/static/js
+SHARED_JS_DIR := $(CURDIR)/apps/static/js
 
 TMUX_SESSION_NAME := medley
 
@@ -110,7 +110,7 @@ profilestats:
 coverage: $(addprefix .coverage., $(APPS) $(PLUGINS) $(PARSERS))
 	coverage combine $(COVERAGE_DIR)
 	coverage report
-	coverage html -d apps/coverage/static
+	coverage html -d apps/static/coverage
 
 
 # Run the tests for everything.
@@ -273,12 +273,12 @@ hooks: dummy
 
 # Build the application favicon.
 favicon: dummy
-	convert -density 900 -background none -geometry 48x48 apps/shared/static/app-icon.svg temp-48.png
-	convert -density 900 -background none -geometry 32x32 apps/shared/static/app-icon.svg temp-32.png
-	convert -density 900 -background none -geometry 16x16 apps/shared/static/app-icon.svg temp-16.png
-	convert temp-16.png temp-32.png temp-48.png apps/shared/static/favicon.ico
+	convert -density 900 -background none -geometry 48x48 apps/static/app-icon.svg temp-48.png
+	convert -density 900 -background none -geometry 32x32 apps/static/app-icon.svg temp-32.png
+	convert -density 900 -background none -geometry 16x16 apps/static/app-icon.svg temp-16.png
+	convert temp-16.png temp-32.png temp-48.png apps/static/favicon.ico
 	rm temp-48.png temp-32.png temp-16.png
-	cd apps/shared/static && optipng -quiet -o 3 *.png
+	cd apps/static && optipng -quiet -o 3 *.png
 
 
 # Automation for setting up a tmux session

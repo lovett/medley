@@ -2,7 +2,7 @@
 {% import "templates/macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('startpage', 'startpage.css') }}
+    {{ macros.asset("css/startpage.css") }}
 
     {% if anonymizer_url %}
         <style type="text/css">
@@ -90,6 +90,6 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
-    {{ macros.staticAsset('startpage', 'startpage.js') }}
+    {{ macros.asset("js/focus-as-you-type.js") }}
+    {{ macros.asset("js/startpage.js") }}
 {% endblock %}

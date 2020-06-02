@@ -1,11 +1,11 @@
 {% extends "templates/base.jinja.html" %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('htmlhead', 'htmlhead.css') }}
+    {{ macros.asset("css/htmlhead.css") }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.staticAsset('htmlhead', 'htmlhead.js') }}
+    {{ macros.asset("js/htmlhead.js") }}
 {% endblock %}
 
 {% block app_message %}

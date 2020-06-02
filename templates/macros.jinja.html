@@ -5,14 +5,14 @@ instantiates a root Vue instance which renders each component. #}
 {% macro vueApp(el_selector, components=(), app_name='app', with_library=True) %}
 
     {% if with_library %}
-        <script src="/shared/static/js/vue.js"></script>
+        <script src="/static/js/vue.js"></script>
     {% endif %}
 
     {% for component in components %}
         {% if component.startswith('/') %}
             <script src="{{ component|cache_bust }}"></script>
         {% else %}
-            <script src="{{ '/shared/static/components/{}.js'.format(component)|cache_bust }}"></script>
+            <script src="{{ "/static/components/{}.js".format(component)|cache_bust }}"></script>
         {% endif %}
     {% endfor %}
 
@@ -115,19 +115,18 @@ in the argument list are returned.  #}
     </svg>
 {% endmacro %}
 
-
-{%- macro staticAsset(app, file_name, cache_bust=True) -%}
+{%- macro asset(static_path, cache_bust=True) -%}
     {%- if cache_bust -%}
-        {%- set url_path = "/{}/static/{}".format(app, file_name)|cache_bust -%}
+        {%- set url_path = "/static/{}".format(static_path)|cache_bust -%}
     {%- else -%}
-        {% set url_path = "/{}/static/{}".format(app, file_name) %}
+        {% set url_path = "/static/{}".format(static_path) %}
     {%- endif -%}
 
-    {%- if file_name.endswith("css") -%}
+    {%- if static_path.endswith("css") -%}
         <link rel="stylesheet" type="text/css" href="{{ url_path }}" />
     {%- endif -%}
 
-    {%- if file_name.endswith("js") -%}
+    {%- if static_path.endswith("js") -%}
         <script src="{{ url_path }}"></script>
     {%- endif -%}
 {%- endmacro %}

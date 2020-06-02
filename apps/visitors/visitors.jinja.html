@@ -2,13 +2,13 @@
 {% import "templates/macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('visitors', 'visitors.css') }}
-    {{ macros.staticAsset('visitors', 'flag-icon-css/css/flag-icon.min.css') }}
+    {{ macros.asset("css/visitors.css") }}
+    {{ macros.asset("flag-icon-css/css/flag-icon.min.css") }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.staticAsset('visitors', 'visitors.js') }}
-    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
+    {{ macros.asset("js/visitors.js") }}
+    {{ macros.asset("js/shortcuts.js") }}
 {% endblock %}
 
 {% block main_toolbar %}

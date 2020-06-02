@@ -8,10 +8,12 @@
 .coverage
 .mypy_cache
 .pytest_cache
-/apps/coverage/static
+/apps/static/coverage
 /coverage
 \#*
 __pycache__
 db
 storage
 venv
+medley.pyz
+medley

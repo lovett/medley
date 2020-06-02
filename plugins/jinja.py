@@ -5,8 +5,7 @@ Based on sample code from https://bitbucket.org/Lawouach/cherrypy-recipes.
 
 import html
 import http.client
-import os
-import os.path
+from pathlib import Path
 import sqlite3
 import typing
 import urllib
@@ -66,30 +65,37 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def load_template(
-            name: str
+            target: str
     ) -> typing.Optional[typing.Tuple[str, str, typing.Callable]]:
         """Load the specified template from the filesystem.
 
         This is used instead of Jinja's FileSystemLoader in an attempt
         to do less work at plugin startup."""
 
-        template_path = os.path.join(
-            cherrypy.config.get("server_root", "./"),
-            name
+        template_path = Path(target)
+
+        template = typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "filesystem:read",
+                template_path
+            ).pop()
         )
 
-        try:
-            mtime = os.path.getmtime(template_path)
+        mtime = None
+        if template_path.is_file():
+            mtime = template_path.stat().st_mtime
 
-            def uptodate() -> bool:
-                """Determine whether a template has changed."""
-                return os.path.getmtime(template_path) == mtime
+        def uptodate() -> bool:
+            """Determine whether a template has changed."""
+            if template_path.is_file():
+                return template_path.stat().st_mtime == mtime
+            return False
 
-            with open(template_path, "r") as handle:
-                return (handle.read(), template_path, uptodate)
+        if template:
+            return (template.decode(), str(template_path), uptodate)
 
-        except FileNotFoundError:
-            return None
+        return None
 
     def start(self) -> None:
 
@@ -358,9 +364,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        abs_path = cherrypy.config.get("app_root") + url
-
-        file_hash = cherrypy.engine.publish("hasher:file", abs_path).pop()
+        file_hash = cherrypy.engine.publish(
+            "filesystem:hash",
+            "apps" + url
+        ).pop()
 
         return f"{url}?{file_hash}"
 

@@ -47,7 +47,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def play_sound(keyword: str) -> None:
         """Play an audio file specified as a keyword.
 
-        Keywords correspond to filenames under apps/shared/static/wav.
+        Keywords correspond to filenames under apps/static/wav.
         """
 
         audio_player = cherrypy.engine.publish(
@@ -57,7 +57,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             default="/usr/bin/aplay -q"
         ).pop()
 
-        wav_file = f"apps/shared/static/wav/{keyword}.wav"
+        wav_file = f"apps/static/wav/{keyword}.wav"
 
         if not os.path.exists(wav_file):
             cherrypy.log(f"ERROR: Could not match '{keyword}' to a sound file")

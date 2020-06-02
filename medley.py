@@ -14,6 +14,7 @@ import logging
 import os
 import os.path
 import typing
+import zipfile
 import cherrypy
 import sdnotify
 import plugins.applog
@@ -91,6 +92,8 @@ def setup() -> None:
         # Gzipping locally avoids Etag complexity. If a reverse
         # proxy handles it, the Etag could be dropped.
         "tools.gzip.on": True,
+
+        "zipapp": not os.path.isdir(server_root)
     })
 
     # Configuration overrides
@@ -132,62 +135,36 @@ def setup() -> None:
     cherrypy.tools.provides = tools.provides.Tool()
 
     # Mount the apps
-    for entry in os.scandir(app_root):
+    if cherrypy.config["zipapp"]:
+        with zipfile.ZipFile(server_root) as archive:
+            apps = [
+                name.split("/")[1]
+                for name in archive.namelist()
+                if name.endswith("main.py")
+            ]
+    else:
+        apps = [
+            entry.name
+            for entry in os.scandir(app_root)
+            if entry.name.isalpha()
+        ]
 
-        if not entry.is_dir():
-            continue
-
-        if entry.name.startswith("__"):
-            continue
-
-        if entry.name.startswith("."):
-            continue
-
-        app_config = {
-            "/": {
-                "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
-                "tools.whitespace.on": True
-            },
-        }
-
-        # The homepage app is unique. Its app name is not its url, and
-        # its static path is not under its app path. It also has additional
-        # configuration for serving the favicon.
-        app_path = f"/{entry.name}"
-        static_url = "/static"
-        if entry.name == "homepage":
+    for app in apps:
+        app_path = f"/{app}"
+        if app == "homepage":
             app_path = "/"
-            static_url = "/homepage/static"
 
-            app_config["/favicon.ico"] = {
-                "tools.staticfile.on": True,
-                "tools.staticfile.filename": os.path.realpath(
-                    "./apps/shared/static/favicon.ico"
-                ),
-            }
-
-        # An app can optionally have a dedicated directory for static assets
-        static_path = os.path.join(app_root, entry.name, "static")
-        if os.path.isdir(static_path):
-
-            app_config[static_url] = {
-                "tools.gzip.on": True,
-                "tools.gzip.mime_types": ["text/*", "application/*"],
-                "tools.staticdir.on": True,
-                "tools.staticdir.dir": os.path.realpath(static_path),
-            }
-
-            app_config[static_url].update({
-                "tools.expires.on": True,
-                "tools.expires.secs": 86400 * 7
-            })
-
-        main = importlib.import_module(f"apps.{entry.name}.main")
+        main = importlib.import_module(f"apps.{app}.main")
 
         cherrypy.tree.mount(
             main.Controller(),  # type: ignore
             app_path,
-            app_config
+            {
+                "/": {
+                    "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
+                    "tools.whitespace.on": True
+                },
+            }
         )
 
     # Plugins

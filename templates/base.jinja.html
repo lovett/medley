@@ -14,13 +14,14 @@
             content="#044B7F"
         />
 
-        {{ macros.staticAsset('shared', 'css/medley.css') }}
+        {{ macros.asset("css/medley.css") }}
 
-        {% block stylesheets %}{% endblock %}
+        {% block stylesheets %}
+        {% endblock%}
 
         {% block app_icon -%}
-        <link rel="shortcut icon" href="/shared/static/app-icon.png" />
-        <link rel="mask-icon" href="/shared/static/app-icon.svg" color="black">
+        <link rel="shortcut icon" href="/static/app-icon.png" />
+        <link rel="mask-icon" href="/static/app-icon.svg" color="black">
         {%- endblock %}
 
         <meta name="medley-home" content="{{ '/' | internal_url }}" />
@@ -50,7 +51,7 @@
 
         {% block page_body %}{% endblock %}
 
-        {{ macros.staticAsset('shared', 'js/medley.js') }}
+        {{ macros.asset("js/medley.js") }}
 
         {% block scripts %}{% endblock %}
     </body>

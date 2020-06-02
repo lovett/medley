@@ -2,12 +2,12 @@
 {% import "templates/macros.jinja.html" as macros %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset("registry", "registry.css") }}
+    {{ macros.asset("css/registry.css") }}
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.staticAsset('shared', 'js/focus-as-you-type.js') }}
-    {{ macros.staticAsset("registry", "registry.js") }}
+    {{ macros.asset("js/focus-as-you-type.js") }}
+    {{ macros.asset("js/registry.js") }}
 {% endblock %}
 
 {% block main_toolbar %}

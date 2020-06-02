@@ -17,7 +17,7 @@
 {%- endmacro %}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('bookmarklets', 'css/bookmarklets.css') }}
+    {{ macros.asset("css/bookmarklets.css") }}
 {% endblock %}
 
 {% block scripts %}
@@ -43,7 +43,7 @@
             </li>
 
             <li>
-                {{ bookmarklet_url("validate.js", "validate") }}
+                {{ bookmarklet_url("/static/js/validate.js", "validate") }}
                 <p>Submit the current page to the W3C HTML validator</p>
             </li>
         </ul>

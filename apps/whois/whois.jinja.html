@@ -2,13 +2,13 @@
 {% import "templates/macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('whois', 'whois.css') }}
+    {{ macros.asset("css/whois.css") }}
 {% endblock %}
 
 {% block scripts %}
     {% if ip_address %}
         <script src="https://www.google.com/jsapi"></script>
-        {{ macros.staticAsset('shared', 'js/maps.js') }}
+        {{ macros.asset("js/maps.js") }}
     {% endif %}
 {% endblock %}
 

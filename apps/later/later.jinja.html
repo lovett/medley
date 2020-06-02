@@ -2,8 +2,8 @@
 {% import "templates/macros.jinja.html" as macros -%}
 
 {% block scripts %}
-    {{ macros.staticAsset('later', 'later.js') }}
-    {{ macros.staticAsset('shared', 'js/shortcuts.js') }}
+    {{ macros.asset("js/later.js") }}
+    {{ macros.asset("js/shortcuts.js") }}
 {% endblock %}
 
 {% block app_message %}

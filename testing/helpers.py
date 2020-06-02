@@ -6,7 +6,6 @@ import typing
 from unittest import mock
 import cherrypy
 import plugins.jinja
-import apps.shared.main
 import tools.etag
 
 
@@ -32,21 +31,15 @@ def start_server(app: typing.Callable) -> None:
         "database_dir": tempfile.gettempdir(),
     })
 
+    cherrypy.tools.etag = tools.etag.Tool()
+
     cherrypy.tree.mount(app(), "/", {
         "/": {
             "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
         }
     })
 
-    # Always load the shared app
-    cherrypy.tree.mount(
-        apps.shared.main.Controller,
-        "/shared",
-        {}
-    )
-
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    cherrypy.tools.etag = tools.etag.Tool()
     cherrypy.engine.start()
 
 

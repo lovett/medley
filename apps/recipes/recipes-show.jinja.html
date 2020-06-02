@@ -1,8 +1,8 @@
 {% extends "apps/recipes/recipes.jinja.html" %}
 
 {% block scripts %}
-    {{ macros.staticAsset('shared', 'js/delete.js') }}
-    {{ macros.staticAsset('recipes', 'recipes.js') }}
+    {{ macros.asset("js/delete.js") }}
+    {{ macros.asset("js/recipes.js") }}
 {% endblock %}
 
 {% block main_toolbar %}

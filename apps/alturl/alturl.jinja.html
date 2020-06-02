@@ -2,13 +2,13 @@
 {% import "templates/macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.staticAsset('alturl', 'alturl.css') }}
+    {{ macros.asset("css/alturl.css") }}
 {% endblock %}
 
 
 {% block scripts %}
-    {{ macros.staticAsset('shared', 'js/delete.js') }}
-    {{ macros.staticAsset('alturl', 'alturl.js') }}
+    {{ macros.asset("js/delete.js") }}
+    {{ macros.asset("js/alturl.js") }}
 {% endblock %}
 
 {% block page_body %}

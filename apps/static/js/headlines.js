@@ -23,7 +23,7 @@ MEDLEY.headlines = (function () {
         init: function () {
             links = Array.from(document.querySelectorAll('#headlines A.title'));
 
-            worker = new Worker('/headlines/static/headlines-worker.js');
+            worker = new Worker('/static/js/headlines-worker.js');
 
             worker.addEventListener('message', function (e) {
                 const fields = e.data.split(':');
