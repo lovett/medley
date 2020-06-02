@@ -1,9 +1,9 @@
 """Trigger indexing of log files."""
 
+from datetime import datetime
 import os.path
 import pathlib
 import typing
-import pendulum
 import cherrypy
 
 
@@ -42,11 +42,9 @@ class Controller:
         cherrypy.response.status = 404
 
     def index_by_date(self, start: str, end: str) -> None:
-        """
-        Index logs in combined format based on a date range.
-        """
+        """Index logs in combined format based on a date range."""
 
-        start_date = self.parse_log_date(start, None)
+        start_date = self.parse_log_date(start)
         end_date = self.parse_log_date(end, start_date)
 
         if not start_date:
@@ -89,18 +87,22 @@ class Controller:
         cherrypy.engine.publish(channel, storage_path)
 
     @staticmethod
-    def parse_log_date(val: str, default: typing.Any) -> typing.Any:
-
-        """
-        Convert a date string in either date or filename format
+    def parse_log_date(val: str, fallback: datetime = None) -> typing.Any:
+        """Convert a date string in either date or filename format
         to a datetime.
 
         Date format is YYYY-mm-dd. Filename format is the same, but with
         a file extension at the end.
         """
 
-        try:
-            filename = os.path.splitext(val)[0]
-            return pendulum.from_format(filename, "YYYY-MM-DD")
-        except (TypeError, ValueError):
-            return default
+        filename = os.path.splitext(val)[0]
+        dt = cherrypy.engine.publish(
+            "clock:from_format",
+            filename,
+            "%Y-%m-%d"
+        ).pop()
+
+        if not dt:
+            return fallback
+
+        return dt

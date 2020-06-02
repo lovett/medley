@@ -17,7 +17,7 @@
         {% if recipe["last_made"] %}
             <time datetime="{{ recipe["last_made"] }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                Last made {{ recipe["last_made"]|dateformat("MMMM D, YYYY") }}
+                Last made {{ recipe["last_made"]|dateformat("%B %-d, %Y") }}
             </time>
         {% endif %}
     </div>

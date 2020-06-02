@@ -75,7 +75,7 @@ class TestApplog(unittest.TestCase):
             self.plugin.pull()
 
         self.assertEqual(
-            db_mock.call_args_list[0][0][0][0][1][2],
+            db_mock.call_args_list[0][0][0][0][1][1],
             "test"
         )
 

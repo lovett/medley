@@ -5,7 +5,6 @@ import math
 import typing
 from collections import defaultdict
 import cherrypy
-import pendulum
 
 Forecast = typing.Dict[str, typing.Any]
 
@@ -129,33 +128,41 @@ class Controller:
         result["upcoming"] = days[1:]
 
         for item in result["upcoming"]:
-            item["time"] = pendulum.from_timestamp(
-                item.get("time"), tz=timezone
-            )
+            item["time"] = cherrypy.engine.publish(
+                "clock:from_timestamp",
+                item.get("time"),
+                timezone=timezone
+            ).pop()
 
             if "temperatureHigh" in item:
                 item["high"] = math.ceil(item.get("temperatureHigh"))
 
             if "temperatureHighTime" in item:
-                item["high_at"] = pendulum.from_timestamp(
-                    item.get("temperatureHighTime"), tz=timezone
-                )
+                item["high_at"] = cherrypy.engine.publish(
+                    "clock:from_timestamp",
+                    item.get("temperatureHighTime"),
+                    timezone=timezone
+                ).pop()
 
             if "temperatureLow" in item:
                 item["low"] = math.ceil(item.get("temperatureLow"))
 
             if "temperatureLowTime" in item:
-                item["low_at"] = pendulum.from_timestamp(
-                    item.get("temperatureLowTime"), tz=timezone
-                )
+                item["low_at"] = cherrypy.engine.publish(
+                    "clock:from_timestamp",
+                    item.get("temperatureLowTime"),
+                    timezone=timezone
+                ).pop()
 
         result["current_temperature"] = math.ceil(
             currently.get("temperature")
         )
 
-        result["current_time"] = pendulum.from_timestamp(
-            currently.get("time"), tz=timezone
-        )
+        result["current_time"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            currently.get("time"),
+            timezone=timezone
+        ).pop()
 
         result["current_humidity"] = currently.get("humidity", 0)
 
@@ -163,27 +170,35 @@ class Controller:
 
         result["temperature"] = math.ceil(today.get("temperature", 0))
 
-        result["sunrise"] = pendulum.from_timestamp(
-            today.get("sunriseTime"), tz=timezone
-        )
+        result["sunrise"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            today.get("sunriseTime"),
+            timezone=timezone
+        ).pop()
 
-        result["sunset"] = pendulum.from_timestamp(
-            today.get("sunsetTime"), tz=timezone
-        )
+        result["sunset"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            today.get("sunsetTime"),
+            timezone=timezone
+        ).pop()
 
         result["humidity"] = currently.get("humidity", 0)
 
         result["high"] = math.ceil(today.get("temperatureHigh"))
 
-        result["high_at"] = pendulum.from_timestamp(
-            today.get("temperatureHighTime"), tz=timezone
-        )
+        result["high_at"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            today.get("temperatureHighTime"),
+            timezone=timezone
+        ).pop()
 
         result["low"] = math.ceil(today.get("temperatureLow"))
 
-        result["low_at"] = pendulum.from_timestamp(
-            today.get("temperatureLowTime"), tz=timezone
-        )
+        result["low_at"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            today.get("temperatureLowTime"),
+            timezone=timezone
+        ).pop()
 
         if "alerts" in forecast:
             result["alerts"] = [
@@ -191,16 +206,18 @@ class Controller:
                 for alert in forecast["alerts"]
             ]
 
-        now = pendulum.now()
+        now = cherrypy.engine.publish("clock:now").pop()
         hours_remaining_today = 24 - now.hour
 
         if "data" in hourly:
             result["hourly"] = []
             for hour in hourly["data"][0:hours_remaining_today]:
                 hour_clone = copy.copy(hour)
-                hour_clone["time"] = pendulum.from_timestamp(
-                    hour_clone["time"], tz=timezone
-                )
+                hour_clone["time"] = cherrypy.engine.publish(
+                    "clock:from_timestamp",
+                    hour_clone["time"],
+                    timezone=timezone
+                ).pop()
 
                 result["hourly"].append(hour_clone)
 

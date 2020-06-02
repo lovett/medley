@@ -5,7 +5,6 @@ import string
 import typing
 from urllib.parse import urlencode, parse_qs
 import cherrypy
-import pendulum
 
 
 class Controller:
@@ -37,9 +36,10 @@ class Controller:
         }
 
         for template_id, template in templates.items():
-            template["duration_in_words"] = pendulum.duration(
+            template["duration_in_words"] = cherrypy.engine.publish(
+                "clock:duration:words",
                 minutes=int(template.get("minutes", 0))
-            ).in_words()
+            ).pop()
 
             template["delete_url"] = cherrypy.engine.publish(
                 "url:internal",
@@ -68,13 +68,26 @@ class Controller:
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message", "")
-        minutes = int(kwargs.get("minutes", 0))
-        hours = int(kwargs.get("hours", 0))
+
+        minutes = 0
+        if kwargs.get("minutes", "").isnumeric():
+            minutes = int(kwargs["minutes"])
+
+        hours = 0
+        if kwargs.get("hours", "").isnumeric():
+            hours = int(kwargs["hours"])
+
         comments = kwargs.get("comments", "")
         notification_id = kwargs.get("notification_id", "")
         url = kwargs.get("url", "")
-        remember = int(kwargs.get("remember", 0))
-        confirm = int(kwargs.get("confirm", 0))
+
+        remember = 0
+        if kwargs.get("remember", "").isnumeric():
+            remember = int(kwargs["remember"])
+
+        confirm = 0
+        if kwargs.get("confirm", "").isnumeric():
+            confirm = int(kwargs["confirm"])
 
         # Server-side template population
         if notification_id and not message:
@@ -111,13 +124,24 @@ class Controller:
                 "attention"
             )
 
-        total_minutes = minutes + (hours * 60)
+        minutes = minutes + (hours * 60)
 
-        expiration_time = pendulum.now().add(
-            minutes=total_minutes
-        ).format('LT')
+        now = cherrypy.engine.publish(
+            "clock:now",
+            local=True
+        ).pop()
 
-        notification_title = f"Timer in progress until {expiration_time}"
+        expiration_time = cherrypy.engine.publish(
+            "clock:shift",
+            now,
+            minutes=minutes
+        ).pop()
+
+        notification_title = cherrypy.engine.publish(
+            "clock:format",
+            expiration_time,
+            "Timer in progress until %I:%M %p"
+        ).pop()
 
         local_id = ''.join(
             random.choices(
@@ -137,7 +161,7 @@ class Controller:
             title=notification_title,
             body=message,
             localId=local_id,
-            expiresAt=f"{total_minutes} minutes"
+            expiresAt=f"{minutes} minutes"
         ).pop()
 
         cherrypy.engine.publish(
@@ -157,7 +181,7 @@ class Controller:
 
         cherrypy.engine.publish(
             "scheduler:persist",
-            total_minutes * 60,
+            minutes * 60,
             "notifier:send",
             finish_notification
         )
@@ -168,7 +192,7 @@ class Controller:
                 "reminder:template",
                 urlencode({
                     "message": message.strip(),
-                    "minutes": total_minutes,
+                    "minutes": minutes,
                     "comments": comments.strip(),
                     "notification_id": notification_id,
                     "url": url.strip()

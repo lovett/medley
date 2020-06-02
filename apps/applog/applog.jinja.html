@@ -50,10 +50,10 @@
                         {% for record in records %}
                             <tr>
                                 <td nowrap>
-                                    {{ record["created"]|localtime|dateformat("YYYY-MM-DD") }}
+                                    {{ record["created"]|dateformat("%Y-%m-%d") }}
                                 </td>
                                 <td nowrap>
-                                    {{ record["created"]|localtime|dateformat("h:mm:ss A")}}
+                                    {{ record["created"]|dateformat("%-I:%m:%S %p")}}
                                 </td>
                                 <td nowrap>
                                     <a href="{{ app_url }}?source={{ record["source"]|urlencode }}">{{ record["source"] }}</a>

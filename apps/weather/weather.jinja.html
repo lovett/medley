@@ -1,6 +1,8 @@
 {% extends "templates/base.jinja.html" %}
 {% import "templates/macros.jinja.html" as macros -%}
 
+{% set time_format = "%-I:%M %p" %}
+
 {% block app_icon -%}
     {{ macros.appSpecificIcon(app_url) }}
 {%- endblock %}
@@ -31,7 +33,7 @@
 
     <main>
         <header id="page-title">
-            <h2>{{ location_name }} as of {{ forecast.current_time|dateformat('LT') }}</h2>
+            <h2>{{ location_name }} as of {{ forecast.current_time|dateformat(time_format) }}</h2>
         </header>
 
         {% for alert in forecast.alerts  %}
@@ -46,13 +48,13 @@
 
         <p>
             {{ forecast.summary }}
-            High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat('LT') }}.
-            Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat('LT') }}.
+            High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat(time_format) }}.
+            Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat(time_format) }}.
         </p>
 
         <p>
-            Sunrise at {{ forecast.sunrise|dateformat('LT') }}.
-            Sunset at {{ forecast.sunset|dateformat('LT') }}
+            Sunrise at {{ forecast.sunrise|dateformat(time_format) }}.
+            Sunset at {{ forecast.sunset|dateformat(time_format) }}
         </p>
 
         <div class="panels">
@@ -68,7 +70,7 @@
 
                         {% for record in forecast.hourly %}
                             <tr>
-                                <th>{{ record.time|dateformat('LT') }}</th>
+                                <th>{{ record.time|dateformat(time_format) }}</th>
                                 <td>
                                     {{ record.summary }},
                                     {{ record.temperature|round|int }}° F
@@ -89,7 +91,7 @@
 
                         {% for forecast in forecast.upcoming %}
                             <tr>
-                                <th>{{ forecast.time|dateformat('dddd') }}</th>
+                                <th>{{ forecast.time|dateformat("%A") }}</th>
                                 <td>
                                     {{ forecast.summary }}
 

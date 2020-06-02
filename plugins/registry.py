@@ -5,8 +5,7 @@ import pathlib
 import sqlite3
 import typing
 import cherrypy
-import pendulum
-from . import mixins
+from plugins import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -39,7 +38,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:first:key", self.first_key)
         self.bus.subscribe("registry:first:value", self.first_value)
         self.bus.subscribe("registry:keys", self.keys)
-        self.bus.subscribe("registry:timezone", self.timezone)
         self.bus.subscribe("registry:remove:id", self.remove_id)
         self.bus.subscribe("registry:remove:key", self.remove_key)
         self.bus.subscribe("registry:replace", self.replace)
@@ -53,13 +51,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Select a single record by unique id (sqlite rowid)."""
 
         return self._selectOne(
-            """SELECT rowid, key, value, created as 'created [datetime]'
+            """SELECT rowid, key, value, created as 'created [timestamp]'
             FROM registry
             WHERE rowid=?""",
             (uid,)
         )
 
-    def replace(self, key: str, value: typing.Any) -> bool:
+    def replace(self, key: str, value: typing.Any) -> None:
         """Create or replace a record.
 
         Use this when a key should only be associated with a single
@@ -80,8 +78,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if result:
             cherrypy.engine.publish("registry:added", key)
-
-        return result
 
     def add(self, key: str, value: typing.Any) -> bool:
         """Create a new record.
@@ -121,7 +117,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         params: typing.Tuple[typing.Any, ...] = ()
 
         sql = """
-        SELECT rowid, key, value, created as 'created [datetime]'
+        SELECT rowid, key, value, created as 'created [timestamp]'
         FROM registry
         WHERE (1) """
 
@@ -299,25 +295,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish("memorize:set", key, value)
 
         return value
-
-    def timezone(self) -> str:
-        """Determine the timezone of the application.
-
-        The registry is checked first so that the application timezone
-        can be independent of the server's timezone. But the server's
-        timezone also acts as a fallback.
-
-        """
-
-        timezone = self.first_value(
-            "config:timezone",
-            memorize=True
-        )
-
-        if not timezone:
-            timezone = pendulum.now().timezone_name
-
-        return typing.cast(str, timezone)
 
     def keys(
             self,

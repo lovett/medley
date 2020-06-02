@@ -1,11 +1,11 @@
 """Website traffic viewer"""
 
+from datetime import datetime
 import re
 import sqlite3
 import typing
 from collections import namedtuple
 import cherrypy
-import pendulum
 
 SavedQuery = namedtuple('SavedQuery', ['id', 'key', 'value', 'active'])
 
@@ -121,15 +121,19 @@ class Controller:
     def get_active_date(
             log_records: typing.List[sqlite3.Row],
             query: str,
-    ) -> pendulum.DateTime:
+    ) -> datetime:
         """Figure out which date the query pertains to."""
 
-        if log_records:
-            return pendulum.from_timestamp(
-                log_records[0]["unix_timestamp"]
-            )
-
         query_date = ""
+
+        if log_records:
+            return typing.cast(
+                datetime,
+                cherrypy.engine.publish(
+                    "clock:from_timestamp",
+                    log_records[0]["unix_timestamp"]
+                ).pop()
+            )
 
         if re.match(r"date\s+yesterday", query):
             query_date = "yesterday"
@@ -154,27 +158,26 @@ class Controller:
             if matches:
                 query_date = matches.group(1) + "-01"
 
-        if query_date == "":
-            active_date = pendulum.today()
-        elif query_date == "yesterday":
-            active_date = pendulum.yesterday()
-        else:
-            active_date = typing.cast(
-                pendulum.DateTime,
-                pendulum.parse(query_date)
-            )
-
-        timezone = typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "registry:timezone"
+        if query_date in ("today", "yesterday"):
+            now = cherrypy.engine.publish(
+                "clock:now",
+                local=True
             ).pop()
-        )
 
-        return typing.cast(
-            pendulum.DateTime,
-            active_date.in_tz(timezone).start_of('day')
-        )
+            if query_date == "yesterday":
+                active_date = cherrypy.engine.publish(
+                    "clock:shift",
+                    now,
+                    days=-1
+                ).pop()
+        else:
+            active_date = cherrypy.engine.publish(
+                "clock:from_format",
+                query_date,
+                "%Y-%m-%d"
+            ).pop()
+
+        return typing.cast(datetime, active_date)
 
     @staticmethod
     def get_annotations(

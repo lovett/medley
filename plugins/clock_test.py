@@ -1,8 +1,9 @@
 """Test suite for the clock plugin."""
 
 from datetime import datetime
+import typing
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
 import pytz
 import plugins.clock
@@ -27,6 +28,25 @@ class TestClock(Subscriber):
 
         self.assertEqual(
             self.plugin.now().tzinfo,
+            pytz.UTC
+        )
+
+    @patch("cherrypy.engine.publish")
+    def test_now_local(self, publish_mock: Mock) -> None:
+        """clock:now can return a local time."""
+
+        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+            """Side effects local function"""
+            if args[0] == "registry:first:value":
+                return ["America/New_York"]
+            return DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        now_local = self.plugin.now(local=True)
+
+        self.assertNotEqual(
+            now_local.tzinfo,
             pytz.UTC
         )
 
@@ -168,15 +188,82 @@ class TestClock(Subscriber):
         result = self.plugin.shift(start, hours=-1)
         self.assertEqual(result.hour, 23)
 
-    def test_shift_timezone(self) -> None:
-        """clock:shift can perform timezone conversion."""
+        result = self.plugin.shift(start, minutes=1)
+        self.assertEqual(result.minute, 1)
 
-        tz = pytz.timezone("US/Eastern")
-        start = datetime(2011, 5, 5, hour=23, tzinfo=tz)
-        result = self.plugin.shift(start, timezone="UTC")
+    @patch("cherrypy.engine.publish")
+    def test_local_with_config(self, publish_mock: Mock) -> None:
+        """clock:local performs timezone conversion using a configured zone."""
 
-        self.assertEqual(result.tzinfo, pytz.UTC)
-        self.assertEqual(result.day, 6)
+        def side_effect(*args: str, **_: str) -> typing.Any:
+            """Side effects local function"""
+            if args[0] == "registry:first:value":
+                return ["America/New_York"]
+            return DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        tz = pytz.timezone("UTC")
+        start = datetime(2011, 1, 1, hour=00, tzinfo=tz)
+        result = self.plugin.local(start)
+
+        self.assertEqual(result.strftime("%Z"), "EST")
+        self.assertEqual(result.day, 31)
+        self.assertEqual(result.year, 2010)
+        self.assertEqual(result.month, 12)
+
+    @patch("cherrypy.engine.publish")
+    def test_local_without_config(self, publish_mock: Mock) -> None:
+        """clock:local performs timezone conversion using the system zone."""
+
+        def side_effect(*args: str, **_: str) -> typing.Any:
+            """Side effects local function"""
+            if args[0] == "registry:first:value":
+                return [None]
+            return DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        tz = pytz.timezone("UTC")
+        start = datetime(2011, 1, 1, hour=00, tzinfo=tz)
+        result = self.plugin.local(start)
+
+        now = datetime.now().astimezone()
+
+        self.assertEqual(
+            result.strftime("%Z"),
+            now.strftime("%Z")
+        )
+        self.assertEqual(result.day, 31)
+        self.assertEqual(result.year, 2010)
+        self.assertEqual(result.month, 12)
+
+    def test_duration_words(self) -> None:
+        """clock:duration:words converts timespans to strings."""
+
+        result = self.plugin.duration_words(days=1, hours=1, minutes=1)
+        self.assertEqual(result, "1 day, 1 hour, 1 minute")
+
+        result = self.plugin.duration_words(hours=1)
+        self.assertEqual(result, "1 hour")
+
+        result = self.plugin.duration_words(hours=2)
+        self.assertEqual(result, "2 hours")
+
+        result = self.plugin.duration_words(minutes=61)
+        self.assertEqual(result, "1 hour, 1 minute")
+
+        result = self.plugin.duration_words(minutes=62)
+        self.assertEqual(result, "1 hour, 2 minutes")
+
+        result = self.plugin.duration_words(seconds=1)
+        self.assertEqual(result, "1 second")
+
+        result = self.plugin.duration_words(seconds=2)
+        self.assertEqual(result, "2 seconds")
+
+        result = self.plugin.duration_words(seconds=0)
+        self.assertEqual(result, "")
 
 
 if __name__ == "__main__":

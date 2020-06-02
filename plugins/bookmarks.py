@@ -5,9 +5,8 @@ import sqlite3
 import typing
 from urllib.parse import urlparse
 import cherrypy
-import pendulum
-from . import mixins
-from . import decorators
+from plugins import mixins
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -148,9 +147,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._selectOne(
             f"""SELECT rowid, url, domain, title,
-            added as 'added [datetime]',
-            updated as 'updated [datetime]',
-            deleted as 'deleted [datetime]',
+            added as 'added [local_datetime]',
+            updated as 'updated [local_datetime]',
+            deleted as 'deleted [local_datetime]',
             tags, comments
             FROM bookmarks WHERE {where_clause}""",  # nosec
             values
@@ -185,10 +184,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         (domain, url) = self.domain_and_url(url)
 
-        add_date = pendulum.now()
         if added and added.isnumeric():
-            numeric_timestamp = int(added)
-            add_date = pendulum.from_timestamp(numeric_timestamp)
+            add_date = cherrypy.engine.publish(
+                "clock:from_timestamp",
+                int(added)
+            ).pop()
+        else:
+            add_date = cherrypy.engine.publish(
+                "clock:now",
+            ).pop()
+
+        add_date_formatted = cherrypy.engine.publish(
+            "clock:format",
+            add_date,
+            "%Y-%m-%d %H:%M:%S"
+        ).pop()
 
         self._execute(
             """INSERT INTO bookmarks
@@ -197,8 +207,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 domain,
                 url,
-                add_date.format('YYYY-MM-DD HH:mm:ss'),
-                add_date.to_date_string(),
+                add_date_formatted,
+                add_date_formatted.split(' ')[0],
                 title,
                 tags,
                 comments
@@ -351,8 +361,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = f"""SELECT b.url, b.domain, b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
-        added as 'added [datetime]',
-        updated as 'updated [datetime]'
+        added as 'added [local_datetime]',
+        updated as 'updated [local_datetime]'
         FROM {from_sql}
         WHERE {where_sql}
         ORDER BY {order_sql}
@@ -378,24 +388,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT url, domain, title,
-        added as 'added [datetime]',
-        updated as 'updated [datetime]',
-        retrieved 'retrieved [datetime]',
+        added as 'added [timestamp]',
+        updated as 'updated [timestamp]',
+        retrieved 'retrieved [timestamp]',
         comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
-        WHERE added_date >= ?
+        WHERE added_date >= date('now', ?)
         AND deleted IS NULL
         ORDER BY added DESC
         LIMIT ? OFFSET ?"""
 
-        cutoff_date = pendulum.now().subtract(
-            days=max_days
-        ).to_date_string()
+        max_days_clause = f"- {max_days} day"
 
         return (
-            self._select(sql, (cutoff_date, limit, offset)),
-            self._count(sql, (cutoff_date,)),
-            self._explain(sql, (cutoff_date, limit, offset))
+            self._select(sql, (max_days_clause, limit, offset)),
+            self._count(sql, (max_days_clause)),
+            self._explain(sql, (max_days_clause, limit, offset))
         )
 
     @decorators.log_runtime

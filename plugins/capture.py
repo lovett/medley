@@ -93,7 +93,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = f"""SELECT rowid, request_line,
         request as 'request [binary]',
         response as 'response [binary]',
-        created as 'created [datetime]',
+        created as 'created [timestamp]',
         (SELECT count(*) FROM captures WHERE 1=1 {search_clause})
         as total
         FROM captures
@@ -117,7 +117,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = """SELECT rowid, request_line, request as 'request [binary]',
         response as 'response [binary]',
-        created as 'created [datetime]'
+        created as 'created [timestamp]'
         FROM captures
         WHERE rowid=?"""
 

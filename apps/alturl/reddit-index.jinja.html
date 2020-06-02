@@ -29,13 +29,13 @@
         <ul>
             {% set ns = namespace(visibleCount=0) %}
             {% for story in stories %}
-                {% set is_hidden = not story.created_utc|localtime|is_today %}
+                {% set is_hidden = not story.created|is_today %}
                 {% if not is_hidden %}
                     {% set ns.visibleCount = ns.visibleCount + 1 %}
                 {% endif %}
 
                 <li class="headline"
-                    data-date="{{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}"
+                    data-date="{{ story.created|dateformat("%Y-%m-%d") }}"
                     {% if is_hidden %}hidden{% endif %}
                 >
                     <h2 class="title">
@@ -49,7 +49,7 @@
                     </h2>
                     <time class="info">
                         <svg class="icon"><use xlink:href="#icon-info"></use></svg>
-                        {{ story.created_utc|localtime|dateformat('YYYY-MM-DD') }}
+                        {{ story.created|dateformat("%Y-%m-%d") }}
                     </time>
 
                     {# Internally link to the subreddit when not viewing the Reddit homepage. #}

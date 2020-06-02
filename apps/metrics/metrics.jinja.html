@@ -30,9 +30,9 @@
 
             {% if points %}
                 <p>
-                    {{ x_range[0]|localtime|dateformat("MMMM D, LT") }}
+                    {{ x_range[0]|dateformat("%b %d, %-I:%M %p") }}
                     to
-                    {{ x_range[1]|localtime|dateformat("MMMM D, LT") }}.
+                    {{ x_range[1]|dateformat("%b %d, %-I:%M %p") }}.
                 </p>
                 <p>
                     Highest: {{ y_range[1] }} {{ unit }},

@@ -1,15 +1,16 @@
 """Parser for logs in combined format."""
 
+from datetime import datetime
 import typing
 from urllib.parse import urlparse
-import pendulum
+from pytz import UTC
 
 OptionalString = typing.Optional[str]
 ConsumeResult = typing.Tuple[OptionalString, str]
 ExtrasDict = typing.Dict[str, OptionalString]
 FieldsDict = typing.Dict[
     str,
-    typing.Union[OptionalString, int, ExtrasDict]
+    typing.Union[OptionalString, int, float, ExtrasDict]
 ]
 
 
@@ -29,22 +30,22 @@ class Parser():
         return bag
 
     @staticmethod
-    def parse_timestamp(timestamp: str) -> typing.Optional[pendulum.DateTime]:
+    def parse_timestamp(timestamp: str) -> typing.Optional[datetime]:
         """Parse a timestamp based on known formats."""
 
         timestamp = timestamp.lstrip("[").rstrip("]")
 
         format_strings = (
-            "DD/MMM/YYYY:HH:mm:ss ZZ",
-            "DD/MMM/YYYY:HH:mm:ss:SSSSSS ZZ"
+            "%d/%b/%Y:%H:%M:%S %z",
+            "%d/%b/%Y:%H:%M:%S:%f %z"
         )
 
         for format_string in format_strings:
             try:
-                return pendulum.from_format(
+                return datetime.strptime(
                     timestamp,
                     format_string
-                ).in_tz("utc")
+                ).astimezone(UTC)
             except ValueError:
                 pass
 
@@ -112,7 +113,9 @@ class Parser():
             parsed_timestamp = self.parse_timestamp(fields["timestamp"])
             if parsed_timestamp:
                 fields["unix_timestamp"] = parsed_timestamp.timestamp()
-                fields["datestamp"] = parsed_timestamp.format("YYYY-MM-DD-HH")
+                fields["datestamp"] = parsed_timestamp.strftime(
+                    "%Y-%m-%d-%H"
+                )
 
         # Method
         fields["method"], logline = self.consume(logline, " ")

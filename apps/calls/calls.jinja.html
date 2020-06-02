@@ -22,8 +22,8 @@
                         {% for call in calls %}
                             <tr>
                                 <td nowrap>
-                                    {{ call["date"]|localtime|dateformat("YYYY-MM-DD") }}
-                                    <div class="smaller">{{ call["date"]|localtime|dateformat("LT")}}</div>
+                                    {{ call["date"]|dateformat("%Y-%m-%d") }}
+                                    <div class="smaller">{{ call["date"]|dateformat("%-I:%M %p")}}</div>
                                 </td>
                                 <td nowrap>
                                     {{ call["clid"]|sane_callerid() }}

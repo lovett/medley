@@ -1,12 +1,12 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
+from datetime import datetime
 import pickle
 import re
 import typing
 import urllib.parse
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
-import pendulum
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -22,93 +22,53 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def start(self) -> None:
         """Register converters."""
-        register_converter("date", self.date)
-        register_converter("datetime", self.datetime)
+        register_converter("local_datetime", self.local_datetime)
         register_converter("date_with_hour", self.date_with_hour)
-        register_converter("binary", self.binary)
-        register_converter("calldate_to_utc", self.calldate_to_utc)
+        register_converter("binary", self.to_binary)
         register_converter("duration", self.duration)
         register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
         register_converter("comma_delimited", self.comma_delimited)
 
     @staticmethod
-    def date(value: bytes) -> pendulum.DateTime:
-        """Convert a date string to a Pendulum instance."""
+    def local_datetime(value: bytes) -> datetime:
+        """Convert a string to a datetime in the application timezone."""
 
         decoded_value = value.decode("utf-8")
 
-        return pendulum.from_format(
+        dt = cherrypy.engine.publish(
+            "clock:from_format",
             decoded_value,
-            "YYYY-MM-DD"
+            "%Y-%m-%d %H:%M:%S"
+        ).pop()
+
+        return typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:local",
+                dt
+            ).pop()
         )
 
     @staticmethod
-    def datetime(value: bytes) -> pendulum.DateTime:
-        """Convert a datetime string to a Pendulum instance."""
-
-        decoded_value = value.decode("utf-8")
-
-        try:
-            return pendulum.from_format(
-                decoded_value,
-                "YYYY-MM-DD HH:mm:ss.SSS"
-            )
-        except ValueError:
-            pass
-
-        try:
-            return pendulum.from_format(
-                decoded_value,
-                "YYYY-MM-DD HH:mm:ss"
-            )
-        except ValueError:
-            pass
-
-        try:
-            return pendulum.from_format(
-                decoded_value,
-                "YYYY-MM-DD"
-            )
-        except ValueError:
-            pass
-
-        last_colon_index = decoded_value.rindex(":")
-        date = decoded_value[:last_colon_index] + \
-            decoded_value[last_colon_index + 1:]
-        utc_date = pendulum.from_format(date, "YYYY-MM-DD HH:mm:ssZZ")
-
-        return utc_date
-
-    @staticmethod
-    def date_with_hour(value: bytes) -> typing.Optional[pendulum.DateTime]:
+    def date_with_hour(value: bytes) -> typing.Optional[datetime]:
         """Convert a date-and-hour string to a Pendulum instance."""
 
-        try:
-            decoded_value = value.decode("utf-8")
-            return pendulum.from_format(decoded_value, "YYYY-MM-DD-HH")
-        except ValueError:
-            return None
-
-    @staticmethod
-    def calldate_to_utc(value: bytes) -> pendulum.DateTime:
-        """Convert a local datetime string to a UTC Pendulum instance."""
-
-        local_tz = cherrypy.engine.publish(
-            "registry:timezone"
+        decoded_value = value.decode("utf-8")
+        dt = cherrypy.engine.publish(
+            "clock:from_format",
+            decoded_value,
+            "%Y-%m-%d-%H"
         ).pop()
 
-        return pendulum.from_format(
-            value.decode("utf-8"),
-            "YYYY-MM-DD HH:mm:ss",
-            tz=local_tz,
-        ).in_timezone("utc")
+        if not dt:
+            return None
+
+        return typing.cast(datetime, dt)
 
     @staticmethod
     def duration(value: bytes) -> str:
         """Convert a number of seconds into a human-readable string."""
-
-        print(type(value))
 
         seconds = int(value)
 
@@ -159,7 +119,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return re.sub(r'"(.*?)".*', r"\1", value.decode("utf-8"))
 
     @staticmethod
-    def binary(blob: bytes) -> typing.Any:
+    def to_binary(blob: bytes) -> typing.Any:
         """Unpack a binary value stored in a blob field.
 
         MessagePack is the only serialization format used by the

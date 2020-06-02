@@ -40,7 +40,7 @@
                 <div class="capture">
                     <header>
                         <div>
-                            #{{ capture.rowid}} {{ capture.created|localtime|dateformat("LLL")}}
+                            #{{ capture.rowid}} {{ capture.created|dateformat("%B %d at %-I:%M %p")}}
                         </div>
 
                         <a href="{{ app_url }}/{{ capture.rowid }}">

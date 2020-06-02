@@ -46,8 +46,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             reversed_values.extend(src_exclude)
 
         sql = f"""
-        SELECT calldate as "date [calldate_to_utc]", end as
-        "end_date [calldate_to_utc]",
+        SELECT calldate as "date [timestamp]", end as
+        "end_date [timestamp]",
         CASE LENGTH(src)
           WHEN 3 THEN "outgoing"
           ELSE "incoming"
@@ -77,7 +77,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         sql = """
-        SELECT calldate as "date [calldate_to_utc]",
+        SELECT calldate as "date [timestamp]",
         CASE LENGTH(src)
           WHEN 3 THEN "outgoing"
           ELSE "incoming"

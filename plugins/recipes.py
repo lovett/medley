@@ -1,11 +1,11 @@
 """Document storage for recipes."""
 
+from datetime import datetime
 import sqlite3
 import typing
 import cherrypy
-import pendulum
-from . import mixins
-from . import decorators
+from plugins import mixins
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -191,8 +191,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._selectOne(
             """SELECT id, title, body, url, domain,
-            created as 'created [datetime]',
-            updated as 'updated [datetime]',
+            created as 'created [timestamp]',
+            updated as 'updated [timestamp]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -205,8 +205,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT id, title, url, domain,
-            created as 'created [datetime]',
-            updated as 'updated [datetime]',
+            created as 'created [timestamp]',
+            updated as 'updated [timestamp]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -220,8 +220,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT id, title, url, domain,
-            created as 'created [datetime]',
-            updated as 'updated [datetime]',
+            created as 'created [timestamp]',
+            updated as 'updated [timestamp]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -276,18 +276,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search_by_date(
             self,
             field: str,
-            query_date: pendulum.DateTime
+            query_date: datetime
     ) -> typing.Iterator[sqlite3.Row]:
         """Locate recipes that match a date search."""
 
-        month_start = query_date.start_of("month").to_date_string()
-        month_end = query_date.end_of("month").to_date_string()
+        month_start = cherrypy.engine.publish(
+            "clock:month:start",
+            query_date,
+            fmt="%Y-%m-%d"
+        ).pop()
+
+        month_end = cherrypy.engine.publish(
+            "clock:month:end",
+            query_date,
+            fmt="%Y-%m-%d"
+        ).pop()
 
         return self._select_generator(
             f"""SELECT r.id, r.title, r.body, r.url, r.domain,
-            r.created as 'created [datetime]',
-            r.updated as 'updated [datetime]',
-            r.last_made as 'last_made [datetime]',
+            r.created as 'created [timestamp]',
+            r.updated as 'updated [timestamp]',
+            r.last_made as 'last_made [timestamp]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r
             WHERE (r.{field} BETWEEN ? and ?)
@@ -300,9 +309,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT r.id, r.title, r.body, r.url, r.domain,
-            r.created as 'created [datetime]',
-            r.updated as 'updated [datetime]',
-            r.last_made as 'last_made [datetime]',
+            r.created as 'created [timestamp]',
+            r.updated as 'updated [timestamp]',
+            r.last_made as 'last_made [timestamp]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r, recipes_fts
             WHERE r.id=recipes_fts.rowid

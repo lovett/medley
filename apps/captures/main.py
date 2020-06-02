@@ -41,7 +41,7 @@ class Controller:
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
-            "apps/captures/captures.jinja.html)",
+            "apps/captures/captures.jinja.html",
             captures=captures,
             total_records=total_records,
             per_page=per_page,

@@ -5,8 +5,8 @@ import os
 import os.path
 import time
 import cherrypy
-from . import mixins
-from . import decorators
+from plugins import mixins
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -29,7 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "maintenance",
-            f"Starting database maintenance"
+            "Starting database maintenance"
         )
 
         cherrypy.engine.publish("cache:prune")
@@ -72,5 +72,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "applog:add",
             "maintenance",
-            f"Finished database maintenance"
+            "Finished database maintenance"
         )

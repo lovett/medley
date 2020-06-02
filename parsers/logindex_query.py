@@ -1,8 +1,9 @@
 """Parser for logindex search queries."""
 
+from datetime import datetime, timedelta
 import re
 import typing
-import pendulum
+from pytz import UTC
 
 Transformer = typing.Callable[[str, str, bool], str]
 PhraseTuple = typing.Tuple[str, ...]
@@ -11,8 +12,6 @@ TermDict = typing.Dict[str, PhraseTuple]
 
 class Parser():
     """Convert a logindex search query to a SQL WHERE clause."""
-
-    timezone: str
 
     # A mapping between search keywords and the corresponding database column
     # that allows for aliasing.
@@ -43,10 +42,8 @@ class Parser():
     numeric_fields = ("statusCode",)
     subquery_fields = ("reverse_domain")
 
-    def parse(self, query: str, timezone: str) -> str:
+    def parse(self, query: str) -> str:
         """Convert a search query to an SQL phrase."""
-
-        self.timezone = timezone
 
         terms: TermDict = {}
         sql_phrases: PhraseTuple = ()
@@ -164,7 +161,8 @@ class Parser():
             boolean = " AND "
         return ("(" + boolean.join(phrases) + ")",)
 
-    def transform_date(self, field: str, term: str, _: bool = False) -> str:
+    @staticmethod
+    def transform_date(field: str, term: str, _: bool = False) -> str:
         """Convert a date value to an SQL phrase.
 
         Dates in YYYY-MM-DD and YYYY-MM format are recognized, as are
@@ -175,32 +173,30 @@ class Parser():
         reference_date = None
 
         if term == "today":
-            reference_date = pendulum.today()
+            reference_date = datetime.today()
         elif term == "yesterday":
-            reference_date = pendulum.yesterday()
+            reference_date = datetime.today() - timedelta(days=1)
         elif re.match(r"\d{4}-\d{2}-\d{2}", term):
-            reference_date = pendulum.from_format(
+            reference_date = datetime.strptime(
                 term,
-                "YYYY-MM-DD",
-                tz=self.timezone
+                "%Y-%m-%d",
             )
         elif re.match(r"\d{4}-\d{2}", term):
-            reference_date = pendulum.from_format(
+            reference_date = datetime.strptime(
                 term,
-                "YYYY-MM",
-                tz=self.timezone
+                "%Y-%m",
             )
 
         if not reference_date:
             return ""
 
-        start = reference_date.start_of("day").in_timezone("utc").format(
-            "YYYY-MM-DD-HH"
-        )
+        start = reference_date.replace(
+            hour=0, minute=0, second=0
+        ).astimezone(UTC).strftime("%Y-%m-%d-%H")
 
-        end = reference_date.end_of("day").in_timezone("utc").format(
-            "YYYY-MM-DD-HH"
-        )
+        end = reference_date.replace(
+            hour=23, minute=59, second=50
+        ).astimezone(UTC).strftime("%Y-%m-%d-%H")
 
         return f"{field} BETWEEN '{start}' AND '{end}'"
 

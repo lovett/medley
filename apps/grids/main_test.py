@@ -1,10 +1,9 @@
 """Test suite for the grids app."""
 
+from datetime import datetime
 import typing
 import unittest
 from unittest import mock
-import cherrypy
-import pendulum
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
@@ -12,9 +11,7 @@ import apps.grids.main
 
 
 class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
+    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -46,6 +43,10 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["Column 1, Column 2, Column 3\nlayout=month"]
+            if args[0] == "clock:from_format":
+                return [datetime.now()]
+            if args[0] == "clock:now":
+                return [datetime.now()]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -60,63 +61,38 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def test_month_layout_invalid_start(self, publish_mock: mock.Mock) -> None:
+    def test_invalid_start(self, publish_mock: mock.Mock) -> None:
         """An invalid start date for a monthly layout is handled gracefully"""
-
-        first_of_current_month = pendulum.today().start_of('month')
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["Column 4, Column 5, Column 6\nlayout=month"]
-            if args[0] == "jinja:render":
-                return [""]
+            if args[0] == "clock:from_format":
+                return [None]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        self.request("/test1", start="1234-56")
+        response = self.request("/test1", start="1234-56")
 
-        self.assertEqual(
-            helpers.template_var(publish_mock, "rows")[0][0],
-            first_of_current_month.strftime("%b %-d, %Y")
-        )
+        self.assert_404(response)
 
     @mock.patch("cherrypy.engine.publish")
-    def test_default_view(self, publish_mock: mock.Mock) -> None:
-        """The default view of the app redirects to the first known template"""
+    def test_invalid_grid(self, publish_mock: mock.Mock) -> None:
+        """An invalid grid name is handled gracefully"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
-                return ["Column A"]
-            if args[0] == "jinja:render":
-                return [""]
+                return [None]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
 
-        self.request("/")
+        response = self.request("/invalid")
 
-        self.assertRaises(cherrypy.HTTPRedirect)
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_invalid_gird(self, publish_mock: mock.Mock) -> None:
-        """Specifying an unknown grid redirects to the first known template"""
-
-        def side_effect(*args: str, **_: str) -> typing.Any:
-            """Side effects local function"""
-            if args[0] == "registry:first:value":
-                return ["Column A"]
-            if args[0] == "jinja:render":
-                return [""]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", "invalid")
-
-        self.assertRaises(cherrypy.HTTPRedirect)
+        self.assert_404(response)
 
 
 if __name__ == "__main__":

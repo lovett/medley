@@ -4,8 +4,8 @@ from collections import deque
 import sqlite3
 import typing
 import cherrypy
-from . import mixins
-from . import decorators
+from plugins import mixins
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -81,7 +81,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """List all available metrics."""
 
         return self._select_generator(
-            f"""SELECT DISTINCT key
+            """SELECT DISTINCT key
             FROM metrics
             ORDER BY key"""
         )
@@ -106,7 +106,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Retrieve records for a single metric."""
 
         return self._select_generator(
-            f"""SELECT created as 'created [datetime]', value, unit
+            f"""SELECT created as 'created [timestamp]', value, unit
             FROM {view}
             WHERE key=?
             ORDER BY created""",

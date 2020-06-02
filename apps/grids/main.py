@@ -1,7 +1,7 @@
-"""Printable data-entry pages"""
+"""Printable pages for data entry."""
 
+import calendar
 import typing
-import pendulum
 import cherrypy
 
 
@@ -22,18 +22,17 @@ class Controller:
 
     @staticmethod
     def index() -> bytes:
-        "List available grids."""
+        """List available grids."""
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
             "grids:*",
         ).pop()
 
-        grid_names = [
+        grid_names = (
             row["key"].split(":").pop()
-            for row
-            in rows
-        ]
+            for row in rows
+        )
 
         return typing.cast(
             bytes,
@@ -48,54 +47,76 @@ class Controller:
     def show(name: str, **kwargs: str) -> bytes:
         """Display a grid."""
 
-        start = kwargs.get("start", "")
+        start = kwargs.get("start")
 
         grid = cherrypy.engine.publish(
             "registry:first:value",
             f"grids:{name}"
         ).pop()
 
+        print(grid)
         if not grid:
             raise cherrypy.HTTPError(404, "Grid not found")
 
-        first_line, second_line = grid.split("\n")
+        header_config, option_config = grid.split("\n")
 
         headers = [
             value.strip()
             for value
-            in first_line.split(",")
+            in header_config.split(",")
         ]
 
         options = dict([
             pair.split("=")
             for pair in
-            second_line.split(",")
+            option_config.split(",")
         ])
 
         rows = []
-
         if options.get("layout") == "month":
-            today = pendulum.today()
+            if start:
+                start_date = cherrypy.engine.publish(
+                    "clock:from_format",
+                    start,
+                    fmt="%Y-%m"
+                ).pop()
 
-            try:
-                start_date = pendulum.from_format(start, "YYYY-MM")
-            except (TypeError, ValueError):
-                start_date = today.start_of("month")
+                if not start_date:
+                    raise cherrypy.HTTPError(404)
+            else:
+                start_date = cherrypy.engine.publish(
+                    "clock:now"
+                ).pop()
 
             headers = ["Date", "Day"] + headers
-            options["last_month"] = start_date.subtract(months=1)
-            options["next_month"] = start_date.add(months=1)
-            options["this_month"] = today
 
-            period = pendulum.period(
-                start_date,
-                start_date.end_of("month")
+            options["this_month"] = cherrypy.engine.publish(
+                "clock:now"
+            ).pop()
+
+            options["last_month"] = cherrypy.engine.publish(
+                "clock:month:previous",
+                start_date
+            ).pop()
+
+            options["next_month"] = cherrypy.engine.publish(
+                "clock:month:next",
+                start_date
+            ).pop()
+
+            cal = calendar.Calendar()
+
+            iterator = cal.itermonthdates(
+                start_date.year,
+                start_date.month
             )
 
-            for day in period.range("days"):
+            for day in iterator:
+                if day.month != start_date.month:
+                    continue
                 row = [''] * len(headers)
-                row[0] = day.format("MMM D, YYYY")
-                row[1] = day.format("dddd")
+                row[0] = day.strftime("%b %-d, %Y")
+                row[1] = day.strftime("%A")
                 rows.append(row)
 
         return typing.cast(

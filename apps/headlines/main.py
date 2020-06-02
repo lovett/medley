@@ -2,7 +2,6 @@
 
 import typing
 import cherrypy
-import pendulum
 
 
 class Controller:
@@ -19,9 +18,12 @@ class Controller:
         walk_start = int(kwargs.get("start", 1))
         walk_stop = walk_start + int(kwargs.get("count", 40)) - 1
 
-        now = pendulum.now()
-
-        cache_lifespan = (now.end_of('day') - now).in_seconds()
+        cache_lifespan = typing.cast(
+            int,
+            cherrypy.engine.publish(
+                "clock:day:remaining"
+            ).pop()
+        )
 
         headlines = cherrypy.engine.publish(
             "cache:get",

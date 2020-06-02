@@ -2,7 +2,6 @@
 
 import unittest
 import cherrypy
-import pendulum
 import plugins.converters
 
 
@@ -47,14 +46,6 @@ class TestConverters(unittest.TestCase):
 
         result = self.plugin.duration(b"604800")
         self.assertEqual(result, "168 hours")
-
-    def test_datetime(self) -> None:
-        """An ISO date string is parsed into a datetime object"""
-        result = self.plugin.datetime(b"2013-03-16 20:04:40")
-        self.assertEqual(
-            result,
-            pendulum.datetime(2013, 3, 16, 20, 4, 40)
-        )
 
     def test_callerid(self) -> None:
         """The callerid name is correctly extracted from a callerid string"""

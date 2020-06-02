@@ -10,7 +10,7 @@
     {% if bookmark.deleted %}
         <div id="app-message" class="error">
             <p>
-                This URL was marked for removal at {{ bookmark.deleted|localtime|dateformat('LT') }}
+                This URL was marked for removal at {{ bookmark.deleted|dateformat("%-I:%M %p") }}
             </p>
         </div>
     {% elif bookmark.rowid and not bookmark.deleted  %}
@@ -18,10 +18,10 @@
             <p>
                 {% if bookmark.updated %}
                     Last updated
-                    {{ bookmark.updated|localtime|dateformat('LL') }}.
+                    {{ bookmark.updated|dateformat("%B %m, %Y") }}.
                 {% else %}
                     This URL was bookmarked on
-                    {{ bookmark.added|localtime|dateformat('LL') }}.
+                    {{ bookmark.added|dateformat("%b, %m, %Y") }}.
                 {% endif %}
 
                 <a href="{{ bookmarks_url }}">Switch to bookmarks</a>.

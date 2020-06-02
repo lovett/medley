@@ -1,10 +1,10 @@
 """Interact with Google Cloud Storage."""
 
+from datetime import datetime
 import json
 import pathlib
 import typing
 import cherrypy
-import pendulum
 import jwt
 from plugins import decorators
 
@@ -47,12 +47,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         service_account = json.loads(config["service_account"])
 
+        now = typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:now"
+            ).pop()
+        )
+
+        expire = typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:shift",
+                now,
+                hours=1
+            ).pop()
+        )
+
         token = jwt.encode({
             "iss": service_account.get("client_email"),
             "scope": config.get("scope"),
             "aud": service_account.get("token_uri"),
-            "exp": pendulum.now().add(hours=1).int_timestamp,
-            "iat": pendulum.now().int_timestamp
+            "exp": int(expire.timestamp()),
+            "iat": int(now.timestamp()),
         }, service_account.get("private_key"), algorithm="RS256")
 
         grant_response = cherrypy.engine.publish(
@@ -142,12 +158,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             files_pulled += 1
 
-        unit = "file" if files_pulled == 1 else "files"
-
         cherrypy.engine.publish(
             "applog:add",
             "gcp_storage",
-            f"{files_pulled} {unit} pulled"
+            f"{files_pulled} {'file' if files_pulled == 1 else 'files'} pulled"
         )
 
     def delete_item(self, url: str, access_token: str) -> None:

@@ -9,8 +9,7 @@ import pathlib
 import typing
 import urllib.parse
 import cherrypy
-import pendulum
-from . import decorators
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -224,9 +223,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             payload["httpVersion"]
         ))
 
-        timestamp = pendulum.parse(
-            payload["startTime"]
-        ).format("DD/MMM/YYYY:HH:mm:ss:SSSSSS ZZ")
+        timestamp = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            payload["startTime"],
+            "%d/%M/%Y:%H:%M:%s:%f %Z"
+        ).pop()
 
         fields = (
             payload["ip"],

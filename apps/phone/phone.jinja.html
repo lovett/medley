@@ -68,8 +68,8 @@
                         <tbody>
                             {% for entry in history %}
                                 <tr>
-                                    <td>{{ entry["date"]|localtime|dateformat("YYYY-MM-DD") }}</td>
-                                    <td>{{ entry["date"]|localtime|dateformat("LT")}}</td>
+                                    <td>{{ entry["date"]|dateformat("%Y-%m-%d") }}</td>
+                                    <td>{{ entry["date"]|dateformat("%-I:%M %p")}}</td>
                                     <td>{{ entry["direction"] }}</td>
                                     <td>{{ entry["duration"] }}</td>
                                 </tr>

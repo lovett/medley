@@ -56,7 +56,7 @@
 
                         <div class="summary">
                             <time datetime="{{ event.time * 1000 }}">
-                                {{ event.time|localtime|dateformat("LT") }}
+                                {{ event.time|date(local=True)|dateformat("%-I:%M %p") }}
                             </time>
                             {{ event.argument[1].title }}
 

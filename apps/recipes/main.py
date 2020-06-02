@@ -4,7 +4,6 @@ import re
 import typing
 import cherrypy
 import mistletoe
-import pendulum
 
 # pylint: disable=protected-access
 Attachment = typing.Union[
@@ -106,7 +105,10 @@ class Controller:
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_made.strip()):
             last_made_date = last_made.strip()
 
-        created_date = pendulum.now().format("YYYY-MM-DD HH:mm:ss")
+        created_date = cherrypy.engine.publish(
+            "clock:now",
+        ).pop()
+
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created.strip()):
             created_date = f"{created.strip()} 00:00:00"
 
@@ -284,16 +286,18 @@ class Controller:
         query_date = None
 
         if re.fullmatch(r"\d{4}-\w{2}-\d{2}", query):
-            query_date = pendulum.from_format(
+            query_date = cherrypy.engine.publish(
+                "clock:from_format",
                 query,
-                "YYYY-MM-DD"
-            )
+                "%Y-%m-%d"
+            ).pop()
 
         if re.fullmatch(r"\d{4}-\d{2}", query):
-            query_date = pendulum.from_format(
+            query_date = cherrypy.engine.publish(
+                "clock:from_format",
                 query,
-                "YYYY-MM"
-            )
+                "%Y-%m"
+            ).pop()
 
         if "." in query:
             query = re.sub(r"\b(\w+)\.(\w+)\b", r"NEAR(\g<1> \g<2>)", query)

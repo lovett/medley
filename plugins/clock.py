@@ -5,10 +5,10 @@ from datetime import datetime, timedelta
 import typing
 import cherrypy
 from pytz import timezone, UTC
+from pytz.exceptions import UnknownTimeZoneError
 
 DatetimeOrString = typing.Union[datetime, str]
 OptionalDatetime = typing.Optional[datetime]
-IntOrFloat = typing.Union[int, float]
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -25,6 +25,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the clock prefix.
         """
 
+        self.bus.subscribe("clock:ago", self.ago)
+        self.bus.subscribe("clock:duration:words", self.duration_words)
         self.bus.subscribe("clock:same_day", self.same_day)
         self.bus.subscribe("clock:now", self.now)
         self.bus.subscribe("clock:format", self.format)
@@ -35,6 +37,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:month:next", self.month_next)
         self.bus.subscribe("clock:month:previous", self.month_previous)
         self.bus.subscribe("clock:shift", self.shift)
+        self.bus.subscribe("clock:local", self.local)
         self.bus.subscribe("clock:day:remaining", self.day_remaining)
 
     def day_remaining(self, dt: datetime = None) -> int:
@@ -62,22 +65,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return dt.strftime(fmt)
 
-    @staticmethod
-    def from_timestamp(timestamp: IntOrFloat) -> datetime:
+    def from_timestamp(
+            self,
+            timestamp: float,
+            local: bool = False
+    ) -> datetime:
         """Convert a Unix timestamp to a datetime."""
 
-        return datetime.fromtimestamp(timestamp, UTC)
+        dt = datetime.fromtimestamp(timestamp, UTC)
 
-    @staticmethod
-    def from_format(value: str, fmt: str) -> OptionalDatetime:
+        if local:
+            return self.local(dt)
+
+        return dt
+
+    def from_format(
+            self,
+            value: str,
+            fmt: str,
+            local: bool = False
+    ) -> OptionalDatetime:
         """Parse a date string in a known format."""
 
         try:
             dt = datetime.strptime(value, fmt).astimezone(UTC)
+            if local:
+                return self.local(dt)
+            return dt
         except ValueError:
             return None
-
-        return dt
 
     @staticmethod
     def month_start(dt: datetime) -> datetime:
@@ -129,21 +145,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return next_month
 
-    @staticmethod
-    def now() -> datetime:
+    def now(self, local: bool = False) -> datetime:
         """The current date and time in UTC."""
 
-        return datetime.now(timezone("UTC"))
+        if local:
+            return self.local(datetime.now(UTC))
+        return datetime.now(UTC)
 
     @staticmethod
-    def shift(dt: datetime, **kwargs: typing.Union[float, str]) -> datetime:
+    def shift(
+            dt: datetime,
+            **kwargs: typing.Union[float, str]
+    ) -> datetime:
         """Roll forwards or backwards in time."""
 
         result = dt
-
-        if "timezone" in kwargs:
-            tz = timezone(typing.cast(str, kwargs["timezone"]))
-            result = result.astimezone(tz)
 
         if "days" in kwargs:
             days = typing.cast(float, kwargs["days"])
@@ -153,4 +169,96 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             hours = typing.cast(float, kwargs["hours"])
             result = result + timedelta(hours=hours)
 
+        if "minutes" in kwargs:
+            minutes = typing.cast(float, kwargs["minutes"])
+            result = result + timedelta(minutes=minutes)
+
         return result
+
+    @staticmethod
+    def local(dt: datetime) -> datetime:
+        """Convert a datetime to the local timezone."""
+
+        local_timezone = cherrypy.engine.publish(
+            "registry:first:value",
+            "config:timezone",
+            memorize=True
+        ).pop()
+
+        try:
+            dt = dt.astimezone(
+                timezone(local_timezone)
+            )
+        except UnknownTimeZoneError:
+            dt = dt.astimezone(
+                datetime.now().astimezone().tzinfo
+            )
+
+        return dt
+
+    def ago(self, value: datetime) -> str:
+        """Describe a timedelta in words."""
+
+        delta = self.now(local=True) - value
+
+        return self.duration_words(
+            seconds=int(delta.total_seconds())
+        )
+
+    @staticmethod
+    def duration_words(**kwargs: int) -> str:
+        """Describe a numeric timespan in words."""
+
+        total_seconds = 0
+
+        if "days" in kwargs:
+            total_seconds += kwargs["days"] * 86400
+
+        if "hours" in kwargs:
+            total_seconds += kwargs["hours"] * 3600
+
+        if "minutes" in kwargs:
+            total_seconds += kwargs["minutes"] * 60
+
+        if "seconds" in kwargs:
+            total_seconds += kwargs["seconds"]
+
+        description = []
+
+        if total_seconds >= 604800:
+            count, total_seconds = divmod(total_seconds, 604800)
+            label = "weeks"
+            if count == 1:
+                label = "week"
+            description.append((count, label))
+
+        if total_seconds >= 86400:
+            count, total_seconds = divmod(total_seconds, 86400)
+            label = "days"
+            if count == 1:
+                label = "day"
+            description.append((count, label))
+
+        if total_seconds >= 3600:
+            count, total_seconds = divmod(total_seconds, 3600)
+            label = "hours"
+            if count == 1:
+                label = "hour"
+            description.append((count, label))
+
+        if total_seconds >= 60:
+            count, total_seconds = divmod(total_seconds, 60)
+            label = "minutes"
+            if count == 1:
+                label = "minute"
+            description.append((count, label))
+
+        if total_seconds > 0:
+            label = "seconds"
+            if total_seconds == 1:
+                label = "second"
+            description.append((total_seconds, label))
+
+        return ", ".join([
+            f"{count} {label}" for count, label in description
+        ])

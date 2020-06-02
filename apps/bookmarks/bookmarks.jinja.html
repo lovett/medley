@@ -119,7 +119,7 @@
                                 </div>
 
                                 <div>
-                                    <time>{{ bookmark.added|localtime|dateformat("MMMM D, YYYY") }}</time>
+                                    <time>{{ bookmark.added|dateformat("%B %-d, %Y") }}</time>
                                 </div>
 
                                 {% if bookmark.domain %}
@@ -139,7 +139,6 @@
         </div>
 
         {{ macros.pagination(pagination_url, offset, per_page, total_records) }}
-
         {{ macros.queryPlan(query_plan) }}
     </main>
 {% endblock %}

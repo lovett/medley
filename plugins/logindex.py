@@ -8,12 +8,12 @@ import sqlite3
 import typing
 from collections import deque
 from collections import defaultdict
+from datetime import datetime, timedelta
 import cherrypy
-import pendulum
 import parsers.logindex_query
 import parsers.combined_log
-from . import mixins
-from . import decorators
+from plugins import mixins
+from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -22,7 +22,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
-        self.queue: typing.Deque[pendulum.Period] = deque()
+        self.queue: typing.Deque[typing.Tuple[datetime, datetime]] = deque()
 
         self._create("""
         PRAGMA journal_mode=WAL;
@@ -194,15 +194,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def file_for_date(
             self,
-            log_date: pendulum.DateTime
+            log_date: datetime
     ) -> typing.Optional[str]:
         """The filesystem path of the log file for the given date"""
 
         root = self.get_root()
 
-        subdir = log_date.strftime("%Y-%m")
-        file = log_date.strftime("%Y-%m-%d.log")
-        log_file = f"{root}/{subdir}/{file}"
+        path = cherrypy.engine.publish(
+            "clock:format",
+            log_date,
+            "%Y-%m/%Y-%m-%d.log"
+        ).pop()
+
+        log_file = f"{root}/{path}"
 
         if not os.path.isfile(log_file):
             return None
@@ -218,8 +222,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     @decorators.log_runtime
     def enqueue(
             self,
-            start_date: pendulum.DateTime,
-            end_date: pendulum.DateTime
+            start_date: datetime,
+            end_date: datetime
     ) -> bool:
         """Schedule logfile processing.
 
@@ -233,7 +237,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        period = pendulum.period(start_date, end_date)
+        period = (start_date, end_date)
 
         if self.queue.count(period) > 0:
             cherrypy.engine.publish(
@@ -268,7 +272,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         try:
-            period = self.queue[0]
+            start_date, end_date = self.queue[0]
         except IndexError:
             cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
 
@@ -280,7 +284,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             return
 
-        for day in period.range("days"):
+        delta = end_date - start_date
+        for i in range(1, delta.days):
+            day = start_date + timedelta(days=i)
             log_file = self.file_for_date(day)
             if log_file:
                 self.ingest_file(log_file)
@@ -598,16 +604,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
         """Perform a search against parsed log lines."""
 
-        timezone = typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "registry:timezone"
-            ).pop()
-        )
-
         parser = parsers.logindex_query.Parser()
 
-        parsed_query = parser.parse(query, timezone)
+        parsed_query = parser.parse(query)
 
         sql = f"""SELECT unix_timestamp, datestamp, logs.ip,
         host, uri, query as "query [querystring]",
@@ -646,13 +645,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        timezone = typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "registry:timezone"
-            ).pop()
-        )
-
         parser = parsers.logindex_query.Parser()
 
         alert_queries = cherrypy.engine.publish(
@@ -662,7 +654,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ).pop()
 
         for name, query in alert_queries.items():
-            parsed_query = parser.parse(query, timezone)
+            parsed_query = parser.parse(query)
 
             sql = f"""SELECT distinct ip, uri
             FROM logs

@@ -67,10 +67,15 @@ def unavailable() -> ViewAndData:
 def view_index(url: str, response: typing.Any) -> ViewAndData:
     """Render a list of story links."""
 
-    stories = (
-        story.get("data")
-        for story in response.get("data").get("children")
-    )
+    stories = []
+    for child in response.get("data").get("children"):
+        story = child.get("data")
+        story["created"] = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            story["created"],
+            local=True
+        ).pop()
+        stories.append(story)
 
     parsed_url = urlparse(url)
 

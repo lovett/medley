@@ -46,7 +46,8 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [{"foo": "bar"}]
-
+            if args[0] == "clock:day:remaining":
+                return [1]
             if args[0] == "jinja:render":
                 return [""]
 
@@ -74,6 +75,8 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **kwargs: str) -> typing.Any:
             """Side effects local function"""
+            if args[0] == "clock:day:remaining":
+                return [1]
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
                 return [{
                     "country": "us",
@@ -111,6 +114,8 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **kwargs: str) -> typing.Any:
             """Side effects local function"""
+            if args[0] == "clock:day:remaining":
+                return [1]
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
                 return [{
                     "country": "us",
@@ -134,6 +139,8 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
+            if args[0] == "clock:day:remaining":
+                return [1]
             if args[0] in ("cache:get", "urlfetch:get"):
                 return [None]
             if args[0] == "jinja:render":

@@ -1,9 +1,7 @@
 """Text formatting function."""
 
 import re
-import typing
 import cherrypy
-import pendulum
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -21,11 +19,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe(
             "formatting:dbpedia_abstract",
             self.dbpedia_abstract
-        )
-
-        self.bus.subscribe(
-            "formatting:http_timestamp",
-            self.http_timestamp
         )
 
         self.bus.subscribe(
@@ -77,19 +70,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             abbreviated_text += "."
 
         return abbreviated_text
-
-    @staticmethod
-    def http_timestamp(instance: pendulum.DateTime) -> str:
-        """Custom Pendulum formatter for an HTTP-date timestamp, as defined in
-        Section 7.1.1.1 of [RFC7231].
-
-        Example output: Thu, 01 Dec 1994 16:00:00 GMT
-
-        """
-        return typing.cast(
-            str,
-            instance.format("ddd, DD MMM YYYY HH:mm:ss zz")
-        )
 
     @staticmethod
     def phone_sanitize(number: str) -> str:

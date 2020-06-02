@@ -177,12 +177,12 @@
 
                                 <td nowrap="nowrap">
                                     <p>
-                                        {{ result.unix_timestamp|localtime|dateformat("YYYY-MM-DD [at] LTS") }}
+                                        {{ result.unix_timestamp|date(local=True)|dateformat("%Y-%m-%d at %-I:%M %pS") }}
                                     </p>
                                 </td>
                                 <td nowrap="nowrap">
                                     <p>
-                                        <a href="/visitors?query=date+{{ active_date|dateformat('YYYY-MM-DD') }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
+                                        <a href="/visitors?query=date+{{ active_date|dateformat("%Y-%m-%d") }}%0Auri+{{result.uri}}" title="Search for visits to this page" rel="noreferrer">
                                             {{ result.method }} {{ result.uri|truncate(30, True) }}
                                         </a>
                                     </p>
@@ -197,7 +197,7 @@
 
                                     {% if result.referrer_domain and result.referrer_domain not in site_domains %}
                                         <p>
-                                            Referrer: <a href="/visitors?query=date+{{ active_date|dateformat('YYYY-MM-DD') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
+                                            Referrer: <a href="/visitors?query=date+{{ active_date|dateformat('%Y-%m-%d') }}%0Areferrer_domain+{{result.referrer_domain}}">{{ result.referrer_domain }}</a>
                                         </p>
                                     {% endif %}
                                 </td>
@@ -218,9 +218,9 @@
                                 <td colspan="6">
                                     <p class="meta">
                                         <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
-                                        {{ result.unix_timestamp|ago() }}
+                                        {{ result.unix_timestamp|date(local=True)|ago }}
                                         {% if result.time_zone %}
-                                            at {{ result.unix_timestamp|localtime(result.time_zone)|dateformat('LTS') }} local time
+                                            at {{ result.unix_timestamp|date(local=True)|dateformat('LTS') }} local time
                                         {% endif %}
                                     </p>
 

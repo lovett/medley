@@ -10,12 +10,12 @@ import os.path
 import sqlite3
 import typing
 import urllib
+from datetime import datetime
 from urllib.parse import urlparse
 import json
 import re
 import cherrypy
 import jinja2
-import pendulum
 import plugins.jinja_cache
 
 
@@ -34,9 +34,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             bytecode_cache=plugins.jinja_cache.Cache()
         )
 
+        self.env.filters["date"] = self.date_filter
         self.env.filters["dateformat"] = self.dateformat_filter
         self.env.filters["ago"] = self.ago_filter
-        self.env.filters["localtime"] = self.localtime_filter
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
@@ -131,35 +131,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return rendered_template.encode()
 
     @staticmethod
-    def localtime_filter(
-            value: pendulum.DateTime,
-            timezone: str = ""
-    ) -> typing.Union[str, pendulum.DateTime]:
-        """Switch a datetime to the local timezone, then format it"""
+    def date_filter(value: float, local: bool = False) -> datetime:
+        """Convert a timestamp to a date."""
 
-        if not value:
-            return ""
-
-        if not timezone:
-            timezone = cherrypy.engine.publish(
-                "registry:timezone"
+        return typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:from_timestamp",
+                value,
+                local=local
             ).pop()
-
-        if isinstance(value, (int, float)):
-            value = pendulum.from_timestamp(value)
-        else:
-            value = pendulum.instance(value)
-
-        return value.in_timezone(timezone)
+        )
 
     @staticmethod
-    def dateformat_filter(
-            value: pendulum.DateTime,
-            format_string: str
-    ) -> str:
+    def dateformat_filter(dt: datetime, fmt: str) -> str:
         """Format a datetime instance to a string."""
 
-        return typing.cast(str, value.format(format_string))
+        return typing.cast(
+            str,
+            cherrypy.engine.publish("clock:format", dt, fmt).pop()
+        )
 
     @staticmethod
     def unindent_filter(string: str) -> str:
@@ -238,9 +229,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return urllib.parse.quote(value)
 
     @staticmethod
-    def ago_filter(
-            value: typing.Union[int, pendulum.DateTime]
-    ) -> str:
+    def ago_filter(value: datetime) -> str:
         """Calculate a human-readable time delta between a date in the past
         and now.
 
@@ -249,21 +238,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        if isinstance(value, (int, float)):
-            date = pendulum.from_timestamp(value)
-        else:
-            date = value
-
-        zone = cherrypy.engine.publish(
-            "registry:timezone"
-        ).pop()
-
-        return date.in_timezone(zone).diff_for_humans()
+        return typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "clock:ago",
+                value
+            ).pop()
+        )
 
     @staticmethod
-    def yearmonth_filter(value: pendulum.DateTime) -> str:
+    def yearmonth_filter(value: datetime) -> str:
         """Format a datetime to a year-month string."""
-        return typing.cast(str, value.strftime("%Y-%m"))
+
+        return typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "clock:format",
+                value,
+                fmt="%Y-%m"
+            ).pop()
+        )
 
     @staticmethod
     def json_filter(value: object) -> str:
@@ -552,10 +546,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @jinja2.contextfilter
     def is_today(
             _: jinja2.runtime.Context,
-            value: pendulum.DateTime
+            value: datetime
     ) -> bool:
         """Deterime if a unix timestamp falls on the current date."""
 
-        diff = pendulum.now().diff(value)
+        now = cherrypy.engine.publish(
+            "clock:now"
+        ).pop()
 
-        return typing.cast(bool, diff.in_days() < 1)
+        return typing.cast(
+            bool,
+            cherrypy.engine.publish(
+                "clock:same_day",
+                value,
+                now
+            ).pop()
+        )

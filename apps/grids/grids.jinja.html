@@ -10,11 +10,11 @@
         <nav id="main-toolbar">
             <a href="{{ app_url }}/{{ name }}?start={{ options["last_month"]|yearmonth }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                {{ options.last_month.format("MMMM") }}
+                {{ options.last_month|dateformat("%B") }}
             </a>
             <a href="{{ app_url }}/{{ name }}?start={{ options["next_month"]|yearmonth }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                {{ options.next_month.format("MMMM") }}
+                {{ options.next_month|dateformat("%B") }}
             </a>
             <a href="{{ app_url }}/{{ name }}?start={{ options["this_month"]|yearmonth }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
