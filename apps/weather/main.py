@@ -113,8 +113,6 @@ class Controller:
 
         result: Forecast = defaultdict()
 
-        timezone = forecast.get("timezone", "")
-
         daily_block = forecast.get("daily", {})
         days = daily_block.get("data", [{}, {}])
 
@@ -131,7 +129,7 @@ class Controller:
             item["time"] = cherrypy.engine.publish(
                 "clock:from_timestamp",
                 item.get("time"),
-                timezone=timezone
+                local=True
             ).pop()
 
             if "temperatureHigh" in item:
@@ -141,7 +139,7 @@ class Controller:
                 item["high_at"] = cherrypy.engine.publish(
                     "clock:from_timestamp",
                     item.get("temperatureHighTime"),
-                    timezone=timezone
+                    local=True
                 ).pop()
 
             if "temperatureLow" in item:
@@ -151,7 +149,7 @@ class Controller:
                 item["low_at"] = cherrypy.engine.publish(
                     "clock:from_timestamp",
                     item.get("temperatureLowTime"),
-                    timezone=timezone
+                    local=True
                 ).pop()
 
         result["current_temperature"] = math.ceil(
@@ -161,7 +159,7 @@ class Controller:
         result["current_time"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             currently.get("time"),
-            timezone=timezone
+            local=True
         ).pop()
 
         result["current_humidity"] = currently.get("humidity", 0)
@@ -173,13 +171,13 @@ class Controller:
         result["sunrise"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             today.get("sunriseTime"),
-            timezone=timezone
+            local=True
         ).pop()
 
         result["sunset"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             today.get("sunsetTime"),
-            timezone=timezone
+            local=True
         ).pop()
 
         result["humidity"] = currently.get("humidity", 0)
@@ -189,7 +187,7 @@ class Controller:
         result["high_at"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             today.get("temperatureHighTime"),
-            timezone=timezone
+            local=True
         ).pop()
 
         result["low"] = math.ceil(today.get("temperatureLow"))
@@ -197,7 +195,7 @@ class Controller:
         result["low_at"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             today.get("temperatureLowTime"),
-            timezone=timezone
+            local=True
         ).pop()
 
         if "alerts" in forecast:
@@ -206,7 +204,7 @@ class Controller:
                 for alert in forecast["alerts"]
             ]
 
-        now = cherrypy.engine.publish("clock:now").pop()
+        now = cherrypy.engine.publish("clock:now", local=True).pop()
         hours_remaining_today = 24 - now.hour
 
         if "data" in hourly:
@@ -216,7 +214,7 @@ class Controller:
                 hour_clone["time"] = cherrypy.engine.publish(
                     "clock:from_timestamp",
                     hour_clone["time"],
-                    timezone=timezone
+                    local=True
                 ).pop()
 
                 result["hourly"].append(hour_clone)
