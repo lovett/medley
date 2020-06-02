@@ -98,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     cached_response
                 )
 
-        if as_json:
+        if as_json and "Accept" not in headers:
             headers["Accept"] = "application/json"
 
         try:
@@ -133,7 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if res.status_code == 204:
             return True
 
-        if "application/json" in res.headers.get("content-type", ""):
+        if res.headers.get("content-type", "").endswith("json"):
             if cache_lifespan > 0:
                 cherrypy.engine.publish(
                     "cache:set",
@@ -159,7 +159,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         params = kwargs.get("params")
         files_to_extract = kwargs.get("files_to_extract")
 
-        if as_json:
+        if as_json and "Accept" not in headers:
             headers["Accept"] = "application/json"
 
         if os.path.isdir(destination):
