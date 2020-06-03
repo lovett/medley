@@ -71,7 +71,6 @@ def setup() -> None:
     #
     # These are reasonable values for a production environment.
     cherrypy.config.update({
-        "app_root": app_root,
         "cache_static_assets": True,
         "database_dir": "./db",
         "etags": True,

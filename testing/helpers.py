@@ -26,7 +26,6 @@ def start_server(app: typing.Callable) -> None:
     server_root = pathlib.Path(__file__).parents[1]
 
     cherrypy.config.update({
-        "app_root": server_root / "apps",
         "server_root": server_root,
         "database_dir": tempfile.gettempdir(),
     })
