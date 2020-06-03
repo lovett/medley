@@ -1,0 +1,12 @@
+- /***.pyc
+- /***/.mypy_cache
+- /***/main_test.py
+- /***/__pycache__
+- /apps/static/coverage
++ /medley.py
++ /apps/***
++ /plugins/***
++ /parsers/***
++ /tools/***
++ /templates/***
+- /**

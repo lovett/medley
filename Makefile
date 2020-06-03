@@ -316,3 +316,18 @@ $(APP_ICONS):
 
 # Generate PNGs for all app icon SVGs.
 app-icons: $(APP_ICONS)
+
+
+zipapp: dummy
+	rm -f medley.pyz
+	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . medley/
+	mv medley/medley.py medley/__main__.py
+	python -m compileall -j 0 -q medley
+	python -m pip install --compile \
+	--disable-pip-version-check \
+	--no-color \
+	-q \
+	-r requirements.txt \
+	--target medley \
+	--upgrade
+	python -m zipapp -p "/usr/bin/env python3" medley
