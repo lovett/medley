@@ -133,7 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if res.status_code == 204:
             return True
 
-        if res.headers.get("content-type", "").endswith("json"):
+        if "json" in res.headers.get("content-type", ""):
             if cache_lifespan > 0:
                 cherrypy.engine.publish(
                     "cache:set",
