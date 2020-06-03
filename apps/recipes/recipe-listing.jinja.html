@@ -1,17 +1,19 @@
 <li>
     <div>
-        <p class="title">
+        <h2 class="title">
             <a href="/recipes/{{ recipe["id"] }}">
                 {{ recipe["title"] }}
             </a>
-        </p>
+        </h2>
 
         <p class="tags">
-            {% for tag in recipe["tags"] %}
-                <a href="/recipes/tag/{{ tag|urlencode }}">
+            {% for recipe_tag in recipe["tags"] %}
+                {% if recipe_tag != tag %}
+                <a href="/recipes/tag/{{ recipe_tag|urlencode }}">
                     <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                    {{ tag }}
+                    {{ recipe_tag }}
                 </a>
+                {% endif %}
             {% endfor %}
         </p>
         {% if recipe["last_made"] %}

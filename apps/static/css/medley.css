@@ -187,8 +187,12 @@ NAV.secondary FIELDSET INPUT[type=reset] {
     margin-left: 1em;
 }
 
-P {
+P, LI {
     line-height: 1.4;
+}
+
+LI {
+    margin-bottom: .25em;
 }
 
 SECTION {
@@ -256,7 +260,7 @@ TEXTAREA {
     padding-left: 0;
     list-style-type: none;
     display: grid;
-    grid-row-gap: 3em;
+    grid-row-gap: 1em;
     grid-column-gap: 4em;
 }
 
