@@ -24,7 +24,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url,
             domain,
             added,
-            added_date,
             updated DEFAULT NULL,
             retrieved DEFAULT NULL,
             deleted DEFAULT NULL,
@@ -45,7 +44,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         );
 
         CREATE INDEX IF NOT EXISTS bookmarks_added_date
-            ON bookmarks (added_date);
+            ON bookmarks (substr(added, 0, 11));
 
         CREATE INDEX IF NOT EXISTS bookmarks_domain
             ON bookmarks (domain);
@@ -202,13 +201,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._execute(
             """INSERT INTO bookmarks
-            (domain, url, added, added_date, title, tags, comments)
-            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (domain, url, added, title, tags, comments)
+            VALUES (?, ?, ?, ?, ?, ?)""",
             (
                 domain,
                 url,
                 add_date_formatted,
-                add_date_formatted.split(' ')[0],
                 title,
                 tags,
                 comments
@@ -393,12 +391,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         retrieved 'retrieved [timestamp]',
         comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
-        WHERE added_date >= date('now', ?)
+        WHERE substr(added, 0, 11) >= date('now', ?)
         AND deleted IS NULL
         ORDER BY added DESC
         LIMIT ? OFFSET ?"""
 
-        max_days_clause = f"- {max_days} day"
+        max_days_clause = f"-{max_days} day"
 
         return (
             self._select(sql, (max_days_clause, limit, offset)),
