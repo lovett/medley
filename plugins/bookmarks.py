@@ -400,7 +400,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (
             self._select(sql, (max_days_clause, limit, offset)),
-            self._count(sql, (max_days_clause)),
+            self._count(sql, (max_days_clause,)),
             self._explain(sql, (max_days_clause, limit, offset))
         )
 
