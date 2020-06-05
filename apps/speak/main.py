@@ -56,18 +56,10 @@ class Controller:
         action = kwargs.get("action", None)
         confirm = kwargs.get("confirm")
 
-        if confirm:
-            cherrypy.engine.publish(
-                "audio:play_sound",
-                "attention"
-            )
-
         muted = cherrypy.engine.publish("speak:muted").pop()
 
         if action == "toggle":
-            action = "mute"
-            if muted:
-                action = "unmute"
+            action = "unmute" if muted else "mute"
 
         if action == "mute":
             cherrypy.engine.publish("speak:mute")
@@ -85,6 +77,12 @@ class Controller:
         if muted:
             response_status = 202
         else:
+            if confirm:
+                cherrypy.engine.publish(
+                    "audio:play_sound",
+                    "attention"
+                )
+
             cherrypy.engine.publish("speak", statement, locale, gender)
             response_status = 204
 
