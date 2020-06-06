@@ -1,6 +1,10 @@
 {% extends "templates/base.jinja.html" %}
 {% import "templates/macros.jinja.html" as macros -%}
 
+{% block app_icon -%}
+    {{ macros.appSpecificIcon("bookmarks") }}
+{%- endblock %}
+
 {% block stylesheets %}
     {{ macros.asset("css/bookmarks.css") }}
 {% endblock %}

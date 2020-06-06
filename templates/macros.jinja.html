@@ -192,7 +192,6 @@ in the argument list are returned.  #}
     </footer>
 {%- endmacro -%}
 
-{% macro appSpecificIcon(app_url) -%}
-        <link rel="shortcut icon" href="{{ app_url }}/static/app-icon.png" />
-        <link rel="mask-icon" href="{{ app_url }}/static/app-icon.svg" color="black">
+{% macro appSpecificIcon(app_name) -%}
+        <link rel="shortcut icon" href="/static/app-icons/{{ app_name }}.svg" />
 {%- endmacro %}

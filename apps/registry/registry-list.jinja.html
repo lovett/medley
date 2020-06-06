@@ -1,5 +1,9 @@
 {% extends "apps/registry/registry.jinja.html" %}
 
+{% block app_icon -%}
+    {{ macros.appSpecificIcon("registry") }}
+{%- endblock %}
+
 {% block scripts %}
     {{ macros.asset("js/delete.js") }}
 {% endblock %}

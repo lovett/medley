@@ -1,6 +1,10 @@
 {% extends "templates/base.jinja.html" %}
 {% import "templates/macros.jinja.html" as macros -%}
 
+{% block app_icon -%}
+    {{ macros.appSpecificIcon("visitors") }}
+{%- endblock %}
+
 {% block stylesheets %}
     {{ macros.asset("css/visitors.css") }}
     {{ macros.asset("flag-icon-css/css/flag-icon.min.css") }}

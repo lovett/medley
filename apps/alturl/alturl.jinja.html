@@ -1,10 +1,13 @@
 {% extends "templates/base.jinja.html" %}
 {% import "templates/macros.jinja.html" as macros -%}
 
+{% block app_icon -%}
+    {{ macros.appSpecificIcon("alturl") }}
+{%- endblock %}
+
 {% block stylesheets %}
     {{ macros.asset("css/alturl.css") }}
 {% endblock %}
-
 
 {% block scripts %}
     {{ macros.asset("js/delete.js") }}

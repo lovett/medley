@@ -1,5 +1,9 @@
 {% extends "apps/alturl/alturl.jinja.html" %}
 
+{% block app_icon -%}
+    {{ macros.appSpecificIcon("alturl") }}
+{%- endblock %}
+
 {% block content %}
 
     <p>The URL is not available.</p>
