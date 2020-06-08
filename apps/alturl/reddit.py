@@ -99,6 +99,9 @@ def view_story(response: typing.Any) -> ViewAndData:
     if story.get("selftext"):
         story["selftext"] = mistletoe.markdown(story["selftext"])
 
+    if not story.get("url", "").startswith("http"):
+        story["url"] = "https://reddit.com" + story["url"]
+
     comments = (
         child.get("data", {})
         for child in response[1].get("data", {}).get("children")
