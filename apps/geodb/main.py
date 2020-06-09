@@ -34,6 +34,7 @@ class Controller:
         )
 
         destination = cherrypy.config.get("database_dir")
+        destination += "/GeoLite2-City.mmdb.tar.gz"
 
         cherrypy.engine.publish(
             "scheduler:add",

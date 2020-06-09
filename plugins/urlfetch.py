@@ -194,7 +194,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     )
 
                     extract_path = os.path.join(
-                        destination,
+                        os.path.dirname(destination),
                         os.path.basename(file_name)
                     )
 
