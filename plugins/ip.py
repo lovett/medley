@@ -1,6 +1,7 @@
 """Look up geographic and network information for an IP address."""
 
 import os.path
+import pathlib
 import socket
 import typing
 import cherrypy
@@ -20,11 +21,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         This plugin owns the ip prefix.
         """
+        self.bus.subscribe("ip:db:modified", self.db_modified)
         self.bus.subscribe("ip:facts", self.facts)
         self.bus.subscribe("ip:reverse", self.reverse)
 
     @staticmethod
-    def facts(ip_address: str) -> typing.Dict[str, str]:
+    def db_path() -> pathlib.Path:
+        """The filesystem path to the GeoLite2-City database."""
+
+        return pathlib.Path(os.path.join(
+            cherrypy.config.get("database_dir"),
+            "GeoLite2-City.mmdb"
+        ))
+
+    def db_modified(self) -> float:
+        """Return the last-modified date of the current database."""
+
+        geodb_path = self.db_path()
+
+        if geodb_path.is_file():
+            return geodb_path.stat().st_mtime
+
+        return 0
+
+    def facts(self, ip_address: str) -> typing.Dict[str, str]:
         """Look up geographic information for an IP address."""
 
         facts: typing.Dict[str, typing.Any] = {
@@ -52,14 +72,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 for row in rows
             ]
 
-        geodb_path = os.path.join(
-            cherrypy.config.get("database_dir"),
-            "GeoLite2-City.mmdb"
-        )
+        geodb_path = self.db_path()
 
         result: typing.Optional[geoip2.models.City] = None
         try:
-            reader = geoip2.database.Reader(geodb_path)
+            reader = geoip2.database.Reader(str(geodb_path))
             result = reader.city(ip_address)
         except FileNotFoundError:
             pass

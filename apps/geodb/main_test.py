@@ -51,10 +51,9 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         shutil.rmtree(self.empty_temp_dir)
 
     def test_allow(self) -> None:
-        """This app does not support HEAD or GET requests."""
-        for method in ("HEAD", "GET", "DELETE"):
-            response = self.request("/", method=method)
-            self.assertEqual(response.code, 405)
+        """Verify the controller's supported HTTP methods"""
+        response = self.request("/", method="HEAD")
+        self.assert_allowed(response, ("HEAD", "GET", "POST"))
 
     def test_exposed(self) -> None:
         """The application is publicly available."""

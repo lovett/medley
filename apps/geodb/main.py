@@ -1,5 +1,6 @@
 """Download the latest GeoLite Legacy City database from maxmind.com."""
 
+import typing
 import cherrypy
 
 
@@ -8,6 +9,28 @@ class Controller:
 
     exposed = True
     show_on_homepage = False
+
+    @staticmethod
+    def GET() -> bytes:
+        """Determine the timestamp of the currently-installed database."""
+
+        modified_timestamp = cherrypy.engine.publish(
+            "ip:db:modified"
+        ).pop()
+
+        modified_date = cherrypy.engine.publish(
+            "clock:from_timestamp",
+            modified_timestamp
+        ).pop()
+
+        return typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "clock:format",
+                modified_date,
+                "%Y-%m-%d"
+            ).pop()
+        ).encode()
 
     @staticmethod
     def POST(action: str = "") -> None:
