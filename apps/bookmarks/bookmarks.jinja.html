@@ -11,6 +11,7 @@
 
 {% block scripts %}
     {{ macros.asset("js/delete.js") }}
+    {{ macros.asset("js/wayback.js") }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -133,7 +134,7 @@
                                 {% endif %}
 
                                 <div>
-                                    <wayback-link url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}" />
+                                    <a class="wayback" href="#" data-url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}">cache</a>
                                 </div>
                             </div>
                         </div>
