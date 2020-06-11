@@ -236,16 +236,17 @@ assets-vue: dummy
 
 # Asset download of flag-icon-css library used in visitors app
 #
-# Similar to how Vue is handled, this is a direct-download approach
-# rather than an npm-based approach. The files used by the visitors
-# app are a subset of what the project provides.
+# These files are used in the visitors app, but only a subset of what
+# the project offers is needed.
 assets-flags: dummy
-	rm -fr master.zip apps/visitors/static/flag-icon-css/flags/4x3
+	rm -rf master.zip apps/static/flag-icon-css
 	curl --max-time 10 --silent -L -O 'https://github.com/lipis/flag-icon-css/archive/master.zip'
 	unzip master.zip
-	mv flag-icon-css-master/flags/4x3 apps/visitors/static/flag-icon-css/flags/
-	mv flag-icon-css-master/css/flag-icon.min.css apps/visitors/static/flag-icon-css/css/
-	mv flag-icon-css-master/LICENSE apps/visitors/static/flag-icon-css/LICENSE
+	mkdir -p apps/static/flag-icon-css/flags/4x3
+	mkdir -p apps/static/flag-icon-css/css
+	mv flag-icon-css-master/flags/4x3 apps/static/flag-icon-css/flags/
+	mv flag-icon-css-master/css/flag-icon.min.css apps/static/flag-icon-css/css/
+	mv flag-icon-css-master/LICENSE apps/static/flag-icon-css/LICENSE
 	rm -rf master.zip flag-icon-css-master
 
 
@@ -305,7 +306,7 @@ install: build
 # Perform sundry cleanup tasks.
 reset:
 	rm -r coverage
-	rm -r htmlcov
+	rm -r apps/static/coverage
 	rm .coverage
 
 
