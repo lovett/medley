@@ -1,15 +1,24 @@
 """Test suite for the markup plugin."""
 
 import unittest
+from unittest.mock import Mock, patch
 import cherrypy
 import plugins.markup
+from testing.assertions import Subscriber
 
 
-class TestMarkup(unittest.TestCase):
+class TestMarkup(Subscriber):
     """Tests for the markup plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.markup.Plugin(cherrypy.engine)
+
+    @patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: Mock) -> None:
+        """Subscriptions are prefixed consistently."""
+
+        self.plugin.start()
+        self.assert_prefix(subscribe_mock, "markup")
 
     def test_plain_text(self) -> None:
         """Markup is removed but text nodes are preserved."""

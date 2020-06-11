@@ -1,19 +1,27 @@
 """Test suite for the applog plugin."""
 
 import unittest
-from unittest import mock
+from unittest.mock import Mock, patch
 import cherrypy
 import plugins.applog
+from testing.assertions import Subscriber
 
 
-class TestApplog(unittest.TestCase):
+class TestApplog(Subscriber):
     """Tests for the applog plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.applog.Plugin(cherrypy.engine)
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_add(self, publish_mock: mock.Mock) -> None:
+    @patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: Mock) -> None:
+        """Subscriptions are prefixed consistently."""
+
+        self.plugin.start()
+        self.assert_prefix(subscribe_mock, "applog")
+
+    @patch("cherrypy.engine.publish")
+    def test_add(self, publish_mock: Mock) -> None:
         """A newly-added message is queued for storage."""
 
         self.plugin.add("foo", "bar")
@@ -39,8 +47,8 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._multi")
-    def test_pull(self, db_mock: mock.Mock) -> None:
+    @patch("plugins.applog.Plugin._multi")
+    def test_pull(self, db_mock: Mock) -> None:
         """Queued messages are written to storage."""
 
         self.plugin.add("foo", "bar")
@@ -64,8 +72,8 @@ class TestApplog(unittest.TestCase):
             0
         )
 
-    @mock.patch("plugins.applog.Plugin._multi")
-    def test_exception_message(self, db_mock: mock.Mock) -> None:
+    @patch("plugins.applog.Plugin._multi")
+    def test_exception_message(self, db_mock: Mock) -> None:
         """Messages can be provided as exceptions."""
 
         try:

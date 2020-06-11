@@ -3,13 +3,14 @@
 import json
 import typing
 import unittest
-from unittest import mock
+from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
-from testing import helpers
 import plugins.geography
+from testing import helpers
+from testing.assertions import Subscriber
 
 
-class TestGeography(unittest.TestCase):
+class TestGeography(Subscriber):
     """
     Tests for the geography plugin.
     """
@@ -17,8 +18,15 @@ class TestGeography(unittest.TestCase):
     def setUp(self) -> None:
         self.plugin = plugins.geography.Plugin(cherrypy.engine)
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_area_code_valid(self, publish_mock: mock.Mock) -> None:
+    @patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: Mock) -> None:
+        """Subscriptions are prefixed consistently."""
+
+        self.plugin.start()
+        self.assert_prefix(subscribe_mock, "geography")
+
+    @patch("cherrypy.engine.publish")
+    def test_area_code_valid(self, publish_mock: Mock) -> None:
         """A triple is returned if the area code is valid"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
@@ -29,7 +37,7 @@ class TestGeography(unittest.TestCase):
                     helpers.get_fixture("dbpedia-area-success.json")
                 )
                 return [fixture]
-            return mock.DEFAULT
+            return DEFAULT
 
         publish_mock.side_effect = side_effect
 
@@ -38,8 +46,8 @@ class TestGeography(unittest.TestCase):
         self.assertTrue("dbpedia" in result[0])
         self.assertEqual(result[1], "NY")
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_area_code_invalid(self, publish_mock: mock.Mock) -> None:
+    @patch("cherrypy.engine.publish")
+    def test_area_code_invalid(self, publish_mock: Mock) -> None:
         """A triple is returned if the area code is valid"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
@@ -50,7 +58,7 @@ class TestGeography(unittest.TestCase):
                     helpers.get_fixture("dbpedia-area-fail.json")
                 )
                 return [fixture]
-            return mock.DEFAULT
+            return DEFAULT
 
         publish_mock.side_effect = side_effect
 
@@ -60,8 +68,8 @@ class TestGeography(unittest.TestCase):
         self.assertIsNone(result[1])
         self.assertIsNone(result[2])
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_state_name_invalid(self, publish_mock: mock.Mock) -> None:
+    @patch("cherrypy.engine.publish")
+    def test_state_name_invalid(self, publish_mock: Mock) -> None:
         """An invalid state abbreviation returns Unknown for the state name"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
@@ -72,7 +80,7 @@ class TestGeography(unittest.TestCase):
                     helpers.get_fixture("dbpedia-state-fail.json")
                 )
                 return [fixture]
-            return mock.DEFAULT
+            return DEFAULT
 
         publish_mock.side_effect = side_effect
 
@@ -80,8 +88,8 @@ class TestGeography(unittest.TestCase):
         self.assertTrue("US-x" in query)
         self.assertIsNone(result)
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_state_name_valid(self, publish_mock: mock.Mock) -> None:
+    @patch("cherrypy.engine.publish")
+    def test_state_name_valid(self, publish_mock: Mock) -> None:
         """A valid state abbreviation returns the correct state name"""
 
         def side_effect(*args: str, **_kwargs: str) -> typing.Any:
@@ -92,7 +100,7 @@ class TestGeography(unittest.TestCase):
                     helpers.get_fixture("dbpedia-state-success.json")
                 )
                 return [fixture]
-            return mock.DEFAULT
+            return DEFAULT
 
         publish_mock.side_effect = side_effect
 

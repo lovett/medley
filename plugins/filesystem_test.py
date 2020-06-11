@@ -17,6 +17,13 @@ class TestFilesystem(Subscriber):
         self.plugin = plugins.filesystem.Plugin(cherrypy.engine)
 
     @patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: Mock) -> None:
+        """Subscriptions are prefixed consistently."""
+
+        self.plugin.start()
+        self.assert_prefix(subscribe_mock, "filesystem")
+
+    @patch("cherrypy.engine.subscribe")
     def test_subscribe_fs(self, subscribe_mock: Mock) -> None:
         """Subscriptions for regular functions are prefixed
         consistently."""

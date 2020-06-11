@@ -17,6 +17,17 @@ class Subscriber(unittest.TestCase):
             segments = args[0].split(":", 1)
             self.assertEqual(segments[0], prefix)
 
+    def assert_prefixes(
+            self,
+            subscribe_mock: mock.Mock,
+            prefixes: typing.Tuple[str, ...]
+    ) -> None:
+        """All subscribe calls have an expected prefix."""
+
+        for args, _ in subscribe_mock.call_args_list:
+            segments = args[0].split(":", 1)
+            self.assertIn(segments[0], prefixes)
+
 
 class ResponseAssertions(unittest.TestCase):
     """A container for additional test assertions."""

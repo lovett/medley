@@ -1,15 +1,24 @@
 """Test suite for the formatting plugin."""
 
 import unittest
+from unittest.mock import Mock, patch
 import cherrypy
 import plugins.formatting
+from testing.assertions import Subscriber
 
 
-class TestFormatting(unittest.TestCase):
+class TestFormatting(Subscriber):
     """Tests for the formatting plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.formatting.Plugin(cherrypy.engine)
+
+    @patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: Mock) -> None:
+        """Subscriptions are prefixed consistently."""
+
+        self.plugin.start()
+        self.assert_prefix(subscribe_mock, "formatting")
 
     def test_phone_sanitize_numeric(self) -> None:
         """Numeric strings are returned untouched"""
