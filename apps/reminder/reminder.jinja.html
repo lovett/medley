@@ -10,10 +10,10 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('countdown',)) }}
     {{ macros.asset("js/delete.js") }}
     {{ macros.asset("js/shortcuts.js") }}
     {{ macros.asset("js/reminder.js") }}
+    {{ macros.asset("js/countdown.js") }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -63,9 +63,10 @@
                             {% if event.argument[1].body %}
                                 <p>{{ event.argument[1].body }}</p>
                             {% endif %}
-                            <p class="remaining smaller">
-                                <countdown end-event="hide" v-bind:expiration-seconds="{{ event.time }}" />
-                            </p>
+                            <p class="countdown smaller"
+                               data-expiration-seconds="{{ event.time }}"
+                               data-hide-closest=".upcoming-reminder"
+                            >&nbsp;</p>
                         </div>
                     </div>
                 {% endfor %}
