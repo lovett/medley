@@ -1,4 +1,4 @@
-"""Aggregate coverage.py report"""
+"""Aggregate code coverage report"""
 
 import cherrypy
 
@@ -11,16 +11,15 @@ class Controller:
 
     @staticmethod
     def GET(*_args: str) -> None:
-        """Redirect to the coverage report.
+        """Redirect to the HTML version of the coverage report.
 
-        The coverage report is the index.html file in this apps's
-        static directory.
+        The report files are part of the static app.
 
         """
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
-            "static/index.html"
+            "/static/coverage/index.html"
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
