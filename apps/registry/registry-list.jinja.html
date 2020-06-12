@@ -6,6 +6,7 @@
 
 {% block scripts %}
     {{ macros.asset("js/delete.js") }}
+    {{ macros.asset("js/clipboard.js") }}
 {% endblock %}
 
 {% block main_toolbar %}
@@ -55,17 +56,23 @@
                                 </a>
                             </div>
 
-                            <div>
-                                <clipboard-button
-                                    target-id="value-{{ loop.index }}"
-                                    tooltip="Copy value"
-                                />
+                            <div class="action-button clipboard-button">
+                                <a href="#"
+                                   class="clipboard"
+                                   title="Copy value"
+                                   data-target-id="value-{{ loop.index }}"
+                                >
+                                    <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+                                </a>
+                                <form>
+                                    <textarea></textarea>
+                                </form>
                             </div>
 
                             <div class="action-button delete-button">
                                 <a href="#"
                                    class="delete"
-                                   tooltip="Delete this record"
+                                   title="Delete this record"
                                    data-hide-closest=".record"
                                    data-delete-url="{{ app_url }}/{{ record.rowid }}">
                                     <svg class="icon"><use xlink:href="#icon-delete"></use></svg>

@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('clipboard-button',)) }}
+    {{ macros.asset("js/clipboard.js") }}
 {% endblock %}
 
 {% block page_body %}
@@ -44,7 +44,22 @@
         {% if result %}
             <div id="transform-result">
                 <header>
-                    <div><clipboard-button target-id="copy-target" label="Copy" /></div>
+                    <div>
+                        <div class="action-button clipboard-button">
+                            <a href="#"
+                               class="clipboard"
+                               title="Copy value"
+                               data-target-id="copy-target"
+                            >
+                                <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+                            </a>
+                            <span class="label">Copy</spa>
+                            <form>
+                                <textarea></textarea>
+                            </form>
+                        </div>
+                    </div>
+
                     {% if result.startswith("http") %}
                         <div>
                             <div class="action-button link-button">

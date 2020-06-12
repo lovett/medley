@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.vueApp('main', ('clipboard-button',)) }}
+    {{ macros.asset("js/clipboard.js") }}
 {% endblock %}
 
 {% block page_body %}
@@ -51,12 +51,22 @@
                     <div class="reqhead">
                         <header>Request Headers
                             <div class="options">
-                                <clipboard-button target-id="{{ "reqhead-" ~ loop.index }}" tooltip="Copy headers" />
+                                <div class="action-button clipboard-button">
+                                    <a href="#"
+                                       class="clipboard"
+                                       title="Copy headers"
+                                       data-target-id="{{ "reqhead-" ~ loop.index }}"
+                                    >
+                                        <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+                                    </a>
+                                    <form>
+                                        <textarea></textarea>
+                                    </form>
                             </div>
                         </header>
 
                         <code id="reqhead-{{ loop.index }}">
-                            {#- The awkward indentation here prevents unwanted whitespace during copy-to-clipboard -#}
+                            {#- The awkward indentation here prevents unwanted whitespace when using copy-to-clipboard button. -#}
 {{- capture.request_line }}
 {%  for key, value in capture.request.headers.items() -%}
     {{ key }}: {{ value }}
@@ -74,10 +84,18 @@
                             <header>
                                 Request Body
                                 <div class="options">
-                                    <clipboard-button
-                                        target-id="{{ "reqbodyparam-" ~ loop.index }}"
-                                        tooltip="Copy body"
-                                    />
+                                    <div class="action-button clipboard-button">
+                                        <a href="#"
+                                           class="clipboard"
+                                           title="Copy body"
+                                           data-target-id="{{ "reqbodyparam-" ~ loop.index }}"
+                                        >
+                                            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+                                        </a>
+                                        <form>
+                                            <textarea></textarea>
+                                        </form>
+                                    </div>
                                 </div>
                             </header>
                             <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
@@ -89,10 +107,18 @@
                             <header>
                                 Request JSON
                                 <div class="options">
-                                    <clipboard-button
-                                        target-id="{{ "reqbodyjson-" ~ loop.index }}"
-                                        tooltip="Copy JSON"
-                                    />
+                                    <div class="action-button clipboard-button">
+                                        <a href="#"
+                                           class="clipboard"
+                                           title="Copy JSON"
+                                           data-target-id="{{ "reqbodyjson-" ~ loop.index }}"
+                                        >
+                                            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+                                        </a>
+                                        <form>
+                                            <textarea></textarea>
+                                        </form>
+                                    </div>
                                 </div>
                             </header>
 
