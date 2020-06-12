@@ -1,28 +1,3 @@
-{# Instantiate a Vue application instance.
-
-This loads the Vue library along with the desired component files. It also
-instantiates a root Vue instance which renders each component. #}
-{% macro vueApp(el_selector, components=(), app_name='app', with_library=True) %}
-
-    {% if with_library %}
-        <script src="/static/js/vue.js"></script>
-    {% endif %}
-
-    {% for component in components %}
-        {% if component.startswith('/') %}
-            <script src="{{ component|cache_bust }}"></script>
-        {% else %}
-            <script src="{{ "/static/components/{}.js".format(component)|cache_bust }}"></script>
-        {% endif %}
-    {% endfor %}
-
-    <script>
-        const {{ app_name }} = new Vue({
-            el: '{{ el_selector }}',
-        })
-    </script>
-{% endmacro %}
-
 {# Bring SVG symbol definitions onto the page in a hidden SVG tag.
 
 This is the master list of all available symbols. Only the ones specified

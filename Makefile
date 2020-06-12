@@ -221,17 +221,7 @@ logindex-reset: dummy
 
 # Download third-party front-end assets.
 #
-assets: assets-vue assets-flags
-
-
-# Asset download of Vue.js without using npm
-#
-# This is deliberately simplistic in order to avoid dependency on
-# Node, which would otherwise be overkill for this application's
-# needs.
-assets-vue: dummy
-	curl --max-time 10 --silent 'https://vuejs.org/js/vue.js' -o $(SHARED_JS_DIR)/vue.js
-	curl --max-time 10 --silent 'https://vuejs.org/js/vue.min.js' -o $(SHARED_JS_DIR)/vue.min.js
+assets: assets-flags
 
 
 # Asset download of flag-icon-css library used in visitors app
@@ -248,19 +238,6 @@ assets-flags: dummy
 	mv flag-icon-css-master/css/flag-icon.min.css apps/static/flag-icon-css/css/
 	mv flag-icon-css-master/LICENSE apps/static/flag-icon-css/LICENSE
 	rm -rf master.zip flag-icon-css-master
-
-
-# Build the application
-#
-# There isn't a whole lot going on here because there isn't much to
-# build. The front-end deliberately doesn't use NPM or anything else
-# that involves Node.js.
-#
-# The one operation that will be done here is to switch from the
-# development version of Vue to the production version.
-build: dummy
-	mv $(SHARED_JS_DIR)/vue.min.js $(SHARED_JS_DIR)/vue.js
-
 
 # Set up git hooks
 #
