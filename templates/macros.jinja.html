@@ -170,3 +170,30 @@ in the argument list are returned.  #}
 {% macro appSpecificIcon(app_name) -%}
         <link rel="shortcut icon" href="/static/app-icons/{{ app_name }}.svg" />
 {%- endmacro %}
+
+{% macro clipboardButton(target_id, tooltip) -%}
+    <div class="action-button clipboard-button">
+        <a href="#"
+           class="clipboard"
+           title="{{ tooltip }}"
+           data-target-id="{{ target_id }}"
+        >
+            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
+        </a>
+        <form>
+            <textarea></textarea>
+        </form>
+    </div>
+{%- endmacro %}
+
+{% macro deleteButton(url, hide_selector, tooltip) -%}
+    <div class="action-button delete-button">
+        <a href="#"
+           class="delete"
+           tooltip="{{ tooltip }}"
+           data-hide-closest="{{ hide_selector }}"
+           data-delete-url="{{ url }}">
+            <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+        </a>
+    </div>
+{%- endmacro %}

@@ -55,15 +55,7 @@
 
                         <li>
                             <div class="actions">
-                                <div class="action-button delete-button">
-                                    <a href="#"
-                                       class="delete"
-                                       tooltip="Delete this bookmark"
-                                       data-hide-closest="li"
-                                       data-delete-url="/registry?uid={{ id }}">
-                                        <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-                                    </a>
-                                </div>
+                                {{ macros.deleteButton("/registry?uid=" ~ id, "li", "Delete this bookmark") }}
                             </div>
                             <a href="{{ alt_url }}">{{ bookmark_url }}</a>
                         </li>

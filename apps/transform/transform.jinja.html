@@ -45,19 +45,7 @@
             <div id="transform-result">
                 <header>
                     <div>
-                        <div class="action-button clipboard-button">
-                            <a href="#"
-                               class="clipboard"
-                               title="Copy value"
-                               data-target-id="copy-target"
-                            >
-                                <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
-                            </a>
-                            <span class="label">Copy</spa>
-                            <form>
-                                <textarea></textarea>
-                            </form>
-                        </div>
+                        {{ macros.clipboardButton("copy-target", "Copy value") }}
                     </div>
 
                     {% if result.startswith("http") %}

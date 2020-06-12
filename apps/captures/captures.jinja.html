@@ -51,17 +51,7 @@
                     <div class="reqhead">
                         <header>Request Headers
                             <div class="options">
-                                <div class="action-button clipboard-button">
-                                    <a href="#"
-                                       class="clipboard"
-                                       title="Copy headers"
-                                       data-target-id="{{ "reqhead-" ~ loop.index }}"
-                                    >
-                                        <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
-                                    </a>
-                                    <form>
-                                        <textarea></textarea>
-                                    </form>
+                                {{ macros.clipboardButton("reqhead-" ~ loop.index, "Copy headers") }}
                             </div>
                         </header>
 
@@ -84,18 +74,7 @@
                             <header>
                                 Request Body
                                 <div class="options">
-                                    <div class="action-button clipboard-button">
-                                        <a href="#"
-                                           class="clipboard"
-                                           title="Copy body"
-                                           data-target-id="{{ "reqbodyparam-" ~ loop.index }}"
-                                        >
-                                            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
-                                        </a>
-                                        <form>
-                                            <textarea></textarea>
-                                        </form>
-                                    </div>
+                                    {{ macros.clipboardButton("reqbodyparam-" ~ loop.index, "Copy body") }}
                                 </div>
                             </header>
                             <code id="reqbodyparam-{{ loop.index }}">{{ capture.request.params }}</code>
@@ -107,18 +86,7 @@
                             <header>
                                 Request JSON
                                 <div class="options">
-                                    <div class="action-button clipboard-button">
-                                        <a href="#"
-                                           class="clipboard"
-                                           title="Copy JSON"
-                                           data-target-id="{{ "reqbodyjson-" ~ loop.index }}"
-                                        >
-                                            <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
-                                        </a>
-                                        <form>
-                                            <textarea></textarea>
-                                        </form>
-                                    </div>
+                                    {{ macros.clipboardButton("reqbodyjson-" ~ loop.index, "Copy JSON") }}
                                 </div>
                             </header>
 

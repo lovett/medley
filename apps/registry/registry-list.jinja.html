@@ -50,36 +50,17 @@
                     <header>
                         {{ record.key }}
                         <div class="toolbar">
-                            <div class="action-button clipboard-button">
+                            <div class="action-button">
                                 <a href="{{ app_url }}/new?key={{ record.key|e }}" title="New record with this key">
                                     <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
                                 </a>
                             </div>
 
-                            <div class="action-button clipboard-button">
-                                <a href="#"
-                                   class="clipboard"
-                                   title="Copy value"
-                                   data-target-id="value-{{ loop.index }}"
-                                >
-                                    <svg class="icon"><use xlink:href="#icon-copy"></use></svg>
-                                </a>
-                                <form>
-                                    <textarea></textarea>
-                                </form>
-                            </div>
+                            {{ macros.clipboardButton("value-" ~ loop.index, "Copy value") }}
 
-                            <div class="action-button delete-button">
-                                <a href="#"
-                                   class="delete"
-                                   title="Delete this record"
-                                   data-hide-closest=".record"
-                                   data-delete-url="{{ app_url }}/{{ record.rowid }}">
-                                    <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-                                </a>
-                            </div>
+                            {{ macros.deleteButton("/registry?uid=" ~ id, ".record", "Delete this record") }}
 
-                            <div class="action-button clipboard-button">
+                            <div class="action-button">
                                 <a id="edit-record" href="{{ app_url}}/{{ record.rowid}}/edit">
                                     <svg class="icon"><use xlink:href="#icon-edit"></use></sv>
                                         Edit

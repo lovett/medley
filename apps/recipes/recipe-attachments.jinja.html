@@ -3,16 +3,7 @@
         {% for attachment in attachments %}
             <li>
                 <div class="actions">
-                    <div class="action-button delete-button">
-                        <a href="#"
-                           class="delete"
-                           tooltip="Delete this attachment"
-                           data-hide-closest="li"
-                           data-delete-url="/recipes/{{ recipe_id }}/attachments/{{ attachment["id"] }}"
-                        >
-                            <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-                        </a>
-                    </div>
+                    {{ macros.deleteButton("/recipes/" ~ recipe_id ~ "/attachments/" ~ attachment["id"], "li", "Delete this attachment") }}
                 </div>
 
                 <a href="/recipes/{{ recipe_id }}/{{ attachment["filename"] }}" target="_blank">

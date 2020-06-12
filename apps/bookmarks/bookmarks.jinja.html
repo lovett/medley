@@ -112,16 +112,7 @@
                             {% endif %}
 
                             <div class="details">
-                                <div class="action-button delete-button">
-                                    <a href="#"
-                                       class="delete"
-                                       tooltip="Delete this bookmark"
-                                       data-hide-closest="li"
-                                       data-delete-url="{{ app_url }}?url={{ bookmark.url|urlencode }}"
-                                    >
-                                        <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-                                    </a>
-                                </div>
+                                {{ macros.deleteButton(app_url ~ "?url=" ~ bookmark.url|urlencode, "li", "Delete this bookmark") }}
 
                                 <div>
                                     <time>{{ bookmark.added|dateformat("%B %-d, %Y") }}</time>

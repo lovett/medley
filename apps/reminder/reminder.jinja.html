@@ -43,15 +43,7 @@
                 {% for event in upcoming %}
                     <div class="upcoming-reminder">
                         <div class="actions">
-                            <div class="action-button delete-button">
-                                <a href="#"
-                                   class="delete"
-                                   tooltip="Delete this reminder"
-                                   data-hide-closest=".upcoming-reminder"
-                                   data-delete-url="{{ app_url }}?uid={{ event.time }}">
-                                    <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-                                </a>
-                            </div>
+                            {{ macros.deleteButton(app_url ~ "?uid=" ~ event.time, ".upcoming-reminder", "Delete this reminder") }}
                         </div>
 
                         <div class="summary">
