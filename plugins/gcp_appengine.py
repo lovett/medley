@@ -224,7 +224,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ))
 
         timestamp = cherrypy.engine.publish(
-            "clock:from_timestamp",
+            "clock:from_format",
             payload["startTime"],
             "%d/%M/%Y:%H:%M:%s:%f %Z"
         ).pop()
