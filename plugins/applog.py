@@ -24,7 +24,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA journal_mode=WAL;
 
         CREATE TABLE IF NOT EXISTS applog (
-            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
+            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')),
             source VARCHAR(255) NOT NULL,
             message VARCHAR(255) NOT NULL
         );
