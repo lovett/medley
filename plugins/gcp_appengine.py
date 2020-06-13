@@ -222,17 +222,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             payload["httpVersion"]
         ))
 
-        timestamp = cherrypy.engine.publish(
+        parsed_timestamp = cherrypy.engine.publish(
             "clock:from_format",
             payload["startTime"],
-            "%d/%M/%Y:%H:%M:%s:%f %Z"
+            "%Y-%m-%dT%H:%M:%S.%fZ"
+        ).pop()
+
+        formatted_timestamp = cherrypy.engine.publish(
+            "clock:format",
+            parsed_timestamp,
+            "%d/%b/%Y:%H:%M:%S:%f %z"
         ).pop()
 
         fields = (
             payload["ip"],
             "-",
             "-",
-            f'[{timestamp}]',
+            f'[{formatted_timestamp}]',
             self.combined_quoted(resource),
             str(payload["status"]),
             payload.get("responseSize", "0"),
