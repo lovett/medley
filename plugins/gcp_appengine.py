@@ -82,7 +82,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         log_path = self.full_storage_path(storage_path)
 
         if not log_path.is_file():
-            print("application log does not exist")
             return
 
         batch: typing.List[typing.Any] = []
