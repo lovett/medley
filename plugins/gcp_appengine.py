@@ -225,7 +225,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         parsed_timestamp = cherrypy.engine.publish(
             "clock:from_format",
             payload["startTime"],
-            "%Y-%m-%dT%H:%M:%S.%fZ"
+            "%Y-%m-%dT%H:%M:%S.%f%z"
         ).pop()
 
         formatted_timestamp = cherrypy.engine.publish(
