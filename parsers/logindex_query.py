@@ -190,13 +190,14 @@ class Parser():
         if not reference_date:
             return ""
 
-        start = reference_date.replace(
+        start_date = reference_date.replace(
             hour=0, minute=0, second=0
-        ).astimezone(UTC).strftime("%Y-%m-%d-%H")
+        ).astimezone(UTC)
 
-        end = reference_date.replace(
-            hour=23, minute=59, second=50
-        ).astimezone(UTC).strftime("%Y-%m-%d-%H")
+        end_date = start_date + timedelta(hours=23)
+
+        start = start_date.strftime("%Y-%m-%d-%H")
+        end = end_date.strftime("%Y-%m-%d-%H")
 
         return f"{field} BETWEEN '{start}' AND '{end}'"
 
