@@ -223,42 +223,39 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if "seconds" in kwargs:
             total_seconds += kwargs["seconds"]
 
-        description = []
-
         if total_seconds >= 604800:
             count, total_seconds = divmod(total_seconds, 604800)
             label = "weeks"
             if count == 1:
                 label = "week"
-            description.append((count, label))
+
+            return f"{count} {label}"
 
         if total_seconds >= 86400:
             count, total_seconds = divmod(total_seconds, 86400)
             label = "days"
             if count == 1:
                 label = "day"
-            description.append((count, label))
+            return f"{count} {label}"
 
         if total_seconds >= 3600:
             count, total_seconds = divmod(total_seconds, 3600)
             label = "hours"
             if count == 1:
                 label = "hour"
-            description.append((count, label))
+            return f"{count} {label}"
 
         if total_seconds >= 60:
             count, total_seconds = divmod(total_seconds, 60)
             label = "minutes"
             if count == 1:
                 label = "minute"
-            description.append((count, label))
+            return f"{count} {label}"
 
         if total_seconds > 0:
             label = "seconds"
             if total_seconds == 1:
                 label = "second"
-            description.append((total_seconds, label))
+            return f"{total_seconds} {label}"
 
-        return ", ".join([
-            f"{count} {label}" for count, label in description
-        ])
+        return ""

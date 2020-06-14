@@ -30,7 +30,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("arrow-left", "arrow-right", "delete", "edit", "database", "flag", "clock", "new-item", "bookmark", "tag", "search") }}
+    {{ macros.svgSymbols("arrow-left", "arrow-right", "delete", "edit", "flag", "clock", "new-item", "bookmark", "tag", "search") }}
 
     <main>
         <header id="app-nav">
@@ -222,16 +222,12 @@
                                 <td colspan="6">
                                     <p class="meta">
                                         <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
-                                        {{ result.unix_timestamp|date(local=True)|ago }}
+                                        {{ result.unix_timestamp|date(local=True)|ago }} ago
                                         {% if result.time_zone %}
                                             at {{ result.unix_timestamp|date(local=True)|dateformat('LTS') }} local time
                                         {% endif %}
                                     </p>
 
-                                    <p class="meta">
-                                        <svg class="icon"><use xlink:href="#icon-database"></use></svg>
-                                        {{ result.host }}
-                                    </p>
                                     <p>
                                         <code>{{ result|logline_with_links() }}</code>
                                     </p>

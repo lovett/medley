@@ -242,7 +242,7 @@ class TestClock(Subscriber):
         """clock:duration:words converts timespans to strings."""
 
         result = self.plugin.duration_words(days=1, hours=1, minutes=1)
-        self.assertEqual(result, "1 day, 1 hour, 1 minute")
+        self.assertEqual(result, "1 day")
 
         result = self.plugin.duration_words(hours=1)
         self.assertEqual(result, "1 hour")
@@ -251,10 +251,10 @@ class TestClock(Subscriber):
         self.assertEqual(result, "2 hours")
 
         result = self.plugin.duration_words(minutes=61)
-        self.assertEqual(result, "1 hour, 1 minute")
+        self.assertEqual(result, "1 hour")
 
         result = self.plugin.duration_words(minutes=62)
-        self.assertEqual(result, "1 hour, 2 minutes")
+        self.assertEqual(result, "1 hour")
 
         result = self.plugin.duration_words(seconds=1)
         self.assertEqual(result, "1 second")

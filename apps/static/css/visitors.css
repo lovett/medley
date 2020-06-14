@@ -70,9 +70,14 @@ input[type=range] {
     padding: .5em 1em;
 }
 
-
 .expandable .meta {
     font-size: .85em;
+    display: inline-flex;
+    align-items: center;
+}
+
+.expandable .meta .icon {
+    margin-right: 0.5em;
 }
 
 .expandable.expanded {
