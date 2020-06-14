@@ -220,14 +220,6 @@
                             </tr>
                             <tr class="expandable">
                                 <td colspan="6">
-                                    <p class="meta">
-                                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
-                                        {{ result.unix_timestamp|date(local=True)|ago }} ago
-                                        {% if result.time_zone %}
-                                            at {{ result.unix_timestamp|date(local=True)|dateformat('LTS') }} local time
-                                        {% endif %}
-                                    </p>
-
                                     <p>
                                         <code>{{ result|logline_with_links() }}</code>
                                     </p>
