@@ -60,10 +60,9 @@ venv:
 
 # Install third-party Python libraries
 setup:
-	python3 -m pip install --progress-bar off --upgrade pip setuptools
-	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements.txt
-	python3 -m pip install --progress-bar off --disable-pip-version-check -r requirements-dev.txt
-
+	python3 -m pip install --quiet --upgrade pip setuptools
+	python3 -m pip install --quiet --disable-pip-version-check -r requirements.txt
+	python3 -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
 
 # Run a local development webserver.
 #
@@ -304,7 +303,7 @@ zipapp: dummy
 	python -m pip install --compile \
 	--disable-pip-version-check \
 	--no-color \
-	-q \
+	--quiet \
 	-r requirements.txt \
 	--target medley \
 	--upgrade
