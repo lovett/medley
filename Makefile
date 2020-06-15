@@ -275,7 +275,7 @@ workspace:
 
 
 # Install the application on the production host via Ansible
-install: build
+install: dummy
 	ansible-playbook ansible/install.yml
 
 
