@@ -19,6 +19,9 @@ class Controller:
         This is an alternative to CherryPy's staticdir tool that
         provides flexibility around how files are read."""
 
+        if args[0] == "templates":
+            raise cherrypy.HTTPError(404)
+
         app_path = ("apps", "static",) + args
         asset_path = Path(*app_path)
 

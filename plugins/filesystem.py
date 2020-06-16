@@ -80,7 +80,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         server_root = Path(cherrypy.config.get("server_root"))
 
-        for root, _, files in os.walk(server_root):
+        app_root = server_root / "apps"
+
+        for root, _, files in os.walk(app_root):
             current_dir = Path(root).relative_to(server_root)
 
             for name in files:
