@@ -43,7 +43,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def read_zip(target: Path) -> bytes:
         """Read a file from a ZIP archive."""
 
-        print(f"read {str(target)}")
         archive = Path(cherrypy.config.get("server_root"))
 
         if not archive.is_file():

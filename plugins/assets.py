@@ -4,7 +4,7 @@ import mimetypes
 from pathlib import Path
 import typing
 import cherrypy
-from plugins import mixins
+from plugins import mixins, decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -69,6 +69,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             typing.cast(str, row["mimetype"])
         )
 
+    @decorators.log_runtime
     def publish(self) -> None:
         """Copy files from the filesystem to the database."""
 
