@@ -18,6 +18,7 @@ import zipfile
 import cherrypy
 import sdnotify
 import plugins.applog
+import plugins.assets
 import plugins.audio
 import plugins.bookmarks
 import plugins.cache
@@ -168,6 +169,7 @@ def setup() -> None:
 
     # Plugins
     plugins.applog.Plugin(cherrypy.engine).subscribe()
+    plugins.assets.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
     plugins.bookmarks.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
@@ -218,5 +220,6 @@ if __name__ == '__main__':
     if cherrypy.config.get("notify_systemd_at_startup"):
         sdnotify.SystemdNotifier().notify("READY=1")
 
+    cherrypy.engine.publish("assets:publish")
     cherrypy.engine.publish("server:ready")
     cherrypy.engine.block()

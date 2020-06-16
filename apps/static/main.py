@@ -21,20 +21,20 @@ class Controller:
         provides flexibility around how files are read."""
 
         app_path = ("apps", "static",) + args
-        asset = Path(*app_path)
+        asset_path = Path(*app_path)
 
         asset_bytes = typing.cast(
             bytes,
             cherrypy.engine.publish(
-                "filesystem:read",
-                asset
+                "assets:get",
+                asset_path
             ).pop()
         )
 
         if asset_bytes == b"":
             raise cherrypy.HTTPError(404)
 
-        mime_type, _ = mimetypes.guess_type(asset.name)
+        mime_type, _ = mimetypes.guess_type(asset_path.name)
 
         if not mime_type:
             mime_type = "application/octet-stream"

@@ -77,7 +77,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         template = typing.cast(
             bytes,
             cherrypy.engine.publish(
-                "filesystem:read",
+                "assets:get",
                 template_path
             ).pop()
         )
@@ -98,7 +98,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return None
 
     def start(self) -> None:
-
         """Define the CherryPy messages to listen for.
 
         This plugin owns the jinja prefix
@@ -357,16 +356,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def cache_bust_filter(_: typing.Any, url: str) -> str:
         """Calculate a cache-aware URL to a static asset.
 
-        A cache-aware URL is one that contains a unique identifier in
-        its querystring that changes whenever the file's content
-        changes. This allows the client to cache the content
-        aggressively but still see new versions.
+        A cache-aware URL contains a unique identifier in its
+        querystring that changes whenever the file's content
+        changes. This allows the client to cache the content far into
+        the future but still pick up new versions.
 
         """
 
+        asset_path = Path("apps") / url.lstrip("/")
+
         file_hash = cherrypy.engine.publish(
-            "filesystem:hash",
-            "apps" + url
+            "assets:hash",
+            asset_path
         ).pop()
 
         return f"{url}?{file_hash}"

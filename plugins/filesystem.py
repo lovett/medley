@@ -1,5 +1,6 @@
 """Filesystem interaction."""
 
+import os
 from pathlib import Path
 import typing
 import zipfile
@@ -15,19 +16,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
+        This plugin owns the filesystem prefix.
+
         A zipfile is considered a filesystem for compatibility with
         running from inside a zipapp.
-
-        This plugin owns the filesystem prefix.
 
         """
 
         if cherrypy.config.get("zipapp"):
             self.bus.subscribe("filesystem:read", self.read_zip)
-            self.bus.subscribe("filesystem:hash", self.hash_zip)
+            self.bus.subscribe("filesystem:walk", self.walk_zip)
         else:
             self.bus.subscribe("filesystem:read", self.read_fs)
-            self.bus.subscribe("filesystem:hash", self.hash_fs)
+            self.bus.subscribe("filesystem:walk", self.walk_fs)
 
     @staticmethod
     def read_fs(target: Path) -> bytes:
@@ -42,6 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def read_zip(target: Path) -> bytes:
         """Read a file from a ZIP archive."""
 
+        print(f"read {str(target)}")
         archive = Path(cherrypy.config.get("server_root"))
 
         if not archive.is_file():
@@ -55,25 +57,35 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 return b""
 
     @staticmethod
-    def hash_fs(target: str) -> str:
-        """Get the hash of a file from the filesystem."""
-        return typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "hasher:file",
-                target
-            ).pop()
-        )
+    def walk_zip(
+            extensions: typing.Tuple[str, ...]
+    ) -> typing.Iterator[Path]:
+        """Walk the contents of a zipapp and filter by extension."""
 
-    def hash_zip(self, target: Path) -> str:
-        """Get the hash of a file in a ZIP archive."""
+        archive = Path(cherrypy.config.get("server_root"))
 
-        file_contents = self.read_zip(target)
+        with zipfile.ZipFile(archive) as handle:
+            for name in handle.namelist():
+                file_path = Path(name)
+                extension = "".join(file_path.suffixes)
 
-        return typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "hasher:value",
-                file_contents
-            ).pop()
-        )
+                if extension in extensions:
+                    yield file_path
+
+    @staticmethod
+    def walk_fs(
+            extensions: typing.Tuple[str, ...]
+    ) -> typing.Iterator[Path]:
+        """Walk the filesystem and filter by extension."""
+
+        server_root = Path(cherrypy.config.get("server_root"))
+
+        for root, _, files in os.walk(server_root):
+            current_dir = Path(root).relative_to(server_root)
+
+            for name in files:
+                file_path = current_dir / name
+                extension = "".join(file_path.suffixes)
+
+                if extension in extensions:
+                    yield file_path
