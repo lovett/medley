@@ -1,5 +1,6 @@
 """Serve static files from Sqlite."""
 
+import mimetypes
 from pathlib import Path
 import typing
 import cherrypy
@@ -19,13 +20,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA foreign_keys=ON;
 
         CREATE TABLE IF NOT EXISTS assets (
-            path TEXT NOT NULL,
-            hash TEXT DEFAULT NULL,
-            bytes BLOB DEFAULT NULL
+            extension TEXT,
+            path TEXT,
+            mimetype TEXT,
+            hash TEXT,
+            bytes BLOB
         );
 
-        CREATE UNIQUE INDEX IF NOT EXISTS index_path
-            ON assets(path);
+        CREATE INDEX IF NOT EXISTS index_extension
+            ON assets(extension);
 
         """)
 
@@ -41,26 +44,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("assets:publish", self.publish)
 
     def get_hash(self, target: Path) -> str:
-        """Read an asset's hash from the database."""
-
-        print(f"get hash {target}")
+        """Retrieve a published asset's hash."""
 
         asset_hash = typing.cast(str, self._selectFirst(
-            "SELECT hash FROM assets WHERE path=?",
-            (str(target),)
+            "SELECT hash FROM assets WHERE extension=? AND path=?",
+            (target.suffix.lstrip("."), str(target),)
         ))
 
         return asset_hash or ""
 
-    def get_asset(self, target: Path) -> bytes:
-        """Read a published asset from the database."""
+    def get_asset(self, target: Path) -> typing.Tuple[bytes, str]:
+        """Retrieve a published asset and its mimetype."""
 
-        asset = typing.cast(bytes, self._selectFirst(
-            "SELECT bytes FROM assets WHERE path=?",
-            (str(target),)
-        ))
+        row = self._selectOne(
+            "SELECT bytes, mimetype FROM assets WHERE extension=? AND path=?",
+            (target.suffix.lstrip("."), str(target))
+        )
 
-        return asset or b""
+        if not row:
+            return (b"", "")
+
+        return (
+            typing.cast(bytes, row["bytes"]),
+            typing.cast(str, row["mimetype"])
+        )
 
     def publish(self) -> None:
         """Copy files from the filesystem to the database."""
@@ -68,8 +75,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self._execute("DELETE FROM assets")
 
         insert_sql = """INSERT OR REPLACE INTO assets
-        (path, hash, bytes)
-        VALUES (?, ?, ?)"""
+        (extension, path, mimetype, hash, bytes)
+        VALUES (?, ?, ?, ?, ?)"""
 
         batch = []
         asset_count = 0
@@ -81,6 +88,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ).pop()
 
         for file_path in walker:
+            mime_type, _ = mimetypes.guess_type(file_path.name)
+
+            if not mime_type:
+                mime_type = "application/octet-stream"
+
             file_bytes = cherrypy.engine.publish(
                 "filesystem:read",
                 file_path
@@ -93,9 +105,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             batch.append(
                 (insert_sql,
-                 (str(file_path),
+                 (file_path.suffix.lstrip("."),
+                  str(file_path),
+                  mime_type,
                   file_hash,
-                  file_bytes)))
+                  file_bytes))
+            )
 
             if len(batch) > batch_size:
                 self._multi(batch)

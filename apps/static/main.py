@@ -1,6 +1,5 @@
 """Serve static assets."""
 
-import mimetypes
 from pathlib import Path
 import typing
 import cherrypy
@@ -23,8 +22,8 @@ class Controller:
         app_path = ("apps", "static",) + args
         asset_path = Path(*app_path)
 
-        asset_bytes = typing.cast(
-            bytes,
+        asset_bytes, asset_mime = typing.cast(
+            typing.Tuple[bytes, str],
             cherrypy.engine.publish(
                 "assets:get",
                 asset_path
@@ -34,11 +33,6 @@ class Controller:
         if asset_bytes == b"":
             raise cherrypy.HTTPError(404)
 
-        mime_type, _ = mimetypes.guess_type(asset_path.name)
-
-        if not mime_type:
-            mime_type = "application/octet-stream"
-
-        cherrypy.response.headers["Content-Type"] = mime_type
+        cherrypy.response.headers["Content-Type"] = asset_mime
 
         return asset_bytes

@@ -74,8 +74,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         template_path = Path(target)
 
-        template = typing.cast(
-            bytes,
+        template, _ = typing.cast(
+            typing.Tuple[bytes, str],
             cherrypy.engine.publish(
                 "assets:get",
                 template_path
