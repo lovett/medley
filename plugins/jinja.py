@@ -67,33 +67,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def load_template(
             target: str
     ) -> typing.Optional[typing.Tuple[str, str, typing.Callable]]:
-        """Load the specified template from the filesystem.
+        """Load the specified template from the asset database.
 
-        This is used instead of Jinja's FileSystemLoader in an attempt
-        to do less work at plugin startup."""
+        This is an alternative to loading templates from the
+        filesystem.
 
-        template_path = Path(target)
+        """
 
-        template, _ = typing.cast(
+        asset_bytes, _ = typing.cast(
             typing.Tuple[bytes, str],
             cherrypy.engine.publish(
                 "assets:get",
-                template_path
+                Path(target)
             ).pop()
         )
 
-        mtime = None
-        if template_path.is_file():
-            mtime = template_path.stat().st_mtime
-
-        def uptodate() -> bool:
-            """Determine whether a template has changed."""
-            if template_path.is_file():
-                return template_path.stat().st_mtime == mtime
-            return False
-
-        if template:
-            return (template.decode(), str(template_path), uptodate)
+        if asset_bytes:
+            return (asset_bytes.decode(), target, lambda: True)
 
         return None
 
