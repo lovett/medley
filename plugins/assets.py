@@ -84,7 +84,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         walker = cherrypy.engine.publish(
             "filesystem:walk",
-            (".css", ".js", ".svg", ".jinja.html")
+            (".css", ".js", ".svg", ".jinja.html", ".wav")
         ).pop()
 
         for file_path in walker:
