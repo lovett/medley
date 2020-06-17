@@ -54,7 +54,6 @@ class Controller:
             f"grids:{name}"
         ).pop()
 
-        print(grid)
         if not grid:
             raise cherrypy.HTTPError(404, "Grid not found")
 

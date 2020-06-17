@@ -2,12 +2,12 @@
 {% import "apps/static/templates/macros.jinja.html" as macros -%}
 
 {% block stylesheets %}
-    {{ macros.asset("grids.css") }}
+    {{ macros.asset("css/grids.css") }}
 {% endblock %}
 
 {% block page_body %}
     <main id="collection">
-        <ul
+        <ul>
             {% for name in grid_names %}
             <li><a href="{{ app_url }}/{{ name }}">{{ name }}</li>
             {% endfor %}
