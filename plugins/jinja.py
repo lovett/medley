@@ -74,18 +74,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
+        template_path = Path(target)
+
         asset_bytes, _ = typing.cast(
             typing.Tuple[bytes, str],
             cherrypy.engine.publish(
                 "assets:get",
-                Path(target)
+                template_path
             ).pop()
         )
 
-        if asset_bytes:
+        if cherrypy.config.get("zipapp"):
             return (asset_bytes.decode(), target, lambda: True)
 
-        return None
+        mtime = 0.0
+        if template_path.is_file():
+            mtime = template_path.stat().st_mtime
+
+        return (
+            asset_bytes.decode(),
+            target,
+            lambda: template_path.stat().st_mtime == mtime
+        )
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.

@@ -39,11 +39,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        self.bus.subscribe("assets:get", self.get_asset)
-        self.bus.subscribe("assets:hash", self.get_hash)
-        self.bus.subscribe("assets:publish", self.publish)
+        if cherrypy.config.get("zipapp"):
+            self.bus.subscribe("assets:get", self.asset_from_db)
+            self.bus.subscribe("assets:hash", self.hash_from_db)
+            self.bus.subscribe("assets:publish", self.publish)
+        else:
+            self.bus.subscribe("assets:get", self.asset_from_fs)
+            self.bus.subscribe("assets:hash", self.hash_from_fs)
 
-    def get_hash(self, target: Path) -> str:
+    def hash_from_db(self, target: Path) -> str:
         """Retrieve a published asset's hash."""
 
         asset_hash = typing.cast(str, self._selectFirst(
@@ -53,7 +57,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return asset_hash or ""
 
-    def get_asset(self, target: Path) -> typing.Tuple[bytes, str]:
+    @staticmethod
+    def hash_from_fs(target: Path) -> str:
+        """Calculate the hash of an asset on the filesystem."""
+
+        return typing.cast(
+            str,
+            cherrypy.engine.publish(
+                "hasher:file",
+                str(target)
+            ).pop()
+        )
+
+    def asset_from_db(self, target: Path) -> typing.Tuple[bytes, str]:
         """Retrieve a published asset and its mimetype."""
 
         row = self._selectOne(
@@ -68,6 +84,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             typing.cast(bytes, row["bytes"]),
             typing.cast(str, row["mimetype"])
         )
+
+    @staticmethod
+    def asset_from_fs(target: Path) -> typing.Tuple[bytes, str]:
+        """Rad an asset from the filesystem."""
+
+        asset_bytes = cherrypy.engine.publish(
+            "filesystem:read",
+            target
+        ).pop()
+
+        mime_type, _ = mimetypes.guess_type(target.name)
+
+        if not mime_type:
+            mime_type = "application/octet-stream"
+
+        return (asset_bytes, mime_type)
 
     @decorators.log_runtime
     def publish(self) -> None:
