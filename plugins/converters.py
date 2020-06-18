@@ -23,6 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self) -> None:
         """Register converters."""
         register_converter("local_datetime", self.local_datetime)
+        register_converter("utc", self.utc)
         register_converter("date_with_hour", self.date_with_hour)
         register_converter("binary", self.to_binary)
         register_converter("duration", self.duration)
@@ -47,6 +48,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "clock:local",
                 dt
+            ).pop()
+        )
+
+    @staticmethod
+    def utc(value: bytes) -> datetime:
+        """Convert a naieve string to a UTC datetime."""
+
+        return typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:from_format",
+                value.decode("utf-8"),
+                "%Y-%m-%d %H:%M:%S.%f"
             ).pop()
         )
 
