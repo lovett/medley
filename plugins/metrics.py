@@ -83,6 +83,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return self._select_generator(
             """SELECT DISTINCT key
             FROM metrics
+            GROUP BY key HAVING count(*) > 1
             ORDER BY key"""
         )
 

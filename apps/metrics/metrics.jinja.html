@@ -11,16 +11,23 @@
         {% if metrics %}
             <div id="collection">
                 <ul>
+                    {% set ns = namespace(metrics_found=False) %}
                     {% for metric in metrics %}
+                        {% set ns.metrics_found = True %}
                         <li>
                             <a href="{{ app_url }}/{{ metric["key"] }}">
                                 <svg class="icon"><use xlink:href="#icon-activity"></use></svg>
                                 {{ metric["key"] }}
                             </a>
-                    </li>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
+
+            {% if not ns.metrics_found %}
+                <p>No metrics found.</p>
+            {% endif %}
+
         {% endif %}
 
         {% if metric %}
