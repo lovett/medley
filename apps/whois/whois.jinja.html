@@ -85,15 +85,15 @@
                     {% if visit_days_count == 1 %}
                         <dt>Activity</dt>
                         <dd>
-                            1 visit on {{ earliest_visit|dateformat('%B %d, %Y') }}
+                            1 visit on {{ earliest_visit|dateformat("%B %d, %Y") }}
                         </dd>
                     {% endif %}
 
                     {% if visit_days_count > 1 %}
                         <dt>Activity</dt>
                         <dd>
-                            {{ visit_days_count|pluralize('visit', 'visits') }}
-                            since {{ earliest_visit|dateformat("^B %d, %Y") }}.
+                            {{ visit_days_count|pluralize("visit", "visits") }}
+                            since {{ earliest_visit|dateformat("%B %d, %Y") }}.
 
                             <p>Last seen {{ latest_visit|ago }}.
                         </dd>
