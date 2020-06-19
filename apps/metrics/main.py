@@ -1,5 +1,7 @@
 """Application performance graphs"""
 
+from datetime import datetime, timedelta, timezone
+from math import ceil
 import typing
 import cherrypy
 
@@ -25,38 +27,66 @@ class Controller:
 
         dataset = cherrypy.engine.publish(
             "metrics:dataset",
-            key=metric,
-            view="today"
+            key=metric
         ).pop()
 
         points = []
-        unit = ""
-        y_range = (None, None)
-        x_range = (None, None)
+        x_range = (
+            datetime.now(tz=timezone.utc),
+            datetime.now(tz=timezone.utc)
+        )
+        y_range = (float("inf"), float("-inf"))
+        y_unit = ""
 
         for row in dataset:
-            value = row["value"]
-            created = row["created"]
-            unit = row["unit"]
+            x_value = cherrypy.engine.publish(
+                "clock:local",
+                row["created_utc"]
+            ).pop()
 
-            points.append((created, value))
+            y_value = round(row["value"], 2)
+            y_unit = row["unit"]
 
-            if not x_range[0]:
-                x_range = (created, created)
-                y_range = (value, value)
+            points.append((x_value, y_value))
 
             x_range = (
-                min(x_range[0], created),
-                max(x_range[1], created)
+                min(x_range[0], x_value),
+                max(x_range[1], x_value)
             )
 
             y_range = (
-                min(y_range[0], value),
-                max(y_range[1], value)
+                min(y_range[0], y_value),
+                max(y_range[1], y_value)
             )
 
-        if y_range[0] == y_range[1]:
-            points = []
+        x_ticks = 5
+        x_step = (x_range[1] - x_range[0]).total_seconds() / (x_ticks - 1)
+
+        x_labels = [
+            cherrypy.engine.publish(
+                "clock:local",
+                x_range[0] + timedelta(seconds=x_step * i)
+            ).pop()
+            for i in range(x_ticks)
+        ]
+
+        y_ticks = 5
+        y_range = (
+            y_range[0],
+            y_ticks * ceil(y_range[1] / y_ticks)
+        )
+
+        y_step = y_range[1] / (y_ticks - 1)
+
+        y_labels = [
+            round(y_step * i, 2)
+            for i in range(y_ticks)
+        ]
+
+        x_range = (
+            cherrypy.engine.publish("clock:local", x_range[0]).pop(),
+            cherrypy.engine.publish("clock:local", x_range[1]).pop(),
+        )
 
         return typing.cast(
             bytes,
@@ -65,9 +95,13 @@ class Controller:
                 "apps/metrics/metrics.jinja.html",
                 metric=metric,
                 x_range=x_range,
+                x_ticks=x_ticks,
+                x_labels=x_labels,
+                y_ticks=y_ticks,
+                y_labels=y_labels,
                 y_range=y_range,
+                y_unit=y_unit,
                 points=points,
-                unit=unit,
                 subview_title=metric
             ).pop()
         )

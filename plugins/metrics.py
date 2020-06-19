@@ -20,7 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA journal_mode=WAL;
 
         CREATE TABLE IF NOT EXISTS metrics (
-            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
+            created_utc DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             key VARCHAR(255) NOT NULL,
             value INTEGER NOT NULL,
             unit VARCHAR(255) NOT NULL
@@ -28,14 +28,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE INDEX IF NOT EXISTS index_key
             ON metrics(key);
-
-        CREATE INDEX IF NOT EXISTS index_created
-            ON metrics(date(created));
-
-        CREATE VIEW IF NOT EXISTS today AS
-            SELECT rowid, key, value, unit, created
-            FROM metrics
-            WHERE date('now') = date(created);
 
         """)
 
@@ -97,19 +89,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._delete(
             """DELETE FROM metrics
-            WHERE strftime('%s', created) < strftime('%s', 'now', ?)
+            WHERE strftime('%s', created_utc) < strftime('%s', 'now', ?)
             """,
             (f"-{cutoff_months} month",)
         )
 
-    @decorators.log_runtime
-    def dataset(self, key: str, view: str) -> typing.Iterator[sqlite3.Row]:
+    def dataset(self, key: str) -> typing.Iterator[sqlite3.Row]:
         """Retrieve records for a single metric."""
 
         return self._select_generator(
-            f"""SELECT created as 'created [timestamp]', value, unit
-            FROM {view}
+            """SELECT created_utc as 'created_utc [utc]', value, unit
+            FROM metrics
             WHERE key=?
-            ORDER BY created""",
+            ORDER BY created_utc DESC
+            LIMIT 50""",
             (key,)
         )

@@ -16,9 +16,32 @@
     font-size: .2em;
 }
 
-.scatter .label-pair:first-of-type text {
+.scatter .points text {
+    font-size: .2em;
+}
+
+.scatter .point text {
+    display: none;
+}
+
+.scatter .point rect {
+    fill: #ccc;
+    display: none;
+}
+
+.scatter .point:hover text {
+    display: block;
+}
+
+.scatter .point:hover rect {
+    display: block;
+}
+
+
+.scatter .label-pair:last-of-type text {
     text-anchor: end;
 }
+
 
 .scatter circle {
     fill: #666;

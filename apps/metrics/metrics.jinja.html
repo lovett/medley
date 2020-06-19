@@ -37,14 +37,12 @@
 
             {% if points %}
                 <p>
-                    {{ x_range[0]|dateformat("%b %d, %-I:%M %p") }}
-                    to
-                    {{ x_range[1]|dateformat("%b %d, %-I:%M %p") }}.
+                    Highest: {{ y_range[1] }} {{ y_unit }},
+                    lowest: {{ y_range[0] }} {{ y_unit }},
+                    delta: {{ (y_range[1] - y_range[0])|round(2) }} {{ y_unit }}.
                 </p>
                 <p>
-                    Highest: {{ y_range[1] }} {{ unit }},
-                    lowest: {{ y_range[0] }} {{ unit }},
-                    Δ {{ y_range[1] - y_range[0] }} {{ unit }}.
+                    {{ points|length|pluralize("sample", "samples") }}
                 </p>
             {% endif %}
 

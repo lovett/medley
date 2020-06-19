@@ -1,58 +1,97 @@
-<svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax" class="scatter">
-    <g class="axis">
-        <line x1="15" x2="15" y1="10" y2="110"></line>
+{% set min_x = 15 %}
+{% set max_x = 300 %}
+{% set min_y = 10 %}
+{% set max_y = 110 %}
+{% set x_label_height = 10 %}
+
+<svg viewBox="0 0 {{ max_x + 10 }} {{ max_y + x_label_height }}" preserveAspectRatio="xMidYMax" class="scatter">
+    <g class="x axis">
+        <line x1="{{ min_x }}" y1="{{ max_y }}" x2="{{ max_x }}" y2="{{ max_y }}"></line>
     </g>
 
-    <g class="axis">
-        <line x1="15" x2="300" y1="110" y2="110"></line>
+    <g class="y axis">
+        <line x1="{{ min_x }}" y1="{{ min_y }}" x2="{{ min_x }}" y2="{{ max_y }}"></line>
     </g>
 
-    <g class="labels">
-        {% set y_step = 100 / 4 %}
-        {% set value_step = (y_range[1] - y_range[0]) / 4 %}
-        {% for i in range(5) %}
-            {% set y = 100 - (i * y_step) + 10 %}
+    {% set step = (max_x - min_x) / (x_ticks - 1) %}
+    <g class="x ticks">
+        {% for i in range(x_ticks) %}
+            {% set x = min_x + (i * step) %}
+            <line x1="{{ x }}" y1="{{ max_y }}" x2="{{ x }}" y2="112" />
+        {% endfor %}
+    </g>
+
+    <g class="x labels">
+        {% for i in range(x_ticks) %}
+            {% set x = min_x + (i * step) %}
+            <g class="label-pair">
+                <text x="{{ x }}" y="115">
+                    {{ x_labels[i]|dateformat("%-I:%M %p") }}
+                </text>
+                <text x="{{ x  }}" y="119">
+                    {{ x_labels[i]|dateformat("%Y-%m-%d") }}
+                </text>
+            </g>
+        {% endfor %}
+    </g>
+
+    {% set step = (max_y - min_y) / (y_ticks - 1) %}
+    <g class="y ticks">
+        {% for i in range(y_ticks) %}
+            {% set y = min_y + (i * step) %}
+            <line x1="{{ min_x - 2 }}" y1="{{ y }}" x2="{{ min_x }}" y2="{{ y }}" />
+        {% endfor %}
+    </g>
+
+    <g class="y labels">
+        {% for i in range(y_ticks) %}
+            {% set y = 100 - (i * step) + 10 %}
             <text x="12"
                   y="{{ y }}"
                   text-anchor="end"
                   alignment-baseline="middle"
-            >{{ y_range[0] + (i * value_step) }}</text>
-            <line x1="13" x2="15" y1="{{ y }}" y2="{{ y }}" />
+            >{{ y_labels[i] }}</text>
         {% endfor %}
     </g>
 
-    <g class="labels">
-        {% set step = 285 / 4 %}
-        {% set label_step = (x_range[1] - x_range[0]).in_hours() / 4 %}
+    <g class="points">
+        {% for point in points %}
+            {% set x_distance_from_min = point[0].timestamp() - x_range[0].timestamp()  %}
+            {% set x_ratio = x_distance_from_min / (x_range[1].timestamp() - x_range[0].timestamp()) %}
 
-        {% for i in range(5) %}
-            {% set x = 285 - (i * step) + 15 %}
-            <g class="label-pair">
-                <text x="{{ x }}" y="115">
-                    {{ x_range[1].subtract(hours=(i * label_step))|dateformat("%-I:%M %p") }}
-                </text>
-                <text x="{{ x  }}" y="119">
-                    {{ x_range[1].subtract(hours=(i * label_step))|dateformat("%Y-%m-%d") }}
-                </text>
-            </g>
-            <line x1="{{ x }}" x2="{{ x }}" y1="110" y2="112" />
-        {% endfor %}
-    </g>
-
-    {% for point in points %}
-        {% set x = ((x_range[1] - point[0]) * 285 / (x_range[1] - x_range[0])) + 15 %}
-        {% set y = ((y_range[1] - point[1]) * 100 / (y_range[1] - y_range[0])) + 10 %}
-        <circle
-            {% if point[1] == y_range[0] %}
-            class="best"
-            {% elif point[1] == y_range[1] %}
-            class="worst"
+            {% if y_range[1] > 0 %}
+                {% set y_ratio = point[1] / y_range[1] %}
+            {% else %}
+                {% set y_ratio = 1 %}
             {% endif %}
-            data-value="{{ point[1] }}"
-            data-date="{{ point[0] }}"
-            cx="{{ x }}"
-            cy="{{ y }}"
-            r="1.5"
-        />
-    {% endfor %}
+
+            {% set label_width = 42 %}
+            {% set x = min_x + (max_x - min_x) * x_ratio %}
+            {% set y = max_y - ((max_y - min_y) * y_ratio) %}
+
+            {% if x > max_x / 2 %}
+                {% set label_x = x - label_width - 5 %}
+            {% else %}
+                {% set label_x = x %}
+            {% endif %}
+
+            <g class="point">
+                <rect x="{{ label_x + 3 }}" y="{{ y - 4 }}" width="{{ label_width }}" height="10" rx="1" />
+
+            <circle
+                cx="{{ x }}"
+                cy="{{ y }}"
+                r="1.5"
+            />
+            <text x="{{ label_x + 4 }}"
+                  y="{{ y }}"
+            >{{ point[1] }} {{ y_unit }}</text>
+            <text x="{{ label_x + 4 }}"
+                  y="{{ y + 3.5}}"
+                  alignment-baseline="middle"
+            >{{ point[0]|dateformat("%Y-%m-%d %-I:%M:%S %p") }}</text>
+            </g>
+        {% endfor %}
+    </g>
+
 </svg>

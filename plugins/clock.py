@@ -88,7 +88,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Parse a date string in a known format."""
 
         try:
-            dt = datetime.strptime(value, fmt).astimezone(UTC)
+            dt = datetime.strptime(value, fmt).replace(tzinfo=UTC)
             if local:
                 return self.local(dt)
             return dt
