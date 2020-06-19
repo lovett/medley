@@ -72,7 +72,7 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
         story = child.get("data")
         story["created"] = cherrypy.engine.publish(
             "clock:from_timestamp",
-            story["created"],
+            story["created_utc"],
             local=True
         ).pop()
         stories.append(story)

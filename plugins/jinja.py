@@ -559,7 +559,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Deterime if a unix timestamp falls on the current date."""
 
         now = cherrypy.engine.publish(
-            "clock:now"
+            "clock:now",
+            local=True
         ).pop()
 
         return typing.cast(
