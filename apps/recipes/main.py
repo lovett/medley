@@ -248,11 +248,19 @@ class Controller:
             body = recipe["body"]
             tags = recipe["tags"]
             url = recipe["url"]
-            created = recipe["created"].format("YYYY-MM-DD")
+            created = cherrypy.engine.publish(
+                "clock:format",
+                recipe["created"],
+                "%Y-%m-%d"
+            ).pop()
             submit_url = f"/recipes/{recipe_id}"
 
             if recipe["last_made"]:
-                last_made = recipe["last_made"].format("YYYY-MM-DD")
+                last_made = cherrypy.engine.publish(
+                    "clock:format",
+                    recipe["last_made"],
+                    "%Y-%m-%d"
+                ).pop()
 
             attachments = cherrypy.engine.publish(
                 "recipes:attachment:list",
