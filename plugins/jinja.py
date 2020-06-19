@@ -537,7 +537,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         replacements = (
             ("<p>&#x200B;</p>", ""),
-            ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/')
+            ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/'),
+            (' ,', ', ')
         )
 
         result = jinja2.Markup(value).unescape()
