@@ -196,5 +196,6 @@
   handlers:
     - name: Restart Nginx
       service:
+        become: true
         name: nginx
         state: restarted
