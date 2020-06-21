@@ -55,7 +55,7 @@
 
                         <li>
                             <div class="actions">
-                                {{ macros.deleteButton("/registry?uid=" ~ id, "li", "Delete this bookmark") }}
+                                {{ macros.deleteButton("/registry/" ~ id, "li", "Delete this bookmark") }}
                             </div>
                             <a href="{{ alt_url }}">{{ bookmark_url }}</a>
                         </li>

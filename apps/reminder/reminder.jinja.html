@@ -43,7 +43,7 @@
                 {% for event in upcoming %}
                     <div class="upcoming-reminder">
                         <div class="actions">
-                            {{ macros.deleteButton(app_url ~ "?uid=" ~ event.time, ".upcoming-reminder", "Delete this reminder") }}
+                            {{ macros.deleteButton("/reminder/" ~ event.time, ".upcoming-reminder", "Delete this reminder") }}
                         </div>
 
                         <div class="summary">

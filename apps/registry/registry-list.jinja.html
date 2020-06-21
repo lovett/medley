@@ -58,7 +58,7 @@
 
                             {{ macros.clipboardButton("value-" ~ loop.index, "Copy value") }}
 
-                            {{ macros.deleteButton("/registry?uid=" ~ record.rowid, ".record", "Delete this record") }}
+                            {{ macros.deleteButton("/registry/" ~ record.rowid, ".record", "Delete this record") }}
 
                             <div class="action-button">
                                 <a id="edit-record" href="{{ app_url}}/{{ record.rowid}}/edit">
