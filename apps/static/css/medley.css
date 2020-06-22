@@ -742,6 +742,13 @@ TEXTAREA {
         background-color: var(--white);
     }
 
+    MAIN {
+        margin: 0;
+        padding: 0;
+    }
+
+
+
     #page-header {
         display: none;
     }

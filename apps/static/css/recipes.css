@@ -192,3 +192,34 @@
 /* Extra large devices */
 @media (min-width: 1200px) {
 }
+
+/* Print layout */
+@media print {
+    #attachments {
+        display: none;
+    }
+
+    #recipe FOOTER {
+        display: none;
+    }
+
+    #recipe.with-ingredients SECTION:nth-of-type(1) {
+        grid-template-columns: 15em 1fr;
+        grid-column-gap: 2em;
+    }
+
+    #page-title UL {
+        display: none;
+    }
+
+    #recipe SECTION P, #recipe SECTION LI {
+        background-color: #fff !important;
+    }
+
+    .done {
+        text-decoration: none;
+        opacity: 1;
+    }
+
+
+}
