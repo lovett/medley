@@ -307,4 +307,5 @@ zipapp: dummy
 	-r requirements.txt \
 	--target medley \
 	--upgrade
+	find medley -depth -type d -name '*.dist-info' -exec rm -rf {} \;
 	python -m zipapp -p "/usr/bin/env python3" medley
