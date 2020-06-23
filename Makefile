@@ -308,4 +308,5 @@ zipapp: dummy
 	--target medley \
 	--upgrade
 	find medley -depth -type d -name '*.dist-info' -exec rm -rf {} \;
+	find medley -depth -type d -name 'test*' -exec rm -rf {} \;
 	python -m zipapp -p "/usr/bin/env python3" medley
