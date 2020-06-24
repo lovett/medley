@@ -87,7 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     @staticmethod
     def asset_from_fs(target: Path) -> typing.Tuple[bytes, str]:
-        """Rad an asset from the filesystem."""
+        """Read an asset from the filesystem."""
 
         asset_bytes = cherrypy.engine.publish(
             "filesystem:read",
@@ -102,9 +102,36 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return (asset_bytes, mime_type)
 
     @decorators.log_runtime
-    def publish(self) -> None:
-        """Copy files from the filesystem to the database."""
+    def publish(self, reset: bool = False) -> None:
+        """Export assets to a database.
 
+        When the application runs as a zipapp, asset access can be
+        excessively slow due to the IO needed to read the zip file,
+        especially when trying to serve multiple requests at the same
+        time (it's normal for a page to reference multiple assets).
+
+        On the other hand, bundling assets in the zip is very
+        convenient for deployment.
+
+        By copying assets to SQLite, the IO issue is mitigated and the
+        deployment advantage is preserved.
+
+        The reset parameter controls publishing frequency. If true,
+        assets will be published regardless of whether the database is
+        currently populated. This is useful for the --publish CLI
+        argument. If false, assets will only be published if the
+        database is empty. This is useful when the application is
+        starting up for the first time.
+
+        """
+
+        asset_count = self._selectFirst("SELECT count(*) FROM assets")
+
+        if reset is False and asset_count > 0:
+            cherrypy.log("Assets already published.")
+            return
+
+        cherrypy.log("Publishing assets...")
         self._execute("DELETE FROM assets")
 
         insert_sql = """INSERT OR REPLACE INTO assets
@@ -153,4 +180,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if len(batch) > 0:
             self._multi(batch)
             asset_count += len(batch)
+
             batch = []
+
+        label = "assets"
+        if asset_count == 1:
+            label = "asset"
+
+        cherrypy.log(f"{asset_count} {label} published.")

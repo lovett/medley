@@ -9,10 +9,12 @@ frequently-needed services instead of starting from zero. It also
 helps each application stay relatively small.
 """
 
+import argparse
 import importlib
 import logging
 import os
 import os.path
+import sys
 import typing
 import zipfile
 import cherrypy
@@ -216,6 +218,27 @@ def setup() -> None:
 
 if __name__ == '__main__':
     setup()
+
+    if len(sys.argv) > 1:
+        argparser = argparse.ArgumentParser()
+
+        argparser.add_argument(
+            "--publish",
+            help='publish static assets',
+            action="store_true"
+        )
+
+        argparser.set_defaults(publish=False)
+        args = argparser.parse_args()
+
+        if args.publish:
+            cherrypy.engine.publish(
+                "assets:publish",
+                reset=True
+            )
+
+        cherrypy.engine.exit()
+        sys.exit()
 
     if cherrypy.config.get("notify_systemd_at_startup"):
         sdnotify.SystemdNotifier().notify("READY=1")
