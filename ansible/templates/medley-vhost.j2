@@ -18,11 +18,6 @@ server {
 
     client_max_body_size 50M;
 
-    location ~ \.(css|js|svg)$ {
-        root {{ project_root }}/apps;
-        sendfile on;
-    }
-
     location / {
         proxy_read_timeout 300;
         proxy_pass http://127.0.0.1:8085;

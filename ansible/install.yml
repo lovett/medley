@@ -4,7 +4,7 @@
     project_name: medley
     project_user: "{{ project_name }}"
     project_group: "{{ project_name }}"
-    project_root: /srv/{{ project_name }}
+    project_root: "/var/{{ project_name }}"
 
   tasks:
     - name: Create application group
@@ -49,8 +49,9 @@
         group="{{ project_group }}"
         mode=0775
       with_items:
-        - /var/medley
-        - /var/medley/storage
+        - "{{ project_root }}"
+        - "{{ project_root }}/db"
+        - "{{ project_root }}/storage"
       tags:
         - firstrun
 
@@ -69,56 +70,19 @@
       tags:
         - firstrun
 
-    # The rsync_opts parameter is specified to give special treatment to
-    # files that would otherwise be subject to unwanted removal due to use
-    # of the delete paramter. Although most exclusions are specifed in
-    # .rsync-filter at the application root, the requirements files and
-    # the virtualenv need to be handled as "exclude without delete"
-    # instead of "exlude and delete" like everything else.
-    - name: Rsync application files
-      become: true
-      synchronize:
-        src: "../../"
-        dest: "{{ project_root }}"
-        delete: true
-        recursive: true
-        rsync_opts:
-          - "--exclude=venv"
-          - "--exclude=.cache"
-          - "--exclude=requirements.txt"
-
-    # The shell module is used to create the virtualenv for simplicity.
-    # The pip module could do it, but needs a virtualenv executable which
-    # the Debian python3-virtualenv package somehow doesn't provide. All
-    # of which is a lot of fuss for what could otherwise be a one-liner.
-    - name: Create python3 virtualenv
-      shell: "python3 -m venv {{ project_root }}/venv"
-      args:
-        creates: "{{ project_root }}/venv"
-      become: true
-      register: venv
-      tags:
-        - firstrun
-
-    - name: Install main requirements file
+    - name: Copy zipapp
       become: true
       copy:
-        src: "../requirements.txt"
-        dest: "{{ project_root }}/requirements.txt"
+        src: "../medley.pyz"
+        dest: "{{ project_root }}/medley.pyz"
+        owner: "{{ project_user }}"
+        group: "{{ project_group }}"
 
-    - name: Install python application packages
+    - name: Copy asset database
       become: true
-      become_user: "{{ project_user }}"
-      pip:
-        extra_args: "--disable-pip-version-check"
-        requirements: "{{ project_root }}/requirements.txt"
-        virtualenv: "{{ project_root }}/venv"
-
-    - name: Set permissions on application root
-      become: true
-      file:
-        path: "{{ project_root }}"
-        recurse: yes
+      copy:
+        src: "../db/assets.sqlite"
+        dest: "{{ project_root }}/db/assets.sqlite"
         owner: "{{ project_user }}"
         group: "{{ project_group }}"
 
@@ -161,7 +125,7 @@
         - files/medley-bucketpull.service
         - files/medley-bucketpull.timer
 
-    - name: Enable medley systemd service
+    - name: Enable primary systemd service
       become: true
       systemd:
         daemon_reload: yes
@@ -170,7 +134,7 @@
         name: medley
         state: restarted
 
-    - name: Enable medley systemd timers
+    - name: Enable systemd timers
       become: true
       systemd:
         daemon_reload: yes
@@ -195,7 +159,7 @@
 
   handlers:
     - name: Restart Nginx
+      become: true
       service:
-        become: true
         name: nginx
         state: restarted

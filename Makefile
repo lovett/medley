@@ -56,13 +56,33 @@ venv:
 	@echo "Creating a new virtual environment..."
 	@python3 -m venv --system-site-packages venv
 	@sed -i'' 's/$$_OLD_FISH_PROMPT_OVERRIDE"$$/$$_OLD_FISH_PROMPT_OVERRIDE" \&\& functions -q _old_fish_prompt/' venv/bin/activate.fish
-	@echo "Done. Now run: source $(VENV_ACTIVATE)"
 
 # Install third-party Python libraries
-setup:
-	python3 -m pip install --quiet --upgrade pip setuptools
-	python3 -m pip install --quiet --disable-pip-version-check -r requirements.txt
-	python3 -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
+setup: venv
+	./venv/bin/python -m pip install --quiet --upgrade pip setuptools
+	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements.txt
+	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
+
+# Build the application as a zipapp
+medley.pyz: setup
+	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . medley/
+	mv medley/medley.py medley/__main__.py
+	./venv/bin/python -m compileall -j 0 -q medley
+	./venv/bin/python -m pip install --compile \
+		--disable-pip-version-check \
+		--no-color \
+		--quiet \
+		-r requirements.txt \
+		--target medley \
+		--upgrade
+	find medley -depth -type d -name '*.dist-info' -exec rm -rf {} \;
+	find medley -depth -type d -name 'test*' -exec rm -rf {} \;
+	python -m zipapp -p "/usr/bin/env python3" medley
+	./medley.pyz --publish
+
+# Install the application on the production host
+install: medley.pyz
+	ansible-playbook ansible/install.yml
 
 # Run a local development webserver.
 #
@@ -274,11 +294,6 @@ workspace:
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
 
 
-# Install the application on the production host via Ansible
-install: dummy
-	ansible-playbook ansible/install.yml
-
-
 # Perform sundry cleanup tasks.
 reset:
 	rm -r coverage
@@ -293,20 +308,3 @@ $(APP_ICONS):
 
 # Generate PNGs for all app icon SVGs.
 app-icons: $(APP_ICONS)
-
-
-zipapp: dummy
-	rm -f medley.pyz
-	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . medley/
-	mv medley/medley.py medley/__main__.py
-	python -m compileall -j 0 -q medley
-	python -m pip install --compile \
-	--disable-pip-version-check \
-	--no-color \
-	--quiet \
-	-r requirements.txt \
-	--target medley \
-	--upgrade
-	find medley -depth -type d -name '*.dist-info' -exec rm -rf {} \;
-	find medley -depth -type d -name 'test*' -exec rm -rf {} \;
-	python -m zipapp -p "/usr/bin/env python3" medley
