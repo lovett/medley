@@ -82,7 +82,7 @@ medley.pyz: setup
 
 # Install the application on the production host
 install: medley.pyz
-	ansible-playbook ansible/install.yml
+	ansible-playbook --skip-tags "firstrun" ansible/install.yml
 
 # Run a local development webserver.
 #
