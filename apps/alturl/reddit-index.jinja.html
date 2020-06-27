@@ -44,10 +44,10 @@
                 >
                     <h2 class="title">
                         {% if story.num_comments == 0 and not story.selftext %}
-                            {{ story.title }}
+                            {{ story.title|safe|truncate(100) }}
                         {% else %}
                             <a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">
-                                {{ story.title|safe|truncate(80) }}
+                                {{ story.title|safe|truncate(100) }}
                             </a>
                         {% endif %}
                     </h2>
