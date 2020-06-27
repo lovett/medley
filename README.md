@@ -5,9 +5,9 @@ services but are otherwise independent.
 
 Medley is build on the CherryPy framework.
 
-## Setup
+## Development Setup
 
-Medley targets the current version of Python 3 in Raspbian, currently
+Medley targets the current version of Python 3 in Debian stable, currently
 3.7. Setup is driven by `make`.
 
 ```sh
@@ -24,14 +24,13 @@ make serve
 
 ## Configuration
 
-The server's default configuration is reasonable for production use.
-Adjustments to the defaults can be made with environment
-variables. Any environment variable that starts with `MEDLEY__` will be
-added to the CherryPy global config. This convention is for
-compatibility with systemd.
+The server uses a default configuration that can be adjusted using
+environment variables. Any environment variable that starts with
+`MEDLEY__` will be added to the CherryPy global config.
 
+### Settings
 `MEDLEY__database_dir`: The filesystem path to the directory that
-should be used for Sqlite databases. Default: `./db`
+should be used for SQLite databases. Default: `./db`
 
 `MEDLEY__engine__autoreload__on`: Whether the CherryPy server should watch
 for changes to application files and restart itself. Only useful during
@@ -40,13 +39,14 @@ development. Default: `False`
 `MEDLEY__local_maintenance`: Whether the server should allow requests
 from localhost that perform cleanup and maintenance operations. These
 can be time intensive and block other requests, and are meant to run
-when the application isn't busy. Default: `True`
+on a nightly basisd when the application isn't busy. Default: `True`
 
 `MEDLEY__log__screen`: Whether log messages should be written to the
 server's stdout. Default: `True`
 
-`MEDLEY__log__screen_access`: If `MEDLEY__log__screen` is enabled,
-whether access logs should also be written to stdout. Default: `False`
+`MEDLEY__log__screen_access`: Whether access logs should be written
+to the stdout of the server process. Only useful when
+`MEDLEY__log__screen` is enabled. Default: `False`
 
 `MEDLEY__memorize_hashes`: Whether the server should keep static asset
 file hashes in memory for use with HTTP cache control. Useful in
@@ -70,9 +70,9 @@ compression. Default: `True`
 
 ## Acknowledgements
 
-This project gratefully makes use of other open-source projects:
+This project gratefully makes use of the following projects:
 
 * [CherryPy](https://cherrypy.org/)
 * [flag-icon-css](http://flag-icon-css.lip.is/)
-* [Sqlite](https://sqlite.org/)
+* [SQLite](https://sqlite.org/)
 * [Feather icons](https://feathericons.com)
