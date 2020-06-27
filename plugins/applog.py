@@ -96,6 +96,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("scheduler:add", 1, "applog:pull")
 
+        # Mirror the log message on the cherrypy log.
+        # This is useful for troubleshooting via journalctl or
+        cherrypy.log(f"[{source}] {message}")
+
     @decorators.log_runtime
     def prune(self, cutoff_months: int = 3) -> None:
         """Delete old records.
