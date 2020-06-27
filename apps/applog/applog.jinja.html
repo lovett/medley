@@ -53,7 +53,7 @@
                                     {{ record["created"]|dateformat("%Y-%m-%d") }}
                                 </td>
                                 <td nowrap>
-                                    {{ record["created"]|dateformat("%-I:%m:%S %p")}}
+                                    {{ record["created"]|dateformat("%-I:%M:%S %p")}}
                                 </td>
                                 <td nowrap>
                                     <a href="{{ app_url }}?source={{ record["source"]|urlencode }}">{{ record["source"] }}</a>
