@@ -4,7 +4,7 @@
     {% if comment.author %}
         <details open class="comment">
             <summary>
-                <time>{{ comment.created|date(local=True)|dateformat("%Y-%m-%d %-I:%M %p") }}</time>
+                <time>{{ comment.created_utc|date(local=True)|dateformat("%Y-%m-%d %-I:%M %p") }}</time>
                 by {{ comment.author }}
                 {%- if comment.replies.data -%} ,
                     {{ comment.replies.data.children|length|pluralize("reply", "replies") }}
@@ -38,7 +38,7 @@
 
         <time class="info">
             <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-            {{ story.created|date(local=True)|dateformat("%Y-%m-%d") }}
+            {{ story.created_utc|date(local=True)|dateformat("%Y-%m-%d") }}
         </time>
 
         {% if story.num_comments > 0 %}
