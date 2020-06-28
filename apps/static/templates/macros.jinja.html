@@ -167,10 +167,6 @@ in the argument list are returned.  #}
     </footer>
 {%- endmacro -%}
 
-{% macro appSpecificIcon(app_name) -%}
-        <link rel="shortcut icon" href="/static/app-icons/{{ app_name }}.svg" />
-{%- endmacro %}
-
 {% macro clipboardButton(target_id, tooltip) -%}
     <div class="action-button clipboard-button">
         <a href="#"

@@ -19,9 +19,8 @@
         {% block stylesheets %}
         {% endblock%}
 
-        {% block app_icon -%}
-            {{ macros.appSpecificIcon("medley") }}
-        {%- endblock %}
+        <link rel="shortcut icon" href="/static/svg/medley.svg" />
+        <link rel="mask-icon" href="/static/svg/medley.svg" color="black" />
 
         <meta name="medley-home" content="{{ '/' | internal_url }}" />
         <meta name="medley-startpage" content="{{ '/startpage' | internal_url }}" />

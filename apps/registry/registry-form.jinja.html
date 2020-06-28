@@ -1,9 +1,5 @@
 {% extends "apps/registry/registry.jinja.html" %}
 
-{% block app_icon -%}
-    {{ macros.appSpecificIcon("registry") }}
-{%- endblock %}
-
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a class="cancel" href="{{ cancel_url }}">

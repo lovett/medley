@@ -1,4 +1,4 @@
-.PHONY: dummy
+b.PHONY: dummy
 .DEFAULT_GOAL := setup
 
 PYTHONPATH := $(CURDIR):test
@@ -299,12 +299,3 @@ reset:
 	rm -r coverage
 	rm -r apps/static/coverage
 	rm .coverage
-
-
-# Render an app icon SVG to PNG.
-$(APP_ICONS):
-	convert -density 900 -background none -geometry 360x360 $(patsubst %.png, %.svg, $@) $@
-
-
-# Generate PNGs for all app icon SVGs.
-app-icons: $(APP_ICONS)

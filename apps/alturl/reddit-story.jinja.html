@@ -1,9 +1,5 @@
 {% extends "apps/alturl/alturl.jinja.html" %}
 
-{% block app_icon -%}
-    {{ macros.appSpecificIcon("alturl") }}
-{%- endblock %}
-
 {% macro commentBlock(comment) %}
     {% if comment.author %}
         <details open class="comment">

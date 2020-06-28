@@ -3,10 +3,6 @@
 
 {% set time_format = "%-I:%M %p" %}
 
-{% block app_icon -%}
-    {{ macros.appSpecificIcon("weather") }}
-{%- endblock %}
-
 {% block stylesheets %}
     {{ macros.asset("css/weather.css") }}
 {% endblock %}
