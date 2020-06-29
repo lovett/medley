@@ -62,6 +62,14 @@ class TestLogindexQueryParser(unittest.TestCase):
 
         self.parse_and_assert(query, expected)
 
+        query = "date 2000-01-01 status 200"
+        expected = (
+            "(datestamp BETWEEN '2000-01-01-05' AND '2000-01-02-04') "
+            "AND (+statusCode = 200)"
+        )
+
+        self.parse_and_assert(query, expected)
+
     def test_string(self) -> None:
         """Searching for a string value applies quotign."""
 

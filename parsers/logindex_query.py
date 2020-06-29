@@ -107,7 +107,7 @@ class Parser():
     def get_transformer(self, field: str) -> Transformer:
         """Match a field to a transform function."""
 
-        field = self.non_negated_field(field)
+        field = self.non_negated_field(field).lstrip("+")
 
         if field in self.date_fields:
             return self.transform_date
