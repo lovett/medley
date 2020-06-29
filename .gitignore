@@ -15,5 +15,5 @@ __pycache__
 db
 storage
 venv
-medley.pyz
 medley
+build

@@ -64,24 +64,24 @@ setup: venv
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
 
 # Build the application as a zipapp
-medley.pyz: setup
-	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . medley/
-	mv medley/medley.py medley/__main__.py
-	./venv/bin/python -m compileall -j 0 -q medley
+medley: setup
+	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . build/
+	mv build/medley.py build/__main__.py
+	./venv/bin/python -m compileall -j 0 -q build
 	./venv/bin/python -m pip install --compile \
 		--disable-pip-version-check \
 		--no-color \
 		--quiet \
 		-r requirements.txt \
-		--target medley \
+		--target build \
 		--upgrade
-	find medley -depth -type d -name '*.dist-info' -exec rm -rf {} \;
-	find medley -depth -type d -name 'test*' -exec rm -rf {} \;
-	python -m zipapp -p "/usr/bin/env python3" medley
-	./medley.pyz --publish
+	find build -depth -type d -name '*.dist-info' -exec rm -rf {} \;
+	find build -depth -type d -name 'test*' -exec rm -rf {} \;
+	python -m zipapp -p "/usr/bin/env python3" -o medley build
+	./medley --publish
 
 # Install the application on the production host
-install: medley.pyz
+install: medley
 	ansible-playbook --skip-tags "firstrun" ansible/install.yml
 
 # Run a local development webserver.

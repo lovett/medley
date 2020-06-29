@@ -70,8 +70,8 @@
     - name: Copy zipapp
       become: true
       copy:
-        src: "../medley.pyz"
-        dest: "{{ project_root }}/medley.pyz"
+        src: "../medley"
+        dest: "{{ project_root }}/medley"
         owner: "{{ project_user }}"
         group: "{{ project_group }}"
 
