@@ -74,6 +74,7 @@
         dest: "{{ project_root }}/medley"
         owner: "{{ project_user }}"
         group: "{{ project_group }}"
+        mode: 0775
 
     - name: Copy asset database
       become: true
