@@ -18,6 +18,7 @@ import sys
 import typing
 import zipfile
 import cherrypy
+from cherrypy._cpnative_server import CPHTTPServer
 import sdnotify
 import plugins.applog
 import plugins.assets
@@ -213,6 +214,7 @@ def setup() -> None:
             if isinstance(handler, logging.StreamHandler):
                 cherrypy.log.access_log.handlers.remove(handler)
 
+    cherrypy.server.httpserver = CPHTTPServer(cherrypy.server)
     cherrypy.engine.start()
 
 
