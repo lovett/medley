@@ -197,10 +197,20 @@ def setup() -> None:
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.recipes.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
-    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.url.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
+
+    # Skip unnecessary services when running in serverless mode.
+    #
+    # This includes Medley's scheduler plugin and CherryPy's HTTP
+    # server.
+    if cherrypy.config.get("serverless"):
+        cherrypy.server.unsubscribe()
+        cherrypy.engine.start()
+        return
+
+    plugins.scheduler.Plugin(cherrypy.engine).subscribe()
 
     # Disable access logging to the console
     #
@@ -238,30 +248,31 @@ def setup() -> None:
         })
 
     cherrypy.server.httpserver = CPHTTPServer(cherrypy.server)
+
     cherrypy.engine.start()
 
 
 if __name__ == '__main__':
+    argparser = argparse.ArgumentParser()
+
+    argparser.add_argument(
+        "--publish",
+        help='publish static assets',
+        action="store_true"
+    )
+
+    argparser.set_defaults(publish=False)
+    args = argparser.parse_args()
+
+    cherrypy.config.update({"serverless": args.publish})
+
     setup()
 
-    if len(sys.argv) > 1:
-        argparser = argparse.ArgumentParser()
-
-        argparser.add_argument(
-            "--publish",
-            help='publish static assets',
-            action="store_true"
+    if args.publish:
+        cherrypy.engine.publish(
+            "assets:publish",
+            reset=True
         )
-
-        argparser.set_defaults(publish=False)
-        args = argparser.parse_args()
-
-        if args.publish:
-            cherrypy.engine.publish(
-                "assets:publish",
-                reset=True
-            )
-
         cherrypy.engine.exit()
         sys.exit()
 
