@@ -19,6 +19,7 @@ import typing
 import zipfile
 import cherrypy
 from cherrypy._cpnative_server import CPHTTPServer
+import portend
 import sdnotify
 import plugins.applog
 import plugins.assets
@@ -213,6 +214,28 @@ def setup() -> None:
         for handler in cherrypy.log.access_log.handlers:
             if isinstance(handler, logging.StreamHandler):
                 cherrypy.log.access_log.handlers.remove(handler)
+
+    # See if the configured port is in use
+    #
+    # If it is, let the OS pick an alternative so that server startup
+    # is more resilient. Cherrypy performs similar checking during
+    # engine start, but it's unclear how to catch that exception
+    # from here.
+    try:
+        portend.Checker().assert_free(
+            cherrypy.config.get("server.socket_host"),
+            cherrypy.config.get("server.socket_port")
+        )
+    except portend.PortNotFree:
+        port = int(cherrypy.config.get("server.socket_port"))
+        cherrypy.engine.log(
+            (f"Port {port} is not available, "
+             "will leave it to the OS to assign one."),
+            level=40
+        )
+        cherrypy.config.update({
+            "server.socket_port": 0
+        })
 
     cherrypy.server.httpserver = CPHTTPServer(cherrypy.server)
     cherrypy.engine.start()
