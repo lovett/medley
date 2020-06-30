@@ -39,10 +39,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
+        self.bus.subscribe("assets:publish", self.publish)
+
         if cherrypy.config.get("zipapp"):
             self.bus.subscribe("assets:get", self.asset_from_db)
             self.bus.subscribe("assets:hash", self.hash_from_db)
-            self.bus.subscribe("assets:publish", self.publish)
         else:
             self.bus.subscribe("assets:get", self.asset_from_fs)
             self.bus.subscribe("assets:hash", self.hash_from_fs)
