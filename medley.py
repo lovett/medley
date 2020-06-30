@@ -18,7 +18,6 @@ import sys
 import typing
 import zipfile
 import cherrypy
-from cherrypy._cpnative_server import CPHTTPServer
 import portend
 import sdnotify
 import plugins.applog
@@ -246,8 +245,6 @@ def setup() -> None:
         cherrypy.config.update({
             "server.socket_port": 0
         })
-
-    cherrypy.server.httpserver = CPHTTPServer(cherrypy.server)
 
     cherrypy.engine.start()
 
