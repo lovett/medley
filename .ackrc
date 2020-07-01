@@ -3,13 +3,13 @@
 --ignore-dir=coverage
 --ignore-dir=htmlcov
 --ignore-dir=logs
---ignore-dir=medley
+--ignore-dir=build
 --ignore-dir=db
 --ignore-dir=storage
 --ignore-dir=.mypy_cache
 --ignore-dir=__pycache__
 --ignore-file=ext:pyc
---ignore-file=ext:pyz
+--ignore-file=is:medley
 --ignore-file=is:.coverage
 --type-set=test:match:/_test.py/
 --type-set=controller:match:/main.py/
