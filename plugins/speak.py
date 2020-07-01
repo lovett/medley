@@ -310,7 +310,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         if not audio_bytes:
             # The post request failed to return audio.
+            cherrypy.engine.publish(
+                "applog:add",
+                "speak:speak",
+                "No audio generated"
+            )
+
             return False
+
+        kilobytes = round(len(audio_bytes) / 1024)
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "speak:speak",
+            f"Generated {kilobytes}k of audio"
+        )
 
         cherrypy.engine.publish(
             "cache:set",

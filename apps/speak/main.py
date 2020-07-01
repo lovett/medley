@@ -79,7 +79,7 @@ class Controller:
         else:
             if confirm:
                 cherrypy.engine.publish(
-                    "audio:play_sound",
+                    "audio:play:asset",
                     "attention"
                 )
 

@@ -4,7 +4,7 @@ Playback occurs by invoking an external utility. Alsa's aplay is used
 by default, but an alternate can be defined in the registry.
 """
 
-import os.path
+from pathlib import Path
 import subprocess
 import cherrypy
 from . import decorators
@@ -23,7 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         self.bus.subscribe("audio:play_bytes", self.play_bytes)
-        self.bus.subscribe("audio:play_sound", self.play_sound)
+        self.bus.subscribe("audio:play:asset", self.play_asset)
 
     @staticmethod
     @decorators.log_runtime
@@ -43,26 +43,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             check=False
         )
 
-    @staticmethod
-    def play_sound(keyword: str) -> None:
-        """Play an audio file specified as a keyword.
+        kilobytes = round(len(audio_bytes) / 1024)
 
-        Keywords correspond to filenames under apps/static/wav.
-        """
+        cherrypy.engine.publish(
+            "applog:add",
+            "audio:play_bytes",
+            f"Played {kilobytes}k of audio"
+        )
 
-        audio_player = cherrypy.engine.publish(
-            "registry:first:value",
-            "config:audio_player",
-            memorize=True,
-            default="/usr/bin/aplay -q"
+    def play_asset(self, name: str) -> None:
+        """Play an audio asset by its filename minus extension."""
+
+        asset_path = Path("apps/static/wav") / f"{name}.wav"
+        audio_bytes, _ = cherrypy.engine.publish(
+            "assets:get",
+            asset_path
         ).pop()
 
-        wav_file = f"apps/static/wav/{keyword}.wav"
-
-        if not os.path.exists(wav_file):
-            cherrypy.log(f"ERROR: Could not match '{keyword}' to a sound file")
-
-        subprocess.run(
-            f"{audio_player} {wav_file}".split(" "),
-            check=False
-        )
+        self.play_bytes(audio_bytes)
