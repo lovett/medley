@@ -360,7 +360,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         cherrypy.engine.publish(
             "notifier:send",
             {
-                "title": "Medly is muted.",
+                "title": "Medley is muted.",
                 "url": app_url,
                 "badge": "medley.svg",
                 "localId": "speak-mute"
