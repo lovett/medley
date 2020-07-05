@@ -15,6 +15,43 @@ class Controller:
 
     default_page_name = "default"
 
+    def __init__(self) -> None:
+        cherrypy.engine.subscribe("registry:added", self.on_registry_changed)
+
+    def on_registry_changed(self, key: str) -> None:
+        """Clear cached etags after a page has been edited."""
+
+        if key.startswith("startpage:"):
+            page_name = key.split(":")[1]
+
+            view_path = ""
+            edit_path = f"{self.default_page_name}/edit"
+            if page_name != self.default_page_name:
+                view_path = page_name
+                edit_path = f"{page_name}/edit"
+
+            url = cherrypy.engine.publish(
+                "url:internal",
+                view_path
+            ).pop()
+            print("view url", url)
+
+            cherrypy.engine.publish(
+                "memorize:clear",
+                f"etag:{url}"
+            )
+
+            url = cherrypy.engine.publish(
+                "url:internal",
+                edit_path
+            ).pop()
+            print("edit url", url)
+
+            cherrypy.engine.publish(
+                "memorize:clear",
+                f"etag:{url}"
+            )
+
     @staticmethod
     def new_page_template() -> str:
         """The default page content for new pages demonstrating sample
