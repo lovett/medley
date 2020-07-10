@@ -29,28 +29,36 @@
 
     <main>
         <header id="page-title">
-            <h2>{{ location_name }} as of {{ forecast.current_time|dateformat(time_format) }}</h2>
+            <h2>
+                {{ location_name }}
+                as of
+                {{ forecast.currently.dt|date(local=True)|dateformat(time_format) }}
+            </h2>
         </header>
 
-        {% for alert in forecast.alerts  %}
-            <div class="alert">{{ alert }}</div>
-        {% endfor %}
-
         <p>
-            {{ forecast.current_summary|capitalize }}.
-            {{ forecast.current_temperature }}° F,
-            {{ forecast.humidity|percentage }} humidity.
+            {{ forecast.currently.temp|round|int }}° F
+
+            {% if (forecast.currently.feels_like - forecast.currently.temp)|abs > 2 %}
+                but feels like {{ forecast.currently.feels_like|round|int }}° F.
+            {% endif %}
+
         </p>
 
         <p>
-            {{ forecast.summary }}
-            High of {{ forecast.high }}° F at {{ forecast.high_at|dateformat(time_format) }}.
-            Low of {{ forecast.low }}° F at {{ forecast.low_at|dateformat(time_format) }}.
+            {{ forecast.currently.clouds|percentage }} cloudy.
         </p>
 
         <p>
-            Sunrise at {{ forecast.sunrise|dateformat(time_format) }}.
-            Sunset at {{ forecast.sunset|dateformat(time_format) }}
+            UV Index {{ forecast.currently.uvi }} .
+        </p>
+
+        <p>
+           {{ forecast.currently.humidity|percentage }} humidity.
+        </p>
+
+        <p>
+            Wind speed {{ forecast.currently.wind_speed|round|int }} miles per hour.
         </p>
 
         <div class="panels">
@@ -58,59 +66,80 @@
                 {% if forecast.hourly %}
                     <h2>Today</h2>
 
+                    <p>
+                        Sunrise at {{ forecast.today.sunrise|date(local=True)|dateformat(time_format) }}.
+                        Sunset at {{ forecast.today.sunset|date(local=True)|dateformat(time_format) }}.
+                    </p>
+
+                    <p>
+                        {{ forecast.today.temp.morn|round|int }}° F in the morning.
+                    </p>
+                    <p>
+                        {{ forecast.today.temp.min|round|int }}° F to
+                        {{ forecast.today.temp.max|round|int }}° F during the day.
+                    </p>
+                    <p>
+                        {{ forecast.today.temp.eve|round|int }}° F during the evening.
+                    </p>
+
+                    <p>
+                        {{ forecast.today.temp.night|round|int }}° F during the night.
+                    </p>
+
+                    <p>
+                        {{ forecast.today.humidity|percentage }} humidity.
+                    </p>
+
+                    <p>
+                        {{ forecast.today.clouds|percentage }} cloudy.
+                    </p>
+
                     <table>
                         <colgroup>
-                            <col>
-                            <col width="100%">
+                            <col/>
+                            <col/>
+                            <col width="100%"/>
                         </colgroup>
-
                         {% for record in forecast.hourly %}
-                            <tr>
-                                <th>{{ record.time|dateformat(time_format) }}</th>
-                                <td>
-                                    {{ record.summary }},
-                                    {{ record.temperature|round|int }}° F
-                        </td>
-                            </tr>
+                        <tr>
+                            <th>{{ record.dt|date(local=True)|dateformat(time_format) }}</th>
+                            <td nowrap>{{ record.temp|round|int }}° F</td>
+                            <td>
+                                {% for group in record.weather %}
+                                    {{ group.description|capitalize }}.
+                                {% endfor %}
+                            </td>
+                        </tr>
                         {% endfor %}
-                    </table>
+                </table>
                 {% endif %}
             </div>
+
             <div>
                 {% if forecast.upcoming %}
                     <h2>Upcoming</h2>
                     <table>
                         <colgroup>
-                            <col>
-                            <col width="100%">
+                            <col/>
+                            <col width="100%" />
                         </colgroup>
 
-                        {% for forecast in forecast.upcoming %}
+                        {% for day in forecast.upcoming %}
                             <tr>
-                                <th>{{ forecast.time|dateformat("%A") }}</th>
+                                <th>{{ day.dt|date(local=True)|dateformat("%A") }}</th>
                                 <td>
-                                    {{ forecast.summary }}
+                                    {% for group in day.weather %}
+                                        {{ group.description|capitalize }}.
+                                    {% endfor %}
 
-                                    {% if forecast.high %}
-                                        <br/>High: {{ forecast.high }}° F
-                                    {% endif %}
-
-                                    {% if forecast.low %}
-                                        <br/>Low: {{ forecast.low }}° F
-                                    {% endif %}
-
+                                    {{ day.temp.min|round|int }}° F to
+                                    {{ day.temp.max|round|int }}° F during the day.
                                 </td>
                             </tr>
                         {% endfor %}
                     </table>
                 {% endif %}
             </div>
-        </div>
-        <p>
-            <a href="https://darksky.net/poweredby/"
-               target="_blank"
-               rel="noopener noreferrer"
-            >Powered by Dark Sky</a>
-        </p>
+
     </main>
 {% endblock %}
