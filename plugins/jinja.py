@@ -535,6 +535,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "/alturl"
         ).pop()
 
+        if "```" in value:
+            value = re.sub(r"```([^`]+)```", r"<code>\1</code>", value)
+
         replacements = (
             ("<p>&#x200B;</p>", ""),
             ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/'),
