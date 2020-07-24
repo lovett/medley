@@ -544,7 +544,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             (' ,', ', ')
         )
 
-        result = jinja2.Markup(value).unescape()
+        result = jinja2.Markup(value)
 
         for before, after in replacements:
             result = result.replace(before, after)
