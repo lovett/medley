@@ -9,9 +9,13 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args: str, **kwargs: str) -> bytes:
-        """Dispatch to a subhandler based on the URL path."""
+        """Dispatch GET requests to a subhandler based on the URL path."""
+
+        if "status" in args:
+            return self.capture(*args, **kwargs)
 
         if "path" in kwargs:
             return self.search(*args, **kwargs)
@@ -20,6 +24,30 @@ class Controller:
             return self.show(int(args[0]))
 
         return self.index()
+
+    def POST(self, *args: str, **kwargs: str) -> bytes:
+        """Dispatch POST requests to a subhandler based on the URL path."""
+
+        if "status" in args:
+            return self.capture(*args, **kwargs)
+
+        raise cherrypy.NotFound()
+
+    def PUT(self, *args: str, **kwargs: str) -> bytes:
+        """Dispatch PUT requests to a subhandler based on the URL path."""
+
+        if "status" in args:
+            return self.capture(*args, **kwargs)
+
+        raise cherrypy.NotFound()
+
+    def DELETE(self, *args: str, **kwargs: str) -> bytes:
+        """Dispatch DELETE requests to a subhandler based on the URL path."""
+
+        if "status" in args:
+            return self.capture(*args, **kwargs)
+
+        raise cherrypy.NotFound()
 
     @staticmethod
     def index(*_args: str, **kwargs: str) -> bytes:
@@ -104,3 +132,30 @@ class Controller:
         ).pop()
 
         return response
+
+    @staticmethod
+    def capture(*args: str, **_kwargs: str) -> bytes:
+        """Capture a request and return the status code indicated by the
+        URL.
+
+        """
+
+        try:
+            status = int(args[1])
+        except ValueError:
+            status = 404
+        except IndexError:
+            status = 200
+
+        if 400 <= status <= 500:
+            raise cherrypy.HTTPError(status)
+
+        if 300 <= status <= 308:
+            destination = cherrypy.engine.publish(
+                "url:internal",
+                "/"
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(destination, status)
+
+        return str(status).encode()

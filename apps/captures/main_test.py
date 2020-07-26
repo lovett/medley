@@ -27,7 +27,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assert_allowed(response, ("GET",))
+        self.assert_allowed(response, ("GET", "POST", "PUT", "DELETE"))
 
     def test_exposed(self) -> None:
         """The application is publicly available."""
