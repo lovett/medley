@@ -35,13 +35,14 @@ class Controller:
             datetime.now(tz=timezone.utc),
             datetime.now(tz=timezone.utc)
         )
+
         y_range = (float("inf"), float("-inf"))
         y_unit = ""
 
         for row in dataset:
             x_value = cherrypy.engine.publish(
                 "clock:local",
-                row["created_utc"]
+                row["created"]
             ).pop()
 
             y_value = round(row["value"], 2)

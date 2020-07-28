@@ -20,7 +20,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         PRAGMA journal_mode=WAL;
 
         CREATE TABLE IF NOT EXISTS metrics (
-            created_utc DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
+            created DEFAULT(strftime('%Y-%m-%d %H:%M:%f', 'now')),
             key VARCHAR(255) NOT NULL,
             value INTEGER NOT NULL,
             unit VARCHAR(255) NOT NULL
@@ -89,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._delete(
             """DELETE FROM metrics
-            WHERE strftime('%s', created_utc) < strftime('%s', 'now', ?)
+            WHERE strftime('%s', created) < strftime('%s', 'now', ?)
             """,
             (f"-{cutoff_months} month",)
         )
@@ -98,10 +98,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Retrieve records for a single metric."""
 
         return self._select_generator(
-            """SELECT created_utc as 'created_utc [utc]', value, unit
+            """SELECT created as 'created [utc]', value, unit
             FROM metrics
             WHERE key=?
-            ORDER BY created_utc DESC
+            ORDER BY created DESC
             LIMIT 50""",
             (key,)
         )
