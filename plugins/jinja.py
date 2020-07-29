@@ -349,6 +349,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if value < 1:
             return str(round(value * 100)) + "%"
 
+        if value == 1:
+            return "100%"
+
         return str(value) + "%"
 
     @staticmethod

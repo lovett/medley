@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("globe", "edit") }}
+    {{ macros.svgSymbols("globe", "edit", "thermometer", "clouds", "sun", "droplet", "wind", "umbrella", "snow", "sunrise") }}
 
     <main>
         <header id="page-title">
@@ -34,65 +34,96 @@
                 as of
                 {{ forecast.currently.dt|date(local=True)|dateformat(time_format) }}
             </h2>
+
         </header>
 
-        <p>
-            {{ forecast.currently.temp|round|int }}° F
+        <p> {{ forecast.currently.weather_description }}</p>
 
-            {% if (forecast.currently.feels_like - forecast.currently.temp)|abs > 2 %}
-                but feels like {{ forecast.currently.feels_like|round|int }}° F.
+        <div class="cards">
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-thermometer"/></svg>
+                <div>
+                    <p>{{ forecast.currently.temp|round|int }}° F</p>
+                    {% if (forecast.currently.feels_like - forecast.currently.temp)|abs > 2 %}
+                        <p>Feels like {{ forecast.currently.feels_like|round|int }}° F</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if "rain" in forecast.currently.weather_groups %}
+                <div class="card">
+                    <svg class="icon"><use xlink:href="#icon-umbrella"/></svg>
+                    <div>
+                        {{ forcast.currently.rain }} mm
+                    </div>
+                </div>
             {% endif %}
 
-        </p>
+            {% if "snow" in forecast.currently.weather_groups %}
+                <div class="card">
+                    <svg class="icon"><use xlink:href="#icon-snow"/></svg>
+                    <div>
+                        {{ forecast.currently.snow }} mm
+                    </div>
+                </div>
+            {% endif %}
 
-        <p>
-            {{ forecast.currently.clouds|percentage }} cloudy.
-        </p>
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-clouds"/></svg>
+                <div>
+                    <p>
+                        {{ forecast.currently.clouds|percentage }} cloudy
+                    </p>
+                </div>
+            </div>
 
-        <p>
-            UV Index {{ forecast.currently.uvi }} .
-        </p>
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-sun"/></svg>
+                <div>
+                    <p>
+                        UV Index {{ forecast.currently.uvi }}
+                    </p>
+                </div>
+            </div>
 
-        <p>
-           {{ forecast.currently.humidity|percentage }} humidity.
-        </p>
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-droplet"/></svg>
+                <div>
+                    <p>
+                        {{ forecast.currently.humidity|percentage }} humidity
+                    </p>
+                </div>
+            </div>
 
-        <p>
-            Wind speed {{ forecast.currently.wind_speed|round|int }} miles per hour.
-        </p>
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-wind"/></svg>
+                <div>
+                    <p>
+                        {{ forecast.currently.wind_speed|round|int }} mph winds
+                    </p>
+
+                    {% if forecast.currently.wind_gust %}
+                        <p>
+                            Gusting to {{ forecast.currently.wind_gust }} mph
+                        </p>
+                    {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card">
+                <svg class="icon"><use xlink:href="#icon-sunrise"/></svg>
+                <div>
+                    <p>{{ forecast.today.sunrise|date(local=True)|dateformat(time_format) }} sunrise</p>
+                    <p>{{ forecast.today.sunset|date(local=True)|dateformat(time_format) }} sunset</p>
+                </div>
+            </div>
+        </div>
 
         <div class="panels">
             <div>
                 {% if forecast.hourly %}
                     <h2>Today</h2>
-
-                    <p>
-                        Sunrise at {{ forecast.today.sunrise|date(local=True)|dateformat(time_format) }}.
-                        Sunset at {{ forecast.today.sunset|date(local=True)|dateformat(time_format) }}.
-                    </p>
-
-                    <p>
-                        {{ forecast.today.temp.morn|round|int }}° F in the morning.
-                    </p>
-                    <p>
-                        {{ forecast.today.temp.min|round|int }}° F to
-                        {{ forecast.today.temp.max|round|int }}° F during the day.
-                    </p>
-                    <p>
-                        {{ forecast.today.temp.eve|round|int }}° F during the evening.
-                    </p>
-
-                    <p>
-                        {{ forecast.today.temp.night|round|int }}° F during the night.
-                    </p>
-
-                    <p>
-                        {{ forecast.today.humidity|percentage }} humidity.
-                    </p>
-
-                    <p>
-                        {{ forecast.today.clouds|percentage }} cloudy.
-                    </p>
 
                     <table>
                         <colgroup>
@@ -105,9 +136,13 @@
                             <th>{{ record.dt|date(local=True)|dateformat(time_format) }}</th>
                             <td nowrap>{{ record.temp|round|int }}° F</td>
                             <td>
-                                {% for group in record.weather %}
-                                    {{ group.description|capitalize }}.
-                                {% endfor %}
+                                <p>
+                                    {% for group in record.weather %}
+                                        {{ group.description|capitalize }}.
+                                    {% endfor %}
+                                </p>
+
+                                <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -117,9 +152,10 @@
 
             <div>
                 {% if forecast.upcoming %}
-                    <h2>Upcoming</h2>
+                    <h2>Coming Up</h2>
                     <table>
                         <colgroup>
+                            <col/>
                             <col/>
                             <col width="100%" />
                         </colgroup>
@@ -127,19 +163,22 @@
                         {% for day in forecast.upcoming %}
                             <tr>
                                 <th>{{ day.dt|date(local=True)|dateformat("%A") }}</th>
+                                <td nowrap>{{ day.temp.max|round|int }}° F</td>
                                 <td>
-                                    {% for group in day.weather %}
-                                        {{ group.description|capitalize }}.
-                                    {% endfor %}
+                                    <p>
+                                        {% for group in day.weather %}
+                                            {{ group.description|capitalize }}.
+                                        {% endfor %}
+                                    </p>
 
-                                    {{ day.temp.min|round|int }}° F to
-                                    {{ day.temp.max|round|int }}° F during the day.
+                                    <p>{{ day.get("pop")|percentage }} chance of precipitation.</p>
+
                                 </td>
                             </tr>
                         {% endfor %}
                     </table>
                 {% endif %}
             </div>
-
+        </div>
     </main>
 {% endblock %}

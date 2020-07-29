@@ -102,7 +102,7 @@ class Controller:
                 other_locations=locations,
                 location_name=location_name,
                 edit_url=edit_url,
-                subview_title=location_name
+                subview_title=location_name,
             ).pop()
         )
 
@@ -125,5 +125,19 @@ class Controller:
         result["hourly"] = hourly[0:(24 - now.hour + 1)]
         result["today"] = daily[0]
         result["upcoming"] = daily[1:]
+
+        print(currently["weather"])
+
+        result["currently"]["weather_groups"] = [
+            item.get("main").lower()
+            for item
+            in currently["weather"]
+        ]
+
+        result["currently"]["weather_description"] = ". ".join([
+            item.get("description").capitalize()
+            for item
+            in currently["weather"]
+        ])
 
         return result
