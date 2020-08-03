@@ -149,7 +149,34 @@
                 </table>
                 {% endif %}
             </div>
+            <div>
+                {% if forecast.hourly_tomorrow %}
+                    <h2>Tomorrow Morning</h2>
 
+                    <table>
+                        <colgroup>
+                            <col/>
+                            <col/>
+                            <col width="100%"/>
+                        </colgroup>
+                        {% for record in forecast.hourly_tomorrow %}
+                            <tr>
+                                <th>{{ record.dt|date(local=True)|dateformat(time_format) }}</th>
+                                <td nowrap>{{ record.temp|round|int }}° F</td>
+                                <td>
+                                    <p>
+                                        {% for group in record.weather %}
+                                            {{ group.description|capitalize }}.
+                                        {% endfor %}
+                                    </p>
+
+                                    <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            </div>
             <div>
                 {% if forecast.upcoming %}
                     <h2>Coming Up</h2>

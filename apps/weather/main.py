@@ -121,12 +121,14 @@ class Controller:
             local=True
         ).pop()
 
+        end_hour_index = 24 - now.hour
         result["currently"] = currently
-        result["hourly"] = hourly[0:(24 - now.hour + 1)]
+        result["hourly"] = hourly[0:end_hour_index]
+
+        hourly_tomorrow = hourly[end_hour_index:end_hour_index+24]
+        result["hourly_tomorrow"] = hourly_tomorrow[6:13]
         result["today"] = daily[0]
         result["upcoming"] = daily[1:]
-
-        print(currently["weather"])
 
         result["currently"]["weather_groups"] = [
             item.get("main").lower()
