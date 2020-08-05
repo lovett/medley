@@ -61,6 +61,12 @@ venv:
 setup: venv
 	./venv/bin/python -m pip install --quiet --upgrade pip setuptools
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements.txt
+
+# Install dev-specific third-party Python libraries
+#
+# This is isolated from the setup target for the benefit of CI, where
+# dev packages are unused.
+setup-dev: setup
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
 
 # Build the application as a zipapp
