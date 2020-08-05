@@ -3,12 +3,14 @@
 }
 
 .scatter {
-    width: 100%;
-    height: 50vh;
+    display: block;
+    margin: auto;
+    width: 90vw;
+    height: 60vh;
 }
 
 .scatter line {
-    stroke: black;
+    stroke: #666;
     stroke-width: 0.25;
 }
 
@@ -16,43 +18,28 @@
     font-size: .2em;
 }
 
-.scatter .points text {
-    font-size: .2em;
-}
-
-.scatter .point text {
-    display: none;
-}
-
-.scatter .point rect {
-    fill: #ccc;
-    display: none;
-}
-
-.scatter .point:hover text {
-    display: block;
-}
-
-.scatter .point:hover rect {
-    display: block;
-}
-
-
-.scatter .label-pair:last-of-type text {
+.scatter .x.labels .label-pair:last-of-type text {
     text-anchor: end;
 }
 
-
-.scatter circle {
-    fill: #666;
+.scatter .dot {
+    fill: dodgerblue;
 }
 
-.scatter circle.best {
-    fill: green;
+.scatter .dot:hover {
+    cursor: pointer;
 }
 
-.scatter circle.worst {
-    fill: red;
+.scatter #label.hidden {
+    display: none;
+}
+
+.scatter #label rect {
+    fill: #ccc;
+}
+
+.scatter #label text {
+    font-size: .2em;
 }
 
 /* Small devices */

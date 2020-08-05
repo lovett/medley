@@ -65,33 +65,57 @@
                 {% set y_ratio = 1 %}
             {% endif %}
 
-            {% set label_width = 42 %}
             {% set x = min_x + (max_x - min_x) * x_ratio %}
             {% set y = max_y - ((max_y - min_y) * y_ratio) %}
 
+            {% set label_width = 42 %}
             {% if x > max_x / 2 %}
                 {% set label_x = x - label_width - 5 %}
             {% else %}
-                {% set label_x = x %}
+                {% set label_x = x + 5%}
             {% endif %}
 
-            <g class="point">
-                <rect x="{{ label_x + 3 }}" y="{{ y - 4 }}" width="{{ label_width }}" height="10" rx="1" />
-
             <circle
+                class="dot"
                 cx="{{ x }}"
                 cy="{{ y }}"
                 r="1.5"
+                data-tooltip-x="{{ label_x }}"
+                data-tooltip-y="{{ y - 5 }}"
+                data-tooltip-text1="{{ point[1] }} {{ y_unit }}"
+                data-tooltip-text2="{{ point[0]|dateformat("%Y-%m-%d %-I:%M:%S %p") }}"
             />
-            <text x="{{ label_x + 4 }}"
-                  y="{{ y }}"
-            >{{ point[1] }} {{ y_unit }}</text>
-            <text x="{{ label_x + 4 }}"
-                  y="{{ y + 3.5}}"
-                  alignment-baseline="middle"
-            >{{ point[0]|dateformat("%Y-%m-%d %-I:%M:%S %p") }}</text>
-            </g>
+
         {% endfor %}
+        <svg id="label" x="0" y="0" class="hidden">
+            <rect x="0" y="0" width="42" height="10" rx="1" />
+            <text x="2" y="4"></text>
+            <text x="2" y="8"></text>
+        </svg>
     </g>
+
+    <script type="text/javascript">
+
+        let label = document.getElementById('label');
+
+        function hideLabel() {
+            label.classList.add('hidden');
+        }
+
+        function showLabel(node) {
+            if (!node.classList.contains('dot')) {
+                return;
+            }
+
+            label.setAttribute('x', node.dataset.tooltipX);
+            label.setAttribute('y', node.dataset.tooltipY);
+            label.querySelector('text:first-of-type').innerHTML = node.dataset.tooltipText1;
+            label.querySelector('text:last-of-type').innerHTML = node.dataset.tooltipText2;
+            label.classList.remove('hidden');
+        }
+
+        document.addEventListener('mouseover', (e) => showLabel(e.target));
+        document.addEventListener('mouseout', hideLabel);
+    </script>
 
 </svg>
