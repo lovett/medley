@@ -78,13 +78,13 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
             accept="json"
         )
 
-        _, value = next(
+        pair = next(
             pair
             for pair in response.json
             if pair[0] == "Special_Header"
         )
 
-        self.assertEqual(value, "Special Value")
+        self.assertEqual(pair[1], "Special Value")
 
 
 if __name__ == "__main__":
