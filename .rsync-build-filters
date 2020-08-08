@@ -3,6 +3,7 @@
 - /***/main_test.py
 - /***/__pycache__
 - /apps/static/coverage
+- /apps/static/mypy
 + /medley.py
 + /apps/***
 + /plugins/***

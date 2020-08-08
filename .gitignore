@@ -9,6 +9,7 @@
 .mypy_cache
 .pytest_cache
 /apps/static/coverage
+/apps/static/mypy
 /coverage
 \#*
 __pycache__

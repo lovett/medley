@@ -5,9 +5,29 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("activity", "arrow-left") }}
+    {{ macros.svgSymbols("activity", "arrow-left", "file") }}
 
     <main>
+        {% if reports %}
+            <section>
+                <h1>Reports</h1>
+                <div id="collection">
+                    <ul>
+                        {% for (name, url) in reports.items() %}
+                            <li>
+                                <a href="{{ url }}">
+                                    <svg class="icon"><use xlink:href="#icon-file"></use></svg>
+                                    {{ name }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+        {% endif %}
+
+        <section>
+            <h1>Metrics</h1>
         {% if metrics %}
             <div id="collection">
                 <ul>
@@ -29,6 +49,7 @@
             {% endif %}
 
         {% endif %}
+        </section>
 
         {% if metric %}
             <header id="page-title">

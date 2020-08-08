@@ -1,4 +1,4 @@
-b.PHONY: dummy
+.PHONY: dummy
 .DEFAULT_GOAL := setup
 
 PYTHONPATH := $(CURDIR):test
@@ -230,7 +230,7 @@ $(PLUGINS):
 # These commands are also present in the Git pre-commit hook, but
 # are only applied to changed files.
 lint: dummy
-	mypy apps parsers plugins scripts testing tools medley.py
+	mypy --html-report apps/static/mypy apps parsers plugins scripts testing tools medley.py
 	flake8 --builtins=ModuleNotFoundError apps parsers plugins scripts testing tools medley.py
 	pylint --rcfile=.pylintrc apps parsers plugins scripts testing tools medley.py
 
