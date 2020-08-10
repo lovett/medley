@@ -36,9 +36,6 @@ class Sqlite:
     def _create(self, sql: str) -> None:
         """Establish a schema by executing a series of SQL statements."""
 
-        if os.path.exists(self.db_path):
-            return
-
         con = self._open()
 
         try:
