@@ -305,3 +305,7 @@ reset:
 	rm -r coverage
 	rm -r apps/static/coverage
 	rm .coverage
+
+# Push the repository to GitHub.
+mirror:
+	git push --force git@github.com:lovett/medley.git master:master
