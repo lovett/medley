@@ -207,11 +207,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             if os.path.isfile(destination):
                 os.unlink(destination)
 
-            cherrypy.engine.publish(
-                "applog:add",
-                "urlfetch:file",
-                f"{res.status_code} {url}"
-            )
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch:get:file",
+            f"{res.status_code} {url}"
+        )
 
     def post(
             self,
