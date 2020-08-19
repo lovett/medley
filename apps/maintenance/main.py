@@ -11,9 +11,7 @@ class Controller:
 
     @staticmethod
     def POST(*_args: str, **kwargs: str) -> None:
-        """
-        Schedule maintenance operations.
-        """
+        """Schedule maintenance operations."""
 
         group = kwargs.get("group")
 
