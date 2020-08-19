@@ -4,7 +4,7 @@ import mimetypes
 from pathlib import Path
 import typing
 import cherrypy
-from plugins import mixins, decorators
+from plugins import mixins
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -102,7 +102,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (asset_bytes, mime_type)
 
-    @decorators.log_runtime
     def publish(self, reset: bool = False) -> None:
         """Export assets to a database.
 

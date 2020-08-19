@@ -7,7 +7,6 @@ by default, but an alternate can be defined in the registry.
 from pathlib import Path
 import subprocess
 import cherrypy
-from . import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -26,7 +25,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("audio:play:asset", self.play_asset)
 
     @staticmethod
-    @decorators.log_runtime
     def play_bytes(audio_bytes: bytes) -> None:
         """Play a wave file provide as raw bytes."""
 
