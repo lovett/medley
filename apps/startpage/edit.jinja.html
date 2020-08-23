@@ -8,7 +8,7 @@
 {% block main_toolbar %}
     <nav id="main-toolbar">
         <a class="cancel" href="{{ cancel_url }}">
-            <svg class="icon"><use xlink:href="#icon-triangle"></use></svg>
+            <svg class="icon"><use xlink:href="#icon-x"></use></svg>
             Cancel
         </a>
     </nav>
@@ -16,7 +16,7 @@
 
 
 {% block page_body %}
-    {{ macros.svgSymbols("triangle") }}
+    {{ macros.svgSymbols("x") }}
     <main id="editor">
         <form method="post" action="{{ post_url }}">
             <input type="hidden" name="page_name" value="{{ page_name }}" />
