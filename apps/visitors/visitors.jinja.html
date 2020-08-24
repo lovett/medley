@@ -37,7 +37,7 @@
                         {% if saved_queries %}
                             <div id="saved-queries">
                                 <select id="saved">
-                                    <option value=""></option>
+                                    <option value="">Saved Queries:</option>
                                     {% for query in saved_queries %}
                                         <option data-id="{{ query[0] }}"
                                                 value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}
@@ -58,6 +58,30 @@
                                 </button>
                             {% endif %}
                         </div>
+                        <select data-field="query" data-shortcut="splice-to-newline">
+                            <option value="">Search Fields:</option>
+                            <option value="agent">agent</option>
+                            <option value="agent_domain">agent_domain</option>
+                            <option value="city">city</option>
+                            <option value="classification">classification</option>
+                            <option value="cookie">cookie</option>
+                            <option value="country">country</option>
+                            <option value="date">date</option>
+                            <option value="datestamp">datestamp</option>
+                            <option value="host">host</option>
+                            <option value="ip">ip</option>
+                            <option value="method">method</option>
+                            <option value="query">query</option>
+                            <option value="referrer">referrer</option>
+                            <option value="referrer_domain">referrer_domain</option>
+                            <option value="region">region</option>
+                            <option value="reverse_domain">reverse_domain</option>
+                            <option value="source_file">source_file</option>
+                            <option value="status">status</option>
+                            <option value="statuscode">statuscode</option>
+                            <option value="uri">uri</option>
+
+                        </select>
                     </div>
                 </div>
 

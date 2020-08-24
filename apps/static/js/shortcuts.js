@@ -50,6 +50,20 @@ MEDLEY.shortcuts = (function () {
         return value.replace(selection, replacement);
     }
 
+    function spliceText(target, value, appendNewline=false) {
+        const insertIndex = target.selectionStart;
+        const before = target.value.slice(0, insertIndex);
+        const suffix = (appendNewline)? " \n" : "";
+        const after = target.value.slice(insertIndex);
+
+        target.value = before + value + suffix + after;
+
+        target.focus();
+
+        const newSelectionStart = insertIndex + value.length + 1;
+        target.setSelectionRange(newSelectionStart, newSelectionStart);
+    }
+
     function urlRemovePath(value) {
         const node = document.createElement('a');
         node.href = value.trim()
@@ -161,9 +175,37 @@ MEDLEY.shortcuts = (function () {
         }
     }
 
+    function dispatchChange(e) {
+        if (!e.target.dataset.shortcut) {
+            return;
+        }
+
+        if (!e.target.dataset.field) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const shortcut = e.target.dataset.shortcut;
+        const field = document.getElementById(e.target.dataset.field);
+
+        if (!field) {
+            return;
+        }
+
+        if (shortcut === 'splice-to-newline') {
+            if (e.target.value) {
+                spliceText(field, e.target.value, true);
+                e.target.value = '';
+            }
+        }
+
+    }
+
     return {
         init: function () {
             document.addEventListener('click', dispatchClick);
+            document.addEventListener('change', dispatchChange);
         }
     }
 })();

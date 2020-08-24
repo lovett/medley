@@ -6,9 +6,10 @@
     --visitors-moved: LightCyan;
 }
 
-#saved-queries select {
-    font-size: 1em;
+select {
+    font-size: 2em;
 }
+
 
 #app-nav form {
     grid-template-columns: auto;
@@ -16,10 +17,6 @@
 
 #delete-saved-query {
     margin-left: 1em;
-}
-
-input[type=range] {
-    width: 100%;
 }
 
 .code-204 td {
