@@ -11,4 +11,4 @@ pytest-cov==2.10.1
 pytest==6.0.1
 pytest-timeout==1.4.2
 requests-mock==1.8.0
-responses==0.10.16
+responses==0.11.0
