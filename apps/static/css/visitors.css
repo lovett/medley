@@ -6,11 +6,6 @@
     --visitors-moved: LightCyan;
 }
 
-select {
-    font-size: 2em;
-}
-
-
 #app-nav form {
     grid-template-columns: auto;
 }
@@ -73,14 +68,39 @@ select {
 
 .shortcuts {
     display: flex;
+    flex-flow: row wrap;
+    align-items: flex-end;
     justify-content: space-between;
-    align-items: center;
-    padding-top: .5em;
 }
 
 .shortcuts button {
     margin-top: 0;
 }
+
+.shortcuts button:first-of-type {
+    margin-left: 0;
+}
+
+.shortcuts select {
+    font-size: 1.25em;
+    margin: 0;
+    padding: 0.25em;
+}
+
+.shortcuts option {
+    padding: 0.5em;
+}
+
+.shortcuts label {
+    text-align: left;
+}
+
+.shortcuts .field {
+    padding-top: 0.5em;
+    box-sizing: border-box;
+    margin-bottom: 1em;
+}
+
 
 .table-top {
     display: flex;
