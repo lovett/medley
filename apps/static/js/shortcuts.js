@@ -148,7 +148,7 @@ MEDLEY.shortcuts = (function () {
                 field.value,
                 field.selectionStart,
                 field.selectionEnd,
-                /^[\s-]*/gm,
+                /^[\s-\*]*/gm,
                 "- "
             );
         }
