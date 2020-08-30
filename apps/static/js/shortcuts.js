@@ -153,6 +153,16 @@ MEDLEY.shortcuts = (function () {
             );
         }
 
+        if (shortcut === 'unwrap') {
+            field.value = replaceSelection(
+                field.value,
+                field.selectionStart,
+                field.selectionEnd,
+                /([^\r\n])[\r\n](?![\s\n]+)/gm,
+                '$1 '
+            );
+        }
+
         if (shortcut === 'spaced-sentences') {
             field.value = replaceSelection(
                 field.value,
