@@ -296,7 +296,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             f"""SELECT r.id, r.title, r.body, r.url, r.domain,
             r.created as 'created [timestamp]',
             r.updated as 'updated [timestamp]',
-            r.last_made as 'last_made [timestamp]',
+            r.last_made as 'last_made [date]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r
             WHERE (r.{field} BETWEEN ? and ?)
@@ -311,7 +311,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT r.id, r.title, r.body, r.url, r.domain,
             r.created as 'created [timestamp]',
             r.updated as 'updated [timestamp]',
-            r.last_made as 'last_made [timestamp]',
+            r.last_made as 'last_made [date]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r, recipes_fts
             WHERE r.id=recipes_fts.rowid
