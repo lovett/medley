@@ -44,6 +44,7 @@
     margin-top: 2em;
     padding-bottom: 0.5em;
     border-bottom: 1px solid currentColor;
+    display: inline-block;
 }
 
 #directions H1:first-child {
@@ -148,12 +149,6 @@
         padding-right: 0.75em;
     }
 
-    #directions {
-        columns: 32em;
-        column-fill: auto;
-        column-gap: 3em;
-    }
-
     #recipe {
         display: grid;
         grid-template-rows: auto 1fr;
@@ -222,4 +217,4 @@
     }
 
 
-}
+p}
