@@ -14,6 +14,12 @@
     stroke-width: 0.25;
 }
 
+.scatter .legend {
+    font-size: .2em;
+    text-transform: uppercase;
+
+}
+
 .scatter .labels text {
     font-size: .2em;
 }

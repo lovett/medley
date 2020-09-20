@@ -1,4 +1,4 @@
-{% set min_x = 15 %}
+{% set min_x = 17 %}
 {% set max_x = 300 %}
 {% set min_y = 10 %}
 {% set max_y = 110 %}
@@ -12,6 +12,9 @@
     <g class="y axis">
         <line x1="{{ min_x }}" y1="{{ min_y }}" x2="{{ min_x }}" y2="{{ max_y }}"></line>
     </g>
+
+
+    <text x="{{ -1 * max_y / 2 }}" y="3" text-anchor="middle" class="legend" transform="rotate(270)">{{ y_legend }}</text>
 
     {% set step = (max_x - min_x) / (x_ticks - 1) %}
     <g class="x ticks">
@@ -46,7 +49,7 @@
     <g class="y labels">
         {% for i in range(y_ticks) %}
             {% set y = 100 - (i * step) + 10 %}
-            <text x="12"
+            <text x="13"
                   y="{{ y }}"
                   text-anchor="end"
                   alignment-baseline="middle"

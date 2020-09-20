@@ -80,10 +80,21 @@ class Controller:
 
         y_step = y_range[1] / (y_ticks - 1)
 
+        y_legend = y_unit
         y_labels = [
-            round(y_step * i, 2)
+            round(y_step * i)
             for i in range(y_ticks)
         ]
+
+        if y_unit == "ms":
+            y_legend = "Milliseconds"
+
+            if y_range[1] > 1000:
+                y_legend = "Seconds"
+                y_labels = [
+                    round(label / 1000)
+                    for label in y_labels
+                ]
 
         x_range = (
             cherrypy.engine.publish("clock:local", x_range[0]).pop(),
@@ -103,6 +114,7 @@ class Controller:
                 y_labels=y_labels,
                 y_range=y_range,
                 y_unit=y_unit,
+                y_legend=y_legend,
                 points=points,
                 subview_title=metric
             ).pop()
