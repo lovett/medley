@@ -37,16 +37,21 @@
 
         </header>
 
-        <p> {{ forecast.currently.weather_description }}</p>
+        <p>
+            {{ forecast.currently.weather_description }},
+            {{ forecast.currently.temp|round|int }}° F
+            {% if (forecast.currently.feels_like - forecast.currently.temp)|abs > 2 %}
+                Feels like {{ forecast.currently.feels_like|round|int }}° F.
+            {% endif %}
+        </p>
 
         <div class="cards">
             <div class="card">
                 <svg class="icon"><use xlink:href="#icon-thermometer"/></svg>
                 <div>
-                    <p>{{ forecast.currently.temp|round|int }}° F</p>
-                    {% if (forecast.currently.feels_like - forecast.currently.temp)|abs > 2 %}
-                        <p>Feels like {{ forecast.currently.feels_like|round|int }}° F</p>
-                    {% endif %}
+                    <p>Low of {{ forecast.today.temp.min|round|int }}° F</p>
+                    <p>High of {{ forecast.today.temp.max|round|int }}° F</p>
+
                 </div>
             </div>
 

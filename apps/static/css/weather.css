@@ -12,6 +12,11 @@
     grid-column-gap: 5em;
     grid-row-gap: 2em;
     margin-bottom: 3em;
+    font-size: .85em;
+    background-color: var(--secondary);
+    margin-left: -1em;
+    margin-right: -1em;
+    padding: 0.5em;
 }
 
 .card {
