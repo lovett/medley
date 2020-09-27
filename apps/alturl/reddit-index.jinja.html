@@ -10,12 +10,6 @@
             <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
             All
         </a>
-        {% if not bookmark_id %}
-            <a id="add-record" href="#" data-url="{{ subreddit }}">
-                <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-                Add bookmark
-            </a>
-        {% endif %}
     </nav>
 {% endblock %}
 
@@ -24,6 +18,14 @@
         <h2>{{ subreddit }}</h2>
     </header>
 
+    {% if not bookmark_id %}
+        <p>
+            <a id="add-record" href="#" data-url="{{ subreddit }}">
+                <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+                Bookmark
+            </a>
+        </p>
+    {% endif %}
 
     <div id="collection">
         <ul>
