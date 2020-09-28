@@ -19,16 +19,17 @@ MEDLEY.visitors = (function () {
         let payload = new FormData()
         payload.set('key', `visitors:${queryName.toLowerCase()}`);
         payload.set('value', queryField.value);
-        payload.set('replace', 1)
+        payload.set('skip_redirect', 1);
 
-        const response = await fetch('/registry', {
-            method: 'PUT',
+        const response = await fetch(e.target.href, {
+            method: 'POST',
             mode: 'same-origin',
             body: payload
         })
 
         if (response.ok) {
             MEDLEY.setSuccessMessage('Query saved.');
+            setTimeout(submitQuery, 1000);
         } else {
             MEDLEY.setErrorMessage('The query could not be saved.');
         }
@@ -64,17 +65,20 @@ MEDLEY.visitors = (function () {
      * Present a saved query.
      */
     function displaySavedQuery(e) {
-        const query = e.target.value;
-        const multilineQuery = query.split(',').reduce((accumulator, segment) => {
+        document.getElementById('query').value = e.target.value.split(';').reduce((accumulator, segment) => {
             return accumulator + '\n' + segment.trim();
         });
-        document.getElementById('query').value = multilineQuery;
-        document.getElementById('search').setAttribute('disabled', true);
 
+        submitQuery();
+    }
+
+    /**
+     * Send the current search query to the server.
+     */
+    function submitQuery() {
         setTimeout(() => {
             document.getElementById('visitors-form').submit();
         }, 250);
-
     }
 
     /**

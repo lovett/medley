@@ -4,16 +4,13 @@ from datetime import datetime
 import re
 import sqlite3
 import typing
-from collections import namedtuple
 import cherrypy
-
-SavedQuery = namedtuple('SavedQuery', ['id', 'key', 'value', 'active'])
 
 
 class Controller:
-    """
-    The primary controller for the application, structured for
+    """The primary controller for the application, structured for
     method-based dispatch
+
     """
 
     exposed = True
@@ -23,23 +20,26 @@ class Controller:
     def GET(self, *_args: str, **kwargs: str) -> bytes:
         """Display a search interface, and the results of the default query"""
 
-        query = kwargs.get("query", "")
-
-        if query:
-            query = query.strip()
-
         site_domains = cherrypy.engine.publish(
             "registry:search:valuelist",
             "logindex:site_domain",
         ).pop()
 
-        saved_queries = self.get_saved_queries(query)
+        saved_queries = cherrypy.engine.publish(
+            "registry:search:dict",
+            "visitors*",
+            key_slice=1
+        ).pop()
 
-        if not query:
-            query = next(
-                (query.value for query in saved_queries if query.active),
-                "date today"
-            )
+        registry_url = cherrypy.engine.publish(
+            "url:internal",
+            "/registry"
+        ).pop()
+
+        query = kwargs.get("query", "").strip()
+
+        if "default" in saved_queries.keys() and not query:
+            query = saved_queries["default"]
 
         log_records, query_plan = cherrypy.engine.publish(
             "logindex:query",
@@ -83,39 +83,13 @@ class Controller:
                 active_date=self.get_active_date(log_records, query),
                 results=log_records,
                 country_names=country_names,
+                registry_url=registry_url,
                 site_domains=site_domains,
                 saved_queries=saved_queries,
                 annotations=annotations,
                 cookies=cookies
             ).pop()
         )
-
-    @staticmethod
-    def get_saved_queries(current_query: str = "") -> typing.List[SavedQuery]:
-        """Fetch and restructure saved search queries"""
-
-        _, rows = cherrypy.engine.publish(
-            "registry:search",
-            "visitors*"
-        ).pop()
-
-        queries = []
-
-        for row in rows:
-            record_id = row["rowid"]
-            key = row["key"].replace("visitors:", "")
-            value = row["value"]
-            active = False
-
-            if current_query:
-                active = row["value"].split() == current_query.split()
-
-            if key == "default" and not current_query:
-                active = True
-
-            queries.append(SavedQuery(record_id, key, value, active))
-
-        return queries
 
     @staticmethod
     def get_active_date(

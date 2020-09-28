@@ -13,7 +13,7 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a id="add-record" class="secondary-action" href="#save">
+        <a id="add-record" class="secondary-action" href="{{ registry_url }}">
             <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
             Save
         </a>
@@ -39,10 +39,8 @@
                                 <label for="saved">Saved queries</label>
                                 <select id="saved">
                                     <option value=""></option>
-                                    {% for query in saved_queries %}
-                                        <option data-id="{{ query[0] }}"
-                                                value="{{ query[2] }}" {% if query[3] %}selected="selected"{% endif %}
-                                        >{{ query[1] }}</option>
+                                    {% for name, query in saved_queries.items() %}
+                                        <option value="{{ query|replace("\n", ";") }}">{{ name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
