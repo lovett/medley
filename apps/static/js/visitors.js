@@ -82,21 +82,13 @@ MEDLEY.visitors = (function () {
     }
 
     /**
-     * Blank the saved query dropdown if the query is edited.
-     *
-     * Also show or hide the date adjustment buttons if the query has
+     * Show or hide the date adjustment buttons if the query has
      * a date clause.
      */
-    function resetQueryMenu(e) {
-        document.getElementById('saved').value = '';
-
+    function adjustSearchOptions(e) {
         const buttons = document.querySelectorAll('button[data-shortcut^="query-date"]');
-
-        if (e.target.value.indexOf('date ') === -1) {
-            buttons.forEach(node => node.hidden = true);
-        } else {
-            buttons.forEach(node => node.hidden = false);
-        }
+        const hidden = e.target.value.indexOf('date ') === -1;
+        buttons.forEach(node => node.hidden = hidden);
     }
 
     /**
@@ -162,7 +154,7 @@ MEDLEY.visitors = (function () {
 
             document.getElementById('query').addEventListener(
                 'keyup',
-                resetQueryMenu
+                adjustSearchOptions
             );
 
             document.addEventListener(
