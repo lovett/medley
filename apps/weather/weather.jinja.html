@@ -147,7 +147,9 @@
                                     {% endfor %}
                                 </p>
 
-                                <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
+                                {% if record.get("pop", 0) > 0 %}
+                                    <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
+                                {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
@@ -175,7 +177,9 @@
                                         {% endfor %}
                                     </p>
 
-                                    <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
+                                    {% if record.get("pop", 0) > 0 %}
+                                        <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endfor %}
@@ -203,7 +207,9 @@
                                         {% endfor %}
                                     </p>
 
-                                    <p>{{ day.get("pop")|percentage }} chance of precipitation.</p>
+                                    {% if day.get("pop", 0) > 0 %}
+                                        <p>{{ day.get("pop")|percentage }} chance of precipitation.</p>
+                                    {% endif %}
 
                                 </td>
                             </tr>
