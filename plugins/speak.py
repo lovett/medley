@@ -352,16 +352,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             1
         )
 
-        app_url = cherrypy.engine.publish(
-            "url:internal",
-            "/speak"
-        ).pop()
-
         cherrypy.engine.publish(
             "notifier:send",
             {
                 "title": "Medley is muted.",
-                "url": app_url,
                 "badge": "medley.svg",
                 "localId": "speak-mute"
             }
