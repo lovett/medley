@@ -5,6 +5,9 @@ in the argument list are returned.  #}
 {% macro svgSymbols() %}
     <svg hidden version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink">
         <defs>
+            {% if "alert" in varargs %}
+                <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></symbol>
+            {% endif %}
             {% if "arrow-left" in varargs %}
                 <symbol id="icon-arrow-left" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></symbol>
             {% endif %}

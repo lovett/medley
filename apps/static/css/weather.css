@@ -38,6 +38,34 @@
     margin-bottom: .5em;
 }
 
+.weather-alerts {
+    margin-bottom: 1em;
+}
+
+.weather-alert {
+    background-color: var(--secondary);
+    padding: 1em;
+    margin-left: -0.75em;
+    margin-right: -0.75em;
+    margin-bottom: 1em;
+}
+
+.weather-alert:last-of-type {
+    margin-bottom: 0;
+}
+
+.weather-alert .title {
+    text-transform: uppercase;
+    margin: 0;
+    text-indent: -1.5em;
+    margin-left: 1.5em;
+    line-height: 1.3;
+}
+
+.weather-alert .title svg {
+    color: var(--alert);
+}
+
 /* Small devices */
 @media (min-width: 576px) {
 }

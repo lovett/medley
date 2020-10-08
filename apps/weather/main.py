@@ -142,4 +142,28 @@ class Controller:
             in currently["weather"]
         ])
 
+        result["alerts"] = []
+
+        if forecast.get("alerts"):
+            blacklist = cherrypy.engine.publish(
+                "registry:search:valuelist",
+                "weather:alerts:blacklist"
+            ).pop()
+
+            for alert in forecast.get("alerts", []):
+                if alert["event"] in blacklist:
+                    continue
+
+                for key in ["start", "end"]:
+                    alert[key] = cherrypy.engine.publish(
+                        "clock:from_timestamp",
+                        alert[key],
+                        True
+                    ).pop()
+
+                alert["description"] = alert["description"].lstrip("...")
+                alert["description"] = alert["description"].split("*")
+
+                result["alerts"].append(alert)
+
         return result
