@@ -23,6 +23,39 @@ class Controller:
         return self.list_metrics()
 
     @staticmethod
+    def list_metrics() -> bytes:
+        """Display a list of metrics."""
+
+        metrics = cherrypy.engine.publish(
+            "metrics:inventory"
+        ).pop()
+
+        reports = {}
+
+        if not cherrypy.config["zipapp"]:
+            if pathlib.Path("apps/static/mypy").is_dir():
+                reports["MyPy"] = cherrypy.engine.publish(
+                    "url:internal",
+                    "/static/mypy/index.html"
+                ).pop()
+
+            if pathlib.Path("apps/static/coverage").is_dir():
+                reports["Code Coverage"] = cherrypy.engine.publish(
+                    "url:internal",
+                    "/static/coverage/index.html"
+                ).pop()
+
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/metrics/metrics.jinja.html",
+                metrics=metrics,
+                reports=reports
+            ).pop()
+        )
+
+    @staticmethod
     def plot(metric: str) -> bytes:
         """Display a single metric as a scatter plot."""
 
@@ -117,38 +150,5 @@ class Controller:
                 y_legend=y_legend,
                 points=points,
                 subview_title=metric
-            ).pop()
-        )
-
-    @staticmethod
-    def list_metrics() -> bytes:
-        """Display a list of metrics."""
-
-        metrics = cherrypy.engine.publish(
-            "metrics:inventory"
-        ).pop()
-
-        reports = {}
-
-        if not cherrypy.config["zipapp"]:
-            if pathlib.Path("apps/static/mypy").is_dir():
-                reports["MyPy"] = cherrypy.engine.publish(
-                    "url:internal",
-                    "/static/mypy/index.html"
-                ).pop()
-
-            if pathlib.Path("apps/static/coverage").is_dir():
-                reports["Code Coverage"] = cherrypy.engine.publish(
-                    "url:internal",
-                    "/static/coverage/index.html"
-                ).pop()
-
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/metrics/metrics.jinja.html",
-                metrics=metrics,
-                reports=reports
             ).pop()
         )

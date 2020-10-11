@@ -11,6 +11,17 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    @staticmethod
+    def DELETE(uid: str) -> None:
+        """Remove an existing entry by its ID"""
+
+        cherrypy.engine.publish(
+            "registry:remove:id",
+            int(uid)
+        )
+
+        cherrypy.response.status = 204
+
     @cherrypy.tools.provides(formats=("html", "json"))
     def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
@@ -33,6 +44,77 @@ class Controller:
             return self.form(int(args[-2]), **kwargs)
 
         raise cherrypy.HTTPError(404)
+
+    @staticmethod
+    def POST(*args: str, **kwargs: str) -> None:
+        """Store a new entry in the database or update an existing entry"""
+
+        key = kwargs.get("key", "").strip()
+        value = kwargs.get("value", "").strip()
+
+        if args:
+            cherrypy.engine.publish(
+                "registry:update",
+                int(args[0]),
+                key,
+                value
+            )
+        else:
+            cherrypy.engine.publish(
+                "registry:add",
+                key,
+                value
+            )
+
+        if not kwargs.get("skip_redirect"):
+            raise cherrypy.HTTPRedirect(f"/registry?q={key}")
+
+        cherrypy.response.status = 204
+
+    @staticmethod
+    def form(rowid: int = 0, **kwargs: str) -> bytes:
+        """Display a form for adding or updating a record."""
+
+        key = kwargs.get("key", "")
+        value = ""
+        submit_url = "/registry"
+        cancel_url = "/registry"
+        subview_title = "New"
+
+        if key:
+            cancel_url = f"/registry?q={key}"
+
+        if cherrypy.request.wants == "json":
+            raise cherrypy.HTTPError(404)
+
+        if rowid:
+            record = cherrypy.engine.publish(
+                "registry:find",
+                rowid
+            ).pop()
+
+            if not record:
+                raise cherrypy.HTTPError(404)
+
+            key = record["key"]
+            value = record["value"]
+            submit_url = f"/registry/{rowid}"
+            cancel_url = f"/registry?q={key}"
+            subview_title = "Update"
+
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/registry/registry-form.jinja.html",
+                rowid=rowid,
+                key=key,
+                value=value,
+                submit_url=submit_url,
+                cancel_url=cancel_url,
+                subview_title=subview_title
+            ).pop()
+        )
 
     @staticmethod
     def index(*_args: str, **_kwargs: str) -> bytes:
@@ -93,85 +175,3 @@ class Controller:
                 subview_title=query
             ).pop()
         )
-
-    @staticmethod
-    def form(rowid: int = 0, **kwargs: str) -> bytes:
-        """Display a form for adding or updating a record."""
-
-        key = kwargs.get("key", "")
-        value = ""
-        submit_url = "/registry"
-        cancel_url = "/registry"
-        subview_title = "New"
-
-        if key:
-            cancel_url = f"/registry?q={key}"
-
-        if cherrypy.request.wants == "json":
-            raise cherrypy.HTTPError(404)
-
-        if rowid:
-            record = cherrypy.engine.publish(
-                "registry:find",
-                rowid
-            ).pop()
-
-            if not record:
-                raise cherrypy.HTTPError(404)
-
-            key = record["key"]
-            value = record["value"]
-            submit_url = f"/registry/{rowid}"
-            cancel_url = f"/registry?q={key}"
-            subview_title = "Update"
-
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/registry/registry-form.jinja.html",
-                rowid=rowid,
-                key=key,
-                value=value,
-                submit_url=submit_url,
-                cancel_url=cancel_url,
-                subview_title=subview_title
-            ).pop()
-        )
-
-    @staticmethod
-    def POST(*args: str, **kwargs: str) -> None:
-        """Store a new entry in the database or update an existing entry"""
-
-        key = kwargs.get("key", "").strip()
-        value = kwargs.get("value", "").strip()
-
-        if args:
-            cherrypy.engine.publish(
-                "registry:update",
-                int(args[0]),
-                key,
-                value
-            )
-        else:
-            cherrypy.engine.publish(
-                "registry:add",
-                key,
-                value
-            )
-
-        if not kwargs.get("skip_redirect"):
-            raise cherrypy.HTTPRedirect(f"/registry?q={key}")
-
-        cherrypy.response.status = 204
-
-    @staticmethod
-    def DELETE(uid: str) -> None:
-        """Remove an existing entry by its ID"""
-
-        cherrypy.engine.publish(
-            "registry:remove:id",
-            int(uid)
-        )
-
-        cherrypy.response.status = 204

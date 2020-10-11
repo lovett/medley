@@ -14,6 +14,47 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
+    def DELETE(uid: str) -> None:
+        """Remove a previously-scheduled reminder."""
+
+        uid_float = float(uid)
+
+        scheduled_events = cherrypy.engine.publish(
+            "scheduler:upcoming",
+            "notifier:send"
+        ).pop()
+
+        wanted_events = [
+            event for event in scheduled_events
+            if event.time == uid_float
+        ]
+
+        if not wanted_events:
+            cherrypy.response.status = 404
+            return
+
+        result = cherrypy.engine.publish(
+            "scheduler:remove",
+            wanted_events[0]
+        ).pop()
+
+        if result is False:
+            cherrypy.response.status = 404
+            return
+
+        deleted_notification = wanted_events[0].argument[1]
+
+        local_id = deleted_notification.get("localId")
+
+        if local_id:
+            cherrypy.engine.publish(
+                "notifier:clear",
+                local_id
+            )
+
+        cherrypy.response.status = 204
+
+    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     def GET(*_args: str, **_kwargs: str) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
@@ -204,44 +245,3 @@ class Controller:
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
-
-    @staticmethod
-    def DELETE(uid: str) -> None:
-        """Remove a previously-scheduled reminder."""
-
-        uid_float = float(uid)
-
-        scheduled_events = cherrypy.engine.publish(
-            "scheduler:upcoming",
-            "notifier:send"
-        ).pop()
-
-        wanted_events = [
-            event for event in scheduled_events
-            if event.time == uid_float
-        ]
-
-        if not wanted_events:
-            cherrypy.response.status = 404
-            return
-
-        result = cherrypy.engine.publish(
-            "scheduler:remove",
-            wanted_events[0]
-        ).pop()
-
-        if result is False:
-            cherrypy.response.status = 404
-            return
-
-        deleted_notification = wanted_events[0].argument[1]
-
-        local_id = deleted_notification.get("localId")
-
-        if local_id:
-            cherrypy.engine.publish(
-                "notifier:clear",
-                local_id
-            )
-
-        cherrypy.response.status = 204

@@ -40,6 +40,26 @@ class Controller:
         ("1/10", "⅒"),
     )
 
+    def DELETE(self, *args: str) -> None:
+        """Dispatch to a subhandler based on the URL path."""
+
+        deleted = False
+
+        if len(args) == 1:
+            recipe_id = int(args[0])
+            deleted = self.delete_recipe(recipe_id)
+
+        if len(args) == 3 and args[1] == "attachments":
+            recipe_id = int(args[0])
+            attachment_id = int(args[2])
+            deleted = self.delete_attachment(recipe_id, attachment_id)
+
+        if deleted:
+            cherrypy.response.status = 204
+            return
+
+        raise cherrypy.HTTPError(404)
+
     # pylint: disable=too-many-return-statements
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args: str, **kwargs: str) -> bytes:
@@ -141,66 +161,21 @@ class Controller:
 
         raise cherrypy.HTTPRedirect(f"/recipes/{upsert_id}")
 
-    def DELETE(self, *args: str) -> None:
-        """Dispatch to a subhandler based on the URL path."""
-
-        deleted = False
-
-        if len(args) == 1:
-            recipe_id = int(args[0])
-            deleted = self.delete_recipe(recipe_id)
-
-        if len(args) == 3 and args[1] == "attachments":
-            recipe_id = int(args[0])
-            attachment_id = int(args[2])
-            deleted = self.delete_attachment(recipe_id, attachment_id)
-
-        if deleted:
-            cherrypy.response.status = 204
-            return
-
-        raise cherrypy.HTTPError(404)
-
     @staticmethod
-    def delete_recipe(recipe_id: int) -> bool:
-        """Remove a recipe from the database."""
+    def attachment(recipe_id: int, filename: str) -> bytes:
+        """Display a single attachment."""
 
-        return typing.cast(bool, cherrypy.engine.publish(
-            "recipes:remove",
-            recipe_id
-        ).pop())
-
-    @staticmethod
-    def delete_attachment(recipe_id: int, attachment_id: int) -> bool:
-        """Remove an attachment from the database."""
-
-        return typing.cast(bool, cherrypy.engine.publish(
-            "recipes:attachment:remove",
+        row = cherrypy.engine.publish(
+            "recipes:attachment:view",
             recipe_id=recipe_id,
-            attachment_id=attachment_id,
-        ).pop())
-
-    @staticmethod
-    def index(*_args: str, **_kwargs: str) -> bytes:
-        """Display the application homepage."""
-
-        tags = cherrypy.engine.publish(
-            "recipes:tags:all"
+            filename=filename
         ).pop()
 
-        recently_added = cherrypy.engine.publish(
-            "recipes:find:recent"
-        ).pop()
+        if not row:
+            raise cherrypy.HTTPError(404)
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-index.jinja.html",
-                tags=tags,
-                recently_added=recently_added
-            ).pop()
-        )
+        cherrypy.response.headers["Content-Type"] = row["mime_type"]
+        return typing.cast(bytes, row["content"])
 
     @staticmethod
     def by_tag(tag: str, **_kwargs: str) -> bytes:
@@ -221,6 +196,25 @@ class Controller:
                 subview_title=tag
             ).pop()
         )
+
+    @staticmethod
+    def delete_attachment(recipe_id: int, attachment_id: int) -> bool:
+        """Remove an attachment from the database."""
+
+        return typing.cast(bool, cherrypy.engine.publish(
+            "recipes:attachment:remove",
+            recipe_id=recipe_id,
+            attachment_id=attachment_id,
+        ).pop())
+
+    @staticmethod
+    def delete_recipe(recipe_id: int) -> bool:
+        """Remove a recipe from the database."""
+
+        return typing.cast(bool, cherrypy.engine.publish(
+            "recipes:remove",
+            recipe_id
+        ).pop())
 
     @staticmethod
     def form(recipe_id: int = 0, **_kwargs: str) -> bytes:
@@ -286,6 +280,28 @@ class Controller:
         )
 
     @staticmethod
+    def index(*_args: str, **_kwargs: str) -> bytes:
+        """Display the application homepage."""
+
+        tags = cherrypy.engine.publish(
+            "recipes:tags:all"
+        ).pop()
+
+        recently_added = cherrypy.engine.publish(
+            "recipes:find:recent"
+        ).pop()
+
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/recipes/recipes-index.jinja.html",
+                tags=tags,
+                recently_added=recently_added
+            ).pop()
+        )
+
+    @staticmethod
     def search(query: str = "") -> bytes:
         """Display recipes and tags matching a search."""
 
@@ -332,22 +348,6 @@ class Controller:
                 subview_title=query
             ).pop()
         )
-
-    @staticmethod
-    def attachment(recipe_id: int, filename: str) -> bytes:
-        """Display a single attachment."""
-
-        row = cherrypy.engine.publish(
-            "recipes:attachment:view",
-            recipe_id=recipe_id,
-            filename=filename
-        ).pop()
-
-        if not row:
-            raise cherrypy.HTTPError(404)
-
-        cherrypy.response.headers["Content-Type"] = row["mime_type"]
-        return typing.cast(bytes, row["content"])
 
     def show(self, recipe_id: int) -> bytes:
         """Display a single recipe."""

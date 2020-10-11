@@ -50,6 +50,33 @@ class Controller:
         raise cherrypy.NotFound()
 
     @staticmethod
+    def capture(*args: str, **_kwargs: str) -> bytes:
+        """Capture a request and return the status code indicated by the
+        URL.
+
+        """
+
+        try:
+            status = int(args[1])
+        except ValueError:
+            status = 404
+        except IndexError:
+            status = 200
+
+        if 400 <= status <= 500:
+            raise cherrypy.HTTPError(status)
+
+        if 300 <= status <= 308:
+            destination = cherrypy.engine.publish(
+                "url:internal",
+                "/"
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(destination, status)
+
+        return str(status).encode()
+
+    @staticmethod
     def index(*_args: str, **kwargs: str) -> bytes:
         """List captures in reverse-chronological order."""
 
@@ -132,30 +159,3 @@ class Controller:
         ).pop()
 
         return response
-
-    @staticmethod
-    def capture(*args: str, **_kwargs: str) -> bytes:
-        """Capture a request and return the status code indicated by the
-        URL.
-
-        """
-
-        try:
-            status = int(args[1])
-        except ValueError:
-            status = 404
-        except IndexError:
-            status = 200
-
-        if 400 <= status <= 500:
-            raise cherrypy.HTTPError(status)
-
-        if 300 <= status <= 308:
-            destination = cherrypy.engine.publish(
-                "url:internal",
-                "/"
-            ).pop()
-
-            raise cherrypy.HTTPRedirect(destination, status)
-
-        return str(status).encode()

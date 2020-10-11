@@ -11,6 +11,20 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
+    @staticmethod
+    def DELETE(url: str) -> None:
+        """Discard a previously bookmarked URL."""
+
+        deleted_rows = cherrypy.engine.publish(
+            "bookmarks:remove",
+            url
+            ).pop()
+
+        if not deleted_rows:
+            raise cherrypy.HTTPError(404, "Invalid url")
+
+        cherrypy.response.status = 204
+
     @cherrypy.tools.provides(formats=("json", "html"))
     def GET(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
@@ -27,6 +41,46 @@ class Controller:
             return self.taglist()
 
         return self.index(**kwargs)
+
+    @staticmethod
+    def POST(url: str, **kwargs: str) -> None:
+        """Add a new bookmark, or update an existing one."""
+
+        title = kwargs.get("title")
+        tags = kwargs.get("tags")
+        comments = kwargs.get("comments")
+        added = kwargs.get("added")
+
+        result = cherrypy.engine.publish(
+            "scheduler:add",
+            2,
+            "bookmarks:add",
+            url,
+            title,
+            comments,
+            tags,
+            added
+        ).pop()
+
+        if not result:
+            raise cherrypy.HTTPError(400)
+
+        cherrypy.response.status = 204
+
+    @staticmethod
+    def check_wayback_availability(url: str) -> bytes:
+        """See if an archived copy of the URL is available."""
+
+        response = cherrypy.engine.publish(
+            "urlfetch:get",
+            "http://archive.org/wayback/available",
+            params={"url": url},
+            as_json=True
+            ).pop() or {}
+
+        snapshots = response.get("archived_snapshots", {})
+        closest_snapshot = snapshots.get("closest", {})
+        return json.dumps(closest_snapshot).encode()
 
     @staticmethod
     def index(*_args: str, **kwargs: str) -> bytes:
@@ -62,24 +116,6 @@ class Controller:
                 query_plan=query_plan,
                 offset=offset,
                 pagination_url=pagination_url
-            ).pop()
-        )
-
-    @staticmethod
-    def taglist() -> bytes:
-        """List all known bookmark tags."""
-
-        tags = cherrypy.engine.publish(
-            "bookmarks:tags:all"
-            ).pop()
-
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/bookmarks/bookmarks-taglist.jinja.html",
-                tags=tags,
-                subview_title="Tags"
             ).pop()
         )
 
@@ -126,55 +162,19 @@ class Controller:
         )
 
     @staticmethod
-    def check_wayback_availability(url: str) -> bytes:
-        """See if an archived copy of the URL is available."""
+    def taglist() -> bytes:
+        """List all known bookmark tags."""
 
-        response = cherrypy.engine.publish(
-            "urlfetch:get",
-            "http://archive.org/wayback/available",
-            params={"url": url},
-            as_json=True
-            ).pop() or {}
-
-        snapshots = response.get("archived_snapshots", {})
-        closest_snapshot = snapshots.get("closest", {})
-        return json.dumps(closest_snapshot).encode()
-
-    @staticmethod
-    def POST(url: str, **kwargs: str) -> None:
-        """Add a new bookmark, or update an existing one."""
-
-        title = kwargs.get("title")
-        tags = kwargs.get("tags")
-        comments = kwargs.get("comments")
-        added = kwargs.get("added")
-
-        result = cherrypy.engine.publish(
-            "scheduler:add",
-            2,
-            "bookmarks:add",
-            url,
-            title,
-            comments,
-            tags,
-            added
-        ).pop()
-
-        if not result:
-            raise cherrypy.HTTPError(400)
-
-        cherrypy.response.status = 204
-
-    @staticmethod
-    def DELETE(url: str) -> None:
-        """Discard a previously bookmarked URL."""
-
-        deleted_rows = cherrypy.engine.publish(
-            "bookmarks:remove",
-            url
+        tags = cherrypy.engine.publish(
+            "bookmarks:tags:all"
             ).pop()
 
-        if not deleted_rows:
-            raise cherrypy.HTTPError(404, "Invalid url")
-
-        cherrypy.response.status = 204
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/bookmarks/bookmarks-taglist.jinja.html",
+                tags=tags,
+                subview_title="Tags"
+            ).pop()
+        )

@@ -17,21 +17,6 @@ class Controller:
         cherrypy.engine.subscribe("registry:removed", self.on_registry_changed)
 
     @staticmethod
-    def on_registry_changed(key: str) -> None:
-        """Clear the cached etag if a URL has been bookmarked."""
-
-        if key == "alturl:bookmark":
-            index_url = cherrypy.engine.publish(
-                "url:internal",
-                "/alturl"
-            ).pop()
-
-            cherrypy.engine.publish(
-                "memorize:clear",
-                f"etag:{index_url}"
-            )
-
-    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
     def GET(*args: str, **_kwargs: str) -> bytes:
@@ -115,3 +100,18 @@ class Controller:
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
+
+    @staticmethod
+    def on_registry_changed(key: str) -> None:
+        """Clear the cached etag if a URL has been bookmarked."""
+
+        if key == "alturl:bookmark":
+            index_url = cherrypy.engine.publish(
+                "url:internal",
+                "/alturl"
+            ).pop()
+
+            cherrypy.engine.publish(
+                "memorize:clear",
+                f"etag:{index_url}"
+            )

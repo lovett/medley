@@ -12,6 +12,38 @@ class Controller:
     exposed = True
     show_on_homepage = False
 
+    @cherrypy.tools.provides(formats=("html", "org"))
+    @cherrypy.tools.etag()
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
+        """List all available applications.
+
+        Apps can be excluded from this list by setting
+        show_on_homepage to False.
+
+        """
+
+        show_all = False
+        if args:
+            show_all = args[0] == "all"
+
+        apps = self.catalog_apps(cherrypy.tree.apps, show_all)
+
+        if cherrypy.request.wants == "org":
+            checklist = (
+                f"- [ ] {name}" for name, _, _, in apps
+            )
+
+            return "\n".join(checklist).encode()
+
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/homepage/homepage.jinja.html",
+                apps=apps,
+            ).pop()
+        )
+
     @staticmethod
     @decorators.log_runtime
     def catalog_apps(
@@ -65,35 +97,3 @@ class Controller:
         catalog.sort(key=lambda tup: tup[0])
 
         return catalog
-
-    @cherrypy.tools.provides(formats=("html", "org"))
-    @cherrypy.tools.etag()
-    def GET(self, *args: str, **_kwargs: str) -> bytes:
-        """List all available applications.
-
-        Apps can be excluded from this list by setting
-        show_on_homepage to False.
-
-        """
-
-        show_all = False
-        if args:
-            show_all = args[0] == "all"
-
-        apps = self.catalog_apps(cherrypy.tree.apps, show_all)
-
-        if cherrypy.request.wants == "org":
-            checklist = (
-                f"- [ ] {name}" for name, _, _, in apps
-            )
-
-            return "\n".join(checklist).encode()
-
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/homepage/homepage.jinja.html",
-                apps=apps,
-            ).pop()
-        )

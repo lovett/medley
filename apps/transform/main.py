@@ -25,10 +25,6 @@ class Controller:
             "urlencode": urllib.parse.quote_plus
         }
 
-    def list_of_transforms(self) -> typing.List[str]:
-        """Shape the list of transforms into a list of keys"""
-        return sorted(self.transforms.keys())
-
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *_args: str, **_kwargs: str) -> bytes:
         """The default view presents the available transformation methods"""
@@ -83,3 +79,7 @@ class Controller:
                 value=value
             ).pop()
         )
+
+    def list_of_transforms(self) -> typing.List[str]:
+        """Shape the list of transforms into a list of keys"""
+        return sorted(self.transforms.keys())
