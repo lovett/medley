@@ -201,10 +201,11 @@ SECTION {
 
 TABLE {
     min-width: 100%;
-    margin: 0 auto 2em 0;
+    margin-bottom: 2em;
     font-size: .85em;
     border-collapse: collapse;
     border: 1px solid #333;
+    overflow: hidden;
 }
 
 TABLE CAPTION {
