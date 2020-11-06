@@ -4,6 +4,6 @@ PyJWT==1.7.1
 geoip2==4.1.0
 httplib2==0.18.1
 mistletoe==0.7.2
-pytz==2020.1
+pytz==2020.4
 requests==2.24.0
 sdnotify==0.3.2
