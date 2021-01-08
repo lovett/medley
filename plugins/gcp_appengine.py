@@ -1,5 +1,4 @@
-"""
-Interact with Google AppEngine.
+"""Interact with Google AppEngine.
 
 See https://googleapis.dev/python/storage/latest/client.html
 """
@@ -7,13 +6,12 @@ See https://googleapis.dev/python/storage/latest/client.html
 import json
 import pathlib
 import typing
-import urllib.parse
 import cherrypy
 from plugins import decorators
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
-    """A CherryPy plugin for interacting with Google Appengine."""
+    """A CherryPy plugin for interacting with Google AppEngine."""
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -53,11 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not storage_path.parts[0:2] == request_top_path:
             return
 
-        extras_path = pathlib.Path("stdout").joinpath(*storage_path.parts[2:])
-
         line_count = self.process_request_log(storage_path, batch_size)
-
-        self.process_application_log(extras_path, batch_size)
 
         unit = "line" if line_count == 1 else "lines"
 
@@ -68,65 +62,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         cherrypy.engine.publish("scheduler:add", 5, "logindex:parse")
-
-    @decorators.log_runtime
-    def process_application_log(
-            self,
-            storage_path: pathlib.Path,
-            batch_size: int = 100
-    ) -> None:
-        """Add the lines of an hourly application log in JSON format to the
-        logindex database.
-        """
-
-        log_path = self.full_storage_path(storage_path)
-
-        if not log_path.is_file():
-            return
-
-        batch: typing.List[typing.Any] = []
-
-        with open(log_path, "r") as file_handle:
-            while True:
-                line = file_handle.readline()
-                if not line:
-                    break
-
-                json_line = json.loads(line)
-
-                payload = json_line.get("textPayload")
-
-                if not payload:
-                    continue
-
-                # Handle payloads that aren't key-value pairs.
-                pairs = {
-                    "message": payload.replace('"', "'")
-                }
-
-                if "=" in payload:
-                    pairs = {
-                        key: value[0].replace('"', "'")
-                        for key, value
-                        in urllib.parse.parse_qs(payload).items()
-                    }
-
-                if "trace" not in pairs:
-                    continue
-
-                record_hash = pairs["trace"].split("/")[0]
-                batch.append((
-                    record_hash,
-                    self.pairs_to_extras(pairs)
-                ))
-
-                if len(batch) > batch_size:
-                    self.publish_extras(batch)
-                    batch = []
-
-        if batch:
-            self.publish_extras(batch)
-            batch = []
 
     @decorators.log_runtime
     def process_request_log(
@@ -253,17 +188,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return " ".join(fields).strip()
 
-    def pairs_to_extras(self, pairs: typing.Dict[str, str]) -> str:
-        """Format a dict as a quoted key-value string."""
-
-        quoted_pairs = [
-            self.combined_pair(key, value)
-            for key, value
-            in pairs.items()
-        ]
-
-        return " ".join(quoted_pairs)
-
     @staticmethod
     def publish_lines(batch: typing.Iterable[str]) -> None:
         """Send a batch of request logs in combined format to the logindex
@@ -272,14 +196,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         cherrypy.engine.publish(
             "logindex:insert_line",
-            batch
-        )
-
-    @staticmethod
-    def publish_extras(batch: typing.List[typing.Tuple[str, str]]) -> None:
-        """Append extra name-value fields a previously-saved combined log."""
-
-        cherrypy.engine.publish(
-            "logindex:append_lineg",
             batch
         )
