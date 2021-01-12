@@ -224,7 +224,10 @@
                         {% for day in forecast.upcoming %}
                             <tr>
                                 <th>{{ day.dt|date(local=True)|dateformat("%A") }}</th>
-                                <td nowrap>{{ day.temp.max|round|int }}° F</td>
+                                <td nowrap>
+                                    {{ day.temp.min|round|int }}° F -
+                                    {{ day.temp.max|round|int }}° F
+                                </td>
                                 <td>
                                     <p>
                                         {% for group in day.weather %}
