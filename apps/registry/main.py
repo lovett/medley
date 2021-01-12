@@ -76,7 +76,7 @@ class Controller:
         """Display a form for adding or updating a record."""
 
         key = kwargs.get("key", "")
-        value = ""
+        value = kwargs.get("value", "")
         submit_url = "/registry"
         cancel_url = "/registry"
         subview_title = "New"
