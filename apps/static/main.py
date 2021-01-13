@@ -11,8 +11,8 @@ class Controller:
     show_on_homepage = False
     exposed = True
 
-    @cherrypy.tools.etag()
     @staticmethod
+    @cherrypy.tools.etag()
     def GET(*args: str, **_kwargs: str) -> bytes:
         """Serve static assets from the filesystem.
 
