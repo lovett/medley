@@ -3,10 +3,25 @@
 {% block scripts %}
     {{ macros.asset("js/delete.js") }}
     {{ macros.asset("js/recipes.js") }}
+    {{ macros.asset("js/star.js") }}
 {% endblock %}
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
+        <a class="star"
+           href="#"
+           data-star-url="/recipes/star/{{ recipe_id }}"
+           data-star-redirect="/recipes/{{ recipe_id }}"
+           data-star-resource-name="recipe">
+            {% if starred %}
+                <svg class="icon"><use xlink:href="#icon-hash"></use></svg>
+                Unstar
+            {% else %}
+                <svg class="icon"><use xlink:href="#icon-star"></use></svg>
+                Star
+            {% endif %}
+        </a>
+
         <a id="edit-record" href="/recipes/{{ recipe_id }}/edit">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
             Edit
@@ -20,7 +35,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("new-item", "arrow-left", "calendar", "edit", "globe", "tag", "delete") }}
+    {{ macros.svgSymbols("star", "hash", "new-item", "arrow-left", "calendar", "edit", "globe", "tag", "delete") }}
 
     <main id="recipe" class="{% if ingredients %}with-ingredients{% endif %}">
         <header id="page-title">

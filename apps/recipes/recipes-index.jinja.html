@@ -1,25 +1,47 @@
 {% extends "apps/recipes/recipes.jinja.html" %}
 
+{% block scripts %}
+    {{ macros.asset("js/star.js") }}
+{% endblock %}
+
 {% block content %}
-    {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete", "calendar") }}
+    {{ macros.svgSymbols("new-item", "arrow-let", "tag", "delete", "calendar", "star", "hash") }}
     <main>
         {% include "apps/recipes/recipe-search.jinja.html" %}
 
-        <section id="collection">
-            <h2>Recently Added</h2>
-            {% set ns = namespace(recipes_found=False) %}
-            <ul>
-                {% for recipe in recently_added %}
-                    {% set ns.recipes_found = True %}
-                    {% include "apps/recipes/recipe-listing.jinja.html" %}
-                {% endfor %}
-            </ul>
+        <div id="collection">
+            <section>
+                <h2>Starred</h2>
+                {% set ns = namespace(recipes_found=False) %}
+                <ul>
+                    {% for recipe in starred %}
+                        {% set ns.recipes_found = True %}
+                        {% include "apps/recipes/recipe-listing.jinja.html" %}
+                    {% endfor %}
+                </ul>
 
-            {% if not ns.recipes_found %}
-                <p>No recipes found.</p>
-            {% endif %}
-            <ul>
-        </section>
+                {% if not ns.recipes_found %}
+                    <p>No starred recipes.</p>
+                {% endif %}
+                <ul>
+            </section>
+
+            <section>
+                <h2>Recently Added</h2>
+                {% set ns = namespace(recipes_found=False) %}
+                <ul>
+                    {% for recipe in recently_added %}
+                        {% set ns.recipes_found = True %}
+                        {% include "apps/recipes/recipe-listing.jinja.html" %}
+                    {% endfor %}
+                </ul>
+
+                {% if not ns.recipes_found %}
+                    <p>No recipes found.</p>
+                {% endif %}
+                <ul>
+            </section>
+        </div>
 
         <section id="tagset">
             <h2>Tags</h2>

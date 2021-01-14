@@ -29,11 +29,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             created DEFAULT CURRENT_TIMESTAMP,
             updated DEFAULT NULL,
             deleted DEFAULT NULL,
-            last_made DEFAULT NULL
+            last_made DEFAULT NULL,
+            starred DEFAULT NULL
         );
 
         CREATE INDEX IF NOT EXISTS index_recipe_last_made
             ON recipes (last_made) WHERE last_made IS NOT NULL;
+
+        CREATE INDEX IF NOT EXISTS index_recipe_starred
+            ON recipes (starred) WHERE starred IS NOT NULL;
 
         CREATE TABLE IF NOT EXISTS recipe_tag (
             recipe_id INT NOT NULL,
@@ -109,7 +113,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         CREATE VIEW IF NOT EXISTS extended_recipes_view AS
             SELECT recipes.id, title, body, url, domain,
-                created, updated, last_made,
+                created, updated, last_made, starred,
                 GROUP_CONCAT(tags.name) as tags
             FROM recipes
             LEFT JOIN recipe_tag
@@ -133,10 +137,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("recipes:find", self.find)
         self.bus.subscribe("recipes:find:tag", self.find_by_tag)
         self.bus.subscribe("recipes:find:recent", self.find_recent)
+        self.bus.subscribe("recipes:find:starred", self.find_starred)
         self.bus.subscribe("recipes:prune", self.prune)
         self.bus.subscribe("recipes:remove", self.remove)
         self.bus.subscribe("recipes:search:date", self.search_by_date)
         self.bus.subscribe("recipes:search:keyword", self.search_by_keyword)
+        self.bus.subscribe("recipes:toggle:star", self.toggle_star)
         self.bus.subscribe("recipes:upsert", self.upsert)
 
     def list_attachments(
@@ -193,6 +199,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT id, title, body, url, domain,
             created as 'created [timestamp]',
             updated as 'updated [timestamp]',
+            starred as 'starred [timestamp]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -211,6 +218,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
             ORDER BY created DESC LIMIT ?
+            """,
+            (limit,)
+        )
+
+    def find_starred(self, limit: int = 20) -> typing.Iterator[sqlite3.Row]:
+        """Locate starred recipes."""
+
+        return self._select_generator(
+            """SELECT id, title, url, domain,
+            created as 'created [timestamp]',
+            updated as 'updated [timestamp]',
+            starred as 'starred [timestamp]',
+            last_made as 'last_made [date]',
+            tags as 'tags [comma_delimited]'
+            FROM extended_recipes_view
+            WHERE starred IS NOT NULL
+            ORDER BY starred DESC LIMIT ?
             """,
             (limit,)
         )
@@ -318,6 +342,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             AND recipes_fts MATCH ?
             ORDER BY recipes_fts.rank DESC""",
             (query,)
+        )
+
+    def toggle_star(self, recipe_id: int) -> None:
+        """If a recipe is not starred, star it. Otherwise, instar it."""
+
+        self._execute(
+            """UPDATE recipes SET starred=CASE
+            WHEN starred IS NULL THEN CURRENT_TIMESTAMP
+            ELSE NULL
+            END where id=?""",
+            (recipe_id,)
         )
 
     def upsert(

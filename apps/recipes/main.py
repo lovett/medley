@@ -85,6 +85,23 @@ class Controller:
 
         return self.show(int(args[0]))
 
+    @staticmethod
+    def PATCH(*args: str) -> None:
+        """Handle updates for toggle fields."""
+        if not args:
+            raise cherrypy.HTTPError(400, "Missing id.")
+
+        if args[0] == "star":
+            cherrypy.engine.publish(
+                "recipes:toggle:star",
+                recipe_id=int(args[1])
+            )
+
+            cherrypy.response.status = 204
+            return
+
+        raise cherrypy.HTTPError(404)
+
     def POST(
             self,
             *args: str,
@@ -291,13 +308,18 @@ class Controller:
             "recipes:find:recent"
         ).pop()
 
+        starred = cherrypy.engine.publish(
+            "recipes:find:starred"
+        ).pop()
+
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
                 "apps/recipes/recipes-index.jinja.html",
                 tags=tags,
-                recently_added=recently_added
+                recently_added=recently_added,
+                starred=starred
             ).pop()
         )
 
@@ -401,6 +423,7 @@ class Controller:
                 tags=recipe["tags"] or [],
                 updated=recipe["updated"],
                 added=recipe["created"],
+                starred=recipe["starred"],
                 url=recipe["url"],
                 url_domain=url_domain,
                 last_made=recipe["last_made"],
