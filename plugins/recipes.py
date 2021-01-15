@@ -197,9 +197,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._selectOne(
             """SELECT id, title, body, url, domain,
-            created as 'created [timestamp]',
-            updated as 'updated [timestamp]',
-            starred as 'starred [timestamp]',
+            created as 'created [local_datetime]',
+            updated as 'updated [local_datetime]',
+            starred as 'starred [local_datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -212,8 +212,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT id, title, url, domain,
-            created as 'created [timestamp]',
-            updated as 'updated [timestamp]',
+            created as 'created [local_datetime]',
+            updated as 'updated [local_datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -227,9 +227,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT id, title, url, domain,
-            created as 'created [timestamp]',
-            updated as 'updated [timestamp]',
-            starred as 'starred [timestamp]',
+            created as 'created [local_datetime]',
+            updated as 'updated [local_datetime]',
+            starred as 'starred [local_datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -244,8 +244,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT id, title, url, domain,
-            created as 'created [timestamp]',
-            updated as 'updated [timestamp]',
+            created as 'created [local_datetime]',
+            updated as 'updated [local_datetime]',
             last_made as 'last_made [date]',
             tags as 'tags [comma_delimited]'
             FROM extended_recipes_view
@@ -318,8 +318,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             f"""SELECT r.id, r.title, r.body, r.url, r.domain,
-            r.created as 'created [timestamp]',
-            r.updated as 'updated [timestamp]',
+            r.created as 'created [local_datetime]',
+            r.updated as 'updated [local_datetime]',
             r.last_made as 'last_made [date]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r
@@ -333,8 +333,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(
             """SELECT r.id, r.title, r.body, r.url, r.domain,
-            r.created as 'created [timestamp]',
-            r.updated as 'updated [timestamp]',
+            r.created as 'created [local_datetime]',
+            r.updated as 'updated [local_datetime]',
             r.last_made as 'last_made [date]',
             r.tags as 'tags [comma_delimited]'
             FROM extended_recipes_view AS r, recipes_fts

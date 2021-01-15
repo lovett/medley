@@ -43,6 +43,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "%Y-%m-%d %H:%M:%S"
         ).pop()
 
+        if not dt:
+            dt = cherrypy.engine.publish(
+                "clock:from_format",
+                decoded_value,
+                "%Y-%m-%d %H:%M:%S.%f%z"
+            ).pop()
+
         return typing.cast(
             datetime,
             cherrypy.engine.publish(
