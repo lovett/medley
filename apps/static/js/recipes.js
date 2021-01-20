@@ -11,10 +11,14 @@ MEDLEY.recipes = (function () {
 
     return {
         init: function () {
-            document.addEventListener(
-                'click',
-                toggleStrike
-            );
+            if (document.getElementById('recipe')) {
+                document.addEventListener(
+                    'click',
+                    toggleStrike
+                );
+            }
+
+            MEDLEY.focusAsYouType('#tagset A, #collection A');
         }
     }
 })();
