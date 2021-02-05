@@ -15,7 +15,8 @@ class Controller:
         """Dispatch GET requests to a subhandler based on the URL path."""
 
         if "status" in args:
-            return self.capture(*args, **kwargs)
+            cherrypy.response.status = self.capture(*args, **kwargs)
+            return str(cherrypy.response.status).encode()
 
         if "path" in kwargs:
             return self.search(*args, **kwargs)
@@ -25,32 +26,38 @@ class Controller:
 
         return self.index()
 
+    @cherrypy.tools.capture()
     def POST(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch POST requests to a subhandler based on the URL path."""
 
         if "status" in args:
-            return self.capture(*args, **kwargs)
+            cherrypy.response.status = self.capture(*args, **kwargs)
+            return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
+    @cherrypy.tools.capture()
     def PUT(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch PUT requests to a subhandler based on the URL path."""
 
         if "status" in args:
-            return self.capture(*args, **kwargs)
+            cherrypy.response.status = self.capture(*args, **kwargs)
+            return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
+    @cherrypy.tools.capture()
     def DELETE(self, *args: str, **kwargs: str) -> bytes:
         """Dispatch DELETE requests to a subhandler based on the URL path."""
 
         if "status" in args:
-            return self.capture(*args, **kwargs)
+            cherrypy.response.status = self.capture(*args, **kwargs)
+            return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @staticmethod
-    def capture(*args: str, **_kwargs: str) -> bytes:
+    def capture(*args: str, **_kwargs: str) -> int:
         """Capture a request and return the status code indicated by the
         URL.
 
@@ -74,7 +81,7 @@ class Controller:
 
             raise cherrypy.HTTPRedirect(destination, status)
 
-        return str(status).encode()
+        return status
 
     @staticmethod
     def index(*_args: str, **kwargs: str) -> bytes:
