@@ -38,7 +38,7 @@
             </li>
 
             <li>
-                {{ inline_bookmarklet("location='https://www.google.com/#' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}
+                {{ inline_bookmarklet("location='https://www.google.com/?' + location.search.slice(1).split('&').filter(function(v) { return v.startsWith('q=') })", "google") }}
                 <p>Retry a web search on Google</p>
             </li>
 
