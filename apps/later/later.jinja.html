@@ -35,10 +35,11 @@
 
 
 {% block page_body %}
+    {{ macros.svgSymbols("link", "tag", "file", "filetext", "comment") }}
     <main>
         <form id="later-form" method="post" action="/bookmarks">
             <div class="field">
-                <label for="title">Title:</label>
+                <label for="title">Title</label>
                 <input
                     type="text"
                     id="title"
@@ -49,7 +50,10 @@
             </div>
 
             <div class="field">
-                <label for="url">URL:</label>
+                <label for="url">
+                    <svg class="icon"><use xlink:href="#icon-link"></use></svg>
+                    URL
+                </label>
                 <input
                     type="text"
                     id="url"
@@ -67,7 +71,10 @@
             </div>
 
             <div class="field">
-                <label for="url">Tags:</label>
+                <label for="url">
+                    <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                    Tags
+                </label>
                 <input
                     type="text"
                     id="tags"
@@ -78,7 +85,10 @@
             </div>
 
             <div class="field">
-                <label for="comments">Comments:</label>
+                <label for="comments">
+                    <svg class="icon"><use xlink:href="#icon-comment"></use></svg>
+                    Comments
+                </label>
                 <textarea
                     id="comments"
                     name="comments"

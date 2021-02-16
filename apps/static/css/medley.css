@@ -288,7 +288,6 @@ TEXTAREA {
     margin-right: 0.25em;
 }
 
-
 #collection .actions {
     display: flex;
     justify-content: flex-start;
@@ -472,10 +471,6 @@ TEXTAREA {
     padding-right: .5em;
 }
 
-.delete-button {
-    background-color: var(--grey);
-}
-
 .delete-button a:hover {
     background-color: var(--alert);
 }
@@ -536,6 +531,7 @@ TEXTAREA {
 }
 
 .field TEXTAREA {
+    margin-top: .2em;
     height: 8em;
 }
 
@@ -677,10 +673,6 @@ TEXTAREA {
 
 /* Small devices */
 @media (min-width: 576px) {
-    #collection ul {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
     #page-header {
         display: flex;
         flex-flow: row wrap;
@@ -691,6 +683,10 @@ TEXTAREA {
 
 /* Medium devices */
 @media (min-width: 768px) {
+    #collection ul {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     #main-toolbar FORM {
         order: 1;
         margin-left: 3em;

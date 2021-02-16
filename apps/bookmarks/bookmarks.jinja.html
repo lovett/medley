@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("search", "delete", "tag", "list", "arrow-right", "arrow-left", "globe") }}
+    {{ macros.svgSymbols("search", "delete", "tag", "list", "arrow-right", "arrow-left", "globe", "calendar", "search", "database") }}
 
     <main>
         <header id="app-nav">
@@ -91,7 +91,7 @@
             <ul>
                 {% for bookmark in bookmarks %}
                     <li>
-                        <div class="bookmark" v-bind:style="styles">
+                        <div class="bookmark">
                             <a class="title" href="{{ bookmark.url|anonymize }}" rel="noreferrer" target="_blank">
                                 {{ bookmark.title }}
                             </a>
@@ -106,24 +106,30 @@
                                     {% endfor %}
                                 </div>
                             {% endif %}
+                            <time>
+                                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                                {{ bookmark.added|dateformat("%B %-d, %Y") }}
+                            </time>
 
-                            <div class="details">
-                                {{ macros.deleteButton(app_url ~ "?url=" ~ bookmark.url|urlencode, "li", "Delete this bookmark") }}
-
-                                <div>
-                                    <time>{{ bookmark.added|dateformat("%B %-d, %Y") }}</time>
-                                </div>
-
+                            <div class="actions">
                                 {% if bookmark.domain %}
                                     <div>
-                                        <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">{{ bookmark.domain }}</a>
+                                        <svg class="icon"><use xlink:href="#icon-search"></use></svg>
+                                        <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">
+                                            search domain
+                                        </a>
                                     </div>
                                 {% endif %}
-
                                 <div>
-                                    <a class="wayback" href="#" data-url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}">cache</a>
+                                    <svg class="icon"><use xlink:href="#icon-database"></use></svg>
+                                    <a class="wayback" href="#" data-url="{{ app_url }}?wayback={{ bookmark.url|urlencode }}">
+                                        view cache
+                                    </a>
                                 </div>
+                                {{ macros.deleteButton(app_url ~ "?url=" ~ bookmark.url|urlencode, "li", "Delete this bookmark") }}
+
                             </div>
+
                         </div>
                     </li>
                 {% endfor %}
