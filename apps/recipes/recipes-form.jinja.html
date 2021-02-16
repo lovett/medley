@@ -27,7 +27,7 @@
 {% endblock %}
 
 {% block content %}
-    {{ macros.svgSymbols("arrow-left", "delete", "x") }}
+    {{ macros.svgSymbols("arrow-left", "delete", "x", "zap", "calendar", "link", "tag", "file", "filetext") }}
 
     <main id="editor">
         <form enctype="multipart/form-data" method="post" action="{{ submit_url }}">
@@ -43,7 +43,10 @@
             </div>
             <div class="field-group">
                 <div class="field">
-                    <label for="tags">Tags</label>
+                    <label for="tags">
+                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                        Tags
+                    </label>
                     <input
                         type="text"
                         id="tags"
@@ -52,7 +55,10 @@
                     />
                 </div>
                 <div class="field">
-                    <label for="url">URL</label>
+                    <label for="url">
+                        <svg class="icon"><use xlink:href="#icon-link"></use></svg>
+                        URL
+                    </label>
                     <input
                         type="text"
                         id="url"
@@ -61,7 +67,10 @@
                     />
                 </div>
                 <div class="field">
-                    <label for="last_made">Created</label>
+                    <label for="created">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Created
+                    </label>
                     <input
                         type="text"
                         id="created"
@@ -71,7 +80,10 @@
                     />
                 </div>
                 <div class="field">
-                    <label for="last_made">Last made</label>
+                    <label for="last_made">
+                        <svg class="icon"><use xlink:href="#icon-zap"></use></svg>
+                        Last made
+                    </label>
                     <input
                         type="text"
                         id="last_made"
@@ -88,7 +100,10 @@
             </div>
 
             <div class="field stretch">
-                <label for="body">Ingredients, Directions, and Notes</label>
+                <label for="body">
+                    <svg class="icon"><use xlink:href="#icon-filetext"></use></svg>
+                    Ingredients, Directions, and Notes
+                </label>
                 <textarea
                     id="body"
                     name="body"
@@ -108,7 +123,10 @@
             </div>
 
             <div class="field">
-                <label for="attachments_input">Attachments</label>
+                <label for="attachments_input">
+                    <svg class="icon"><use xlink:href="#icon-file"></use></svg>
+                    Attachments
+                </label>
                 <input type="file" id="attachments_input" name="attachments" multiple />
             </div>
 

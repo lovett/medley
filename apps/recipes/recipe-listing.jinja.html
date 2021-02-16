@@ -5,22 +5,28 @@
                 {{ recipe["title"] }}
             </a>
         </h2>
+        {% set target_date = recipe["created"] %}
+        {% set icon="#icon-calendar" %}
+
+        {% if recipe["last_made"] %}
+            {% set target_date = recipe["last_made"] %}
+            {% set icon="#icon-zap" %}
+        {% elif recipe["updated"] %}
+            {% set target_date = recipe["updated"] %}
+        {% endif %}
+
+        <time datetime="{{ target_date }}">
+            <svg class="icon"><use xlink:href="{{ icon }}"></use></svg>
+            {{ target_date|dateformat("%B %-d, %Y") }}
+        </time>
 
         <p class="tags">
-            {% for recipe_tag in recipe["tags"] %}
-                {% if recipe_tag != tag %}
+            {% for recipe_tag in recipe["tags"] if recipe_tag != tag %}
                 <a href="/recipes/tag/{{ recipe_tag|urlencode }}">
                     <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                     {{ recipe_tag }}
                 </a>
-                {% endif %}
             {% endfor %}
         </p>
-        {% if recipe["last_made"] %}
-            <time datetime="{{ recipe["last_made"] }}">
-                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                Last made {{ recipe["last_made"]|dateformat("%B %-d, %Y") }}
-            </time>
-        {% endif %}
     </div>
 </li>
