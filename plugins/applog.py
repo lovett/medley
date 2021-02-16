@@ -20,6 +20,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("applog.sqlite")
         self.queue: deque = deque()
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -42,6 +45,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the applog prefix.
         """
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("applog:add", self.add)
         self.bus.subscribe("applog:pull", self.pull)
         self.bus.subscribe("applog:newest", self.newest)

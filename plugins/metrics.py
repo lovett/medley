@@ -16,6 +16,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("metrics.sqlite")
         self.queue: deque = deque()
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -36,6 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the metrics prefix.
         """
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("metrics:add", self.add)
         self.bus.subscribe("metrics:inventory", self.inventory)
         self.bus.subscribe("metrics:pull", self.pull)

@@ -16,6 +16,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("recipes.sqlite")
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
         PRAGMA foreign_keys=ON;
@@ -130,6 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the recipes prefix.
         """
 
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("recipes:attachment:list", self.list_attachments)
         self.bus.subscribe("recipes:attachment:view", self.view_attachment)
         self.bus.subscribe("recipes:attachment:remove", self.remove_attachment)

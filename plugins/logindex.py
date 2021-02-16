@@ -24,6 +24,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.db_path = self._path("logindex.sqlite")
         self.queue: typing.Deque[typing.Tuple[datetime, datetime]] = deque()
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -123,13 +126,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
+        self.parse()
+
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the logindex prefix.
         """
 
-        self.bus.subscribe("server:ready", self.parse)
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("logindex:parse", self.parse)
         self.bus.subscribe("logindex:reversal", self.reversal)
         self.bus.subscribe("logindex:alert", self.alert)

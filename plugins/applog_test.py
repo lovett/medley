@@ -18,7 +18,7 @@ class TestApplog(Subscriber):
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
-        self.assert_prefix(subscribe_mock, "applog")
+        self.assert_prefixes(subscribe_mock, ("server", "applog"))
 
     @patch("cherrypy.engine.publish")
     def test_add(self, publish_mock: Mock) -> None:

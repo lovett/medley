@@ -16,6 +16,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("registry.sqlite")
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -33,6 +36,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the registry prefix.
         """
 
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("registry:add", self.add)
         self.bus.subscribe("registry:find", self.find)
         self.bus.subscribe("registry:first:key", self.first_key)

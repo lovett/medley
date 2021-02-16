@@ -15,6 +15,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("captures.sqlite")
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -33,6 +36,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the capture prefix.
         """
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("capture:add", self.add)
         self.bus.subscribe("capture:search", self.search)
         self.bus.subscribe("capture:get", self.get)

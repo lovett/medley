@@ -17,6 +17,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("bookmarks.sqlite")
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -87,6 +90,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
+        self.add_full_text()
+
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
@@ -95,7 +100,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         It depends on the urlfetch plugin for URL retrieval.
         """
 
-        self.bus.subscribe("server:ready", self.add_full_text)
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("bookmarks:find", self.find)
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)

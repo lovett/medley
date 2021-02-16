@@ -18,7 +18,7 @@ class TestCapture(Subscriber):
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
-        self.assert_prefix(subscribe_mock, "capture")
+        self.assert_prefixes(subscribe_mock, ("server", "capture"))
 
     def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""

@@ -14,6 +14,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.db_path = self._path("cache.sqlite")
 
+    def setup(self) -> None:
+        """Create the database."""
+
         self._create("""
         PRAGMA journal_mode=WAL;
 
@@ -40,6 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This plugin owns the cdr prefix.
         """
 
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("cache:get", self.get)
         self.bus.subscribe("cache:match", self.match)
         self.bus.subscribe("cache:set", self.set)

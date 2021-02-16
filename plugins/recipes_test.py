@@ -18,7 +18,7 @@ class TestRecipes(Subscriber):
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
-        self.assert_prefix(subscribe_mock, "recipes")
+        self.assert_prefixes(subscribe_mock, ("server", "recipes"))
 
     def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
