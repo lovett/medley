@@ -18,7 +18,7 @@ class Controller:
 
         headers = sorted(
             cherrypy.request.headers.items(),
-            key=lambda pair: pair[0]
+            key=lambda pair: typing.cast(str, pair[0])
         )
 
         if cherrypy.request.wants == "text":

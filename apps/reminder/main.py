@@ -185,7 +185,7 @@ class Controller:
         ).pop()
 
         local_id = ''.join(
-            random.choices(
+            (random.SystemRandom()).choices(
                 string.ascii_uppercase + string.digits,
                 k=10
             )
