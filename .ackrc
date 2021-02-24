@@ -3,6 +3,7 @@
 --ignore-dir=coverage
 --ignore-dir=htmlcov
 --ignore-dir=logs
+--ignore-dir=mypy
 --ignore-dir=build
 --ignore-dir=db
 --ignore-dir=storage
