@@ -76,7 +76,7 @@ class Controller:
             cherrypy.engine.publish(
                 "jinja:render",
                 "apps/visitors/visitors.jinja.html",
-                flagless_countries=("AP", None),
+                flagless_countries=("AP", None, ""),
                 query=query,
                 query_plan=query_plan,
                 reversed_ips=reversed_ips,

@@ -156,7 +156,7 @@
                                             >{{ result.ip|truncate(20, True)  }}</a>
                                         </p>
 
-                                        {% if reverse_domain %}
+                                        {% if reverse_domain and result.ip != "0.0.0.0" %}
                                             <p class="smaller">
                                                 <a href="/visitors?query=reverse_domain+{{ reverse_domain }}"
                                                    title="Search for visits from this network"
@@ -181,15 +181,15 @@
                                                    title="Search for visits with this cookie"
                                                    rel="noreferrer"
                                                 ><svg class="icon"><use xlink:href="#icon-tag"></use></svg></a>
-                                            {% else %}
-                                                <span title="No cookie on request"><svg class="icon inactive"><use xlink:href="#icon-tag"></use></svg></span>
                                             {% endif %}
 
+                                            {% if result.ip != "0.0.0.0" %}
                                             <a href="/whois?address={{ result.ip }}"
                                                target="_blank"
                                                title="View whois details for this address"
                                                rel="noreferrer"
                                             ><svg class="icon"><use xlink:href="#icon-search"></use></svg></a>
+                                            {% endif %}
 
                                             <a href="#annotate" data-ip="{{ result.ip }}"
                                                class="annotate-ip"
