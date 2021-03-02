@@ -1,7 +1,7 @@
 """Custom datatype conversions for use with Python's DB-API interface."""
 
 from datetime import datetime
-import pickle
+import json
 import re
 import typing
 import urllib.parse
@@ -25,7 +25,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("local_datetime", self.local_datetime)
         register_converter("utc", self.utc)
         register_converter("date_with_hour", self.date_with_hour)
-        register_converter("binary", self.to_binary)
+        register_converter("json", self.json)
         register_converter("duration", self.duration)
         register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
@@ -140,17 +140,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return re.sub(r'"(.*?)".*', r"\1", value.decode("utf-8"))
 
     @staticmethod
-    def to_binary(blob: bytes) -> typing.Any:
-        """Unpack a binary value stored in a blob field.
-
-        MessagePack is the only serialization format used by the
-        application.
-
-        """
-
-        return pickle.loads(blob)
-
-    @staticmethod
     def querystring(value: bytes) -> typing.Dict[str, typing.List[str]]:
         """Parse a URL querystring into a dict."""
 
@@ -167,3 +156,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             word.strip()
             for word in value.decode("utf-8").split(",")
         ]
+
+    @staticmethod
+    def json(value: bytes) -> typing.Any:
+        """Parse a value stored as JSON."""
+
+        return json.loads(value.decode("utf-8"))

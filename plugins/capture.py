@@ -1,6 +1,6 @@
 """Store HTTP requests and responses for later review"""
 
-import pickle
+import json
 import sqlite3
 import typing
 import cherrypy
@@ -54,15 +54,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not hasattr(request, "json"):
             request.json = None
 
-        request_bin = pickle.dumps({
+        request_bundle = {
             "headers": request.headers,
             "params": request.body.params,
             "json": request.json
-        })
+        }
 
-        response_bin = pickle.dumps({
+        response_bundle = {
             "status": response.status
-        })
+        }
 
         request_uri_parts = request.request_line.split(" ")
 
@@ -75,8 +75,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 request_uri,
                 request.request_line,
-                sqlite3.Binary(request_bin),
-                sqlite3.Binary(response_bin)
+                json.dumps(request_bundle),
+                json.dumps(response_bundle)
             )
         )
 
@@ -95,8 +95,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             search_clause = "AND request_uri=?"
 
         sql = f"""SELECT rowid, request_line,
-        request as 'request [binary]',
-        response as 'response [binary]',
+        request as 'request [json]',
+        response as 'response [json]',
         created as 'created [local_datetime]',
         (SELECT count(*) FROM captures WHERE 1=1 {search_clause})
         as total
@@ -119,8 +119,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def get(self, rowid: int) -> typing.Optional[sqlite3.Row]:
         """Locate previously stored requests by ID."""
 
-        sql = """SELECT rowid, request_line, request as 'request [binary]',
-        response as 'response [binary]',
+        sql = """SELECT rowid, request_line, request as 'request [json]',
+        response as 'response [json]',
         created as 'created [timestamp]'
         FROM captures
         WHERE rowid=?"""

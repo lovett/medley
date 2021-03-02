@@ -1,6 +1,5 @@
 """Store arbitrary values in an SQLite database."""
 
-import pickle
 import typing
 import cherrypy
 from . import mixins
@@ -66,7 +65,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Retrieve multiple values based on a common prefix."""
 
         rows = self._select(
-            """SELECT value as 'value [binary]'
+            """SELECT value
             FROM unexpired
             WHERE prefix=?""",
             (prefix,)
@@ -80,7 +79,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         prefix, rest = self.keysplit(key)
 
         return self._selectFirst(
-            """SELECT value as 'value [binary]'
+            """SELECT value
             FROM unexpired
             WHERE prefix=? AND key=?""",
             (prefix, rest)
@@ -103,7 +102,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 prefix,
                 rest,
-                pickle.dumps(value),
+                value,
                 f"{lifespan_seconds} seconds"
             )
         )
