@@ -49,9 +49,9 @@ class Controller:
                     address_clean
                 )
                 ip_address = result[2][0]
-            except OSError:
+            except OSError as err:
                 redirect_url = cherrypy.engine.publish("url:internal").pop()
-                raise cherrypy.HTTPRedirect(redirect_url)
+                raise cherrypy.HTTPRedirect(redirect_url) from err
 
         whois_cache_key = f"whois:{ip_address}"
 

@@ -66,7 +66,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
             self.finished = True
             return
 
-        while self.stack and True:
+        while self.stack:
             collected_tag = self.stack.pop()
             if collected_tag[0].startswith(tag):
                 self.result.append(collected_tag)

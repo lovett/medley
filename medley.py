@@ -128,8 +128,8 @@ def setup() -> None:
         os.mkdir(cherrypy.config.get("database_dir"))
     except FileExistsError:
         pass
-    except PermissionError:
-        raise SystemExit("No permission to create database directory")
+    except PermissionError as err:
+        raise SystemExit("Permission error on database directory") from err
 
     # Tools
     cherrypy.tools.capture = tools.capture.Tool()

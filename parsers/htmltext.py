@@ -89,7 +89,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         if tag not in self.whitelist:
             return
 
-        while self.stack and True:
+        while self.stack:
             popped_tag = self.stack.pop()
             if popped_tag.startswith(tag):
                 break
