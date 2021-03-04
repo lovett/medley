@@ -38,8 +38,13 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.whois.main.Controller)
 
+    @mock.patch("socket.gethostbyname_ex")
     @mock.patch("cherrypy.engine.publish")
-    def test_invalid_address_hostname(self, publish_mock: mock.Mock) -> None:
+    def test_invalid_address_hostname(
+            self,
+            publish_mock: mock.Mock,
+            socket_mock: mock.Mock
+    ) -> None:
         """Request lookup of an invalid hostname"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
@@ -50,6 +55,9 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
             return True
 
         publish_mock.side_effect = side_effect
+
+        socket_mock.side_effect = OSError
+
         response = self.request("/", address="invalid")
         self.assertEqual(response.code, 303)
 

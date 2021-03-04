@@ -43,7 +43,6 @@ class Controller:
             address_parsed = urllib.parse.urlparse(address_unquoted)
             address_clean = address_parsed.hostname or address_parsed.path
 
-        if address_clean and not ip_address:
             try:
                 result = socket.gethostbyname_ex(  # pylint: disable=no-member
                     address_clean
