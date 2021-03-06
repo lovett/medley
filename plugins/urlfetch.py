@@ -86,17 +86,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         params = kwargs.get("params")
         cache_lifespan = typing.cast(int, kwargs.get("cache_lifespan", 0))
 
-        if cache_lifespan > 0:
+        if as_json and cache_lifespan > 0:
             cached_response = cherrypy.engine.publish(
                 "cache:get",
                 url
             ).pop()
 
             if cached_response:
-                return typing.cast(
-                    requests.models.Response,
-                    cached_response
-                )
+                return json.loads(cached_response)
 
         if as_json and "Accept" not in headers:
             headers["Accept"] = "application/json"
@@ -138,7 +135,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 cherrypy.engine.publish(
                     "cache:set",
                     url,
-                    res.json(),
+                    json.dumps(res.json()),
                     lifespan_seconds=cache_lifespan
                 )
             return res.json()

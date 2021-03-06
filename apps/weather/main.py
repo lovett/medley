@@ -53,39 +53,20 @@ class Controller:
                 and location[1] == longitude
             ), "")
 
-        cache_key = f"openweather_{latitude},{longitude}"
+        endpoint = "https://api.openweathermap.org/data/2.5/onecall"
+        endpoint += f"?lat={latitude}&lon={longitude}"
+        endpoint += "&exclude=minutely"
+        endpoint += "&units=imperial"
+        endpoint += f"&appid={config['openweather_api_key']}"
 
-        cached_api_response = cherrypy.engine.publish(
-            "cache:get",
-            cache_key
+        api_response = cherrypy.engine.publish(
+            "urlfetch:get",
+            endpoint,
+            as_json=True,
+            cache_lifespan=600
         ).pop()
 
-        if cached_api_response:
-            forecast = self.shape_forecast(cached_api_response)
-
-        if not cached_api_response:
-            endpoint = "https://api.openweathermap.org/data/2.5/onecall"
-            endpoint += f"?lat={latitude}&lon={longitude}"
-            endpoint += "&exclude=minutely"
-            endpoint += "&units=imperial"
-            endpoint += f"&appid={config['openweather_api_key']}"
-
-            api_response = cherrypy.engine.publish(
-                "urlfetch:get",
-                endpoint,
-                as_json=True,
-            ).pop()
-
-            if api_response:
-                # Cache for 1 hour.
-                cherrypy.engine.publish(
-                    "cache:set",
-                    cache_key,
-                    api_response,
-                    3600
-                )
-
-                forecast = self.shape_forecast(api_response)
+        forecast = self.shape_forecast(api_response)
 
         edit_url = cherrypy.engine.publish(
             "url:internal",

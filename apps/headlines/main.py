@@ -1,5 +1,6 @@
 """News headlines via News API"""
 
+import json
 import typing
 import cherrypy
 
@@ -25,10 +26,12 @@ class Controller:
             ).pop()
         )
 
-        headlines = cherrypy.engine.publish(
+        headlines_json = cherrypy.engine.publish(
             "cache:get",
             "headlines"
         ).pop()
+
+        headlines = json.loads(headlines_json) if headlines_json else None
 
         if not headlines:
             headlines = {}
@@ -59,7 +62,7 @@ class Controller:
             cherrypy.engine.publish(
                 "cache:set",
                 "headlines",
-                headlines,
+                json.dumps(headlines),
                 cache_lifespan
             )
 

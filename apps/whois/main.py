@@ -1,6 +1,7 @@
 """IP and domain metadata"""
 
 import ipaddress
+import json
 import re
 import socket
 import typing
@@ -52,23 +53,20 @@ class Controller:
                 redirect_url = cherrypy.engine.publish("url:internal").pop()
                 raise cherrypy.HTTPRedirect(redirect_url) from err
 
-        whois_cache_key = f"whois:{ip_address}"
-
-        whois = cherrypy.engine.publish("cache:get", whois_cache_key).pop()
-
-        if not whois:
-            whois = cherrypy.engine.publish(
-                "urlfetch:get",
-                f"http://whois.arin.net/rest/ip/{ip_address}",
-                as_json=True
-            ).pop()
-
-            if whois:
-                cherrypy.engine.publish("cache:set", whois_cache_key, whois)
+        whois = cherrypy.engine.publish(
+            "urlfetch:get",
+            f"http://whois.arin.net/rest/ip/{ip_address}",
+            as_json=True
+        ).pop()
 
         facts_cache_key = f"ipfacts:{ip_address}"
 
-        facts = cherrypy.engine.publish("cache:get", facts_cache_key).pop()
+        facts_json = cherrypy.engine.publish(
+            "cache:get",
+            facts_cache_key
+        ).pop()
+
+        facts = json.loads(facts_json) if facts_json else None
 
         if not facts:
             facts = cherrypy.engine.publish("ip:facts", ip_address).pop()
@@ -82,7 +80,11 @@ class Controller:
                 facts.update(reverse_ip)
 
             if facts:
-                cherrypy.engine.publish("cache:set", facts_cache_key, facts)
+                cherrypy.engine.publish(
+                    "cache:set",
+                    facts_cache_key,
+                    json.dumps(facts)
+                )
 
         visit_days = cherrypy.engine.publish(
             "logindex:count_visit_days",

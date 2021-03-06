@@ -97,15 +97,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertIsNotNone(
-            helpers.find_publish_call(publish_mock, "cache:get")
-        )
-
-        self.assertIsNotNone(
             helpers.find_publish_call(publish_mock, "urlfetch:get")
-        )
-
-        self.assertIsNotNone(
-            helpers.find_publish_call(publish_mock, "cache:set")
         )
 
     @mock.patch("cherrypy.engine.publish")
