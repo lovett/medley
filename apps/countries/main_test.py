@@ -73,7 +73,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "cache:get":
+            if args[0] == "urlfetch:get":
                 return [self.fixture]
             return mock.DEFAULT
 
@@ -109,20 +109,12 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(response.code, 204)
 
-        # There is no assert_not_called_with() method,
-        # so make sure the last one wasn't registry:replace
-        last_call = publish_mock.call_args[0][0]
-
-        self.assertEqual(last_call, "cache:get")
-
     @mock.patch("cherrypy.engine.publish")
     def test_url_fetched_if_not_cached(self, publish_mock: mock.Mock) -> None:
         """The JSON file is fetched if it is not already in the cache"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "cache:get":
-                return [None]
             if args[0] == "urlfetch:get":
                 return [self.fixture]
             return mock.DEFAULT
@@ -132,12 +124,6 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/")
 
         self.assertEqual(response.code, 204)
-
-        publish_mock.assert_any_call(
-            "cache:set",
-            "countries",
-            self.fixture
-        )
 
         publish_mock.assert_any_call(
             "registry:replace",
@@ -154,7 +140,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] in ("cache:get", "urlfetch:get"):
+            if args[0] == "urlfetch:get":
                 return [None]
             return mock.DEFAULT
 

@@ -14,28 +14,16 @@ class Controller:
     def GET(*_args: str, **_kwargs: str) -> None:
         """Request the country code list and populate the registry"""
 
+        source_url = "https://pkgstore.datahub.io" \
+            "/core/country-codes/country-codes_json/data" \
+            "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
+
         country_codes = cherrypy.engine.publish(
-            "cache:get",
-            "countries"
+            "urlfetch:get",
+            source_url,
+            as_json=True,
+            cache_lifespan=86400
         ).pop()
-
-        if not country_codes:
-            source_url = "https://pkgstore.datahub.io" \
-                "/core/country-codes/country-codes_json/data" \
-                "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
-
-            country_codes = cherrypy.engine.publish(
-                "urlfetch:get",
-                source_url,
-                as_json=True
-            ).pop()
-
-            if country_codes:
-                cherrypy.engine.publish(
-                    "cache:set",
-                    "countries",
-                    country_codes
-                )
 
         if not country_codes:
             raise cherrypy.HTTPError(
