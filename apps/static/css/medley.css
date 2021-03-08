@@ -428,6 +428,7 @@ TEXTAREA {
 }
 
 #app-nav .options input[type=text],
+#app-nav .options input[type=date],
 #app-nav .options input[type=search],
 #app-nav .options input[type=password] {
     width: auto;
@@ -512,6 +513,7 @@ TEXTAREA {
 }
 
 .field INPUT[type=text],
+.field INPUT[type=date],
 .field INPUT[type=search],
 .field INPUT[type=password],
 .field INPUT[type=number],
