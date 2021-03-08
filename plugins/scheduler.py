@@ -1,5 +1,6 @@
 """Perform actions in the future."""
 
+import json
 import time
 import sched
 import typing
@@ -44,7 +45,7 @@ class ScheduledEvent():
         cherrypy.engine.publish(
             "cache:set",
             self.cache_key,
-            values,
+            json.dumps(values),
             self.time_remaining
         )
 
@@ -108,23 +109,24 @@ class Plugin(cherrypy.process.plugins.Monitor):
         This is usually only called at server start.
         """
 
-        cached_events = cherrypy.engine.publish(
+        cached_events_json = cherrypy.engine.publish(
             "cache:match",
             "scheduler"
         ).pop()
 
-        if not cached_events:
+        if not cached_events_json:
             return
 
-        unit = "event" if len(cached_events) == 1 else "events"
+        unit = "event" if len(cached_events_json) == 1 else "events"
 
         cherrypy.engine.publish(
             "applog:add",
             "scheduler",
-            f"{len(cached_events)} {unit} revived"
+            f"{len(cached_events_json)} {unit} revived"
         )
 
-        for cached_event in cached_events:
+        for cached_event_json in cached_events_json:
+            cached_event = json.loads(cached_event_json)
             self.add(
                 cached_event["time"] - time.time(),
                 *cached_event["argument"],
