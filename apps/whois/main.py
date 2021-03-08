@@ -55,7 +55,8 @@ class Controller:
         whois = cherrypy.engine.publish(
             "urlfetch:get",
             f"http://whois.arin.net/rest/ip/{ip_address}",
-            as_json=True
+            as_json=True,
+            cache_lifespan=86400
         ).pop()
 
         facts_cache_key = f"ipfacts:{ip_address}"
