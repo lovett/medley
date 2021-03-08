@@ -44,8 +44,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "cache:get":
-                return [{"foo": "bar"}]
             if args[0] == "clock:day:remaining":
                 return [1]
             if args[0] == "jinja:render":
@@ -56,10 +54,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
 
         self.request("/")
-
-        self.assertIsNotNone(
-            helpers.find_publish_call(publish_mock, "cache:get")
-        )
 
         self.assertIsNone(
             helpers.find_publish_call(publish_mock, "urlfetch:get")
@@ -83,9 +77,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
                     "key": "testkey",
                     "category": ["category1", "category2", "category3"]
                 }]
-
-            if args[0] == "cache:get":
-                return [None]
 
             if args[0] == "jinja:render":
                 return [""]
@@ -115,7 +106,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
                     "category": ["category1", "category2", "category3"]
                 }]
 
-            if args[0] in ("cache:get", "urlfetch:get"):
+            if args[0] == "urlfetch:get":
                 return [None]
             return mock.DEFAULT
 
@@ -133,7 +124,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
-            if args[0] in ("cache:get", "urlfetch:get"):
+            if args[0] == "urlfetch:get":
                 return [None]
             if args[0] == "jinja:render":
                 return [""]

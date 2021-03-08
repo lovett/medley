@@ -25,43 +25,31 @@ class Controller:
             ).pop()
         )
 
-        headlines = cherrypy.engine.publish(
-            "cache:get",
-            "headlines"
+        headlines = {}
+
+        settings = cherrypy.engine.publish(
+            "registry:search:multidict",
+            key="newsapi:*",
+            key_slice=1
         ).pop()
 
-        if not headlines:
-            headlines = {}
-
-            settings = cherrypy.engine.publish(
-                "registry:search:multidict",
-                key="newsapi:*",
-                key_slice=1
+        for category in settings["category"]:
+            response = cherrypy.engine.publish(
+                "urlfetch:get",
+                "https://newsapi.org/v2/top-headlines",
+                as_json=True,
+                params={
+                    "country": settings["country"][0],
+                    "apiKey": settings["key"][0],
+                    "category": category
+                },
+                cache_lifespan=cache_lifespan
             ).pop()
 
-            for category in settings["category"]:
-                response = cherrypy.engine.publish(
-                    "urlfetch:get",
-                    "https://newsapi.org/v2/top-headlines",
-                    as_json=True,
-                    params={
-                        "country": settings["country"][0],
-                        "apiKey": settings["key"][0],
-                        "category": category
-                    }
-                ).pop()
+            if not response:
+                raise cherrypy.HTTPError(503)
 
-                if not response:
-                    raise cherrypy.HTTPError(503)
-
-                headlines[category] = response["articles"]
-
-            cherrypy.engine.publish(
-                "cache:set",
-                "headlines",
-                headlines,
-                cache_lifespan
-            )
+            headlines[category] = response["articles"]
 
         cache_control = f"private, max-age={cache_lifespan}"
         cherrypy.response.headers["Cache-Control"] = cache_control
