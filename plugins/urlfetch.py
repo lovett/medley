@@ -5,6 +5,7 @@ import os.path
 import shutil
 import tarfile
 import typing
+import urllib.parse
 import requests
 import cherrypy
 
@@ -86,10 +87,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         params = kwargs.get("params")
         cache_lifespan = typing.cast(int, kwargs.get("cache_lifespan", 0))
 
+        full_url = url
+        if params:
+            full_url = "{}?{}".format(
+                url,
+                urllib.parse.urlencode(params)
+            )
+
         if as_json and cache_lifespan > 0:
             cached_response = cherrypy.engine.publish(
                 "cache:get",
-                url
+                full_url
             ).pop()
 
             if cached_response:
@@ -134,7 +142,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             if cache_lifespan > 0:
                 cherrypy.engine.publish(
                     "cache:set",
-                    url,
+                    full_url,
                     res.json(),
                     lifespan_seconds=cache_lifespan
                 )
