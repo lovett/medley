@@ -69,7 +69,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "format": "json",
                 "timeout": "5000"
             },
-            as_json=True
+            as_json=True,
+            cache_lifespan=86400
         ).pop()
 
         try:
@@ -117,7 +118,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "format": "json",
                 "timeout": "5000"
             },
-            as_json=True
+            as_json=True,
+            cache_lifespan=86400
         ).pop()
 
         try:

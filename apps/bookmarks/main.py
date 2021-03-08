@@ -75,8 +75,9 @@ class Controller:
             "urlfetch:get",
             "http://archive.org/wayback/available",
             params={"url": url},
-            as_json=True
-            ).pop() or {}
+            as_json=True,
+            cache_lifespan=86400
+        ).pop() or {}
 
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})
