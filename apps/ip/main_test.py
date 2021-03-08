@@ -1,4 +1,4 @@
-"""Test suite for the whois app."""
+"""Test suite for the ip app."""
 
 import typing
 import unittest
@@ -42,8 +42,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "cache:get":
-                return ["1.1.1.1"]
+            if args[0] == "urlfetch:get":
+                return [{"ip": "1.1.1.1"}]
             if args[0] == "jinja:render":
                 return [""]
 
@@ -69,8 +69,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "cache:get":
-                return ["1.1.1.1"]
+            if args[0] == "urlfetch:get":
+                return [{"ip": "1.1.1.1"}]
 
             return mock.DEFAULT
 
@@ -92,8 +92,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "cache:get":
-                return ["1.1.1.1"]
+            if args[0] == "urlfetch:get":
+                return [{"ip": "1.1.1.1"}]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -108,8 +108,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "cache:get":
-                return ["1.1.1.1"]
+            if args[0] == "urlfetch:get":
+                return [{"ip": "1.1.1.1"}]
             if args[0] == "jinja:render":
                 return [""]
 
@@ -122,55 +122,6 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(
             helpers.template_var(publish_mock, "client_ip"),
             "2.2.2.2"
-        )
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_cache_save_on_success(self, publish_mock: mock.Mock) -> None:
-        """The external IP lookup is cached if successfully retrieved"""
-
-        def side_effect(*args: str, **_: str) -> typing.Any:
-            """Side effects local function"""
-
-            if args[0] == "cache:get":
-                return [None]
-            if args[0] == "urlfetch:get":
-                return ["3.3.3.3"]
-            if args[0] == "jinja:render":
-                return [""]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
-
-        publish_mock.assert_any_call(
-            "cache:set",
-            "ip:external",
-            "3.3.3.3",
-            300
-        )
-
-    @mock.patch("cherrypy.engine.publish")
-    def test_no_cache_save_on_fail(self, publish_mock: mock.Mock) -> None:
-        """The external IP lookup is not cached if retrieval fails"""
-
-        def side_effect(*args: str, **_: str) -> typing.Any:
-            """Side effects local function"""
-
-            if args[0] in ("cache:get", "urlfetch:get"):
-                return [None]
-            if args[0] == "jinja:render":
-                return [""]
-
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        self.request("/", headers={"X-Real-Ip": "2.2.2.2"})
-
-        self.assertNotIn(
-            "cache:set",
-            (call[0] for call in publish_mock.call_args_list)
         )
 
 

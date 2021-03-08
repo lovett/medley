@@ -21,24 +21,17 @@ class Controller:
         if "X-Real-Ip" in cherrypy.request.headers:
             client_ip = cherrypy.request.headers["X-Real-Ip"]
 
-        external_ip = cherrypy.engine.publish(
-            "cache:get",
-            "ip:external"
+        api_response = cherrypy.engine.publish(
+            "urlfetch:get",
+            "https://api.ipify.org",
+            params={"format": "json"},
+            as_json=True,
+            cache_lifespan=86400
         ).pop()
 
-        if not external_ip:
-            external_ip = cherrypy.engine.publish(
-                "urlfetch:get",
-                "https://api.ipify.org",
-            ).pop()
-
-            if external_ip:
-                cherrypy.engine.publish(
-                    "cache:set",
-                    "ip:external",
-                    external_ip,
-                    300
-                )
+        external_ip = None
+        if api_response:
+            external_ip = api_response.get("ip")
 
         if cherrypy.request.wants == "json":
             return json.dumps({
