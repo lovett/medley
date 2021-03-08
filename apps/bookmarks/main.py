@@ -167,7 +167,7 @@ class Controller:
 
         tags = cherrypy.engine.publish(
             "bookmarks:tags:all"
-            ).pop()
+        ).pop()
 
         return typing.cast(
             bytes,
