@@ -53,15 +53,16 @@ class Controller:
                 and location[1] == longitude
             ), "")
 
-        endpoint = "https://api.openweathermap.org/data/2.5/onecall"
-        endpoint += f"?lat={latitude}&lon={longitude}"
-        endpoint += "&exclude=minutely"
-        endpoint += "&units=imperial"
-        endpoint += f"&appid={config['openweather_api_key']}"
-
         api_response = cherrypy.engine.publish(
             "urlfetch:get",
-            endpoint,
+            "https://api.openweathermap.org/data/2.5/onecall",
+            params={
+                "lat": latitude,
+                "lon": longitude,
+                "exclude": "minutely",
+                "units": "imperial",
+                "appid": config['openweather_api_key']
+            },
             as_json=True,
             cache_lifespan=600
         ).pop()
