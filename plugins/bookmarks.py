@@ -1,6 +1,5 @@
 """Storage and search for bookmarked URLs."""
 
-import json
 import re
 import sqlite3
 import typing
@@ -419,13 +418,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cache_key = "bookmarks:all_tags"
 
-        tags_json: str = cherrypy.engine.publish(
+        cached_tags: str = cherrypy.engine.publish(
             "cache:get",
             cache_key
         ).pop()
 
-        if tags_json:
-            return list(json.loads(tags_json))
+        if cached_tags:
+            return list(cached_tags)
 
         sql = """SELECT distinct tags as 'tags [comma_delimited]'
         FROM bookmarks
@@ -436,7 +435,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         generator = self._select_generator(sql)
 
-        tags = set()
+        tags: typing.Set[str] = set()
         for row in generator:
             tags.update(row["tags"])
 
@@ -445,7 +444,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish(
             "cache:set",
             cache_key,
-            json.dumps(sorted_tags)
+            sorted_tags
         )
 
         if not for_precache:

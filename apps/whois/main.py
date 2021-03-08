@@ -1,7 +1,6 @@
 """IP and domain metadata"""
 
 import ipaddress
-import json
 import re
 import socket
 import typing
@@ -61,12 +60,10 @@ class Controller:
 
         facts_cache_key = f"ipfacts:{ip_address}"
 
-        facts_json = cherrypy.engine.publish(
+        facts = cherrypy.engine.publish(
             "cache:get",
             facts_cache_key
         ).pop()
-
-        facts = json.loads(facts_json) if facts_json else None
 
         if not facts:
             facts = cherrypy.engine.publish("ip:facts", ip_address).pop()
@@ -83,7 +80,7 @@ class Controller:
                 cherrypy.engine.publish(
                     "cache:set",
                     facts_cache_key,
-                    json.dumps(facts)
+                    facts
                 )
 
         visit_days = cherrypy.engine.publish(

@@ -1,5 +1,6 @@
 """Store arbitrary values in an SQLite database."""
 
+import json
 import typing
 import cherrypy
 from . import mixins
@@ -61,29 +62,44 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return ("_", key)
 
-    def match(self, prefix: str) -> typing.List[typing.Any]:
+    def match(self, prefix: str) -> typing.Iterator[typing.Any]:
         """Retrieve multiple values based on a common prefix."""
 
-        rows = self._select(
+        rows = self._select_generator(
             """SELECT value
             FROM unexpired
             WHERE prefix=?""",
             (prefix,)
         )
 
-        return [row["value"] for row in rows]
+        for row in rows:
+            if isinstance(row["value"], str):
+                try:
+                    yield json.loads(row["value"])
+                except json.decoder.JSONDecodeError:
+                    pass
+
+            yield row["value"]
 
     def get(self, key: str) -> typing.Any:
         """Retrieve a value from the store."""
 
         prefix, rest = self.keysplit(key)
 
-        return self._selectFirst(
+        value = self._selectFirst(
             """SELECT value
             FROM unexpired
             WHERE prefix=? AND key=?""",
             (prefix, rest)
         )
+
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.decoder.JSONDecodeError:
+                pass
+
+        return value
 
     def set(
             self,
@@ -91,7 +107,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             value: typing.Any,
             lifespan_seconds: int = 604800
     ) -> bool:
-        """Add a value to the store."""
+        """Add a value to the store.
+
+        If the value is anything other than bytes or a string, JSON
+        encoding will be attempted. If the value cannot be JSON
+        encoded, no caching will occur.
+
+        """
+
+        value_for_storage = value
+
+        if isinstance(value, (dict, list, set)):
+            try:
+                value_for_storage = json.dumps(value)
+            except TypeError:
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "cache:set",
+                    f"A value for {key} could not be cached."
+                )
+
+                return False
 
         prefix, rest = self.keysplit(key)
 
@@ -102,7 +138,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (
                 prefix,
                 rest,
-                value,
+                value_for_storage,
                 f"{lifespan_seconds} seconds"
             )
         )

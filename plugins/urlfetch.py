@@ -93,7 +93,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).pop()
 
             if cached_response:
-                return json.loads(cached_response)
+                return cached_response
 
         if as_json and "Accept" not in headers:
             headers["Accept"] = "application/json"
@@ -135,7 +135,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 cherrypy.engine.publish(
                     "cache:set",
                     url,
-                    json.dumps(res.json()),
+                    res.json(),
                     lifespan_seconds=cache_lifespan
                 )
             return res.json()
