@@ -134,7 +134,8 @@ class Controller:
 
         """
 
-        host_without_port = host.split(":")[0]
+        host_without_scheme = host.split("://")[-1]
+        host_without_port = host_without_scheme.split(":")[0]
 
         segments = [host_without_port]
         if "." in host_without_port:
@@ -156,7 +157,8 @@ class Controller:
         """Reduce a host to a word that distinguishes it from
         others in the same group."""
 
-        host_without_port = host.split(":")[0]
+        host_without_scheme = host.split("://")[-1]
+        host_without_port = host_without_scheme.split(":")[0]
 
         segments = [host_without_port]
         if "." in host_without_port:
@@ -181,4 +183,4 @@ class Controller:
         parsed_url = urlparse(url)
         if not parsed_url.netloc:
             return url
-        return parsed_url.netloc
+        return f"{parsed_url.scheme}://{parsed_url.netloc}"

@@ -46,23 +46,19 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         candidates = (
             # Path is ignored.
             ("https://example.com/with/a/path",
-             "example.com"),
+             "https://example.com"),
 
             # Querystring and fragment are ignored.
             ("http://example.com/path?and=querystring#andfragment",
-             "example.com"),
-
-            # Scheme is ignored.
-            ("https://example.com",
-             "example.com"),
+             "http://example.com"),
 
             # Port is preserved
             ("http://example.com:12345",
-             "example.com:12345"),
+             "http://example.com:12345"),
 
             # Subdomains are preserved
             ("http://a.b.c.example.com",
-             "a.b.c.example.com"),
+             "http://a.b.c.example.com"),
 
             # Bare hostname is left intact
             ("site1.example.com", "site1.example.com")
@@ -125,24 +121,24 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
-                return ["example"]
+                return ["http://example.com"]
 
             if args[0] == "registry:search":
                 return [(3, (
                     {
                         "rowid": 1,
                         "key": "bounce:example:stage",
-                        "value": "stage.example.com",
+                        "value": "http://stage.example.com",
                     },
                     {
                         "rowid": 2,
                         "key": "bounce:example:othersite",
-                        "value": "othersite.example.com"
+                        "value": "http://othersite.example.com"
                     },
                     {
                         "rowid": 3,
                         "key": "bounce:example:dev",
-                        "value": "dev.example.com"
+                        "value": "http://dev.example.com"
                     }
                 ))]
             if args[0] == "jinja:render":
@@ -299,19 +295,19 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
             if args[0] == "registry:first:key":
-                return ["example"]
+                return ["http://example.com"]
 
             if args[0] == "registry:search":
                 return [(2, (
                     {
                         "rowid": 1,
                         "key": "bounce:example:stage",
-                        "value": "stage.example.com",
+                        "value": "http://stage.example.com",
                     },
                     {
                         "rowid": 2,
                         "key": "bounce:example:othersite",
-                        "value": "othersite.example.com"
+                        "value": "http://othersite.example.com"
                     }
                 ))]
 
