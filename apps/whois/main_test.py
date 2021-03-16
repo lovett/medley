@@ -89,7 +89,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         )
 
     @mock.patch("cherrypy.engine.publish")
-    def xtest_invalid_address_as_ip(self, publish_mock: mock.Mock) -> None:
+    def test_invalid_address_as_ip(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an invalid IP address"""
 
         def side_effect(*args: str, **_: str) -> typing.Any:
@@ -104,17 +104,18 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 303)
 
     @mock.patch("cherrypy.engine.publish")
-    def xtest_address_as_ip(self, publish_mock: mock.Mock) -> None:
+    def test_address_as_ip(self, publish_mock: mock.Mock) -> None:
         """Request lookup of a cached IP address"""
 
-        cache_fake = {"foo": "bar"}
+        whois_fake = {"hello": "world"}
+        facts_fake = {"foo": "bar"}
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Overrides to be returned by the mock"""
             if args[0] == "cache:get":
-                return [cache_fake]
+                return [facts_fake]
             if args[0] == "urlfetch:get":
-                return [None]
+                return [whois_fake]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -125,12 +126,12 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(
             helpers.template_var(publish_mock, "whois"),
-            cache_fake
+            whois_fake
         )
 
         self.assertEqual(
             helpers.template_var(publish_mock, "ip_facts"),
-            cache_fake
+            facts_fake
         )
 
     @mock.patch("cherrypy.engine.publish")
