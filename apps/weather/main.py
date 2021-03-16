@@ -5,6 +5,7 @@ from collections import defaultdict
 import cherrypy
 
 Forecast = typing.Dict[str, typing.Any]
+Config = typing.Dict[str, typing.Any]
 
 
 class Controller:
@@ -15,59 +16,17 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, *args: str, **_kwargs: str) -> bytes:
-        """Display selected parts of the most recent OpenWeather API query"""
-
-        config = cherrypy.engine.publish(
-            "registry:search:dict",
-            "weather:*",
-            key_slice=1
-        ).pop()
-
-        if "openweather_api_key" not in config:
-            raise cherrypy.HTTPError(500, "No api key")
-
-        locations = tuple(
-            tuple(value.split(",", 2))
-            for key, value in config.items()
-            if key.startswith("latlong")
-        )
+        """Display current and upcoming weather conditions."""
 
         latitude = ""
         longitude = ""
-        location_name = ""
-
-        if "latlong:default" in config:
-            defaults = config["latlong:default"].split(",", 2)
-            latitude = defaults[0]
-            longitude = defaults[1]
-            location_name = defaults[2]
 
         if len(args) == 1:
-            params = args[0].split(",", 1)
-            latitude = params[0]
-            longitude = params[1]
-            location_name = next((
-                location[2]
-                for location in locations
-                if location[0] == latitude
-                and location[1] == longitude
-            ), "")
+            latitude, longitude = args[0].split(",", 1)
 
-        api_response = cherrypy.engine.publish(
-            "urlfetch:get",
-            "https://api.openweathermap.org/data/2.5/onecall",
-            params={
-                "lat": latitude,
-                "lon": longitude,
-                "exclude": "minutely",
-                "units": "imperial",
-                "appid": config['openweather_api_key']
-            },
-            as_json=True,
-            cache_lifespan=600
-        ).pop()
+        config = self.get_config(latitude, longitude)
 
-        forecast = self.shape_forecast(api_response)
+        forecast = self.request_forecast(config)
 
         edit_url = cherrypy.engine.publish(
             "url:internal",
@@ -81,12 +40,90 @@ class Controller:
                 "jinja:render",
                 "apps/weather/weather.jinja.html",
                 forecast=forecast,
-                other_locations=locations,
-                location_name=location_name,
+                other_locations=config["locations"],
+                location_name=config["location_name"],
                 edit_url=edit_url,
-                subview_title=location_name,
+                subview_title=config["location_name"],
             ).pop()
         )
+
+    def POST(self, *args: str, **kwargs: str) -> None:
+        """Dispatch to a subhandler based on the URL path."""
+
+        latitude = ""
+        longitude = ""
+        components = tuple(kwargs.get("components", ''))
+
+        if args[0] == "speak":
+            try:
+                latitude, longitude = args[1].split(",", 1)
+            except IndexError:
+                pass
+            return self.speak(components, latitude, longitude)
+
+        raise cherrypy.HTTPError(404)
+
+    def request_forecast(self, config: Config) -> Forecast:
+        """Request current weather data from OpenWeatherMap."""
+
+        latitude = config.get("latitude")
+        longitude = config.get("longitude")
+        api_key = config.get("openweather_api_key")
+
+        api_response = cherrypy.engine.publish(
+            "urlfetch:get",
+            "https://api.openweathermap.org/data/2.5/onecall",
+            params={
+                "lat": latitude,
+                "lon": longitude,
+                "exclude": "minutely",
+                "units": "imperial",
+                "appid": api_key,
+            },
+            as_json=True,
+            cache_lifespan=600
+        ).pop()
+
+        return self.shape_forecast(api_response)
+
+    @staticmethod
+    def get_config(latitude: str, longitude: str) -> Config:
+        """Load the application configuration."""
+
+        config: Config = cherrypy.engine.publish(
+            "registry:search:dict",
+            "weather:*",
+            key_slice=1
+        ).pop()
+
+        if "openweather_api_key" not in config:
+            raise cherrypy.HTTPError(500, "No api key")
+
+        config["locations"] = tuple(
+            tuple(value.split(",", 2))
+            for key, value in config.items()
+            if key.startswith("latlong")
+        )
+
+        location_name = ""
+        if not latitude and not longitude:
+            latitude, longitude, location_name = config.get(
+                "latlong:default", ""
+            ).split(",", 2)
+
+        if not location_name:
+            location_name = next((
+                location[2]
+                for location in config["locations"]
+                if location[0] == latitude
+                and location[1] == longitude
+            ), "")
+
+        config["latitude"] = latitude
+        config["longitude"] = longitude
+        config["location_name"] = location_name
+
+        return config
 
     @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:
@@ -149,3 +186,49 @@ class Controller:
                 result["alerts"].append(alert)
 
         return result
+
+    def speak(
+            self,
+            components: typing.Tuple[str, ...],
+            latitude: str,
+            longitude: str
+    ) -> None:
+        """Present the current forecast in a format suitable for
+        text-to-speech."""
+
+        config = self.get_config(latitude, longitude)
+
+        forecast = self.request_forecast(config)
+
+        statements = []
+
+        for component in components:
+            statement = ""
+
+            if component == "summary":
+                statement = forecast["currently"]["weather_description"]
+
+            if component == "temperature":
+                temp = round(forecast["currently"]["temp"])
+                feel = round(forecast["currently"]["feels_like"])
+
+                statement = "It's {}".format(temp)
+
+                if abs(temp - feel) > 5:
+                    statement += " but feels like {}".format(feel)
+
+            if component == "humidity":
+                statement = "{} percent humidity".format(
+                    forecast["currently"]["humidity"]
+                )
+
+            if statement:
+                statements.append(statement)
+
+        if statements:
+            cherrypy.engine.publish(
+                "speak",
+                ", ".join(statements)
+            )
+
+        cherrypy.response.status = 204
