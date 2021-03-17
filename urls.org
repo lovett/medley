@@ -352,5 +352,5 @@ curl -i -d "statement=hello world" -d "action=toggle" "$host/speak"
 
 #+NAME: speak_weather
 #+BEGIN_SRC sh :wrap EXPORT http
-curl -i -d "components=summary" -d "components=temperature" "$host/weather/speak"
+curl -i -d "components=temperature" -d "components=summary" "$host/weather/speak"
 #+END_SRC

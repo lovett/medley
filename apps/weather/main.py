@@ -212,7 +212,7 @@ class Controller:
                 temp = round(forecast["currently"]["temp"])
                 feel = round(forecast["currently"]["feels_like"])
 
-                statement = "It's {}".format(temp)
+                statement = "It's {} degrees".format(temp)
 
                 if abs(temp - feel) > 5:
                     statement += " but feels like {}".format(feel)
@@ -225,10 +225,10 @@ class Controller:
             if statement:
                 statements.append(statement)
 
-        if statements:
+        for statement in statements:
             cherrypy.engine.publish(
                 "speak",
-                ", ".join(statements)
+                statement
             )
 
         cherrypy.response.status = 204
