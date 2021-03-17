@@ -208,6 +208,17 @@ class Controller:
             if component == "summary":
                 statement = forecast["currently"]["weather_description"]
 
+            if component == "clouds":
+                clouds = forecast["currently"]["clouds"]
+
+                statement = f"{clouds} percent cloudy."
+
+            if component == "precipitation":
+                if "rain" in forecast["currently"]["weather_groups"]:
+                    statement = "It's raining."
+                if "snow" in forecast["currently"]["weather_groups"]:
+                    statement = "It's snowing."
+
             if component == "temperature":
                 temp = round(forecast["currently"]["temp"])
                 feel = round(forecast["currently"]["feels_like"])
