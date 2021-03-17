@@ -189,7 +189,7 @@ class Controller:
 
     def speak(
             self,
-            components: typing.Tuple[str, ...],
+            components: typing.Union[str, typing.Tuple[str, ...]],
             latitude: str,
             longitude: str
     ) -> None:
@@ -201,6 +201,14 @@ class Controller:
         forecast = self.request_forecast(config)
 
         statements = []
+        if components == "all":
+            components = (
+                "summary",
+                "precipitation",
+                "temperature",
+                "clouds",
+                "humidity"
+            )
 
         for component in components:
             statement = ""
