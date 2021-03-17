@@ -206,6 +206,29 @@ Start maintenance tasks.
 curl -i -d "group=db" "$host/maintenance"
 #+END_SRC
 
+* Notification
+** POST
+#+NAME: notification_post_input
+#+BEGIN_EXAMPLE
+{
+  "deliveryStyle": "normal",
+  "body": "",
+  "localId": "test",
+  "title": "📦 test",
+  "group": "",
+  "source": "",
+  "url": "http://example.com",
+  "publicId": "abcde123",
+  "badge": ""
+}
+#+END_EXAMPLE
+
+#+NAME: notification_post
+#+HEADER: :stdin notification_post_input
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/notification"
+#+END_SRC
+
 * Recipes
 ** DELETE
 Mark a recipe for deletion.
