@@ -52,14 +52,14 @@ class Controller:
 
         latitude = ""
         longitude = ""
-        components = tuple(kwargs.get("components", ''))
+        parts = kwargs.get("parts", '')
 
         if args[0] == "speak":
             try:
                 latitude, longitude = args[1].split(",", 1)
             except IndexError:
                 pass
-            return self.speak(components, latitude, longitude)
+            return self.speak(parts, latitude, longitude)
 
         raise cherrypy.HTTPError(404)
 
@@ -189,7 +189,7 @@ class Controller:
 
     def speak(
             self,
-            components: typing.Union[str, typing.Tuple[str, ...]],
+            parts: typing.Union[str, typing.Tuple[str, ...]],
             latitude: str,
             longitude: str
     ) -> None:
@@ -201,8 +201,9 @@ class Controller:
         forecast = self.request_forecast(config)
 
         statements = []
-        if components == "all":
-            components = (
+
+        if parts == "all":
+            parts = (
                 "summary",
                 "precipitation",
                 "temperature",
@@ -210,24 +211,24 @@ class Controller:
                 "humidity"
             )
 
-        for component in components:
+        for part in parts:
             statement = ""
 
-            if component == "summary":
+            if part == "summary":
                 statement = forecast["currently"]["weather_description"]
 
-            if component == "clouds":
+            if part == "clouds":
                 clouds = forecast["currently"]["clouds"]
 
                 statement = f"{clouds} percent cloudy."
 
-            if component == "precipitation":
+            if part == "precipitation":
                 if "rain" in forecast["currently"]["weather_groups"]:
                     statement = "It's raining."
                 if "snow" in forecast["currently"]["weather_groups"]:
                     statement = "It's snowing."
 
-            if component == "temperature":
+            if part == "temperature":
                 temp = round(forecast["currently"]["temp"])
                 feel = round(forecast["currently"]["feels_like"])
 
@@ -236,7 +237,7 @@ class Controller:
                 if abs(temp - feel) > 5:
                     statement += " but feels like {}".format(feel)
 
-            if component == "humidity":
+            if part == "humidity":
                 statement = "{} percent humidity".format(
                     forecast["currently"]["humidity"]
                 )
