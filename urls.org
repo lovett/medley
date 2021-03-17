@@ -214,7 +214,7 @@ curl -i -d "group=db" "$host/maintenance"
   "deliveryStyle": "normal",
   "body": "",
   "localId": "test",
-  "title": "📦 test",
+  "title": "📦 test 📦",
   "group": "",
   "source": "",
   "url": "http://example.com",
