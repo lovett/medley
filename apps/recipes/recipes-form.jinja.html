@@ -1,6 +1,7 @@
 {% extends "apps/recipes/recipes.jinja.html" %}
 
 {% block scripts %}
+    {{ macros.asset("js/recipes.js") }}
     {{ macros.asset("js/shortcuts.js") }}
     {{ macros.asset("js/delete.js") }}
 {% endblock %}

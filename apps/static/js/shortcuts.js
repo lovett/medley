@@ -144,11 +144,16 @@ MEDLEY.shortcuts = (function () {
         }
 
         if (shortcut === 'markdown-list') {
+            field.value = field.value.replace(
+                /^\s+[\r\n]/gm,
+                ''
+            );
+
             field.value = replaceSelection(
                 field.value,
                 field.selectionStart,
                 field.selectionEnd,
-                /^[\s-\*]*/gm,
+                /^[\s\-\*]*/gm,
                 "- "
             );
         }
