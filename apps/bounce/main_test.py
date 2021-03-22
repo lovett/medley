@@ -65,14 +65,12 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         for pair in candidates:
-            result = self.controller.url_to_host(pair[0])
+            result = self.controller.url_to_base(pair[0])
             self.assertEqual(result, pair[1])
 
     def test_group_reduction(self) -> None:
-        """Hostnames are associated with one another by subtracting known
-        keywords from the hostname.
-
-        """
+        """URLs are associated with one another by subtracting known
+        keywords from the hostname."""
 
         candidates = (
             ("example.com", "example"),
@@ -87,13 +85,11 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         for pair in candidates:
-            result = self.controller.host_to_group(pair[0])
+            result = self.controller.url_to_group(pair[0])
             self.assertEqual(result, pair[1])
 
     def test_keyword_redution(self) -> None:
-        """Site environment keywords are identified by isolating common names.
-
-        """
+        """Site names are identified by isolating common words."""
 
         candidates = (
             ("example.com", "live"),
@@ -108,7 +104,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         )
 
         for pair in candidates:
-            result = self.controller.host_to_keyword(pair[0])
+            result = self.controller.url_to_name(pair[0])
             self.assertEqual(result, pair[1])
 
     @mock.patch("cherrypy.engine.publish")

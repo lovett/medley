@@ -17,9 +17,9 @@
 {% endblock %}
 
 {% block app_message %}
-    {% if invalid == "group" %}
+    {% if error == "group" %}
         <div id="app-message" class="error">Invalid group.</div>
-    {% elif invalid == "name" %}
+    {% elif error == "name" %}
         <div id="app-message" class="error">Invalid name.</div>
     {% else %}
         {{ super() }}
@@ -38,7 +38,7 @@
                 </div>
                 <div class="field-group">
                     <div class="field">
-                        <label for="name">Name</label>
+                        <label for="name">Site Name</label>
                         <input required type="text" id="name" name="name" value="{{ name }}"/>
                     </div>
 

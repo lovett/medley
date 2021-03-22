@@ -23,27 +23,29 @@ class Controller:
     def GET(self, *_args: str, **kwargs: str) -> bytes:
         """Display all the URLs in a group."""
 
-        host = ""
-        name = ""
-        group = kwargs.get("group", "")
         url = kwargs.get("u", "")
-        invalid = kwargs.get("invalid")
+        group = kwargs.get("group", "")
+        error = kwargs.get("error", "")
+
+        base_url = ""
+        site_name = ""
         registry_url = ""
+
         bounces: typing.List[typing.Tuple[str, str]] = []
 
         if url:
-            host = self.url_to_host(url)
-            key = cherrypy.engine.publish(
+            base_url = self.url_to_base(url)
+            registry_key = cherrypy.engine.publish(
                 "registry:first:key",
-                value=host,
+                value=base_url,
                 key_prefix="bounce*"
             ).pop()
 
             try:
-                _, group, name = key.split(":")
+                _, group, site_name = registry_key.split(":")
             except (AttributeError, ValueError):
-                group = self.host_to_group(host)
-                name = self.host_to_keyword(host)
+                group = self.url_to_group(base_url)
+                site_name = self.url_to_name(base_url)
 
         if group:
             _, rows = cherrypy.engine.publish(
@@ -53,7 +55,7 @@ class Controller:
 
             if rows:
                 bounces = [
-                    (url.replace(host, row["value"]),
+                    (url.replace(base_url, row["value"]),
                      row["key"].split(":").pop())
                     for row in rows
                 ]
@@ -64,19 +66,19 @@ class Controller:
                 {"q": f"bounce:{group}"}
             ).pop()
 
-        if not any(host in bounce[0] for bounce in bounces):
+        if not any(url in bounce[0] for bounce in bounces):
             bounces = []
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/bounce/bounce.jinja.html",
             url=url,
-            site=host,
+            site=base_url,
             group=group,
-            name=name,
+            name=site_name,
             bounces=bounces,
             registry_url=registry_url,
-            invalid=invalid
+            error=error
         ).pop()
 
         return response
@@ -84,7 +86,7 @@ class Controller:
     def POST(self, url: str, name: str, group: str) -> None:
         """Add a new URL to a group."""
 
-        host = self.url_to_host(url)
+        host = self.url_to_base(url)
 
         group = cherrypy.engine.publish(
             "formatting:string_sanitize",
@@ -95,7 +97,7 @@ class Controller:
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
                 None,
-                {"name": name, "url": url, "invalid": "group"}
+                {"name": name, "url": url, "error": "group"}
             ).pop()
 
             raise cherrypy.HTTPRedirect(redirect_url)
@@ -109,7 +111,7 @@ class Controller:
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
                 None,
-                {"url": url, "group": group, "invalid": "name"}
+                {"url": url, "group": group, "error": "name"}
             ).pop()
 
             raise cherrypy.HTTPRedirect(redirect_url)
@@ -128,11 +130,9 @@ class Controller:
 
         raise cherrypy.HTTPRedirect(redirect_url)
 
-    def host_to_group(self, host: str = "") -> str:
-        """Reduce a host to a word that describes the project
-        or entity it is related to.
-
-        """
+    def url_to_group(self, host: str = "") -> str:
+        """Reduce a URL to a word that describes the project
+        or entity it is related to."""
 
         host_without_scheme = host.split("://")[-1]
         host_without_port = host_without_scheme.split(":")[0]
@@ -153,16 +153,16 @@ class Controller:
 
         return filtered_segments[-1]
 
-    def host_to_keyword(self, host: str = "") -> str:
-        """Reduce a host to a word that distinguishes it from
+    def url_to_name(self, host: str = "") -> str:
+        """Reduce a URL to a word that distinguishes it from
         others in the same group."""
 
-        host_without_scheme = host.split("://")[-1]
-        host_without_port = host_without_scheme.split(":")[0]
+        url_without_scheme = host.split("://")[-1]
+        url_without_port = url_without_scheme.split(":")[0]
 
-        segments = [host_without_port]
-        if "." in host_without_port:
-            segments = host_without_port.split(".")
+        segments = [url_without_port]
+        if "." in url_without_port:
+            segments = url_without_port.split(".")
 
         intersect = [
             segment for segment in segments
@@ -178,8 +178,9 @@ class Controller:
         return "live"
 
     @staticmethod
-    def url_to_host(url: str = "") -> str:
-        """Reduce a URL to its hostname"""
+    def url_to_base(url: str = "") -> str:
+        """Reduce a URL to its scheme and hostname."""
+
         parsed_url = urlparse(url)
         if not parsed_url.netloc:
             return url
