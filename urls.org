@@ -93,69 +93,6 @@ curl -i -I "$host/"
 curl -i -I -H "If-None-Match: e3e5f241ef61db2c61aa327dc1c0394c" "$host/"
 #+END_SRC
 
-* Jenkins
-#+NAME: jenkins_queued_job_input
-#+BEGIN_EXAMPLE
-{
-  "build": {
-    "artifacts": {},
-    "full_url": "http://example.com/job/example/123/",
-    "log": "",
-    "number": 68,
-    "phase": "QUEUED",
-    "queue_id": 155,
-    "scm": {
-      "branch": "origin/master",
-      "changes": [],
-      "commit": "abc123",
-      "culprits": []
-    },
-    "timestamp": 1525656472964,
-    "url": "job/example/123/"
-  },
-  "display_name": "test",
-  "name": "test",
-  "url": "job/example/123/"
-}
-#+END_EXAMPLE
-
-#+NAME: jenkins_started_job_input
-#+BEGIN_EXAMPLE
-{
-  "build": {
-    "artifacts": {},
-    "full_url": "http://example.com/job/example/123/",
-    "log": "",
-    "number": 68,
-    "phase": "STARTED",
-    "queue_id": 155,
-    "scm": {
-      "branch": "origin/master",
-      "changes": [],
-      "commit": "abc123",
-      "culprits": []
-    },
-    "timestamp": 1525656472974,
-    "url": "job/example/123/"
-  },
-  "display_name": "test",
-  "name": "test",
-  "url": "job/example/123/"
-}
-#+END_EXAMPLE
-
-#+NAME: jenkins_queued_job
-#+HEADER: :stdin jenkins_queued_job_input
-#+BEGIN_SRC sh :wrap EXPORT json
-curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/jenkins"
-#+END_SRC
-
-#+NAME: jenkins_started_job
-#+HEADER: :stdin jenkins_started_job_input
-#+BEGIN_SRC sh :wrap EXPORT json
-curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/jenkins"
-#+END_SRC
-
 * Lintable
 ** GET
 Ask the server to compare the current hash of a file to the last
