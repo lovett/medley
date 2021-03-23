@@ -438,7 +438,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (batch_size,)
         )
 
-        if not records:
+        if records[0]["value"] == 0:
+            cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
 
         cherrypy.engine.publish(
@@ -447,10 +448,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             records[0]['value'],
             "rows"
         )
-
-        if records[0]["value"] == 0:
-            cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
-            return
 
         parser = parsers.combined_log.Parser()
 
