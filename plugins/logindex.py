@@ -379,15 +379,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         unreversed_ips = records[0]["value"]
 
+        if unreversed_ips == 0:
+            return
+
         cherrypy.engine.publish(
             "metrics:add",
             "logindex:unreversed_ips",
             unreversed_ips,
             "count"
         )
-
-        if unreversed_ips == 0:
-            return
 
         for record in records[1:]:
             facts = cherrypy.engine.publish(
