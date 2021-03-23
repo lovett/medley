@@ -1,5 +1,6 @@
 """Text-to-speech service"""
 
+import re
 import typing
 import cherrypy
 
@@ -9,6 +10,29 @@ class Controller:
 
     exposed = True
     show_on_homepage = True
+
+    # Taken from https://stackoverflow.com/questions/33404752
+    emoji_regex = re.compile("["
+                             u"\U0001F600-\U0001F64F"
+                             u"\U0001F300-\U0001F5FF"
+                             u"\U0001F680-\U0001F6FF"
+                             u"\U0001F1E0-\U0001F1FF"
+                             u"\U00002500-\U00002BEF"
+                             u"\U00002702-\U000027B0"
+                             u"\U00002702-\U000027B0"
+                             u"\U000024C2-\U0001F251"
+                             u"\U0001f926-\U0001f937"
+                             u"\U00010000-\U0010ffff"
+                             u"\u2640-\u2642"
+                             u"\u2600-\u2B55"
+                             u"\u200d"
+                             u"\u23cf"
+                             u"\u23e9"
+                             u"\u231a"
+                             u"\ufe0f"
+                             u"\u3030"
+                             "]+",
+                             flags=re.UNICODE)
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
@@ -45,16 +69,28 @@ class Controller:
             ).pop()
         )
 
-    @staticmethod
     @cherrypy.tools.capture()
-    def POST(*_args: str, **kwargs: str) -> None:
-        """Accept a piece of text for text-to-speech conversion"""
+    @cherrypy.tools.json_in(force=False)
+    def POST(self, *args: str, **kwargs: str) -> None:
+        """Dispatch POST requests to a subhandler based on the URL path."""
 
-        statement = kwargs.get("statement")
-        locale = kwargs.get("locale", "en-GB")
-        gender = kwargs.get("gender", "Male")
-        action = kwargs.get("action", None)
-        confirm = kwargs.get("confirm")
+        url_path = args or (None,)
+
+        if url_path[0] is None:
+            self.handle_post_vars(kwargs)
+
+        if url_path[0] == "notification":
+            self.handle_notification(cherrypy.request.json)
+
+    @staticmethod
+    def handle_post_vars(post_vars: typing.Dict[str, str]) -> None:
+        """Transform POST parameters to speech-ready statement."""
+
+        statement = post_vars.get("statement")
+        locale = post_vars.get("locale", "en-GB")
+        gender = post_vars.get("gender", "Male")
+        action = post_vars.get("action", None)
+        confirm = post_vars.get("confirm")
 
         muted = cherrypy.engine.publish("speak:muted").pop()
 
@@ -75,15 +111,47 @@ class Controller:
             raise cherrypy.HTTPRedirect(app_url)
 
         if muted:
-            response_status = 202
-        else:
-            if confirm:
-                cherrypy.engine.publish(
-                    "audio:play:asset",
-                    "attention"
-                )
+            cherrypy.response.status = 202
+            return
 
-            cherrypy.engine.publish("speak", statement, locale, gender)
-            response_status = 204
+        if confirm:
+            cherrypy.engine.publish(
+                "audio:play:asset",
+                "attention"
+            )
 
-        cherrypy.response.status = response_status
+        cherrypy.engine.publish("speak", statement, locale, gender)
+        cherrypy.response.status = 204
+
+    def handle_notification(self, notification: typing.Dict[str, str]) -> None:
+        """Transform a notification to a speech-ready statement."""
+
+        muted = cherrypy.engine.publish("speak:muted").pop()
+
+        if muted:
+            cherrypy.response.status = 202
+            return
+
+        if "retracted" in notification:
+            cherrypy.response.status = 202
+            return
+
+        skippable_groups = cherrypy.engine.publish(
+            "registry:search:valuelist",
+            "notification:skip:group"
+        ).pop()
+
+        if notification.get("group") in skippable_groups:
+            cherrypy.response.status = 202
+            return
+
+        title = self.emoji_regex.sub(
+            "", notification.get("title", "")
+        ).strip()
+
+        if not title:
+            cherrypy.response.status = 400
+            return
+
+        cherrypy.engine.publish("speak", title)
+        cherrypy.response.status = 204

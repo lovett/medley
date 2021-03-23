@@ -134,6 +134,7 @@ YESTERDAY=$(date --date yesterday +"%Y-%m-%d")
 TODAY=$(date +"%Y-%m-%d")
 curl -i -d "start=$YESTERDAY" -d "end=$TODAY" "$host/logindex"
 #+END_SRC
+
 * Maintenance
 ** POST
 Start maintenance tasks.
@@ -145,26 +146,6 @@ curl -i -d "group=db" "$host/maintenance"
 
 * Notification
 ** POST
-#+NAME: notification_post_input
-#+BEGIN_EXAMPLE
-{
-  "deliveryStyle": "normal",
-  "body": "",
-  "localId": "test",
-  "title": "📦 test 📦",
-  "group": "",
-  "source": "",
-  "url": "http://example.com",
-  "publicId": "abcde123",
-  "badge": ""
-}
-#+END_EXAMPLE
-
-#+NAME: notification_post
-#+HEADER: :stdin notification_post_input
-#+BEGIN_SRC sh :wrap EXPORT json
-curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/notification"
-#+END_SRC
 
 * Recipes
 ** DELETE
@@ -284,6 +265,28 @@ curl -i -d "statement=hello world" -d "confirm=1N" "$host/speak"
 #+BEGIN_SRC sh :wrap EXPORT http
 curl -i -d "statement=hello world" -d "action=toggle" "$host/speak"
 #+END_SRC
+
+#+NAME: speak_post_notification_input
+#+BEGIN_EXAMPLE
+{
+  "deliveryStyle": "normal",
+  "body": "",
+  "localId": "test",
+  "title": "📦 test 📦",
+  "group": "",
+  "source": "",
+  "url": "http://example.com",
+  "publicId": "abcde123",
+  "badge": ""
+}
+#+END_EXAMPLE
+
+#+NAME: speak_post_notification
+#+HEADER: :stdin speak_post_notification_input
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/speak/notification"
+#+END_SRC
+
 * Weather
 ** POST
 
