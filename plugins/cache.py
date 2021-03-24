@@ -73,13 +73,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         for row in rows:
-            if isinstance(row["value"], str):
-                try:
-                    yield json.loads(row["value"])
-                except json.decoder.JSONDecodeError:
-                    pass
-
-            yield row["value"]
+            if not isinstance(row["value"], str):
+                yield row["value"]
+                continue
+            try:
+                yield json.loads(row["value"])
+            except json.decoder.JSONDecodeError:
+                pass
 
     def get(self, key: str) -> typing.Any:
         """Retrieve a value from the store."""
