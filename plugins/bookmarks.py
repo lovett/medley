@@ -239,7 +239,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return True
 
-    @decorators.log_runtime
     def add_full_text(self) -> None:
         """Store the plain text of a bookmarked URL.
 
@@ -409,7 +408,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._explain(sql, (max_days_clause, limit, offset))
         )
 
-    @decorators.log_runtime
     def all_tags(
             self,
             for_precache: bool = False
