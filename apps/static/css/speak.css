@@ -1,0 +1,44 @@
+main {
+}
+
+#status {
+    text-align: center;
+    padding: 2em 0;
+}
+
+#status svg {
+    font-size: 4em;
+}
+
+#actions {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-column-gap: 2em;
+    justify-content: center;
+}
+
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    #ip-report {
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 1em;
+        max-width: 48em;
+        margin: auto;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}

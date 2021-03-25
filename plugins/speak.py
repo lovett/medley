@@ -7,6 +7,7 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-
 
 import datetime
 import re
+import typing
 import cherrypy
 
 
@@ -88,6 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("speak:muted", self.muted)
         self.bus.subscribe("speak:muted:scheduled", self.muted_by_schedule)
+        self.bus.subscribe("speak:muted:temporarily", self.muted_temporarily)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak", self.speak)
@@ -151,17 +153,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return document.strip().encode("utf-8")
 
     def muted(self) -> bool:
-        """Determine whether the application has been muted."""
+        """Determine whether the application has been muted for any reason."""
 
-        temporarily_muted = cherrypy.engine.publish(
-            "registry:first:value",
-            "speak:mute:temporary"
-        ).pop()
-
-        if temporarily_muted:
+        if self.muted_temporarily():
             return True
 
         return self.muted_by_schedule()
+
+    @staticmethod
+    def muted_temporarily() -> bool:
+        """Determine whether a manual mute is in effect."""
+        return typing.cast(
+            bool,
+            cherrypy.engine.publish(
+                "registry:first:value",
+                "speak:mute:temporary"
+            ).pop()
+        )
 
     @staticmethod
     def muted_by_schedule() -> bool:

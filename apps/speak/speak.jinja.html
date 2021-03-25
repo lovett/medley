@@ -1,57 +1,71 @@
 {% extends "apps/static/templates/base.jinja.html" %}
 {% import "apps/static/templates/macros.jinja.html" as macros -%}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        <a id="edit-record" class="template-edit" href="{{ registry_url }}">
-            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-            Edit
-        </a>
-    </nav>
+{% block stylesheets %}
+    {{ macros.asset("css/speak.css") }}
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("edit") }}
+    {{ macros.svgSymbols("edit", "muted", "unmuted") }}
 
     <main>
-        {% if muted_by_schedule %}
-            <p>Automuted by schedule.</p>
-        {% endif %}
-
-        {% if schedules %}
-            <p>
-                Auto muting occurs between
-
-                {% for schedule in schedules %}
-                    {{ schedule|replace("\n", " and ") }}
-
-                    {%- if not loop.last %} and between {% endif %}
-                {%- endfor -%}.
-            </p>
-        {% endif %}
-
-        {% if not muted_by_schedule %}
-            {% if not muted %}
-                <p>Not currently muted.</p>
-            {% else %}
+        <div id="status">
+            {% if muted_by_schedule and not muted_temporarily %}
+                <svg class="icon"><use xlink:href="#icon-muted"></use></svg>
                 <p>Currently muted.</p>
-            {% endif %}
-        {% endif %}
+                <p>
+                    Automatic muting is scheduled from
 
-        {% if not muted_by_schedule %}
-            {% if not muted %}
+                    {% for schedule in schedules %}
+                        {{ schedule|replace("\n", " to ") }}
+
+                        {%- if not loop.last %}, {% endif %}
+
+                    {%- endfor -%}.
+                </p>
+            {% elif muted_temporarily %}
+                <svg class="icon"><use xlink:href="#icon-muted"></use></svg>
+                <p>Currently muted.</p>
+            {% else %}
+                <svg class="icon"><use xlink:href="#icon-unmuted"></use></svg>
+                <p>Currently unmuted.</p>
+            {% endif %}
+        </div>
+
+
+        <div id="actions">
+            {% if muted_by_schedule and not muted_temporarily %}
                 <form method="POST" action="{{ app_url }}">
                     <input type="hidden" name="action" value="mute" />
-                    <button>Mute now</button>
-                </form>
-            {% else %}
-                <form method="POST" action="{{ app_url }}">
-                    <input type="hidden" name="action" value="unmute" />
-                    <button>Unmute</button>
+                    <button><svg class="icon"><use xlink:href="#icon-muted"></use></svg> Stay muted</button>
                 </form>
             {% endif %}
-        {% endif %}
 
+            {% if muted_by_schedule and muted_temporarily %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button><svg class="icon"><use xlink:href="#icon-unmuted"></use></svg> Resume schedule</button>
+                </form>
+            {% endif %}
 
+            {% if not muted_by_schedule and not muted_temporarily %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="mute" />
+                    <button><svg class="icon"><use xlink:href="#icon-muted"></use></svg> Mute</button>
+                </form>
+            {% endif %}
+
+            {% if not muted_by_schedule and muted_temporarily %}
+                <form method="POST" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="unmute" />
+                    <button><svg class="icon"><use xlink:href="#icon-unmuted"></use></svg> Unmute</button>
+                </form>
+            {% endif %}
+
+            <form method="GET" action="{{ registry_url }}">
+                <input type="hidden" name="q" value="speak:mute" />
+                <button><svg class="icon"><use xlink:href="#icon-edit"></use></svg> Edit schedule</button>
+            </form>
+        </div>
     </main>
 {% endblock %}
