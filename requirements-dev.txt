@@ -3,7 +3,7 @@ coverage==5.5
 dlint==0.11.0
 flake8==3.9.0
 flake8-comprehensions==3.4.0
-lxml==4.6.2
+lxml==4.6.3
 memory-profiler==0.58.0
 mypy==0.812
 mypy-extensions==0.4.3
