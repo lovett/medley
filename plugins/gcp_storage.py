@@ -101,8 +101,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         files_pulled = 0
 
-        for item in bucket.get("items"):
-            item_path = pathlib.Path(item.get("name"))
+        for item in bucket.get("items", []):
+            item_path = pathlib.Path(item.get("name", ""))
             destination_path = pathlib.Path(storage_root) / item_path
             should_delete = False
 
@@ -131,7 +131,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             if should_delete:
                 self.delete_item(
-                    item.get("selfLink"),
+                    item.get("selfLink", ""),
                     access_token
                 )
                 continue
@@ -141,7 +141,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             cherrypy.engine.publish(
                 "urlfetch:get:file",
-                item.get("mediaLink"),
+                item.get("mediaLink", ""),
                 destination_path,
                 headers=self.standard_headers(access_token)
             )
