@@ -126,13 +126,14 @@ class Plugin(cherrypy.process.plugins.Monitor):
             )
             counter += 1
 
-        unit = "event" if counter == 1 else "events"
+        if counter > 0:
+            unit = "event" if counter == 1 else "events"
 
-        cherrypy.engine.publish(
-            "applog:add",
-            "scheduler",
-            f"{counter} {unit} revived"
-        )
+            cherrypy.engine.publish(
+                "applog:add",
+                "scheduler",
+                f"{counter} {unit} revived"
+            )
 
     @staticmethod
     def execute(
