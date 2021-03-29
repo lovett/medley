@@ -205,9 +205,7 @@ class Controller:
         if parts == "all":
             parts = (
                 "summary",
-                "precipitation",
                 "temperature",
-                "clouds",
                 "humidity"
             )
 
@@ -216,17 +214,6 @@ class Controller:
 
             if part == "summary":
                 statement = forecast["currently"]["weather_description"]
-
-            if part == "clouds":
-                clouds = forecast["currently"]["clouds"]
-
-                statement = f"{clouds} percent cloudy."
-
-            if part == "precipitation":
-                if "rain" in forecast["currently"]["weather_groups"]:
-                    statement = "It's raining."
-                if "snow" in forecast["currently"]["weather_groups"]:
-                    statement = "It's snowing."
 
             if part == "temperature":
                 temp = round(forecast["currently"]["temp"])
