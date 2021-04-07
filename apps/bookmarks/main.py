@@ -1,6 +1,7 @@
 """Saved webpages"""
 
 import json
+import sqlite3
 import typing
 import cherrypy
 
@@ -84,7 +85,22 @@ class Controller:
         return json.dumps(closest_snapshot).encode()
 
     @staticmethod
-    def index(*_args: str, **kwargs: str) -> bytes:
+    def count_by_domain(
+            bookmarks: typing.Iterator[sqlite3.Row]
+    ) -> typing.Dict[str, int]:
+        """ Get bookmark counts per domain for a set of bookmarks."""
+        counts = {}
+
+        for bookmark in bookmarks:
+            domain = bookmark["domain"]
+            if domain not in counts:
+                counts[domain] = cherrypy.engine.publish(
+                    "bookmarks:domaincount",
+                    domain
+                ).pop()
+        return counts
+
+    def index(self, *_args: str, **kwargs: str) -> bytes:
         """Display recently-added bookmarks."""
 
         max_days = 180
@@ -99,6 +115,8 @@ class Controller:
             max_days=max_days
         ).pop()
 
+        domain_counts = self.count_by_domain(bookmarks)
+
         pagination_url = cherrypy.engine.publish(
             "url:internal",
             "/bookmarks",
@@ -110,6 +128,7 @@ class Controller:
                 "jinja:render",
                 "apps/bookmarks/bookmarks.jinja.html",
                 bookmarks=bookmarks,
+                domain_counts=domain_counts,
                 max_days=max_days,
                 total_records=total_records,
                 order=order,
@@ -120,8 +139,7 @@ class Controller:
             ).pop()
         )
 
-    @staticmethod
-    def search(**kwargs: str) -> bytes:
+    def search(self, **kwargs: str) -> bytes:
         """Find bookmarks matching a search query."""
         per_page = 20
         offset = int(kwargs.get("offset", 0))
@@ -135,6 +153,10 @@ class Controller:
             offset=offset,
             order=order
         ).pop()
+
+        domain_counts = {}
+        if "domain:" not in query:
+            domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",
@@ -151,6 +173,7 @@ class Controller:
                 "jinja:render",
                 "apps/bookmarks/bookmarks.jinja.html",
                 bookmarks=bookmarks,
+                domain_counts=domain_counts,
                 offset=offset,
                 order=order,
                 pagination_url=pagination_url,

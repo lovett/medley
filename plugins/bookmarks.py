@@ -104,6 +104,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:find", self.find)
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
+        self.bus.subscribe("bookmarks:domaincount", self.domain_count)
         self.bus.subscribe("bookmarks:search", self.search)
         self.bus.subscribe("bookmarks:prune", self.prune)
         self.bus.subscribe("bookmarks:recent", self.recent)
@@ -280,6 +281,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "scheduler:add",
             10,
             "bookmarks:add:fulltext"
+        )
+
+    def domain_count(self, domain: str) -> int:
+        """Count the number of bookmarks for a given domain."""
+
+        return typing.cast(
+            int,
+            self._selectFirst(
+                """SELECT count(*) FROM bookmarks WHERE domain=?""",
+                (domain,)
+            )
         )
 
     @decorators.log_runtime
