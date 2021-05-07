@@ -9,7 +9,7 @@ mypy==0.812
 mypy-extensions==0.4.3
 pylint==2.8.2
 pytest-cov==2.11.1
-pytest==6.2.3
+pytest==6.2.4
 pytest-timeout==1.4.2
 requests-mock==1.9.2
 responses==0.13.3
