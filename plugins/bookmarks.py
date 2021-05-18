@@ -370,7 +370,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if query:
             # The query is sanitized to prevent FTS5 syntax errors.
-            query = re.sub(r"[^\w ]", "_", query)
+            query = re.sub(r"[^\w\" ]", "_", query)
 
             # Semicolons are allowed after column names.
             query = re.sub(
