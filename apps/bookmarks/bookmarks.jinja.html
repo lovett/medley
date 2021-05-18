@@ -127,7 +127,7 @@
                                             <div>
                                                 <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                                                 {{ count|pluralize('bookmark', 'bookmarks') }} from
-                                                <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">
+                                                <a href="{{ app_url }}?query=site:{{ display_domain|urlencode}}">
                                                     {{ display_domain }}
                                                 </a>
                                             </div>

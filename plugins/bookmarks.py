@@ -349,11 +349,23 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if "comment:" in query:
             query = query.replace("comment:", "comments:")
 
-        if "domain:" in query:
-            match = re.search(r"domain:\s*(\S+)", query)
+        if "site:" in query:
+            match = re.search(r"site:\s*(\S+)", query)
             if match:
                 where_sql += " AND b.domain=?"
-                placeholder_values += (match.group(1),)
+
+                domain = match.group(1)
+                path = ""
+                if domain.startswith("/r/"):
+                    domain = "www.reddit.com"
+                    path = f"%{match.group(1)}%"
+                    where_sql += " AND b.url LIKE ?"
+
+                placeholder_values += (domain,)
+
+                if path:
+                    placeholder_values += (path,)
+
                 query = query.replace(match.group(0), "")
 
         if query:
@@ -362,7 +374,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             # Semicolons are allowed after column names.
             query = re.sub(
-                r"\b(title|tags|comments|domain)_\s*", r"\g<1>:",
+                r"\b(title|tags|comments)_\s*", r"\g<1>:",
                 query
             )
 

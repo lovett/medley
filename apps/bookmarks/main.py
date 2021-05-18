@@ -166,7 +166,7 @@ class Controller:
         ).pop()
 
         domain_counts = {}
-        if "domain:" not in query:
+        if "site:" not in query:
             domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
