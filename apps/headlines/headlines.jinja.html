@@ -10,10 +10,12 @@
 {% endblock %}
 
 {% block main_toolbar %}
-    <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
-        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-        Bing.com
-    </a>
+    <nav id="main-toolbar">
+        <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
+            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+            Bing.com
+        </a>
+    </nav>
 {% endblock %}
 
 
