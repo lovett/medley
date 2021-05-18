@@ -60,6 +60,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["internal_url"] = self.internal_url_filter
         self.env.filters["better_html"] = self.better_html
         self.env.filters["is_today"] = self.is_today
+        self.env.filters["display_domain"] = self.display_domain_filter
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -547,7 +548,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             (' ,', ', ')
         )
 
-        result = jinja2.Markup(value)
+        result = str(jinja2.Markup(value))
 
         for before, after in replacements:
             result = result.replace(before, after)
@@ -578,3 +579,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 now
             ).pop()
         )
+
+    @staticmethod
+    def display_domain_filter(value: str) -> str:
+        """Apply URL encoding to a value."""
+
+        parsed_url = urlparse(value)
+
+        if "reddit" in value:
+            path_parts = parsed_url.path.split("/", 3)
+            return "/".join(path_parts[0:3])
+
+        return parsed_url.netloc.lstrip("www.")

@@ -116,8 +116,9 @@
 
                             <div class="actions">
                                 {% if bookmark.domain %}
-                                    {% set count = domain_counts.get(bookmark.domain, 0) %}
+                                    {% set display_domain = bookmark.url|display_domain %}
 
+                                    {% set count = domain_counts.get(display_domain, 0) %}
                                     {% if count == 1 %}
                                         {{ bookmark.domain }}
                                     {% endif %}
@@ -127,7 +128,7 @@
                                                 <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                                                 {{ count|pluralize('bookmark', 'bookmarks') }} from
                                                 <a href="{{ app_url }}?query=domain:{{ bookmark.domain|urlencode}}">
-                                                    {{ bookmark.domain }}
+                                                    {{ display_domain }}
                                                 </a>
                                             </div>
 

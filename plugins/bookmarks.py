@@ -283,15 +283,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "bookmarks:add:fulltext"
         )
 
-    def domain_count(self, domain: str) -> int:
+    def domain_count(self, domain: str, path: str = "") -> int:
         """Count the number of bookmarks for a given domain."""
+
+        sql = """SELECT count(*) FROM bookmarks WHERE domain=?"""
+        placeholders = [domain]
+
+        if path:
+            sql += "AND URL like ?"
+            placeholders.append(f"%{path}%")
 
         return typing.cast(
             int,
-            self._selectFirst(
-                """SELECT count(*) FROM bookmarks WHERE domain=?""",
-                (domain,)
-            )
+            self._selectFirst(sql, placeholders)
         )
 
     @decorators.log_runtime

@@ -3,6 +3,7 @@
 import json
 import sqlite3
 import typing
+from urllib.parse import urlparse
 import cherrypy
 
 
@@ -93,11 +94,21 @@ class Controller:
 
         for bookmark in bookmarks:
             domain = bookmark["domain"]
-            if domain not in counts:
-                counts[domain] = cherrypy.engine.publish(
+            key = domain.lstrip("www.")
+            path = ""
+
+            if "reddit.com" in domain:
+                parsed_url = urlparse(bookmark["url"])
+                path_parts = parsed_url.path.split("/", 3)
+                path = "/".join(path_parts[0:3])
+                key = path
+
+            if key not in counts:
+                counts[key] = cherrypy.engine.publish(
                     "bookmarks:domaincount",
-                    domain
+                    bookmark["domain"], path
                 ).pop()
+
         return counts
 
     def index(self, *_args: str, **kwargs: str) -> bytes:
