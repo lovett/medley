@@ -1,7 +1,8 @@
 """Test suite for the jinja plugin."""
 
+import typing
 import unittest
-from unittest.mock import Mock, patch
+from unittest import mock
 import cherrypy
 import plugins.jinja
 from testing.assertions import Subscriber
@@ -13,8 +14,8 @@ class TestJinja(Subscriber):
     def setUp(self) -> None:
         self.plugin = plugins.jinja.Plugin(cherrypy.engine)
 
-    @patch("cherrypy.engine.subscribe")
-    def test_subscribe(self, subscribe_mock: Mock) -> None:
+    @mock.patch("cherrypy.engine.subscribe")
+    def test_subscribe(self, subscribe_mock: mock.Mock) -> None:
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
@@ -37,6 +38,33 @@ class TestJinja(Subscriber):
         initial = "1234567"
         final = self.plugin.phonenumber_filter(initial)
         self.assertEqual(final, "123-4567")
+
+    @mock.patch("cherrypy.engine.publish")
+    def test_autolink(self, publish_mock: mock.Mock) -> None:
+        """Autolinking detects URLs."""
+
+        def side_effect(*args: str, **_: str) -> typing.Any:
+            """Side effects local function"""
+            if args[0] == "url:internal":
+                return ["/test"]
+
+            return mock.DEFAULT
+        publish_mock.side_effect = side_effect
+
+        initial = "http://example.com"
+        final = self.plugin.autolink_filter(initial)
+        self.assertIn("<a href=", final)
+
+        initial = "no link here"
+        final = self.plugin.autolink_filter(initial)
+        self.assertNotIn("<a href=", final)
+
+    def test_autolink_empty_value(self) -> None:
+        """Autolinking doesn't throw if the value is empty."""
+
+        initial = None
+        final = self.plugin.autolink_filter(initial)
+        self.assertEqual(final, "")
 
 
 if __name__ == "__main__":

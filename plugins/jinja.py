@@ -458,9 +458,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def autolink_filter(
             self,
-            value: str
+            value: typing.Optional[str]
     ) -> str:
         """Convert a bare URL to a hyperlink"""
+
+        if not value:
+            return ""
 
         links = re.findall("http[^ ]+", value)
 
