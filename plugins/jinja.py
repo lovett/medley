@@ -15,6 +15,7 @@ import json
 import re
 import cherrypy
 import jinja2
+import markupsafe
 import plugins.jinja_cache
 
 
@@ -204,7 +205,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"{count:{number_format}} {value}{suffix}"
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def anonymize_filter(
             _: typing.Any,
             url: str
@@ -270,7 +271,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Pretty-print a JSON value."""
         return json.dumps(value, sort_keys=True, indent=2)
 
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def websearch_filter(
             self,
             context: jinja2.runtime.Context,
@@ -305,7 +306,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         >{icon} {label}</a>"""
 
         if context.eval_ctx.autoescape:
-            return jinja2.Markup(result)
+            return markupsafe.Markup(result)
 
         return result
 
@@ -356,7 +357,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return str(value) + "%"
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def cache_bust_filter(_: typing.Any, url: str) -> str:
         """Calculate a cache-aware URL to a static asset.
 
@@ -377,7 +378,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"{url}?{file_hash}"
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def escapejs_filter(_: typing.Any, val: str) -> str:
         """Escape special characters in JavaScript when rendered inline with
         markup.
@@ -411,7 +412,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ".".join(segment_slice[::-1])
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def logline_with_links_filter(
             context: jinja2.runtime.Context,
             record: sqlite3.Row
@@ -428,7 +429,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         result = result.replace(record["ip"], link)
 
         if context.eval_ctx.autoescape:
-            return jinja2.Markup(result)
+            return markupsafe.Markup(result)
 
         return result
 
@@ -475,7 +476,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             value = value.replace(link, anchor)
 
-        return jinja2.Markup(value)
+        return markupsafe.Markup(value)
 
     def optional_qs_param_filter(self, value: str, key: str) -> str:
         """Return a URL querystring key-value pair if the value exists."""
@@ -487,7 +488,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"&{key}={encoded_value}"
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def unescape_filter(
             context: jinja2.runtime.Context,
             value: str
@@ -497,12 +498,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         result = html.unescape(value)
 
         if context.eval_ctx.autoescape:
-            return jinja2.Markup(result)
+            return markupsafe.Markup(result)
 
         return result
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def internal_url_filter(
             context: jinja2.runtime.Context,
             value: str,
@@ -525,12 +526,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         if context.eval_ctx.autoescape:
-            return jinja2.Markup(url)
+            return markupsafe.Markup(url)
 
         return url
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def better_html(
             context: jinja2.runtime.Context,
             value: str
@@ -551,18 +552,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             (' ,', ', ')
         )
 
-        result = str(jinja2.Markup(value))
+        result = str(markupsafe.Markup(value))
 
         for before, after in replacements:
             result = result.replace(before, after)
 
         if context.eval_ctx.autoescape:
-            return jinja2.Markup(result)
+            return markupsafe.Markup(result)
 
         return result
 
     @staticmethod
-    @jinja2.contextfilter
+    @jinja2.pass_context
     def is_today(
             _: jinja2.runtime.Context,
             value: datetime
