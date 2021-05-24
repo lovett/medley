@@ -1,6 +1,5 @@
 [Unit]
 Description=Medley headlines precache
-OnFailure=medley-failure@%n
 
 [Service]
 Type=exec

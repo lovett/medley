@@ -1,6 +1,5 @@
 [Unit]
 Description=Medley database maintenance
-OnFailure=medley-failure@%n
 
 [Service]
 Type=exec

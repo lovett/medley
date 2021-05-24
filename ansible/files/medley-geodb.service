@@ -1,6 +1,5 @@
 [Unit]
 Description=Medley Geodb Database Download
-OnFailure=medley-failure@%n
 
 [Service]
 Type=simple

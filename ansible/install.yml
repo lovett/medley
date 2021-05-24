@@ -104,12 +104,6 @@
         src: "templates/medley.service.j2"
         dest: "/etc/systemd/system/medley.service"
 
-    - name: Install systemd failure service
-      become: true
-      template:
-        src: "templates/medley-failure@.service.j2"
-        dest: "/etc/systemd/system/medley-failure@.service"
-
     - name: Install supplemental systemd services
       become: true
       copy: src={{ item }} dest=/etc/systemd/system/
