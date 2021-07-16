@@ -5,5 +5,5 @@ geoip2==4.2.0
 httplib2==0.19.1
 mistletoe==0.7.2
 pytz==2021.1
-requests==2.25.1
+requests==2.26.0
 sdnotify==0.3.2
