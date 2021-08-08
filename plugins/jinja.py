@@ -546,10 +546,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if "```" in value:
             value = re.sub(r"```([^`]+)```", r"<code>\1</code>", value)
 
+        value = re.sub(
+            r"([^\'\"])(https?://[^ <]+)",
+            r'\1<a href="\2" target="_blank" rel="noopener noreferer">\2</a>',
+            value
+        )
+
         replacements = (
             ("<p>&#x200B;</p>", ""),
             ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/'),
-            (' ,', ', ')
+            (' ,', ', '),
         )
 
         value = html.unescape(value)
