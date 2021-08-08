@@ -11,7 +11,7 @@
                 {%- endif -%}
             </summary>
             <div class="body">
-                {{ comment.body_html|better_html|unescape }}
+                {{ comment.body_html|better_html }}
             </div>
             {% if comment.replies %}
                 {% for reply in comment.replies.data.children %}

@@ -552,15 +552,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             (' ,', ', ')
         )
 
-        result = str(markupsafe.Markup(value))
-
+        value = html.unescape(value)
         for before, after in replacements:
-            result = result.replace(before, after)
+            value = value.replace(before, after)
 
         if context.eval_ctx.autoescape:
-            return markupsafe.Markup(result)
+            return markupsafe.Markup(value)
 
-        return result
+        return value
 
     @staticmethod
     @jinja2.pass_context
