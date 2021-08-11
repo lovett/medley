@@ -1,5 +1,6 @@
 """Parser for logindex search queries."""
 
+import calendar
 from datetime import datetime, timedelta
 import re
 import typing
@@ -171,6 +172,7 @@ class Parser():
         """
 
         reference_date = None
+        end_date_delta = timedelta(hours=23)
 
         if term == "today":
             reference_date = datetime.today()
@@ -187,6 +189,13 @@ class Parser():
                 "%Y-%m",
             )
 
+            month_range = calendar.monthrange(
+                reference_date.year,
+                reference_date.month
+            )
+
+            end_date_delta = timedelta(days=month_range[1])
+
         if not reference_date:
             return ""
 
@@ -194,7 +203,7 @@ class Parser():
             hour=0, minute=0, second=0
         ).astimezone(UTC)
 
-        end_date = start_date + timedelta(hours=23)
+        end_date = start_date + end_date_delta
 
         start = start_date.strftime("%Y-%m-%d-%H")
         end = end_date.strftime("%Y-%m-%d-%H")
