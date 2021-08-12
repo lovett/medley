@@ -52,6 +52,7 @@ import plugins.scheduler
 import plugins.speak
 import plugins.urlfetch
 import plugins.url
+import plugins.weather
 import tools.capture
 import tools.etag
 import tools.whitespace
@@ -199,6 +200,7 @@ def setup() -> None:
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.url.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
+    plugins.weather.Plugin(cherrypy.engine).subscribe()
 
     # Skip unnecessary services when running in serverless mode.
     #
