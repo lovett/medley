@@ -70,6 +70,7 @@
                              data-minutes="{{ template.minutes }}"
                              data-notification_id="{{ template.notification_id }}"
                              data-url="{{ template.url }}"
+                             data-badge="{{ template.badge }}"
                         >
                             <a href="#"
                                class="hash-focus-candidate"
@@ -107,9 +108,15 @@
                     <textarea id="comments" name="comments"></textarea>
                 </div>
 
-                <div class="field">
-                    <label for="notification_id">Notification ID</label>
-                    <input type="text" id="notification_id" name="notification_id" />
+                <div class="field-group">
+                    <div class="field">
+                        <label for="notification_id">Notification ID</label>
+                        <input type="text" id="notification_id" name="notification_id" />
+                    </div>
+                    <div class="field">
+                        <label for="badge">Badge</label>
+                        <input type="text" id="badge" name="badge" />
+                    </div>
                 </div>
 
                 <div class="field">

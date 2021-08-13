@@ -109,6 +109,7 @@ class Controller:
         """Queue a new reminder for delivery."""
 
         message = kwargs.get("message", "")
+        badge = kwargs.get("badge", "")
 
         minutes = 0
         if kwargs.get("minutes", "").isnumeric():
@@ -151,6 +152,7 @@ class Controller:
                     hours = int(values.get("hours", 0))
                     comments = values.get("comments", "")
                     url = values.get("url", "")
+                    badge = values.get("badge", "")
                     break
 
         if notification_id and not message:
@@ -202,7 +204,8 @@ class Controller:
             title=notification_title,
             body=message,
             localId=local_id,
-            expiresAt=f"{minutes} minutes"
+            expiresAt=f"{minutes} minutes",
+            badge=badge
         ).pop()
 
         cherrypy.engine.publish(
@@ -217,7 +220,8 @@ class Controller:
             title=message,
             body=comments,
             localId=local_id,
-            url=url
+            url=url,
+            badge=badge
         ).pop()
 
         cherrypy.engine.publish(
@@ -236,7 +240,8 @@ class Controller:
                     "minutes": minutes,
                     "comments": comments.strip(),
                     "notification_id": notification_id,
-                    "url": url.strip()
+                    "url": url.strip(),
+                    "badge": badge
                 })
             )
 

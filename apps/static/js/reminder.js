@@ -56,10 +56,9 @@ MEDLEY.reminder = (function () {
     }
 
     function applyTemplate(template) {
-        const fields = ['message', 'comments', 'notification_id', 'url'];
+        const fields = ['message', 'comments', 'notification_id', 'url', 'badge'];
         fields.forEach((field) => {
             document.getElementById(field).value = template.dataset[field] || '';
-
         });
 
         let minutes = parseInt(template.dataset.minutes, 10);
