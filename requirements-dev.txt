@@ -2,7 +2,7 @@ bandit==1.7.0
 coverage==5.5
 dlint==0.11.0
 flake8==3.9.2
-flake8-comprehensions==3.5.0
+flake8-comprehensions==3.6.0
 lxml==4.6.3
 memory-profiler==0.58.0
 mypy==0.910
@@ -12,5 +12,5 @@ pytest-cov==2.12.1
 pytest==6.2.4
 pytest-timeout==1.4.2
 requests-mock==1.9.3
-responses==0.13.3
+responses==0.13.4
 types-pytz==2021.1.2
