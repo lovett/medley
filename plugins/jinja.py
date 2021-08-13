@@ -59,9 +59,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
         self.env.filters["unescape"] = self.unescape_filter
         self.env.filters["internal_url"] = self.internal_url_filter
-        self.env.filters["better_html"] = self.better_html
+        self.env.filters["better_html"] = self.better_html_filter
         self.env.filters["is_today"] = self.is_today
         self.env.filters["display_domain"] = self.display_domain_filter
+        self.env.filters["retarget_html"] = self.retarget_html_filter
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -531,11 +532,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return url
 
     @staticmethod
-    @jinja2.pass_context
-    def better_html(
-            context: jinja2.runtime.Context,
-            value: str
-    ) -> str:
+    def better_html_filter(value: str) -> str:
         """Remove undesirable markup."""
 
         alturl_base = cherrypy.engine.publish(
@@ -547,8 +544,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             value = re.sub(r"```([^`]+)```", r"<code>\1</code>", value)
 
         value = re.sub(
-            r"([^\'\"=/])(https?://[^ <]+)",
-            r'\1<a href="\2" target="_blank" rel="noopener noreferer">\2</a>',
+            r"([^\'\"=/>])(https?://[^ <]+)",
+            r'\1<a href="\2">\2</a>',
             value
         )
 
@@ -558,12 +555,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             (' ,', ', '),
         )
 
-        value = html.unescape(value)
         for before, after in replacements:
             value = value.replace(before, after)
-
-        if context.eval_ctx.autoescape:
-            return markupsafe.Markup(value)
 
         return value
 
@@ -600,3 +593,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return "/".join(path_parts[0:3])
 
         return parsed_url.netloc.lstrip("www.")
+
+    @staticmethod
+    def retarget_html_filter(value: str) -> str:
+        """Add target=_blank to links."""
+
+        value = re.sub(
+            r""" (target|rel)=['"]([^'"]+)['"]""",
+            "",
+            value
+        )
+
+        value = re.sub(
+            r"""<a """,
+            """<a target="_blank" rel="noopener noreferrer" """,
+            value
+        )
+
+        return value
