@@ -79,7 +79,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             try:
                 yield json.loads(row["value"])
             except json.decoder.JSONDecodeError:
-                pass
+                yield row["value"]
 
     def get(self, key: str) -> typing.Any:
         """Retrieve a value from the store."""
