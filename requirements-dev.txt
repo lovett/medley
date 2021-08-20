@@ -2,7 +2,7 @@ bandit==1.7.0
 coverage==5.5
 dlint==0.11.0
 flake8==3.9.2
-flake8-comprehensions==3.6.0
+flake8-comprehensions==3.6.1
 lxml==4.6.3
 memory-profiler==0.58.0
 mypy==0.910
