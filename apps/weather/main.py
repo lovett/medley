@@ -99,14 +99,15 @@ class Controller:
             parts = (
                 "summary",
                 "temperature",
-                "humidity"
+                "humidity",
+                "alerts"
             )
 
         for part in parts:
-            statement = ""
-
             if part == "summary":
-                statement = forecast["currently"]["weather_description"]
+                statements.append(
+                    forecast["currently"]["weather_description"]
+                )
 
             if part == "temperature":
                 temp = round(forecast["currently"]["temp"])
@@ -117,13 +118,20 @@ class Controller:
                 if abs(temp - feel) > 5:
                     statement += " but feels like {}".format(feel)
 
+                statements.append(statement)
+
             if part == "humidity":
                 statement = "{} percent humidity".format(
-                    forecast["currently"]["humidity"]
+                     forecast["currently"]["humidity"]
                 )
-
-            if statement:
                 statements.append(statement)
+
+            if part == "alerts":
+                for alert in forecast.get("alerts", []):
+                    statement = "A {} is in effect".format(
+                        alert["event"]
+                    )
+                    statements.append(statement)
 
         for statement in statements:
             cherrypy.engine.publish(
