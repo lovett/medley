@@ -1,5 +1,6 @@
 """API interaction with openweathermap.org."""
 
+import datetime
 import typing
 from collections import defaultdict
 import cherrypy
@@ -14,12 +15,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
+    @staticmethod
+    def setup() -> None:
+        """Start a recurring timer to prefetch weather forecasts.
+
+        This is the one-time call that starts the timer. Further calls
+        will occur recursively from prefetch().
+
+        The 5-second delay provides some post-server-start breathing
+        room but is otherwise not important."""
+
+        if cherrypy.config.get("prefetch"):
+            cherrypy.log("[weather] Starting prefetch")
+            cherrypy.engine.publish(
+                "scheduler:add",
+                5,
+                "weather:prefetch"
+            )
+
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the weather prefix."""
 
+        self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("weather:forecast", self.get_forecast)
+        self.bus.subscribe("weather:prefetch", self.prefetch)
         self.bus.subscribe("weather:config", self.get_config)
 
     @staticmethod
@@ -58,7 +79,71 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return config
 
+    def prefetch(self) -> None:
+        """Request forecasts from OpenWeather on a recurring basis.
+
+        Having the forecasts cached slightly improves page response
+        time while also providing a convenient place for sending
+        notifications."""
+
+        if not self.can_prefetch():
+            return
+
+        config = self.get_config("", "")
+
+        if "openweather_api_key" not in config:
+            return
+
+        forecast = self.get_forecast(config)
+
+        cached_hashes = list(cherrypy.engine.publish(
+            "cache:match",
+            "weather"
+        ).pop())
+
+        # Only cache alerts until the end of the day. For multi-day
+        # alerts, this will result in multiple notifications which is ok.
+        cache_lifespan = typing.cast(
+            int,
+            cherrypy.engine.publish(
+                "clock:day:remaining"
+            ).pop()
+        )
+
+        weather_app_url = cherrypy.engine.publish(
+            "url:internal",
+            "/weather"
+        ).pop()
+
+        for alert in forecast.get("alerts", []):
+            if alert["hash"] in cached_hashes:
+                continue
+
+            cherrypy.engine.publish(
+                "notifier:send",
+                {
+                    "title": alert["event"],
+                    "localId": f"weather-{alert['hash']}",
+                    "url": weather_app_url,
+                    "deliveryStyle": "whisper"
+                }
+            )
+
+            cherrypy.engine.publish(
+                "cache:set",
+                f"weather:{alert['hash']}",
+                alert["hash"],
+                cache_lifespan
+            )
+
+        cherrypy.engine.publish(
+            "scheduler:add",
+            3600,
+            "weather:prefetch"
+        )
+
     def get_forecast(self, config: Config) -> Forecast:
+
         """Request current weather data from OpenWeather."""
 
         latitude = config.get("latitude")
@@ -76,10 +161,55 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "appid": api_key,
             },
             as_json=True,
-            cache_lifespan=600
+            cache_lifespan=1800
         ).pop()
 
         return self.shape_forecast(api_response)
+
+    @staticmethod
+    def can_prefetch() -> bool:
+        """Determine whether prefetching is allowed."""
+
+        schedules = cherrypy.engine.publish(
+            "registry:search:valuelist",
+            "weather:prefetch_schedule",
+            exact=True
+        ).pop()
+
+        if not schedules:
+            return True
+
+        today = datetime.date.today()
+        tomorrow = today + datetime.timedelta(1)
+        now = datetime.datetime.now()
+
+        for schedule in schedules:
+            schedule_lines = [
+                line.rstrip()
+                for line in schedule.split("\n")
+            ]
+
+            for time_format in ("%I:%M %p", "%H:%M"):
+                try:
+                    time_range = [
+                        datetime.datetime.strptime(line, time_format)
+                        for line in schedule_lines
+                    ]
+                    break
+                except ValueError:
+                    return True
+
+            start = datetime.datetime.combine(today, time_range[0].time())
+
+            if time_range[1] < time_range[0]:
+                end = datetime.datetime.combine(tomorrow, time_range[1].time())
+            else:
+                end = datetime.datetime.combine(today, time_range[1].time())
+
+            if start <= now <= end:
+                return True
+
+        return False
 
     @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:
@@ -135,6 +265,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                         alert[key],
                         True
                     ).pop()
+
+                alert["hash"] = cherrypy.engine.publish(
+                    "hasher:value",
+                    alert["description"]
+                ).pop()
 
                 alert["description"] = alert["description"].lstrip("...")
                 alert["description"] = alert["description"].split("*")

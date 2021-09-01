@@ -98,6 +98,7 @@ serve: export MEDLEY__engine__autoreload__on=True
 serve: export MEDLEY__memorize_hashes=False
 serve: export MEDLEY__etags=False
 serve: export MEDLEY__request__show_tracebacks=True
+serve: export MEDLEY__prefetch=False
 serve:
 	ls apps/**/main.py plugins/*.py tools/*.py parsers/*.py medley.py | entr python medley.py
 
