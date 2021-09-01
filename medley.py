@@ -86,6 +86,7 @@ def setup() -> None:
         "log.access_file": "",
         "log.error_file": "",
         "memorize_hashes": True,
+        "prefetch": True,
         "request.show_tracebacks": False,
         "server.daemonize": False,
         "server.socket_host": "127.0.0.1",
