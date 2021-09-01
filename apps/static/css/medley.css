@@ -99,6 +99,10 @@ DETAILS SUMMARY {
     margin-bottom: 1em;
 }
 
+DETAILS SUMMARY:hover {
+    cursor: pointer;
+}
+
 DT {
     font-weight: bold;
     margin-left: 0;

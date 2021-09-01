@@ -48,11 +48,11 @@
         {% if forecast.alerts %}
             <div class="weather-alerts">
                 {% for alert in forecast.alerts %}
-                    <div class="weather-alert">
-                        <h3 class="title">
+                    <details class="weather-alert">
+                        <summary class="title">
                             <svg class="icon"><use xlink:href="#icon-alert"></use></svg>
                             {{ alert.event }} until {{ alert.end|dateformat("%-I:%m %p") }}
-                        </h3>
+                        </summary>
 
                         <div class="body">
                             {% for statement in alert.description %}
