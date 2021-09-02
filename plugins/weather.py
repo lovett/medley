@@ -82,11 +82,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def prefetch(self) -> None:
         """Request forecasts from OpenWeather on a recurring basis.
 
-        Having the forecasts cached slightly improves page response
-        time while also providing a convenient place for sending
-        notifications."""
+        This provides a caching benefit and also provides a convenient
+        place for sending notifications about alerts.
+
+        """
+
+        wait_interval_seconds = 3600
 
         if not self.can_prefetch():
+            cherrypy.engine.publish(
+                "scheduler:add",
+                wait_interval_seconds,
+                "weather:prefetch"
+            )
             return
 
         config = self.get_config("", "")
@@ -138,7 +146,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cherrypy.engine.publish(
             "scheduler:add",
-            3600,
+            wait_interval_seconds,
             "weather:prefetch"
         )
 
