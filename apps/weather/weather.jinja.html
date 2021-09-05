@@ -55,9 +55,7 @@
                         </summary>
 
                         <div class="body">
-                            {% for statement in alert.description %}
-                                <p>{{ statement }}</p>
-                            {% endfor %}
+                            <p>{{ alert.description }}</p>
 
                             <p align="right">
                                 <a href="/registry/new?key=weather:alerts:blacklist&value={{ alert.event }}" target="_blank">

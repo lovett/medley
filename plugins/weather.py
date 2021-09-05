@@ -293,9 +293,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     r" \1:\2 \3 ",
                     alert["description"]
                 )
-                alert["description"] = alert["description"].lstrip("...")
-                alert["description"] = alert["description"].split("*")
-                print(alert["description"])
+
+                alert["description"] = re.sub(
+                    r"\n",
+                    " ",
+                    alert["description"]
+                )
+
+                alert["description"] = alert["description"].replace(" * ", " ")
 
                 result["alerts"].append(alert)
 
