@@ -135,7 +135,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     "localId": f"weather-{alert['hash']}",
                     "url": weather_app_url,
                     "deliveryStyle": "whisper",
-                    "group": "weather"
+                    "group": "weather",
+                    "expiresAt": f"{alert['seconds_remaining']} seconds"
                 }
             )
 
@@ -270,8 +271,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).pop()
 
             for alert in forecast.get("alerts", []):
-                if alert["end"] < now_unix:
+                seconds_remaining = int(alert["end"] - now_unix)
+
+                if seconds_remaining < 0:
                     continue
+
+                alert["seconds_remaining"] = seconds_remaining
 
                 if alert["event"] in blacklist:
                     continue
