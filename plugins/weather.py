@@ -128,6 +128,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             if alert["hash"] in cached_hashes:
                 continue
 
+            badge = ""
+            if alert["icon"]:
+                badge = f"{alert['icon']}.svg"
+
             cherrypy.engine.publish(
                 "notifier:send",
                 {
@@ -136,7 +140,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     "url": weather_app_url,
                     "deliveryStyle": "whisper",
                     "group": "weather",
-                    "expiresAt": f"{alert['seconds_remaining']} seconds"
+                    "expiresAt": f"{alert['seconds_remaining']} seconds",
+                    "badge": badge
                 }
             )
 
@@ -306,6 +311,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 )
 
                 alert["description"] = alert["description"].replace(" * ", " ")
+
+                alert["icon"] = ""
+                tags = [tag.lower() for tag in alert.get("tags", [])]
+                if "flood" in tags:
+                    alert["icon"] = "water"
 
                 result["alerts"].append(alert)
 
