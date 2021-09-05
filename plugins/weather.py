@@ -1,6 +1,7 @@
 """API interaction with openweathermap.org."""
 
 import datetime
+import re
 import typing
 from collections import defaultdict
 import cherrypy
@@ -287,8 +288,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     alert["description"]
                 ).pop()
 
+                alert["description"] = re.sub(
+                    r" (\d+?)(\d\d) (AM|PM) ",
+                    r" \1:\2 \3 ",
+                    alert["description"]
+                )
                 alert["description"] = alert["description"].lstrip("...")
                 alert["description"] = alert["description"].split("*")
+                print(alert["description"])
 
                 result["alerts"].append(alert)
 
