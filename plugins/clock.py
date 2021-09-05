@@ -2,7 +2,6 @@
 
 import calendar
 from datetime import datetime, timedelta
-import time
 import typing
 import cherrypy
 from pytz import timezone, UTC
@@ -157,7 +156,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def now_unix() -> float:
         """The current date and time as a Unix timestamp."""
-        return time.mktime(datetime.now(UTC).timetuple())
+        return datetime.now(UTC).timestamp()
 
     @staticmethod
     def shift(
