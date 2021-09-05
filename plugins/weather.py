@@ -133,7 +133,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     "title": alert["event"],
                     "localId": f"weather-{alert['hash']}",
                     "url": weather_app_url,
-                    "deliveryStyle": "whisper"
+                    "deliveryStyle": "whisper",
+                    "group": "weather"
                 }
             )
 
