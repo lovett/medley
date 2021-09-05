@@ -259,12 +259,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         result["alerts"] = []
 
         if forecast.get("alerts"):
+            now_unix = cherrypy.engine.publish(
+                "clock:now_unix"
+            ).pop()
+
             blacklist = cherrypy.engine.publish(
                 "registry:search:valuelist",
                 "weather:alerts:blacklist"
             ).pop()
 
             for alert in forecast.get("alerts", []):
+                if alert["end"] < now_unix:
+                    continue
+
                 if alert["event"] in blacklist:
                     continue
 
