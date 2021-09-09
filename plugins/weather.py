@@ -295,7 +295,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 alert["hash"] = cherrypy.engine.publish(
                     "hasher:value",
-                    alert["description"]
+                    alert["event"]
                 ).pop()
 
                 alert["description"] = re.sub(
