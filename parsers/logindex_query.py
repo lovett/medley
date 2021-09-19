@@ -18,13 +18,11 @@ class Parser():
     # that allows for aliasing.
     keywords = {
         "date": "datestamp",
-        "datestamp": "datestamp",
         "source_file": "source_file",
         "ip": "ip",
         "host": "host",
         "uri": "uri",
         "query": "query",
-        "statuscode": "statusCode",
         "status": "statusCode",
         "method": "method",
         "agent": "agent",
