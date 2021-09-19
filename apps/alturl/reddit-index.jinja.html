@@ -1,16 +1,6 @@
 {% extends "apps/alturl/alturl.jinja.html" %}
 
 {% block main_toolbar %}
-    <nav id="main-toolbar">
-        <a class="date-filter active" data-filter="today" href="#">
-            <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-            Today
-        </a>
-        <a class="date-filter" data-filter="all" href="#">
-            <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-            All
-        </a>
-    </nav>
 {% endblock %}
 
 {% block content %}
@@ -31,14 +21,8 @@
         <ul>
             {% set ns = namespace(visibleCount=0) %}
             {% for story in stories %}
-                {% set is_hidden = not story.created|is_today %}
-                {% if not is_hidden %}
-                    {% set ns.visibleCount = ns.visibleCount + 1 %}
-                {% endif %}
-
                 <li class="headline"
                     data-date="{{ story.created|dateformat("%Y-%m-%d") }}"
-                    {% if is_hidden %}hidden{% endif %}
                 >
                     <h2 class="title">
                         {% if story.num_comments == 0 and not story.selftext %}
@@ -79,10 +63,6 @@
                 </li>
 
             {% endfor %}
-            <li id="no-matches" class="headline" {% if ns.visibleCount > 0 %}hidden{% endif %}>
-                Nothing to display.
-                <a class="date-filter" data-filter="all" href="#">Show all stories instead</a>.
-            </li>
         </ul>
     </div>
 
