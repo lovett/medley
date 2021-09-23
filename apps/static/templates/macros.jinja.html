@@ -193,10 +193,10 @@ in the argument list are returned.  #}
 {% macro pagination(url, offset, per_page, total) -%}
     {% set at_start = offset <= 0 %}
     {% set at_end = offset + per_page >= total %}
-    {% set previous_page_offset = offset - per_page - 1 %}
-    {% set next_page_offset = offset + per_page + 1 %}
-
+    {% set previous_page_offset = offset - per_page %}
+    {% set next_page_offset = offset + per_page %}
     {% set previous_page = "" %}
+
     {% if previous_page_offset > 0 %}
         {% set previous_page = "offset=" ~ previous_page_offset %}
         {% if "?" not in url %}
