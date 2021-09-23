@@ -40,6 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:shift", self.shift)
         self.bus.subscribe("clock:local", self.local)
         self.bus.subscribe("clock:day:remaining", self.day_remaining)
+        self.bus.subscribe("clock:utc", self.utc)
 
     def day_remaining(self, dt: datetime = None) -> int:
         """Calculate how many seconds are left in the day."""
@@ -180,6 +181,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             result = result + timedelta(minutes=minutes)
 
         return result
+
+    @staticmethod
+    def utc(dt: datetime) -> datetime:
+        """Convert a datetime to UTC."""
+
+        return dt.astimezone(UTC)
 
     @staticmethod
     def local(dt: datetime) -> datetime:
