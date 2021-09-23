@@ -31,6 +31,7 @@ import plugins.clock
 import plugins.converters
 import plugins.decorators
 import plugins.filesystem
+import plugins.foodlog
 import plugins.formatting
 import plugins.gcp_appengine
 import plugins.gcp_storage
@@ -183,6 +184,7 @@ def setup() -> None:
     plugins.clock.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.filesystem.Plugin(cherrypy.engine).subscribe()
+    plugins.foodlog.Plugin(cherrypy.engine).subscribe()
     plugins.formatting.Plugin(cherrypy.engine).subscribe()
     plugins.gcp_appengine.Plugin(cherrypy.engine).subscribe()
     plugins.gcp_storage.Plugin(cherrypy.engine).subscribe()

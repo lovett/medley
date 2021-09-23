@@ -245,6 +245,11 @@ TABLE TD {
     line-height: 1.3;
 }
 
+TABLE TD.warning {
+    background-color: var(--alert);
+    color: var(--white);
+}
+
 TEXTAREA {
     font-size: 1em;
 }
@@ -434,6 +439,7 @@ TEXTAREA {
 #app-nav .options input[type=text],
 #app-nav .options input[type=date],
 #app-nav .options input[type=search],
+#app-nav .options input[type=time],
 #app-nav .options input[type=password] {
     width: auto;
 }
@@ -521,11 +527,17 @@ TEXTAREA {
 .field INPUT[type=search],
 .field INPUT[type=password],
 .field INPUT[type=number],
+.field INPUT[type=time],
+.field SELECT,
 .field TEXTAREA {
     box-sizing: border-box;
     border: 1px solid #ccc;
     padding: .5em;
     width: 100%;
+}
+
+.field SELECT {
+    font-size: 1.1em;
 }
 
 .field INPUT[type=text].inline {

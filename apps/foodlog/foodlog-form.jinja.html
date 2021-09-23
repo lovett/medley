@@ -1,0 +1,72 @@
+{% extends "apps/foodlog/foodlog.jinja.html" %}
+
+{% block scripts %}
+    {{ macros.asset("js/foodlog.js") }}
+    {{ macros.asset("js/delete.js") }}
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("arrow-left", "delete", "x", "zap", "calendar", "clock") }}
+    <main id="collection">
+        <form id="foodlog-form" method="post" action="/foodlog">
+            {% if entry_id %}
+                <input type="hidden" name="entry_id" value="{{ entry_id }}" />
+            {% endif %}
+            <div class="field-group">
+                <div class="field">
+                    <label for="consume_date">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Date
+                    </label>
+                    <input
+                        type="date"
+                        id="consume_date"
+                        name="consume_date"
+                        value="{{ entry_date|dateformat('%Y-%m-%d') }}"
+                        required
+                    />
+                </div>
+                <div class="field">
+                    <label for="consume_time">
+                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
+                        Time
+                    </label>
+                    <input
+                        type="time"
+                        id="consume_time"
+                        name="consume_time"
+                        value="{{ entry_date|dateformat('%H:%M') }}"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="foods_eaten">
+                    Foods Eaten
+                </label>
+                <textarea
+                    id="foods_eaten"
+                    name="foods_eaten"
+                    autofocus="autofocus"
+                >{{ foods_eaten }}</textarea>
+            </div>
+
+            <div class="field">
+                <label for="overate">
+                    <input
+                        type="checkbox"
+                        id="overate"
+                        name="overate"
+                        value="1"
+                        {% if overate %}checked="checked"{% endif %}
+                    />
+                    Overate
+                </label>            </div>
+
+            <div class="field">
+                <button data-default-label="Save" data-progress-label="Please wait">Save</button>
+            </div>
+        </form>
+    </main>
+{% endblock %}

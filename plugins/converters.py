@@ -47,6 +47,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             dt = cherrypy.engine.publish(
                 "clock:from_format",
                 decoded_value,
+                "%Y-%m-%d %H:%M:%S%z"
+            ).pop()
+
+        if not dt:
+            dt = cherrypy.engine.publish(
+                "clock:from_format",
+                decoded_value,
                 "%Y-%m-%d %H:%M:%S.%f%z"
             ).pop()
 

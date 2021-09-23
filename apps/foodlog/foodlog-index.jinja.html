@@ -1,0 +1,59 @@
+{% extends "apps/foodlog/foodlog.jinja.html" %}
+
+{% block content %}
+    <main>
+        <header id="app-nav">
+            <form method="get" action="{{ app_url }}/search">
+                <div class="field">
+                    <input
+                        type="search"
+                        id="q"
+                        name="q"
+                        value="{{ query }}"
+                        autocapitalize="none"
+                    />
+                </div>
+                <div class="field">
+                    <button>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </header>
+
+        <section class="table-sleeve">
+            {% if entry_count == 0 %}
+                <p clas="warning">No entries found.</p>
+            {% endif %}
+
+            {% if entry_count > 0 %}
+            <table id="matches">
+                <thead>
+                    <tr>
+                        <th width="15%">Date</th>
+                        <th width="10%">Time</th>
+                        <th>Foods Eaten</th>
+                        <th width"10%">Overate?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in entries %}
+                        <tr>
+                            <td><a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%B %d, %Y") }}</a></td>
+                            <td>{{ entry.consumed_on|dateformat("%-I:%M %p") }}</td>
+                            <td>{{ entry.foods_eaten }}</td>
+                            {% if entry.overate %}
+                                <td class="warning">Yes</td>
+                            {% else %}
+                                <td>No</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {{ macros.pagination(pagination_url, offset, per_page, entry_count) }}
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}
