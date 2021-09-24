@@ -51,7 +51,7 @@
                     <details class="weather-alert">
                         <summary class="title">
                             <svg class="icon"><use xlink:href="#icon-alert"></use></svg>
-                            {{ alert.event }} until {{ alert.end|dateformat("%-I:%m %p %A") }}
+                            {{ alert.event }} until {{ alert.end|dateformat(time_format) }}
                         </summary>
 
                         <div class="body">
