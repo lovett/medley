@@ -77,6 +77,14 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
         ).pop()
         stories.append(story)
 
+    def story_sorter(story: typing.Dict[str, typing.Any]) -> float:
+        return story.get("created_utc", 0)
+
+    stories.sort(
+        key=story_sorter,
+        reverse=True
+    )
+
     parsed_url = urlparse(url)
 
     subreddit = f"{parsed_url.netloc}{parsed_url.path}"
