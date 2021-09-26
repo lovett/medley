@@ -543,14 +543,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if "```" in value:
             value = re.sub(r"```([^`]+)```", r"<code>\1</code>", value)
 
+        # A URL that is preceded by a paragraph tag.
         value = re.sub(
-            r"([^\'\"=/])(https?://[^ <]+)",
+            r"(<p>)(https?://[^ <]+)",
             r'\1<a target="_blank" rel="noopener noreferrer" href="\2">\2</a>',
             value
         )
 
-        if "latest blog post" in value:
-            print(value)
+        # A URL that is not within an HTML attribute or preceded by a tag.
+        value = re.sub(
+            r"([^\'\"=/>])(https?://[^ <]+)",
+            r'\1<a target="_blank" rel="noopener noreferrer" href="\2">\2</a>',
+            value
+        )
 
         replacements = (
             ("<p>&#x200B;</p>", ""),
