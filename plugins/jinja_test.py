@@ -82,11 +82,11 @@ class TestJinja(Subscriber):
         test_suite = [
             # Bare URL
             ("""Before http://example.com after""",
-             """Before <a href="http://example.com">http://example.com</a> after"""),  # noqa: E501
+             """Before <a target="_blank" rel="noopener noreferrer" href="http://example.com">http://example.com</a> after"""),  # noqa: E501
 
             # Bare URL with other URL in path
             ("""Before http://example.com/http://example.net after""",
-             """Before <a href="http://example.com/http://example.net">http://example.com/http://example.net</a> after"""),  # noqa: E501
+             """Before <a target="_blank" rel="noopener noreferrer" href="http://example.com/http://example.net">http://example.com/http://example.net</a> after"""),  # noqa: E501
 
             # Linked URL
             ("""Before <a href="http://example.com">link</a>""",
@@ -98,7 +98,7 @@ class TestJinja(Subscriber):
 
             # Multiple URLs
             ("""Before http://example.com http://example.net after""",
-             """Before <a href="http://example.com">http://example.com</a> <a href="http://example.net">http://example.net</a> after""")  # noqa: E501
+             """Before <a target="_blank" rel="noopener noreferrer" href="http://example.com">http://example.com</a> <a target="_blank" rel="noopener noreferrer" href="http://example.net">http://example.net</a> after""")  # noqa: E501
         ]
 
         for key, value in test_suite:

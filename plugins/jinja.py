@@ -544,10 +544,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             value = re.sub(r"```([^`]+)```", r"<code>\1</code>", value)
 
         value = re.sub(
-            r"([^\'\"=/>])(https?://[^ <]+)",
-            r'\1<a href="\2">\2</a>',
+            r"([^\'\"=/])(https?://[^ <]+)",
+            r'\1<a target="_blank" rel="noopener noreferrer" href="\2">\2</a>',
             value
         )
+
+        if "latest blog post" in value:
+            print(value)
 
         replacements = (
             ("<p>&#x200B;</p>", ""),
