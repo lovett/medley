@@ -21,9 +21,7 @@
         <ul>
             {% set ns = namespace(visibleCount=0) %}
             {% for story in stories %}
-                <li class="headline"
-                    data-date="{{ story.created|dateformat("%Y-%m-%d") }}"
-                >
+                <li class="headline">
                     <h2 class="title">
                         {% if story.num_comments == 0 and not story.selftext %}
                             {{ story.title|safe|truncate(100) }}
@@ -35,7 +33,7 @@
                     </h2>
                     <time class="info">
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                        {{ story.created|dateformat("%Y-%m-%d") }}
+                        {{ story.created|dateformat("%Y-%m-%d %-I:%M %p") }}
                     </time>
 
                     {# Internally link to the subreddit when not viewing the Reddit homepage. #}
