@@ -270,7 +270,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """
 
-        for table in ("recipe", "attachment"):
+        for table in ("recipes", "attachments"):
             deletion_count = self._delete(
                 f"DELETE FROM {table} WHERE deleted IS NOT NULL"
             )
