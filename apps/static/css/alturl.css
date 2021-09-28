@@ -18,7 +18,23 @@ code {
 
 #collection .headline {
     display: block;
-    margin-bottom: 1em;
+    position: relative;
+    padding-left: 1.5em;
+}
+
+#collection .headline.today:before {
+    font-size: .65em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transform: rotate(-90deg);
+    transform-origin: top left;
+    position: absolute;
+    top: 5em;
+    left: 0.1em;
+    line-height: 1.5;
+    padding: 0 .5em;
+    content: 'today';
+    background-color: palegreen;
 }
 
 #collection li {

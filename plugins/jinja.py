@@ -9,7 +9,7 @@ from pathlib import Path
 import sqlite3
 import typing
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
 import json
 import re
@@ -61,6 +61,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["internal_url"] = self.internal_url_filter
         self.env.filters["better_html"] = self.better_html_filter
         self.env.filters["is_today"] = self.is_today
+        self.env.filters["is_yesterday"] = self.is_yesterday
         self.env.filters["display_domain"] = self.display_domain_filter
         self.env.filters["retarget_html"] = self.retarget_html_filter
 
@@ -587,6 +588,33 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "clock:same_day",
                 value,
                 now
+            ).pop()
+        )
+
+    @staticmethod
+    @jinja2.pass_context
+    def is_yesterday(
+            _: jinja2.runtime.Context,
+            value: datetime
+    ) -> bool:
+        """Determine if a unix timestamp falls on yesterday's date."""
+
+        now = typing.cast(
+            datetime,
+            cherrypy.engine.publish(
+                "clock:now",
+                local=True
+            ).pop()
+        )
+
+        yesterday = now - timedelta(days=1)
+
+        return typing.cast(
+            bool,
+            cherrypy.engine.publish(
+                "clock:same_day",
+                value,
+                yesterday
             ).pop()
         )
 
