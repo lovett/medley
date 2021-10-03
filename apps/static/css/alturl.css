@@ -19,7 +19,10 @@ code {
 #collection .headline {
     display: block;
     position: relative;
-    padding-left: 1.5em;
+}
+
+#collection .headline.today {
+    padding-left: 1.75em;
 }
 
 #collection .headline.today:before {
@@ -29,17 +32,33 @@ code {
     transform: rotate(-90deg);
     transform-origin: top left;
     position: absolute;
-    top: 5em;
+    top: 5.30em;
     left: 0.1em;
     line-height: 1.5;
     padding: 0 .5em;
     content: 'today';
     background-color: palegreen;
+    border: 1px solid var(--black);
 }
 
 #collection li {
     display: inline-flex;
     align-items: center;
+}
+
+#collection time {
+    display: inline-block;
+}
+
+#collection .info {
+    font-size: .85em;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 1em;
+}
+
+#collection .info svg {
+    margin-right: .5em;
 }
 
 #comments {
@@ -97,18 +116,6 @@ code {
 
 .comment blockquote p {
     line-height: inherit;
-}
-
-.info {
-    font-size: .85em;
-    display: inline-flex;
-    align-items: center;
-    margin-right: 1em;
-    margin-bottom: .5em;
-}
-
-.info svg {
-    margin-right: .5em;
 }
 
 .intro {

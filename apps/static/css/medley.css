@@ -270,7 +270,7 @@ TEXTAREA {
     padding-left: 0;
     list-style-type: none;
     display: grid;
-    grid-row-gap: 1em;
+    grid-row-gap: 1.5em;
     grid-column-gap: 4em;
 }
 
@@ -306,6 +306,8 @@ TEXTAREA {
 
 #collection .title {
     font-size: 1.1em;
+    line-height: 1.2;
+    margin-bottom: .25em;
 }
 
 #collection .tags {
