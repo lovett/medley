@@ -45,14 +45,14 @@
 
         {% if story.num_comments > 0 %}
             <span class="info">
-                <svg class="icon"><use xlink:href="#icon-info"></use></svg>
+                <svg class="icon"><use xlink:href="#icon-comment"></use></svg>
                 {{ story.num_comments|pluralize("comment", "comments") }}
             </span>
         {% endif %}
 
         <a class="info" rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            u/{{ story.author }}
+            <svg class="icon"><use xlink:href="#icon-user"></use></svg>
+            {{ story.author }}
         </a>
 
         <a class="info" target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
@@ -64,8 +64,15 @@
             {% endif %}
         </a>
 
-        {% if story.selftext %}
-            {{ story.selftext|better_html|unescape|retarget_html|safe }}
+        {% for subreddit, url in crossposts %}
+            <a class="info" href="{{ url }}">
+                <svg class="icon"><use xlink:href="#icon-duplicate"></use></svg>
+                {{ subreddit }} crosspost
+            </a>
+        {% endfor %}
+
+        {% if intro %}
+            {{ intro|better_html|unescape|retarget_html|safe }}
         {% endif %}
 
     </div>

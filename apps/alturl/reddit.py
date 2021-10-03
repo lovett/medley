@@ -104,8 +104,26 @@ def view_story(response: typing.Any) -> ViewAndData:
     story_wrapper = listing.get("children").pop()
     story = story_wrapper.get("data")
 
+    intro = ""
+    crossposts = []
     if story.get("selftext"):
-        story["selftext"] = mistletoe.markdown(story["selftext"])
+        intro = mistletoe.markdown(story["selftext"])
+
+    if story.get("crosspost_parent_list"):
+        crossposts = [
+            (
+                item['subreddit_name_prefixed'],
+                cherrypy.engine.publish(
+                    "url:internal",
+                    f"reddit.com/{item['subreddit_name_prefixed']}"
+                ).pop()
+            )
+            for item in story["crosspost_parent_list"]
+        ]
+
+        intro = mistletoe.markdown(
+            story["crosspost_parent_list"][0]["selftext"]
+        )
 
     if not story.get("url", "").startswith("http"):
         story["url"] = "https://reddit.com" + story["url"]
@@ -124,9 +142,11 @@ def view_story(response: typing.Any) -> ViewAndData:
     ).pop()
 
     return ("apps/alturl/reddit-story.jinja.html", {
+        "intro": intro,
         "story": story,
         "comments": comments,
         "subreddit": subreddit,
         "subreddit_alturl": subreddit_alturl,
+        "crossposts": crossposts,
         "subview_title": story["title"]
     })

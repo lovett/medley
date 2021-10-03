@@ -123,6 +123,17 @@ code {
     margin: auto;
 }
 
+.intro .info {
+    display: block;
+    align-items: center;
+    margin-right: 1em;
+    margin-bottom: .5em;
+}
+
+.intro .info svg {
+    margin-right: .5em;
+}
+
 .intro .title {
     font-size: 1.25em;
 }
@@ -139,6 +150,10 @@ code {
 @media (min-width: 768px) {
     .intro .title {
         font-size: 1.5em;
+    }
+
+    .intro .info {
+        display: inline-flex;
     }
 }
 
