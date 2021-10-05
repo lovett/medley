@@ -562,10 +562,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ("<p>&#x200B;</p>", ""),
             ('<a href="/r/', f'<a href="{alturl_base}/reddit.com/r/'),
             (' ,', ', '),
+            ("https?://(www|old).reddit.com", f"{alturl_base}/reddit.com"),
+            (
+                "https://www.google.com/amp/s/amp.reddit.com",
+                f"{alturl_base}/reddit.com"
+            ),
         )
 
         for before, after in replacements:
-            value = value.replace(before, after)
+            value = re.sub(before, after, value)
 
         return value
 
