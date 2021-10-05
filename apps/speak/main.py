@@ -34,9 +34,41 @@ class Controller:
                              "]+",
                              flags=re.UNICODE)
 
-    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **_kwargs: str) -> bytes:
+    def GET(self, *args: str, **_kwargs: str) -> bytes:
+        """Dispatch to a subhandler based on the URL path."""
+
+        if args and args[0] == "voices":
+            return self.list_voices()
+
+        return self.status()
+
+    @staticmethod
+    def list_voices() -> bytes:
+        """List available voices."""
+
+        default_voice = cherrypy.engine.publish(
+            "registry:first:value",
+            "speak:default_name",
+        ).pop()
+
+        voices = cherrypy.engine.publish(
+            "speak:voices"
+        ).pop()
+
+        return typing.cast(
+            bytes,
+            cherrypy.engine.publish(
+                "jinja:render",
+                "apps/speak/speak-voices.jinja.html",
+                voices=voices,
+                default_voice=default_voice,
+                subview_title="Voice List"
+            ).pop()
+        )
+
+    @staticmethod
+    def status() -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         muted_temporarily = cherrypy.engine.publish(
@@ -83,14 +115,45 @@ class Controller:
         if url_path[0] == "notification":
             self.handle_notification(cherrypy.request.json)
 
+        if url_path[0] == "voice":
+            self.set_default_voice(kwargs)
+
+    @staticmethod
+    def set_default_voice(post_vars: typing.Dict[str, str]) -> None:
+        """Write default voice values to the registry."""
+        locale = post_vars.get("locale", "en-US")
+        gender = post_vars.get("gender", "Male")
+        name = post_vars.get("name", "Guy")
+
+        cherrypy.engine.publish(
+            "registry:replace",
+            "speak:default_locale",
+            locale
+        )
+
+        cherrypy.engine.publish(
+            "registry:replace",
+            "speak:default_gender",
+            gender
+        )
+
+        cherrypy.engine.publish(
+            "registry:replace",
+            "speak:default_name",
+            name
+        )
+
+        cherrypy.response.status = 204
+
     @staticmethod
     def handle_post_vars(post_vars: typing.Dict[str, str]) -> None:
         """Transform POST parameters to speech-ready statement."""
 
         statement = post_vars.get("statement")
-        locale = post_vars.get("locale", "en-GB")
-        gender = post_vars.get("gender", "Male")
-        action = post_vars.get("action", None)
+        name = post_vars.get("name")
+        locale = post_vars.get("locale")
+        gender = post_vars.get("gender")
+        action = post_vars.get("action")
         confirm = post_vars.get("confirm")
 
         if action == "toggle":
@@ -120,7 +183,14 @@ class Controller:
                 "attention"
             )
 
-        cherrypy.engine.publish("speak", statement, locale, gender)
+        cherrypy.engine.publish(
+            "speak",
+            statement,
+            locale,
+            gender,
+            name,
+        )
+
         cherrypy.response.status = 204
 
     def handle_notification(self, notification: typing.Dict[str, str]) -> None:

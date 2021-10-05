@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("edit", "muted", "unmuted") }}
+    {{ macros.svgSymbols("edit", "muted", "unmuted", "list") }}
 
     <main>
         <div id="status">
@@ -64,7 +64,17 @@
 
             <form method="GET" action="{{ registry_url }}">
                 <input type="hidden" name="q" value="speak:mute" />
-                <button><svg class="icon"><use xlink:href="#icon-edit"></use></svg> Edit schedule</button>
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                    Edit schedule
+                </button>
+            </form>
+
+            <form method="GET" action="{{ app_url }}/voices">
+                <button>
+                    <svg class="icon"><use xlink:href="#icon-list"></use></svg>
+                    Voice List
+                </button>
             </form>
         </div>
     </main>

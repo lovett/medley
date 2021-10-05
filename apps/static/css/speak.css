@@ -12,9 +12,17 @@ main {
 
 #actions {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto auto auto;
     grid-column-gap: 2em;
     justify-content: center;
+}
+
+.deprecated > TD {
+    background-color: var(--grey);
+}
+
+.default > TD {
+    background-color: var(--success);
 }
 
 

@@ -1,8 +1,8 @@
-"""Perform text-to-speech synthesis via Microsoft Cognitive Services
+"""Perform text-to-speech synthesis via Azure.
 
 See:
 https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-text-to-speech
-
+https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech
 """
 
 import datetime
@@ -13,71 +13,6 @@ import cherrypy
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for text-to-speech."""
-
-    voice_fonts = {
-        ("ar-EG", "Female"): "Hoda",
-        ("ar-SA", "Male"): "Naayf",
-        ("bg-BG", "Male"): "Ivan",
-        ("ca-ES", "Female"): "HerenaRUS",
-        ("cs-CZ", "Male"): "Jakub",
-        ("da-DK", "Female"): "HelleRUS",
-        ("de-AT", "Male"): "Michael",
-        ("de-CH", "Male"): "Karsten",
-        ("de-DE", "Female"): "Hedda",
-        ("de-DE", "Male"): "Stefan, Apollo",
-        ("el-GR", "Male"): "Stefanos",
-        ("en-AU", "Female"): "Catherine",
-        ("en-CA", "Female"): "Linda",
-        ("en-GB", "Female"): "Susan, Apollo",
-        ("en-GB", "Male"): "George, Apollo",
-        ("en-IE", "Male"): "Sean",
-        ("en-IN", "Female"): "Heera, Apollo",
-        ("en-IN", "Male"): "Ravi, Apollo",
-        ("en-US", "Female"): "ZiraRUS",
-        ("en-US", "Male"): "BenjaminRUS",
-        ("es-ES", "Female"): "Laura, Apollo",
-        ("es-ES", "Male"): "Pablo, Apollo",
-        ("es-MX", "Female"): "HildaRUS",
-        ("es-MX", "Male"): "Raul, Apollo",
-        ("fi-FI", "Female"): "HeidiRUS",
-        ("fr-CA", "Female"): "Caroline",
-        ("fr-CH", "Male"): "Guillaume",
-        ("fr-FR", "Female"): "Julie, Apollo",
-        ("fr-FR", "Male"): "Paul, Apollo",
-        ("he-IL", "Male"): "Asaf",
-        ("hi-IN", "Female"): "Kalpana",
-        ("hi-IN", "Male"): "Hemant",
-        ("hr-HR", "Male"): "Matej",
-        ("hu-HU", "Male"): "Szabolcs",
-        ("id-ID", "Male"): "Andika",
-        ("it-IT", "Male"): "Cosimo, Apollo",
-        ("ja-JP", "Female"): "Ayumi, Apollo",
-        ("ja-JP", "Male"): "Ichiro, Apollo",
-        ("ko-KR", "Female"): "HeamiRUS",
-        ("ms-MY", "Male"): "Rizwan",
-        ("nb-NO", "Female"): "HuldaRUS",
-        ("nl-NL", "Female"): "HannaRUS",
-        ("pl-PL", "Female"): "PaulinaRUS",
-        ("pt-BR", "Female"): "HeloisaRUS",
-        ("pt-BR", "Male"): "Daniel, Apollo",
-        ("pt-PT", "Female"): "HeliaRUS",
-        ("ro-RO", "Male"): "Andrei",
-        ("ru-RU", "Female"): "Irina, Apollo",
-        ("ru-RU", "Male"): "Pavel, Apollo",
-        ("sk-SK", "Male"): "Filip",
-        ("sl-SI", "Male"): "Lado",
-        ("sv-SE", "Female"): "HedvigRUS",
-        ("ta-IN", "Male"): "Valluvar",
-        ("th-TH", "Male"): "Pattara",
-        ("tr-TR", "Female"): "SedaRUS",
-        ("vi-VN", "Male"): "An",
-        ("zh-CN", "Female"): "Yaoyao, Apollo",
-        ("zh-CN", "Male"): "Kangkang, Apollo",
-        ("zh-HK", "Female"): "Tracy, Apollo",
-        ("zh-HK", "Male"): "Danny, Apollo",
-        ("zh-TW", "Female"): "Yating, Apollo",
-        ("zh-TW", "Male"): "Zhiwei, Apollo"
-    }
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -92,6 +27,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak:muted:temporarily", self.muted_temporarily)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
+        self.bus.subscribe("speak:voices", self.voices)
         self.bus.subscribe("speak", self.speak)
 
     @staticmethod
@@ -125,25 +61,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return replaced_statement
 
-    def ssml(self, statement: str, locale: str, gender: str) -> bytes:
-        """Build an SSML document representing the text to be spoken.
-
-        SSML is XML-based, but the document is assembled as a string
-        to make it easier for the statement to include self-closing
-        tags and ad-hoc markup that would otherwise be annoying to
-        work with as nodes.
-
-        """
-
-        prefix = "Microsoft Server Speech Text to Speech Voice"
-        name = self.voice_fonts[(locale, gender)]
-        voice_name = f"{prefix} ({locale}, {name})"
+    @staticmethod
+    def ssml(
+            statement: str,
+            name: str,
+            locale: str,
+            gender: str
+    ) -> bytes:
+        """Build an SSML document representing the text to be spoken."""
 
         document = f"""
         <?xml version="1.0" ?>
         <speak version="1.0" xml:lang="{locale}">
           <voice
-            name="{voice_name}"
+            name="{name}"
             xml:gender="{gender}"
             xml:lang="{locale}"
           >{statement}</voice>
@@ -216,27 +147,60 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return False
 
+    @staticmethod
+    def voices() -> typing.List[typing.Dict[str, str]]:
+        """Get the list of available voices."""
+
+        config = cherrypy.engine.publish(
+            "registry:search:dict",
+            keys=(
+                "speak:azure_key",
+                "speak:voice_list_url",
+            ),
+            key_slice=1
+        ).pop()
+
+        return typing.cast(
+            typing.List[typing.Dict[str, str]],
+            cherrypy.engine.publish(
+                "urlfetch:get",
+                config.get("voice_list_url"),
+                as_json=True,
+                headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")},
+                cache_lifespan=1800,
+            ).pop()
+        )
+
     def speak(
             self,
             statement: str,
             locale: str = "en-GB",
-            gender: str = "Male"
+            gender: str = "Male",
+            name: str = "en-GB-RyanNeural",
     ) -> bool:
         """Speak a statement in one of the supported voices."""
-
-        if (locale, gender) not in self.voice_fonts:
-            locale = "en-GB"
-            gender = "Male"
 
         config = cherrypy.engine.publish(
             "registry:search:dict",
             keys=(
                 "speak:azure_key",
                 "speak:synthesize_url",
-                "speak:token_request_url"
+                "speak:token_request_url",
+                "speak:default_gender",
+                "speak:default_locale",
+                "speak:default_name",
             ),
             key_slice=1
         ).pop()
+
+        if "default_gender" in config and not gender:
+            gender = config.get("default_gender")
+
+        if "default_locale" in config and not locale:
+            locale = config.get("default_locale")
+
+        if "default_name" in config and not name:
+            name = config.get("default_name")
 
         if "azure_key" not in config:
             config = {}
@@ -267,7 +231,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         adjusted_statement = self.adjust_pronunciation(statement)
 
-        ssml_string = self.ssml(adjusted_statement, locale, gender)
+        ssml_string = self.ssml(adjusted_statement, name, locale, gender)
 
         hash_digest = cherrypy.engine.publish(
             "hasher:value",

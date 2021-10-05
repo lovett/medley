@@ -1,0 +1,82 @@
+{% extends "apps/static/templates/base.jinja.html" %}
+{% import "apps/static/templates/macros.jinja.html" as macros -%}
+
+{% block stylesheets %}
+    {{ macros.asset("css/speak.css") }}
+{% endblock %}
+
+{% block scripts %}
+    {{ macros.asset("js/speak.js") }}
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("edit", "muted", "unmuted", "arrow-left") }}
+
+    <main>
+        <section class="table-sleeve">
+            <h1>Voice List</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Locale</th>
+                        <th>Gender</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for voice in voices %}
+                        <tr class="{% if voice.Status == 'Deprecated' %}deprecated{% endif %}
+                                   {% if voice.ShortName == default_voice %}default{% endif %}">
+                            <td>{{ voice.Locale }}</td>
+                            <td>{{ voice.Gender }}</td>
+                            <td>
+                                <details>
+                                    <summary>{{ voice.ShortName }}</summary>
+                                    <form class="voice-test" action="{{ app_url }}" method="post">
+                                        <input type="hidden" name="name" value="{{ voice.ShortName }}" />
+                                        <input type="hidden" name="gender" value="{{ voice.Gender }}" />
+                                        <input type="hidden" name="locale" value="{{ voice.Locale }}" />
+                                        <div class="field">
+                                            <input
+                                                type="text"
+                                                name="statement"
+                                                class="inline"
+                                                value="This is a test"
+                                                placeholder="Sample text"
+                                                required
+                                            />
+                                            <button
+                                                data-default-label="Test"
+                                                data-progress-label="Please wait"
+                                            >Test</button>
+                                        </div>
+                                    </form>
+
+                                    {% if voice.ShortName != default_voice %}
+                                        <form class="default-voice" action="{{ app_url }}/voice" method="post">
+                                            <input type="hidden" name="name" value="{{ voice.ShortName }}" />
+                                            <input type="hidden" name="gender" value="{{ voice.Gender }}" />
+                                            <input type="hidden" name="locale" value="{{ voice.Locale }}" />
+                                            <button
+                                                data-default-label="Set as default"
+                                                data-progress-label="Please wait..."
+                                            >Set as default</button>
+                                        </form>
+                                    {% else %}
+                                        <p>This is the default voice.</p>
+                                    {% endif %}
+
+
+                                </details>
+                            </td>
+                            <td>{{ voice.VoiceType }}</td>
+                            <td>{{ voice.Status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+{% endblock %}
