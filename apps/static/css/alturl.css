@@ -86,6 +86,10 @@ code {
     cursor: pointer;
 }
 
+.comment.from-author > summary {
+    background-color: var(--secondary);
+}
+
 .comment ul {
     margin-top: 0.5em;
     padding-left: 1.25em;

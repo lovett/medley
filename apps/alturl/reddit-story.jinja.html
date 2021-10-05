@@ -4,10 +4,14 @@
 
 {% macro commentBlock(comment) %}
     {% if comment.author %}
-        <details open class="comment">
+        <details open class="comment {% if comment.author == story.author %}from-author{% endif %}">
             <summary>
                 <time>{{ comment.created_utc|date(local=True)|dateformat(default_date_format) }}</time>
-                by {{ comment.author }}
+                by
+                {% if comment.author == story.author %}
+                    <svg class="icon"><use xlink:href="#icon-user"></use></svg>
+                {% endif %}
+                {{ comment.author }}
                 {%- if comment.replies.data -%} ,
                     {{ comment.replies.data.children|length|pluralize("reply", "replies") }}
                 {%- endif -%}
