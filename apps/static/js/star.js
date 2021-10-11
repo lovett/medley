@@ -1,34 +1,39 @@
 MEDLEY.star = (function () {
 
-    function starResource(e) {
+    function toggle(e) {
         if (!e.target.classList.contains('star')) {
             return;
         }
 
-        const starUrl = e.target.dataset.starUrl;
-        const starRedirect = e.target.dataset.starRedirect;
+        const endpoint = e.target.dataset.resourceUrl;
 
-        if (!starUrl) {
+        if (!endpoint) {
             return;
         }
 
-        fetch(starUrl, {
-            method: 'PATCH'
+        let payload = new FormData();
+        payload.set('toggle', 'star');
+
+        fetch(endpoint, {
+            method: 'PATCH',
+            mode: 'same-origin',
+            body: payload
         }).then(res => {
             if (res.ok) {
-                if (starRedirect) {
-                    window.location.assign(starRedirect);
-                }
+                window.location.assign(endpoint);
+                return;
             }
+
+            throw new Error();
         }).catch(err => {
-            const resourceName = e.target.dataset.deleteResourceName;
+            const resourceName = e.target.dataset.resourceName;
             MEDLEY.setErrorMessage(`The ${resourceName} could not be starred.`);
         });
     }
 
     return {
         init: function () {
-            document.addEventListener('click', starResource);
+            document.addEventListener('click', toggle);
         }
     }
 })();

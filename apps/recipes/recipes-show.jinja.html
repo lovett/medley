@@ -10,9 +10,8 @@
     <nav id="main-toolbar">
         <a class="star"
            href="#"
-           data-star-url="/recipes/star/{{ recipe_id }}"
-           data-star-redirect="/recipes/{{ recipe_id }}"
-           data-star-resource-name="recipe">
+           data-resource-url="/recipes/{{ recipe_id }}"
+           data-resource-name="recipe">
             {% if starred %}
                 <svg class="icon"><use xlink:href="#icon-hash"></use></svg>
                 Unstar

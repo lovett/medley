@@ -86,21 +86,24 @@ class Controller:
         return self.show(int(args[0]))
 
     @staticmethod
-    def PATCH(*args: str) -> None:
+    def PATCH(*args: str, **kwargs: str) -> None:
         """Handle updates for toggle fields."""
-        if not args:
-            raise cherrypy.HTTPError(400, "Missing id.")
 
-        if args[0] == "star":
+        try:
+            recipe_id = int(args[0])
+        except (IndexError, ValueError) as error:
+            raise cherrypy.HTTPError(400, "Invalid recipe id") from error
+
+        if kwargs.get("toggle", "") == "star":
             cherrypy.engine.publish(
                 "recipes:toggle:star",
-                recipe_id=int(args[1])
+                recipe_id=recipe_id
             )
 
             cherrypy.response.status = 204
             return
 
-        raise cherrypy.HTTPError(404)
+        raise cherrypy.HTTPError(400)
 
     def POST(
             self,
