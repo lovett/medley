@@ -392,7 +392,7 @@ class Controller:
         for search, replace in self.fractions:
             body_html = body_html.replace(search, replace)
 
-        body_html = re.sub(r"([0-9]{3,})F", r"\1° F", body_html).strip()
+        body_html = re.sub(r"([0-9]{2,})F", r"\1° F", body_html).strip()
 
         if body_html.startswith("<ul>"):
             end_of_first_list = body_html.index("</ul>") + 5
