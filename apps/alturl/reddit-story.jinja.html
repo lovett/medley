@@ -8,13 +8,12 @@
             <summary>
                 <time>{{ comment.created_utc|date(local=True)|dateformat(default_date_format) }}</time>
                 by
-                {% if comment.author == story.author %}
-                    <svg class="icon"><use xlink:href="#icon-user"></use></svg>
-                {% endif %}
-                {{ comment.author }}
-                {%- if comment.replies.data -%} ,
-                    {{ comment.replies.data.children|length|pluralize("reply", "replies") }}
-                {%- endif -%}
+                <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ comment.author|lower }}">
+                    {% if comment.author == story.author %}
+                        <svg class="icon"><use xlink:href="#icon-user"></use></svg>
+                    {% endif %}
+                    {{ comment.author }}
+                </a>
             </summary>
             <div class="body">
                 {{ comment.body_html|unescape|better_html|retarget_html|safe }}

@@ -1,4 +1,7 @@
-"""Reformat pages from reddit.com."""
+"""Reformat pages from reddit.com.
+
+See https://www.reddit.com/dev/api
+"""
 
 import re
 import typing
@@ -69,6 +72,9 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
 
     stories = []
     for child in response.get("data").get("children"):
+        if child.get("kind") != "t3":
+            continue
+
         story = child.get("data")
         story["created"] = cherrypy.engine.publish(
             "clock:from_timestamp",
