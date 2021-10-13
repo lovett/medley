@@ -41,7 +41,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
             request_path: str = "/",
             method: str = "GET",
             data: typing.Optional[bytes] = None,
-            headers: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            headers: typing.Optional[typing.Dict[str, str]] = None,
             accept: str = "*/*",
             json_body: typing.Optional[object] = None,
             **kwargs: str
@@ -85,7 +85,7 @@ class BaseCherryPyTestCase(unittest.TestCase):
             if json_body:
                 data = json.dumps(json_body).encode("utf-8")
             byte_stream = BytesIO(data)
-            request_headers['content-length'] = '%d' % len(data)
+            request_headers['content-length'] = str(len(data))
 
         # Get our application and run the request against it
         app = cherrypy.tree.apps.get("")
