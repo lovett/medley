@@ -15,11 +15,11 @@ import logging
 import os
 import os.path
 import sys
-import typing
 import zipfile
 import cherrypy
 import portend
 import sdnotify
+from typing_extensions import TypedDict
 import plugins.applog
 import plugins.assets
 import plugins.audio
@@ -59,6 +59,70 @@ import tools.etag
 import tools.whitespace
 import tools.provides
 
+# Type definitions for server configuration.
+#
+# This is similar to CherryPy's configuration, but more flat.
+# It also dictates what can be overriden by environment variables.
+ServerConfig = TypedDict("ServerConfig", {
+    "access_log": str,
+    "autoreload": bool,
+    "daemonize": bool,
+    "database_dir": str,
+    "encode": bool,
+    "error_log": str,
+    "etags": bool,
+    "gzip": bool,
+    "log_screen": bool,
+    "log_screen_access": bool,
+    "memorize_hashes": bool,
+    "prefetch": bool,
+    "server_host": str,
+    "server_port": int,
+    "server_root": str,
+    "tracebacks": bool,
+    "zipapp": bool,
+})
+
+# The parts of CherryPy's configuration that use dot notation. Mapping
+# the shorter names in the server config to these longer equivalents makes
+# it easeier to use environment variable overrides.
+ServerConfigAliases = TypedDict("ServerConfigAliases", {
+    "engine.autoreload.on": bool,
+    "log.access_file": str,
+    "log.error_file": str,
+    "log.screen": bool,
+    "log.screen_access": bool,
+    "request.show_tracebacks": bool,
+    "server.daemonize": bool,
+    "server.socket_host": str,
+    "server.socket_port": int,
+    "tools.encode.on": bool,
+    "tools.gzip.on": bool,
+})
+
+
+def env_boolean(key: str, default: bool) -> bool:
+    """Read a server environment variable as a boolean."""
+    value = os.getenv(f"MEDLEY__{key}")
+    if value == "True":
+        return True
+    if value == "False":
+        return False
+    return default
+
+
+def env_integer(key: str, default: int) -> int:
+    """Read a server environment variable as an integer."""
+    value = os.getenv(f"MEDLEY__{key}")
+    if value:
+        return int(value)
+    return default
+
+
+def env_string(key: str, default: str) -> str:
+    """Read a server environment variable."""
+    return os.getenv(f"MEDLEY__{key}", default)
+
 
 # pylint: disable=too-many-statements
 @plugins.decorators.log_runtime
@@ -76,52 +140,44 @@ def setup() -> None:
     # Configuration defaults
     #
     # These are reasonable values for a production environment.
-    cherrypy.config.update({
-        "cache_static_assets": True,
-        "database_dir": "./db",
-        "etags": True,
-        "engine.autoreload.on": False,
-        "local_maintenance": True,
-        "log.screen": True,
-        "log.screen_access": False,
-        "log.access_file": "",
-        "log.error_file": "",
-        "memorize_hashes": True,
-        "prefetch": True,
-        "request.show_tracebacks": False,
-        "server.daemonize": False,
-        "server.socket_host": "127.0.0.1",
-        "server.socket_port": 8085,
-        "server_root": server_root,
-        "tools.encode.on": False,
+    config = ServerConfig(
+        access_log=env_string("access_log", ""),
+        autoreload=env_boolean("autoreload", False),
+        daemonize=env_boolean("daemonize", False),
+        database_dir=env_string("database_dir", "./db"),
+        encode=env_boolean("encode", False),
+        error_log=env_string("error_log", ""),
+        etags=env_boolean("etags", True),
+        gzip=env_boolean("gzip", True),
+        log_screen=env_boolean("log_screen", True),
+        log_screen_access=env_boolean("log_screen_access", False),
+        memorize_hashes=env_boolean("memorize_hashes", True),
+        prefetch=env_boolean("prefetch", True),
+        server_host=env_string("server_host", "127.0.0.1"),
+        server_port=env_integer("server_port", 8085),
+        server_root=server_root,
+        tracebacks=env_boolean("tracebacks", False),
+        zipapp=not os.path.isdir(server_root)
+    )
 
-        # Gzipping locally avoids Etag complexity. If a reverse
-        # proxy handles it, the Etag could be dropped.
-        "tools.gzip.on": True,
+    cherrypy.config.update(config)
 
-        "zipapp": not os.path.isdir(server_root)
-    })
+    # Remap medley configuration to cherrypy configuration.
+    aliases = {
+        "engine.autoreload.on": config["autoreload"],
+        "log.access_file": config["access_log"],
+        "log.error_file": config["error_log"],
+        "log.screen": config["log_screen"],
+        "log.screen_access": config["log_screen_access"],
+        "request.show_tracebacks": config["tracebacks"],
+        "server.daemonize": config["daemonize"],
+        "server.socket_host": config["server_host"],
+        "server.socket_port": config["server_port"],
+        "tools.encode.on": config["encode"],
+        "tools.gzip.on": config["gzip"],
+    }  # type: ServerConfigAliases
 
-    # Configuration overrides
-    #
-    # Accept any environment variable that starts with "MEDLEY".
-    # Double underscores are used for systemd compatibilty.
-    environment_config: typing.Dict[str, typing.Any] = {
-        key[8:].replace("__", "."): os.getenv(key)
-        for key in os.environ
-        if key.startswith("MEDLEY")
-    }
-
-    for key, value in environment_config.items():
-        if value == "True":
-            environment_config[key] = True
-        if value == "False":
-            environment_config[key] = False
-        if value.isnumeric():
-            environment_config[key] = int(value)
-
-    if environment_config:
-        cherrypy.config.update(environment_config)
+    cherrypy.config.update(aliases)
 
     # Database Directory
     #
@@ -237,14 +293,12 @@ def setup() -> None:
     # from here.
     try:
         portend.Checker().assert_free(
-            cherrypy.config.get("server.socket_host"),
-            cherrypy.config.get("server.socket_port")
+            config["server_host"],
+            config["server_port"],
         )
     except portend.PortNotFree:
-        port = int(cherrypy.config.get("server.socket_port"))
         cherrypy.engine.log(
-            (f"Port {port} is not available, "
-             "will leave it to the OS to assign one."),
+            f"Port {config['server_port']} is not available",
             level=40
         )
         cherrypy.config.update({
