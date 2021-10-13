@@ -103,7 +103,7 @@ ServerConfigAliases = TypedDict("ServerConfigAliases", {
 
 def env_boolean(key: str, default: bool) -> bool:
     """Read a server environment variable as a boolean."""
-    value = os.getenv(f"MEDLEY__{key}")
+    value = os.getenv(f"MEDLEY_{key}")
     if value == "True":
         return True
     if value == "False":
@@ -113,7 +113,7 @@ def env_boolean(key: str, default: bool) -> bool:
 
 def env_integer(key: str, default: int) -> int:
     """Read a server environment variable as an integer."""
-    value = os.getenv(f"MEDLEY__{key}")
+    value = os.getenv(f"MEDLEY_{key}")
     if value:
         return int(value)
     return default
@@ -121,7 +121,7 @@ def env_integer(key: str, default: int) -> int:
 
 def env_string(key: str, default: str) -> str:
     """Read a server environment variable."""
-    return os.getenv(f"MEDLEY__{key}", default)
+    return os.getenv(f"MEDLEY_{key}", default)
 
 
 # pylint: disable=too-many-statements

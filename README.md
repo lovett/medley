@@ -27,51 +27,51 @@ make serve
 The server's default configuration can be adjusted using the following
 environment variables.
 
-`MEDLEY__access_log`: The file path to use for site-wide request
+`MEDLEY_access_log`: The file path to use for site-wide request
 logging. Default: Not set
 
-`MEDLEY__autoreload`: Whether the server should watch for changes to
+`MEDLEY_autoreload`: Whether the server should watch for changes to
 application files and restart itself. Only useful during
 development. Default: `False`
 
-`MEDLEY__daemonize`: Whether the server should run as a daemon.
+`MEDLEY_daemonize`: Whether the server should run as a daemon.
 Unnecessary when the server is being manged by systemd and probably
 not useful during development. Default: `False`
 
-`MEDLEY__database_dir`: The directory path to use for SQLite
+`MEDLEY_database_dir`: The directory path to use for SQLite
 databases. Default: `./db`
 
-`MEDLEY__error_log`: The file path to use for site-wide error
+`MEDLEY_error_log`: The file path to use for site-wide error
 logging. Probably not needed when the server is being managed by
 systemd (view errors via `journalctl` instead). Default: Not set
 
-`MEDLEY__etags`: Whether to use `ETag` HTTP headers for caching.
+`MEDLEY_etags`: Whether to use `ETag` HTTP headers for caching.
 Default: `True`
 
-`MEDLEY__gzip`: Whether to enable gzip compression. Default: `True`
+`MEDLEY_gzip`: Whether to enable gzip compression. Default: `True`
 
-`MEDLEY__log__screen`: Whether log messages should be written to the
+`MEDLEY_log_screen`: Whether log messages should be written to the
 server's `stdout`. Default: `True`
 
-`MEDLEY__log__screen_access`: Whether access logs should be written to
+`MEDLEY_log_screen_access`: Whether access logs should be written to
 the `stdout` of the server process. Only applicable if
-`MEDLEY__log__screen` is enabled. Default: `False`
+`MEDLEY_log_screen` is enabled. Default: `False`
 
-`MEDLEY__memorize_hashes`: Whether the server should keep static asset
+`MEDLEY_memorize_hashes`: Whether the server should keep static asset
 file hashes in memory for use with HTTP cache control. Useful in
 production but not in development. Default: `True`
 
-`MEDLEY__prefetch`: Whether applications are allowed to make HTTP
+`MEDLEY_prefetch`: Whether applications are allowed to make HTTP
 requests on a recurring basis so that they can be served more quickly
 from cache when needed. Default: `True`
 
-`MEDLEY__server_host`: The IP the server should listen
+`MEDLEY_server_host`: The IP the server should listen
 on. Default: `127.0.0.1`
 
-`MEDLEY__server_port`: The port the server should listen
+`MEDLEY_server_port`: The port the server should listen
 on. Default: `8085`
 
-`MEDLEY__tracebacks`: Whether CherryPy should display
+`MEDLEY_tracebacks`: Whether CherryPy should display
 Python error trackebacks in the browser. Default: `False`
 
 
