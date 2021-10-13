@@ -75,6 +75,7 @@ ServerConfig = TypedDict("ServerConfig", {
     "log_screen": bool,
     "log_screen_access": bool,
     "memorize_hashes": bool,
+    "notify_systemd": bool,
     "prefetch": bool,
     "server_host": str,
     "server_port": int,
@@ -152,6 +153,7 @@ def setup() -> None:
         log_screen=env_boolean("log_screen", True),
         log_screen_access=env_boolean("log_screen_access", False),
         memorize_hashes=env_boolean("memorize_hashes", True),
+        notify_systemd=env_boolean("notify_systemd", False),
         prefetch=env_boolean("prefetch", True),
         server_host=env_string("server_host", "127.0.0.1"),
         server_port=env_integer("server_port", 8085),
@@ -332,7 +334,7 @@ if __name__ == '__main__':
         cherrypy.engine.exit()
         sys.exit()
 
-    if cherrypy.config.get("notify_systemd_at_startup"):
+    if cherrypy.config.get("notify_systemd"):
         sdnotify.SystemdNotifier().notify("READY=1")
 
     cherrypy.engine.publish("assets:publish")

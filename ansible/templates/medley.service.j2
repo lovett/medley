@@ -7,7 +7,7 @@ Type=notify
 NotifyAccess=all
 User=medley
 Group=medley
-Environment=MEDLEY_notify_systemd_at_startup=1
+Environment=MEDLEY_notify_systemd=True
 Environment=MEDLEY_database_dir={{ project_root }}/db
 WorkingDirectory={{ project_root }}
 ExecStart={{ project_root }}/medley

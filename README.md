@@ -61,6 +61,9 @@ the `stdout` of the server process. Only applicable if
 file hashes in memory for use with HTTP cache control. Useful in
 production but not in development. Default: `True`
 
+`MEDLEY_notify_systemd`: Whether the server should let systemd know it
+has started and is ready to receive requests. Default: `False`
+
 `MEDLEY_prefetch`: Whether applications are allowed to make HTTP
 requests on a recurring basis so that they can be served more quickly
 from cache when needed. Default: `True`
