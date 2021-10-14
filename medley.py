@@ -19,6 +19,7 @@ import zipfile
 import cherrypy
 import portend
 import sdnotify
+from cherrypy._cpnative_server import CPHTTPServer
 from typing_extensions import TypedDict
 import plugins.applog
 import plugins.assets
@@ -273,6 +274,11 @@ def setup() -> None:
         return
 
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
+
+    # Disable the WSGI interface.
+    cherrypy.server.httpserver = CPHTTPServer(
+        cherrypy.server
+    )
 
     # Disable access logging to the console
     #
