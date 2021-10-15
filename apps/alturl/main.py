@@ -1,9 +1,10 @@
-"""Webpage reformatting"""
+"""Web page reformatting"""
 
 import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
+from apps.alturl.bookmark import Bookmark
 
 
 class Controller:
@@ -22,20 +23,26 @@ class Controller:
     def GET(*args: str, **_kwargs: str) -> bytes:
         """Dispatch to a site-specific handler."""
 
-        _, rows = cherrypy.engine.publish(
+        target_url = "/".join(args)
+
+        _, registry_rows = cherrypy.engine.publish(
             "registry:search",
             "alturl:bookmark",
             exact=True,
             sort_by_value=True
         ).pop()
 
-        bookmarks = ((
-            row["rowid"],
-            cherrypy.engine.publish("url:readable", row["value"]).pop(),
-            cherrypy.engine.publish("url:alt", row["value"]).pop()
-        ) for row in rows)
+        bookmarks = [
+            Bookmark(
+                row["rowid"],
+                row["value"],
+                cherrypy.engine.publish("url:readable", row["value"]).pop(),
+                cherrypy.engine.publish("url:alt", row["value"]).pop()
+            )
+            for row in registry_rows
+        ]
 
-        if not args:
+        if not target_url:
             return typing.cast(
                 bytes,
                 cherrypy.engine.publish(
@@ -45,14 +52,6 @@ class Controller:
                 ).pop()
             )
 
-        target_url = "/".join(args)
-
-        bookmark_id = next((
-            row["rowid"]
-            for row in rows
-            if target_url == row["value"]
-        ), None)
-
         parsed_url = urlparse(f"//{target_url}")
 
         site_specific_template = ""
@@ -61,27 +60,32 @@ class Controller:
                 target_url,
             )
 
-        if site_specific_template:
-            view_vars["url"] = target_url
-            view_vars["bookmark_id"] = bookmark_id
-            view_vars["bookmarks"] = bookmarks
-
+        if not site_specific_template:
             return typing.cast(
                 bytes,
                 cherrypy.engine.publish(
                     "jinja:render",
-                    site_specific_template,
-                    **view_vars
+                    "apps/alturl/alturl.jinja.html",
+                    unrecognized=True,
+                    url=target_url,
+                    bookmarks=bookmarks
                 ).pop()
             )
+
+        active_bookmark = next((
+            bookmark
+            for bookmark in bookmarks
+            if target_url == bookmark.url
+        ), None)
+
+        view_vars["active_bookmark"] = active_bookmark
 
         return typing.cast(
             bytes,
             cherrypy.engine.publish(
                 "jinja:render",
-                "apps/alturl/alturl.jinja.html",
-                unrecognized=True,
-                url=target_url
+                site_specific_template,
+                **view_vars
             ).pop()
         )
 

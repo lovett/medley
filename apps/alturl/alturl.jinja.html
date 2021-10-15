@@ -42,23 +42,18 @@
                 <h2>Bookmarks</h2>
             </header>
 
-            {% set ns = namespace(bookmarks_found=False) %}
-
             <div id="collection">
                 <ul>
-                    {% for (id, bookmark_url, alt_url) in bookmarks %}
-                        {% set ns.recipes_found = True %}
-
+                    {% for bookmark in bookmarks %}
                         <li>
                             <div class="actions">
-                                {{ macros.deleteButton("/registry/" ~ id, "li", "Delete this bookmark") }}
+                                {{ macros.deleteButton("/registry/" ~ bookmark.id, "li", "Delete this bookmark") }}
                             </div>
-                            <a href="{{ alt_url }}">{{ bookmark_url }}</a>
+                            <a href="{{ bookmark.alt_url }}">{{ bookmark.readable_url }}</a>
                         </li>
-
                     {% endfor %}
 
-                    {% if not ns.recipes_found %}
+                    {% if not bookmarks %}
                         <p>No URLs have been bookmarked yet.</p>
                     {% endif %}
                 </ul>
