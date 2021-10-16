@@ -22,11 +22,10 @@ class Controller:
 
         """
 
-        show_all = False
-        if args:
-            show_all = args[0] == "all"
+        if not args:
+            args = ("",)
 
-        apps = self.catalog_apps(cherrypy.tree.apps, show_all)
+        apps = self.catalog_apps(cherrypy.tree.apps, args[0] == "all")
 
         if cherrypy.request.wants == "org":
             checklist = (
