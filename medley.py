@@ -57,6 +57,7 @@ import plugins.url
 import plugins.weather
 import tools.capture
 import tools.etag
+import tools.trailing_slash
 import tools.whitespace
 import tools.provides
 
@@ -196,6 +197,7 @@ def setup() -> None:
     # Tools
     cherrypy.tools.capture = tools.capture.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
+    cherrypy.tools.trailing_slash = tools.trailing_slash.Tool()
     cherrypy.tools.whitespace = tools.whitespace.Tool()
     cherrypy.tools.provides = tools.provides.Tool()
 
@@ -215,9 +217,11 @@ def setup() -> None:
         ]
 
     for app in apps:
+        # Must not end in a slash. For the root, must be an empty
+        # string rather than "/"
         app_path = f"/{app}"
         if app == "homepage":
-            app_path = "/"
+            app_path = ""
 
         main = importlib.import_module(f"apps.{app}.main")
 
@@ -227,7 +231,8 @@ def setup() -> None:
             {
                 "/": {
                     "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
-                    "tools.whitespace.on": True
+                    "tools.whitespace.on": True,
+                    "tools.trailing_slash.on": True,
                 },
             }
         )

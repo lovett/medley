@@ -91,9 +91,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         url = f"{scheme}{hostname}{path or cherrypy.request.script_name}"
 
-        if url.endswith("/"):
-            url = url.strip("/")
-
         if query:
             query = {
                 key: value
