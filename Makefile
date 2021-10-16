@@ -68,6 +68,7 @@ setup: venv
 # dev packages are unused.
 setup-dev: setup
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
+	mypy --install-types
 
 # Build the application as a zipapp
 medley: setup
