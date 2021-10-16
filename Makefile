@@ -103,6 +103,10 @@ serve: export MEDLEY_prefetch=False
 serve:
 	ls apps/**/main.py plugins/*.py tools/*.py parsers/*.py medley.py | entr python medley.py
 
+# A temporary target to help with building out mypy stubs
+stubdev:
+	ls apps/**/*.py | entr mypy apps
+
 # Profile function calls.
 profile:
 	python -m cProfile -o medley.prof medley.py
