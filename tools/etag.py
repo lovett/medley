@@ -45,7 +45,7 @@ class Tool(cherrypy.Tool):
         if_none_match = cherrypy.request.headers.get("If-None-Match")
 
         if cache_value == if_none_match:
-            raise cherrypy.HTTPRedirect(None, 304)
+            raise cherrypy.HTTPRedirect("", 304)
 
     @staticmethod
     def set_header() -> None:

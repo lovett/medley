@@ -96,7 +96,7 @@ class Controller:
         if not group:
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
-                None,
+                "",
                 {"name": name, "url": url, "error": "group"}
             ).pop()
 
@@ -110,7 +110,7 @@ class Controller:
         if not name:
             redirect_url = cherrypy.engine.publish(
                 "url:internal",
-                None,
+                "",
                 {"url": url, "group": group, "error": "name"}
             ).pop()
 
@@ -124,7 +124,7 @@ class Controller:
 
         redirect_url = cherrypy.engine.publish(
             "url:internal",
-            None,
+            "",
             {"group": group}
         ).pop()
 

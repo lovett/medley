@@ -17,7 +17,7 @@ class Controller:
         look up a number
         """
 
-        number = kwargs.get('number')
+        number = kwargs.get("number", "")
         if number:
             number = number.strip()
 

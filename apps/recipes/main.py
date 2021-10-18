@@ -118,7 +118,7 @@ class Controller:
     ) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
-        recipe_id = None
+        recipe_id = 0
         if args:
             recipe_id = int(args[0])
 
@@ -150,7 +150,11 @@ class Controller:
         ).pop()
 
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created.strip()):
-            created_date = f"{created.strip()} 00:00:00"
+            created_date = cherrypy.engine.publish(
+                "clock:from_format",
+                f"{created.strip()} 00:00:00",
+                "%Y-%m-%d %H:%M:%s"
+            ).pop()
 
         attachment_list = []
         if attachments and not isinstance(attachments, list):
@@ -169,7 +173,7 @@ class Controller:
 
         upsert_id = cherrypy.engine.publish(
             "recipes:upsert",
-            recipe_id=recipe_id,
+            recipe_id,
             title=title,
             body=body,
             url=url,
@@ -247,12 +251,12 @@ class Controller:
         submit_url = "/recipes"
         last_made = ""
         created = ""
-        attachments = ()
+        attachments = []
 
         if recipe_id:
             recipe = cherrypy.engine.publish(
                 "recipes:find",
-                recipe_id
+                int(recipe_id)
             ).pop()
 
             if not recipe:
@@ -278,7 +282,7 @@ class Controller:
 
             attachments = cherrypy.engine.publish(
                 "recipes:attachment:list",
-                recipe_id=recipe_id
+                recipe_id
             ).pop()
 
         return typing.cast(

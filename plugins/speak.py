@@ -164,10 +164,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             typing.List[typing.Dict[str, str]],
             cherrypy.engine.publish(
                 "urlfetch:get",
-                config.get("voice_list_url"),
+                config.get("voice_list_url", ""),
                 as_json=True,
-                headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")},
                 cache_lifespan=1800,
+                headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")},
             ).pop()
         )
 
@@ -194,13 +194,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         if "default_gender" in config and not gender:
-            gender = config.get("default_gender")
+            gender = config.get("default_gender", "")
 
         if "default_locale" in config and not locale:
-            locale = config.get("default_locale")
+            locale = config.get("default_locale", "")
 
         if "default_name" in config and not name:
-            name = config.get("default_name")
+            name = config.get("default_name", "")
 
         if "azure_key" not in config:
             config = {}
@@ -257,9 +257,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         auth_response = cherrypy.engine.publish(
             "urlfetch:post",
-            config.get("token_request_url"),
+            config.get("token_request_url", ""),
             None,
-            headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")}
+            headers={"Ocp-Apim-Subscription-Key": config.get("azure_key", "")}
         ).pop()
 
         if not auth_response:
@@ -267,7 +267,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         audio_bytes = cherrypy.engine.publish(
             "urlfetch:post",
-            config.get("synthesize_url"),
+            config.get("synthesize_url", ""),
             ssml_string,
             as_bytes=True,
             headers={

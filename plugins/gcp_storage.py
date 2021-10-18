@@ -64,9 +64,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         token = jwt.encode({
-            "iss": service_account.get("client_email"),
-            "scope": config.get("scope"),
-            "aud": service_account.get("token_uri"),
+            "iss": service_account.get("client_email", ""),
+            "scope": config.get("scope", ""),
+            "aud": service_account.get("token_uri", ""),
             "exp": int(expire.timestamp()),
             "iat": int(now.timestamp()),
         }, service_account.get("private_key"), algorithm="RS256")
@@ -92,8 +92,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "https://storage.googleapis.com/storage/v1/b/"
                 f"{config.get('bucket')}/o"
             ),
+            as_json=True,
             headers=self.standard_headers(access_token),
-            as_json=True
         ).pop()
 
         if not bucket:
@@ -114,7 +114,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             if should_delete and "request_log" in destination_path.parts:
                 lines_in_blob = 0
-                with open(destination_path) as handle:
+                with open(destination_path, "r", encoding="utf-8") as handle:
                     for lines_in_blob, _ in enumerate(handle):
                         pass
 

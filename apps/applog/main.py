@@ -1,6 +1,5 @@
 """Site-wide status and activity"""
 
-import sqlite3
 import typing
 import cherrypy
 
@@ -20,25 +19,25 @@ class Controller:
         source = kwargs.get("source", "")
         per_page = 20
 
-        publish_topic = "applog:view"
-        if source:
-            publish_topic = "applog:search"
-
         sources = None
-        if publish_topic == "applog:view":
-            sources = typing.cast(
-                typing.Iterator[sqlite3.Row],
-                cherrypy.engine.publish(
-                    "applog:sources"
-                ).pop()
-            )
+        if source:
+            sources = cherrypy.engine.publish(
+                "applog:sources",
+            ).pop()
 
-        records, total, query_plan = cherrypy.engine.publish(
-            publish_topic,
-            source=source,
-            offset=offset,
-            limit=per_page
-        ).pop()
+            records, total, query_plan = cherrypy.engine.publish(
+                "applog:search",
+                source=source,
+                offset=offset,
+                limit=per_page
+            ).pop()
+        else:
+            records, total, query_plan = cherrypy.engine.publish(
+                "applog:view",
+                source=source,
+                offset=offset,
+                limit=per_page
+            ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",

@@ -149,12 +149,12 @@ class Controller:
     def handle_post_vars(post_vars: typing.Dict[str, str]) -> None:
         """Transform POST parameters to speech-ready statement."""
 
-        statement = post_vars.get("statement")
-        name = post_vars.get("name")
-        locale = post_vars.get("locale")
-        gender = post_vars.get("gender")
-        action = post_vars.get("action")
-        confirm = post_vars.get("confirm")
+        statement = post_vars.get("statement", "")
+        name = post_vars.get("name", "")
+        locale = post_vars.get("locale", "")
+        gender = post_vars.get("gender", "")
+        action = post_vars.get("action", "")
+        confirm = post_vars.get("confirm", "")
 
         if action == "toggle":
             muted_temporarily = cherrypy.engine.publish("speak:muted").pop()
@@ -193,7 +193,10 @@ class Controller:
 
         cherrypy.response.status = 204
 
-    def handle_notification(self, notification: typing.Dict[str, str]) -> None:
+    def handle_notification(
+            self,
+            notification: typing.Dict[str, typing.Union[str, int, float]]
+    ) -> None:
         """Transform a notification to a speech-ready statement."""
 
         muted = cherrypy.engine.publish("speak:muted").pop()
@@ -216,7 +219,7 @@ class Controller:
             return
 
         title = self.emoji_regex.sub(
-            "", notification.get("title", "")
+            "", str(notification.get("title", ""))
         ).strip()
 
         if not title:

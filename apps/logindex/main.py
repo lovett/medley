@@ -30,12 +30,8 @@ class Controller:
             url_path = "/".join(args)
             path = kwargs.get("path", "")
 
-            channel: typing.Optional[str] = None
             if url_path == "bucket/gcp/appengine":
-                channel = "gcp:appengine:ingest_file"
-
-            if channel:
-                self.index_by_file(path, channel)
+                self.index_by_gcp_file(path)
                 cherrypy.response.status = 204
                 return
 
@@ -56,13 +52,8 @@ class Controller:
         cherrypy.engine.publish("logindex:enqueue", start_date, end_date)
 
     @staticmethod
-    def index_by_file(path: str, channel: str) -> None:
-        """Index a log file by its path.
-
-        The channel argument dictates how the indexing will
-        occur. Unlike date-based indexing, there is no expectation
-        that the file will be in combined format.
-        """
+    def index_by_gcp_file(path: str) -> None:
+        """Index a GCP log file by its path."""
 
         storage_root = typing.cast(
             pathlib.Path,
@@ -84,7 +75,7 @@ class Controller:
             raise cherrypy.HTTPError(400, "Path is not a file")
 
         storage_path = pathlib.Path(path)
-        cherrypy.engine.publish(channel, storage_path)
+        cherrypy.engine.publish("gcp:appengine:ingest_file", storage_path)
 
     @staticmethod
     def parse_log_date(val: str, fallback: datetime = None) -> typing.Any:

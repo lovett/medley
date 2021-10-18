@@ -20,7 +20,7 @@ class Controller:
         if not details.get("siteName"):
             raise cherrypy.HTTPError(400, "Site name not specified")
 
-        body = details.get("message", "").split("\n")
+        body = str(details.get("message", "")).split("\n")
 
         azure_portal_url = cherrypy.engine.publish(
             "registry:first:value",

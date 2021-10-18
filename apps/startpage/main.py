@@ -75,7 +75,7 @@ class Controller:
             page_content
         )
 
-        redirect_path = None
+        redirect_path = ""
         if page_name != self.default_page_name:
             redirect_path = page_name
 

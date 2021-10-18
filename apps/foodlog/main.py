@@ -62,7 +62,7 @@ class Controller:
 
         consume_date = kwargs.get("consume_date")
         consume_time = kwargs.get("consume_time")
-        entry_id = kwargs.get("entry_id", 0)
+        entry_id = int(kwargs.get("entry_id", 0))
         foods_eaten = kwargs.get("foods_eaten")
         overate = int(kwargs.get("overate", 0))
 
@@ -182,23 +182,26 @@ class Controller:
 
         query = query.lower().strip()
 
-        publish_topic = "foodlog:search:keyword"
-        search_term = query
-
         if re.fullmatch(r"\d{4}-\w{2}-\d{2}", query):
-            publish_topic = "foodlog:search:date"
             search_term = cherrypy.engine.publish(
                 "clock:from_format",
                 query,
                 "%Y-%m-%d"
             ).pop()
 
-        (entries, entry_count) = cherrypy.engine.publish(
-            publish_topic,
-            query=search_term,
-            offset=offset,
-            limit=limit
-        ).pop()
+            (entries, entry_count) = cherrypy.engine.publish(
+                "foodlog:search:date",
+                query=search_term,
+                offset=offset,
+                limit=limit
+            ).pop()
+        else:
+            (entries, entry_count) = cherrypy.engine.publish(
+                "foodlog:search:keyword",
+                query=query,
+                offset=offset,
+                limit=limit
+            ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "url:internal",

@@ -14,10 +14,10 @@ class TestStartpageParser(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        cls.parser = parsers.startpage.Parser()
+        cls.parser = parsers.startpage.Parser("", [])
         cls.anon_parser = parsers.startpage.Parser(
             cls.anonymizer_url,
-            ("localhost",)
+            ["localhost"]
         )
 
     def test_basic_parsing(self) -> None:

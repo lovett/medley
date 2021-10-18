@@ -142,7 +142,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
             **kwargs: typing.Any
     ) -> None:
         """Run a previously-scheduled job."""
-        cherrypy.engine.publish(name, *args, **kwargs)
+        cherrypy.engine.publish(name, *args, **kwargs)  # type: ignore
 
     def add(
             self,

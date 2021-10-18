@@ -16,12 +16,12 @@ class Parser():
     """A small wrapper for Python's standard ConfigParser class."""
 
     anonymizer: str = ""
-    local_domains: typing.Tuple[str, ...] = ()
+    local_domains: typing.List[str]
 
     def __init__(
             self,
-            anonymizer: str = "",
-            local_domains: typing.Tuple[str, ...] = ()
+            anonymizer: str,
+            local_domains: typing.List[str],
     ) -> None:
         self.anonymizer = anonymizer
         self.local_domains = local_domains

@@ -864,8 +864,8 @@ def publish(
 def publish(
         channel: Literal["hasher:file"],
         path: str,
-        algorithm: Optional[str] = "sha256",
-        memorize: Optional[bool] = True
+        algorithm: str = "sha256",
+        memorize: bool = True
 ) -> List[str]: ...
 
 

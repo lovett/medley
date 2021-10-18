@@ -47,10 +47,10 @@ class Controller:
             response = cherrypy.engine.publish(
                 "urlfetch:get",
                 url,
+                as_object=True,
                 username=username,
                 password=password,
                 auth=auth,
-                as_object=True
             ).pop()
 
             try:
@@ -67,8 +67,7 @@ class Controller:
         if request_failed:
             failure_message = cherrypy.engine.publish(
                 "applog:newest",
-                source="urlfetch",
-                key="get"
+                source="urlfetch:get",
             ).pop()
 
         return typing.cast(

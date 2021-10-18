@@ -4,8 +4,7 @@ import calendar
 from datetime import datetime, timedelta
 import typing
 import cherrypy
-from pytz import timezone, UTC
-from pytz.exceptions import UnknownTimeZoneError
+from pytz import timezone, UTC, UnknownTimeZoneError
 
 DatetimeOrString = typing.Union[datetime, str]
 OptionalDatetime = typing.Optional[datetime]
