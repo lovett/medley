@@ -1,6 +1,5 @@
 """Webpage tag viewer"""
 
-import typing
 import cherrypy
 import parsers.htmlhead
 
@@ -16,13 +15,10 @@ class Controller:
     def GET(*_args: str, **_kwargs: str) -> bytes:
         """Present a form for specifying a URL to fetch."""
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/htmlhead/htmlhead.jinja.html",
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/htmlhead/htmlhead.jinja.html",
+        ).pop()
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
@@ -70,16 +66,13 @@ class Controller:
                 source="urlfetch:get",
             ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/htmlhead/htmlhead.jinja.html",
-                failure_message=failure_message,
-                status_code=status_code,
-                url=url,
-                tags=head_tags,
-                username=username,
-                password=password
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/htmlhead/htmlhead.jinja.html",
+            failure_message=failure_message,
+            status_code=status_code,
+            url=url,
+            tags=head_tags,
+            username=username,
+            password=password
+        ).pop()

@@ -71,25 +71,22 @@ class Controller:
                 and record["ip"] not in cookies
             }
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/visitors/visitors.jinja.html",
-                flagless_countries=("AP", None, ""),
-                query=query,
-                query_plan=query_plan,
-                reversed_ips=reversed_ips,
-                active_date=self.get_active_date(log_records, query),
-                results=log_records,
-                country_names=country_names,
-                registry_url=registry_url,
-                site_domains=site_domains,
-                saved_queries=saved_queries,
-                annotations=annotations,
-                cookies=cookies
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/visitors/visitors.jinja.html",
+            flagless_countries=("AP", None, ""),
+            query=query,
+            query_plan=query_plan,
+            reversed_ips=reversed_ips,
+            active_date=self.get_active_date(log_records, query),
+            results=log_records,
+            country_names=country_names,
+            registry_url=registry_url,
+            site_domains=site_domains,
+            saved_queries=saved_queries,
+            annotations=annotations,
+            cookies=cookies
+        ).pop()
 
     @staticmethod
     def get_active_date(
@@ -101,13 +98,10 @@ class Controller:
         query_date = ""
 
         if log_records:
-            return typing.cast(
-                datetime,
-                cherrypy.engine.publish(
-                    "clock:from_timestamp",
-                    log_records[0]["unix_timestamp"]
-                ).pop()
-            )
+            return cherrypy.engine.publish(
+                "clock:from_timestamp",
+                log_records[0]["unix_timestamp"]
+            ).pop()
 
         if re.match(r"date\s+yesterday", query):
             query_date = "yesterday"
@@ -151,7 +145,7 @@ class Controller:
                 "%Y-%m-%d"
             ).pop()
 
-        return typing.cast(datetime, active_date)
+        return active_date
 
     @staticmethod
     def get_annotations(
@@ -163,11 +157,8 @@ class Controller:
 
         keys = tuple(f"ip:{ip}" for ip in ips)
 
-        return typing.cast(
-            typing.Dict[str, str],
-            cherrypy.engine.publish(
-                "registry:search:multidict",
-                keys=keys,
-                key_slice=1
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "registry:search:multidict",
+            keys=keys,
+            key_slice=1
+        ).pop()

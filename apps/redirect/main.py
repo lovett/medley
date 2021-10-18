@@ -1,6 +1,5 @@
 """URL redirection for referrer privacy."""
 
-import typing
 import cherrypy
 
 
@@ -18,10 +17,7 @@ class Controller:
 
         """
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/redirect/redirect.jinja.html",
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/redirect/redirect.jinja.html",
+        ).pop()

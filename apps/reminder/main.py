@@ -2,7 +2,6 @@
 
 import random
 import string
-import typing
 from urllib.parse import urlencode, parse_qs
 import cherrypy
 
@@ -93,16 +92,13 @@ class Controller:
             "notifier:send"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/reminder/reminder.jinja.html",
-                registry_url=registry_url,
-                templates=templates,
-                upcoming=upcoming
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/reminder/reminder.jinja.html",
+            registry_url=registry_url,
+            templates=templates,
+            upcoming=upcoming
+        ).pop()
 
     @staticmethod
     def POST(*_args: str, **kwargs: str) -> None:

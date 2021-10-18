@@ -56,16 +56,13 @@ class Controller:
             "speak:voices"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/speak/speak-voices.jinja.html",
-                voices=voices,
-                default_voice=default_voice,
-                subview_title="Voice List"
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/speak/speak-voices.jinja.html",
+            voices=voices,
+            default_voice=default_voice,
+            subview_title="Voice List"
+        ).pop()
 
     @staticmethod
     def status() -> bytes:
@@ -90,17 +87,14 @@ class Controller:
             "/registry",
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/speak/speak.jinja.html",
-                muted_temporarily=muted_temporarily,
-                muted_by_schedule=muted_by_schedule,
-                registry_url=registry_url,
-                schedules=schedules
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/speak/speak.jinja.html",
+            muted_temporarily=muted_temporarily,
+            muted_by_schedule=muted_by_schedule,
+            registry_url=registry_url,
+            schedules=schedules
+        ).pop()
 
     @cherrypy.tools.capture()
     @cherrypy.tools.json_in(force=False)

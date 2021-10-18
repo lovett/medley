@@ -1,6 +1,5 @@
 """News headlines via News API"""
 
-import typing
 import cherrypy
 
 
@@ -18,12 +17,9 @@ class Controller:
         walk_start = int(kwargs.get("start", 1))
         walk_stop = walk_start + int(kwargs.get("count", 40)) - 1
 
-        cache_lifespan = typing.cast(
-            int,
-            cherrypy.engine.publish(
-                "clock:day:remaining"
-            ).pop()
-        )
+        cache_lifespan = cherrypy.engine.publish(
+            "clock:day:remaining"
+        ).pop()
 
         headlines = {}
 
@@ -54,13 +50,10 @@ class Controller:
         cache_control = f"private, max-age={cache_lifespan}"
         cherrypy.response.headers["Cache-Control"] = cache_control
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/headlines/headlines.jinja.html",
-                headlines=headlines,
-                walk_start=walk_start,
-                walk_stop=walk_stop,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/headlines/headlines.jinja.html",
+            headlines=headlines,
+            walk_start=walk_start,
+            walk_stop=walk_stop,
+        ).pop()

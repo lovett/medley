@@ -34,14 +34,11 @@ class Controller:
 
             return "\n".join(checklist).encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/homepage/homepage.jinja.html",
-                apps=apps,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/homepage/homepage.jinja.html",
+            apps=apps,
+        ).pop()
 
     @staticmethod
     @decorators.log_runtime

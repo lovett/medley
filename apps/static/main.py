@@ -1,7 +1,6 @@
 """Serve static assets."""
 
 from pathlib import Path
-import typing
 import cherrypy
 
 
@@ -25,13 +24,10 @@ class Controller:
         app_path = ("apps", "static",) + args
         asset_path = Path(*app_path)
 
-        asset_bytes, asset_mime = typing.cast(
-            typing.Tuple[bytes, str],
-            cherrypy.engine.publish(
-                "assets:get",
-                asset_path
-            ).pop()
-        )
+        asset_bytes, asset_mime = cherrypy.engine.publish(
+            "assets:get",
+            asset_path
+        ).pop()
 
         if asset_bytes == b"":
             raise cherrypy.HTTPError(404)

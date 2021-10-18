@@ -1,7 +1,6 @@
 """General-purpose key-value store"""
 
 import json
-import typing
 import cherrypy
 
 
@@ -102,19 +101,16 @@ class Controller:
             cancel_url = f"/registry?q={key}"
             subview_title = "Update"
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/registry/registry-form.jinja.html",
-                rowid=rowid,
-                key=key,
-                value=value,
-                submit_url=submit_url,
-                cancel_url=cancel_url,
-                subview_title=subview_title
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/registry/registry-form.jinja.html",
+            rowid=rowid,
+            key=key,
+            value=value,
+            submit_url=submit_url,
+            cancel_url=cancel_url,
+            subview_title=subview_title
+        ).pop()
 
     @staticmethod
     def index(*_args: str, **_kwargs: str) -> bytes:
@@ -129,14 +125,11 @@ class Controller:
                 "groups": list(roots)
             }).encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/registry/registry.jinja.html",
-                roots=roots
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/registry/registry.jinja.html",
+            roots=roots
+        ).pop()
 
     @staticmethod
     def search(query: str = "") -> bytes:
@@ -163,15 +156,12 @@ class Controller:
                 ]
             }).encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/registry/registry-list.jinja.html",
-                query=query.strip(),
-                parent_key=parent_key,
-                record_count=count,
-                records=rows,
-                subview_title=query
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/registry/registry-list.jinja.html",
+            query=query.strip(),
+            parent_key=parent_key,
+            record_count=count,
+            records=rows,
+            subview_title=query
+        ).pop()

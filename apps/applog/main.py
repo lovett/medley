@@ -1,6 +1,5 @@
 """Site-wide status and activity"""
 
-import typing
 import cherrypy
 
 
@@ -45,19 +44,16 @@ class Controller:
             {"source": source}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/applog/applog.jinja.html",
-                records=records,
-                total=total,
-                source=source,
-                query_plan=query_plan,
-                pagination_url=pagination_url,
-                offset=offset,
-                total_records=total,
-                per_page=per_page,
-                sources=sources,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/applog/applog.jinja.html",
+            records=records,
+            total=total,
+            source=source,
+            query_plan=query_plan,
+            pagination_url=pagination_url,
+            offset=offset,
+            total_records=total,
+            per_page=per_page,
+            sources=sources,
+        ).pop()

@@ -1,6 +1,5 @@
 """Download the latest GeoLite Legacy City database from maxmind.com."""
 
-import typing
 import cherrypy
 
 
@@ -23,14 +22,11 @@ class Controller:
             modified_timestamp
         ).pop()
 
-        return typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "clock:format",
-                modified_date,
-                "%Y-%m-%d"
-            ).pop()
-        ).encode()
+        return cherrypy.engine.publish(
+            "clock:format",
+            modified_date,
+            "%Y-%m-%d"
+        ).pop().encode()
 
     @staticmethod
     def POST(action: str = "") -> None:

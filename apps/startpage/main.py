@@ -1,7 +1,6 @@
 """Browser homepage"""
 
 import sqlite3
-import typing
 from textwrap import dedent
 import cherrypy
 from parsers.startpage import Parser
@@ -105,19 +104,16 @@ class Controller:
             button_label = "Create"
             cancel_url = post_url
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/startpage/edit.jinja.html",
-                button_label=button_label,
-                cancel_url=cancel_url,
-                page_name=page_name,
-                page_content=page_content,
-                post_url=post_url,
-                subview_title="Edit"
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/startpage/edit.jinja.html",
+            button_label=button_label,
+            cancel_url=cancel_url,
+            page_name=page_name,
+            page_content=page_content,
+            post_url=post_url,
+            subview_title="Edit"
+        ).pop()
 
     @staticmethod
     def new_page_template() -> str:
@@ -191,14 +187,11 @@ class Controller:
             f"{page_name}/edit"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/startpage/startpage.jinja.html",
-                created=page_record["created"],
-                anonymizer_url=anonymizer_url,
-                edit_url=edit_url,
-                page=page
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/startpage/startpage.jinja.html",
+            created=page_record["created"],
+            anonymizer_url=anonymizer_url,
+            edit_url=edit_url,
+            page=page
+        ).pop()

@@ -133,22 +133,19 @@ class Controller:
             "/bookmarks",
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/bookmarks/bookmarks.jinja.html",
-                bookmarks=bookmarks,
-                domain_counts=domain_counts,
-                max_days=max_days,
-                total_records=total_records,
-                order=order,
-                per_page=per_page,
-                query_plan=query_plan,
-                offset=offset,
-                pagination_url=pagination_url
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/bookmarks/bookmarks.jinja.html",
+            bookmarks=bookmarks,
+            domain_counts=domain_counts,
+            max_days=max_days,
+            total_records=total_records,
+            order=order,
+            per_page=per_page,
+            query_plan=query_plan,
+            offset=offset,
+            pagination_url=pagination_url
+        ).pop()
 
     def search(self, **kwargs: str) -> bytes:
         """Find bookmarks matching a search query."""
@@ -178,23 +175,20 @@ class Controller:
             }
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/bookmarks/bookmarks.jinja.html",
-                bookmarks=bookmarks,
-                domain_counts=domain_counts,
-                offset=offset,
-                order=order,
-                pagination_url=pagination_url,
-                per_page=per_page,
-                query=query,
-                query_plan=query_plan,
-                total_records=total_records,
-                subview_title=query
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/bookmarks/bookmarks.jinja.html",
+            bookmarks=bookmarks,
+            domain_counts=domain_counts,
+            offset=offset,
+            order=order,
+            pagination_url=pagination_url,
+            per_page=per_page,
+            query=query,
+            query_plan=query_plan,
+            total_records=total_records,
+            subview_title=query
+        ).pop()
 
     @staticmethod
     def taglist() -> bytes:
@@ -204,12 +198,9 @@ class Controller:
             "bookmarks:tags:all"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/bookmarks/bookmarks-taglist.jinja.html",
-                tags=tags,
-                subview_title="Tags"
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/bookmarks/bookmarks-taglist.jinja.html",
+            tags=tags,
+            subview_title="Tags"
+        ).pop()

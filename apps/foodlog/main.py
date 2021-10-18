@@ -2,7 +2,6 @@
 
 import datetime
 import re
-import typing
 import cherrypy
 
 
@@ -21,10 +20,10 @@ class Controller:
         except (IndexError, ValueError) as error:
             raise cherrypy.HTTPError(400) from error
 
-        result = typing.cast(bool, cherrypy.engine.publish(
+        result = cherrypy.engine.publish(
             "foodlog:remove",
             entry_id
-        ).pop())
+        ).pop()
 
         if result:
             cherrypy.response.status = 204
@@ -110,19 +109,16 @@ class Controller:
             "url:internal"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/foodlog/foodlog-index.jinja.html",
-                entries=entries,
-                entry_count=entry_count,
-                pagination_url=pagination_url,
-                offset=offset,
-                per_page=limit,
-                allow_add=True
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/foodlog/foodlog-index.jinja.html",
+            entries=entries,
+            entry_count=entry_count,
+            pagination_url=pagination_url,
+            offset=offset,
+            per_page=limit,
+            allow_add=True
+        ).pop()
 
     @staticmethod
     def form(entry_id: int = 0, **_kwargs: str) -> bytes:
@@ -151,20 +147,17 @@ class Controller:
             foods_eaten = entry["foods_eaten"]
             overate = entry["overate"]
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/foodlog/foodlog-form.jinja.html",
-                allow_cancel=True,
-                allow_add=False,
-                allow_delete=allow_delete,
-                entry_id=entry_id,
-                entry_date=entry_date,
-                foods_eaten=foods_eaten,
-                overate=overate
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/foodlog/foodlog-form.jinja.html",
+            allow_cancel=True,
+            allow_add=False,
+            allow_delete=allow_delete,
+            entry_id=entry_id,
+            entry_date=entry_date,
+            foods_eaten=foods_eaten,
+            overate=overate
+        ).pop()
 
     @staticmethod
     def search(query: str = "", **kwargs: str) -> bytes:
@@ -209,18 +202,15 @@ class Controller:
             {"q": query}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/foodlog/foodlog-index.jinja.html",
-                entries=entries,
-                entry_count=entry_count,
-                query=query,
-                offset=offset,
-                per_page=limit,
-                pagination_url=pagination_url,
-                allow_cancel=True,
-                allow_add=True
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/foodlog/foodlog-index.jinja.html",
+            entries=entries,
+            entry_count=entry_count,
+            query=query,
+            offset=offset,
+            per_page=limit,
+            pagination_url=pagination_url,
+            allow_cancel=True,
+            allow_add=True
+        ).pop()

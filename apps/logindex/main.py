@@ -1,9 +1,7 @@
 """Trigger indexing of log files."""
 
-from datetime import datetime
 import os.path
 import pathlib
-import typing
 import cherrypy
 
 
@@ -37,14 +35,31 @@ class Controller:
 
         cherrypy.response.status = 404
 
-    def index_by_date(self, start: str, end: str) -> None:
+    @staticmethod
+    def index_by_date(start: str, end: str) -> None:
         """Index logs in combined format based on a date range."""
 
-        start_date = self.parse_log_date(start)
-        end_date = self.parse_log_date(end, start_date)
+        start_base, _ = os.path.splitext(start)
+        start_date = cherrypy.engine.publish(
+            "clock:from_format",
+            start_base,
+            "%Y-%m-%d"
+        ).pop()
 
         if not start_date:
             raise cherrypy.HTTPError(400, "Invalid start")
+
+        end_date = start_date
+        if end:
+            end_base, _ = os.path.splitext(end)
+            end_date = cherrypy.engine.publish(
+                "clock:from_format",
+                end_base,
+                "%Y-%m-%d"
+            ).pop()
+
+        if not end_date:
+            raise cherrypy.HTTPError(400, "Invalid end")
 
         if start_date > end_date:
             raise cherrypy.HTTPError(400, "Invalid range")
@@ -55,14 +70,11 @@ class Controller:
     def index_by_gcp_file(path: str) -> None:
         """Index a GCP log file by its path."""
 
-        storage_root = typing.cast(
-            pathlib.Path,
-            cherrypy.engine.publish(
-                "registry:first:value",
-                "config:storage_root",
-                as_path=True
-            ).pop()
-        )
+        storage_root = cherrypy.engine.publish(
+            "registry:first:value",
+            "config:storage_root",
+            as_path=True
+        ).pop()
 
         try:
             # Is the file within the storage root?
@@ -76,24 +88,3 @@ class Controller:
 
         storage_path = pathlib.Path(path)
         cherrypy.engine.publish("gcp:appengine:ingest_file", storage_path)
-
-    @staticmethod
-    def parse_log_date(val: str, fallback: datetime = None) -> typing.Any:
-        """Convert a date string in either date or filename format
-        to a datetime.
-
-        Date format is YYYY-mm-dd. Filename format is the same, but with
-        a file extension at the end.
-        """
-
-        filename = os.path.splitext(val)[0]
-        dt = cherrypy.engine.publish(
-            "clock:from_format",
-            filename,
-            "%Y-%m-%d"
-        ).pop()
-
-        if not dt:
-            return fallback
-
-        return dt

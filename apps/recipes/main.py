@@ -210,35 +210,32 @@ class Controller:
             tag
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-list.jinja.html",
-                recipes=recipes,
-                tag=tag,
-                subview_title=tag
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/recipes/recipes-list.jinja.html",
+            recipes=recipes,
+            tag=tag,
+            subview_title=tag
+        ).pop()
 
     @staticmethod
     def delete_attachment(recipe_id: int, attachment_id: int) -> bool:
         """Remove an attachment from the database."""
 
-        return typing.cast(bool, cherrypy.engine.publish(
+        return cherrypy.engine.publish(
             "recipes:attachment:remove",
             recipe_id=recipe_id,
             attachment_id=attachment_id,
-        ).pop())
+        ).pop()
 
     @staticmethod
     def delete_recipe(recipe_id: int) -> bool:
         """Remove a recipe from the database."""
 
-        return typing.cast(bool, cherrypy.engine.publish(
+        return cherrypy.engine.publish(
             "recipes:remove",
             recipe_id
-        ).pop())
+        ).pop()
 
     @staticmethod
     def form(recipe_id: int = 0, **_kwargs: str) -> bytes:
@@ -285,23 +282,20 @@ class Controller:
                 recipe_id
             ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-form.jinja.html",
-                recipe_id=recipe_id,
-                title=title,
-                attachments=attachments,
-                body=body,
-                tags=tags,
-                url=url,
-                submit_url=submit_url,
-                cancel_url=submit_url,
-                last_made=last_made,
-                created=created
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/recipes/recipes-form.jinja.html",
+            recipe_id=recipe_id,
+            title=title,
+            attachments=attachments,
+            body=body,
+            tags=tags,
+            url=url,
+            submit_url=submit_url,
+            cancel_url=submit_url,
+            last_made=last_made,
+            created=created
+        ).pop()
 
     @staticmethod
     def index(*_args: str, **_kwargs: str) -> bytes:
@@ -319,16 +313,13 @@ class Controller:
             "recipes:find:starred"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-index.jinja.html",
-                tags=tags,
-                recently_added=recently_added,
-                starred=starred
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/recipes/recipes-index.jinja.html",
+            tags=tags,
+            recently_added=recently_added,
+            starred=starred
+        ).pop()
 
     @staticmethod
     def search(query: str = "") -> bytes:
@@ -367,16 +358,13 @@ class Controller:
                 query
             ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-list.jinja.html",
-                recipes=recipes,
-                query=query,
-                subview_title=query
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/recipes/recipes-list.jinja.html",
+            recipes=recipes,
+            query=query,
+            subview_title=query
+        ).pop()
 
     def show(self, recipe_id: int) -> bytes:
         """Display a single recipe."""
@@ -418,23 +406,20 @@ class Controller:
                 recipe["url"]
             ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/recipes/recipes-show.jinja.html",
-                title=recipe["title"],
-                recipe_id=recipe["id"],
-                ingredients=ingredients,
-                body=rest,
-                tags=recipe["tags"] or [],
-                updated=recipe["updated"],
-                added=recipe["created"],
-                starred=recipe["starred"],
-                url=recipe["url"],
-                url_domain=url_domain,
-                last_made=recipe["last_made"],
-                subview_title=recipe["title"],
-                attachments=attachments
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/recipes/recipes-show.jinja.html",
+            title=recipe["title"],
+            recipe_id=recipe["id"],
+            ingredients=ingredients,
+            body=rest,
+            tags=recipe["tags"] or [],
+            updated=recipe["updated"],
+            added=recipe["created"],
+            starred=recipe["starred"],
+            url=recipe["url"],
+            url_domain=url_domain,
+            last_made=recipe["last_made"],
+            subview_title=recipe["title"],
+            attachments=attachments
+        ).pop()

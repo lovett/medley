@@ -1,7 +1,6 @@
 """Printable pages for data entry."""
 
 import calendar
-import typing
 import cherrypy
 
 
@@ -34,14 +33,11 @@ class Controller:
             for row in rows
         )
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/grids/grids-index.jinja.html",
-                grid_names=grid_names
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/grids/grids-index.jinja.html",
+            grid_names=grid_names
+        ).pop()
 
     @staticmethod
     def show(name: str, **kwargs: str) -> bytes:
@@ -118,15 +114,12 @@ class Controller:
                 row[1] = day.strftime("%A")
                 rows.append(row)
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/grids/grids.jinja.html",
-                headers=headers,
-                name=name,
-                options=options,
-                rows=rows,
-                subview_title=name
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/grids/grids.jinja.html",
+            headers=headers,
+            name=name,
+            options=options,
+            rows=rows,
+            subview_title=name
+        ).pop()

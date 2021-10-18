@@ -44,18 +44,15 @@ class Controller:
             {"q": "weather:latlong"}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/weather/weather.jinja.html",
-                forecast=forecast,
-                other_locations=config["locations"],
-                location_name=config["location_name"],
-                edit_url=edit_url,
-                subview_title=config["location_name"],
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/weather/weather.jinja.html",
+            forecast=forecast,
+            other_locations=config["locations"],
+            location_name=config["location_name"],
+            edit_url=edit_url,
+            subview_title=config["location_name"],
+        ).pop()
 
     def POST(self, *args: str, **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
@@ -113,25 +110,21 @@ class Controller:
                 temp = round(forecast["currently"]["temp"])
                 feel = round(forecast["currently"]["feels_like"])
 
-                statement = "It's {} degrees".format(temp)
+                statement = f"It's {temp} degrees"
 
                 if abs(temp - feel) > 5:
-                    statement += " but feels like {}".format(feel)
+                    statement += f" but feels like {feel}"
 
                 statements.append(statement)
 
             if part == "humidity":
-                statement = "{} percent humidity".format(
-                     forecast["currently"]["humidity"]
+                statements.append(
+                    f"{forecast['currently']['humidity']} percent humidity"
                 )
-                statements.append(statement)
 
             if part == "alerts":
                 for alert in forecast.get("alerts", []):
-                    statement = "A {} is in effect".format(
-                        alert["event"]
-                    )
-                    statements.append(statement)
+                    statements.append(f"A {alert['event']} is in effect")
 
         for statement in statements:
             cherrypy.engine.publish(

@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta, timezone
 from math import ceil
 import pathlib
-import typing
 import cherrypy
 
 
@@ -45,15 +44,12 @@ class Controller:
                     "/static/coverage/index.html"
                 ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/metrics/metrics.jinja.html",
-                metrics=metrics,
-                reports=reports
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/metrics/metrics.jinja.html",
+            metrics=metrics,
+            reports=reports
+        ).pop()
 
     @staticmethod
     def plot(metric: str) -> bytes:
@@ -134,21 +130,18 @@ class Controller:
             cherrypy.engine.publish("clock:local", x_range[1]).pop(),
         )
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/metrics/metrics.jinja.html",
-                metric=metric,
-                x_range=x_range,
-                x_ticks=x_ticks,
-                x_labels=x_labels,
-                y_ticks=y_ticks,
-                y_labels=y_labels,
-                y_range=y_range,
-                y_unit=y_unit,
-                y_legend=y_legend,
-                points=points,
-                subview_title=metric
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/metrics/metrics.jinja.html",
+            metric=metric,
+            x_range=x_range,
+            x_ticks=x_ticks,
+            x_labels=x_labels,
+            y_ticks=y_ticks,
+            y_labels=y_labels,
+            y_range=y_range,
+            y_unit=y_unit,
+            y_legend=y_legend,
+            points=points,
+            subview_title=metric
+        ).pop()

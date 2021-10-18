@@ -1,7 +1,6 @@
 """Internal and external addressess"""
 
 import json
-import typing
 import cherrypy
 
 
@@ -42,12 +41,9 @@ class Controller:
         if cherrypy.request.wants == "text":
             return f"client_ip={client_ip}\nexternal_ip={external_ip}".encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/ip/ip.jinja.html",
-                client_ip=client_ip,
-                external_ip=external_ip,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/ip/ip.jinja.html",
+            client_ip=client_ip,
+            external_ip=external_ip,
+        ).pop()

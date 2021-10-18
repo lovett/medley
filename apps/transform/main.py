@@ -29,15 +29,12 @@ class Controller:
     def GET(self, *_args: str, **_kwargs: str) -> bytes:
         """The default view presents the available transformation methods"""
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/transform/transform.jinja.html",
-                transforms=self.list_of_transforms(),
-                current_transform="as-is"
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/transform/transform.jinja.html",
+            transforms=self.list_of_transforms(),
+            current_transform="as-is"
+        ).pop()
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))
     def POST(self, *_args: str, **kwargs: str) -> bytes:
@@ -66,19 +63,16 @@ class Controller:
             return json.dumps({"result": result}).encode()
 
         if cherrypy.request.wants == "text":
-            return typing.cast(bytes, result.encode())
+            return result.encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/transform/transform.jinja.html",
-                result=result,
-                current_transform=transform,
-                transforms=self.list_of_transforms(),
-                value=value
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/transform/transform.jinja.html",
+            result=result,
+            current_transform=transform,
+            transforms=self.list_of_transforms(),
+            value=value
+        ).pop()
 
     def list_of_transforms(self) -> typing.List[str]:
         """Shape the list of transforms into a list of keys"""

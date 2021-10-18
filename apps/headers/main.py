@@ -1,7 +1,6 @@
 """HTTP request headers"""
 
 import json
-import typing
 import cherrypy
 
 
@@ -18,7 +17,7 @@ class Controller:
 
         headers = sorted(
             cherrypy.request.headers.items(),
-            key=lambda pair: typing.cast(str, pair[0])
+            key=lambda pair: str(pair[0])
         )
 
         if cherrypy.request.wants == "text":
@@ -30,11 +29,8 @@ class Controller:
         if cherrypy.request.wants == "json":
             return json.dumps(headers).encode()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/headers/headers.jinja.html",
-                headers=headers,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/headers/headers.jinja.html",
+            headers=headers,
+        ).pop()

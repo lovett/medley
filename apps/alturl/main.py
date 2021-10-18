@@ -1,6 +1,5 @@
 """Web page reformatting"""
 
-import typing
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
@@ -43,14 +42,11 @@ class Controller:
         ]
 
         if not target_url:
-            return typing.cast(
-                bytes,
-                cherrypy.engine.publish(
-                    "jinja:render",
-                    "apps/alturl/alturl.jinja.html",
-                    bookmarks=bookmarks
-                ).pop()
-            )
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "apps/alturl/alturl.jinja.html",
+                bookmarks=bookmarks
+            ).pop()
 
         parsed_url = urlparse(f"//{target_url}")
 
@@ -61,16 +57,13 @@ class Controller:
             )
 
         if not site_specific_template:
-            return typing.cast(
-                bytes,
-                cherrypy.engine.publish(
-                    "jinja:render",
-                    "apps/alturl/alturl.jinja.html",
-                    unrecognized=True,
-                    url=target_url,
-                    bookmarks=bookmarks
-                ).pop()
-            )
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "apps/alturl/alturl.jinja.html",
+                unrecognized=True,
+                url=target_url,
+                bookmarks=bookmarks
+            ).pop()
 
         active_bookmark = next((
             bookmark
@@ -80,14 +73,11 @@ class Controller:
 
         view_vars["active_bookmark"] = active_bookmark
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                site_specific_template,
-                **view_vars
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            site_specific_template,
+            **view_vars
+        ).pop()
 
     @staticmethod
     def POST(url: str) -> None:

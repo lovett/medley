@@ -3,7 +3,6 @@
 import ipaddress
 import re
 import socket
-import typing
 import urllib.parse
 import cherrypy
 
@@ -22,13 +21,10 @@ class Controller:
         address = kwargs.get("address")
 
         if not address:
-            return typing.cast(
-                bytes,
-                cherrypy.engine.publish(
-                    "jinja:render",
-                    "apps/whois/whois.jinja.html"
-                ).pop()
-            )
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "apps/whois/whois.jinja.html"
+            ).pop()
 
         address_unquoted = urllib.parse.unquote_plus(address.strip()).lower()
 
@@ -95,19 +91,16 @@ class Controller:
             {"query": f"ip {ip_address}"}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/whois/whois.jinja.html",
-                address=address_clean,
-                ip_address=ip_address,
-                whois=whois,
-                ip_facts=facts,
-                visitors_url=visitors_url,
-                earliest_visit=visit_days.get("earliest"),
-                latest_visit=visit_days.get("latest"),
-                visit_days_count=visit_days.get("count", 0),
-                subview_title=address_clean
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/whois/whois.jinja.html",
+            address=address_clean,
+            ip_address=ip_address,
+            whois=whois,
+            ip_facts=facts,
+            visitors_url=visitors_url,
+            earliest_visit=visit_days.get("earliest"),
+            latest_visit=visit_days.get("latest"),
+            visit_days_count=visit_days.get("count", 0),
+            subview_title=address_clean
+        ).pop()

@@ -1,7 +1,6 @@
 """Bookmark a webpage"""
 
 import re
-import typing
 import cherrypy
 
 
@@ -81,17 +80,14 @@ class Controller:
             {"query": title, "order": "date-desc"}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/later/later.jinja.html",
-                bookmarks_url=bookmarks_url,
-                error=error,
-                bookmark=bookmark,
-                title=title,
-                url=url,
-                tags=tags,
-                comments=comments,
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/later/later.jinja.html",
+            bookmarks_url=bookmarks_url,
+            error=error,
+            bookmark=bookmark,
+            title=title,
+            url=url,
+            tags=tags,
+            comments=comments,
+        ).pop()

@@ -1,6 +1,5 @@
 """Webpage utilities"""
 
-import typing
 import cherrypy
 
 
@@ -26,12 +25,9 @@ class Controller:
             "/bounce"
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/bookmarklets/bookmarklets.jinja.html",
-                bounce_url=bounce_url,
-                later_url=later_url
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/bookmarklets/bookmarklets.jinja.html",
+            bounce_url=bounce_url,
+            later_url=later_url
+        ).pop()

@@ -2,7 +2,6 @@
 
 import socket
 import struct
-import typing
 import cherrypy
 
 
@@ -31,20 +30,17 @@ class Controller:
             {"key": "wakeup", "view": "add", "q": "wakeup"}
         ).pop()
 
-        return typing.cast(
-            bytes,
-            cherrypy.engine.publish(
-                "jinja:render",
-                "apps/wakeup/wakeup.jinja.html",
-                hosts=hosts,
-                registry_url=registry_url,
-                sent=sent
-            ).pop()
-        )
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/wakeup/wakeup.jinja.html",
+            hosts=hosts,
+            registry_url=registry_url,
+            sent=sent
+        ).pop()
 
     @staticmethod
     @cherrypy.tools.provides(formats=("text", "html"))
-    def POST(*_args: str, **kwargs: str) -> typing.Optional[bytes]:
+    def POST(*_args: str, **kwargs: str) -> bytes:
         """Send a WoL packet to the mac address of the specified host."""
 
         host = kwargs.get('host')
