@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.metrics.main
+import apps.metrics.main  # type: ignore
 
 
 class TestMetrics(BaseCherryPyTestCase, ResponseAssertions):

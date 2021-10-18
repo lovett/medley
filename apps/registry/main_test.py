@@ -6,7 +6,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.registry.main
+import apps.registry.main  # type: ignore
 
 
 class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):

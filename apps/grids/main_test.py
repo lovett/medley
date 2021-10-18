@@ -7,7 +7,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.grids.main
+import apps.grids.main  # type: ignore
 
 
 class TestGrids(BaseCherryPyTestCase, ResponseAssertions):

@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.reminder.main
+import apps.reminder.main  # type: ignore
 
 
 class TestReminder(BaseCherryPyTestCase, ResponseAssertions):

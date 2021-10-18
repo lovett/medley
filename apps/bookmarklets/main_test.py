@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.bookmarklets.main
+import apps.bookmarklets.main  # type: ignore
 
 
 class TestBookmarklets(BaseCherryPyTestCase, ResponseAssertions):

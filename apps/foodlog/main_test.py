@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.foodlog.main
+import apps.foodlog.main  # type: ignore
 
 
 class TestFoodlog(BaseCherryPyTestCase, ResponseAssertions):

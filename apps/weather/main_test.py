@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.weather.main
+import apps.weather.main  # type: ignore
 
 
 class TestWeather(BaseCherryPyTestCase, ResponseAssertions):

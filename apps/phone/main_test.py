@@ -6,7 +6,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.phone.main
+import apps.phone.main  # type: ignore
 
 
 class TestPhone(BaseCherryPyTestCase, ResponseAssertions):

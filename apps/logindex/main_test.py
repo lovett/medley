@@ -8,7 +8,7 @@ import pytz
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.logindex.main
+import apps.logindex.main  # type: ignore
 
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):

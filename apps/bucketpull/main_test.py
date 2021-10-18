@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.bucketpull.main
+import apps.bucketpull.main  # type: ignore
 
 
 class TestBucketpull(BaseCherryPyTestCase, ResponseAssertions):

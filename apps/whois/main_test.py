@@ -7,7 +7,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.whois.main
+import apps.whois.main  # type: ignore
 
 
 class TestWhois(BaseCherryPyTestCase, ResponseAssertions):

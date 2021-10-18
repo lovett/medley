@@ -6,7 +6,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.transform.main
+import apps.transform.main  # type: ignore
 
 
 class TestTransform(BaseCherryPyTestCase, ResponseAssertions):

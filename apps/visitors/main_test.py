@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.visitors.main
+import apps.visitors.main  # type: ignore
 
 
 class TestVisitors(BaseCherryPyTestCase, ResponseAssertions):

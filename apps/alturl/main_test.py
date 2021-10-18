@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.alturl.main
+import apps.alturl.main  # type: ignore
 
 
 class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):

@@ -11,7 +11,7 @@ import cherrypy
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.geodb.main
+import apps.geodb.main  # type: ignore
 
 
 class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):

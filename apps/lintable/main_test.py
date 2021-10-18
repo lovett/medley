@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.lintable.main
+import apps.lintable.main  # type: ignore
 
 
 class TestLintable(BaseCherryPyTestCase, ResponseAssertions):

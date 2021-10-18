@@ -5,7 +5,7 @@ from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.maintenance.main
+import apps.maintenance.main  # type: ignore
 
 
 class TestLater(BaseCherryPyTestCase, ResponseAssertions):

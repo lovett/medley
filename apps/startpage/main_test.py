@@ -4,7 +4,7 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.startpage.main
+import apps.startpage.main  # type: ignore
 
 
 class TestStartpage(BaseCherryPyTestCase, ResponseAssertions):

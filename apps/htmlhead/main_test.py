@@ -8,7 +8,7 @@ import responses
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.htmlhead.main
+import apps.htmlhead.main  # type: ignore
 
 
 class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
