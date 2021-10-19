@@ -11,7 +11,7 @@ import tools.etag
 
 def get_fixture(path: str) -> str:
     """Return the contents of a file in the fixtures directory."""
-    with open("testing/fixtures/" + path) as handle:
+    with open("testing/fixtures/" + path, "r", encoding="utf-8") as handle:
         return handle.read()
 
 

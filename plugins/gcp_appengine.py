@@ -87,7 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         line_count = 0
         batch: typing.List[typing.Any] = []
-        with open(log_path, "r") as file_handle:
+        with open(log_path, "r", encoding="utf-8") as file_handle:
             while True:
                 line = file_handle.readline()
 

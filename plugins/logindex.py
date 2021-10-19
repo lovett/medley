@@ -308,7 +308,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         max_offset = self.last_known_offset(file_path)
 
-        with open(file_path, "r") as file_handle:
+        with open(file_path, "r", encoding="utf-8") as file_handle:
 
             # When indexing a previously indexed log file, max_offset
             # is the position of the last line that was added to the

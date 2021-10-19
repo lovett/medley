@@ -89,10 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         full_url = url
         if params:
-            full_url = "{}?{}".format(
-                url,
-                urllib.parse.urlencode(params)
-            )
+            full_url = f"{url}?{urllib.parse.urlencode(params)}"
 
         if as_json and cache_lifespan > 0:
             cached_response = cherrypy.engine.publish(
