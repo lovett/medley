@@ -1181,3 +1181,9 @@ def publish(
 def publish(
         channel: Literal["server:ready"],
 ) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["cache:ready"],
+) -> List[None]: ...

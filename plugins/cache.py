@@ -37,6 +37,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             WHERE expires > datetime('now');
         """)
 
+        cherrypy.engine.publish("cache:ready")
+
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 

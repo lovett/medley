@@ -84,7 +84,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
         This plugin owns the scheduler prefix.
 
         """
-        self.bus.subscribe("server:ready", self.revive)
+        self.bus.subscribe("cache:ready", self.revive)
         self.bus.subscribe("scheduler:add", self.add)
         self.bus.subscribe("scheduler:persist", self.persist)
         self.bus.subscribe("scheduler:remove", self.remove)

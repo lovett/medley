@@ -18,7 +18,10 @@ class TestScheduler(Subscriber):
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
-        self.assert_prefixes(subscribe_mock, ("server", "scheduler"))
+        self.assert_prefixes(
+            subscribe_mock,
+            ("cache", "server", "scheduler")
+        )
 
     def test_placeholder(self) -> None:
         """Placeholder to force pytest to generate a coverage file."""
