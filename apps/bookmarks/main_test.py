@@ -108,7 +108,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", url="http://example.com", method="DELETE")
+        response = self.request("/12345", method="DELETE")
         self.assert_404(response)
 
     @mock.patch("cherrypy.engine.publish")
@@ -123,7 +123,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
 
         publish_mock.side_effect = side_effect
 
-        response = self.request("/", url="http://example.com", method="DELETE")
+        response = self.request("/123", method="DELETE")
         self.assertEqual(response.code, 204)
 
 

@@ -109,7 +109,7 @@
                                     </a>
                                 </div>
                                 <div>
-                                    {{ macros.deleteButton(app_url ~ "?url=" ~ bookmark.url|urlencode, "li", "Delete this bookmark") }}
+                                    {{ macros.deleteButton(app_url ~ "/" ~ bookmark.rowid, "li", "Delete this bookmark") }}
                                 </div>
 
                             </div>

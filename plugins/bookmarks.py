@@ -128,14 +128,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     def find(self,
-             uid: str = None,
+             uid: int = 0,
              url: str = None) -> typing.Optional[sqlite3.Row]:
         """Locate a bookmark by ID or URL."""
 
         where_clause = None
 
         values: typing.Union[
-            typing.Tuple[str],
+            typing.Tuple[int],
             typing.Tuple[str, str]
         ]
 
@@ -299,10 +299,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def remove(self, url: str) -> int:
+    def remove(self, uid: int) -> int:
         """Discard a previously bookmarked URL."""
 
-        bookmark = self.find(url=url)
+        bookmark = self.find(uid)
 
         deletions = 0
 
@@ -389,7 +389,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             placeholder_values += (query,)
 
-        sql = f"""SELECT b.url, b.domain, b.title,
+        sql = f"""SELECT b.rowid, b.url, b.domain, b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
         added as 'added [local_datetime]',
         updated as 'updated [local_datetime]'
@@ -417,7 +417,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ]:
         """Get a newest-first list of recently bookmarked URLs."""
 
-        sql = """SELECT url, domain, title,
+        sql = """SELECT rowid, url, domain, title,
         added as 'added [timestamp]',
         updated as 'updated [timestamp]',
         retrieved 'retrieved [timestamp]',

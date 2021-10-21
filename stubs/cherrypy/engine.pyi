@@ -520,7 +520,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["bookmarks:remove"],
-        url: str,
+        uid: int,
 ) -> List[int]: ...
 
 

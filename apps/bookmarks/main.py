@@ -14,13 +14,13 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(url: str) -> None:
+    def DELETE(uid: int) -> None:
         """Discard a previously bookmarked URL."""
 
         deleted_rows = cherrypy.engine.publish(
             "bookmarks:remove",
-            url
-            ).pop()
+            uid
+        ).pop()
 
         if not deleted_rows:
             raise cherrypy.HTTPError(404, "Invalid url")
