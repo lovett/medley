@@ -12,6 +12,8 @@ MEDLEY.delete = (function () {
             return;
         }
 
+        e.preventDefault();
+
         const deleteUrl = e.target.dataset.deleteUrl;
         const deleteRedirect = e.target.dataset.deleteRedirect;
         const hideSelector = e.target.dataset.hideClosest;
