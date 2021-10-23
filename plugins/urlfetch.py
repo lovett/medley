@@ -25,12 +25,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("urlfetch:delete", self.delete)
         self.bus.subscribe("urlfetch:get", self.get)
+        self.bus.subscribe("urlfetch:get:json", self.get_json)
         self.bus.subscribe("urlfetch:get:file", self.get_file)
         self.bus.subscribe("urlfetch:post", self.post)
 
     @staticmethod
     def headers(
-            additions: typing.Optional[typing.Dict[str, str]]
+            additions: typing.Optional[typing.Dict[str, str]] = None
     ) -> typing.Dict[str, str]:
         """Add headers to a default set."""
 
@@ -72,6 +73,66 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         return True
+
+    def get_json(
+            self,
+            url: str,
+            *,
+            auth: typing.Iterable[str] = (),
+            params: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            headers: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            cache_lifespan: int = 0
+    ) -> typing.Any:
+        """Make a GET request for a JSON resource."""
+
+        request_url = url
+        if params:
+            request_url = f"{url}?{urllib.parse.urlencode(params)}"
+
+        if cache_lifespan > 0:
+            cached_response = cherrypy.engine.publish(
+                "cache:get",
+                request_url
+            ).pop()
+
+            if cached_response:
+                return cached_response
+
+        request_headers = self.headers(headers)
+        request_headers["Accept"] = "application/json"
+
+        try:
+            res = requests.get(
+                request_url,
+                auth=auth,
+                timeout=15,
+                headers=request_headers,
+            )
+
+            res.raise_for_status()
+
+        except requests.exceptions.RequestException as exception:
+            cherrypy.engine.publish(
+                "applog:add",
+                "urlfetch:exception",
+                exception
+            )
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "urlfetch:get:json",
+            f"{res.status_code} {url}"
+        )
+
+        if cache_lifespan:
+            cherrypy.engine.publish(
+                "cache:set",
+                request_url,
+                res.json(),
+                lifespan_seconds=cache_lifespan
+            )
+
+        return res.json()
 
     def get(
             self,

@@ -345,7 +345,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["scheduler:add"],
-        cache_lifespan: int,
+        delay_seconds: int,
         scheduled_channel: Literal["memorize:clear"],
         key: str,
 ) -> List[ScheduledEvent]: ...
@@ -354,7 +354,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["scheduler:add"],
-        cache_lifespan: int,
+        delay_seconds: int,
         scheduled_channel: str,
         *args: Optional[Any],
         **kwargs: Optional[Any],
@@ -729,11 +729,14 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["urlfetch:get"],
+        channel: Literal["urlfetch:get:json"],
         url: str,
-        as_json: Literal[True],
-        **kwargs: Any,
-) -> List[Dict]: ...
+        *,
+        auth: Iterable[str] = (),
+        params: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        cache_lifespan: int = 0
+) -> List[Any]: ...
 
 
 @overload
