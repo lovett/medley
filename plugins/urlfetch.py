@@ -99,7 +99,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 return cached_response
 
         request_headers = self.headers(headers)
-        request_headers["Accept"] = "application/json"
+
+        if "Accept" not in request_headers:
+            request_headers["Accept"] = "application/json"
 
         try:
             res = requests.get(
