@@ -3,10 +3,10 @@
 import re
 import sqlite3
 import typing
-from urllib.parse import urlparse
 import cherrypy
 from plugins import mixins
 from plugins import decorators
+from resources.url import Url
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -112,57 +112,33 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
 
-    @staticmethod
-    def domain_and_url(url: str) -> typing.Tuple[str, str]:
-        """Parse the domain from a normalized URL."""
-
-        parsed_url = urlparse(
-            url.split("#", 1)[0],
-            scheme="http",
-            allow_fragments=False
-        )
-
-        return (
-            parsed_url.netloc.lower(),
-            parsed_url.geturl()
-        )
-
-    def find(self,
-             uid: int = 0,
-             url: str = None) -> typing.Optional[sqlite3.Row]:
+    def find(
+            self,
+            uid: int = 0,
+            url: Url = None
+    ) -> typing.Optional[sqlite3.Row]:
         """Locate a bookmark by ID or URL."""
 
-        where_clause = None
-
-        values: typing.Union[
-            typing.Tuple[int],
-            typing.Tuple[str, str]
-        ]
-
-        if uid:
-            where_clause = "rowid=?"
-            values = (uid,)
-
-        if url:
-            where_clause = "domain=? AND url=?"
-            values = self.domain_and_url(url)
-
-        if not where_clause:
-            return None
-
-        return self._selectOne(
-            f"""SELECT rowid, url, domain, title,
+        sql = """SELECT rowid, url, domain, title,
             added as 'added [local_datetime]',
             updated as 'updated [local_datetime]',
             deleted as 'deleted [local_datetime]',
             tags, comments
-            FROM bookmarks WHERE {where_clause}""",  # nosec
-            values
-        )
+            FROM bookmarks"""
+
+        if uid:
+            sql += " WHERE rowid=?"
+            return self._selectOne(sql, (uid,))
+
+        if url:
+            sql += " WHERE domain=? AND url=?"
+            return self._selectOne(sql, (url.domain, url.address))
+
+        return None
 
     @decorators.log_runtime
     def add(self,
-            url: str,
+            url: Url,
             title: str = None,
             comments: str = None,
             tags: str = None,
@@ -187,8 +163,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             return True
 
-        (domain, url) = self.domain_and_url(url)
-
         if added and added.isnumeric():
             add_date = cherrypy.engine.publish(
                 "clock:from_timestamp",
@@ -210,8 +184,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (domain, url, added, title, tags, comments)
             VALUES (?, ?, ?, ?, ?, ?)""",
             (
-                domain,
-                url,
+                url.domain,
+                url.address,
                 add_date_formatted,
                 title,
                 tags,
@@ -513,8 +487,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         for row in rows_without_domain:
-            (domain, _) = self.domain_and_url(row["url"])
+            url = Url(row["url"], row["rowid"])
             self._execute(
                 "UPDATE bookmarks SET domain=? WHERE rowid=?",
-                (domain, row["rowid"])
+                (url.domain, url.id)
             )

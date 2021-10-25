@@ -16,6 +16,7 @@ from typing_extensions import Literal
 from plugins.scheduler import ScheduledEvent
 from plugins.applog import SearchResult
 from plugins.foodlog import SearchResult as FoodLogSearchResult
+from resources.url import Url
 from sqlite3 import Row
 from pathlib import Path
 
@@ -532,14 +533,14 @@ def publish(
 def publish(
         channel: Literal["bookmarks:find"],
         uid: str = "",
-        url: str = "",
+        url: Optional[Url] = None,
 ) -> List[Optional[Row]]: ...
 
 
 @overload
 def publish(
         channel: Literal["bookmarks:add"],
-        url: str,
+        url: Url,
         title: str = "",
         comments: str = "",
         tags: str = "",

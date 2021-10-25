@@ -5,6 +5,7 @@ import sqlite3
 import typing
 from urllib.parse import urlparse
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -57,7 +58,7 @@ class Controller:
             "scheduler:add",
             2,
             "bookmarks:add",
-            url,
+            Url(url),
             title,
             comments,
             tags,

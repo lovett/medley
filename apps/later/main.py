@@ -2,6 +2,7 @@
 
 import re
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -66,7 +67,7 @@ class Controller:
         if url:
             bookmark = cherrypy.engine.publish(
                 "bookmarks:find",
-                url=url
+                url=Url(url)
             ).pop()
 
         if bookmark:
