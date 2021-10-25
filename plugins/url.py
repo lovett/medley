@@ -89,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if path and not path.startswith("/"):
             path = f"{cherrypy.request.script_name}/{path}"
 
-        url = f"{scheme}{hostname}{path or cherrypy.request.script_name}"
+        url = f"{scheme}{hostname}{path or cherrypy.request.script_name}/"
 
         if query:
             query = {

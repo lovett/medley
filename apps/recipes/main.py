@@ -210,11 +210,17 @@ class Controller:
             tag
         ).pop()
 
+        search_url = cherrpy.engine.publish(
+            "url:internal",
+            "search"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
             tag=tag,
+            search_url=search_url,
             subview_title=tag
         ).pop()
 
@@ -313,11 +319,17 @@ class Controller:
             "recipes:find:starred"
         ).pop()
 
+        search_url = cherrypy.engine.publish(
+            "url:internal",
+            "search"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-index.jinja.html",
             tags=tags,
             recently_added=recently_added,
+            search_url=search_url,
             starred=starred
         ).pop()
 
@@ -328,6 +340,11 @@ class Controller:
         query = query.lower().strip()
 
         query_date = None
+
+        search_url = cherrypy.engine.publish(
+            "url:internal",
+            "search"
+        ).pop()
 
         if re.fullmatch(r"\d{4}-\w{2}-\d{2}", query):
             query_date = cherrypy.engine.publish(
@@ -363,7 +380,8 @@ class Controller:
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
             query=query,
-            subview_title=query
+            search_url=search_url,
+            subview_title=query,
         ).pop()
 
     def show(self, recipe_id: int) -> bytes:
