@@ -6,11 +6,13 @@
             <form method="get" action="{{ app_url }}/search">
                 <div class="field">
                     <input
-                        type="search"
+                        autocapitalize="none"
+                        autocomplete="off"
                         id="q"
                         name="q"
+                        placeholder="Search term"
+                        type="search"
                         value="{{ query }}"
-                        autocapitalize="none"
                     />
                 </div>
                 <div class="field">

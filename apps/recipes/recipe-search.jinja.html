@@ -2,12 +2,13 @@
     <form method="get" action="{{ search_url }}">
         <div class="field">
             <input
-                type="search"
-                id="q"
-                name="q"
-                value="{{ query }}"
                 autocapitalize="none"
                 autocomplete="off"
+                id="q"
+                name="q"
+                placeholder="Search term"
+                type="search"
+                value="{{ query }}"
             />
         </div>
         <div class="field">

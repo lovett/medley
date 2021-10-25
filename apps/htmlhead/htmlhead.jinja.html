@@ -27,8 +27,15 @@
     <header id="app-nav">
         <form method="post" action="{{ app_url }}">
             <div class="field">
-                <label for="url">URL</label>
-                <input type="search" id="url" name="url" value="{{ url|default('', true) }}" autocapitalize="none" />
+                <input
+                    autocapitalize="none"
+                    autocomplete="off"
+                    id="url"
+                    name="url"
+                    placeholder="URL"
+                    type="search"
+                    value="{{ url|default('', true) }}"
+                />
             </div>
 
             <div class="field">

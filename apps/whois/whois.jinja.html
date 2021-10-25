@@ -20,12 +20,13 @@
             <form id="search-form" method="get" action="/whois">
                 <div class="field">
                     <input
-                        type="search"
+                        autocapitalize="none"
+                        autocomplete="off"
                         id="address"
                         name="address"
-                        value="{{ address }}"
-                        autocapitalize="none"
                         placeholder="IP or host"
+                        type="search"
+                        value="{{ address }}"
                     />
                 </div>
                 <div class="field">

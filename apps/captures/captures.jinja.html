@@ -17,12 +17,13 @@
             <form method="get" action="{{ app_url }}">
                 <div class="field">
                     <input
-                        type="search"
+                        autocapitalize="none"
+                        autocomplete="off"
                         id="path"
                         name="path"
-                        value="{{ path }}"
-                        autocapitalize="none"
                         placeholder="URL"
+                        type="search"
+                        value="{{ path }}"
                     />
                 </div>
                 <div>

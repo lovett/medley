@@ -29,12 +29,13 @@
             <form method="get" action="/phone">
                 <div class="field">
                     <input
-                        type="search"
+                        autocapitalize="none"
+                        autocomplete="off"
                         id="number"
                         name="number"
-                        value="{{ number }}"
-                        autocapitalize="none"
                         placeholder="Phone number or area code"
+                        type="search"
+                        value="{{ number }}"
                     />
                 </div>
                 <div class="field">
