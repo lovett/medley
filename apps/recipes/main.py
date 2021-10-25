@@ -1,5 +1,6 @@
 """A collection of recipes"""
 
+import datetime
 import re
 import typing
 import cherrypy
@@ -151,10 +152,14 @@ class Controller:
         ).pop()
 
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created.strip()):
+            created_date = datetime.datetime.strptime(
+                f"{created.strip()} 00:00",
+                "%Y-%m-%d %H:%M",
+            )
+
             created_date = cherrypy.engine.publish(
-                "clock:from_format",
-                f"{created.strip()} 00:00:00",
-                "%Y-%m-%d %H:%M:%s"
+                "clock:utc",
+                created_date
             ).pop()
 
         attachment_list = []
