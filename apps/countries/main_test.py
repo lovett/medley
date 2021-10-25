@@ -73,7 +73,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [self.fixture]
             return mock.DEFAULT
 
@@ -115,7 +115,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [self.fixture]
             return mock.DEFAULT
 
@@ -140,7 +140,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [None]
             return mock.DEFAULT
 

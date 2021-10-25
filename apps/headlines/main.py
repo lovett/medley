@@ -31,14 +31,13 @@ class Controller:
 
         for category in settings["category"]:
             response = cherrypy.engine.publish(
-                "urlfetch:get",
+                "urlfetch:get:json",
                 "https://newsapi.org/v2/top-headlines",
                 params={
                     "country": settings["country"][0],
                     "apiKey": settings["key"][0],
                     "category": category
                 },
-                as_json=True,
                 cache_lifespan=cache_lifespan
             ).pop()
 

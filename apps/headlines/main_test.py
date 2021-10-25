@@ -56,7 +56,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertIsNone(
-            helpers.find_publish_call(publish_mock, "urlfetch:get")
+            helpers.find_publish_call(publish_mock, "urlfetch:get:json")
         )
 
         self.assertIsNone(
@@ -88,7 +88,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         self.request("/")
 
         self.assertIsNotNone(
-            helpers.find_publish_call(publish_mock, "urlfetch:get")
+            helpers.find_publish_call(publish_mock, "urlfetch:get:json")
         )
 
     @mock.patch("cherrypy.engine.publish")
@@ -106,7 +106,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
                     "category": ["category1", "category2", "category3"]
                 }]
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [None]
             return mock.DEFAULT
 
@@ -124,7 +124,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [None]
             if args[0] == "jinja:render":
                 return [""]

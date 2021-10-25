@@ -42,7 +42,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [{"ip": "1.1.1.1"}]
             if args[0] == "jinja:render":
                 return [""]
@@ -69,7 +69,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [{"ip": "1.1.1.1"}]
 
             return mock.DEFAULT
@@ -92,7 +92,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 return [{"ip": "1.1.1.1"}]
             return mock.DEFAULT
 

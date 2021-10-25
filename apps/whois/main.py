@@ -49,9 +49,8 @@ class Controller:
                 raise cherrypy.HTTPRedirect(redirect_url) from err
 
         whois = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             f"http://whois.arin.net/rest/ip/{ip_address}",
-            as_json=True,
             cache_lifespan=86400
         ).pop()
 

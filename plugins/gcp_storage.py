@@ -87,12 +87,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         access_token = grant_response.json().get("access_token")
 
         bucket = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             (
                 "https://storage.googleapis.com/storage/v1/b/"
                 f"{config.get('bucket')}/o"
             ),
-            as_json=True,
             headers=self.standard_headers(access_token),
         ).pop()
 

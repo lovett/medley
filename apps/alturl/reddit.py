@@ -14,19 +14,15 @@ ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 def view(url: str) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
-    json_url = f"https://{url}/.json"
     app_url = cherrypy.engine.publish(
         "url:internal",
         url
     ).pop()
 
-    cache_lifespan = 900
-
     response = cherrypy.engine.publish(
-        "urlfetch:get",
-        json_url,
-        as_json=True,
-        cache_lifespan=cache_lifespan
+        "urlfetch:get:json",
+        f"https://{url}/.json",
+        cache_lifespan=900
     ).pop()
 
     if not response:
@@ -34,7 +30,7 @@ def view(url: str) -> ViewAndData:
 
     cherrypy.engine.publish(
         "scheduler:add",
-        cache_lifespan,
+        1,
         "memorize:clear",
         f"etag:{app_url}"
     )

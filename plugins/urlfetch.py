@@ -139,7 +139,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def get(
             self,
             url: str,
-            as_json: bool = False,
             as_object: bool = False,
             **kwargs: Kwargs
     ) -> typing.Any:
@@ -154,7 +153,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if params:
             full_url = f"{url}?{urllib.parse.urlencode(params)}"
 
-        if as_json and cache_lifespan > 0:
+        if cache_lifespan > 0:
             cached_response = cherrypy.engine.publish(
                 "cache:get",
                 full_url
@@ -162,9 +161,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             if cached_response:
                 return cached_response
-
-        if as_json and "Accept" not in headers:
-            headers["Accept"] = "application/json"
 
         try:
             res = requests.get(
@@ -198,15 +194,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if res.status_code == 204:
             return True
 
-        if "json" in res.headers.get("content-type", ""):
-            if cache_lifespan > 0:
-                cherrypy.engine.publish(
-                    "cache:set",
-                    full_url,
-                    res.json(),
-                    lifespan_seconds=cache_lifespan
-                )
-            return res.json()
+        if cache_lifespan > 0:
+            cherrypy.engine.publish(
+                "cache:set",
+                full_url,
+                res.text,
+                lifespan_seconds=cache_lifespan
+            )
 
         return res.text
 

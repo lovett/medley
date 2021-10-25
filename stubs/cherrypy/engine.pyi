@@ -761,7 +761,6 @@ def publish(
         channel: Literal["urlfetch:get:file"],
         url: str,
         destination: Path,
-        as_json: Optional[bool] = False,
         **kwargs: Any
 ) -> List[None]: ...
 

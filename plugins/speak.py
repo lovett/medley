@@ -163,9 +163,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return typing.cast(
             typing.List[typing.Dict[str, str]],
             cherrypy.engine.publish(
-                "urlfetch:get",
+                "urlfetch:get:json",
                 config.get("voice_list_url", ""),
-                as_json=True,
                 cache_lifespan=1800,
                 headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")},
             ).pop()

@@ -21,10 +21,9 @@ class Controller:
             client_ip = cherrypy.request.headers["X-Real-Ip"]
 
         api_response = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             "https://api.ipify.org",
             params={"format": "json"},
-            as_json=True,
             cache_lifespan=86400
         ).pop()
 

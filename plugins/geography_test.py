@@ -32,7 +32,7 @@ class TestGeography(Subscriber):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-area-success.json")
                 )
@@ -53,7 +53,7 @@ class TestGeography(Subscriber):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-area-fail.json")
                 )
@@ -75,7 +75,7 @@ class TestGeography(Subscriber):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-state-fail.json")
                 )
@@ -95,7 +95,7 @@ class TestGeography(Subscriber):
         def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
+            if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-state-success.json")
                 )

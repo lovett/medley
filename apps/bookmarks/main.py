@@ -74,12 +74,13 @@ class Controller:
         """See if an archived copy of the URL is available."""
 
         response = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             "http://archive.org/wayback/available",
             params={"url": url},
-            as_json=True,
             cache_lifespan=86400
         ).pop() or {}
+
+        print(response)
 
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})

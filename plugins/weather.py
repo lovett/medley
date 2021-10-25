@@ -167,7 +167,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         api_key = config.get("openweather_api_key")
 
         api_response = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             "https://api.openweathermap.org/data/2.5/onecall",
             params={
                 "lat": latitude,
@@ -176,7 +176,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "units": "imperial",
                 "appid": api_key,
             },
-            as_json=True,
             cache_lifespan=1800
         ).pop()
 

@@ -59,7 +59,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         response = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             "http://dbpedia.org/sparql",
             headers={
                 "Accept": "application/sparql-results+json"
@@ -69,7 +69,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "format": "json",
                 "timeout": "5000"
             },
-            as_json=True,
             cache_lifespan=86400
         ).pop()
 
@@ -108,7 +107,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         response = cherrypy.engine.publish(
-            "urlfetch:get",
+            "urlfetch:get:json",
             "http://dbpedia.org/sparql",
             headers={
                 "Accept": "application/sparql-results+json"
@@ -118,7 +117,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "format": "json",
                 "timeout": "5000"
             },
-            as_json=True,
             cache_lifespan=86400
         ).pop()
 
