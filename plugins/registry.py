@@ -161,7 +161,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         else:
             sql += "ORDER BY key "
 
-        sql += f" LIMIT {limit}"
+        if limit > 0:
+            sql += f" LIMIT {limit}"
 
         result = typing.cast(
             typing.Any,
