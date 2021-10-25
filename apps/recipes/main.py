@@ -4,6 +4,7 @@ import re
 import typing
 import cherrypy
 import mistletoe
+from resources.url import Url
 
 # pylint: disable=protected-access
 Attachment = typing.Union[
@@ -210,7 +211,7 @@ class Controller:
             tag
         ).pop()
 
-        search_url = cherrpy.engine.publish(
+        search_url = cherrypy.engine.publish(
             "url:internal",
             "search"
         ).pop()
@@ -417,12 +418,9 @@ class Controller:
             ingredients = ""
             rest = body_html
 
-        url_domain = None
+        url = None
         if recipe["url"]:
-            url_domain = cherrypy.engine.publish(
-                "url:readable",
-                recipe["url"]
-            ).pop()
+            url = Url(recipe["url"])
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -435,8 +433,7 @@ class Controller:
             updated=recipe["updated"],
             added=recipe["created"],
             starred=recipe["starred"],
-            url=recipe["url"],
-            url_domain=url_domain,
+            url=url,
             last_made=recipe["last_made"],
             subview_title=recipe["title"],
             attachments=attachments

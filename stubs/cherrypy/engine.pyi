@@ -197,27 +197,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["url:readable"],
-        path: str = ""
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["url:domain"],
-        url: Optional[str],
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["url:alt"],
-        path: str = ""
-) -> List[str]: ...
-
-
-@overload
-def publish(
         channel: Literal["registry:add"],
         key: str,
         value: Any

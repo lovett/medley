@@ -3,7 +3,7 @@
 from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
-from apps.alturl.bookmark import Bookmark
+from resources.url import Url
 
 
 class Controller:
@@ -33,12 +33,7 @@ class Controller:
         ).pop()
 
         bookmarks = [
-            Bookmark(
-                row["rowid"],
-                row["value"],
-                cherrypy.engine.publish("url:readable", row["value"]).pop(),
-                cherrypy.engine.publish("url:alt", row["value"]).pop()
-            )
+            Url(row["value"], row["rowid"])
             for row in registry_rows
         ]
 
@@ -69,7 +64,7 @@ class Controller:
         active_bookmark = next((
             bookmark
             for bookmark in bookmarks
-            if target_url == bookmark.url
+            if target_url == bookmark.address
         ), None)
 
         view_vars["active_bookmark"] = active_bookmark

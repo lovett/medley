@@ -19,9 +19,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("url:current", self.current_url)
         self.bus.subscribe("url:internal", self.internal_url)
-        self.bus.subscribe("url:alt", self.alt_url)
-        self.bus.subscribe("url:readable", self.readable_url)
-        self.bus.subscribe("url:domain", self.url_domain)
 
     def current_url(self) -> str:
         """The URL of the request currently being served."""
@@ -109,33 +106,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             url = f"https:{url.split(':', 1).pop()}"
 
         return url
-
-    def alt_url(self, url: str) -> str:
-        """Convert an external URL to the equivalent in the alturl app."""
-
-        if not url.startswith("http"):
-            url = f"//{url}"
-
-        parsed_url = urlparse(url)
-
-        return self.internal_url(
-            f"/alturl/{parsed_url.netloc}{parsed_url.path}"
-        )
-
-    @staticmethod
-    def readable_url(url: str) -> str:
-        """Convert a URL to a form suitable for bare display."""
-
-        readable_url = url.replace("https://", "")
-        readable_url = readable_url.replace("http://", "")
-        readable_url = readable_url.split("#", 1)[0]
-        return readable_url
-
-    @staticmethod
-    def url_domain(url: typing.Optional[str]) -> typing.Optional[str]:
-        """Parse the domain from a URL."""
-
-        if not url:
-            return None
-
-        return urlparse(url).hostname

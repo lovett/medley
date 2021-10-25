@@ -82,9 +82,9 @@
             </div>
             {% if url %}
                 <div>
-                    <a href="{{ url|anonymize }}" target="_blank">
+                    <a href="{{ url.anonymized }}" target="_blank">
                         <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                        {{ url_domain }}
+                        {{ url.readable_name }}
                     </a>
                 </div>
             {% endif %}

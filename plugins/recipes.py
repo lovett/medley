@@ -6,6 +6,7 @@ import typing
 import cherrypy
 from plugins import mixins
 from plugins import decorators
+from resources.url import Url
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -368,12 +369,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         title = kwargs.get("title")
         body = kwargs.get("body")
-        url = kwargs.get("url")
+        url = Url(kwargs.get("url", ""))
         last_made = kwargs.get("last_made")
         created = kwargs.get("created")
         tags = kwargs.get("tags", [])
         attachments = kwargs.get("attachments", [])
-        domain = cherrypy.engine.publish("url:domain", url).pop()
 
         queries: typing.List[typing.Tuple[str, typing.Tuple]] = []
 
@@ -393,7 +393,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url=excluded.url,
             created=excluded.created,
             last_made=excluded.last_made""",
-            (recipe_id, title, body, domain, url, created, last_made)
+            (recipe_id, title, body,
+             url.domain, url.address,
+             created, last_made)
         ))
 
         if recipe_id:

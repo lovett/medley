@@ -34,7 +34,7 @@ class TestUrl(Subscriber):
         publish_mock.side_effect = side_effect
 
         result = self.plugin.internal_url("/hello/world")
-        self.assertEqual(result, "http://example.com/hello/world")
+        self.assertEqual(result, "http://example.com/hello/world/")
 
     @patch("cherrypy.engine.publish")
     def test_port_preserved(self, publish_mock: Mock) -> None:
@@ -49,7 +49,7 @@ class TestUrl(Subscriber):
         publish_mock.side_effect = side_effect
 
         result = self.plugin.internal_url("/hello/world")
-        self.assertEqual(result, "http://example.com:12345/hello/world")
+        self.assertEqual(result, "http://example.com:12345/hello/world/")
 
     @patch("cherrypy.engine.publish")
     def test_no_local_url(self, publish_mock: Mock) -> None:
@@ -65,7 +65,7 @@ class TestUrl(Subscriber):
 
         cherrypy.request.base = "http://127.0.0.1/test"
         result = self.plugin.internal_url("/local/url")
-        self.assertEqual(result, "http://example.com/local/url")
+        self.assertEqual(result, "http://example.com/local/url/")
 
 
 if __name__ == "__main__":
