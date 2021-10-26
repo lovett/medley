@@ -176,4 +176,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def url(value: bytes) -> Url:
         """Convert a URL string to a URL resource."""
 
-        return Url(value.decode("utf-8"))
+        return Url(value.decode("utf-8") or "")

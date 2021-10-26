@@ -1,27 +1,23 @@
 """Data class for URLs."""
 
-import dataclasses
+from dataclasses import dataclass, field
 from urllib.parse import urlparse
-from typing import Optional
 
 
-@dataclasses.dataclass()
+@dataclass()
 class Url():
     """Assorted representations of a URL."""
 
-    address: Optional[str] = None
-    id: Optional[int] = None
-    readable_name: str = dataclasses.field(init=False)
-    alt: str = dataclasses.field(init=False)
-    anonymized: str = dataclasses.field(init=False)
-    domain: str = dataclasses.field(init=False)
-    display_domain: str = dataclasses.field(init=False)
-    path: str = dataclasses.field(init=False)
+    address: str
+    id: int = 0
+    path: str = field(init=False, default="")
+    readable_name: str = field(init=False, default="")
+    alt: str = field(init=False, default="")
+    anonymized: str = field(init=False, default="")
+    domain: str = field(init=False, default="")
+    display_domain: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
-        if not self.address:
-            return
-
         self.address = self.address.lower()
 
         parsed_url = urlparse(self.address)
@@ -32,7 +28,11 @@ class Url():
         if parsed_url.scheme in ("http", "https"):
             self.anonymized = f"/redirect/?u={self.address}"
 
-        self.domain = parsed_url.hostname or ""
+        if parsed_url.hostname:
+            self.domain = parsed_url.hostname
+
+        if self.domain.startswith("www."):
+            self.domain = self.domain[4:]
 
         self.path = parsed_url.path
 
@@ -42,4 +42,4 @@ class Url():
             self.display_domain = "/".join(path_parts[0:3])
 
     def __repr__(self) -> str:
-        return self.address or ""
+        return self.address
