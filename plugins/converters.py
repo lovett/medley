@@ -7,6 +7,7 @@ import typing
 import urllib.parse
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
+from resources.url import Url
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -30,6 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
         register_converter("comma_delimited", self.comma_delimited)
+        register_converter("url", self.url)
 
     @staticmethod
     def local_datetime(value: bytes) -> datetime:
@@ -169,3 +171,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Parse a value stored as JSON."""
 
         return json.loads(value.decode("utf-8"))
+
+    @staticmethod
+    def url(value: bytes) -> Url:
+        """Convert a URL string to a URL resource."""
+
+        return Url(value.decode("utf-8"))

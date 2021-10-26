@@ -524,8 +524,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["bookmarks:domaincount"],
-        domain: str,
-        path: str = "",
+        url: Url,
 ) -> List[int]: ...
 
 

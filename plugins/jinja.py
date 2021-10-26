@@ -62,7 +62,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["better_html"] = self.better_html_filter
         self.env.filters["is_today"] = self.is_today
         self.env.filters["is_yesterday"] = self.is_yesterday
-        self.env.filters["display_domain"] = self.display_domain_filter
         self.env.filters["retarget_html"] = self.retarget_html_filter
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -622,18 +621,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 yesterday
             ).pop()
         )
-
-    @staticmethod
-    def display_domain_filter(value: str) -> str:
-        """Apply URL encoding to a value."""
-
-        parsed_url = urlparse(value)
-
-        if "reddit" in value:
-            path_parts = parsed_url.path.split("/", 3)
-            return "/".join(path_parts[0:3])
-
-        return parsed_url.netloc.lstrip("www.")
 
     @staticmethod
     def retarget_html_filter(value: str) -> str:

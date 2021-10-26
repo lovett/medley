@@ -119,7 +119,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> typing.Optional[sqlite3.Row]:
         """Locate a bookmark by ID or URL."""
 
-        sql = """SELECT rowid, url, domain, title,
+        sql = """SELECT rowid, url as 'url [url]', title,
             added as 'added [local_datetime]',
             updated as 'updated [local_datetime]',
             deleted as 'deleted [local_datetime]',
@@ -257,20 +257,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "bookmarks:add:fulltext"
         )
 
-    def domain_count(self, domain: str, path: str = "") -> int:
+    def domain_count(self, url: Url) -> int:
         """Count the number of bookmarks for a given domain."""
 
         sql = """SELECT count(*) FROM bookmarks WHERE domain=?"""
-        placeholders = [domain]
 
-        if path:
-            sql += "AND URL like ?"
-            placeholders.append(f"%{path}%")
+        if "reddit.com" not in url.domain:
+            count = self._selectFirst(sql, (url.domain,))
+        else:
+            sql += " AND url LIKE ?"
+            count = self._selectFirst(
+                sql,
+                (url.domain, f"%{url.display_domain}%")
+            )
 
-        return typing.cast(
-            int,
-            self._selectFirst(sql, placeholders)
-        )
+        return int(count)
 
     @decorators.log_runtime
     def remove(self, uid: int) -> int:
@@ -363,7 +364,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             placeholder_values += (query,)
 
-        sql = f"""SELECT b.rowid, b.url, b.domain, b.title,
+        sql = f"""SELECT b.rowid, b.url as 'url [url]', b.title,
         b.comments, b.tags as 'tags [comma_delimited]',
         added as 'added [local_datetime]',
         updated as 'updated [local_datetime]'
@@ -391,7 +392,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ]:
         """Get a newest-first list of recently bookmarked URLs."""
 
-        sql = """SELECT rowid, url, domain, title,
+        sql = """SELECT rowid, url as 'url [url]', domain, title,
         added as 'added [timestamp]',
         updated as 'updated [timestamp]',
         retrieved 'retrieved [timestamp]',
@@ -483,12 +484,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Correct wrong or missing values."""
 
         rows_without_domain = self._select_generator(
-            "SELECT rowid, url FROM bookmarks WHERE domain IS NULL"
+            """SELECT rowid, url as 'url [url]'
+            FROM bookmarks
+            WHERE domain IS NULL"""
         )
 
         for row in rows_without_domain:
-            url = Url(row["url"], row["rowid"])
             self._execute(
                 "UPDATE bookmarks SET domain=? WHERE rowid=?",
-                (url.domain, url.id)
+                (row["url"].domain, row["id"])
             )
