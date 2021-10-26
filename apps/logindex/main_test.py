@@ -44,7 +44,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """An error should be thrown if the start date cannot be parsed"""
         def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
-            print(args)
             if args[0] == "clock:from_format":
                 return [None]
             return mock.DEFAULT
@@ -64,7 +63,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_kwargs: str) -> typing.Any:
             """Side effects local function"""
-            print(args)
             if args[0] == "clock:from_format":
                 if args[1] == "2000-01-01":
                     return [
@@ -146,9 +144,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         start = datetime(2017, 1, 1, 0, 0, tzinfo=pytz.timezone("UTC"))
 
         mock_call = mock.call("logindex:enqueue", start, start)
-
-        print(enqueue_call)
-        print(mock_call)
 
         self.assertEqual(
             enqueue_call,

@@ -146,7 +146,6 @@ class Controller:
                 "url:internal",
                 view_path
             ).pop()
-            print("view url", url)
 
             cherrypy.engine.publish(
                 "memorize:clear",
@@ -157,7 +156,6 @@ class Controller:
                 "url:internal",
                 edit_path
             ).pop()
-            print("edit url", url)
 
             cherrypy.engine.publish(
                 "memorize:clear",

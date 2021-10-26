@@ -79,7 +79,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         """A valid number lookup performs a state abbreviation lookup"""
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            print(args)
             value_map = {
                 "cache:get": [None],
                 "geography:state_by_area_code": [

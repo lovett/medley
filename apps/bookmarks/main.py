@@ -80,8 +80,6 @@ class Controller:
             cache_lifespan=86400
         ).pop() or {}
 
-        print(response)
-
         snapshots = response.get("archived_snapshots", {})
         closest_snapshot = snapshots.get("closest", {})
         return json.dumps(closest_snapshot).encode()
