@@ -157,9 +157,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             params = params + (value,)
 
         if sort_by_value:
-            sql += "ORDER BY value "
+            sql += "ORDER BY value COLLATE NOCASE "
         else:
-            sql += "ORDER BY key "
+            sql += "ORDER BY key COLLATE NOCASE "
 
         if limit > 0:
             sql += f" LIMIT {limit}"
@@ -334,7 +334,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         SELECT DISTINCT rtrim(val, ':') AS val
         FROM cte
         WHERE depth=?
-        ORDER BY val
+        ORDER BY val COLLATE NOCASE
         """
 
         result = self._select(sql, [depth])

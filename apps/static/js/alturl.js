@@ -7,7 +7,7 @@ MEDLEY.alturl = (function () {
 
         let payload = new FormData();
         payload.set('key', 'alturl:bookmark');
-        payload.set('value', url);
+        payload.set('value', url.toLowerCase());
         payload.set('skip_redirect', true);
 
         const response = await fetch('/registry', {
