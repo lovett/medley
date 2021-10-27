@@ -37,6 +37,9 @@ class Url():
 
         self.path = parsed_url.path
 
+        if not self.text:
+            self.text = self.address
+
         self.display_domain = self.domain
         if "reddit.com" in self.domain:
             path_parts = self.path.split("/", 3)

@@ -10,13 +10,13 @@ import sqlite3
 import typing
 import urllib
 from datetime import datetime, timedelta
-from urllib.parse import urlparse
 import json
 import re
 import cherrypy
 import jinja2
 import markupsafe
 import plugins.jinja_cache
+from resources.url import Url
 
 
 # pylint: disable=too-many-public-methods
@@ -41,7 +41,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
         self.env.filters["pluralize"] = self.pluralize_filter
-        self.env.filters["anonymize"] = self.anonymize_filter
         self.env.filters["urlencode"] = self.urlencode_filter
         self.env.filters["yearmonth"] = self.yearmonth_filter
         self.env.filters["json"] = self.json_filter
@@ -206,31 +205,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return f"{count:{number_format}} {value}{suffix}"
 
     @staticmethod
-    @jinja2.pass_context
-    def anonymize_filter(
-            _: typing.Any,
-            url: str
-    ) -> str:
-        """Prepend an HTTP URL with the URL of the redirect app increase
-        referrer privacy.
-
-        """
-
-        parsed_url = urlparse(url)
-
-        if parsed_url.scheme not in ("http", "https"):
-            return url
-
-        return typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "url:internal",
-                "/redirect",
-                {"u": url}
-            ).pop()
-        )
-
-    @staticmethod
     def urlencode_filter(value: str) -> str:
         """Apply URL encoding to a value."""
 
@@ -272,9 +246,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Pretty-print a JSON value."""
         return json.dumps(value, sort_keys=True, indent=2)
 
+    @staticmethod
     @jinja2.pass_context
     def websearch_filter(
-            self,
             context: jinja2.runtime.Context,
             value: str,
             engine: str = "",
@@ -285,26 +259,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         escaped_value = html.escape(value)
 
         if engine == "google":
-            url = f"https://www.google.com/search?q={escaped_value}"
+            url = Url(
+                f"https://www.google.com/search?q={escaped_value}",
+                0, label or "Google")
 
         if engine == "bing":
-            url = f"https://www.bing.com/search?q={escaped_value}"
+            url = Url(
+                f"https://www.bing.com/search?q={escaped_value}",
+                0, label or "Bing")
 
         if not url:
             raise jinja2.TemplateError("Unrecognized search engine")
-
-        url = self.anonymize_filter(context, url)
 
         icon = """<svg class="icon icon-globe">
         <use xlink:href="#icon-globe"></use>
         </svg>"""
 
-        if not label:
-            label = engine.capitalize()
-
-        result = f"""<a href="{url}"
+        result = f"""<a href="{url.address}"
         target="_blank" rel="noopener noreferer"
-        >{icon} {label}</a>"""
+        >{icon} {url.text}</a>"""
 
         if context.eval_ctx.autoescape:
             return markupsafe.Markup(result)
@@ -458,8 +431,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return value
 
+    @staticmethod
     def autolink_filter(
-            self,
             value: typing.Optional[str]
     ) -> str:
         """Convert a bare URL to a hyperlink"""
@@ -470,9 +443,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         links = re.findall("http[^ ]+", value)
 
         for link in links:
-            anonymized_link = self.anonymize_filter(None, link)
-            anchor = f"""<a href="{anonymized_link}"
-            target="_blank" rel="noreferrer"'>{link}</a>
+            url = Url(link)
+            anchor = f"""<a href="{url.anonymized}"
+            target="_blank" rel="noreferrer"'>{url.text}</a>
             """
 
             value = value.replace(link, anchor)
