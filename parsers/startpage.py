@@ -7,9 +7,9 @@ used as keys.
 """
 
 import typing
-from urllib.parse import quote, urlparse
 import configparser
 import re
+from resources.url import Url
 
 
 class Parser():
@@ -34,17 +34,17 @@ class Parser():
 
         """
 
-        parsed_url = urlparse(option)
+        url = Url(self.postprocess(option))
 
         # Skip non-http URLs.
-        if parsed_url.scheme not in ('http', 'https'):
-            return self.postprocess(option)
+        if not url.is_http():
+            return url.address
 
         # Skip URLs in local domains.
         if ([d for d in self.local_domains if d in option]):
-            return self.postprocess(option)
+            return url.address
 
-        return self.anonymizer + quote(self.postprocess(option))
+        return self.anonymizer + url.escaped_address
 
     @staticmethod
     def preprocess(text: str) -> str:

@@ -171,10 +171,7 @@ class Controller:
             "startpage:local",
         ).pop()
 
-        anonymizer_url = cherrypy.engine.publish(
-            "url:internal",
-            "/redirect/?u="
-        ).pop()
+        anonymizer_url = "/redirect?u="
 
         parser = Parser(anonymizer_url, local_domains)
 

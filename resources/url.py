@@ -1,7 +1,7 @@
 """Data class for URLs."""
 
 from dataclasses import dataclass, field
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 
 @dataclass()
@@ -17,6 +17,7 @@ class Url():
     anonymized: str = field(init=False, default="")
     domain: str = field(init=False, default="")
     display_domain: str = field(init=False, default="")
+    escaped_address: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
         self.address = self.address.lower()
@@ -44,6 +45,12 @@ class Url():
         if "reddit.com" in self.domain:
             path_parts = self.path.split("/", 3)
             self.display_domain = "/".join(path_parts[0:3])
+
+        self.escaped_address = quote(self.address)
+
+    def is_http(self) -> bool:
+        """Whether the URL uses an HTTP protocol."""
+        return self.address.startswith("http")
 
     def __repr__(self) -> str:
         return self.address
