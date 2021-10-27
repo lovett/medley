@@ -27,7 +27,7 @@
                         {% if story.num_comments == 0 and not story.selftext %}
                             {{ story.title|safe|truncate(100) }}
                         {% else %}
-                            <a href="{{ app_url }}/reddit.com{{ story.permalink|lower }}">
+                            <a href="{{ story.permalink.alt }}">
                                 {{ story.title|safe|truncate(100) }}
                             </a>
                         {% endif %}

@@ -83,6 +83,8 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
 
         story["url"] = Url(story["url"])
 
+        story["permalink"] = Url(f"reddit.com{story['permalink']}")
+
         story["subreddit"] = Url(
             f"https://reddit.com/r/{story['subreddit']}",
             f"/r/{story['subreddit']}".lower()
