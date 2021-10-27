@@ -85,7 +85,6 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
 
         story["subreddit"] = Url(
             f"https://reddit.com/r/{story['subreddit']}",
-            0,
             f"/r/{story['subreddit']}".lower()
         )
         stories.append(story)

@@ -46,7 +46,7 @@ class Controller:
                 raise cherrypy.HTTPError(503)
 
             headlines[category] = [
-                Url(article["url"], 0, article["title"])
+                Url(article["url"], article["title"])
                 for article in response["articles"]
             ]
 

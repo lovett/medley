@@ -261,12 +261,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if engine == "google":
             url = Url(
                 f"https://www.google.com/search?q={escaped_value}",
-                0, label or "Google")
+                label or "Google"
+            )
 
         if engine == "bing":
             url = Url(
                 f"https://www.bing.com/search?q={escaped_value}",
-                0, label or "Bing")
+                label or "Bing"
+            )
 
         if not url:
             raise jinja2.TemplateError("Unrecognized search engine")

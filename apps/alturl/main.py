@@ -33,7 +33,7 @@ class Controller:
         ).pop()
 
         bookmarks = [
-            Url(row["value"], row["rowid"])
+            Url(row["value"], "", row["rowid"])
             for row in registry_rows
         ]
 

@@ -58,7 +58,6 @@ class Controller:
                 bounces = [
                     Url(
                         url.replace(base_url, row["value"]),
-                        0,
                         row["key"].split(":").pop()
                     )
                     for row in rows

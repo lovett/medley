@@ -9,8 +9,8 @@ class Url():
     """Assorted representations of a URL."""
 
     address: str
-    id: int = 0
     text: str = ""
+    id: int = 0
     path: str = field(init=False, default="")
     readable_name: str = field(init=False, default="")
     alt: str = field(init=False, default="")
