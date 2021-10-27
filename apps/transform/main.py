@@ -5,6 +5,7 @@ import json
 import urllib.parse
 import re
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -59,6 +60,10 @@ class Controller:
 
         result = transformer(value.strip())
 
+        result_url = None
+        if result.startswith("http"):
+            result_url = Url(result)
+
         if cherrypy.request.wants == "json":
             return json.dumps({"result": result}).encode()
 
@@ -69,6 +74,7 @@ class Controller:
             "jinja:render",
             "apps/transform/transform.jinja.html",
             result=result,
+            result_url=result_url,
             current_transform=transform,
             transforms=self.list_of_transforms(),
             value=value

@@ -10,6 +10,7 @@ class Url():
 
     address: str
     id: int = 0
+    text: str = ""
     path: str = field(init=False, default="")
     readable_name: str = field(init=False, default="")
     alt: str = field(init=False, default="")

@@ -58,7 +58,7 @@
             {{ story.author }}
         </a>
 
-        <a class="info" target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">
+        <a class="info" target="_blank" rel="noopeneer noreferrer" href="{{ story.url.anonymized }}">
             <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
             {% if "self." not in story.domain %}
                 {{ story.domain }}

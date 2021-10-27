@@ -1,6 +1,7 @@
 """News headlines via News API"""
 
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -44,7 +45,10 @@ class Controller:
             if not response:
                 raise cherrypy.HTTPError(503)
 
-            headlines[category] = response["articles"]
+            headlines[category] = [
+                Url(article["url"], 0, article["title"])
+                for article in response["articles"]
+            ]
 
         cache_control = f"private, max-age={cache_lifespan}"
         cherrypy.response.headers["Cache-Control"] = cache_control
@@ -55,4 +59,5 @@ class Controller:
             headlines=headlines,
             walk_start=walk_start,
             walk_stop=walk_stop,
+            bing=Url("https://www.bing.com")
         ).pop()

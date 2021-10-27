@@ -8,6 +8,8 @@ import typing
 from urllib.parse import urlparse
 import cherrypy
 import mistletoe
+from resources.url import Url
+
 ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 
 
@@ -72,11 +74,20 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
             continue
 
         story = child.get("data")
+
         story["created"] = cherrypy.engine.publish(
             "clock:from_timestamp",
             story["created_utc"],
             local=True
         ).pop()
+
+        story["url"] = Url(story["url"])
+
+        story["subreddit"] = Url(
+            f"https://reddit.com/r/{story['subreddit']}",
+            0,
+            f"/r/{story['subreddit']}".lower()
+        )
         stories.append(story)
 
     def story_sorter(story: typing.Dict[str, typing.Any]) -> float:
@@ -129,6 +140,8 @@ def view_story(response: typing.Any) -> ViewAndData:
 
     if not story.get("url", "").startswith("http"):
         story["url"] = "https://reddit.com" + story["url"]
+
+    story["url"] = Url(story["url"])
 
     comments = (
         child.get("data", {})

@@ -11,7 +11,7 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a href="{{ 'https://www.bing.com'|anonymize }}" rel="noreferrer">
+        <a href="{{ bing.anonymized }}" rel="noreferrer">
             <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
             Bing.com
         </a>
@@ -42,10 +42,10 @@
                             {% set ns.loop_count = ns.loop_count + 1 %}
                             <li>
                                 <a class="title"
-                                   href="{{ article["url"]|anonymize }}"
+                                   href="{{ article.anonymized }}"
                                    rel="noreferrer"
-                                   data-search-href="https://www.bing.com/search/?q={{ article["title"]|urlencode }}"
-                                >{{ article["title"] }}</a>
+                                   data-search-href="{{ bing }}/search/?q={{ article.text|urlencode }}"
+                                >{{ article.text }}</a>
                             </li>
                         {% endfor %}
                     </ol>

@@ -3,6 +3,7 @@
 import typing
 from urllib.parse import urlparse
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -31,7 +32,7 @@ class Controller:
         site_name = ""
         registry_url = ""
 
-        bounces: typing.List[typing.Tuple[str, str]] = []
+        bounces: typing.List[Url] = []
 
         if url:
             base_url = self.url_to_base(url)
@@ -55,8 +56,11 @@ class Controller:
 
             if rows:
                 bounces = [
-                    (url.replace(base_url, row["value"]),
-                     row["key"].split(":").pop())
+                    Url(
+                        url.replace(base_url, row["value"]),
+                        0,
+                        row["key"].split(":").pop()
+                    )
                     for row in rows
                 ]
 
@@ -66,7 +70,7 @@ class Controller:
                 {"q": f"bounce:{group}"}
             ).pop()
 
-        if not any(url in bounce[0] for bounce in bounces):
+        if not any(url in bounce.address for bounce in bounces):
             bounces = []
 
         response: bytes = cherrypy.engine.publish(

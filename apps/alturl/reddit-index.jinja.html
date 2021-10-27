@@ -50,8 +50,8 @@
                     {% if "r/" not in url %}
                         <span class="info">
                             <svg class="icon"><use xlink:href="#icon-link"></use></svg>
-                            <a href="{{ app_url }}/reddit.com/r/{{ story.subreddit|lower }}">
-                                r/{{ story.subreddit|lower }}
+                            <a href="{{ story.subreddit.alt }}">
+                                {{ story.subreddit.text }}
                             </a>
                         </span>
                     {% endif %}
@@ -60,7 +60,7 @@
                     {% if "self." not in story.domain %}
                         <span class="info">
                             <svg class="icon"><use xlink:href="#icon-link"></use></svg>
-                            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url|anonymize }}">{{ story.domain }}</a>
+                            <a target="_blank" rel="noopeneer noreferrer" href="{{ story.url.anonymized }}">{{ story.domain }}</a>
                         </span>
                     {% endif %}
 

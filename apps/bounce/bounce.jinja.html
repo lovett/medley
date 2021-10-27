@@ -55,14 +55,14 @@
         {% endif %}
 
         {% if bounces %}
-            {% for url, name in bounces %}
+            {% for url in bounces %}
                 <p class="destination">
                     <a class="numeric-shortcut"
                        data-numeric-shortcut="{{ loop.index }}"
-                       href="{{ url|anonymize }}"
+                       href="{{ url.anonymized }}"
                     >
                         <span>{{ loop.index }}</span>
-                        {{ name }} @  {{ url|truncate(100) }}
+                        {{ url.text }} @  {{ url.address|truncate(100) }}
                     </a>
                 </p>
             {% endfor %}

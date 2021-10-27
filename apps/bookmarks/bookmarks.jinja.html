@@ -94,7 +94,7 @@
                 {% for bookmark in bookmarks %}
                     <li>
                         <div class="bookmark">
-                            <a class="title" href="{{ bookmark.url.address|anonymize }}" rel="noreferrer" target="_blank">
+                            <a class="title" href="{{ bookmark.url.anonymized }}" rel="noreferrer" target="_blank">
                                 {{ bookmark.title }}
                             </a>
 

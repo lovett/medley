@@ -48,11 +48,11 @@
                         {{ macros.clipboardButton("copy-target", "Copy value") }}
                     </div>
 
-                    {% if result.startswith("http") %}
+                    {% if result_url %}
                         <div>
                             <div class="action-button link-button">
 
-                                <a href="{{ result|anonymize}}" rel="noopener noreferrer">
+                                <a href="{{ result_url.anonymized}}" rel="noopener noreferrer">
                                     <svg class="icon"><use xlink:href="#icon-link"></use></svg>
                                 </a>
                                 <span class="label">Link</span>

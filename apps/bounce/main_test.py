@@ -159,22 +159,22 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         bounces = helpers.template_var(publish_mock, "bounces")
 
         self.assertEqual(
-            bounces[0][0],
+            bounces[0].address,
             "http://stage.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounces[0][1],
+            bounces[0].text,
             "stage"
         )
 
         self.assertEqual(
-            bounces[1][0],
+            bounces[1].address,
             "http://othersite.example.com/with/subpath"
         )
 
         self.assertEqual(
-            bounces[1][1],
+            bounces[1].text,
             "othersite"
         )
 
