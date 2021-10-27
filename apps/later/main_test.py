@@ -99,7 +99,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
-            if args[0] == "bookmarks:find":
+            if args[0] == "bookmarks:find:url":
                 return [{
                     "title": "existing title",
                     "tags": None,
@@ -132,7 +132,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
-            if args[0] == "bookmarks:find":
+            if args[0] == "bookmarks:find:url":
                 return [{
                     "title": "existing title",
                     "tags": None,

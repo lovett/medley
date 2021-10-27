@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 import cherrypy
 import plugins.markup
 from testing.assertions import Subscriber
+from resources.url import Url
 
 
 class TestMarkup(Subscriber):
@@ -38,7 +39,7 @@ class TestMarkup(Subscriber):
         initial = '<div class="reply">hello <em>world</em></div>'
         result = self.plugin.plain_text(
             initial,
-            "http://news.ycombinator.com/"
+            Url("http://news.ycombinator.com/")
         )
         self.assertEqual(result, "")
 

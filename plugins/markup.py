@@ -1,9 +1,9 @@
 """Tools for working with text containing HTML markup."""
 
-from urllib.parse import urlparse
 import typing
 import cherrypy
 import parsers.htmltext
+from resources.url import Url
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -38,24 +38,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return self.reduce_title(reduced_title)
 
     @staticmethod
-    def plain_text(html: str = None, url: str = None) -> str:
+    def plain_text(html: str = None, url: Url = Url("")) -> str:
         """Remove markup and entities from a string"""
 
         if not html:
             return ""
 
-        domain = None
-        if url:
-            parsed_url = urlparse(
-                url,
-                scheme='http',
-                allow_fragments=False
-            )
-            domain = parsed_url.netloc.lower()
-
         parser = parsers.htmltext.Parser()
 
-        if domain == "news.ycombinator.com":
+        if url.domain == "news.ycombinator.com":
             blacklist = (
                 "span.pagetop",
                 "span.yclinks",

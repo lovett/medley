@@ -537,9 +537,15 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["bookmarks:find"],
-        uid: str = "",
-        url: Optional[Url] = None,
+        channel: Literal["bookmarks:find:id"],
+        uid: int
+) -> List[Optional[Row]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["bookmarks:find:url"],
+        url: Url
 ) -> List[Optional[Row]]: ...
 
 
@@ -801,7 +807,7 @@ def publish(
 def publish(
         channel: Literal["markup:plaintext"],
         html: str = "",
-        url: str = "",
+        url: Url = Url(""),
 ) -> List[str]: ...
 
 

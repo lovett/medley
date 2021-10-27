@@ -20,7 +20,7 @@ class Url():
     escaped_address: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
-        self.address = self.address.lower()
+        self.address = self.address.lower().strip()
 
         parsed_url = urlparse(self.address)
         self.readable_name = f"{parsed_url.netloc}{parsed_url.path}"
@@ -54,3 +54,6 @@ class Url():
 
     def __repr__(self) -> str:
         return self.address
+
+    def __bool__(self) -> bool:
+        return self.address != ""

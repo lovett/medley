@@ -58,12 +58,12 @@
                     type="text"
                     id="url"
                     name="url"
-                    data-original-value="{{url|default('', true)}}"
-                    value="{{ url|default('', true)|e }}"
+                    data-original-value="{{url.address}}"
+                    value="{{ url.address|e }}"
                     required
                 />
 
-                <div class="shortcuts" {% if not url %}hidden{% endif %}>
+                <div class="shortcuts" {% if not url.address %}hidden{% endif %}>
                     <a href="#" data-field="url" data-shortcut="url-remove-path">Remove path</a>
                     <a href="#" data-field="url" data-shortcut="url-remove-query">Remove querystring</a>
                     <a href="#" data-field="url" data-shortcut="url-remove-hash">Remove hash</a>

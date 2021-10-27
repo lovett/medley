@@ -17,18 +17,15 @@ class Controller:
         """Display a form for for bookmarking a URL"""
 
         error = None
-        url = kwargs.get("url", "")
-        title = kwargs.get("title", "")
-        tags = kwargs.get("tags", "")
-        comments = kwargs.get("comments", "")
-
-        if url:
-            url = url.strip()
+        url = Url(kwargs.get("url", ""))
+        title = kwargs.get("title", "").strip()
+        tags = kwargs.get("tags", "").strip()
+        comments = kwargs.get("comments", "").strip()
 
         if title:
             title = cherrypy.engine.publish(
                 "markup:plaintext",
-                title.strip(),
+                title,
                 url
             ).pop()
 
@@ -40,18 +37,19 @@ class Controller:
         if tags:
             tags = cherrypy.engine.publish(
                 "markup:plaintext",
-                tags.strip()
+                tags
             ).pop()
 
-        # Discard comment if it came from a meta description tag on Reddit,
-        # since it isn't specific to the URL being bookmarked.
-        if comments and comments.startswith("r/") and "reddit.com" in url:
-            comments = ""
+        # Meta description tags on Reddit aren't specific to the URL
+        # being bookmarked.
+        if "reddit.com" in url.domain:
+            if comments.startswith("r/"):
+                comments = ""
 
         if comments:
             comments = cherrypy.engine.publish(
                 "markup:plaintext",
-                comments.strip()
+                comments
             ).pop()
             comments = re.sub(r"\s+", " ", comments).strip()
             comments = re.sub(r",(\w)", ", \\1", comments)
@@ -66,8 +64,8 @@ class Controller:
         bookmark = None
         if url:
             bookmark = cherrypy.engine.publish(
-                "bookmarks:find",
-                url=Url(url)
+                "bookmarks:find:url",
+                url
             ).pop()
 
         if bookmark:

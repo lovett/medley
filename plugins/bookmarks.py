@@ -101,7 +101,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.setup)
-        self.bus.subscribe("bookmarks:find", self.find)
+        self.bus.subscribe("bookmarks:find:id", self.find_id)
+        self.bus.subscribe("bookmarks:find:url", self.find_url)
         self.bus.subscribe("bookmarks:add", self.add)
         self.bus.subscribe("bookmarks:add:fulltext", self.add_full_text)
         self.bus.subscribe("bookmarks:domaincount", self.domain_count)
@@ -112,29 +113,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
 
-    def find(
-            self,
-            uid: int = 0,
-            url: Url = None
-    ) -> typing.Optional[sqlite3.Row]:
-        """Locate a bookmark by ID or URL."""
+    def find_id(self, uid: int) -> typing.Optional[sqlite3.Row]:
+        """Locate a bookmark by ID."""
 
         sql = """SELECT rowid, url as 'url [url]', title,
             added as 'added [local_datetime]',
             updated as 'updated [local_datetime]',
             deleted as 'deleted [local_datetime]',
             tags, comments
-            FROM bookmarks"""
+            FROM bookmarks
+            WHERE rowid=?"""
+        return self._selectOne(sql, (uid,))
 
-        if uid:
-            sql += " WHERE rowid=?"
-            return self._selectOne(sql, (uid,))
+    def find_url(self, url: Url) -> typing.Optional[sqlite3.Row]:
+        """Locate a bookmark by URL."""
 
-        if url:
-            sql += " WHERE domain=? AND url=?"
-            return self._selectOne(sql, (url.domain, url.address))
-
-        return None
+        sql = """SELECT rowid, url as 'url [url]', title,
+            added as 'added [local_datetime]',
+            updated as 'updated [local_datetime]',
+            deleted as 'deleted [local_datetime]',
+            tags, comments
+            FROM bookmarks
+            WHERE domain=? AND url=?"""
+        return self._selectOne(sql, (url.domain, url.address))
 
     @decorators.log_runtime
     def add(self,
@@ -145,7 +146,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             added: str = None) -> bool:
         """Store a bookmarked URL and its metadata."""
 
-        bookmark = self.find(url=url)
+        bookmark = self.find_url(url)
 
         if bookmark:
             self._execute(
@@ -220,7 +221,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         This is only used for searching.
         """
 
-        url = self._selectFirst("""SELECT url
+        url = self._selectFirst("""
+        SELECT url as 'url [url]'
         FROM bookmarks
         WHERE retrieved IS NULL
         LIMIT 1""")
@@ -230,7 +232,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         html = cherrypy.engine.publish(
             "urlfetch:get",
-            url
+            url.address
         ).pop()
 
         text = cherrypy.engine.publish(
@@ -243,7 +245,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """UPDATE bookmarks
             SET fulltext=?, retrieved=CURRENT_TIMESTAMP
             WHERE url=?""",
-            (text, url)
+            (text, url.address)
         )
 
         cherrypy.engine.publish(
@@ -277,7 +279,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def remove(self, uid: int) -> int:
         """Discard a previously bookmarked URL."""
 
-        bookmark = self.find(uid)
+        bookmark = self.find_id(uid)
 
         deletions = 0
 
