@@ -1,6 +1,5 @@
 """API interaction with openweathermap.org."""
 
-import datetime
 import re
 import typing
 from collections import defaultdict
@@ -194,37 +193,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not schedules:
             return True
 
-        today = datetime.date.today()
-        tomorrow = today + datetime.timedelta(1)
-        now = datetime.datetime.now()
-
-        for schedule in schedules:
-            schedule_lines = [
-                line.rstrip()
-                for line in schedule.split("\n")
-            ]
-
-            for time_format in ("%I:%M %p", "%H:%M"):
-                try:
-                    time_range = [
-                        datetime.datetime.strptime(line, time_format)
-                        for line in schedule_lines
-                    ]
-                    break
-                except ValueError:
-                    return True
-
-            start = datetime.datetime.combine(today, time_range[0].time())
-
-            if time_range[1] < time_range[0]:
-                end = datetime.datetime.combine(tomorrow, time_range[1].time())
-            else:
-                end = datetime.datetime.combine(today, time_range[1].time())
-
-            if start <= now <= end:
-                return True
-
-        return False
+        return cherrypy.engine.publish(
+            "clock:scheduled",
+            schedules
+        ).pop()
 
     @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:

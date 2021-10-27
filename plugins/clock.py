@@ -1,7 +1,7 @@
 """Date and time calculations."""
 
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import typing
 import cherrypy
 from pytz import timezone, UTC, UnknownTimeZoneError
@@ -40,6 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:local", self.local)
         self.bus.subscribe("clock:day:remaining", self.day_remaining)
         self.bus.subscribe("clock:utc", self.utc)
+        self.bus.subscribe("clock:scheduled", self.scheduled)
 
     def day_remaining(self, dt: datetime = None) -> int:
         """Calculate how many seconds are left in the day."""
@@ -271,3 +272,39 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return f"{total_seconds} {label}"
 
         return ""
+
+    @staticmethod
+    def scheduled(schedules: typing.List[str]) -> bool:
+        """Whether the current time falls within a set of ranges."""
+
+        today = date.today()
+        tomorrow = today + timedelta(1)
+        now = datetime.now()
+
+        for schedule in schedules:
+            schedule_lines = [
+                line.rstrip()
+                for line in schedule.split("\n")
+            ]
+
+            for time_format in ("%I:%M %p", "%H:%M"):
+                try:
+                    time_range = [
+                        datetime.strptime(line, time_format)
+                        for line in schedule_lines
+                    ]
+                    break
+                except ValueError:
+                    return False
+
+            start = datetime.combine(today, time_range[0].time())
+
+            if time_range[1] < time_range[0]:
+                end = datetime.combine(tomorrow, time_range[1].time())
+            else:
+                end = datetime.combine(today, time_range[1].time())
+
+            if start <= now <= end:
+                return True
+
+        return False

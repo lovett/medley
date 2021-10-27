@@ -5,7 +5,6 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-
 https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech
 """
 
-import datetime
 import re
 import typing
 import cherrypy
@@ -115,37 +114,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not schedules:
             return False
 
-        today = datetime.date.today()
-        tomorrow = today + datetime.timedelta(1)
-        now = datetime.datetime.now()
+        is_scheduled = cherrypy.engine.publish(
+            "clock:scheduled",
+            schedules
+        )
 
-        for schedule in schedules:
-            schedule_lines = [
-                line.rstrip()
-                for line in schedule.split("\n")
-            ]
-
-            for time_format in ("%I:%M %p", "%H:%M"):
-                try:
-                    time_range = [
-                        datetime.datetime.strptime(line, time_format)
-                        for line in schedule_lines
-                    ]
-                    break
-                except ValueError:
-                    return False
-
-            start = datetime.datetime.combine(today, time_range[0].time())
-
-            if time_range[1] < time_range[0]:
-                end = datetime.datetime.combine(tomorrow, time_range[1].time())
-            else:
-                end = datetime.datetime.combine(today, time_range[1].time())
-
-            if start <= now <= end:
-                return True
-
-        return False
+        return not is_scheduled
 
     @staticmethod
     def voices() -> typing.List[typing.Dict[str, str]]:

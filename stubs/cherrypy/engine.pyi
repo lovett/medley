@@ -86,6 +86,13 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["clock:scheduled"],
+        schedules: List[str],
+) -> List[bool]: ...
+
+
+@overload
+def publish(
         channel: Literal["clock:month:start"],
         dt: datetime,
         fmt: Optional[str] = "",
