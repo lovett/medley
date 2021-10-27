@@ -12,7 +12,7 @@ class Url():
     text: str = ""
     id: int = 0
     path: str = field(init=False, default="")
-    readable_name: str = field(init=False, default="")
+    schemeless_address: str = field(init=False, default="")
     alt: str = field(init=False, default="")
     anonymized: str = field(init=False, default="")
     domain: str = field(init=False, default="")
@@ -23,8 +23,8 @@ class Url():
         self.address = self.address.lower().strip()
 
         parsed_url = urlparse(self.address)
-        self.readable_name = f"{parsed_url.netloc}{parsed_url.path}"
-        self.alt = f"/alturl/{self.readable_name}"
+        self.schemeless_address = f"{parsed_url.netloc}{parsed_url.path}"
+        self.alt = f"/alturl/{self.schemeless_address}"
 
         self.anonymized = self.address
         if parsed_url.scheme in ("http", "https"):
@@ -59,4 +59,4 @@ class Url():
         return self.address != ""
 
     def __eq__(self, other: object) -> bool:
-        return self.readable_name == other
+        return self.schemeless_address == other

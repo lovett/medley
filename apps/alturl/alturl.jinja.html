@@ -49,7 +49,7 @@
                             <div class="actions">
                                 {{ macros.deleteButton("/registry/" ~ bookmark.id, "li", "Delete this bookmark") }}
                             </div>
-                            <a href="{{ bookmark.alt }}">{{ bookmark.readable_name }}</a>
+                            <a href="{{ bookmark.alt }}">{{ bookmark.schemeless_address }}</a>
                         </li>
                     {% endfor %}
 
