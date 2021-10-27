@@ -5,7 +5,6 @@ See https://www.reddit.com/dev/api
 
 import re
 import typing
-from urllib.parse import urlparse
 import cherrypy
 import mistletoe
 from resources.url import Url
@@ -13,17 +12,17 @@ from resources.url import Url
 ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
 
 
-def view(url: str) -> ViewAndData:
+def view(url: Url) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     app_url = cherrypy.engine.publish(
         "url:internal",
-        url
+        url.address
     ).pop()
 
     response = cherrypy.engine.publish(
         "urlfetch:get:json",
-        f"https://{url}/.json",
+        f"{url.address}/.json",
         cache_lifespan=900
     ).pop()
 
@@ -39,7 +38,7 @@ def view(url: str) -> ViewAndData:
 
     match = re.search(
         "/r/(?P<subreddit>[^/]+)/?(?P<comments>comments)?",
-        url
+        url.address
     )
 
     if match and match.group("comments"):
@@ -65,7 +64,7 @@ def unavailable() -> ViewAndData:
     })
 
 
-def view_index(url: str, response: typing.Any) -> ViewAndData:
+def view_index(url: Url, response: typing.Any) -> ViewAndData:
     """Render a list of story links."""
 
     stories = []
@@ -99,15 +98,11 @@ def view_index(url: str, response: typing.Any) -> ViewAndData:
         reverse=True
     )
 
-    parsed_url = urlparse(url)
-
-    subreddit = f"{parsed_url.netloc}{parsed_url.path}"
-
     return ("apps/alturl/reddit-index.jinja.html", {
         "stories": stories,
-        "subreddit": subreddit,
+        "subreddit": url.display_domain,
         "url": url,
-        "subview_title": subreddit
+        "subview_title": url.display_domain
     })
 
 

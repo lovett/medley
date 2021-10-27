@@ -1,6 +1,5 @@
 """Web page reformatting"""
 
-from urllib.parse import urlparse
 import cherrypy
 import apps.alturl.reddit
 from resources.url import Url
@@ -22,8 +21,6 @@ class Controller:
     def GET(*args: str, **_kwargs: str) -> bytes:
         """Dispatch to a site-specific handler."""
 
-        target_url = "/".join(args)
-
         _, registry_rows = cherrypy.engine.publish(
             "registry:search",
             "alturl:bookmark",
@@ -37,19 +34,19 @@ class Controller:
             for row in registry_rows
         ]
 
-        if not target_url:
+        if not args:
             return cherrypy.engine.publish(
                 "jinja:render",
                 "apps/alturl/alturl.jinja.html",
                 bookmarks=bookmarks
             ).pop()
 
-        parsed_url = urlparse(f"//{target_url}")
+        url = Url("https://" + "/".join(args))
 
         site_specific_template = ""
-        if parsed_url.netloc.lower().endswith("reddit.com"):
+        if url.domain.endswith("reddit.com"):
             site_specific_template, view_vars = apps.alturl.reddit.view(
-                target_url,
+                url
             )
 
         if not site_specific_template:
@@ -57,14 +54,14 @@ class Controller:
                 "jinja:render",
                 "apps/alturl/alturl.jinja.html",
                 unrecognized=True,
-                url=target_url,
+                url=url,
                 bookmarks=bookmarks
             ).pop()
 
         active_bookmark = next((
             bookmark
             for bookmark in bookmarks
-            if target_url == bookmark.address
+            if url.address == bookmark.address
         ), None)
 
         view_vars["active_bookmark"] = active_bookmark
@@ -79,17 +76,9 @@ class Controller:
     def POST(url: str) -> None:
         """Redirect to a site-specific display view."""
 
-        if "//" not in url:
-            url = f"//{url}"
+        target_url = Url(url)
 
-        parsed_url = urlparse(url)
-
-        redirect_url = cherrypy.engine.publish(
-            "url:internal",
-            parsed_url.netloc + parsed_url.path
-        ).pop()
-
-        raise cherrypy.HTTPRedirect(redirect_url)
+        raise cherrypy.HTTPRedirect(target_url.alt)
 
     @staticmethod
     def on_registry_changed(key: str) -> None:

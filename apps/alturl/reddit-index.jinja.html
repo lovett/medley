@@ -47,7 +47,7 @@
                     </time>
 
                     {# Internally link to the subreddit when not viewing the Reddit homepage. #}
-                    {% if "r/" not in url %}
+                    {% if "r/" not in url.display_domain %}
                         <span class="info">
                             <svg class="icon"><use xlink:href="#icon-link"></use></svg>
                             <a href="{{ story.subreddit.alt }}">
