@@ -57,3 +57,6 @@ class Url():
 
     def __bool__(self) -> bool:
         return self.address != ""
+
+    def __eq__(self, other: object) -> bool:
+        return self.readable_name == other

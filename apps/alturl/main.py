@@ -58,13 +58,11 @@ class Controller:
                 bookmarks=bookmarks
             ).pop()
 
-        active_bookmark = next((
+        view_vars["active_bookmark"] = next((
             bookmark
             for bookmark in bookmarks
-            if url.address == bookmark.address
+            if bookmark == url
         ), None)
-
-        view_vars["active_bookmark"] = active_bookmark
 
         return cherrypy.engine.publish(
             "jinja:render",
