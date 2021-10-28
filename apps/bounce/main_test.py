@@ -40,34 +40,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """The application is displayed in the bounce app."""
         self.assert_show_on_homepage(apps.bounce.main.Controller)
 
-    def test_host_reduction(self) -> None:
-        """An incoming URL is reduced to its host name."""
-
-        candidates = (
-            # Path is ignored.
-            ("https://example.com/with/a/path",
-             "https://example.com"),
-
-            # Querystring and fragment are ignored.
-            ("http://example.com/path?and=querystring#andfragment",
-             "http://example.com"),
-
-            # Port is preserved
-            ("http://example.com:12345",
-             "http://example.com:12345"),
-
-            # Subdomains are preserved
-            ("http://a.b.c.example.com",
-             "http://a.b.c.example.com"),
-
-            # Bare hostname is left intact
-            ("site1.example.com", "site1.example.com")
-        )
-
-        for pair in candidates:
-            result = self.controller.url_to_base(pair[0])
-            self.assertEqual(result, pair[1])
-
     def test_group_reduction(self) -> None:
         """URLs are associated with one another by subtracting known
         keywords from the hostname."""

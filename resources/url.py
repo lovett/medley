@@ -23,6 +23,9 @@ class Url():
     def __post_init__(self) -> None:
         self.address = self.address.lower().strip()
 
+        if "//" not in self.address:
+            self.address = f"http://{self.address}"
+
         parsed_url = urlparse(self.address)
         self.schemeless_address = f"{parsed_url.netloc}{parsed_url.path}"
         self.alt = f"/alturl/{self.schemeless_address}"
