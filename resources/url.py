@@ -18,6 +18,7 @@ class Url():
     domain: str = field(init=False, default="")
     display_domain: str = field(init=False, default="")
     escaped_address: str = field(init=False, default="")
+    base_address: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
         self.address = self.address.lower().strip()
@@ -48,8 +49,10 @@ class Url():
 
         self.escaped_address = quote(self.address)
 
+        self.base_address = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
     def is_http(self) -> bool:
-        """Whether the URL uses an HTTP protocol."""
+        """Whether the URL scheme is either of HTTP or HTTPS."""
         return self.address.startswith("http")
 
     def __repr__(self) -> str:

@@ -1,7 +1,6 @@
 """Redirection between domains"""
 
 import typing
-from urllib.parse import urlparse
 import cherrypy
 from resources.url import Url
 
@@ -24,29 +23,27 @@ class Controller:
     def GET(self, *_args: str, **kwargs: str) -> bytes:
         """Display all the URLs in a group."""
 
-        url = kwargs.get("u", "")
+        url = Url(kwargs.get("u", ""))
         group = kwargs.get("group", "")
         error = kwargs.get("error", "")
 
-        base_url = ""
         site_name = ""
         registry_url = ""
 
         bounces: typing.List[Url] = []
 
         if url:
-            base_url = self.url_to_base(url)
             registry_key = cherrypy.engine.publish(
                 "registry:first:key",
-                value=base_url,
+                value=url.base_address,
                 key_prefix="bounce*"
             ).pop()
 
             try:
                 _, group, site_name = registry_key.split(":")
             except (AttributeError, ValueError):
-                group = self.url_to_group(base_url)
-                site_name = self.url_to_name(base_url)
+                group = self.url_to_group(url.base_address)
+                site_name = self.url_to_name(url.base_address)
 
         if group:
             _, rows = cherrypy.engine.publish(
@@ -57,7 +54,10 @@ class Controller:
             if rows:
                 bounces = [
                     Url(
-                        url.replace(base_url, row["value"]),
+                        url.address.replace(
+                            url.base_address,
+                            row["value"]
+                        ),
                         row["key"].split(":").pop()
                     )
                     for row in rows
@@ -69,14 +69,14 @@ class Controller:
                 {"q": f"bounce:{group}"}
             ).pop()
 
-        if not any(url in bounce.address for bounce in bounces):
+        if url not in bounces:
             bounces = []
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/bounce/bounce.jinja.html",
             url=url,
-            site=base_url,
+            site=url.base_address,
             group=group,
             name=site_name,
             bounces=bounces,
@@ -86,10 +86,11 @@ class Controller:
 
         return response
 
-    def POST(self, url: str, name: str, group: str) -> None:
+    @staticmethod
+    def POST(url: str, name: str, group: str) -> None:
         """Add a new URL to a group."""
 
-        host = self.url_to_base(url)
+        host = Url(url).base_address
 
         group = cherrypy.engine.publish(
             "formatting:string_sanitize",
@@ -179,12 +180,3 @@ class Controller:
             return segments[0]
 
         return "live"
-
-    @staticmethod
-    def url_to_base(url: str = "") -> str:
-        """Reduce a URL to its scheme and hostname."""
-
-        parsed_url = urlparse(url)
-        if not parsed_url.netloc:
-            return url
-        return f"{parsed_url.scheme}://{parsed_url.netloc}"
