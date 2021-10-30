@@ -30,7 +30,7 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         TESTS_TO_RUN="$TESTS_TO_RUN apps.${PATH_PARTS[1]}"
     fi
 
-    if [[ "${PATH_PARTS[0]}" == "parsers" ]] || [[ "${PATH_PARTS[0]}" == "plugins" ]]; then
+    if [[ "${PATH_PARTS[0]}" == "parsers" ]] || [[ "${PATH_PARTS[0]}" == "plugins" ]] || [[ "${PATH_PARTS[0]}" == "resources" ]]; then
         TYPE="${PATH_PARTS[0]}"
         NAME=${PATH_PARTS[1]%.*} # remove file extension
         NAME=${NAME/_test/} # remove test prefix
