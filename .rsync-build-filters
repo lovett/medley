@@ -8,6 +8,7 @@
 + /apps/***
 + /plugins/***
 + /parsers/***
++ /resources/***
 + /tools/***
 + /templates/***
 - /**
