@@ -114,12 +114,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not schedules:
             return False
 
-        is_scheduled = cherrypy.engine.publish(
+        return cherrypy.engine.publish(
             "clock:scheduled",
             schedules
-        )
-
-        return not is_scheduled
+        ).pop()
 
     @staticmethod
     def voices() -> typing.List[typing.Dict[str, str]]:
