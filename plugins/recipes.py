@@ -369,7 +369,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         title = kwargs.get("title")
         body = kwargs.get("body")
-        url = Url(kwargs.get("url", ""))
+
+        url = Url(kwargs.get("url") or "")
         last_made = kwargs.get("last_made")
         created = kwargs.get("created")
         tags = kwargs.get("tags", [])
