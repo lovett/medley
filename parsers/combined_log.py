@@ -2,8 +2,8 @@
 
 from datetime import datetime
 import typing
-from urllib.parse import urlparse
 from pytz import UTC
+from resources.url import Url
 
 OptionalString = typing.Optional[str]
 ConsumeResult = typing.Tuple[OptionalString, str]
@@ -144,11 +144,9 @@ class Parser():
 
         # Referrer
         fields["referrer"], logline = self.consume(logline, " ")
+        fields["referrer_domain"] = None
         if isinstance(fields["referrer"], str):
-            parsed_referrer = urlparse(fields["referrer"])
-
-            if parsed_referrer.netloc:
-                fields["referrer_domain"] = parsed_referrer.netloc
+            fields["referrer_domain"] = Url(fields["referrer"]).domain
 
         # User agent
         fields["agent"], logline = self.consume(logline.lstrip('"'), '"')

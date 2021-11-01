@@ -16,7 +16,7 @@ class TestCombinedLogParser(unittest.TestCase):
         cls.parser = parsers.combined_log.Parser()
 
     def test_parse(self) -> None:
-        """A query with no keywords is ignored."""
+        """All fields of a typical log line are extracted as expected."""
 
         logline = helpers.get_fixture("combined.log")
         fields = self.parser.parse(logline)
@@ -44,6 +44,14 @@ class TestCombinedLogParser(unittest.TestCase):
         self.assertEqual(fields["extras"]["latitude"], "123")
         self.assertEqual(fields["extras"]["longitude"], "456")
         self.assertNotIn("region", fields["extras"].keys())
+
+    def test_noreferrer_parse(self) -> None:
+        """A logline without a referrer is parsed as expected."""
+
+        logline = helpers.get_fixture("combined_noreferrer.log")
+        fields = self.parser.parse(logline)
+        self.assertIsNone(fields["referrer"])
+        self.assertIsNone(fields["referrer_domain"])
 
 
 if __name__ == "__main__":
