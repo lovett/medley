@@ -5,6 +5,7 @@ import re
 import socket
 import urllib.parse
 import cherrypy
+from resources.url import Url
 
 
 class Controller:
@@ -36,12 +37,11 @@ class Controller:
             ip_address = ""
 
         if not ip_address:
-            address_parsed = urllib.parse.urlparse(address_unquoted)
-            address_clean = address_parsed.hostname or address_parsed.path
+            address_parsed = Url(address_unquoted)
 
             try:
                 result = socket.gethostbyname_ex(  # pylint: disable=no-member
-                    address_clean
+                    address_parsed.domain
                 )
                 ip_address = result[2][0]
             except OSError as err:
