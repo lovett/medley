@@ -19,6 +19,7 @@ class Url():
     display_domain: str = field(init=False, default="")
     escaped_address: str = field(init=False, default="")
     base_address: str = field(init=False, default="")
+    etag_key: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
         self.address = self.address.lower().strip()
@@ -53,6 +54,8 @@ class Url():
         self.escaped_address = quote(self.address)
 
         self.base_address = f"{parsed_url.scheme}://{parsed_url.netloc}"
+
+        self.etag_key = f"etag:{self.schemeless_address}".rstrip("/")
 
     def is_http(self) -> bool:
         """Whether the URL scheme is either of HTTP or HTTPS."""

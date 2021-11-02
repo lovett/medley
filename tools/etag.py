@@ -1,6 +1,7 @@
 """Set and validate etags."""
 
 import cherrypy
+from resources.url import Url
 
 
 class Tool(cherrypy.Tool):
@@ -27,18 +28,19 @@ class Tool(cherrypy.Tool):
         )
 
     @staticmethod
-    def current_url() -> str:
+    def current_url() -> Url:
         """The relative path of the current request"""
-        return f"{cherrypy.request.script_name}{cherrypy.request.path_info}"
+        req = cherrypy.request
+        return Url(f"{req.script_name}{req.path_info}")
 
     def check_header(self) -> None:
         """Decide if the If-None-Match header is a valid ETag."""
 
-        etag_key = f"etag:{self.current_url()}"
+        url = self.current_url()
 
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            etag_key
+            url.etag_key
         ).pop()
 
         if not cache_hit:
@@ -58,8 +60,6 @@ class Tool(cherrypy.Tool):
 
         """
 
-        etag_key = f"etag:{self.current_url()}"
-
         try:
             success = 200 <= cherrypy.response.status <= 299
         except TypeError:
@@ -68,12 +68,14 @@ class Tool(cherrypy.Tool):
         if not success:
             return
 
+        url = self.current_url()
+
         # There may not have been an If-None-Match on this request,
         # but maybe there was one in a previous request. Don't
         # generate the hash unnecessarily.
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            etag_key
+            url.etag_key
         ).pop()
 
         if cache_hit:
@@ -87,7 +89,7 @@ class Tool(cherrypy.Tool):
 
         cherrypy.engine.publish(
             "memorize:set",
-            etag_key,
+            url.etag_key,
             content_hash
         )
 
