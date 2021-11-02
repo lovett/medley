@@ -74,7 +74,7 @@ class Controller:
             comments = bookmark["comments"]
 
         bookmarks_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/bookmarks",
             {"query": title, "order": "date-desc"}
         ).pop()

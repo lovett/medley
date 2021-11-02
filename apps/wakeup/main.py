@@ -25,7 +25,7 @@ class Controller:
         ).pop()
 
         registry_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/registry",
             {"key": "wakeup", "view": "add", "q": "wakeup"}
         ).pop()
@@ -73,7 +73,7 @@ class Controller:
             return "WoL packet sent.".encode()
 
         redirect_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             query={"sent": 1}
         ).pop()
 

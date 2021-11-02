@@ -217,7 +217,7 @@ class Controller:
         ).pop()
 
         search_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "search"
         ).pop()
 
@@ -326,7 +326,7 @@ class Controller:
         ).pop()
 
         search_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "search"
         ).pop()
 
@@ -348,7 +348,7 @@ class Controller:
         query_date = None
 
         search_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "search"
         ).pop()
 

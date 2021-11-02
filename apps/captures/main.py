@@ -75,7 +75,7 @@ class Controller:
 
         if 300 <= status <= 308:
             destination = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 "/"
             ).pop()
 
@@ -97,7 +97,7 @@ class Controller:
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/captures"
         ).pop()
 
@@ -130,7 +130,7 @@ class Controller:
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/captures",
             {"path": path}
         ).pop()

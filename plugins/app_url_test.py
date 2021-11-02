@@ -5,21 +5,21 @@ import unittest
 from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
 from testing.assertions import Subscriber
-import plugins.url
+import plugins.app_url
 
 
 class TestUrl(Subscriber):
     """Tests for the url plugin."""
 
     def setUp(self) -> None:
-        self.plugin = plugins.url.Plugin(cherrypy.engine)
+        self.plugin = plugins.app_url.Plugin(cherrypy.engine)
 
     @patch("cherrypy.engine.subscribe")
     def test_subscribe(self, subscribe_mock: Mock) -> None:
         """Subscriptions are prefixed consistently."""
 
         self.plugin.start()
-        self.assert_prefix(subscribe_mock, "url")
+        self.assert_prefix(subscribe_mock, "app_url")
 
     @patch("cherrypy.engine.publish")
     def test_absolute_url(self, publish_mock: Mock) -> None:
@@ -33,7 +33,7 @@ class TestUrl(Subscriber):
 
         publish_mock.side_effect = side_effect
 
-        result = self.plugin.internal_url("/hello/world")
+        result = self.plugin.app_url("/hello/world")
         self.assertEqual(result, "http://example.com/hello/world/")
 
     @patch("cherrypy.engine.publish")
@@ -48,7 +48,7 @@ class TestUrl(Subscriber):
 
         publish_mock.side_effect = side_effect
 
-        result = self.plugin.internal_url("/hello/world")
+        result = self.plugin.app_url("/hello/world")
         self.assertEqual(result, "http://example.com:12345/hello/world/")
 
     @patch("cherrypy.engine.publish")
@@ -64,7 +64,7 @@ class TestUrl(Subscriber):
         publish_mock.side_effect = side_effect
 
         cherrypy.request.base = "http://127.0.0.1/test"
-        result = self.plugin.internal_url("/local/url")
+        result = self.plugin.app_url("/local/url")
         self.assertEqual(result, "http://example.com/local/url/")
 
 

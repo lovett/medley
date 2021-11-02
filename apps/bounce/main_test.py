@@ -306,7 +306,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 return [args[1]]
             if args[0] == "registry:replace":
                 return [{"uid": 1, "group": "example"}]
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["http://example.com"]
             if args[0] == "jinja:render":
                 return [""]
@@ -335,7 +335,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 if args[1] == "???":
                     return [""]
                 return [args[1]]
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["http://example.com"]
             if args[0] == "jinja:render":
                 return [""]
@@ -364,7 +364,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
                 if args[1] == "???":
                     return [""]
                 return [args[1]]
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["http://example.com"]
             if args[0] == "jinja:render":
                 return [""]

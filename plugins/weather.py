@@ -119,7 +119,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         weather_app_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/weather"
         ).pop()
 

@@ -117,7 +117,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         data["app_name"] = cherrypy.request.script_name.lstrip("/")
 
         data["app_url"] = cherrypy.engine.publish(
-            "url:internal"
+            "app_url"
         )
 
         data["page_title"] = "Medley"
@@ -488,7 +488,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Generate an application URL via the URL plugin."""
 
         publish_response = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             path=value,
             query=query
         )
@@ -511,7 +511,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Remove undesirable markup."""
 
         alturl_base = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/alturl"
         ).pop()
 

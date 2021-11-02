@@ -22,6 +22,7 @@ import sdnotify
 from cherrypy._cpnative_server import CPHTTPServer
 from typing_extensions import TypedDict
 import plugins.applog
+import plugins.app_url
 import plugins.assets
 import plugins.audio
 import plugins.bookmarks
@@ -53,7 +54,6 @@ import plugins.registry
 import plugins.scheduler
 import plugins.speak
 import plugins.urlfetch
-import plugins.url
 import plugins.weather
 import tools.capture
 import tools.etag
@@ -239,6 +239,7 @@ def setup() -> None:
 
     # Plugins
     plugins.applog.Plugin(cherrypy.engine).subscribe()
+    plugins.app_url.Plugin(cherrypy.engine).subscribe()
     plugins.assets.Plugin(cherrypy.engine).subscribe()
     plugins.audio.Plugin(cherrypy.engine).subscribe()
     plugins.bookmarks.Plugin(cherrypy.engine).subscribe()
@@ -265,7 +266,6 @@ def setup() -> None:
     plugins.recipes.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
-    plugins.url.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
     plugins.weather.Plugin(cherrypy.engine).subscribe()
 

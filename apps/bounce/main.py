@@ -64,7 +64,7 @@ class Controller:
                 ]
 
             registry_url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 "/registry",
                 {"q": f"bounce:{group}"}
             ).pop()
@@ -99,7 +99,7 @@ class Controller:
 
         if not group:
             redirect_url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 "",
                 {"name": name, "url": url, "error": "group"}
             ).pop()
@@ -113,7 +113,7 @@ class Controller:
 
         if not name:
             redirect_url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 "",
                 {"url": url, "group": group, "error": "name"}
             ).pop()
@@ -127,7 +127,7 @@ class Controller:
         )
 
         redirect_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "",
             {"group": group}
         ).pop()

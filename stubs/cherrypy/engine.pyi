@@ -65,7 +65,7 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["url:internal"],
+        channel: Literal["app_url"],
         path: str = "",
         query: Optional[Dict[str, Any]] = None,
 ) -> List[str]: ...

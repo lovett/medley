@@ -44,7 +44,7 @@ class Controller:
                 # Redirect to the edit form when a non-existent page
                 # is requested.
                 redirect_url = cherrypy.engine.publish(
-                    "url:internal",
+                    "app_url",
                     f"{page_name}/edit"
                 ).pop()
 
@@ -79,7 +79,7 @@ class Controller:
             redirect_path = page_name
 
         redirect_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             redirect_path
         ).pop()
 
@@ -89,11 +89,11 @@ class Controller:
         """Present a form for editing the contents of a page."""
 
         post_url = cherrypy.engine.publish(
-            "url:internal"
+            "app_url"
         ).pop()
 
         cancel_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             page_name,
         ).pop()
 
@@ -143,7 +143,7 @@ class Controller:
                 edit_path = f"{page_name}/edit"
 
             url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 view_path
             ).pop()
 
@@ -153,7 +153,7 @@ class Controller:
             )
 
             url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 edit_path
             ).pop()
 
@@ -178,7 +178,7 @@ class Controller:
         page = parser.parse(page_record["value"])
 
         edit_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             f"{page_name}/edit"
         ).pop()
 

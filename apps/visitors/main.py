@@ -32,7 +32,7 @@ class Controller:
         ).pop()
 
         registry_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/registry"
         ).pop()
 

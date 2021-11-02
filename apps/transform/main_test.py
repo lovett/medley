@@ -42,7 +42,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
 
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["/"]
             if args[0] == "jinja:render":
                 return [""]

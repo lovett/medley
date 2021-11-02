@@ -45,7 +45,7 @@ class TestJinja(Subscriber):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["/test"]
 
             return mock.DEFAULT
@@ -72,7 +72,7 @@ class TestJinja(Subscriber):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return [""]
 
             return mock.DEFAULT

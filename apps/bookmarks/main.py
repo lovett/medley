@@ -119,7 +119,7 @@ class Controller:
         domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/bookmarks",
         ).pop()
 
@@ -157,7 +157,7 @@ class Controller:
             domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/bookmarks",
             {
                 "query": query,

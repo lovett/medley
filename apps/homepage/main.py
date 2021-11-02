@@ -78,7 +78,7 @@ class Controller:
 
             try:
                 url = cherrypy.engine.publish(
-                    "url:internal",
+                    "app_url",
                     name
                 ).pop()
             except IndexError:

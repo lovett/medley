@@ -41,7 +41,7 @@ class Tool(cherrypy.Tool):
 
         if not cherrypy.request.path_info.endswith("/"):
             redirect_url = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 f"{cherrypy.request.path_info}/",
                 cherrypy.request.params
             ).pop()

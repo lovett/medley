@@ -39,7 +39,7 @@ class Controller:
             ).pop()
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/applog",
             {"source": source}
         ).pop()

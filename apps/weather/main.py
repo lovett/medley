@@ -39,7 +39,7 @@ class Controller:
         ).pop()
 
         edit_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/registry",
             {"q": "weather:latlong"}
         ).pop()

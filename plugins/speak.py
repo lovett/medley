@@ -296,7 +296,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         speak_app_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/speak"
         ).pop()
 

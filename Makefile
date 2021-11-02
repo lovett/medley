@@ -103,7 +103,7 @@ install: medley
 # fatal error like bad syntax. It is a backup for CherryPy's autoreload.
 serve: export MEDLEY_autoreload=True
 serve: export MEDLEY_memorize_hashes=False
-serve: export MEDLEY_etags=False
+serve: export MEDLEY_etags=True
 serve: export MEDLEY_tracebacks=True
 serve: export MEDLEY_prefetch=False
 serve:

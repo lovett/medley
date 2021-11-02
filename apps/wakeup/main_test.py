@@ -44,7 +44,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "registry:search:dict":
                 return [{"host1": "mac1", "host2": "mac2"}]
 
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["/registry"]
 
             if args[0] == "jinja:render":
@@ -106,7 +106,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["/"]
             if args[0] == "jinja:render":
                 return [""]
@@ -126,7 +126,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
-            if args[0] == "url:internal":
+            if args[0] == "app_url":
                 return ["/"]
             return mock.DEFAULT
 

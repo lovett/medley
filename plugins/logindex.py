@@ -669,7 +669,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
             for record in records:
                 url = cherrypy.engine.publish(
-                    "url:internal",
+                    "app_url",
                     "/visitors",
                     {"query": f"ip {record['ip']}\n{query}"}
                 ).pop()

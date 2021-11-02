@@ -16,7 +16,7 @@ def view(url: Url) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     app_url = cherrypy.engine.publish(
-        "url:internal",
+        "app_url",
         url.address
     ).pop()
 
@@ -51,7 +51,7 @@ def unavailable() -> ViewAndData:
     """Display a message saying the URL could not be retrieved."""
 
     applog_url = cherrypy.engine.publish(
-        "url:internal",
+        "app_url",
         "/applog",
         {
             "sources": "exception",
@@ -123,7 +123,7 @@ def view_story(response: typing.Any) -> ViewAndData:
             (
                 item['subreddit_name_prefixed'],
                 cherrypy.engine.publish(
-                    "url:internal",
+                    "app_url",
                     f"reddit.com/{item['subreddit_name_prefixed']}"
                 ).pop()
             )
@@ -148,7 +148,7 @@ def view_story(response: typing.Any) -> ViewAndData:
     subreddit = story.get("subreddit").lower()
 
     subreddit_alturl = cherrypy.engine.publish(
-        "url:internal",
+        "app_url",
         f"reddit.com/r/{subreddit}"
     ).pop()
 

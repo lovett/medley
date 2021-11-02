@@ -45,7 +45,7 @@ class Controller:
                 )
                 ip_address = result[2][0]
             except OSError as err:
-                redirect_url = cherrypy.engine.publish("url:internal").pop()
+                redirect_url = cherrypy.engine.publish("app_url").pop()
                 raise cherrypy.HTTPRedirect(redirect_url) from err
 
         whois = cherrypy.engine.publish(
@@ -85,7 +85,7 @@ class Controller:
         ).pop()
 
         visitors_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/visitors",
             {"query": f"ip {ip_address}"}
         ).pop()

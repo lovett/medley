@@ -65,7 +65,7 @@ class Controller:
         ).pop()
 
         registry_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/registry",
             {"q": "reminder:template"}
         ).pop()
@@ -82,7 +82,7 @@ class Controller:
             ).pop()
 
             template["delete_url"] = cherrypy.engine.publish(
-                "url:internal",
+                "app_url",
                 "/registry",
                 {"uid": template_id}
             ).pop()
@@ -242,7 +242,7 @@ class Controller:
             )
 
         redirect_url = cherrypy.engine.publish(
-            "url:internal"
+            "app_url"
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

@@ -87,7 +87,7 @@ class Controller:
             raise cherrypy.HTTPError(400)
 
         redirect_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             query={"sent": 1}
         ).pop()
 
@@ -106,7 +106,7 @@ class Controller:
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal"
+            "app_url"
         ).pop()
 
         return cherrypy.engine.publish(
@@ -168,7 +168,7 @@ class Controller:
 
         if not query:
             redirect_url = cherrypy.engine.publish(
-                "url:internal"
+                "app_url"
             ).pop()
 
             raise cherrypy.HTTPRedirect(redirect_url)
@@ -197,7 +197,7 @@ class Controller:
             ).pop()
 
         pagination_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/foodlog/search",
             {"q": query}
         ).pop()

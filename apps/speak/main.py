@@ -83,7 +83,7 @@ class Controller:
         ).pop()
 
         registry_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/registry",
         ).pop()
 
@@ -162,7 +162,7 @@ class Controller:
 
         if action:
             app_url = cherrypy.engine.publish(
-                "url:internal"
+                "app_url"
             ).pop()
 
             raise cherrypy.HTTPRedirect(app_url)

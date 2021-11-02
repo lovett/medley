@@ -16,12 +16,12 @@ class Controller:
         """Present a static list of bookmarklets"""
 
         later_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/later"
         ).pop()
 
         bounce_url = cherrypy.engine.publish(
-            "url:internal",
+            "app_url",
             "/bounce"
         ).pop()
 

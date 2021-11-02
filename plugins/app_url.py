@@ -15,12 +15,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
-        This plugin owns the url prefix.
+        This plugin owns the app_url prefix.
         """
-        self.bus.subscribe("url:internal", self.internal_url)
+        self.bus.subscribe("app_url", self.app_url)
 
     @staticmethod
-    def internal_url(
+    def app_url(
             path: typing.Optional[str] = None,
             query: typing.Optional[typing.Dict[str, typing.Any]] = None,
     ) -> str:
