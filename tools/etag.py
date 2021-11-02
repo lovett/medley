@@ -27,12 +27,18 @@ class Tool(cherrypy.Tool):
         )
 
     @staticmethod
-    def check_header() -> None:
+    def current_url() -> str:
+        """The relative path of the current request"""
+        return f"{cherrypy.request.script_name}{cherrypy.request.path_info}"
+
+    def check_header(self) -> None:
         """Decide if the If-None-Match header is a valid ETag."""
+
+        etag_key = f"etag:{self.current_url()}"
 
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            f"etag:{cherrypy.request.path_info}"
+            etag_key
         ).pop()
 
         if not cache_hit:
@@ -43,8 +49,7 @@ class Tool(cherrypy.Tool):
         if cache_value == if_none_match:
             raise cherrypy.HTTPRedirect("", 304)
 
-    @staticmethod
-    def set_header() -> None:
+    def set_header(self) -> None:
         """Add an ETag header to the outgoing response.
 
         This happens during the before_finalize hook point, so the
@@ -52,6 +57,8 @@ class Tool(cherrypy.Tool):
         consider it a 2xx.
 
         """
+
+        etag_key = f"etag:{self.current_url()}"
 
         try:
             success = 200 <= cherrypy.response.status <= 299
@@ -66,7 +73,7 @@ class Tool(cherrypy.Tool):
         # generate the hash unnecessarily.
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            f"etag:{cherrypy.request.path_info}"
+            etag_key
         ).pop()
 
         if cache_hit:
@@ -80,7 +87,7 @@ class Tool(cherrypy.Tool):
 
         cherrypy.engine.publish(
             "memorize:set",
-            f"etag:{cherrypy.request.path_info}",
+            etag_key,
             content_hash
         )
 

@@ -82,13 +82,11 @@ class Controller:
     def on_registry_changed(key: str) -> None:
         """Clear the cached etag if a URL has been bookmarked."""
 
-        if key == "alturl:bookmark":
-            index_url = cherrypy.engine.publish(
-                "url:internal",
-                "/alturl"
-            ).pop()
+        mount_point = __package__.split(".").pop()
+        etag_key = f"etag:/{mount_point}/"
 
+        if key == "alturl:bookmark":
             cherrypy.engine.publish(
                 "memorize:clear",
-                f"etag:{index_url}"
+                etag_key
             )
