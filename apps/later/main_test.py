@@ -20,20 +20,20 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     def tearDownClass(cls) -> None:
         helpers.stop_server()
 
-    def xtest_allow(self) -> None:
+    def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
-    def xtest_exposed(self) -> None:
+    def test_exposed(self) -> None:
         """The application is publicly available."""
         self.assert_exposed(apps.later.main.Controller)
 
-    def xtest_show_on_homepage(self) -> None:
+    def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
         self.assert_show_on_homepage(apps.later.main.Controller)
 
-    def xtest_populates_title(self) -> None:
+    def test_populates_title(self) -> None:
         """The title field is prepopulated if provided via querystring"""
 
         samples = (
@@ -53,6 +53,9 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             if args[0].startswith("markup:"):
                 return ["abc123"]
 
+            if args[0] == "bookmarks:find:url":
+                return [None]
+
             if args[0] == "jinja:render":
                 return [""]
 
@@ -62,6 +65,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", tags="hello")
 
+        print(publish_mock.call_args_list)
         self.assertEqual(
             helpers.template_var(publish_mock, "tags"),
             "abc123"
@@ -77,6 +81,10 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["This is sentence 1. this is sentence 2"]
+
+            if args[0] == "bookmarks:find:url":
+                return [None]
+
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
