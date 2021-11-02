@@ -30,13 +30,9 @@ class Tool(cherrypy.Tool):
     def check_header() -> None:
         """Decide if the If-None-Match header is a valid ETag."""
 
-        url = cherrypy.engine.publish(
-            "url:current"
-        ).pop()
-
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            f"etag:{url}"
+            f"etag:{cherrypy.request.path_info}"
         ).pop()
 
         if not cache_hit:
@@ -65,16 +61,12 @@ class Tool(cherrypy.Tool):
         if not success:
             return
 
-        url = cherrypy.engine.publish(
-            "url:current"
-        ).pop()
-
         # There may not have been an If-None-Match on this request,
         # but maybe there was one in a previous request. Don't
         # generate the hash unnecessarily.
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            f"etag:{url}"
+            f"etag:{cherrypy.request.path_info}"
         ).pop()
 
         if cache_hit:
@@ -88,7 +80,7 @@ class Tool(cherrypy.Tool):
 
         cherrypy.engine.publish(
             "memorize:set",
-            f"etag:{url}",
+            f"etag:{cherrypy.request.path_info}",
             content_hash
         )
 
