@@ -100,32 +100,6 @@ class TestClock(Subscriber):
 
         self.assertIsNone(result)
 
-    def test_month_start(self) -> None:
-        """clock:month:start identifies the first day of the month."""
-
-        tz = pytz.timezone("US/Mountain")
-        dt = datetime(1999, 2, 2, 2, 2, tzinfo=tz)
-
-        result = self.plugin.month_start(dt)
-
-        self.assertEqual(result.day, 1)
-        self.assertEqual(result.tzinfo, tz)
-
-    def test_month_end(self) -> None:
-        """clock:month:end identifies the last day of the month."""
-
-        tz = pytz.timezone("US/Eastern")
-        dt = datetime(1995, 2, 2, 2, 2, tzinfo=tz)
-        result = self.plugin.month_end(dt)
-
-        self.assertEqual(result.day, 28)
-
-        dt = datetime(1996, 2, 2, 2, 2, tzinfo=tz)
-        result = self.plugin.month_end(dt)
-
-        self.assertEqual(result.day, 29)
-        self.assertEqual(result.tzinfo, tz)
-
     def test_month_next(self) -> None:
         """clock:month:next handles year boundary."""
 
@@ -178,6 +152,12 @@ class TestClock(Subscriber):
         start = datetime(2010, 4, 4, tzinfo=pytz.timezone("UTC"))
         result = self.plugin.shift(start, days=1)
         self.assertEqual(result.day, 5)
+
+        result = self.plugin.shift(start, "month_start")
+        self.assertEqual(result.day, 1)
+
+        result = self.plugin.shift(start, "month_end")
+        self.assertEqual(result.day, 30)
 
         result = self.plugin.shift(start, days=-1)
         self.assertEqual(result.day, 3)

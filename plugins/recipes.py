@@ -310,16 +310,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate recipes that match a date search."""
 
         month_start = cherrypy.engine.publish(
-            "clock:month:start",
+            "clock:shift",
             query_date,
-            fmt="%Y-%m-%d"
+            "month_start"
         ).pop()
 
+        print(month_start)
+
         month_end = cherrypy.engine.publish(
-            "clock:month:end",
+            "clock:shift",
             query_date,
-            fmt="%Y-%m-%d"
+            "month_end"
         ).pop()
+
+        print(month_end)
 
         return self._select_generator(
             f"""SELECT r.id, r.title, r.body, r.url, r.domain,

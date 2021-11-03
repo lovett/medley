@@ -32,8 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:format", self.format)
         self.bus.subscribe("clock:from_timestamp", self.from_timestamp)
         self.bus.subscribe("clock:from_format", self.from_format)
-        self.bus.subscribe("clock:month:start", self.month_start)
-        self.bus.subscribe("clock:month:end", self.month_end)
         self.bus.subscribe("clock:month:next", self.month_next)
         self.bus.subscribe("clock:month:previous", self.month_previous)
         self.bus.subscribe("clock:shift", self.shift)
@@ -98,20 +96,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return None
 
     @staticmethod
-    def month_start(dt: datetime) -> datetime:
-        """Rewind a date to the first day of the month."""
-
-        return dt.replace(day=1)
-
-    @staticmethod
-    def month_end(dt: datetime) -> datetime:
-        """Fast-forward a date to the last day of the month."""
-
-        cal = calendar.monthrange(dt.year, dt.month)
-
-        return dt.replace(day=cal[1])
-
-    @staticmethod
     def month_previous(dt: datetime) -> datetime:
         """Roll back a date to the first day of the previous month."""
 
@@ -162,11 +146,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def shift(
             dt: datetime,
+            *args: str,
             **kwargs: typing.Union[float, str]
     ) -> datetime:
         """Roll forwards or backwards in time."""
 
         result = dt
+
+        if "month_start" in args:
+            result = result.replace(day=1)
+
+        if "month_end" in args:
+            cal = calendar.monthrange(result.year, result.month)
+            result = result.replace(day=cal[1])
 
         if "days" in kwargs:
             days = typing.cast(float, kwargs["days"])

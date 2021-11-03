@@ -87,22 +87,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["clock:month:start"],
-        dt: datetime,
-        fmt: Optional[str] = "",
-) -> List[datetime]: ...
-
-
-@overload
-def publish(
-        channel: Literal["clock:month:end"],
-        dt: datetime,
-        fmt: Optional[str] = "",
-) -> List[datetime]: ...
-
-
-@overload
-def publish(
         channel: Literal["clock:month:next"],
         dt: datetime,
 ) -> List[datetime]: ...
@@ -119,6 +103,7 @@ def publish(
 def publish(
         channel: Literal["clock:shift"],
         dt: datetime,
+        *args: str,
         **kwargs: Union[float, str]
 ) -> List[datetime]: ...
 
