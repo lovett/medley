@@ -1,0 +1,11 @@
+[Unit]
+Description=Medley database maintenance
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/curl --user-agent medley-maintenance.service --silent --show-error --max-time 30 -d "" "http://127.0.0.1:8085/maintenance"
+Restart=no
+
+# Local Variables:
+# mode: conf
+# End:

@@ -110,8 +110,8 @@
       with_items:
         - files/medley-geodb.service
         - files/medley-geodb.timer
-        - files/medley-db-maintenance.service
-        - files/medley-db-maintenance.timer
+        - files/medley-maintenance.service
+        - files/medley-maintenance.timer
         - files/medley-headlines.service
         - files/medley-headlines.timer
         - files/medley-bucketpull.service
@@ -136,7 +136,7 @@
         state: started
       with_items:
         - medley-geodb.timer
-        - medley-db-maintenance.timer
+        - medley-maintenance.timer
         - medley-headlines.timer
         - medley-bucketpull.timer
 
