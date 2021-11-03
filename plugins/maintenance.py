@@ -1,5 +1,6 @@
 """Perform maintenance tasks."""
 
+import gc
 import glob
 import os
 import os.path
@@ -20,7 +21,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         This plugin owns the maintenance prefix.
         """
-        self.bus.subscribe("maintenance:db", self.db_maintenance)
+        self.bus.subscribe("maintenance", self.maintenance)
+
+    def maintenance(self) -> None:
+        """Entry point for all maintenance tasks."""
+
+        self.db_maintenance()
+
+        # Might as well garbage collect since we're in a maintenance
+        # frame of mind. No particular expectation that doing so will
+        # have a noticeable impact or is especially necessary. Even
+        # so, why not.
+        gc.collect()
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "maintenance",
+            "Ran garbage collection"
+        )
 
     @decorators.log_runtime
     def db_maintenance(self) -> None:

@@ -36,23 +36,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """The application is not_displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.maintenance.main.Controller)
 
-    def test_group_required(self) -> None:
-        """The group parameter must be specified."""
-        response = self.request(
-            "/",
-            method="POST"
-        )
-        self.assertEqual(response.code, 400)
-
-    def test_group_valid(self) -> None:
-        """The group parameter must be valid."""
-        response = self.request(
-            "/",
-            method="POST",
-            group="test"
-        )
-        self.assertEqual(response.code, 400)
-
     @mock.patch("cherrypy.engine.publish")
     def test_invokes_scheduler(self, publish_mock: mock.Mock) -> None:
         """The maintenance plug is invoked via the scheduler."""
@@ -65,7 +48,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(db_response.code, 204)
         publish_mock.assert_called_with(
-            "scheduler:add", 2, "maintenance:db"
+            "scheduler:add", 2, "maintenance"
         )
 
         fs_response = self.request(
@@ -76,7 +59,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.assertEqual(fs_response.code, 204)
         publish_mock.assert_called_with(
-            "scheduler:add", 2, "maintenance:db"
+            "scheduler:add", 2, "maintenance"
         )
 
 

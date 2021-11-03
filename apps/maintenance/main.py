@@ -10,22 +10,13 @@ class Controller:
     exposed = True
 
     @staticmethod
-    def POST(*_args: str, **kwargs: str) -> None:
+    def POST(*_args: str, **_kwargs: str) -> None:
         """Schedule maintenance operations."""
-
-        group = kwargs.get("group")
-
-        topic = ""
-        if group == "db":
-            topic = "maintenance:db"
-
-        if not topic:
-            raise cherrypy.HTTPError(400, "Invalid task group")
 
         cherrypy.engine.publish(
             "scheduler:add",
             2,
-            topic
+            "maintenance"
         )
 
         cherrypy.response.status = 204
