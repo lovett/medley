@@ -32,8 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:format", self.format)
         self.bus.subscribe("clock:from_timestamp", self.from_timestamp)
         self.bus.subscribe("clock:from_format", self.from_format)
-        self.bus.subscribe("clock:month:next", self.month_next)
-        self.bus.subscribe("clock:month:previous", self.month_previous)
         self.bus.subscribe("clock:shift", self.shift)
         self.bus.subscribe("clock:local", self.local)
         self.bus.subscribe("clock:day:remaining", self.day_remaining)
@@ -95,42 +93,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         except ValueError:
             return None
 
-    @staticmethod
-    def month_previous(dt: datetime) -> datetime:
-        """Roll back a date to the first day of the previous month."""
-
-        start_date = dt.replace(day=1)
-
-        if start_date.month == 1:
-            previous_month = start_date.replace(
-                month=12,
-                year=(start_date.year - 1)
-            )
-        else:
-            previous_month = start_date.replace(
-                month=(start_date.month - 1)
-            )
-
-        return previous_month
-
-    @staticmethod
-    def month_next(dt: datetime) -> datetime:
-        """Advance a date to the first day of the next month."""
-
-        start_date = dt.replace(day=1)
-
-        if start_date.month == 12:
-            next_month = start_date.replace(
-                month=1,
-                year=(start_date.year + 1),
-            )
-        else:
-            next_month = start_date.replace(
-                month=(start_date.month + 1)
-            )
-
-        return next_month
-
     def now(self, local: bool = False) -> datetime:
         """The current date and time in UTC."""
 
@@ -159,6 +121,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if "month_end" in args:
             cal = calendar.monthrange(result.year, result.month)
             result = result.replace(day=cal[1])
+
+        if "month_previous" in args:
+            month = result.month - 1
+            year = result.year
+            if result.month == 1:
+                month = 12
+                year -= 1
+            result = result.replace(month=month, year=year)
+
+        if "month_next" in args:
+            month = result.month + 1
+            year = result.year
+            if result.month == 12:
+                month = 1
+                year += 1
+            result = result.replace(month=month, year=year)
 
         if "days" in kwargs:
             days = typing.cast(float, kwargs["days"])

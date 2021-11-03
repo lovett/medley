@@ -90,13 +90,15 @@ class Controller:
             ).pop()
 
             options["last_month"] = cherrypy.engine.publish(
-                "clock:month:previous",
-                start_date
+                "clock:shift",
+                start_date,
+                "month_previous"
             ).pop()
 
             options["next_month"] = cherrypy.engine.publish(
-                "clock:month:next",
-                start_date
+                "clock:shift",
+                start_date,
+                "month_next"
             ).pop()
 
             cal = calendar.Calendar()

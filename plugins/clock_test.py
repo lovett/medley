@@ -100,36 +100,6 @@ class TestClock(Subscriber):
 
         self.assertIsNone(result)
 
-    def test_month_next(self) -> None:
-        """clock:month:next handles year boundary."""
-
-        dt = datetime(1955, 12, 12, 12, 12)
-        result = self.plugin.month_next(dt)
-
-        self.assertEqual(result.month, 1)
-        self.assertEqual(result.year, 1956)
-
-        dt = datetime(1954, 11, 11, 11, 11)
-        result = self.plugin.month_next(dt)
-
-        self.assertEqual(result.month, 12)
-        self.assertEqual(result.year, 1954)
-
-    def test_month_previous(self) -> None:
-        """clock:month:previous handles year boundary."""
-
-        dt = datetime(1940, 1, 1, 1, 1)
-        result = self.plugin.month_previous(dt)
-
-        self.assertEqual(result.month, 12)
-        self.assertEqual(result.year, 1939)
-
-        dt = datetime(1920, 11, 11, 11, 11)
-        result = self.plugin.month_previous(dt)
-
-        self.assertEqual(result.month, 10)
-        self.assertEqual(result.year, 1920)
-
     def test_day_remaining(self) -> None:
         """clock:day:remaining returns seconds until end-of-day regardless of
         timezone.
@@ -149,7 +119,7 @@ class TestClock(Subscriber):
     def test_shift(self) -> None:
         """clock:shift moves forward and backward in time."""
 
-        start = datetime(2010, 4, 4, tzinfo=pytz.timezone("UTC"))
+        start = datetime(2010, 1, 4, tzinfo=pytz.timezone("UTC"))
         result = self.plugin.shift(start, days=1)
         self.assertEqual(result.day, 5)
 
@@ -157,7 +127,15 @@ class TestClock(Subscriber):
         self.assertEqual(result.day, 1)
 
         result = self.plugin.shift(start, "month_end")
-        self.assertEqual(result.day, 30)
+        self.assertEqual(result.day, 31)
+
+        result = self.plugin.shift(start, "month_previous")
+        self.assertEqual(result.month, 12)
+        self.assertEqual(result.year, 2009)
+
+        result = self.plugin.shift(start, "month_next")
+        self.assertEqual(result.month, 2)
+        self.assertEqual(result.year, 2010)
 
         result = self.plugin.shift(start, days=-1)
         self.assertEqual(result.day, 3)

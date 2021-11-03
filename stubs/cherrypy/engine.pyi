@@ -87,20 +87,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["clock:month:next"],
-        dt: datetime,
-) -> List[datetime]: ...
-
-
-@overload
-def publish(
-        channel: Literal["clock:month:previous"],
-        dt: datetime,
-) -> List[datetime]: ...
-
-
-@overload
-def publish(
         channel: Literal["clock:shift"],
         dt: datetime,
         *args: str,
