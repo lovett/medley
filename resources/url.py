@@ -1,7 +1,8 @@
 """Data class for URLs."""
 
 from dataclasses import dataclass, field
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse, quote, urlencode
+from typing import Dict, Any, Optional
 
 
 @dataclass()
@@ -11,6 +12,7 @@ class Url():
     address: str
     text: str = ""
     id: int = 0
+    query: Optional[Dict[str, Any]] = None
     path: str = field(init=False, default="")
     schemeless_address: str = field(init=False, default="")
     alt: str = field(init=False, default="")
@@ -23,6 +25,20 @@ class Url():
 
     def __post_init__(self) -> None:
         self.address = self.address.lower().strip()
+
+        if self.query:
+            nonempty_query = {
+                key: value
+                for (key, value) in self.query.items()
+                if value
+            }
+
+            if nonempty_query:
+                if "?" in self.address:
+                    self.address += "&"
+                else:
+                    self.address += "?"
+                self.address += urlencode(nonempty_query)
 
         if "//" not in self.address:
             self.address = f"http://{self.address}"
@@ -60,6 +76,14 @@ class Url():
     def is_http(self) -> bool:
         """Whether the URL scheme is either of HTTP or HTTPS."""
         return self.address.startswith("http")
+
+    def is_loopback(self) -> bool:
+        """Whether the URL references the loopback address."""
+
+        for candidate in ("localhost", "127.0.0"):
+            if self.domain.startswith(candidate):
+                return True
+        return False
 
     def __repr__(self) -> str:
         return self.address
