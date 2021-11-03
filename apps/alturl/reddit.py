@@ -97,7 +97,6 @@ def view_index(url: Url, response: typing.Any) -> ViewAndData:
 
     return ("apps/alturl/reddit-index.jinja.html", {
         "stories": stories,
-        "subreddit": url.display_domain,
         "url": url,
         "subview_title": url.display_domain
     })

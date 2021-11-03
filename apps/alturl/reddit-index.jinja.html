@@ -5,12 +5,12 @@
 
 {% block content %}
     <header id="page-title">
-        <h2>{{ subreddit }}</h2>
+        <h2>{{ url.display_domain }}</h2>
     </header>
 
     {% if not active_bookmark %}
         <p>
-            <a id="add-record" href="#" data-url="{{ subreddit }}">
+            <a id="add-record" href="#" data-url="{{ url.address }}">
                 <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
                 Bookmark
             </a>
