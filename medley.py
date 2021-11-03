@@ -19,7 +19,6 @@ import zipfile
 import cherrypy
 import portend
 import sdnotify
-from cherrypy._cpnative_server import CPHTTPServer
 from typing_extensions import TypedDict
 import plugins.applog
 import plugins.app_url
@@ -57,7 +56,6 @@ import plugins.urlfetch
 import plugins.weather
 import tools.capture
 import tools.etag
-import tools.trailing_slash
 import tools.whitespace
 import tools.provides
 
@@ -197,7 +195,6 @@ def setup() -> None:
     # Tools
     cherrypy.tools.capture = tools.capture.Tool()
     cherrypy.tools.etag = tools.etag.Tool()
-    cherrypy.tools.trailing_slash = tools.trailing_slash.Tool()
     cherrypy.tools.whitespace = tools.whitespace.Tool()
     cherrypy.tools.provides = tools.provides.Tool()
 
@@ -232,7 +229,6 @@ def setup() -> None:
                 "/": {
                     "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
                     "tools.whitespace.on": True,
-                    "tools.trailing_slash.on": True,
                 },
             }
         )
@@ -279,11 +275,6 @@ def setup() -> None:
         return
 
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
-
-    # Disable the WSGI interface.
-    cherrypy.server.httpserver = CPHTTPServer(
-        cherrypy.server
-    )
 
     # Disable access logging to the console
     #
