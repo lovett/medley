@@ -14,7 +14,7 @@
             </a>
         {% endif %}
 
-        <a id="add-record" href="{{ app_url }}/new?key={{ query|urlencode }}">
+        <a id="add-record" href="{{ add_url }}?key={{ query|urlencode }}">
             <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
             Add
         </a>
@@ -47,7 +47,7 @@
                         {{ record.key }}
                         <div class="toolbar">
                             <div class="action-button">
-                                <a href="{{ app_url }}/new?key={{ record.key|e }}" title="New record with this key">
+                                <a href="{{ add_url }}?key={{ record.key|e }}" title="New record with this key">
                                     <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
                                 </a>
                             </div>
@@ -57,7 +57,7 @@
                             {{ macros.deleteButton("/registry/" ~ record.rowid, ".record", "Delete this record") }}
 
                             <div class="action-button">
-                                <a id="edit-record" href="{{ app_url}}/{{ record.rowid}}/edit">
+                                <a id="edit-record" href="{{ app_url}}{{ record.rowid}}/edit/">
                                     <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
                                     Edit
                                 </a>

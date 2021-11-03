@@ -125,9 +125,15 @@ class Controller:
                 "groups": list(roots)
             }).encode()
 
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "new"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/registry/registry.jinja.html",
+            add_url=add_url,
             roots=roots
         ).pop()
 
@@ -156,9 +162,15 @@ class Controller:
                 ]
             }).encode()
 
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "new"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/registry/registry-list.jinja.html",
+            add_url=add_url,
             query=query.strip(),
             parent_key=parent_key,
             record_count=count,
