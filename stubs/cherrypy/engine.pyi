@@ -299,7 +299,7 @@ def publish(
         channel: Literal["scheduler:add"],
         delay_seconds: int,
         scheduled_channel: Literal["memorize:clear"],
-        key: str,
+        key: str = "",
 ) -> List[ScheduledEvent]: ...
 
 

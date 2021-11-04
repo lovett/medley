@@ -42,9 +42,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.cache[lowercase_key] = value
 
-    def clear(self, key: str) -> None:
+    def clear(self, key: str = "") -> None:
         """Remove a value from the cache."""
 
         lowercase_key = key.lower()
+        applog_key = "memorize:clear"
 
-        self.cache.pop(lowercase_key, None)
+        if key:
+            self.cache.pop(lowercase_key, None)
+
+            cherrypy.engine.publish(
+                "applog:add",
+                applog_key,
+                f"Cleared {lowercase_key}"
+            )
+            return
+
+        self.cache = {}
+
+        cherrypy.engine.publish(
+            "applog:add",
+            applog_key,
+            "Reset"
+        )

@@ -148,6 +148,7 @@ coverage: $(addprefix .coverage., $(APPS) $(PLUGINS) $(PARSERS) $(RESOURCES))
 	coverage combine $(COVERAGE_DIR)
 	coverage report
 	coverage html -d apps/static/coverage
+	curl -X DELETE 'http://localhost:8085/maintenance/memorize'
 
 
 # Run the tests for everything.

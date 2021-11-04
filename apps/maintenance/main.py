@@ -20,3 +20,16 @@ class Controller:
         )
 
         cherrypy.response.status = 204
+
+    @staticmethod
+    def DELETE(*args: str, **_kwargs: str) -> None:
+        """Perform deletion-oriented on-demand maintenance tasks."""
+
+        if "memorize" in args:
+            cherrypy.engine.publish(
+                "memorize:clear"
+            )
+            cherrypy.response.status = 204
+            return
+
+        raise cherrypy.NotFound()
