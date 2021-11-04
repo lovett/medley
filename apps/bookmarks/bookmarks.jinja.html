@@ -106,7 +106,7 @@
 
                                 <div class="cache">
                                     <svg class="icon"><use xlink:href="#icon-database"></use></svg>
-                                    <a class="wayback" href="#" data-url="{{ app_url }}?wayback={{ bookmark.url.address|urlencode }}">
+                                    <a class="wayback" href="#" data-url="{{ app_url }}?wayback={{ bookmark.url.escaped_address }}">
                                         cache
                                     </a>
                                 </div>
@@ -127,7 +127,7 @@
                                             <div>
                                                 <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                                                 {{ count|pluralize('bookmark', 'bookmarks') }} from
-                                                <a href="{{ app_url }}?query=site:{{ bookmark.url.display_domain|urlencode}}">
+                                                <a href="{{ app_url }}?query=site:{{ bookmark.url.display_domain }}">
                                                     {{ bookmark.url.display_domain }}
                                                 </a>
                                             </div>
