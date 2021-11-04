@@ -30,7 +30,7 @@ def view(url: Url) -> ViewAndData:
         "scheduler:add",
         cache_lifespan,
         "memorize:clear",
-        url.etag_key
+        url.alt_etag_key
     )
 
     match = re.search(

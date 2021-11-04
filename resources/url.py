@@ -16,6 +16,7 @@ class Url():
     path: str = field(init=False, default="")
     schemeless_address: str = field(init=False, default="")
     alt: str = field(init=False, default="")
+    alt_etag_key: str = field(init=False, default="")
     anonymized: str = field(init=False, default="")
     domain: str = field(init=False, default="")
     display_domain: str = field(init=False, default="")
@@ -40,10 +41,11 @@ class Url():
                     self.address += "?"
                 self.address += urlencode(nonempty_query)
 
-        if "//" not in self.address:
-            self.address = f"http://{self.address}"
+        if "://" not in self.address:
+            parsed_url = urlparse(f"http://{self.address}")
+        else:
+            parsed_url = urlparse(self.address)
 
-        parsed_url = urlparse(self.address)
         self.schemeless_address = f"{parsed_url.netloc}{parsed_url.path}"
         self.alt = f"/alturl/{self.schemeless_address}"
 
@@ -72,6 +74,7 @@ class Url():
         self.base_address = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
         self.etag_key = f"etag:{self.schemeless_address}".rstrip("/")
+        self.alt_etag_key = f"etag:{self.alt}".rstrip("/")
 
     def is_http(self) -> bool:
         """Whether the URL scheme is either of HTTP or HTTPS."""
