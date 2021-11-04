@@ -40,24 +40,12 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     def test_invokes_scheduler(self, publish_mock: mock.Mock) -> None:
         """The maintenance plugin is invoked via the scheduler."""
 
-        db_response = self.request(
+        response = self.request(
             "/",
-            method="POST",
-            group="db"
+            method="POST"
         )
 
-        self.assertEqual(db_response.code, 204)
-        publish_mock.assert_called_with(
-            "scheduler:add", 2, "maintenance"
-        )
-
-        fs_response = self.request(
-            "/",
-            method="POST",
-            group="db"
-        )
-
-        self.assertEqual(fs_response.code, 204)
+        self.assertEqual(response.code, 204)
         publish_mock.assert_called_with(
             "scheduler:add", 2, "maintenance"
         )
