@@ -65,7 +65,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         self.request("/", tags="hello")
 
-        print(publish_mock.call_args_list)
         self.assertEqual(
             helpers.template_var(publish_mock, "tags"),
             "abc123"

@@ -315,15 +315,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "month_start"
         ).pop()
 
-        print(month_start)
-
         month_end = cherrypy.engine.publish(
             "clock:shift",
             query_date,
             "month_end"
         ).pop()
-
-        print(month_end)
 
         return self._select_generator(
             f"""SELECT r.id, r.title, r.body, r.url, r.domain,
