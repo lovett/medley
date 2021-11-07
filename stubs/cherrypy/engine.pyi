@@ -20,6 +20,7 @@ from plugins.foodlog import SearchResult as FoodLogSearchResult
 from plugins.scheduler import ScheduledEvent
 from resources.url import Url
 
+
 def block() -> None: ...
 
 
@@ -301,6 +302,7 @@ def publish(
         channel: Literal["clock:ago"],
         value: datetime,
 ) -> List[str]: ...
+
 
 @overload
 def publish(
@@ -834,8 +836,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["registry:find"],
-        value: Any,
-        key_prefix: Optional[str] = ""
+        id: int,
 ) -> List[Optional[Row]]: ...
 
 
@@ -972,8 +973,8 @@ def publish(
 @overload
 def publish(
         channel: Literal["scheduler:remove"],
-        event: Union[str,
- sched.Event]) -> List[bool]: ...
+        event: Union[str, sched.Event]
+) -> List[bool]: ...
 
 
 @overload

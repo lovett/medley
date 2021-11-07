@@ -51,7 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:search:valuelist", self.search_valuelist)
         self.bus.subscribe("registry:update", self.update)
 
-    def find(self, uid: str) -> typing.Optional[sqlite3.Row]:
+    def find(self, uid: int) -> typing.Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
 
         return self._selectOne(
@@ -232,22 +232,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return deletions
 
-    def remove_id(self, rowid: str) -> int:
+    def remove_id(self, uid: int) -> None:
         """Delete a record by unique id (sqlite rowid)."""
 
-        row = self.find(rowid)
+        row = self.find(uid)
 
         if not row:
-            return 0
+            return
 
         deletions = self._delete(
             "DELETE FROM registry WHERE rowid=?",
-            (rowid,)
+            (uid,)
         )
 
-        cherrypy.engine.publish("registry:removed", row["key"])
-
-        return deletions
+        if deletions > 0:
+            cherrypy.engine.publish("registry:removed", row["key"])
 
     def first_key(
             self,

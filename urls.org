@@ -199,6 +199,14 @@ curl -i "$host/redirect?u=http://example.com"
 curl -i "$host/redirect?u=http%3A%2F%2Fexample.com"
 #+END_SRC
 * Registry
+** DELETE
+Delete a row from the registry
+
+#+NAME: registry_delete_id
+#+BEGIN_SRC sh :wrap export http
+curl -i -X DELETE "$host/registry/1"
+#+END_SRC
+
 ** GET
 *** Key groups
 Retrieve a list of key groups.

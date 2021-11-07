@@ -1,7 +1,41 @@
 """General-purpose key-value store"""
 
+from enum import Enum
+from typing import Optional
 import json
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+
+
+class Actions(str, Enum):
+    """Valid keywords for the first URL segment of this application."""
+    NONE = ""
+    NEW = "new"
+    EDIT = "edit"
+
+
+class DeleteParams(BaseModel):
+    """Valid request parameters for DELETE requests."""
+    uid: int = Field(0, gt=0)
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    uid: int = Field(0, gt=-1)
+    action: Actions = Actions.NONE
+    q: str = Field("", strip_whitespace=True, min_length=1)
+    key: str = Field("", strip_whitespace=True, min_length=1)
+    value: str = Field("", strip_whitespace=True, min_length=1)
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    uid: int = Field(0, gt=-1)
+    key: str = Field(strip_whitespace=True, min_length=1)
+    value: str = Field(strip_whitespace=True, min_length=1)
+    skip_redirect: Optional[bool] = False
 
 
 class Controller:
@@ -11,109 +45,119 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: str) -> None:
-        """Remove an existing entry by its ID"""
+    def DELETE(uid: str = "0") -> None:
+        """Remove an existing entry by its id."""
 
-        cherrypy.engine.publish(
-            "registry:remove:id",
-            int(uid)
-        )
+        try:
+            params = DeleteParams(uid=uid)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        cherrypy.engine.publish("registry:remove:id", params.uid)
 
         cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("html", "json"))
-    def GET(self, *args: str, **kwargs: str) -> bytes:
+    def GET(self, action: str = "", uid: str = "0", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        query = kwargs.get("q", "").strip()
+        try:
+            params = GetParams(
+                uid=uid,
+                action=action,
+                **kwargs
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if query:
-            return self.search(query)
+        if params.q:
+            return self.search(params)
 
-        if not args:
+        if not params.action:
             return self.index()
 
-        if args[0] in ("index", "index.json", ".json"):
-            return self.index()
+        if params.action == Actions.NEW:
+            params.uid = 0
+            return self.form(params)
 
-        if args[0] == "new":
-            return self.form(0, **kwargs)
-
-        if args[-1] == "edit":
-            return self.form(int(args[-2]), **kwargs)
+        if params.action == Actions.EDIT:
+            return self.form(params)
 
         raise cherrypy.HTTPError(404)
 
     @staticmethod
-    def POST(*args: str, **kwargs: str) -> None:
+    def POST(uid: str = "0", **kwargs: str) -> None:
         """Store a new entry in the database or update an existing entry"""
 
-        key = kwargs.get("key", "").strip()
-        value = kwargs.get("value", "").strip()
+        try:
+            params = PostParams(
+                uid=uid,
+                **kwargs
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if args:
+        if params.uid > 0:
             cherrypy.engine.publish(
                 "registry:update",
-                int(args[0]),
-                key,
-                value
+                params.uid,
+                params.key,
+                params.value
             )
         else:
             cherrypy.engine.publish(
                 "registry:add",
-                key,
-                value
+                params.key,
+                params.value
             )
 
-        if not kwargs.get("skip_redirect"):
-            raise cherrypy.HTTPRedirect(f"/registry?q={key}")
+        if not params.skip_redirect:
+            raise cherrypy.HTTPRedirect(f"/registry?q={params.key}")
 
         cherrypy.response.status = 204
 
     @staticmethod
-    def form(rowid: int = 0, **kwargs: str) -> bytes:
+    def form(params: GetParams) -> bytes:
         """Display a form for adding or updating a record."""
 
-        key = kwargs.get("key", "")
-        value = kwargs.get("value", "")
         submit_url = "/registry"
         cancel_url = "/registry"
         subview_title = "New"
 
-        if key:
-            cancel_url = f"/registry?q={key}"
+        if params.key:
+            cancel_url = f"/registry?q={params.key}"
 
         if cherrypy.request.wants == "json":
             raise cherrypy.HTTPError(404)
 
-        if rowid:
+        if params.uid:
             record = cherrypy.engine.publish(
                 "registry:find",
-                rowid
+                params.uid
             ).pop()
 
             if not record:
                 raise cherrypy.HTTPError(404)
 
-            key = record["key"]
-            value = record["value"]
-            submit_url = f"/registry/{rowid}"
-            cancel_url = f"/registry?q={key}"
+            params.key = record["key"]
+            params.value = record["value"]
+            submit_url = f"/registry/{params.uid}"
+            cancel_url = f"/registry?q={params.key}"
             subview_title = "Update"
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/registry/registry-form.jinja.html",
-            rowid=rowid,
-            key=key,
-            value=value,
+            rowid=params.uid,
+            key=params.key,
+            value=params.value,
             submit_url=submit_url,
             cancel_url=cancel_url,
             subview_title=subview_title
         ).pop()
 
     @staticmethod
-    def index(*_args: str, **_kwargs: str) -> bytes:
+    def index() -> bytes:
         """Display the application homepage."""
 
         roots = cherrypy.engine.publish(
@@ -138,17 +182,17 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def search(query: str = "") -> bytes:
+    def search(params: GetParams) -> bytes:
         """Search for records by key."""
 
         parent_key = None
-        if ":" in query:
-            key_segments = query.split(":")[0:-1]
+        if ":" in params.q:
+            key_segments = params.q.split(":")[0:-1]
             parent_key = ":".join(key_segments)
 
         count, rows = cherrypy.engine.publish(
             "registry:search",
-            key=query,
+            key=params.q,
             include_count=True
         ).pop()
 
@@ -171,9 +215,9 @@ class Controller:
             "jinja:render",
             "apps/registry/registry-list.jinja.html",
             add_url=add_url,
-            query=query.strip(),
+            query=params.q,
             parent_key=parent_key,
             record_count=count,
             records=rows,
-            subview_title=query
+            subview_title=params.q
         ).pop()
