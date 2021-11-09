@@ -1,8 +1,20 @@
 """Web page reformatting"""
 
+from pydantic import BaseModel
+from pydantic import ValidationError
 import cherrypy
-import apps.alturl.reddit
 from resources.url import Url
+import apps.alturl.reddit
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests.
+
+    Not handling url with one of pydantic's URL types to allow the
+    scheme to remain optional.
+
+    """
+    url: str
 
 
 class Controller:
@@ -72,9 +84,23 @@ class Controller:
 
     @staticmethod
     def POST(url: str) -> None:
-        """Redirect to a site-specific display view."""
+        """Redirect to a site-specific display view.
 
-        target_url = Url(url)
+        This is for the benefit of the form shown on the default view,
+        which would create a querystring if it submitted via GET and
+        not otherwise match the append-to-path approach preferred by
+        the application.
+
+        """
+
+        try:
+            params = PostParams(
+                url=url
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        target_url = Url(params.url)
 
         raise cherrypy.HTTPRedirect(target_url.alt)
 
