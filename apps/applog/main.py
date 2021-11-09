@@ -1,6 +1,15 @@
 """Site-wide status and activity"""
 
+from pydantic import BaseModel
+from pydantic import ValidationError
 import cherrypy
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    offset: int = 0
+    source: str = ""
+    per_page: int = 20
 
 
 class Controller:
@@ -14,34 +23,35 @@ class Controller:
     def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of recent log entries"""
 
-        offset = int(kwargs.get("offset", 0))
-        source = kwargs.get("source", "")
-        per_page = 20
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         sources = None
-        if source:
+        if params.source:
             sources = cherrypy.engine.publish(
                 "applog:sources",
             ).pop()
 
             records, total, query_plan = cherrypy.engine.publish(
                 "applog:search",
-                source=source,
-                offset=offset,
-                limit=per_page
+                source=params.source,
+                offset=params.offset,
+                limit=params.per_page
             ).pop()
         else:
             records, total, query_plan = cherrypy.engine.publish(
                 "applog:view",
-                source=source,
-                offset=offset,
-                limit=per_page
+                source=params.source,
+                offset=params.offset,
+                limit=params.per_page
             ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/applog",
-            {"source": source}
+            {"source": params.source}
         ).pop()
 
         return cherrypy.engine.publish(
@@ -49,11 +59,11 @@ class Controller:
             "apps/applog/applog.jinja.html",
             records=records,
             total=total,
-            source=source,
+            source=params.source,
             query_plan=query_plan,
             pagination_url=pagination_url,
-            offset=offset,
+            offset=params.offset,
             total_records=total,
-            per_page=per_page,
+            per_page=params.per_page,
             sources=sources,
         ).pop()
