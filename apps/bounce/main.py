@@ -2,7 +2,31 @@
 
 import typing
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+from pydantic import HttpUrl
 from resources.url import Url
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    u: HttpUrl = Field("")
+    group: str = ""
+    error: str = ""
+    site_name: str = ""
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    url: str = ""
+    name: str = ""
+    group: str = Field(
+        "",
+        strip_whitespace=True,
+        to_lower=True,
+        min_length=1
+    )
 
 
 class Controller:
@@ -20,19 +44,20 @@ class Controller:
     }
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args: str, **kwargs: str) -> bytes:
+    def GET(self, **kwargs: str) -> bytes:
         """Display all the URLs in a group."""
 
-        url = Url(kwargs.get("u", ""))
-        group = kwargs.get("group", "")
-        error = kwargs.get("error", "")
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        site_name = ""
         registry_url = ""
-
         bounces: typing.List[Url] = []
 
-        if url:
+        url = Url(params.u)
+
+        if params.u:
             registry_key = cherrypy.engine.publish(
                 "registry:first:key",
                 value=url.base_address,
@@ -40,15 +65,15 @@ class Controller:
             ).pop()
 
             try:
-                _, group, site_name = registry_key.split(":")
+                _, params.group, params.site_name = registry_key.split(":")
             except (AttributeError, ValueError):
-                group = self.url_to_group(url.base_address)
-                site_name = self.url_to_name(url.base_address)
+                params.group = self.url_to_group(url.base_address)
+                params.site_name = self.url_to_name(url.base_address)
 
-        if group:
+        if params.group:
             _, rows = cherrypy.engine.publish(
                 "registry:search",
-                f"bounce:{group}"
+                f"bounce:{params.group}"
             ).pop()
 
             if rows:
@@ -66,70 +91,45 @@ class Controller:
             registry_url = cherrypy.engine.publish(
                 "app_url",
                 "/registry",
-                {"q": f"bounce:{group}"}
+                {"q": f"bounce:{params.group}"}
             ).pop()
 
         if url not in bounces:
             bounces = []
 
-        response: bytes = cherrypy.engine.publish(
+        return cherrypy.engine.publish(
             "jinja:render",
             "apps/bounce/bounce.jinja.html",
             url=url,
             site=url.base_address,
-            group=group,
-            name=site_name,
+            group=params.group,
+            name=params.site_name,
             bounces=bounces,
             registry_url=registry_url,
-            error=error
+            error=params.error
         ).pop()
-
-        return response
 
     @staticmethod
     def POST(url: str, name: str, group: str) -> None:
         """Add a new URL to a group."""
 
-        host = Url(url).base_address
+        try:
+            params = PostParams(url=url, name=name, group=group)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        group = cherrypy.engine.publish(
-            "formatting:string_sanitize",
-            group
-        ).pop()
-
-        if not group:
-            redirect_url = cherrypy.engine.publish(
-                "app_url",
-                "",
-                {"name": name, "url": url, "error": "group"}
-            ).pop()
-
-            raise cherrypy.HTTPRedirect(redirect_url)
-
-        name = cherrypy.engine.publish(
-            "formatting:string_sanitize",
-            name
-        ).pop()
-
-        if not name:
-            redirect_url = cherrypy.engine.publish(
-                "app_url",
-                "",
-                {"url": url, "group": group, "error": "name"}
-            ).pop()
-
-            raise cherrypy.HTTPRedirect(redirect_url)
+        host = Url(params.url).base_address
 
         cherrypy.engine.publish(
             "registry:replace",
-            f"bounce:{group}:{name}",
+            f"bounce:{params.group}:{params.name}",
             host
         )
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
             "",
-            {"group": group}
+            {"group": params.group}
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

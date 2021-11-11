@@ -302,8 +302,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
-            if args[0] == "formatting:string_sanitize":
-                return [args[1]]
             if args[0] == "registry:replace":
                 return [{"uid": 1, "group": "example"}]
             if args[0] == "app_url":
@@ -331,10 +329,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
-            if args[0] == "formatting:string_sanitize":
-                if args[1] == "???":
-                    return [""]
-                return [args[1]]
             if args[0] == "app_url":
                 return ["http://example.com"]
             if args[0] == "jinja:render":
@@ -360,10 +354,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function."""
-            if args[0] == "formatting:string_sanitize":
-                if args[1] == "???":
-                    return [""]
-                return [args[1]]
             if args[0] == "app_url":
                 return ["http://example.com"]
             if args[0] == "jinja:render":
