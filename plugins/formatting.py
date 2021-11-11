@@ -26,11 +26,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.phone_sanitize
         )
 
-        self.bus.subscribe(
-            "formatting:string_sanitize",
-            self.string_sanitize
-        )
-
     @staticmethod
     def dbpedia_abstract(text: str) -> str:
         """Extract the first two meaningful sentences from a dbpedia
@@ -80,13 +75,3 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         number = re.sub(r"\D", "", number)
         number = re.sub(r"^1(\d{10})", r"\1", number)
         return number
-
-    @staticmethod
-    def string_sanitize(value: str, also_allowed: str = '') -> str:
-        """Remove non-alphanumeric characters from a string."""
-
-        return "".join(
-            char
-            for char in value
-            if (char.isalnum() or char in also_allowed)
-        )

@@ -460,14 +460,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["formatting:string_sanitize"],
-        value: str,
-        also_allowed: str = "",
-) -> List[str]: ...
-
-
-@overload
-def publish(
         channel: Literal["gcp:appengine:ingest_file"],
         storage_path: Path,
         batch_size: Optional[int] = 100,
