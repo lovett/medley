@@ -1,6 +1,14 @@
 """Phone call metadata"""
 
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    offset: int = 0
+    per_page: int = 50
 
 
 class Controller:
@@ -14,8 +22,10 @@ class Controller:
     def GET(*_args: str, **kwargs: str) -> bytes:
         """Display a list of recent calls"""
 
-        offset = int(kwargs.get("offset", 0))
-        per_page = 50
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
@@ -34,8 +44,8 @@ class Controller:
             "cdr:timeline",
             src_exclude=src_exclusions,
             dst_exclude=dst_exclusions,
-            offset=offset,
-            limit=per_page
+            offset=params.offset,
+            limit=params.per_page
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -48,8 +58,8 @@ class Controller:
             "apps/calls/calls.jinja.html",
             calls=calls,
             total_records=total_records,
-            offset=offset,
-            per_page=per_page,
+            offset=params.offset,
+            per_page=params.per_page,
             pagination_url=pagination_url
         ).pop()
 
