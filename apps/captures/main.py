@@ -1,6 +1,47 @@
 """Review HTTP requests and responses"""
 
+from enum import Enum
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+
+
+class Actions(str, Enum):
+    """Valid keywords for the first URL segment of this application."""
+    NONE = ""
+    STATUS = "status"
+    PATH = "path"
+    SHOW = "show"
+
+
+class StatusParams(BaseModel):
+    """Base class for status URLs across all HTTP verbs."""
+    status: int = 0
+    action: Actions = Actions.NONE
+
+
+class GetParams(StatusParams):
+    """Valid request parameters for GET requests."""
+    per_page: int = 20
+    offset: int = 0
+    path: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
+    uid: int = Field(0, gt=-1)
+
+
+class PostParams(StatusParams):
+    """Valid request parameters for POST requests."""
+    ...
+
+
+class PutParams(StatusParams):
+    """Valid request parameters for POST requests."""
+    ...
+
+
+class DeleteParams(StatusParams):
+    """Valid request parameters for POST requests."""
+    ...
 
 
 class Controller:
@@ -11,89 +52,99 @@ class Controller:
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args: str, **kwargs: str) -> bytes:
+    def GET(self, action: str = "", uid: str = "0", **kwargs: str) -> bytes:
         """Dispatch GET requests to a subhandler based on the URL path."""
 
-        if "status" in args:
-            cherrypy.response.status = self.capture(*args, **kwargs)
+        try:
+            params = GetParams(action=action, uid=uid, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.STATUS:
+            cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
-        if "path" in kwargs:
-            return self.search(*args, **kwargs)
+        if params.path:
+            return self.search(params)
 
-        if args:
-            return self.show(int(args[0]))
+        if params.action == Actions.SHOW:
+            return self.show(params)
 
-        return self.index()
+        return self.index(params)
 
     @cherrypy.tools.capture()
-    def POST(self, *args: str, **kwargs: str) -> bytes:
+    def POST(self, action: str = "", **kwargs: str) -> bytes:
         """Dispatch POST requests to a subhandler based on the URL path."""
 
-        if "status" in args:
-            cherrypy.response.status = self.capture(*args, **kwargs)
+        try:
+            params = PostParams(action=action, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.STATUS:
+            cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @cherrypy.tools.capture()
-    def PUT(self, *args: str, **kwargs: str) -> bytes:
+    def PUT(self, action: str = "", **kwargs: str) -> bytes:
         """Dispatch PUT requests to a subhandler based on the URL path."""
 
-        if "status" in args:
-            cherrypy.response.status = self.capture(*args, **kwargs)
+        try:
+            params = PutParams(action=action, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.STATUS:
+            cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @cherrypy.tools.capture()
-    def DELETE(self, *args: str, **kwargs: str) -> bytes:
+    def DELETE(self, action: str = "", **kwargs: str) -> bytes:
         """Dispatch DELETE requests to a subhandler based on the URL path."""
 
-        if "status" in args:
-            cherrypy.response.status = self.capture(*args, **kwargs)
+        try:
+            params = DeleteParams(action=action, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.STATUS:
+            cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @staticmethod
-    def capture(*args: str, **_kwargs: str) -> int:
+    def capture(params: StatusParams) -> int:
         """Capture a request and return the status code indicated by the
         URL.
 
         """
 
-        try:
-            status = int(args[1])
-        except ValueError:
-            status = 404
-        except IndexError:
-            status = 200
+        if 400 <= params.status <= 500:
+            raise cherrypy.HTTPError(params.status)
 
-        if 400 <= status <= 500:
-            raise cherrypy.HTTPError(status)
-
-        if 300 <= status <= 308:
+        if 300 <= params.status <= 308:
             destination = cherrypy.engine.publish(
                 "app_url",
                 "/"
             ).pop()
 
-            raise cherrypy.HTTPRedirect(destination, status)
+            raise cherrypy.HTTPRedirect(destination, params.status)
 
-        return status
+        return params.status
 
     @staticmethod
-    def index(*_args: str, **kwargs: str) -> bytes:
+    def index(params: GetParams) -> bytes:
         """List captures in reverse-chronological order."""
-
-        per_page = 20
-        offset = int(kwargs.get("offset", 0))
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
-            offset=offset,
-            limit=per_page
+            offset=params.offset,
+            limit=params.per_page
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -106,33 +157,28 @@ class Controller:
             "apps/captures/captures.jinja.html",
             captures=captures,
             total_records=total_records,
-            per_page=per_page,
-            offset=offset,
+            per_page=params.per_page,
+            offset=params.offset,
             pagination_url=pagination_url
         ).pop()
 
         return response
 
     @staticmethod
-    def search(*_args: str, **kwargs: str) -> bytes:
+    def search(params: GetParams) -> bytes:
         """Locate captures by request path."""
-
-        per_page = 20
-        offset = int(kwargs.get("offset", 0))
-        path = kwargs.get("path", "").strip()
-        subview_title = path
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
-            path=path,
-            offset=offset,
-            limit=per_page
+            path=params.path,
+            offset=params.offset,
+            limit=params.per_page
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/captures",
-            {"path": path}
+            {"path": params.path}
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
@@ -140,29 +186,29 @@ class Controller:
             "apps/captures/captures.jinja.html",
             captures=captures,
             total_records=total_records,
-            per_page=per_page,
-            offset=offset,
-            path=path,
+            per_page=params.per_page,
+            offset=params.offset,
+            path=params.path,
             pagination_url=pagination_url,
-            subview_title=subview_title
+            subview_title=params.path
         ).pop()
 
         return response
 
     @staticmethod
-    def show(rowid: int) -> bytes:
+    def show(params: GetParams) -> bytes:
         """Display a single capture."""
 
         capture = cherrypy.engine.publish(
             "capture:get",
-            rowid
+            params.uid
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/captures/captures.jinja.html",
             captures=(capture,),
-            subview_title=rowid
+            subview_title=params.uid
         ).pop()
 
         return response
