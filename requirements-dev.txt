@@ -1,5 +1,5 @@
-bandit==1.7.0
-coverage==6.1.1
+bandit==1.7.1
+coverage==6.1.2
 flake8==4.0.1
 flake8-comprehensions==3.7.0
 lxml==4.6.4
@@ -13,5 +13,5 @@ pytest-timeout==2.0.1
 requests-mock==1.9.3
 responses==0.15.0
 types-pytz==2021.3.0
-types-requests==2.25.11
+types-requests==2.26.0
 typing-extensions==3.10.0.2
