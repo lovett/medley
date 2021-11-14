@@ -376,6 +376,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         tags = kwargs.get("tags", [])
         attachments = kwargs.get("attachments", [])
 
+        upsert_id = None
+        if recipe_id > 0:
+            upsert_id = recipe_id
+
         queries: typing.List[typing.Tuple[str, typing.Tuple]] = []
 
         queries.append((
@@ -394,16 +398,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             url=excluded.url,
             created=excluded.created,
             last_made=excluded.last_made""",
-            (recipe_id, title, body,
+            (upsert_id, title, body,
              url.domain, url.address,
              created, last_made)
         ))
 
-        if recipe_id:
+        if upsert_id:
             queries.append((
                 """INSERT INTO tmp (key, value)
                 VALUES ("recipe_id", ?)""",
-                (recipe_id,)
+                (upsert_id,)
             ))
         else:
             queries.append((
@@ -412,10 +416,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 ()
             ))
 
-        if recipe_id:
+        if upsert_id:
             queries.append((
                 """DELETE FROM recipe_tag WHERE recipe_id=?""",
-                (recipe_id,)
+                (upsert_id,)
             ))
 
         for tag in tags:
