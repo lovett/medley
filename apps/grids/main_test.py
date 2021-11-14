@@ -76,7 +76,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         response = self.request("/test1", start="1234-56")
 
-        self.assert_404(response)
+        self.assert_status(response, 400)
 
     @mock.patch("cherrypy.engine.publish")
     def test_invalid_grid(self, publish_mock: mock.Mock) -> None:
@@ -92,7 +92,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         response = self.request("/invalid")
 
-        self.assert_404(response)
+        self.assert_status(response, 404)
 
 
 if __name__ == "__main__":

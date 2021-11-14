@@ -42,7 +42,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["nl2br"] = self.nl2br_filter
         self.env.filters["pluralize"] = self.pluralize_filter
         self.env.filters["urlencode"] = self.urlencode_filter
-        self.env.filters["yearmonth"] = self.yearmonth_filter
         self.env.filters["json"] = self.json_filter
         self.env.filters["websearch"] = self.websearch_filter
         self.env.filters["phonenumber"] = self.phonenumber_filter
@@ -225,19 +224,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cherrypy.engine.publish(
                 "clock:ago",
                 value
-            ).pop()
-        )
-
-    @staticmethod
-    def yearmonth_filter(value: datetime) -> str:
-        """Format a datetime to a year-month string."""
-
-        return typing.cast(
-            str,
-            cherrypy.engine.publish(
-                "clock:format",
-                value,
-                fmt="%Y-%m"
             ).pop()
         )
 

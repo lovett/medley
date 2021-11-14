@@ -119,6 +119,6 @@ class ResponseAssertions(unittest.TestCase):
             getattr(controller, "show_on_homepage")
         )
 
-    def assert_404(self, response: Response) -> None:
-        """The response code is 404."""
-        self.assertEqual(response.code, 404)
+    def assert_status(self, response: Response, code: int) -> None:
+        """The response has the specified status code."""
+        self.assertEqual(response.code, code)

@@ -107,10 +107,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def shift(
-            dt: datetime,
+            dt: typing.Union[date, datetime],
             *args: str,
             **kwargs: typing.Union[float, str]
-    ) -> datetime:
+    ) -> typing.Union[date, datetime]:
         """Roll forwards or backwards in time."""
 
         result = dt

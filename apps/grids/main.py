@@ -1,7 +1,16 @@
 """Printable pages for data entry."""
 
+from datetime import date
 import calendar
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    grid: str = ""
+    start: date = date.today().replace(day=1)
 
 
 class Controller:
@@ -11,11 +20,16 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args: str, **kwargs: str) -> bytes:
+    def GET(self, grid: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        if args:
-            return self.show(args[0], **kwargs)
+        try:
+            params = GetParams(grid=grid, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.grid:
+            return self.show(params)
 
         return self.index()
 
@@ -40,14 +54,12 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def show(name: str, **kwargs: str) -> bytes:
+    def show(params: GetParams) -> bytes:
         """Display a grid."""
-
-        start = kwargs.get("start")
 
         grid = cherrypy.engine.publish(
             "registry:first:value",
-            f"grids:{name}"
+            f"grids:{params.grid}"
         ).pop()
 
         if not grid:
@@ -69,20 +81,6 @@ class Controller:
 
         rows = []
         if options.get("layout") == "month":
-            if start:
-                start_date = cherrypy.engine.publish(
-                    "clock:from_format",
-                    start,
-                    fmt="%Y-%m"
-                ).pop()
-
-                if not start_date:
-                    raise cherrypy.HTTPError(404)
-            else:
-                start_date = cherrypy.engine.publish(
-                    "clock:now"
-                ).pop()
-
             headers = ["Date", "Day"] + headers
 
             options["this_month"] = cherrypy.engine.publish(
@@ -91,25 +89,25 @@ class Controller:
 
             options["last_month"] = cherrypy.engine.publish(
                 "clock:shift",
-                start_date,
+                params.start,
                 "month_previous"
             ).pop()
 
             options["next_month"] = cherrypy.engine.publish(
                 "clock:shift",
-                start_date,
+                params.start,
                 "month_next"
             ).pop()
 
             cal = calendar.Calendar()
 
             iterator = cal.itermonthdates(
-                start_date.year,
-                start_date.month
+                params.start.year,
+                params.start.month
             )
 
             for day in iterator:
-                if day.month != start_date.month:
+                if day.month != params.start.month:
                     continue
                 row = [''] * len(headers)
                 row[0] = day.strftime("%b %-d, %Y")
@@ -120,8 +118,8 @@ class Controller:
             "jinja:render",
             "apps/grids/grids.jinja.html",
             headers=headers,
-            name=name,
+            name=params.grid,
             options=options,
             rows=rows,
-            subview_title=name
+            subview_title=params.grid,
         ).pop()

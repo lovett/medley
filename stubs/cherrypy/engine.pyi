@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pathlib import Path
 from sqlite3 import Row
 from typing import Any
@@ -381,10 +381,10 @@ def publish(
 @overload
 def publish(
         channel: Literal["clock:shift"],
-        dt: datetime,
+        dt: Union[date, datetime],
         *args: str,
         **kwargs: Union[float, str]
-) -> List[datetime]: ...
+) -> List[Union[date, datetime]]: ...
 
 
 @overload
