@@ -2,7 +2,18 @@
 
 import re
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field, HttpUrl
 from resources.url import Url
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    url: HttpUrl = Field("")
+    title: str = Field("", strip_whitespace=True)
+    tags: str = Field("", strip_whitespace=True)
+    comments: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -13,19 +24,20 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display a form for for bookmarking a URL"""
 
-        error = None
-        url = Url(kwargs.get("url", ""))
-        title = kwargs.get("title", "").strip()
-        tags = kwargs.get("tags", "").strip()
-        comments = kwargs.get("comments", "").strip()
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if title:
+        url = Url(params.url)
+
+        if params.title:
             title = cherrypy.engine.publish(
                 "markup:plaintext",
-                title,
+                params.title,
                 url
             ).pop()
 
@@ -34,32 +46,31 @@ class Controller:
                 title
             ).pop()
 
-        if tags:
-            tags = cherrypy.engine.publish(
+        if params.tags:
+            params.tags = cherrypy.engine.publish(
                 "markup:plaintext",
-                tags
+                params.tags
             ).pop()
 
         # Meta description tags on Reddit aren't specific to the URL
         # being bookmarked.
-        if "reddit.com" in url.domain:
-            if comments.startswith("r/"):
-                comments = ""
+        if "reddit.com" in url.domain and params.comments.startswith("r/"):
+            params.comments = ""
 
-        if comments:
-            comments = cherrypy.engine.publish(
+        if params.comments:
+            params.comments = cherrypy.engine.publish(
                 "markup:plaintext",
-                comments
+                params.comments
             ).pop()
-            comments = re.sub(r"\s+", " ", comments).strip()
-            comments = re.sub(r",(\w)", ", \\1", comments)
-            comments = ". ".join([
+            params.comments = re.sub(r"\s+", " ", params.comments).strip()
+            params.comments = re.sub(r",(\w)", ", \\1", params.comments)
+            params.comments = ". ".join([
                 sentence[0].capitalize() + sentence[1:]
-                for sentence in comments.split(". ")
+                for sentence in params.comments.split(". ")
             ])
 
-        if comments and not comments.endswith("."):
-            comments += "."
+            if not params.comments.endswith("."):
+                params.comments += "."
 
         bookmark = None
         if url:
@@ -69,24 +80,23 @@ class Controller:
             ).pop()
 
         if bookmark:
-            title = bookmark["title"]
-            tags = bookmark["tags"]
-            comments = bookmark["comments"]
+            params.title = bookmark["title"]
+            params.tags = bookmark["tags"]
+            params.comments = bookmark["comments"]
 
         bookmarks_url = cherrypy.engine.publish(
             "app_url",
             "/bookmarks",
-            {"query": title, "order": "date-desc"}
+            {"query": params.title, "order": "date-desc"}
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/later/later.jinja.html",
             bookmarks_url=bookmarks_url,
-            error=error,
             bookmark=bookmark,
-            title=title,
+            title=params.title,
             url=url,
-            tags=tags,
-            comments=comments,
+            tags=params.tags,
+            comments=params.comments,
         ).pop()
