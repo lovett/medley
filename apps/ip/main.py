@@ -1,4 +1,4 @@
-"""Internal and external addressess"""
+"""Internal and external addresses"""
 
 import json
 import cherrypy
@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def GET(*_args: str, **_kwargs: str) -> bytes:
+    def GET() -> bytes:
         """Display the client's local IP, and the server's external IP"""
 
         client_ip = cherrypy.request.headers.get("Remote-Addr")
