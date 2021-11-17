@@ -1,6 +1,14 @@
 """Phone number metadata"""
 
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    number: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -11,29 +19,28 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """
         Display information about the specified number, or a search form to
         look up a number
         """
 
-        number = kwargs.get("number", "")
-        if number:
-            number = number.strip()
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        sanitized_number = cherrypy.engine.publish(
-            "formatting:phone_sanitize",
-            number=number
-        ).pop()
-
-        error = ""
-
-        if not number:
+        if not params.number:
             default_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "apps/phone/phone.jinja.html"
             ).pop()
             return default_response
+
+        sanitized_number = cherrypy.engine.publish(
+            "formatting:phone_sanitize",
+            number=params.number
+        ).pop()
 
         if not sanitized_number:
             search_response: bytes = cherrypy.engine.publish(
@@ -88,7 +95,6 @@ class Controller:
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/phone/phone.jinja.html",
-            error=error,
             history=call_history,
             number=sanitized_number,
             state_abbreviation=state_lookup[1],
