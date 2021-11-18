@@ -5,7 +5,16 @@ import json
 import urllib.parse
 import re
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
 from resources.url import Url
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    transform: str
+    value: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -27,7 +36,7 @@ class Controller:
         }
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args: str, **_kwargs: str) -> bytes:
+    def GET(self) -> bytes:
         """The default view presents the available transformation methods"""
 
         return cherrypy.engine.publish(
@@ -38,27 +47,23 @@ class Controller:
         ).pop()
 
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def POST(self, *_args: str, **kwargs: str) -> bytes:
+    def POST(self, **kwargs: str) -> bytes:
         """Perform a transformation and display the result"""
 
-        transform = kwargs.get("transform")
-        value = kwargs.get("value", "")
-
-        if not transform:
-            raise cherrypy.HTTPError(
-                400,
-                "Missing transform parameter."
-            )
+        try:
+            params = PostParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         transformer = typing.cast(
             typing.Callable[[str], str],
             self.transforms.get(
-                transform,
+                params.transform,
                 lambda x: x
             )
         )
 
-        result = transformer(value.strip())
+        result = transformer(params.value)
 
         result_url = None
         if result.startswith("http"):
@@ -75,9 +80,9 @@ class Controller:
             "apps/transform/transform.jinja.html",
             result=result,
             result_url=result_url,
-            current_transform=transform,
+            current_transform=params.transform,
             transforms=self.list_of_transforms(),
-            value=value
+            value=params.value
         ).pop()
 
     def list_of_transforms(self) -> typing.List[str]:
