@@ -1,8 +1,22 @@
 """Text-to-speech service"""
 
+from enum import Enum
 import re
 import typing
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+
+
+class Actions(str, Enum):
+    """Valid keywords for the first URL segment of this application."""
+    NONE = ""
+    VOICES = "voices"
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    action: Actions = Actions.NONE
 
 
 class Controller:
@@ -35,10 +49,15 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args: str, **_kwargs: str) -> bytes:
+    def GET(self, action: str = "") -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        if args and args[0] == "voices":
+        try:
+            params = GetParams(action=action)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.VOICES:
             return self.list_voices()
 
         return self.status()
