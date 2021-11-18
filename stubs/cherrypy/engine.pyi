@@ -321,7 +321,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["clock:format"],
-        dt: datetime,
+        dt: Union[date, datetime],
         fmt: str,
 ) -> List[str]: ...
 

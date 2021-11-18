@@ -3,7 +3,38 @@
 import random
 import string
 from urllib.parse import urlencode, parse_qs
+from typing import Union
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+from pydantic import validator
 import cherrypy
+
+
+class DeleteParams(BaseModel):
+    """Valid request parameters for DELETE requests."""
+    uid: float = Field(0, gt=0)
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    message: str = Field("", strip_whitespace=True)
+    badge: str = Field("", strip_whitespace=True)
+    minutes: int = Field(0, gt=-1)
+    hours: int = Field(0, gt=-1)
+    comments: str = Field("", strip_whitespace=True)
+    notification_id: str = Field("", strip_whitespace=True)
+    url: str = Field("", strip_whitespace=True)
+    remember: bool = False
+    confirm: bool = False
+
+    @validator("hours", "minutes", pre=True)
+    @classmethod
+    def blank_string(cls, value: str) -> Union[int, str]:
+        """Rewrite empty strings as zeros."""
+        if value == "":
+            return 0
+        return value
 
 
 class Controller:
@@ -16,7 +47,10 @@ class Controller:
     def DELETE(uid: str) -> None:
         """Remove a previously-scheduled reminder."""
 
-        uid_float = float(uid)
+        try:
+            params = DeleteParams(uid=uid)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         scheduled_events = cherrypy.engine.publish(
             "scheduler:upcoming",
@@ -25,7 +59,7 @@ class Controller:
 
         wanted_events = [
             event for event in scheduled_events
-            if event.time == uid_float
+            if event.time == params.uid
         ]
 
         if not wanted_events:
@@ -55,7 +89,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **_kwargs: str) -> bytes:
+    def GET() -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
 
         _, rows = cherrypy.engine.publish(
@@ -101,34 +135,18 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(*_args: str, **kwargs: str) -> None:
+    def POST(**kwargs: str) -> None:
         """Queue a new reminder for delivery."""
 
-        message = kwargs.get("message", "")
-        badge = kwargs.get("badge", "")
+        print(kwargs)
 
-        minutes = 0
-        if kwargs.get("minutes", "").isnumeric():
-            minutes = int(kwargs["minutes"])
-
-        hours = 0
-        if kwargs.get("hours", "").isnumeric():
-            hours = int(kwargs["hours"])
-
-        comments = kwargs.get("comments", "")
-        notification_id = kwargs.get("notification_id", "")
-        url = kwargs.get("url", "")
-
-        remember = 0
-        if kwargs.get("remember", "").isnumeric():
-            remember = int(kwargs["remember"])
-
-        confirm = 0
-        if kwargs.get("confirm", "").isnumeric():
-            confirm = int(kwargs["confirm"])
+        try:
+            params = PostParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         # Server-side template population
-        if notification_id and not message:
+        if params.notification_id and not params.message:
             templates = cherrypy.engine.publish(
                 "registry:search:valuelist",
                 "reminder:template",
@@ -142,28 +160,28 @@ class Controller:
                     in parse_qs(template).items()
                 }
 
-                if notification_id == values.get("notification_id", ""):
-                    message = values.get("message", "")
-                    minutes = int(values.get("minutes", 0))
-                    hours = int(values.get("hours", 0))
-                    comments = values.get("comments", "")
-                    url = values.get("url", "")
-                    badge = values.get("badge", "")
+                if params.notification_id == values.get("notification_id", ""):
+                    params.message = values.get("message", "")
+                    params.minutes = int(values.get("minutes", 0))
+                    params.hours = int(values.get("hours", 0))
+                    params.comments = values.get("comments", "")
+                    params.url = values.get("url", "")
+                    params.badge = values.get("badge", "")
                     break
 
-        if notification_id and not message:
+        if params.notification_id and not params.message:
             raise cherrypy.HTTPError(
                 400,
                 "Invalid notification id"
             )
 
-        if confirm:
+        if params.confirm:
             cherrypy.engine.publish(
                 "audio:play:asset",
                 "attention"
             )
 
-        minutes = minutes + (hours * 60)
+        minutes = params.minutes + (params.hours * 60)
 
         now = cherrypy.engine.publish(
             "clock:now",
@@ -189,19 +207,19 @@ class Controller:
             )
         )
 
-        if notification_id:
-            notification_title = f"Timer in progress for {notification_id}"
-            local_id = notification_id
+        if params.notification_id:
+            local_id = params.notification_id
+            notification_title = f"Timer in progress for {local_id}"
 
-        # Send an immediate notificationt to confirm reminder creation.
+        # Send an immediate notification to confirm reminder creation.
         start_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
             title=notification_title,
-            body=message,
+            body=params.message,
             localId=local_id,
             expiresAt=f"{minutes} minutes",
-            badge=badge
+            badge=params.badge
         ).pop()
 
         cherrypy.engine.publish(
@@ -213,11 +231,11 @@ class Controller:
         finish_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
-            title=message,
-            body=comments,
+            title=params.message,
+            body=params.comments,
             localId=local_id,
-            url=url,
-            badge=badge
+            url=params.url,
+            badge=params.badge
         ).pop()
 
         cherrypy.engine.publish(
@@ -227,17 +245,17 @@ class Controller:
             finish_notification
         )
 
-        if remember == 1:
+        if params.remember:
             cherrypy.engine.publish(
                 "registry:add",
                 "reminder:template",
                 urlencode({
-                    "message": message.strip(),
+                    "message": params.message,
                     "minutes": minutes,
-                    "comments": comments.strip(),
-                    "notification_id": notification_id,
-                    "url": url.strip(),
-                    "badge": badge
+                    "comments": params.comments,
+                    "notification_id": params.notification_id,
+                    "url": params.url,
+                    "badge": params.badge
                 })
             )
 
