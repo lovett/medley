@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("copy", "link") }}
+    {{ macros.svgSymbols("copy") }}
     <main>
         <form method="post" action="/transform">
             <div class="field">
@@ -20,17 +20,17 @@
 
             <div class="field">
                 <div id="transformations" class="field">
-                    {% for transform in transforms %}
+                    {% for transform in transforms if transform.value %}
                         <div class="transform">
                             <input
-                                id="transform-{{ transform }}"
+                                id="transform-{{ transform.value }}"
                                 type="radio"
                                 class="inline"
                                 name="transform"
-                                value="{{ transform }}"
-                                {% if transform == current_transform %}checked{% endif %}
+                                value="{{ transform.value }}"
+                                {% if transform.value == current_transform %}checked{% endif %}
                             />
-                            <label for="transform-{{ transform }}" class="inline">{{ transform|title }}</label>
+                            <label for="transform-{{ transform.value }}" class="inline">{{ transform.value|title }}</label>
                         </div>
                     {% endfor %}
                 </div>
@@ -47,18 +47,6 @@
                     <div>
                         {{ macros.clipboardButton("copy-target", "Copy value") }}
                     </div>
-
-                    {% if result_url %}
-                        <div>
-                            <div class="action-button link-button">
-
-                                <a href="{{ result_url.anonymized}}" rel="noopener noreferrer">
-                                    <svg class="icon"><use xlink:href="#icon-link"></use></svg>
-                                </a>
-                                <span class="label">Link</span>
-                            </div>
-                        </div>
-                    {% endif %}
                 </header>
                 <div id="copy-target">{{ result|escape() }}</div>
             </div>

@@ -1,6 +1,6 @@
 """Text converters"""
 
-import typing
+from enum import Enum
 import json
 import urllib.parse
 import re
@@ -8,12 +8,24 @@ import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
 from pydantic import Field
-from resources.url import Url
+
+
+class Transforms(str, Enum):
+    """Valid keywords for the transform parameter of POST requests."""
+    NONE = ""
+    CAPITALIZE = "capitalize"
+    FLATTEN = "flatten"
+    LOWER = "lower"
+    TITLE = "title"
+    UPPER = "upper"
+    URLDECODE = "urldecode"
+    URLENCODE = "urlencode"
+    LINK = "link"
 
 
 class PostParams(BaseModel):
     """Valid request parameters for POST requests."""
-    transform: str
+    transform: Transforms
     value: str = Field("", strip_whitespace=True)
 
 
@@ -23,31 +35,21 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    def __init__(self) -> None:
-        self.transforms = {
-            "as-is": lambda x: x,
-            "capitalize": lambda x: x.capitalize(),
-            "flatten": lambda x: re.sub("[\r\n]+", "", x),
-            "lower": lambda x: x.lower(),
-            "title": lambda x: x.title(),
-            "upper": lambda x: x.upper(),
-            "urldecode": urllib.parse.unquote_plus,
-            "urlencode": urllib.parse.quote_plus
-        }
-
+    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self) -> bytes:
+    def GET() -> bytes:
         """The default view presents the available transformation methods"""
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/transform/transform.jinja.html",
-            transforms=self.list_of_transforms(),
-            current_transform="as-is"
+            transforms=Transforms,
+            current_transform=Transforms.NONE
         ).pop()
 
+    @staticmethod
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def POST(self, **kwargs: str) -> bytes:
+    def POST(**kwargs: str) -> bytes:
         """Perform a transformation and display the result"""
 
         try:
@@ -55,19 +57,34 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        transformer = typing.cast(
-            typing.Callable[[str], str],
-            self.transforms.get(
-                params.transform,
-                lambda x: x
-            )
-        )
+        result = ""
 
-        result = transformer(params.value)
+        if params.transform == Transforms.CAPITALIZE:
+            result = params.value.capitalize()
 
-        result_url = None
-        if result.startswith("http"):
-            result_url = Url(result)
+        if params.transform == Transforms.FLATTEN:
+            result = re.sub("[\r\n]+", "", params.value)
+
+        if params.transform == Transforms.LOWER:
+            result = params.value.lower()
+
+        if params.transform == Transforms.TITLE:
+            result = params.value.title()
+
+        if params.transform == Transforms.UPPER:
+            result = params.value.upper()
+
+        if params.transform == Transforms.URLDECODE:
+            result = urllib.parse.unquote_plus(params.value)
+
+        if params.transform == Transforms.URLENCODE:
+            result = urllib.parse.quote_plus(params.value)
+
+        if params.transform == Transforms.LINK:
+            result = cherrypy.engine.publish(
+                "jinja:autolink",
+                params.value
+            ).pop()
 
         if cherrypy.request.wants == "json":
             return json.dumps({"result": result}).encode()
@@ -79,12 +96,7 @@ class Controller:
             "jinja:render",
             "apps/transform/transform.jinja.html",
             result=result,
-            result_url=result_url,
             current_transform=params.transform,
-            transforms=self.list_of_transforms(),
+            transforms=Transforms,
             value=params.value
         ).pop()
-
-    def list_of_transforms(self) -> typing.List[str]:
-        """Shape the list of transforms into a list of keys"""
-        return sorted(self.transforms.keys())

@@ -105,6 +105,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
 
         self.bus.subscribe("jinja:render", self.render)
+        self.bus.subscribe("jinja:autolink", self.autolink_filter)
 
     def render(self, template_name: str, **kwargs: typing.Any) -> bytes:
         """Populate a Jinja template."""

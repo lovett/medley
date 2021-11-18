@@ -128,10 +128,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.body.strip(), "This Is A Test 1999")
 
     def test_invalid_transform(self) -> None:
-        """
-        Unrecognized values for the transform parameter return leave the
-        value unmodified
-        """
+        """Unrecognized values for the transform parameter return an error."""
 
         val = "test"
         response = self.request(
@@ -141,8 +138,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
             transform="example",
             value=val
         )
-        self.assertEqual(response.code, 200)
-        self.assertEqual(response.body.strip(), val)
+        self.assertEqual(response.code, 400)
 
     def test_params_required(self) -> None:
         """Transform parameter is required"""

@@ -534,6 +534,13 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["jinja:autolink"],
+        value: str,
+) -> List[str]: ...
+
+
+@overload
+def publish(
         channel: Literal["logindex:alert"],
         earliest_id: int,
         count: int,
