@@ -6,7 +6,7 @@
                     {{ macros.deleteButton("/recipes/" ~ recipe_id ~ "/attachments/" ~ attachment["id"], "li", "Delete this attachment") }}
                 </div>
 
-                <a href="/recipes/{{ recipe_id }}/{{ attachment["filename"] }}" target="_blank">
+                <a href="/recipes/{{ recipe_id }}/attachments/{{ attachment["filename"] }}" target="_blank">
                     {{ attachment["filename"] }}
                 </a>
             </li>

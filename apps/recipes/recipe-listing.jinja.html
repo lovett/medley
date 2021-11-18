@@ -22,7 +22,7 @@
 
         <p class="tags">
             {% for recipe_tag in recipe["tags"] if recipe_tag != tag %}
-                <a href="/recipes/tag/{{ recipe_tag|urlencode }}">
+                <a href="/recipes/?tag={{ recipe_tag|urlencode }}">
                     <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                     {{ recipe_tag }}
                 </a>

@@ -1,11 +1,16 @@
 """A collection of recipes"""
 
+from enum import Enum
 import datetime
 import re
 import typing
 import cherrypy
 import mistletoe
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
 from resources.url import Url
+
 
 # pylint: disable=protected-access
 Attachment = typing.Union[
@@ -13,6 +18,50 @@ Attachment = typing.Union[
     cherrypy._cpreqbody.Part,
     typing.List[cherrypy._cpreqbody.Part]
 ]
+
+
+class Actions(str, Enum):
+    """Valid keywords for the first URL segment of this application."""
+    NONE = ""
+    NEW = "new"
+    EDIT = "edit"
+    ATTACHMENTS = "attachments"
+
+
+class DeleteParams(BaseModel):
+    """Valid request parameters for DELETE requests."""
+    uid: int = Field(0, gt=0)
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    uid: int = Field(0, gt=-1)
+    action: Actions = Actions.NONE
+    q: str = Field("", strip_whitespace=True, min_length=1)
+    resource: str = Field("", strip_whitespace=True)
+    tag: str = Field("", strip_whitespace=True)
+
+
+class PatchParams(BaseModel):
+    """Valid request parameters for PATCH requests."""
+    uid: int = Field(0, gt=-1)
+    toggle: str = ""
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    uid: int = Field(0, gt=-1)
+    title: str = Field(strip_whitespace=True)
+    body: str = Field(strip_whitespace=True)
+    url: str = Field("", strip_whitespace=True)
+    tags: str = Field(strip_whitespace=True, to_lower=True)
+    last_made: str = Field("", strip_whitespace=True)
+    created: str = Field("", strip_whitespace=True)
+    attachments: Attachment
+
+    class Config:
+        """Custom model configuration."""
+        arbitrary_types_allowed = True
 
 
 class Controller:
@@ -64,42 +113,59 @@ class Controller:
 
     # pylint: disable=too-many-return-statements
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args: str, **kwargs: str) -> bytes:
+    def GET(
+            self,
+            uid: str = "0",
+            action: str = "",
+            resource: str = "",
+            **kwargs: str
+    ) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        if not args:
-            return self.index(**kwargs)
+        try:
+            params = GetParams(
+                uid=uid,
+                action=action,
+                resource=resource,
+                **kwargs
+            )
 
-        if args[0] == "tag":
-            return self.by_tag(args[1], **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if args[0] == "new":
-            return self.form(0, **kwargs)
+        if params.uid and params.action == Actions.NONE:
+            return self.show(params)
 
-        if args[-1] == "edit":
-            return self.form(int(args[-2]), **kwargs)
+        if params.tag:
+            return self.by_tag(params)
 
-        if args[0] == "search":
-            return self.search(kwargs.get("q", ""))
+        if params.action == Actions.NEW:
+            return self.form(params)
 
-        if len(args) == 2:
-            return self.attachment(int(args[0]), args[1])
+        if params.action == Actions.EDIT:
+            return self.form(params)
 
-        return self.show(int(args[0]))
+        if params.q:
+            return self.search(params)
+
+        if params.action == Actions.ATTACHMENTS:
+            return self.attachment(params)
+
+        return self.index()
 
     @staticmethod
-    def PATCH(*args: str, **kwargs: str) -> None:
+    def PATCH(uid: str = "0", **kwargs: str) -> None:
         """Handle updates for toggle fields."""
 
         try:
-            recipe_id = int(args[0])
-        except (IndexError, ValueError) as error:
-            raise cherrypy.HTTPError(400, "Invalid recipe id") from error
+            params = PatchParams(uid=uid, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if kwargs.get("toggle", "") == "star":
+        if params.toggle == "star":
             cherrypy.engine.publish(
                 "recipes:toggle:star",
-                recipe_id=recipe_id
+                recipe_id=params.uid
             )
 
             cherrypy.response.status = 204
@@ -107,53 +173,40 @@ class Controller:
 
         raise cherrypy.HTTPError(400)
 
-    def POST(
-            self,
-            *args: str,
-            title: str,
-            body: str,
-            url: typing.Optional[str],
-            tags: str = "",
-            last_made: str = "",
-            created: str = "",
-            attachments: Attachment = None
-    ) -> None:
+    def POST(self, uid: str, **kwargs: str) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
-        recipe_id = 0
-        if args:
-            recipe_id = int(args[0])
-
-        if not url:
-            url = None
+        try:
+            params = PostParams(uid=uid, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         tag_list = [
-            re.sub(r"\s+", "-", item.strip().lower())
-            for item in tags.split(",")
-            if item.strip()
+            re.sub(r"\s+", "-", item)
+            for item in params.tags.split(",")
         ]
 
-        title = re.sub(r"\s*&\s*", " and ", title)
+        params.title = re.sub(r"\s*&\s*", " and ", params.title)
 
         for replace, search in self.fractions:
-            body = body.replace(search, replace)
+            params.body = params.body.replace(search, replace)
 
-        body = re.sub(r"(\d+)\s*°\s*F", r"\g<1>F", body)
+        params.body = re.sub(r"(\d+)\s*°\s*F", r"\g<1>F", params.body)
 
         if not tag_list:
             tag_list = ["untagged"]
 
         last_made_date = None
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_made.strip()):
-            last_made_date = last_made.strip()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", params.last_made):
+            last_made_date = params.last_made.strip()
 
         created_date = cherrypy.engine.publish(
             "clock:now",
         ).pop()
 
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created.strip()):
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", params.created):
             created_date = datetime.datetime.strptime(
-                f"{created.strip()} 00:00",
+                f"{params.created} 00:00",
                 "%Y-%m-%d %H:%M",
             )
 
@@ -163,26 +216,26 @@ class Controller:
             ).pop()
 
         attachment_list = []
-        if attachments and not isinstance(attachments, list):
-            attachments = [attachments]
+        if params.attachments and not isinstance(params.attachments, list):
+            params.attachments = [params.attachments]
 
-        if attachments:
+        if params.attachments:
             attachment_list = [
                 (
                     attachment.filename.lower(),
                     attachment.content_type.value,
                     attachment.file.read()
                 )
-                for attachment in attachments
+                for attachment in params.attachments
                 if attachment.file
             ]
 
         upsert_id = cherrypy.engine.publish(
             "recipes:upsert",
-            recipe_id,
-            title=title,
-            body=body,
-            url=url,
+            params.uid,
+            title=params.title,
+            body=params.body,
+            url=params.url,
             tags=tag_list,
             last_made=last_made_date,
             created=created_date,
@@ -192,42 +245,36 @@ class Controller:
         raise cherrypy.HTTPRedirect(f"/recipes/{upsert_id}")
 
     @staticmethod
-    def attachment(recipe_id: int, filename: str) -> bytes:
+    def attachment(params: GetParams) -> bytes:
         """Display a single attachment."""
 
-        row = cherrypy.engine.publish(
+        resource = cherrypy.engine.publish(
             "recipes:attachment:view",
-            recipe_id=recipe_id,
-            filename=filename
+            recipe_id=params.uid,
+            filename=params.resource
         ).pop()
 
-        if not row:
+        if not resource:
             raise cherrypy.HTTPError(404)
 
-        cherrypy.response.headers["Content-Type"] = row["mime_type"]
-        return typing.cast(bytes, row["content"])
+        cherrypy.response.headers["Content-Type"] = resource["mime_type"]
+        return typing.cast(bytes, resource["content"])
 
     @staticmethod
-    def by_tag(tag: str, **_kwargs: str) -> bytes:
+    def by_tag(params: GetParams) -> bytes:
         """Display recipes associated with a tag."""
 
         recipes = cherrypy.engine.publish(
             "recipes:find:tag",
-            tag
-        ).pop()
-
-        search_url = cherrypy.engine.publish(
-            "app_url",
-            "search"
+            params.tag
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
-            tag=tag,
-            search_url=search_url,
-            subview_title=tag
+            tag=params.tag,
+            subview_title=params.resource
         ).pop()
 
     @staticmethod
@@ -250,7 +297,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def form(recipe_id: int = 0, **_kwargs: str) -> bytes:
+    def form(params: GetParams) -> bytes:
         """Display a form for adding or updating a recipe."""
 
         title = ""
@@ -262,10 +309,10 @@ class Controller:
         created = ""
         attachments = []
 
-        if recipe_id:
+        if params.uid:
             recipe = cherrypy.engine.publish(
                 "recipes:find",
-                int(recipe_id)
+                params.uid
             ).pop()
 
             if not recipe:
@@ -280,7 +327,7 @@ class Controller:
                 recipe["created"],
                 "%Y-%m-%d"
             ).pop()
-            submit_url = f"/recipes/{recipe_id}"
+            submit_url = f"/recipes/{params.uid}"
 
             if recipe["last_made"]:
                 last_made = cherrypy.engine.publish(
@@ -291,13 +338,13 @@ class Controller:
 
             attachments = cherrypy.engine.publish(
                 "recipes:attachment:list",
-                recipe_id
+                params.uid
             ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-form.jinja.html",
-            recipe_id=recipe_id,
+            recipe_id=params.uid,
             title=title,
             attachments=attachments,
             body=body,
@@ -310,7 +357,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def index(*_args: str, **_kwargs: str) -> bytes:
+    def index() -> bytes:
         """Display the application homepage."""
 
         tags = cherrypy.engine.publish(
@@ -340,34 +387,31 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def search(query: str = "") -> bytes:
+    def search(params: GetParams) -> bytes:
         """Display recipes and tags matching a search."""
-
-        query = query.lower().strip()
 
         query_date = None
 
-        search_url = cherrypy.engine.publish(
-            "app_url",
-            "search"
-        ).pop()
-
-        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", query):
+        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", params.q):
             query_date = cherrypy.engine.publish(
                 "clock:from_format",
-                query,
+                params.q,
                 "%Y-%m-%d"
             ).pop()
 
-        if re.fullmatch(r"\d{4}-\d{2}", query):
+        if re.fullmatch(r"\d{4}-\d{2}", params.q):
             query_date = cherrypy.engine.publish(
                 "clock:from_format",
-                query,
+                params.q,
                 "%Y-%m"
             ).pop()
 
-        if "." in query:
-            query = re.sub(r"\b(\w+)\.(\w+)\b", r"NEAR(\g<1> \g<2>)", query)
+        if "." in params.q:
+            params.q = re.sub(
+                r"\b(\w+)\.(\w+)\b",
+                r"NEAR(\g<1> \g<2>)",
+                params.q
+            )
 
         if query_date:
             recipes = cherrypy.engine.publish(
@@ -378,24 +422,23 @@ class Controller:
         else:
             recipes = cherrypy.engine.publish(
                 "recipes:search:keyword",
-                query
+                params.q
             ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
-            query=query,
-            search_url=search_url,
-            subview_title=query,
+            query=params.q,
+            subview_title=params.q,
         ).pop()
 
-    def show(self, recipe_id: int) -> bytes:
+    def show(self, params: GetParams) -> bytes:
         """Display a single recipe."""
 
         recipe = cherrypy.engine.publish(
             "recipes:find",
-            recipe_id
+            params.uid
         ).pop()
 
         if not recipe:
@@ -403,7 +446,7 @@ class Controller:
 
         attachments = cherrypy.engine.publish(
             "recipes:attachment:list",
-            recipe_id=recipe_id
+            recipe_id=params.uid
         ).pop()
 
         body_html = mistletoe.markdown(recipe["body"])

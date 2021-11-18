@@ -53,7 +53,7 @@
                 {% for tag in tags %}
                     {% set ns.tags_found = True %}
                     <li>
-                        <a href="/recipes/tag/{{ tag["name"]|urlencode }}">
+                        <a href="/recipes/?tag={{ tag["name"]|urlencode }}">
                             <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                             {{ tag["name"] }}
                         </a>
