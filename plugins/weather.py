@@ -137,7 +137,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     "title": alert["event"],
                     "localId": f"weather-{alert['hash']}",
                     "url": weather_app_url,
-                    "deliveryStyle": "whisper",
                     "group": "weather",
                     "expiresAt": f"{alert['seconds_remaining']} seconds",
                     "badge": badge
