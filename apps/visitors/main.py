@@ -1,10 +1,18 @@
 """Website traffic viewer"""
 
-from datetime import datetime
+from datetime import date, datetime
 import re
 import sqlite3
 import typing
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    query: str = Field("", strip_whitespace=True, min_length=1)
 
 
 class Controller:
@@ -17,8 +25,13 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *_args: str, **kwargs: str) -> bytes:
+    def GET(self, **kwargs: str) -> bytes:
         """Display a search interface, and the results of the default query"""
+
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         site_domains = cherrypy.engine.publish(
             "registry:search:valuelist",
@@ -36,14 +49,12 @@ class Controller:
             "/registry"
         ).pop()
 
-        query = kwargs.get("query", "").strip()
-
-        if "default" in saved_queries.keys() and not query:
-            query = saved_queries["default"]
+        if "default" in saved_queries.keys() and not params.query:
+            params.query = saved_queries["default"]
 
         log_records, query_plan = cherrypy.engine.publish(
             "logindex:query",
-            query
+            params.query
         ).pop() or []
 
         reversed_ips = None
@@ -75,10 +86,10 @@ class Controller:
             "jinja:render",
             "apps/visitors/visitors.jinja.html",
             flagless_countries=("AP", None, ""),
-            query=query,
+            query=params.query,
             query_plan=query_plan,
             reversed_ips=reversed_ips,
-            active_date=self.get_active_date(log_records, query),
+            active_date=self.get_active_date(log_records, params.query),
             results=log_records,
             country_names=country_names,
             registry_url=registry_url,
@@ -92,7 +103,7 @@ class Controller:
     def get_active_date(
             log_records: typing.List[sqlite3.Row],
             query: str,
-    ) -> datetime:
+    ) -> typing.Union[date, datetime]:
         """Figure out which date the query pertains to."""
 
         query_date = ""
