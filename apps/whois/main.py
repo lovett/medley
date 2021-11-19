@@ -5,7 +5,15 @@ import re
 import socket
 import urllib.parse
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
 from resources.url import Url
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    address: str = Field("", strip_whitespace=True, to_lower=True)
 
 
 class Controller:
@@ -16,18 +24,21 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display a search form and lookup results."""
 
-        address = kwargs.get("address")
+        try:
+            params = GetParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if not address:
+        if not params.address:
             return cherrypy.engine.publish(
                 "jinja:render",
                 "apps/whois/whois.jinja.html"
             ).pop()
 
-        address_unquoted = urllib.parse.unquote_plus(address.strip()).lower()
+        address_unquoted = urllib.parse.unquote_plus(params.address)
 
         # The address could be an IP or a hostname
         try:
