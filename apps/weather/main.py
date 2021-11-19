@@ -1,10 +1,34 @@
 """Current and upcoming forecasts"""
 
+from enum import Enum
 import typing
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+from pydantic import Field
 
 Forecast = typing.Dict[str, typing.Any]
 Config = typing.Dict[str, typing.Any]
+
+
+class Actions(str, Enum):
+    """Valid keywords for the first URL segment of this application."""
+    NONE = ""
+    SPEAK = "speak"
+
+
+class GetParams(BaseModel):
+    """Valid request parameters for GET requests."""
+    latitude: str = Field("", strip_whitespace=True)
+    longitude: str = Field("", strip_whitespace=True)
+
+
+class PostParams(BaseModel):
+    """Valid request parameters for POST requests."""
+    action: Actions = Actions.NONE
+    parts: str = ""
+    latitude: str = ""
+    longitude: str = ""
 
 
 class Controller:
@@ -15,19 +39,26 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*args: str, **_kwargs: str) -> bytes:
+    def GET(latlong: str = "", **_kwargs: str) -> bytes:
         """Display current and upcoming weather conditions."""
 
         latitude = ""
         longitude = ""
+        if latlong:
+            latitude, longitude = latlong.split(",", 1)
 
-        if len(args) == 1:
-            latitude, longitude = args[0].split(",", 1)
+        try:
+            params = GetParams(
+                latitude=latitude,
+                longitude=longitude
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         config = cherrypy.engine.publish(
             "weather:config",
-            latitude,
-            longitude
+            params.latitude,
+            params.longitude
         ).pop()
 
         if "openweather_api_key" not in config:
@@ -54,35 +85,38 @@ class Controller:
             subview_title=config["location_name"],
         ).pop()
 
-    def POST(self, *args: str, **kwargs: str) -> None:
+    def POST(self, action: str = "", latlong: str = "", **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         latitude = ""
         longitude = ""
-        parts = kwargs.get("parts", '')
+        if latlong:
+            latitude, longitude = latlong.split(",", 1)
 
-        if args[0] == "speak":
-            try:
-                latitude, longitude = args[1].split(",", 1)
-            except IndexError:
-                pass
-            return self.speak(parts, latitude, longitude)
+        try:
+            params = PostParams(
+                action=action,
+                latitude=latitude,
+                longitude=longitude,
+                **kwargs
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        if params.action == Actions.SPEAK:
+            return self.speak(params)
 
         raise cherrypy.HTTPError(404)
 
     @staticmethod
-    def speak(
-            parts: typing.Union[str, typing.Tuple[str, ...]],
-            latitude: str,
-            longitude: str
-    ) -> None:
+    def speak(params: PostParams) -> None:
         """Present the current forecast in a format suitable for
         text-to-speech."""
 
         config = cherrypy.engine.publish(
             "weather:config",
-            latitude,
-            longitude
+            params.latitude,
+            params.longitude
         ).pop()
 
         forecast = cherrypy.engine.publish(
@@ -92,15 +126,16 @@ class Controller:
 
         statements = []
 
-        if parts == "all":
-            parts = (
+        speech_parts = []
+        if params.parts == "all":
+            speech_parts = [
                 "summary",
                 "temperature",
                 "humidity",
                 "alerts"
-            )
+            ]
 
-        for part in parts:
+        for part in speech_parts:
             if part == "summary":
                 statements.append(
                     forecast["currently"]["weather_description"]
