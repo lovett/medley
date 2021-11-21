@@ -109,7 +109,7 @@ class Controller:
         """Clear the cached etag if a URL has been bookmarked."""
 
         mount_point = __package__.split(".").pop()
-        etag_key = f"etag:/{mount_point}/"
+        etag_key = f"etag:/{mount_point}"
 
         if key == "alturl:bookmark":
             cherrypy.engine.publish(
