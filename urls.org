@@ -302,3 +302,18 @@ curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/spe
 #+BEGIN_SRC sh :wrap EXPORT http
 curl -i -d "parts=all" "$host/weather/speak"
 #+END_SRC
+* Warehouse
+** PUT
+#+NAME: warehouse_put_svg
+#+BEGIN_SRC sh :wrap EXPORT http
+curl -i -X PUT \
+   -F "content=@apps/static/svg/medley.svg" \
+   "$host/warehouse/test/path.svg"
+#+END_SRC
+
+** GET
+#+NAME: warehouse_get_svg
+#+BEGIN_SRC sh :wrap EXPORT http
+curl -i \
+   "$host/warehouse/test/path.svg"
+#+END_SRC

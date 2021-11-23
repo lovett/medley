@@ -5,6 +5,7 @@ Based on sample code from https://bitbucket.org/Lawouach/cherrypy-recipes.
 
 import html
 import http.client
+import math
 from pathlib import Path
 import sqlite3
 import typing
@@ -61,6 +62,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["is_today"] = self.is_today
         self.env.filters["is_yesterday"] = self.is_yesterday
         self.env.filters["retarget_html"] = self.retarget_html_filter
+        self.env.filters["filesize"] = self.filesize_filter
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -601,3 +603,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         return value
+
+    @staticmethod
+    def filesize_filter(value: int) -> str:
+        """Convert bytes to a larger labeled unit."""
+
+        conversions = (
+            ("GB", 1024 ** 3),
+            ("MB", 1024 ** 2),
+            ("KB", 1024 ** 1),
+        )
+
+        for label, limit in conversions:
+            if value > limit:
+                return f"{math.ceil(value / limit)} {label}"
+
+        return f"{value} B"
