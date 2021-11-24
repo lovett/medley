@@ -1,5 +1,6 @@
 """Phone number metadata"""
 
+import re
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -37,12 +38,10 @@ class Controller:
             ).pop()
             return default_response
 
-        sanitized_number = cherrypy.engine.publish(
-            "formatting:phone_sanitize",
-            number=params.number
-        ).pop()
+        params.number = re.sub(r"\D", "", params.number)
+        params.number = re.sub(r"^1(\d{10})", r"\1", params.number)
 
-        if not sanitized_number:
+        if not params.number:
             search_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "apps/phone/phone.jinja.html",
@@ -51,7 +50,7 @@ class Controller:
             ).pop()
             return search_response
 
-        area_code = sanitized_number[:3]
+        area_code = params.number[:3]
 
         location = cherrypy.engine.publish(
             "cache:get",
@@ -83,7 +82,7 @@ class Controller:
 
         call_history, _ = cherrypy.engine.publish(
             "cdr:history",
-            sanitized_number
+            params.number
         ).pop()
 
         sparql = [
@@ -96,12 +95,12 @@ class Controller:
             "jinja:render",
             "apps/phone/phone.jinja.html",
             history=call_history,
-            number=sanitized_number,
+            number=params.number,
             state_abbreviation=state_lookup[1],
             comment=state_lookup[2],
             state_name=state_name_lookup[1],
             sparql=sparql,
-            subview_title=sanitized_number
+            subview_title=params.number
         ).pop()
 
         return response

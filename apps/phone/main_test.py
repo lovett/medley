@@ -43,8 +43,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "formatting:phone_sanitize":
-                return [None]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -61,8 +59,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> typing.Any:
             """Side effects local function"""
-            if args[0] == "formatting:phone_sanitize":
-                return [None]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -87,7 +83,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 "geography:unabbreviate_state": [
                     (None, "Unabbreviated State")
                 ],
-                "formatting:phone_sanitize": ["1234567890"],
                 "cdr:history": [([], 0)],
             }
             if args[0] == "jinja:render":
@@ -115,8 +110,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                         "Unabbreviated State"
                     )
                 }]
-            if args[0] == "formatting:phone_sanitize":
-                return ["1234567890"]
             if args[0] == "cdr:history":
                 return [[{"clid": "test"}, 1]]
             if args[0] == "jinja:render":

@@ -20,26 +20,6 @@ class TestFormatting(Subscriber):
         self.plugin.start()
         self.assert_prefix(subscribe_mock, "formatting")
 
-    def test_phone_sanitize_numeric(self) -> None:
-        """Numeric strings are returned untouched"""
-        initial = "100"
-        final = self.plugin.phone_sanitize(initial)
-        self.assertEqual(final, initial)
-
-    def test_phone_sanitize_mixed(self) -> None:
-        """Alphanumeric strings are reduced to numbers only"""
-
-        initial = "This is a test 100"
-        final = self.plugin.phone_sanitize(initial)
-        self.assertEqual(final, "100")
-
-    def test_phone_sanitize_empty(self) -> None:
-        """An empty string is returned untouched"""
-
-        initial = ""
-        final = self.plugin.phone_sanitize(initial)
-        self.assertEqual(final, "")
-
     def test_dbpedia_truncation(self) -> None:
         """A comment with two sentences is reduced to the first two"""
 
