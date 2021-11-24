@@ -46,9 +46,6 @@ class Url():
         else:
             parsed_url = urlparse(self.address)
 
-        self.schemeless_address = f"{parsed_url.netloc}{parsed_url.path}"
-        self.alt = f"/alturl/{self.schemeless_address}"
-
         self.anonymized = self.address
         if parsed_url.scheme in ("http", "https"):
             self.anonymized = f"/redirect/?u={self.address}"
@@ -56,21 +53,23 @@ class Url():
         if parsed_url.hostname:
             self.domain = parsed_url.hostname
 
-        if self.domain.startswith("www."):
-            self.domain = self.domain[4:]
-
         self.path = parsed_url.path
 
         if not self.text:
             self.text = self.address
 
         self.display_domain = self.domain
-        if "reddit.com" in self.domain:
+        if self.domain.endswith("reddit.com"):
+            if "www" in self.domain:
+                self.domain = self.domain[4:]
+
             path_parts = self.path.split("/", 3)
             self.display_domain = "/".join(path_parts[0:3])
 
         self.escaped_address = quote(self.address)
 
+        self.schemeless_address = f"{self.domain}{parsed_url.path}"
+        self.alt = f"/alturl/{self.schemeless_address}"
         self.base_address = f"{parsed_url.scheme}://{parsed_url.netloc}"
 
         self.etag_key = f"etag:{self.schemeless_address}".rstrip("/")

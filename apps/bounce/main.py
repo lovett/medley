@@ -43,6 +43,10 @@ class Controller:
         "test",
     }
 
+    alturl_domains = (
+        "reddit.com",
+    )
+
     @cherrypy.tools.provides(formats=("html",))
     def GET(self, **kwargs: str) -> bytes:
         """Display all the URLs in a group."""
@@ -56,6 +60,14 @@ class Controller:
         bounces: typing.List[Url] = []
 
         url = Url(params.u)
+
+        if url.domain in self.alturl_domains:
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+                url.alt
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         if params.u:
             registry_key = cherrypy.engine.publish(
