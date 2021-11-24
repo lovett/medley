@@ -110,7 +110,7 @@
 }
 
 #editor TEXTAREA {
-    height: 100%;
+    height: 20em;
 }
 
 #tagset ul {
@@ -136,6 +136,10 @@
 @media (min-width: 768px) {
     #attachments {
         border-top: 1px solid var(--grey);
+    }
+
+    #editor TEXTAREA {
+        height: 100%;
     }
 
     #ingredients {
