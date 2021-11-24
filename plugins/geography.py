@@ -1,5 +1,6 @@
 """Look up geographic information by various identifiers."""
 
+import re
 import typing
 import cherrypy
 
@@ -34,8 +35,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.country_by_abbreviation
         )
 
-    @staticmethod
     def state_by_area_code(
+            self,
             area_code: str
     ) -> typing.Tuple[str, typing.Optional[str], typing.Optional[str]]:
         """Query dbpedia for the geographic location of a North American
@@ -73,10 +74,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         try:
-            abstract = cherrypy.engine.publish(
-                "formatting:dbpedia_abstract",
+            abstract = self.dbpedia_abstract(
                 response["results"]["bindings"][0]["abstract"]["value"]
-            ).pop()
+            )
 
             return (
                 sparql,
@@ -152,3 +152,41 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             typing.Dict[str, str],
             rows
         )
+
+    @staticmethod
+    def dbpedia_abstract(text: str) -> str:
+        """Extract the first two meaningful sentences from a dbpedia
+        abstract."""
+
+        # Separate collided sentences:
+        #
+        # Before:
+        # This is the first.This is the second.
+        #
+        # After:
+        # This is the first. This is the second.
+        abbreviated_text = re.sub(r'([^A-Z])\.([^ ])', '\\1. \\2', text)
+
+        # Remove sentences referring to maps
+        sentences = [
+            sentence for sentence in abbreviated_text.split(". ")
+            if not re.search(
+                    " in (red|blue) (is|are)", sentence,
+                    re.IGNORECASE
+            )
+            and not re.match(
+                "The map to the right", sentence,
+                re.IGNORECASE
+            )
+            and not re.match(
+                "Error: ", sentence,
+                re.IGNORECASE
+            )
+        ][:2]
+
+        abbreviated_text = ". ".join(sentences)
+
+        if abbreviated_text and not abbreviated_text.endswith("."):
+            abbreviated_text += "."
+
+        return abbreviated_text

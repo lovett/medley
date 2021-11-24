@@ -446,13 +446,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["formatting:dbpedia_abstract"],
-        text: str,
-) -> List[str]: ...
-
-
-@overload
-def publish(
         channel: Literal["gcp:appengine:ingest_file"],
         storage_path: Path,
         batch_size: Optional[int] = 100,
