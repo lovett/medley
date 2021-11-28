@@ -103,7 +103,9 @@ MEDLEY.visitors = (function () {
 
         e.preventDefault();
 
-        const endpoint = '/registry';
+        const tag = document.querySelector('meta[name=medley-registry]');
+        const endpoint = tag.getAttribute('content');
+        console.log(endpoint)
         const label = prompt('Enter a label for this IP');
         const td = annotateIcon.closest('td');
 
@@ -128,8 +130,7 @@ MEDLEY.visitors = (function () {
         payload.set('replace', true);
 
         const response = await fetch(endpoint, {
-            method: 'PUT',
-            mode: 'same-origin',
+            method: 'POST',
             body: payload
         })
 

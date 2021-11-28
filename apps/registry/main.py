@@ -1,7 +1,6 @@
 """General-purpose key-value store"""
 
 from enum import Enum
-from typing import Optional
 import json
 import cherrypy
 from pydantic import BaseModel
@@ -35,7 +34,7 @@ class PostParams(BaseModel):
     uid: int = Field(0, gt=-1)
     key: str = Field(strip_whitespace=True, min_length=1)
     value: str = Field(strip_whitespace=True, min_length=1)
-    skip_redirect: Optional[bool] = False
+    skip_redirect: bool = False
 
 
 class Controller:
@@ -112,7 +111,13 @@ class Controller:
             )
 
         if not params.skip_redirect:
-            raise cherrypy.HTTPRedirect(f"/registry?q={params.key}")
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+                "/registry",
+                query={"q": params.key}
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         cherrypy.response.status = 204
 
