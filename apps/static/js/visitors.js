@@ -105,24 +105,9 @@ MEDLEY.visitors = (function () {
 
         const tag = document.querySelector('meta[name=medley-registry]');
         const endpoint = tag.getAttribute('content');
-        console.log(endpoint)
-        const label = prompt('Enter a label for this IP');
-        const td = annotateIcon.closest('td');
-
-        if (label.trim() === '') {
-            const response = await fetch(endpoint, {
-                method: 'DELETE',
-                mode: 'same-origin',
-            });
-
-            if (response.ok) {
-                td.querySelector('.annotations').innerHTML = '<p></p>';
-            } else {
-                MEDLEY.setErrorMessage('Unable to clear the annotation.');
-            }
-
-            return;
-        }
+        const container = annotateIcon.closest('td').querySelector('.annotations')
+        const existingLabel = container.innerText;
+        const label = prompt('Enter a label for this IP (leave empty to erase):', existingLabel);
 
         let payload = new FormData()
         payload.set('key', `ip:${annotateIcon.dataset.ip}`);
@@ -135,7 +120,7 @@ MEDLEY.visitors = (function () {
         })
 
         if (response.ok) {
-            td.querySelector('.annotations').innerHTML = `<p>${label}</p>`;
+            container.innerHTML = `<p>${label}</p>`;
         } else {
             MEDLEY.setErrorMessage('The annotation not be saved.');
         }

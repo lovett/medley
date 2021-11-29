@@ -73,12 +73,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("memorize:clear", key)
 
-        result = self._multi([
+        Query = typing.Tuple[str, typing.Tuple[str, ...]]
+
+        queries: typing.Tuple[Query, ...] = (
             ("DELETE FROM registry WHERE key=?",
              (key,)),
-            ("INSERT INTO registry (key, value) VALUES (?, ?)",
-             (key, value))
-        ])
+        )
+
+        if value:
+            queries += (
+                ("INSERT INTO registry (key, value) VALUES (?, ?)",
+                 (key, value)),
+            )
+
+        result = self._multi(queries)
 
         if result:
             cherrypy.engine.publish("registry:added", key)

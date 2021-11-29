@@ -32,8 +32,9 @@ class GetParams(BaseModel):
 class PostParams(BaseModel):
     """Valid request parameters for POST requests."""
     uid: int = Field(0, gt=-1)
-    key: str = Field(strip_whitespace=True, min_length=1)
-    value: str = Field(strip_whitespace=True, min_length=1)
+    key: str = Field(strip_whitespace=True)
+    value: str = Field(strip_whitespace=True)
+    replace: bool = False
     skip_redirect: bool = False
 
 
@@ -96,7 +97,13 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.uid > 0:
+        if params.replace:
+            cherrypy.engine.publish(
+                "registry:replace",
+                params.key,
+                params.value
+            )
+        elif params.uid > 0:
             cherrypy.engine.publish(
                 "registry:update",
                 params.uid,
