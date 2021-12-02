@@ -105,7 +105,7 @@ MEDLEY.visitors = (function () {
 
         const tag = document.querySelector('meta[name=medley-registry]');
         const endpoint = tag.getAttribute('content');
-        const container = annotateIcon.closest('td').querySelector('.annotations')
+        const container = annotateIcon.closest('td').querySelector('.annotations');
         const existingLabel = container.innerText;
         const label = prompt('Enter a label for this IP (leave empty to erase):', existingLabel);
 
