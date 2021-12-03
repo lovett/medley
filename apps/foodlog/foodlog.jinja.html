@@ -3,24 +3,24 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        {% if allow_cancel %}
+        {% if uid is defined %}
         <a class="cancel" href="{{ app_url }}">
             <svg class="icon"><use xlink:href="#icon-x"></use></svg>
             Cancel
         </a>
         {% endif %}
 
-        {% if allow_add %}
-        <a id="add-record" href="{{ app_url }}/new">
+        {% if add_url %}
+        <a id="add-record" href="{{ add_url }}">
             <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
             Add
         </a>
         {% endif %}
 
-        {% if allow_delete %}
+        {% if delete_url %}
             <a class="delete"
                href="#"
-               data-delete-url="{{ app_url }}/{{ entry_id }}"
+               data-delete-url="{{ delete_url }}"
                data-delete-redirect="{{ app_url }}"
                data-delete-resource-name="entry">
                 <svg class="icon"><use xlink:href="#icon-delete"></use></svg>

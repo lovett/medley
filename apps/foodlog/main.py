@@ -35,7 +35,7 @@ class PostParams(BaseModel):
     """Valid request parameters for POST requests."""
     consume_date: datetime.date
     consume_time: datetime.time
-    entry_id: int = Field(0, gt=-1)
+    uid: int = Field(0, gt=-1)
     foods_eaten: str = ""
     overate: int = 0
 
@@ -47,7 +47,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: str = "0") -> None:
+    def DELETE(uid: int) -> None:
         """Remove an entry from the database."""
 
         try:
@@ -67,7 +67,7 @@ class Controller:
         raise cherrypy.HTTPError(404)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, uid: str = "0", action: str = "", **kwargs: str) -> bytes:
+    def GET(self, uid: int = 0, action: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
@@ -92,7 +92,7 @@ class Controller:
         return self.index(params)
 
     @staticmethod
-    def POST(uid: str = "0", **kwargs: str) -> None:
+    def POST(uid: int = 0, **kwargs: str) -> None:
         """Add a new entry or update an existing one."""
 
         try:
@@ -115,7 +115,7 @@ class Controller:
 
         result = cherrypy.engine.publish(
             "foodlog:upsert",
-            params.entry_id,
+            params.uid,
             consumed_on=consumed_on_utc,
             foods_eaten=params.foods_eaten,
             overate=params.overate
@@ -144,6 +144,11 @@ class Controller:
             "app_url"
         ).pop()
 
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "0/new"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/foodlog/foodlog-index.jinja.html",
@@ -152,7 +157,7 @@ class Controller:
             pagination_url=pagination_url,
             offset=params.offset,
             per_page=params.per_page,
-            allow_add=True
+            add_url=add_url
         ).pop()
 
     @staticmethod
@@ -164,12 +169,18 @@ class Controller:
             local=True
         ).pop()
 
-        allow_delete = False
+        delete_url = ""
+        foods_eaten = ""
+        overate = False
         if params.uid:
-            allow_delete = True
             entry = cherrypy.engine.publish(
                 "foodlog:find",
                 params.uid
+            ).pop()
+
+            delete_url = cherrypy.engine.publish(
+                "app_url",
+                str(params.uid)
             ).pop()
 
             if not entry:
@@ -182,10 +193,9 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/foodlog/foodlog-form.jinja.html",
-            allow_cancel=True,
-            allow_add=False,
-            allow_delete=allow_delete,
-            entry_id=params.uid,
+            add_url="",
+            delete_url=delete_url,
+            uid=params.uid,
             entry_date=entry_date,
             foods_eaten=foods_eaten,
             overate=overate
@@ -231,6 +241,4 @@ class Controller:
             offset=params.offset,
             per_page=params.per_page,
             pagination_url=pagination_url,
-            allow_cancel=True,
-            allow_add=True
         ).pop()
