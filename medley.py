@@ -205,7 +205,9 @@ def setup() -> None:
                 name.split("/")[1]
                 for name in archive.namelist()
                 if name.endswith("main.py")
+                and name.startswith("apps/")
             ]
+
     else:
         apps = [
             entry.name
