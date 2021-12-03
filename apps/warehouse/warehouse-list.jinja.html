@@ -13,27 +13,35 @@
     {{ macros.svgSymbols("file", "delete", "calendar") }}
     <main>
         <div class="table-sleeve">
-            <table id="tags" class="key-value">
-                <tbody>
-                    {% for file in files %}
-                        <tr>
-                            <td>
-                                <svg class="icon"><use xlink:href="#icon-file"></use></svg>
-                                <a href="{{ file.path.address }}">
-                                    {{ file.path.text }}
-                                </a>
-                            </td>
-                            <td>
-                                {{ file.total_bytes|filesize }}
-                            </td>
-                            <td>
-                                <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                                {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% for file in files %}
+                {% if loop.first %}
+                    <table id="tags" class="key-value">
+                        <tbody>
+                {% endif %}
+                <tr>
+                    <td>
+                        <svg class="icon"><use xlink:href="#icon-file"></use></svg>
+                        <a href="{{ file.path.address }}">
+                            {{ file.path.text }}
+                        </a>
+                    </td>
+                    <td>
+                        {{ file.total_bytes|filesize }}
+                    </td>
+                    <td>
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
+                    </td>
+                </tr>
+
+                {% if loop.last %}
+                        </tbody>
+                    </table>
+                {% endif %}
+
+                    {% else %}
+                <p>The warehouse is empty.</p>
+            {% endfor %}
         </div>
     </main>
 {% endblock %}
