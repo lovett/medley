@@ -8,29 +8,29 @@ from pydantic import ValidationError
 from pydantic import Field
 
 
-class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+class Subresource(str, Enum):
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     NEW = "new"
     EDIT = "edit"
 
 
 class DeleteParams(BaseModel):
-    """Valid request parameters for DELETE requests."""
+    """Parameters for DELETE requests."""
     uid: int = Field(0, gt=0)
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     uid: int = Field(0, gt=-1)
-    action: Actions = Actions.NONE
+    subresource: Subresource = Subresource.NONE
     q: str = Field("", strip_whitespace=True, min_length=1)
     key: str = Field("", strip_whitespace=True, min_length=1)
     value: str = Field("", strip_whitespace=True, min_length=1)
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     uid: int = Field(0, gt=-1)
     key: str = Field(strip_whitespace=True)
     value: str = Field(strip_whitespace=True)
@@ -58,32 +58,34 @@ class Controller:
         cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("html", "json"))
-    def GET(self, action: str = "", uid: str = "0", **kwargs: str) -> bytes:
+    def GET(self, uid: int = 0, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
             params = GetParams(
                 uid=uid,
-                action=action,
+                subresource=subresource,
                 **kwargs
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
+        if params.uid > 0 and params.subresource == Subresource.EDIT:
+            return self.form(params)
+
+        if params.uid == 0 and params.subresource == Subresource.NEW:
+            return self.form(params)
+
         if params.q:
             return self.search(params)
 
-        if not params.action:
-            return self.index()
+        if cherrypy.request.path_info != "/":
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+            ).pop()
+            raise cherrypy.HTTPRedirect(redirect_url)
 
-        if params.action == Actions.NEW:
-            params.uid = 0
-            return self.form(params)
-
-        if params.action == Actions.EDIT:
-            return self.form(params)
-
-        raise cherrypy.HTTPError(404)
+        return self.index()
 
     @staticmethod
     def POST(uid: str = "0", **kwargs: str) -> None:
@@ -183,7 +185,7 @@ class Controller:
 
         add_url = cherrypy.engine.publish(
             "app_url",
-            "new"
+            "0/new"
         ).pop()
 
         return cherrypy.engine.publish(
