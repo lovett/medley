@@ -27,6 +27,7 @@ class GetParams(BaseModel):
     q: str = Field("", strip_whitespace=True, min_length=1)
     key: str = Field("", strip_whitespace=True, min_length=1)
     value: str = Field("", strip_whitespace=True, min_length=1)
+    format: str = ""
 
 
 class PostParams(BaseModel):
@@ -225,6 +226,12 @@ class Controller:
             "new"
         ).pop()
 
+        export_url = cherrypy.engine.publish(
+            "app_url",
+            "",
+            {"q": params.q, "format": "json"}
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/registry/registry-list.jinja.html",
@@ -233,5 +240,6 @@ class Controller:
             parent_key=parent_key,
             record_count=count,
             records=rows,
-            subview_title=params.q
+            subview_title=params.q,
+            export_url=export_url,
         ).pop()

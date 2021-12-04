@@ -41,6 +41,7 @@ class Tool(cherrypy.Tool):
         ]
 
         request_path = pathlib.Path(cherrypy.request.path_info)
+        querystring_format = cherrypy.request.params.get("format", "")
 
         # Handle bare extensions.
         if request_path.name.startswith("."):
@@ -53,15 +54,15 @@ class Tool(cherrypy.Tool):
             cherrypy.request.wants = "html"
             response_type = "text/html"
 
-        if request_path.suffix == ".txt" or "text/plain" in accept:
+        if querystring_format == "txt" or "text/plain" in accept:
             cherrypy.request.wants = "text"
             response_type = "text/plain;charset=utf-8"
 
-        if request_path.suffix == ".json" or "application/json" in accept:
+        if querystring_format == "json" or "application/json" in accept:
             cherrypy.request.wants = "json"
             response_type = "application/json"
 
-        if request_path.suffix == ".org" or "text/x-org" in accept:
+        if querystring_format == "org" or "text/x-org" in accept:
             cherrypy.request.wants = "org"
             response_type = "text/x-org"
 
