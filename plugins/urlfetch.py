@@ -120,6 +120,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 exception
             )
 
+            return None
+
         cherrypy.engine.publish(
             "applog:add",
             "urlfetch:get:json",
