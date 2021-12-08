@@ -308,6 +308,7 @@ curl -i -d "parts=all" "$host/weather/speak"
 #+BEGIN_SRC sh :wrap EXPORT http
 curl -i -X PUT \
    -F "content=@apps/static/svg/medley.svg" \
+   -F "content_type=image/svg+xml" \
    "$host/warehouse/test/path.svg"
 #+END_SRC
 

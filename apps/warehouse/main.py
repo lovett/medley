@@ -54,7 +54,7 @@ class Controller:
     @staticmethod
     def PUT(
             *args: str,
-            content_type: str = "",
+            content_type: str = "application/octet-stream",
             content: cherrypy._cpreqbody.Part
     ) -> None:
         """Accept a file for storage."""
@@ -106,7 +106,7 @@ class Controller:
         ).pop()
 
         if not content_type:
-            raise cherrypy.HTTPError(404)
+            content_type = "application/octet-stream"
 
         cherrypy.response.stream = True
         cherrypy.response.headers["Content-Type"] = content_type
