@@ -8,12 +8,7 @@ import apps.alturl.reddit
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests.
-
-    Not handling url with one of pydantic's URL types to allow the
-    scheme to remain optional.
-
-    """
+    """Parameters for POST requests."""
     url: str
 
 

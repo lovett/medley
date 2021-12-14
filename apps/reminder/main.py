@@ -12,12 +12,12 @@ import cherrypy
 
 
 class DeleteParams(BaseModel):
-    """Valid request parameters for DELETE requests."""
+    """Parameters for DELETE requests."""
     uid: float = Field(0, gt=0)
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     message: str = Field("", strip_whitespace=True)
     badge: str = Field("", strip_whitespace=True)
     minutes: int = Field(0, gt=-1)

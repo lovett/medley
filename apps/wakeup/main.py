@@ -9,12 +9,12 @@ from pydantic import Field
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     sent: bool = False
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     host: str = Field(strip_whitespace=True)
 
 

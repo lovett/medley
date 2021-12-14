@@ -8,7 +8,7 @@ from pydantic import Field
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     STATUS = "status"
     PATH = "path"
@@ -22,7 +22,7 @@ class StatusParams(BaseModel):
 
 
 class GetParams(StatusParams):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     per_page: int = 20
     offset: int = 0
     path: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
@@ -30,17 +30,17 @@ class GetParams(StatusParams):
 
 
 class PostParams(StatusParams):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     ...
 
 
 class PutParams(StatusParams):
-    """Valid request parameters for POST requests."""
+    """Parameters for PUT requests."""
     ...
 
 
 class DeleteParams(StatusParams):
-    """Valid request parameters for POST requests."""
+    """Parameters for DELETE requests."""
     ...
 
 

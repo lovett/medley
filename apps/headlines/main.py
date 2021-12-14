@@ -7,7 +7,7 @@ from resources.url import Url
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     start: int = 1
     count: int = 40
 

@@ -109,7 +109,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
 
         response = self.request("/12345", method="DELETE")
-        self.assert_404(response)
+        self.assert_status(response, 404)
 
     @mock.patch("cherrypy.engine.publish")
     def test_delete_success(self, publish_mock: mock.Mock) -> None:
@@ -124,7 +124,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         publish_mock.side_effect = side_effect
 
         response = self.request("/123", method="DELETE")
-        self.assertEqual(response.code, 204)
+        self.assert_status(response, 204)
 
 
 if __name__ == "__main__":

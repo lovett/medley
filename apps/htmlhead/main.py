@@ -9,7 +9,7 @@ import parsers.htmlhead
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     url: HttpUrl = Field(strip_whitespace=True)
     username: str = ""
     password: str = ""

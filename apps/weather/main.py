@@ -12,19 +12,19 @@ Config = typing.Dict[str, typing.Any]
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     SPEAK = "speak"
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     latitude: str = Field("", strip_whitespace=True)
     longitude: str = Field("", strip_whitespace=True)
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     action: Actions = Actions.NONE
     parts: str = ""
     latitude: str = ""

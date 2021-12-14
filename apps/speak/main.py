@@ -9,13 +9,13 @@ from pydantic import ValidationError
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     VOICES = "voices"
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     action: Actions = Actions.NONE
 
 

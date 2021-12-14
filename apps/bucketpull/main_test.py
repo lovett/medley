@@ -40,7 +40,7 @@ class TestBucketpull(BaseCherryPyTestCase, ResponseAssertions):
             "/",
             method="POST",
         )
-        self.assert_404(response)
+        self.assert_status(response, 404)
 
     def test_service_invalid(self) -> None:
         """A 404 is returned if the service specified in the URL is unknown."""
@@ -50,7 +50,7 @@ class TestBucketpull(BaseCherryPyTestCase, ResponseAssertions):
             method="POST",
         )
 
-        self.assert_404(response)
+        self.assert_status(response, 404)
 
 
 if __name__ == "__main__":

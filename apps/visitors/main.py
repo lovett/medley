@@ -11,15 +11,12 @@ from pydantic import Field
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     query: str = Field("", strip_whitespace=True, min_length=1)
 
 
 class Controller:
-    """The primary controller for the application, structured for
-    method-based dispatch
-
-    """
+    """Dispatch application requests based on HTTP verb."""
 
     exposed = True
     show_on_homepage = True

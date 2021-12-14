@@ -10,7 +10,7 @@ class Controller:
     exposed = True
 
     @staticmethod
-    def POST(*_args: str, **_kwargs: str) -> None:
+    def POST() -> None:
         """Schedule maintenance operations."""
 
         cherrypy.engine.publish(

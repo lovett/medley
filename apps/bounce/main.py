@@ -10,7 +10,7 @@ from resources.url import Url
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     u: HttpUrl = Field("")
     group: str = ""
     error: str = ""
@@ -18,7 +18,7 @@ class GetParams(BaseModel):
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     url: str = ""
     name: str = ""
     group: str = Field(

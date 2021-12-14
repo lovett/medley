@@ -11,7 +11,7 @@ from pydantic import Field
 
 
 class Transforms(str, Enum):
-    """Valid keywords for the transform parameter of POST requests."""
+    """Parameters for POST requests."""
     NONE = ""
     CAPITALIZE = "capitalize"
     FLATTEN = "flatten"
@@ -24,7 +24,7 @@ class Transforms(str, Enum):
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     transform: Transforms
     value: str = Field("", strip_whitespace=True)
 

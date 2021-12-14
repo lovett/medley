@@ -12,13 +12,13 @@ from resources.url import Url
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     TAGLIST = "taglist"
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     action: Actions = Actions.NONE
     query: str = Field("", strip_whitespace=True, min_length=1)
     wayback: str = Field("", strip_whitespace=True, min_length=1)
@@ -29,7 +29,7 @@ class GetParams(BaseModel):
 
 
 class DeleteParams(BaseModel):
-    """Valid request parameters for DELETE requests."""
+    """Parameters for DELETE requests."""
     uid: int = Field(0, gt=0)
 
 

@@ -10,12 +10,12 @@ from pydantic import Field
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     path: Path
 
 
 class PutParams(BaseModel):
-    """Valid request parameters for PUT requests."""
+    """Parameters for PUT requests."""
     storage_path: Path
     content_type: str = Field(
         "",

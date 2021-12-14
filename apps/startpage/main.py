@@ -9,19 +9,19 @@ from parsers.startpage import Parser
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     EDIT = "edit"
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     page_name: str = "default"
     action: Actions = Actions.NONE
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     page_name: str
     page_content: str
 

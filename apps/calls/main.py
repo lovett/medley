@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     offset: int = 0
     per_page: int = 50
 

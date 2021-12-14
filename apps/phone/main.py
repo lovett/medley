@@ -8,7 +8,7 @@ from pydantic import Field
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     number: str = Field("", strip_whitespace=True)
 
 

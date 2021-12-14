@@ -6,7 +6,7 @@ import cherrypy
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     offset: int = 0
     source: str = ""
     per_page: int = 20

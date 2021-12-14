@@ -21,7 +21,7 @@ Attachment = typing.Union[
 
 
 class Actions(str, Enum):
-    """Valid keywords for the first URL segment of this application."""
+    """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     NEW = "new"
     EDIT = "edit"
@@ -29,12 +29,12 @@ class Actions(str, Enum):
 
 
 class DeleteParams(BaseModel):
-    """Valid request parameters for DELETE requests."""
+    """Parameters for DELETE requests."""
     uid: int = Field(0, gt=0)
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     uid: int = Field(0, gt=-1)
     action: Actions = Actions.NONE
     q: str = Field("", strip_whitespace=True, min_length=1)
@@ -43,13 +43,13 @@ class GetParams(BaseModel):
 
 
 class PatchParams(BaseModel):
-    """Valid request parameters for PATCH requests."""
+    """Parameters for PATCH requests."""
     uid: int = Field(0, gt=-1)
     toggle: str = ""
 
 
 class PostParams(BaseModel):
-    """Valid request parameters for POST requests."""
+    """Parameters for POST requests."""
     uid: int = Field(0, gt=-1)
     title: str = Field(strip_whitespace=True)
     body: str = Field(strip_whitespace=True)

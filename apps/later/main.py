@@ -9,7 +9,7 @@ from resources.url import Url
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     url: HttpUrl = Field("")
     title: str = Field("", strip_whitespace=True)
     tags: str = Field("", strip_whitespace=True)

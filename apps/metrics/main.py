@@ -10,7 +10,7 @@ from pydantic import Field
 
 
 class GetParams(BaseModel):
-    """Valid request parameters for GET requests."""
+    """Parameters for GET requests."""
     metric: str = Field("", strip_whitespace=True, to_lower=True)
 
 
