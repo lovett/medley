@@ -11,16 +11,16 @@ import cherrypy
 from resources.url import Url
 
 
-class Actions(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
+class Subresource(str, Enum):
+    """Valid keywords for the first URL path segment of this application."""
     NONE = ""
     TAGLIST = "taglist"
 
 
 class GetParams(BaseModel):
     """Parameters for GET requests."""
-    action: Actions = Actions.NONE
-    query: str = Field("", strip_whitespace=True, min_length=1)
+    subresource: Subresource = Subresource.NONE
+    q: str = Field("", strip_whitespace=True, min_length=1)
     wayback: str = Field("", strip_whitespace=True, min_length=1)
     offset: int = 0
     max_days: int = 180
@@ -59,24 +59,24 @@ class Controller:
         cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("json", "html"))
-    def GET(self, action: str = "", **kwargs: str) -> bytes:
+    def GET(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
             params = GetParams(
-                action=action,
+                subresource=subresource,
                 **kwargs
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.query:
+        if params.q:
             return self.search(params)
 
         if params.wayback:
             return self.check_wayback_availability(params)
 
-        if params.action == Actions.TAGLIST:
+        if params.subresource == Subresource.TAGLIST:
             return self.taglist()
 
         return self.index(params)
@@ -174,21 +174,21 @@ class Controller:
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
             "bookmarks:search",
-            params.query,
+            params.q,
             limit=params.per_page,
             offset=params.offset,
             order=params.order
         ).pop()
 
         domain_counts = {}
-        if "site:" not in params.query:
+        if "site:" not in params.q:
             domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/bookmarks",
             {
-                "query": params.query,
+                "q": params.q,
                 "order": params.order
             }
         ).pop()
@@ -202,10 +202,10 @@ class Controller:
             order=params.order,
             pagination_url=pagination_url,
             per_page=params.per_page,
-            query=params.query,
+            q=params.q,
             query_plan=query_plan,
             total_records=total_records,
-            subview_title=params.query
+            subview_title=params.q
         ).pop()
 
     @staticmethod

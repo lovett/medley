@@ -29,11 +29,11 @@
                     <input
                         autocapitalize="none"
                         autocomplete="off"
-                        id="query"
-                        name="query"
+                        id="q"
+                        name="q"
                         placeholder="Search term"
                         type="search"
-                        value="{{ query|default('', true)|e }}"
+                        value="{{ q|e }}"
                     />
                 </div>
                 <div class="field">
@@ -127,7 +127,7 @@
                                             <div>
                                                 <svg class="icon"><use xlink:href="#icon-search"></use></svg>
                                                 {{ count|pluralize('bookmark', 'bookmarks') }} from
-                                                <a href="{{ app_url }}?query=site:{{ bookmark.url.display_domain }}">
+                                                <a href="{{ app_url }}?q=site:{{ bookmark.url.display_domain }}">
                                                     {{ bookmark.url.display_domain }}
                                                 </a>
                                             </div>
