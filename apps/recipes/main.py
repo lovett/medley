@@ -20,7 +20,7 @@ Attachment = typing.Union[
 ]
 
 
-class Actions(str, Enum):
+class Subresource(str, Enum):
     """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     NEW = "new"
@@ -36,7 +36,7 @@ class DeleteParams(BaseModel):
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     uid: int = Field(0, gt=-1)
-    action: Actions = Actions.NONE
+    subresource: Subresource = Subresource.NONE
     q: str = Field("", strip_whitespace=True, min_length=1)
     resource: str = Field("", strip_whitespace=True)
     tag: str = Field("", strip_whitespace=True)
@@ -116,7 +116,7 @@ class Controller:
     def GET(
             self,
             uid: str = "0",
-            action: str = "",
+            subresource: str = "",
             resource: str = "",
             **kwargs: str
     ) -> bytes:
@@ -125,7 +125,7 @@ class Controller:
         try:
             params = GetParams(
                 uid=uid,
-                action=action,
+                subresource=subresource,
                 resource=resource,
                 **kwargs
             )
@@ -133,22 +133,22 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.uid and params.action == Actions.NONE:
+        if params.uid and params.subresource == Subresource.NONE:
             return self.show(params)
 
         if params.tag:
             return self.by_tag(params)
 
-        if params.action == Actions.NEW:
+        if params.subresource == Subresource.NEW:
             return self.form(params)
 
-        if params.action == Actions.EDIT:
+        if params.subresource == Subresource.EDIT:
             return self.form(params)
 
         if params.q:
             return self.search(params)
 
-        if params.action == Actions.ATTACHMENTS:
+        if params.subresource == Subresource.ATTACHMENTS:
             return self.attachment(params)
 
         return self.index()
