@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from pydantic import ValidationError
 
 
-class Actions(str, Enum):
+class Subresource(str, Enum):
     """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     VOICES = "voices"
@@ -16,7 +16,7 @@ class Actions(str, Enum):
 
 class GetParams(BaseModel):
     """Parameters for GET requests."""
-    action: Actions = Actions.NONE
+    subresource: Subresource = Subresource.NONE
 
 
 class Controller:
@@ -49,15 +49,15 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, action: str = "") -> bytes:
+    def GET(self, subresource: str = "") -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
-            params = GetParams(action=action)
+            params = GetParams(subresource=subresource)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.VOICES:
+        if params.subresource == Subresource.VOICES:
             return self.list_voices()
 
         return self.status()
