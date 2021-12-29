@@ -7,25 +7,24 @@ from pydantic import ValidationError
 from pydantic import Field
 
 
-class Actions(str, Enum):
+class Subresource(str, Enum):
     """Valid keywords for the second URL path segment of this application."""
     NONE = ""
     STATUS = "status"
-    PATH = "path"
     SHOW = "show"
 
 
 class StatusParams(BaseModel):
     """Base class for status URLs across all HTTP verbs."""
     status: int = 0
-    action: Actions = Actions.NONE
+    subresource: Subresource = Subresource.NONE
 
 
 class GetParams(StatusParams):
     """Parameters for GET requests."""
     per_page: int = 20
     offset: int = 0
-    path: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
+    q: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
     uid: int = Field(0, gt=-1)
 
 
@@ -52,66 +51,71 @@ class Controller:
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, action: str = "", uid: str = "0", **kwargs: str) -> bytes:
+    def GET(
+            self,
+            uid: str = "0",
+            subresource: str = "",
+            **kwargs: str
+    ) -> bytes:
         """Dispatch GET requests to a subhandler based on the URL path."""
 
         try:
-            params = GetParams(action=action, uid=uid, **kwargs)
+            params = GetParams(subresource=subresource, uid=uid, **kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.STATUS:
+        if params.subresource == Subresource.STATUS:
             cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
-        if params.path:
+        if params.q:
             return self.search(params)
 
-        if params.action == Actions.SHOW:
+        if params.subresource == Subresource.SHOW:
             return self.show(params)
 
         return self.index(params)
 
     @cherrypy.tools.capture()
-    def POST(self, action: str = "", **kwargs: str) -> bytes:
+    def POST(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch POST requests to a subhandler based on the URL path."""
 
         try:
-            params = PostParams(action=action, **kwargs)
+            params = PostParams(subresource=subresource, **kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.STATUS:
+        if params.subresource == Subresource.STATUS:
             cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @cherrypy.tools.capture()
-    def PUT(self, action: str = "", **kwargs: str) -> bytes:
+    def PUT(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch PUT requests to a subhandler based on the URL path."""
 
         try:
-            params = PutParams(action=action, **kwargs)
+            params = PutParams(subresource=subresource, **kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.STATUS:
+        if params.subresource == Subresource.STATUS:
             cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @cherrypy.tools.capture()
-    def DELETE(self, action: str = "", **kwargs: str) -> bytes:
+    def DELETE(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch DELETE requests to a subhandler based on the URL path."""
 
         try:
-            params = DeleteParams(action=action, **kwargs)
+            params = DeleteParams(subresource=subresource, **kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.STATUS:
+        if params.subresource == Subresource.STATUS:
             cherrypy.response.status = self.capture(params)
             return str(cherrypy.response.status).encode()
 
@@ -170,7 +174,7 @@ class Controller:
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
-            path=params.path,
+            path=params.q,
             offset=params.offset,
             limit=params.per_page
         ).pop()
@@ -178,7 +182,7 @@ class Controller:
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/captures",
-            {"path": params.path}
+            {"q": params.q}
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
@@ -188,9 +192,9 @@ class Controller:
             total_records=total_records,
             per_page=params.per_page,
             offset=params.offset,
-            path=params.path,
+            q=params.q,
             pagination_url=pagination_url,
-            subview_title=params.path
+            subview_title=params.q
         ).pop()
 
         return response
