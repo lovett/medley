@@ -11,8 +11,8 @@ Forecast = typing.Dict[str, typing.Any]
 Config = typing.Dict[str, typing.Any]
 
 
-class Actions(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
+class Subresource(str, Enum):
+    """Valid keywords for the first URL path segment of this application."""
     NONE = ""
     SPEAK = "speak"
 
@@ -25,7 +25,7 @@ class GetParams(BaseModel):
 
 class PostParams(BaseModel):
     """Parameters for POST requests."""
-    action: Actions = Actions.NONE
+    subresource: Subresource = Subresource.NONE
     parts: str = ""
     latitude: str = ""
     longitude: str = ""
@@ -85,7 +85,12 @@ class Controller:
             subview_title=config["location_name"],
         ).pop()
 
-    def POST(self, action: str = "", latlong: str = "", **kwargs: str) -> None:
+    def POST(
+            self,
+            subresource: str = "",
+            latlong: str = "",
+            **kwargs: str
+    ) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         latitude = ""
@@ -95,7 +100,7 @@ class Controller:
 
         try:
             params = PostParams(
-                action=action,
+                subresource=subresource,
                 latitude=latitude,
                 longitude=longitude,
                 **kwargs
@@ -103,7 +108,7 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        if params.action == Actions.SPEAK:
+        if params.subresource == Subresource.SPEAK:
             return self.speak(params)
 
         raise cherrypy.HTTPError(404)
