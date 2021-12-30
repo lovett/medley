@@ -1,4 +1,4 @@
-"""Text-to-speech service"""
+"""Text to speech"""
 
 from enum import Enum
 import re
@@ -6,17 +6,45 @@ import typing
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
+from pydantic import Field
+
+
+class Action(str, Enum):
+    """Values for the action parameter in POST requests."""
+    NONE = ""
+    TOGGLE = "toggle"
+    MUTE = "mute"
+    UNMUTE = "unmute"
+
+
+class Gender(str, Enum):
+    """Values for the gender parameter in POST requests."""
+    MALE = "male"
+    FEMALE = "female"
 
 
 class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
+    """Valid keywords for the first URL path segment of this application."""
     NONE = ""
+    NOTIFICATION = "notification"
+    VOICE = "voice"
     VOICES = "voices"
 
 
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     subresource: Subresource = Subresource.NONE
+
+
+class PostParams(BaseModel):
+    """Parameters for POST requests."""
+    subresource: Subresource = Subresource.NONE
+    statement: str = Field("", strip_whitespace=True)
+    name: str = Field("Guy", strip_whitespace=True)
+    locale: str = Field("en-US", strip_whitespace=True)
+    gender: Gender = Gender.MALE
+    action: Action = Action.NONE
+    confirm: bool = False
 
 
 class Controller:
@@ -117,80 +145,70 @@ class Controller:
 
     @cherrypy.tools.capture()
     @cherrypy.tools.json_in(force=False)
-    def POST(self, *args: str, **kwargs: str) -> None:
-        """Dispatch POST requests to a subhandler based on the URL path."""
+    def POST(self, subresource: str = "", **kwargs: str) -> None:
+        """Dispatch to a subhandler based on the URL path."""
 
-        url_path = args or (None,)
+        try:
+            params = PostParams(subresource=subresource, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if url_path[0] is None:
-            self.handle_post_vars(kwargs)
+        if params.subresource == Subresource.NONE:
+            self.handle_post_vars(params)
 
-        if url_path[0] == "notification":
+        if params.subresource == Subresource.NOTIFICATION:
             self.handle_notification(cherrypy.request.json)
 
-        if url_path[0] == "voice":
-            self.set_default_voice(kwargs)
+        if params.subresource == Subresource.VOICE:
+            self.set_default_voice(params)
 
     @staticmethod
-    def set_default_voice(post_vars: typing.Dict[str, str]) -> None:
+    def set_default_voice(params: PostParams) -> None:
         """Write default voice values to the registry."""
-        locale = post_vars.get("locale", "en-US")
-        gender = post_vars.get("gender", "Male")
-        name = post_vars.get("name", "Guy")
 
         cherrypy.engine.publish(
             "registry:replace",
             "speak:default_locale",
-            locale
+            params.locale
         )
 
         cherrypy.engine.publish(
             "registry:replace",
             "speak:default_gender",
-            gender
+            params.gender
         )
 
         cherrypy.engine.publish(
             "registry:replace",
             "speak:default_name",
-            name
+            params.name
         )
 
         cherrypy.response.status = 204
 
     @staticmethod
-    def handle_post_vars(post_vars: typing.Dict[str, str]) -> None:
+    def handle_post_vars(params: PostParams) -> None:
         """Transform POST parameters to speech-ready statement."""
 
-        statement = post_vars.get("statement", "")
-        name = post_vars.get("name", "")
-        locale = post_vars.get("locale", "")
-        gender = post_vars.get("gender", "")
-        action = post_vars.get("action", "")
-        confirm = post_vars.get("confirm", "")
-
-        if action == "toggle":
+        if params.action == Action.TOGGLE:
             muted_temporarily = cherrypy.engine.publish("speak:muted").pop()
-            action = "unmute" if muted_temporarily else "mute"
+            params.action = Action.UNMUTE if muted_temporarily else Action.MUTE
 
-        if action == "mute":
+        if params.action == Action.MUTE:
             cherrypy.engine.publish("speak:mute")
+            cherrypy.response.status = 204
+            return
 
-        if action == "unmute":
+        if params.action == Action.UNMUTE:
             cherrypy.engine.publish("speak:unmute")
-
-        if action:
-            app_url = cherrypy.engine.publish(
-                "app_url"
-            ).pop()
-
-            raise cherrypy.HTTPRedirect(app_url)
+            cherrypy.response.status = 204
+            return
 
         if cherrypy.engine.publish("speak:muted").pop():
             cherrypy.response.status = 202
             return
 
-        if confirm:
+        if params.confirm:
             cherrypy.engine.publish(
                 "audio:play:asset",
                 "attention"
@@ -198,10 +216,10 @@ class Controller:
 
         cherrypy.engine.publish(
             "speak",
-            statement,
-            locale,
-            gender,
-            name,
+            params.statement,
+            params.locale,
+            params.gender,
+            params.name,
         )
 
         cherrypy.response.status = 204
