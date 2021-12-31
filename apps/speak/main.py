@@ -190,19 +190,21 @@ class Controller:
     def handle_post_vars(params: PostParams) -> None:
         """Transform POST parameters to speech-ready statement."""
 
+        app_url = cherrypy.engine.publish(
+            "app_url"
+        ).pop()
+
         if params.action == Action.TOGGLE:
             muted_temporarily = cherrypy.engine.publish("speak:muted").pop()
             params.action = Action.UNMUTE if muted_temporarily else Action.MUTE
 
         if params.action == Action.MUTE:
             cherrypy.engine.publish("speak:mute")
-            cherrypy.response.status = 204
-            return
+            raise cherrypy.HTTPRedirect(app_url)
 
         if params.action == Action.UNMUTE:
             cherrypy.engine.publish("speak:unmute")
-            cherrypy.response.status = 204
-            return
+            raise cherrypy.HTTPRedirect(app_url)
 
         if cherrypy.engine.publish("speak:muted").pop():
             cherrypy.response.status = 202
