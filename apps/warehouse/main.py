@@ -94,6 +94,14 @@ class Controller:
                 chunk=typing.cast(bytes, data)
             )
 
+        mount_point = __package__.split(".").pop()
+        etag_key = f"etag:/{mount_point}"
+
+        cherrypy.engine.publish(
+            "memorize:clear",
+            etag_key
+        )
+
         cherrypy.response.status = 204
 
     @staticmethod
