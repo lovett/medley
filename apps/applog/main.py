@@ -28,11 +28,11 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        sources = None
+        sources = cherrypy.engine.publish(
+            "applog:sources",
+        ).pop()
+
         if params.source:
-            sources = cherrypy.engine.publish(
-                "applog:sources",
-            ).pop()
 
             records, total, query_plan = cherrypy.engine.publish(
                 "applog:search",
