@@ -160,11 +160,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = """SELECT source, message,
         created as 'created [timestamp]'
         FROM applog
-        WHERE source=?
+        WHERE source LIKE ?
         ORDER BY created DESC
         LIMIT ? OFFSET ?"""
 
-        placeholders = (source, limit, offset)
+        placeholders = (f"%{source}%", limit, offset)
 
         return (
             self._select(sql, placeholders),
