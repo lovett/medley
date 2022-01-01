@@ -181,9 +181,10 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
+        tag_list = params.tags.split(",")
         tag_list = [
-            re.sub(r"\s+", "-", item)
-            for item in params.tags.split(",")
+            re.sub(r"\s+", "-", tag.strip())
+            for tag in tag_list
         ]
 
         params.title = re.sub(r"\s*&\s*", " and ", params.title)
@@ -304,7 +305,7 @@ class Controller:
         body = ""
         tags = ""
         url = ""
-        submit_url = "/recipes"
+        submit_url = f"/recipes/{params.uid}"
         last_made = ""
         created = ""
         attachments = []
@@ -320,7 +321,9 @@ class Controller:
 
             title = recipe["title"]
             body = recipe["body"]
-            tags = recipe["tags"]
+            if recipe["tags"]:
+                tags = recipe["tags"]
+
             url = recipe["url"]
             created = cherrypy.engine.publish(
                 "clock:format",
