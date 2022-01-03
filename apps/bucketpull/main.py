@@ -1,6 +1,20 @@
 """Download files from a storage bucket."""
 
+from enum import Enum
 import cherrypy
+from pydantic import BaseModel
+from pydantic import ValidationError
+
+
+class Service(str, Enum):
+    """Valid keywords for the service parameter in POST requests."""
+    NONE = ""
+    GCP = "gcp"
+
+
+class PostParams(BaseModel):
+    """Parameters for POST requests."""
+    service: Service = Service.NONE
 
 
 class Controller:
@@ -10,14 +24,17 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def POST(*_args: str, **kwargs: str) -> None:
+    def POST(**kwargs: str) -> None:
         """
         Dispatch to a service-specific plugin.
         """
 
-        service = kwargs.get("service")
+        try:
+            params = PostParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
-        if service == "gcp":
+        if params.service == Service.GCP:
             cherrypy.engine.publish(
                 "scheduler:add",
                 1,
