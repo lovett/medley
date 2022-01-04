@@ -3,7 +3,6 @@
 from datetime import datetime
 import unittest
 from unittest import mock
-import typing
 import pytz
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -39,17 +38,8 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """The application is not displayed in the homepage app."""
         self.assert_not_show_on_homepage(apps.logindex.main.Controller)
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_invalid_start(self, publish_mock: mock.Mock) -> None:
+    def test_invalid_start(self) -> None:
         """An error should be thrown if the start date cannot be parsed"""
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
-            """Side effects local function"""
-            if args[0] == "clock:from_format":
-                return [None]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
         response = self.request(
             "/",
             method="POST",
@@ -57,24 +47,8 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         )
         self.assertEqual(response.code, 400)
 
-    @mock.patch("cherrypy.engine.publish")
-    def test_invalid_end(self, publish_mock: mock.Mock) -> None:
+    def test_invalid_end(self) -> None:
         """An error should be thrown if the end date cannot be parsed"""
-
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
-            """Side effects local function"""
-            if args[0] == "clock:from_format":
-                if args[1] == "2000-01-01":
-                    return [
-                        datetime(2000, 1, 1, tzinfo=pytz.timezone("UTC"))
-                    ]
-                if args[1] == "1999-12-31":
-                    return [
-                        datetime(1999, 12, 31, tzinfo=pytz.timezone("UTC"))
-                    ]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
 
         response = self.request(
             "/",
@@ -88,23 +62,15 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     def test_valid_range(self, publish_mock: mock.Mock) -> None:
         """The logindex plugin is called when a valid time range is given."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
-            """Side effects local function"""
-            if args[0] == "clock:from_format":
-                if args[1] == "2017-01-01":
-                    return [datetime(2017, 1, 1, tzinfo=pytz.timezone("UTC"))]
-                if args[1] == "2017-01-03":
-                    return [datetime(2017, 1, 3, tzinfo=pytz.timezone("UTC"))]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
         self.request(
             "/",
             method="POST",
-            start="2017-01-01.log",
-            end="2017-01-03.log"
+            start="2017-01-01",
+            end="2017-01-03"
         )
+
+        for call in publish_mock.call_args_list:
+            print(call)
 
         self.assertEqual(
             helpers.find_publish_call(publish_mock, "logindex:enqueue"),
@@ -122,18 +88,10 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         start date.
         """
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
-            """Side effects local function"""
-            if args[0] == "clock:from_format":
-                return [datetime(2017, 1, 1, tzinfo=pytz.timezone("UTC"))]
-            return mock.DEFAULT
-
-        publish_mock.side_effect = side_effect
-
         self.request(
             "/",
             method="POST",
-            start="2017-01-01.log"
+            start="2017-01-01"
         )
 
         enqueue_call = helpers.find_publish_call(
