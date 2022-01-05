@@ -7,6 +7,7 @@ import typing
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import ValidationError
+from pydantic import HttpUrl
 import cherrypy
 from resources.url import Url
 
@@ -31,6 +32,15 @@ class GetParams(BaseModel):
 class DeleteParams(BaseModel):
     """Parameters for DELETE requests."""
     uid: int = Field(0, gt=0)
+
+
+class PostParams(BaseModel):
+    """Parameters for POST requests."""
+    url: HttpUrl
+    title: str = Field("", strip_whitespace=True)
+    tags: str = Field("", strip_whitespace=True)
+    comments: str = Field("", strip_whitespace=True)
+    added: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -85,20 +95,23 @@ class Controller:
     def POST(url: str, **kwargs: str) -> None:
         """Add a new bookmark, or update an existing one."""
 
-        title = kwargs.get("title")
-        tags = kwargs.get("tags")
-        comments = kwargs.get("comments")
-        added = kwargs.get("added")
+        try:
+            params = PostParams(
+                url=url,
+                **kwargs
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         result = cherrypy.engine.publish(
             "scheduler:add",
             2,
             "bookmarks:add",
-            Url(url),
-            title,
-            comments,
-            tags,
-            added
+            Url(params.url),
+            params.title,
+            params.comments,
+            params.tags,
+            params.added
         ).pop()
 
         if not result:
