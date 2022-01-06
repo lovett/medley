@@ -12,6 +12,35 @@
 {% block page_body %}
     {{ macros.svgSymbols("file", "delete", "calendar") }}
     <main>
+        <form enctype="multipart/form-data" method="post" action="{{ upload_url }}">
+            <div class="field">
+                <input
+                    id="content"
+                    name="content"
+                    type="file"
+                    value=""
+                />
+            </div>
+            <div class="field-group">
+                <div class="field">
+                    <input
+                        autocapitalize="none"
+                        autocomplete="off"
+                        id="storage_path"
+                        name="storage_path"
+                        placeholder="Path"
+                        type="text"
+                        value=""
+                    />
+                </div>
+                <div class="field">
+                    <button>
+                        Upload
+                    </button>
+                </div>
+            </div>
+        </form>
+
         <div class="table-sleeve">
             {% for file in files %}
                 {% if loop.first %}

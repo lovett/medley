@@ -29,6 +29,11 @@ class PutParams(BaseModel):
         arbitrary_types_allowed = True
 
 
+class PostParams(PutParams):
+    """Parameters for POST requests."""
+    uid: int = Field(0, gt=-1)
+
+
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
@@ -51,8 +56,46 @@ class Controller:
 
         return self.index()
 
-    @staticmethod
+    def POST(
+            self,
+            uid: str = "",
+            *,
+            storage_path: str = "",
+            content: cherrypy._cpreqbody.Part
+    ) -> None:
+        """Accept a file for storage."""
+
+        try:
+            params = PostParams(
+                uid=uid,
+                storage_path=storage_path,
+                content=content,
+            )
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        params.content_type = "application/octet-stream"
+        guessed_type, _ = mimetypes.guess_type(
+            params.storage_path.as_posix()
+        )
+
+        if guessed_type:
+            params.content_type = guessed_type
+
+        if params.storage_path.as_posix() == ".":
+            params.storage_path = Path(
+                content.filename.lower().replace(" ", "-")
+            )
+
+        self.ingest_file(params)
+
+        redirect_url = cherrypy.engine.publish(
+            "app_url",
+        ).pop()
+        raise cherrypy.HTTPRedirect(redirect_url)
+
     def PUT(
+            self,
             *args: str,
             content_type: str = "application/octet-stream",
             content: cherrypy._cpreqbody.Part
@@ -75,6 +118,14 @@ class Controller:
 
             if guessed_type:
                 params.content_type = guessed_type
+
+        self.ingest_file(params)
+
+        cherrypy.response.status = 204
+
+    @staticmethod
+    def ingest_file(params: PutParams) -> None:
+        """Storage of a newly-uploaded file."""
 
         cherrypy.engine.publish(
             "warehouse:remove",
@@ -101,8 +152,6 @@ class Controller:
             "memorize:clear",
             etag_key
         )
-
-        cherrypy.response.status = 204
 
     @staticmethod
     def serve_file(params: GetParams) -> typing.Iterator[bytes]:
@@ -132,8 +181,14 @@ class Controller:
             "warehouse:list"
         ).pop()
 
+        upload_url = cherrypy.engine.publish(
+            "app_url",
+            "0"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/warehouse/warehouse-list.jinja.html",
             files=files,
+            upload_url=upload_url
         ).pop()
