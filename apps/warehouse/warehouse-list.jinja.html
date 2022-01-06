@@ -4,13 +4,14 @@
 {% endblock %}
 
 {% block scripts %}
+    {{ macros.asset("js/clipboard.js") }}
 {% endblock %}
 
 {% block app_message %}
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("file", "delete", "calendar") }}
+    {{ macros.svgSymbols("copy", "file", "delete", "calendar") }}
     <main>
         <form enctype="multipart/form-data" method="post" action="{{ upload_url }}">
             <div class="field">
@@ -55,6 +56,10 @@
                         </a>
                     </td>
                     <td>
+                        {{ macros.clipboardButton("url-" ~ loop.index, "Copy URL") }}
+                        <div id="url-{{ loop.index }}" hidden>{{ app_url }}{{ file.path.address }}</div>
+                    </td>
+                    <td>
                         {{ file.total_bytes|filesize }}
                     </td>
                     <td>
@@ -62,6 +67,7 @@
                         {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
                     </td>
                 </tr>
+
 
                 {% if loop.last %}
                         </tbody>

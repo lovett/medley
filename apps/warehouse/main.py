@@ -181,6 +181,10 @@ class Controller:
             "warehouse:list"
         ).pop()
 
+        app_url = cherrypy.engine.publish(
+            "app_url"
+        ).pop()
+
         upload_url = cherrypy.engine.publish(
             "app_url",
             "0"
@@ -190,5 +194,6 @@ class Controller:
             "jinja:render",
             "apps/warehouse/warehouse-list.jinja.html",
             files=files,
-            upload_url=upload_url
+            upload_url=upload_url,
+            app_url=app_url
         ).pop()
