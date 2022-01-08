@@ -723,7 +723,7 @@ def publish(
         channel: Literal["recipes:attachment:view"],
         recipe_id: int,
         filename: str,
-) -> List[Row]: ...
+) -> List[Tuple[str, str, bytes]]: ...
 
 
 @overload

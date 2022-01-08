@@ -249,17 +249,17 @@ class Controller:
     def attachment(params: GetParams) -> bytes:
         """Display a single attachment."""
 
-        resource = cherrypy.engine.publish(
+        (_, mime_type, content) = cherrypy.engine.publish(
             "recipes:attachment:view",
             recipe_id=params.uid,
             filename=params.resource
         ).pop()
 
-        if not resource:
+        if not content:
             raise cherrypy.HTTPError(404)
 
-        cherrypy.response.headers["Content-Type"] = resource["mime_type"]
-        return typing.cast(bytes, resource["content"])
+        cherrypy.response.headers["Content-Type"] = mime_type
+        return content
 
     @staticmethod
     def by_tag(params: GetParams) -> bytes:

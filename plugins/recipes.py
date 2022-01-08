@@ -165,19 +165,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (recipe_id,)
         )
 
-    def view_attachment(self, recipe_id: int, filename: str) -> bytes:
-        """Get the bytes of an attachment."""
+    def view_attachment(
+            self,
+            recipe_id: int,
+            filename: str
+    ) -> typing.Tuple[str, str, bytes]:
+        """Retrieve a file attached to a recipe."""
 
-        return typing.cast(
-            bytes,
-            self._selectOne(
-                """SELECT filename, mime_type, content
-                FROM attachments
-                WHERE recipe_id=?
-                AND filename=?""",
-                (recipe_id, filename)
-            )
+        row = self._selectOne(
+            """SELECT filename, mime_type, content
+            FROM attachments
+            WHERE recipe_id=?
+            AND filename=?""",
+            (recipe_id, filename)
         )
+
+        if row:
+            return (row["filename"], row["mime_type"], row["content"])
+
+        return ("", "", b"")
 
     def all_tags(self) -> typing.Iterator[sqlite3.Row]:
         """List all known tags.
