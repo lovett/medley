@@ -12,9 +12,9 @@ main {
 
 #actions {
     display: grid;
-    grid-template-columns: auto auto auto;
-    grid-column-gap: 2em;
-    justify-content: center;
+    grid-template-columns: auto;
+    grid-row-gap: 2em;
+    text-align: center;
 }
 
 .deprecated > TD {
@@ -32,14 +32,10 @@ main {
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #ip-report {
-        display: grid;
-        grid-template-columns: auto auto;
-        grid-column-gap: 1em;
-        max-width: 48em;
-        margin: auto;
-        justify-content: space-between;
-        align-items: center;
+    #actions {
+        grid-template-columns: auto auto auto;
+        grid-column-gap: 2em;
+        justify-content: center;
     }
 }
 
