@@ -133,7 +133,7 @@ class Controller:
         )
 
         while True:
-            data = params.content.file.read(8192)
+            data: bytes = params.content.file.read(8192)
 
             if not data:
                 break
@@ -142,7 +142,7 @@ class Controller:
                 "warehouse:add:chunk",
                 path=params.storage_path,
                 content_type=params.content_type,
-                chunk=typing.cast(bytes, data)
+                chunk=data
             )
 
         mount_point = __package__.split(".").pop()
