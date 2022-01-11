@@ -9,6 +9,11 @@ from pydantic import ValidationError
 from pydantic import Field
 
 
+class DeleteParams(BaseModel):
+    """Parameters for DELETE requests."""
+    path: Path
+
+
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     path: Path
@@ -41,6 +46,29 @@ class Controller:
 
     show_on_homepage = True
     exposed = True
+
+    def DELETE(
+            self,
+            *args: str,
+            **kwargs: str
+    ) -> None:
+        """Discard a previously-uploaded file."""
+
+        path = Path(*args)
+
+        try:
+            params = DeleteParams(path=path, **kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
+
+        cherrypy.engine.publish(
+            "warehouse:remove",
+            params.path
+        ).pop()
+
+        self.clear_etag()
+
+        cherrypy.response.status = 204
 
     @cherrypy.tools.etag()
     def GET(
@@ -143,8 +171,7 @@ class Controller:
 
         cherrypy.response.status = 204
 
-    @staticmethod
-    def ingest_file(params: PutParams) -> None:
+    def ingest_file(self, params: PutParams) -> None:
         """Storage of a newly-uploaded file."""
 
         cherrypy.engine.publish(
@@ -165,13 +192,7 @@ class Controller:
                 chunk=data
             )
 
-        mount_point = __package__.split(".").pop()
-        etag_key = f"etag:/{mount_point}"
-
-        cherrypy.engine.publish(
-            "memorize:clear",
-            etag_key
-        )
+        self.clear_etag()
 
     @staticmethod
     def serve_file(params: GetParams) -> typing.Iterator[bytes]:
@@ -219,3 +240,13 @@ class Controller:
             upload_url=upload_url,
             app_url=app_url
         ).pop()
+
+    @staticmethod
+    def clear_etag() -> None:
+        """Drop the current etag for the index page."""
+        mount_point = __package__.split(".").pop()
+
+        cherrypy.engine.publish(
+            "memorize:clear",
+            f"etag:/{mount_point}"
+        )

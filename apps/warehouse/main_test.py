@@ -23,7 +23,7 @@ class TestShared(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assert_allowed(response, ("GET", "PUT", "POST"))
+        self.assert_allowed(response, ("DELETE", "GET", "PUT", "POST"))
 
     def test_exposed(self) -> None:
         """The application is publicly available."""

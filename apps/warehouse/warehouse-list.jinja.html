@@ -4,6 +4,7 @@
 {% endblock %}
 
 {% block scripts %}
+    {{ macros.asset("js/delete.js") }}
     {{ macros.asset("js/clipboard.js") }}
 {% endblock %}
 
@@ -74,6 +75,9 @@
                         {% if file.path.text == added_file %}<div class="new">NEW</div>{% endif %}
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
                         {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
+                    </td>
+                    <td>
+                        {{ macros.deleteButton(file.path.address, "tr", "Delete this file") }}
                     </td>
                 </tr>
 
