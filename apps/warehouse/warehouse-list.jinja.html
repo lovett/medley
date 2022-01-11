@@ -8,11 +8,19 @@
 {% endblock %}
 
 {% block app_message %}
+    {% if failure == "nofile" %}
+        <div id="app-message" class="error">
+            <p>
+                No file provided.
+            </p>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block page_body %}
     {{ macros.svgSymbols("copy", "file", "delete", "calendar") }}
     <main>
+
         <form enctype="multipart/form-data" method="post" action="{{ upload_url }}">
             <div class="field">
                 <input

@@ -13,6 +13,7 @@ class GetParams(BaseModel):
     """Parameters for GET requests."""
     path: Path
     added: str = Field("", strip_whitespace=True)
+    failure: str = ""
 
 
 class PutParams(BaseModel):
@@ -78,6 +79,16 @@ class Controller:
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
+
+        if not params.content.file:
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+                "",
+                {
+                    "failure": "nofile"
+                }
+            ).pop()
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         params.content_type = "application/octet-stream"
         guessed_type, _ = mimetypes.guess_type(
@@ -204,6 +215,7 @@ class Controller:
             "apps/warehouse/warehouse-list.jinja.html",
             files=files,
             added_file=params.added,
+            failure=params.failure,
             upload_url=upload_url,
             app_url=app_url
         ).pop()
