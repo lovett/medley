@@ -63,6 +63,7 @@
                         {{ file.total_bytes|filesize }}
                     </td>
                     <td>
+                        {% if file.path.text == added_file %}<div class="new">NEW</div>{% endif %}
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
                         {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
                     </td>

@@ -12,6 +12,7 @@ from pydantic import Field
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     path: Path
+    added: str = Field("", strip_whitespace=True)
 
 
 class PutParams(BaseModel):
@@ -41,20 +42,24 @@ class Controller:
     exposed = True
 
     @cherrypy.tools.etag()
-    def GET(self, *args: str) -> typing.Union[bytes, typing.Iterator[bytes]]:
+    def GET(
+            self,
+            *args: str,
+            **kwargs: str
+    ) -> typing.Union[bytes, typing.Iterator[bytes]]:
         """Dispatch to a subhandler based on the URL path."""
 
         path = Path(*args)
 
         try:
-            params = GetParams(path=path)
+            params = GetParams(path=path, **kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
         if params.path.as_posix() != ".":
             return self.serve_file(params)
 
-        return self.index()
+        return self.index(params)
 
     def POST(
             self,
@@ -91,6 +96,10 @@ class Controller:
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
+            "",
+            {
+                "added": params.storage_path.as_posix()
+            }
         ).pop()
         raise cherrypy.HTTPRedirect(redirect_url)
 
@@ -174,7 +183,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def index() -> bytes:
+    def index(params: GetParams) -> bytes:
         """List all available files."""
 
         files = cherrypy.engine.publish(
@@ -194,6 +203,7 @@ class Controller:
             "jinja:render",
             "apps/warehouse/warehouse-list.jinja.html",
             files=files,
+            added_file=params.added,
             upload_url=upload_url,
             app_url=app_url
         ).pop()

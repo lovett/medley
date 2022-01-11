@@ -614,6 +614,14 @@ TEXTAREA {
     padding: 0.5em 1em 0.5em 0;
 }
 
+.new {
+    float: right;
+    padding: .25em;
+    font-size: .85em;
+    color: var(--white);
+    background-color: var(--success);
+}
+
 .pagination {
     margin: auto;
     padding: 1em 0;
