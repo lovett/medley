@@ -89,7 +89,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET() -> bytes:
+    def GET(**_kwargs: str) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
 
         _, rows = cherrypy.engine.publish(

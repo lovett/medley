@@ -77,7 +77,7 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, subresource: str = "") -> bytes:
+    def GET(self, subresource: str = "", **_kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:

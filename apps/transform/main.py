@@ -37,7 +37,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET() -> bytes:
+    def GET(**_kwargs: str) -> bytes:
         """The default view presents the available transformation methods"""
 
         return cherrypy.engine.publish(

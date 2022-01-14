@@ -37,7 +37,12 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(self, uid: str = "default", subresource: str = "") -> bytes:
+    def GET(
+            self,
+            uid: str = "default",
+            subresource: str = "",
+            **_kwargs: str
+    ) -> bytes:
         """Render a page or present the edit form."""
 
         try:

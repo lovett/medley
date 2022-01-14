@@ -12,7 +12,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("json", "text", "html"))
-    def GET() -> bytes:
+    def GET(**_kwargs: str) -> bytes:
         """Display the client's local IP, and the server's external IP"""
 
         client_ip = cherrypy.request.headers.get("Remote-Addr")
