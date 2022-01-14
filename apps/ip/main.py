@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("json", "text", "html"))
+    @cherrypy.tools.provides(formats=("html", "json", "text"))
     def GET(**_kwargs: str) -> bytes:
         """Display the client's local IP, and the server's external IP"""
 

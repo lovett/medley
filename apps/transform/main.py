@@ -48,7 +48,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("json", "text", "html"))
+    @cherrypy.tools.provides(formats=("html", "json", "text"))
     def POST(**kwargs: str) -> bytes:
         """Perform a transformation and display the result"""
 

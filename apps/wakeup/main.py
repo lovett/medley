@@ -55,7 +55,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("text", "html"))
+    @cherrypy.tools.provides(formats=("html", "text"))
     def POST(*_args: str, **kwargs: str) -> bytes:
         """Send a WoL packet to the mac address of the specified host."""
 
