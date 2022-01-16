@@ -43,65 +43,65 @@ class TestFilesystem(Subscriber):
     def test_file_fs(self) -> None:
         """A file on the filesystem is returned as bytes."""
 
-        temp = tempfile.NamedTemporaryFile(delete=False)
-        temp.write(b"hello world")
-        temp.close()
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            temp.write(b"hello world")
+            temp.close()
 
-        result = self.plugin.read_fs(Path(temp.name))
+            result = self.plugin.read_fs(Path(temp.name))
+            Path(temp.name).unlink()
 
         self.assertEqual(result, b"hello world")
-
-        Path(temp.name).unlink()
 
     def test_file_fs_nonexistant(self) -> None:
         """No exception is raised if a file does not exist."""
 
-        temp = tempfile.NamedTemporaryFile()
-        temp.close()
+        with tempfile.NamedTemporaryFile() as temp:
+            temp.close()
 
-        result = self.plugin.read_fs(Path(temp.name))
+            result = self.plugin.read_fs(Path(temp.name))
         self.assertEqual(result, b"")
 
     def test_file_zip(self) -> None:
         """A file in a ZIP archive is returned as bytes."""
-        tmpfile = tempfile.NamedTemporaryFile(delete=False)
-        tmpfile.write(b"hello world")
-        tmpfile.close()
+        with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+            tmpfile.write(b"hello world")
+            tmpfile.close()
 
-        tmpzip = tempfile.NamedTemporaryFile(delete=False)
-        with ZipFile(tmpzip.name, "w") as handle:
-            handle.write(tmpfile.name)
+            with tempfile.NamedTemporaryFile(delete=False) as tmpzip:
+                with ZipFile(tmpzip.name, "w") as handle:
+                    handle.write(tmpfile.name)
 
-        cherrypy.config.update({"server_root": tmpzip.name})
+                cherrypy.config.update({"server_root": tmpzip.name})
 
-        zipfile_path = Path(tmpfile.name).relative_to("/")
-        result = self.plugin.read_zip(zipfile_path)
+            zipfile_path = Path(tmpfile.name).relative_to("/")
+            result = self.plugin.read_zip(zipfile_path)
+            Path(tmpzip.name).unlink()
+            Path(tmpfile.name).unlink()
+
         self.assertEqual(result, b"hello world")
-        Path(tmpzip.name).unlink()
-        Path(tmpfile.name).unlink()
 
     def test_file_zip_nonexistant(self) -> None:
         """No exception is raised if a file does not exist."""
 
-        tmpfile = tempfile.NamedTemporaryFile(delete=False)
-        tmpfile.write(b"hello world")
-        tmpfile.close()
+        with tempfile.NamedTemporaryFile(delete=False) as tmpfile:
+            tmpfile.write(b"hello world")
+            tmpfile.close()
 
-        tmpzip = tempfile.NamedTemporaryFile(delete=False)
-        with ZipFile(tmpzip.name, "w") as handle:
-            handle.write(tmpfile.name)
+            with tempfile.NamedTemporaryFile(delete=False) as tmpzip:
+                with ZipFile(tmpzip.name, "w") as handle:
+                    handle.write(tmpfile.name)
 
-        cherrypy.config.update({"server_root": tmpzip.name})
+                cherrypy.config.update({"server_root": tmpzip.name})
 
-        result = self.plugin.read_zip(Path("a/b/c/d/e"))
-        self.assertEqual(result, b"")
-        Path(tmpzip.name).unlink()
-        Path(tmpfile.name).unlink()
+                result = self.plugin.read_zip(Path("a/b/c/d/e"))
+                self.assertEqual(result, b"")
+                Path(tmpzip.name).unlink()
+            Path(tmpfile.name).unlink()
 
-        cherrypy.config.update({"server_root": ""})
+            cherrypy.config.update({"server_root": ""})
 
-        result = self.plugin.read_zip(Path("f/g/h"))
-        self.assertEqual(result, b"")
+            result = self.plugin.read_zip(Path("f/g/h"))
+            self.assertEqual(result, b"")
 
 
 if __name__ == "__main__":

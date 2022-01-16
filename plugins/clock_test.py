@@ -120,33 +120,60 @@ class TestClock(Subscriber):
         """clock:shift moves forward and backward in time."""
 
         start = datetime(2010, 1, 4, tzinfo=pytz.timezone("UTC"))
-        result = self.plugin.shift(start, days=1)
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, days=1)
+        )
         self.assertEqual(result.day, 5)
 
-        result = self.plugin.shift(start, "month_start")
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, "month_start")
+        )
         self.assertEqual(result.day, 1)
 
-        result = self.plugin.shift(start, "month_end")
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, "month_end")
+        )
         self.assertEqual(result.day, 31)
 
-        result = self.plugin.shift(start, "month_previous")
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, "month_previous")
+        )
         self.assertEqual(result.month, 12)
         self.assertEqual(result.year, 2009)
 
-        result = self.plugin.shift(start, "month_next")
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, "month_next")
+        )
         self.assertEqual(result.month, 2)
         self.assertEqual(result.year, 2010)
 
-        result = self.plugin.shift(start, days=-1)
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, days=-1)
+        )
         self.assertEqual(result.day, 3)
 
-        result = self.plugin.shift(start, hours=1)
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, hours=1)
+        )
         self.assertEqual(result.hour, 1)
 
-        result = self.plugin.shift(start, hours=-1)
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, hours=-1)
+        )
         self.assertEqual(result.hour, 23)
 
-        result = self.plugin.shift(start, minutes=1)
+        result = typing.cast(
+            datetime,
+            self.plugin.shift(start, minutes=1)
+        )
         self.assertEqual(result.minute, 1)
 
     @patch("cherrypy.engine.publish")

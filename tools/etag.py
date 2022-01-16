@@ -15,12 +15,6 @@ class Tool(cherrypy.Tool):
             priority=10
         )
 
-    def _setup(self) -> None:
-        cherrypy.Tool._setup(self)
-
-        if not cherrypy.config.get("etags"):
-            return
-
         cherrypy.request.hooks.attach(
             "before_finalize",
             self.set_header,
@@ -59,6 +53,9 @@ class Tool(cherrypy.Tool):
         consider it a 2xx.
 
         """
+
+        if not cherrypy.config.get("etags"):
+            return
 
         try:
             success = 200 <= cherrypy.response.status <= 299

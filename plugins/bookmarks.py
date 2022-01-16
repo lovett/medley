@@ -375,7 +375,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY {order_sql}
         LIMIT ? OFFSET ?"""  # nosec
 
-        placeholder_values += (limit, offset)
+        placeholder_values += (
+            str(limit),
+            str(offset)
+        )
 
         return (
             self._select(sql, placeholder_values),
