@@ -145,33 +145,24 @@ class Controller:
     def on_registry_changed(key: str) -> None:
         """Clear cached etags after a page has been edited."""
 
+        mount_point = __package__.split(".").pop()
+
         if key.startswith("startpage:"):
             uid = key.split(":")[1]
 
-            view_path = ""
-            edit_path = "default/edit"
-            if uid != "default":
-                view_path = uid
-                edit_path = f"{uid}/edit"
-
-            url = cherrypy.engine.publish(
-                "app_url",
-                view_path
-            ).pop()
+            view_path = uid
+            edit_path = f"{uid}/edit"
+            if uid == "default":
+                view_path = ""
 
             cherrypy.engine.publish(
                 "memorize:clear",
-                f"etag:{url}"
+                f"etag:/{mount_point}/{view_path}"
             )
 
-            url = cherrypy.engine.publish(
-                "app_url",
-                edit_path
-            ).pop()
-
             cherrypy.engine.publish(
                 "memorize:clear",
-                f"etag:{url}"
+                f"etag:/{mount_point}/{edit_path}"
             )
 
     @staticmethod
