@@ -75,6 +75,14 @@ class Controller:
             {"q": "weather:latlong"}
         ).pop()
 
+        if forecast["unavailable"]:
+            return cherrypy.engine.publish(
+                "jinja:render",
+                "apps/weather/weather-unavailable.jinja.html",
+                location_name=config["location_name"],
+                edit_url=edit_url,
+            ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/weather/weather.jinja.html",

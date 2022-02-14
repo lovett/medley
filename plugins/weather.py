@@ -177,7 +177,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             cache_lifespan=1800
         ).pop()
 
-        return self.shape_forecast(api_response)
+        try:
+            return self.shape_forecast(api_response)
+        except (NameError, AttributeError):
+            result: Forecast = defaultdict()
+            result["unavailable"] = True
+            return result
 
     @staticmethod
     def can_prefetch() -> bool:
@@ -198,10 +203,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
     @staticmethod
+    def forecast_unavailable() -> Forecast:
+        """Provide an object that tells the caller the forecast is
+        unavailable."""
+
+    @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:
         """Reduce an API response object to wanted values"""
 
         result: Forecast = defaultdict()
+        result["unavailable"] = False
 
         daily = forecast.get("daily", [])
         hourly = forecast.get("hourly", [])

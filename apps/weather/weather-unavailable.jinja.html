@@ -1,0 +1,35 @@
+{% extends "apps/static/templates/base.jinja.html" %}
+{% import "apps/static/templates/macros.jinja.html" as macros -%}
+
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        {% for latitude, longitude, label in other_locations %}
+            {% if label != location_name %}
+                <a href="{{ app_url }}/{{ latitude }},{{ longitude }}">
+                    <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                    {{ label }}
+                </a>
+            {% endif %}
+        {% endfor %}
+        <a id="edit-record" class="template-edit" href="{{ edit_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </nav>
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("globe", "edit", "thermometer", "clouds", "sun", "droplet", "wind", "umbrella", "snow", "sunrise", "alert") }}
+
+    <main>
+        <header id="page-title">
+            <h2>
+                {{ location_name }}
+            </h2>
+        </header>
+
+        <p>
+            Forecast data is not currently available.
+        </p>
+    </main>
+{% endblock %}
