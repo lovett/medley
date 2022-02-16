@@ -1,7 +1,7 @@
 """Test suite for the homepage app."""
 
 import types
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -22,7 +22,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         helpers.stop_server()
 
     @staticmethod
-    def default_side_effect_callback(*args: str, **_: str) -> typing.Any:
+    def default_side_effect_callback(*args: str, **_: str) -> Any:
         """
         The standard mock side effect function used by all tests
         """
@@ -69,7 +69,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     def test_returns_org(self, publish_mock: mock.Mock) -> None:
         """GET supports text/x-org output."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -85,7 +85,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """If the first URL path segment is "all", the output includes all
         apps, not just the ones meant for display on the homepage."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -100,7 +100,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     def test_valid_etag(self, publish_mock: mock.Mock) -> None:
         """A valid etag produces a 304 response."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
@@ -116,7 +116,7 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
     def test_invalid_etag(self, publish_mock: mock.Mock) -> None:
         """An invalid etag produces a 200 response."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc456")]

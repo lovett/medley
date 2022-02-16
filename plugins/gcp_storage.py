@@ -3,7 +3,8 @@
 from datetime import datetime
 import json
 import pathlib
-import typing
+from typing import Dict
+from typing import cast
 import cherrypy
 import jwt
 from plugins import decorators
@@ -47,14 +48,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         service_account = json.loads(config["service_account"])
 
-        now = typing.cast(
+        now = cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:now"
             ).pop()
         )
 
-        expire = typing.cast(
+        expire = cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:shift",
@@ -173,7 +174,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
     @staticmethod
-    def standard_headers(access_token: str) -> typing.Dict[str, str]:
+    def standard_headers(access_token: str) -> Dict[str, str]:
         """Wrap an access token in a headers dict."""
 
         return {

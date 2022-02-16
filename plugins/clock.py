@@ -2,12 +2,15 @@
 
 import calendar
 from datetime import datetime, timedelta, date
-import typing
+from typing import Optional
+from typing import List
+from typing import Union
+from typing import cast
 import cherrypy
 from pytz import timezone, UTC, UnknownTimeZoneError
 
-DatetimeOrString = typing.Union[datetime, str]
-OptionalDatetime = typing.Optional[datetime]
+DatetimeOrString = Union[datetime, str]
+OptionalDatetime = Optional[datetime]
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -107,10 +110,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def shift(
-            dt: typing.Union[date, datetime],
+            dt: Union[date, datetime],
             *args: str,
-            **kwargs: typing.Union[float, str]
-    ) -> typing.Union[date, datetime]:
+            **kwargs: Union[float, str]
+    ) -> Union[date, datetime]:
         """Roll forwards or backwards in time."""
 
         result = dt
@@ -139,15 +142,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             result = result.replace(month=month, year=year)
 
         if "days" in kwargs:
-            days = typing.cast(float, kwargs["days"])
+            days = cast(float, kwargs["days"])
             result = result + timedelta(days=days)
 
         if "hours" in kwargs:
-            hours = typing.cast(float, kwargs["hours"])
+            hours = cast(float, kwargs["hours"])
             result = result + timedelta(hours=hours)
 
         if "minutes" in kwargs:
-            minutes = typing.cast(float, kwargs["minutes"])
+            minutes = cast(float, kwargs["minutes"])
             result = result + timedelta(minutes=minutes)
 
         return result
@@ -244,7 +247,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ""
 
     @staticmethod
-    def scheduled(schedules: typing.List[str]) -> bool:
+    def scheduled(schedules: List[str]) -> bool:
         """Whether the current time falls within a set of ranges."""
 
         today = date.today()

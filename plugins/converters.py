@@ -3,7 +3,11 @@
 from datetime import datetime
 import json
 import re
-import typing
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import cast
 import urllib.parse
 from sqlite3 import register_converter  # pylint: disable=no-name-in-module
 import cherrypy
@@ -59,7 +63,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "%Y-%m-%d %H:%M:%S.%f%z"
             ).pop()
 
-        return typing.cast(
+        return cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:local",
@@ -71,7 +75,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def utc(value: bytes) -> datetime:
         """Convert a naieve string to a UTC datetime."""
 
-        return typing.cast(
+        return cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:from_format",
@@ -81,7 +85,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def date_with_hour(value: bytes) -> typing.Optional[datetime]:
+    def date_with_hour(value: bytes) -> Optional[datetime]:
         """Convert a date-and-hour string to a Pendulum instance."""
 
         decoded_value = value.decode("utf-8")
@@ -94,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not dt:
             return None
 
-        return typing.cast(datetime, dt)
+        return cast(datetime, dt)
 
     @staticmethod
     def duration(value: bytes) -> str:
@@ -149,7 +153,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return re.sub(r'"(.*?)".*', r"\1", value.decode("utf-8"))
 
     @staticmethod
-    def querystring(value: bytes) -> typing.Dict[str, typing.List[str]]:
+    def querystring(value: bytes) -> Dict[str, List[str]]:
         """Parse a URL querystring into a dict."""
 
         return urllib.parse.parse_qs(
@@ -158,7 +162,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     @staticmethod
-    def comma_delimited(value: bytes) -> typing.List[str]:
+    def comma_delimited(value: bytes) -> List[str]:
         """Parse a comma-delimited string into a list."""
 
         return [
@@ -167,7 +171,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ]
 
     @staticmethod
-    def json(value: bytes) -> typing.Any:
+    def json(value: bytes) -> Any:
         """Parse a value stored as JSON."""
 
         return json.loads(value.decode("utf-8"))

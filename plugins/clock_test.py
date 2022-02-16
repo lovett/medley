@@ -1,7 +1,8 @@
 """Test suite for the clock plugin."""
 
 from datetime import datetime
-import typing
+from typing import Any
+from typing import cast
 import unittest
 from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
@@ -35,7 +36,7 @@ class TestClock(Subscriber):
     def test_now_local(self, publish_mock: Mock) -> None:
         """clock:now can return a local time."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["America/New_York"]
@@ -120,57 +121,57 @@ class TestClock(Subscriber):
         """clock:shift moves forward and backward in time."""
 
         start = datetime(2010, 1, 4, tzinfo=pytz.timezone("UTC"))
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, days=1)
         )
         self.assertEqual(result.day, 5)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, "month_start")
         )
         self.assertEqual(result.day, 1)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, "month_end")
         )
         self.assertEqual(result.day, 31)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, "month_previous")
         )
         self.assertEqual(result.month, 12)
         self.assertEqual(result.year, 2009)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, "month_next")
         )
         self.assertEqual(result.month, 2)
         self.assertEqual(result.year, 2010)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, days=-1)
         )
         self.assertEqual(result.day, 3)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, hours=1)
         )
         self.assertEqual(result.hour, 1)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, hours=-1)
         )
         self.assertEqual(result.hour, 23)
 
-        result = typing.cast(
+        result = cast(
             datetime,
             self.plugin.shift(start, minutes=1)
         )
@@ -180,7 +181,7 @@ class TestClock(Subscriber):
     def test_local_with_config(self, publish_mock: Mock) -> None:
         """clock:local performs timezone conversion using a configured zone."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["America/New_York"]
@@ -201,7 +202,7 @@ class TestClock(Subscriber):
     def test_local_without_config(self, publish_mock: Mock) -> None:
         """clock:local performs timezone conversion using the system zone."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]

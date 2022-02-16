@@ -1,13 +1,17 @@
 """Storage for food log entries."""
 
 import sqlite3
-import typing
+from typing import Any
+from typing import Iterator
+from typing import Optional
+from typing import Tuple
+from typing import cast
 import cherrypy
 from plugins import mixins
 from plugins import decorators
 
-SearchResult = typing.Tuple[
-    typing.Iterator[sqlite3.Row], int
+SearchResult = Tuple[
+    Iterator[sqlite3.Row], int
 ]
 
 
@@ -77,7 +81,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("foodlog:search:keyword", self.search_by_keyword)
         self.bus.subscribe("foodlog:upsert", self.upsert)
 
-    def find(self, entry_id: int) -> typing.Optional[sqlite3.Row]:
+    def find(self, entry_id: int) -> Optional[sqlite3.Row]:
         """Locate an entry by its ID."""
 
         return self._selectOne(
@@ -97,7 +101,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (entry_id,)
         )
 
-    def search_by_date(self, **kwargs: typing.Any) -> SearchResult:
+    def search_by_date(self, **kwargs: Any) -> SearchResult:
         """Locate entries that match a date search."""
 
         query = kwargs.get("query", "")
@@ -122,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY consumed_on DESC
         LIMIT ? OFFSET ?"""
 
-        placeholders = typing.cast(typing.Any, (limit, offset))
+        placeholders = cast(Any, (limit, offset))
         if query:
             placeholders = (consumed_on, limit, offset)
 
@@ -131,7 +135,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._count(sql, placeholders)
         )
 
-    def search_by_keyword(self, **kwargs: typing.Any) -> SearchResult:
+    def search_by_keyword(self, **kwargs: Any) -> SearchResult:
         """Locate entries that match a keyword search."""
 
         limit = int(kwargs.get("limit", 20))
@@ -155,7 +159,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def upsert(
             self,
             entry_id: int,
-            **kwargs: typing.Any
+            **kwargs: Any
     ) -> bool:
         """Insert or update an entry."""
 

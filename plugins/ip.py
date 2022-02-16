@@ -3,7 +3,9 @@
 import os.path
 import pathlib
 import socket
-import typing
+from typing import Any
+from typing import Optional
+from typing import Dict
 import cherrypy
 import geoip2.database
 import geoip2.errors
@@ -44,10 +46,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return 0
 
-    def facts(self, ip_address: str) -> typing.Dict[str, str]:
+    def facts(self, ip_address: str) -> Dict[str, str]:
         """Look up geographic information for an IP address."""
 
-        facts: typing.Dict[str, typing.Any] = {
+        facts: Dict[str, Any] = {
             "annotations": [],
             "geo": {
                 "city": "",
@@ -74,7 +76,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         geodb_path = self.db_path()
 
-        result: typing.Optional[geoip2.models.City] = None
+        result: Optional[geoip2.models.City] = None
         try:
             reader = geoip2.database.Reader(str(geodb_path))
             result = reader.city(ip_address)
@@ -124,7 +126,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return facts
 
     @staticmethod
-    def reverse(ip_address: str) -> typing.Dict[str, typing.Any]:
+    def reverse(ip_address: str) -> Dict[str, Any]:
         """Look up the reverse host and domain for an IP address.
 
         These are treated as separate values because the reverse host
@@ -133,7 +135,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        facts: typing.Dict[str, typing.Any] = {
+        facts: Dict[str, Any] = {
             "reverse_host": "",
             "reverse_domain": ""
         }

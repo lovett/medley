@@ -1,7 +1,7 @@
 """Test suite for the grids app."""
 
 from datetime import datetime
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -39,7 +39,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         """The first two columns of a template with layout=month are Date and
         Day, even though these are not otherwise specified in the template"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["Column 1, Column 2, Column 3\nlayout=month"]
@@ -64,7 +64,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
     def test_invalid_start(self, publish_mock: mock.Mock) -> None:
         """An invalid start date for a monthly layout is handled gracefully"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["Column 4, Column 5, Column 6\nlayout=month"]
@@ -82,7 +82,7 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
     def test_invalid_grid(self, publish_mock: mock.Mock) -> None:
         """An invalid grid name is handled gracefully"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]

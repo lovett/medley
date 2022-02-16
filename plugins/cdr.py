@@ -1,7 +1,8 @@
 """Query an Asterisk sqlite3 CDR database."""
 
 import sqlite3
-import typing
+from typing import List
+from typing import Tuple
 import cherrypy
 from . import mixins
 
@@ -24,11 +25,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def timeline(
             self,
-            src_exclude: typing.Tuple[str, ...] = (),
-            dst_exclude: typing.Tuple[str, ...] = (),
+            src_exclude: Tuple[str, ...] = (),
+            dst_exclude: Tuple[str, ...] = (),
             offset: int = 0,
             limit: int = 50
-    ) -> typing.Tuple[typing.List[sqlite3.Row], int]:
+    ) -> Tuple[List[sqlite3.Row], int]:
         """Get a list of calls in reverse-chronological order."""
 
         reversed_values = [str(offset), str(limit)]
@@ -69,7 +70,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             number: str,
             limit: int = 50
-    ) -> typing.Tuple[typing.List[sqlite3.Row], int]:
+    ) -> Tuple[List[sqlite3.Row], int]:
         """An abbreviated version of log() for a single number.
 
         Puts more emphasis on whether a call was placed or received.

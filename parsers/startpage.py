@@ -6,7 +6,7 @@ used as keys.
 
 """
 
-import typing
+from typing import List
 import configparser
 import re
 from resources.url import Url
@@ -16,12 +16,12 @@ class Parser():
     """A small wrapper for Python's standard ConfigParser class."""
 
     anonymizer: str = ""
-    local_domains: typing.List[str]
+    local_domains: List[str]
 
     def __init__(
             self,
             anonymizer: str,
-            local_domains: typing.List[str],
+            local_domains: List[str],
     ) -> None:
         self.anonymizer = anonymizer
         self.local_domains = local_domains

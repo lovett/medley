@@ -1,6 +1,6 @@
 """Test suite for the bookmarks app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -41,7 +41,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     def test_empty(self, publish_mock: mock.Mock) -> None:
         """If the database is empty, a no-records message is returned"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "bookmarks:recent":
                 return [[[], 0, _]]
@@ -65,7 +65,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     def test_add_success(self, publish_mock: mock.Mock) -> None:
         """A URL can be added to the database"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "scheduler:add":
                 return [True]
@@ -84,7 +84,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     def test_add_fail(self, publish_mock: mock.Mock) -> None:
         """URLs must be well-formed"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "scheduler:add":
                 return [False]
@@ -100,7 +100,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     def test_delete_fail(self, publish_mock: mock.Mock) -> None:
         """Deletion fails if the URL is not found"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "bookmarks:remove":
                 return [0]
@@ -115,7 +115,7 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
     def test_delete_success(self, publish_mock: mock.Mock) -> None:
         """Successful deletion sends no response"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "bookmarks:remove":
                 return [1]

@@ -1,6 +1,6 @@
 """Test suite for the redirect app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -39,7 +39,7 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
     def test_no_destination(self, publish_mock: mock.Mock) -> None:
         """If no URL is provided, no redirect occurs."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]

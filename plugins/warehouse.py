@@ -1,7 +1,9 @@
 """Store arbitrary files in SQLite."""
 
 import sqlite3
-import typing
+from typing import Iterator
+from typing import Optional
+from typing import cast
 from pathlib import Path
 import cherrypy
 from plugins import mixins
@@ -59,10 +61,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (path.as_posix(), content_type, chunk)
         )
 
-    def get_type(self, path: Path) -> typing.Optional[str]:
+    def get_type(self, path: Path) -> Optional[str]:
         """Retrieve the content type of a stored file."""
 
-        return typing.cast(
+        return cast(
             str,
             self._selectFirst(
                 """SELECT content_type
@@ -73,7 +75,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             )
         )
 
-    def get_chunk(self, path: Path) -> typing.Iterator[bytes]:
+    def get_chunk(self, path: Path) -> Iterator[bytes]:
         """Retrieve a previously-stored file."""
 
         rows = self._select_generator(
@@ -95,7 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (path.as_posix(),)
         )
 
-    def list_files(self) -> typing.Iterator[sqlite3.Row]:
+    def list_files(self) -> Iterator[sqlite3.Row]:
         """List available files by path."""
 
         return self._select_generator(

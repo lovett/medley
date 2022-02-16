@@ -4,12 +4,14 @@ See https://www.reddit.com/dev/api
 """
 
 import re
-import typing
+from typing import Any
+from typing import Dict
+from typing import Tuple
 import cherrypy
 import mistletoe
 from resources.url import Url
 
-ViewAndData = typing.Tuple[str, typing.Dict[str, typing.Any]]
+ViewAndData = Tuple[str, Dict[str, Any]]
 
 
 def view(url: Url) -> ViewAndData:
@@ -61,7 +63,7 @@ def unavailable() -> ViewAndData:
     })
 
 
-def view_index(url: Url, response: typing.Any) -> ViewAndData:
+def view_index(url: Url, response: Any) -> ViewAndData:
     """Render a list of story links."""
 
     stories = []
@@ -87,7 +89,7 @@ def view_index(url: Url, response: typing.Any) -> ViewAndData:
         )
         stories.append(story)
 
-    def story_sorter(story: typing.Dict[str, typing.Any]) -> float:
+    def story_sorter(story: Dict[str, Any]) -> float:
         return story.get("created_utc", 0)
 
     stories.sort(
@@ -102,7 +104,7 @@ def view_index(url: Url, response: typing.Any) -> ViewAndData:
     })
 
 
-def view_story(response: typing.Any) -> ViewAndData:
+def view_story(response: Any) -> ViewAndData:
     """Render the comments of a single story."""
 
     listing = response[0].get("data", {})

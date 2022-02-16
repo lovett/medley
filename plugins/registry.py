@@ -3,7 +3,14 @@
 from collections import defaultdict
 import pathlib
 import sqlite3
-import typing
+from typing import Any
+from typing import Dict
+from typing import Generator
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import cast
 import cherrypy
 from plugins import mixins
 
@@ -51,7 +58,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("registry:search:valuelist", self.search_valuelist)
         self.bus.subscribe("registry:update", self.update)
 
-    def find(self, uid: int) -> typing.Optional[sqlite3.Row]:
+    def find(self, uid: int) -> Optional[sqlite3.Row]:
         """Select a single record by unique id (sqlite rowid)."""
 
         return self._selectOne(
@@ -61,7 +68,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (uid,)
         )
 
-    def replace(self, key: str, value: typing.Any) -> None:
+    def replace(self, key: str, value: Any) -> None:
         """Create or replace a record.
 
         Use this when a key should only be associated with a single
@@ -73,9 +80,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         cherrypy.engine.publish("memorize:clear", key)
 
-        Query = typing.Tuple[str, typing.Tuple[str, ...]]
+        Query = Tuple[str, Tuple[str, ...]]
 
-        queries: typing.Tuple[Query, ...] = (
+        queries: Tuple[Query, ...] = (
             ("DELETE FROM registry WHERE key=?",
              (key,)),
         )
@@ -91,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if result:
             cherrypy.engine.publish("registry:added", key)
 
-    def add(self, key: str, value: typing.Any) -> bool:
+    def add(self, key: str, value: Any) -> bool:
         """Create a new record.
 
         Use this when a key is allowed to be used by multiple records.
@@ -115,8 +122,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search(
             self,
             key: str = "",
-            **kwargs: typing.Any
-    ) -> typing.Tuple[int, typing.Iterator[sqlite3.Row]]:
+            **kwargs: Any
+    ) -> Tuple[int, Iterator[sqlite3.Row]]:
         """Search for records by key or value."""
 
         keys = kwargs.get("keys", ())
@@ -126,7 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sort_by_value = kwargs.get("sort_by_value", False)
         include_count = kwargs.get("include_count", False)
 
-        params: typing.Tuple[typing.Any, ...] = ()
+        params: Tuple[Any, ...] = ()
 
         sql = """
         SELECT rowid, key, value, created as 'created [timestamp]'
@@ -172,8 +179,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if limit > 0:
             sql += f" LIMIT {limit}"
 
-        result = typing.cast(
-            typing.Any,
+        result = cast(
+            Any,
             self._select_generator(sql, params)
         )
 
@@ -185,9 +192,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search_dict(
             self,
-            *args: typing.Any,
-            **kwargs: typing.Any
-    ) -> typing.Dict[str, typing.Any]:
+            *args: Any,
+            **kwargs: Any
+    ) -> Dict[str, Any]:
         """Shape a search result as a key-value dict."""
 
         key_slice = kwargs.get("key_slice", 0)
@@ -202,16 +209,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search_multidict(
             self,
-            *args: typing.Any,
-            **kwargs: typing.Any
-    ) -> typing.Dict[str, typing.List]:
+            *args: Any,
+            **kwargs: Any
+    ) -> Dict[str, List]:
         """Shape a search result as a dict whose values are lists."""
 
         key_slice = kwargs.get("key_slice", 0)
 
         _, rows = self.search(*args, **kwargs)
 
-        multi_dict: typing.Dict[str, typing.List] = defaultdict(list)
+        multi_dict: Dict[str, List] = defaultdict(list)
 
         for row in rows:
             key = row["key"].split(":", key_slice).pop()
@@ -221,9 +228,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search_valuelist(
             self,
-            *args: typing.Any,
-            **kwargs: typing.Any
-    ) -> typing.List:
+            *args: Any,
+            **kwargs: Any
+    ) -> List:
         """Shape a result set as a list of values."""
 
         _, rows = self.search(*args, **kwargs)
@@ -258,9 +265,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def first_key(
             self,
-            value: typing.Any = None,
+            value: Any = None,
             key_prefix: str = ""
-    ) -> typing.Optional[str]:
+    ) -> Optional[str]:
         """Perform a search by value and return the key of the first match.
 
         For cases where the value may be associated with more than one
@@ -270,7 +277,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         _, rows = self.search(key=key_prefix, value=value, limit=1)
 
         try:
-            return typing.cast(str, next(rows)["key"])
+            return cast(str, next(rows)["key"])
         except StopIteration:
             return None
 
@@ -279,8 +286,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             key: str,
             memorize: bool = False,
             as_path: bool = False,
-            default: typing.Any = None
-    ) -> typing.Any:
+            default: Any = None
+    ) -> Any:
         """Perform a search by key and return the value of the first match."""
 
         if memorize:
@@ -311,7 +318,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def keys(
             self,
             depth: int = 1
-    ) -> typing.Generator[typing.Any, None, None]:
+    ) -> Generator[Any, None, None]:
         """List known keys filtered by the number of segments.
 
         Returns a generator that yields key names.
@@ -348,7 +355,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (row["val"] for row in result)
 
-    def update(self, rowid: int, key: str, value: typing.Any) -> bool:
+    def update(self, rowid: int, key: str, value: Any) -> bool:
         """Modify an existing record."""
 
         cherrypy.engine.publish("memorize:clear", key)

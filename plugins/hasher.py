@@ -1,7 +1,8 @@
 """Generate hashes of values and files."""
 
 import hashlib
-import typing
+from typing import Union
+from typing import cast
 import cherrypy
 
 
@@ -22,7 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def hash_value(
-            value: typing.Union[str, bytes],
+            value: Union[str, bytes],
             algorithm: str = "sha256"
     ) -> str:
         """Calculate the hash of a value."""
@@ -50,7 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
         if memorized_value:
-            return typing.cast(str, memorized_value)
+            return cast(str, memorized_value)
 
         hasher = hashlib.new(algorithm)
 

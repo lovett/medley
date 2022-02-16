@@ -2,7 +2,8 @@
 
 import mimetypes
 from pathlib import Path
-import typing
+from typing import Iterator
+from typing import Union
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -75,7 +76,7 @@ class Controller:
             self,
             *args: str,
             **kwargs: str
-    ) -> typing.Union[bytes, typing.Iterator[bytes]]:
+    ) -> Union[bytes, Iterator[bytes]]:
         """Dispatch to a subhandler based on the URL path."""
 
         path = Path(*args)
@@ -195,7 +196,7 @@ class Controller:
         self.clear_etag()
 
     @staticmethod
-    def serve_file(params: GetParams) -> typing.Iterator[bytes]:
+    def serve_file(params: GetParams) -> Iterator[bytes]:
         """Send back a previously-stored file."""
 
         content_type = cherrypy.engine.publish(

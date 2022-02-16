@@ -1,6 +1,6 @@
 """Test suite for the registry app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -41,7 +41,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     def test_get_by_search(self, publish_mock: mock.Mock) -> None:
         """Records can be searched by key"""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [(1, [{"key": "abc456", "value": "test"}])]

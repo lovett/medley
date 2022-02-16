@@ -1,6 +1,6 @@
 """Test suite for the htmlhead app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 import requests
@@ -44,7 +44,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     def test_with_url(self, publish_mock: mock.Mock) -> None:
         """When a URL is provided, it is parsed for tags in the head."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":
@@ -77,7 +77,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
     def test_404(self, publish_mock: mock.Mock) -> None:
         """When a URL is provided, it is parsed for tags in the head."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":

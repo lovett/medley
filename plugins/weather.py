@@ -1,12 +1,14 @@
 """API interaction with openweathermap.org."""
 
 import re
-import typing
+from typing import Any
+from typing import Dict
+from typing import cast
 from collections import defaultdict
 import cherrypy
 
-Forecast = typing.Dict[str, typing.Any]
-Config = typing.Dict[str, typing.Any]
+Forecast = Dict[str, Any]
+Config = Dict[str, Any]
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -111,7 +113,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         # Only cache alerts until the end of the day. For multi-day
         # alerts, this will result in multiple notifications which is ok.
-        cache_lifespan = typing.cast(
+        cache_lifespan = cast(
             int,
             cherrypy.engine.publish(
                 "clock:day:remaining"

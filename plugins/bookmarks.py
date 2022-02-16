@@ -2,7 +2,11 @@
 
 import re
 import sqlite3
-import typing
+from typing import Optional
+from typing import List
+from typing import Set
+from typing import Tuple
+from typing import Union
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -113,7 +117,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:remove", self.remove)
         self.bus.subscribe("bookmarks:repair", self.repair)
 
-    def find_id(self, uid: int) -> typing.Optional[sqlite3.Row]:
+    def find_id(self, uid: int) -> Optional[sqlite3.Row]:
         """Locate a bookmark by ID."""
 
         sql = """SELECT rowid, url as 'url [url]', title,
@@ -125,7 +129,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             WHERE rowid=?"""
         return self._selectOne(sql, (uid,))
 
-    def find_url(self, url: Url) -> typing.Optional[sqlite3.Row]:
+    def find_url(self, url: Url) -> Optional[sqlite3.Row]:
         """Locate a bookmark by URL."""
 
         sql = """SELECT rowid, url as 'url [url]', title,
@@ -301,8 +305,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             order: str = "rank",
             limit: int = 20,
             offset: int = 0
-    ) -> typing.Tuple[
-        typing.List[sqlite3.Row], int, typing.List[str]
+    ) -> Tuple[
+        List[sqlite3.Row], int, List[str]
     ]:
         """Locate bookmarks via fulltext search.
 
@@ -317,7 +321,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         from_sql = "bookmarks b"
         where_sql = "b.deleted IS NULL"
-        placeholder_values: typing.Tuple[str, ...] = ()
+        placeholder_values: Tuple[str, ...] = ()
         order_sql = "b.added DESC"
 
         if "tag:" in query:
@@ -392,8 +396,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             limit: int = 20,
             offset: int = 0,
             max_days: int = 180
-    ) -> typing.Tuple[
-        typing.List[sqlite3.Row], int, typing.List[str]
+    ) -> Tuple[
+        List[sqlite3.Row], int, List[str]
     ]:
         """Get a newest-first list of recently bookmarked URLs."""
 
@@ -419,7 +423,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def all_tags(
             self,
             for_precache: bool = False
-    ) -> typing.Union[None, typing.List[str]]:
+    ) -> Union[None, List[str]]:
         """Get the full list of all known tags."""
 
         cache_key = "bookmarks:all_tags"
@@ -441,7 +445,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         generator = self._select_generator(sql)
 
-        tags: typing.Set[str] = set()
+        tags: Set[str] = set()
         for row in generator:
             tags.update(row["tags"])
 

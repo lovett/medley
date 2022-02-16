@@ -1,7 +1,9 @@
 """Present all the available applications."""
 
 import sys
-import typing
+from typing import Dict
+from typing import List
+from typing import Tuple
 import cherrypy
 from plugins import decorators
 
@@ -43,9 +45,9 @@ class Controller:
     @staticmethod
     @decorators.log_runtime
     def catalog_apps(
-            apps: typing.Dict[str, cherrypy.Application],
+            apps: Dict[str, cherrypy.Application],
             show_all: bool = True
-    ) -> typing.List[typing.Tuple[str, str, str]]:
+    ) -> List[Tuple[str, str, str]]:
         """Extract app summaries from module docstrings."""
         catalog = []
         for mount_path, controller in apps.items():

@@ -3,7 +3,9 @@
 from datetime import date, datetime
 import re
 import sqlite3
-import typing
+from typing import Dict
+from typing import List
+from typing import Union
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -57,7 +59,7 @@ class Controller:
         reversed_ips = None
         country_names = None
         annotations = None
-        cookies: typing.Dict[str, str] = {}
+        cookies: Dict[str, str] = {}
 
         if log_records:
             reversed_ips = cherrypy.engine.publish(
@@ -98,9 +100,9 @@ class Controller:
 
     @staticmethod
     def get_active_date(
-            log_records: typing.List[sqlite3.Row],
+            log_records: List[sqlite3.Row],
             query: str,
-    ) -> typing.Union[date, datetime]:
+    ) -> Union[date, datetime]:
         """Figure out which date the query pertains to."""
 
         query_date = ""
@@ -157,8 +159,8 @@ class Controller:
 
     @staticmethod
     def get_annotations(
-            log_records: typing.List[sqlite3.Row]
-    ) -> typing.Dict[str, str]:
+            log_records: List[sqlite3.Row]
+    ) -> Dict[str, str]:
         """Get IP address custom labels from the registry"""
 
         ips = {record["ip"] for record in log_records}

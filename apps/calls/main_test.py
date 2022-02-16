@@ -1,6 +1,6 @@
 """Test suite for the calls app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -38,7 +38,7 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.engine.publish")
     def test_exclusion(self, publish_mock: mock.Mock) -> None:
         """Source and destination numbers are skipped"""
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search":
                 return [(2, (

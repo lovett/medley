@@ -1,6 +1,6 @@
 """Redirection between domains"""
 
-import typing
+from typing import List
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -57,7 +57,7 @@ class Controller:
             raise cherrypy.HTTPError(400) from error
 
         registry_url = ""
-        bounces: typing.List[Url] = []
+        bounces: List[Url] = []
 
         url = Url(params.u)
 

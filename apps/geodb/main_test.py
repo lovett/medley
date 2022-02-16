@@ -4,7 +4,7 @@ import os
 import os.path
 import shutil
 import tempfile
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 import cherrypy
@@ -73,7 +73,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
     def test_url_required(self, publish_mock: mock.Mock) -> None:
         """The download URL must be defined in the registry."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{}]
@@ -88,7 +88,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
     def test_license_required(self, publish_mock: mock.Mock) -> None:
         """The license key must be defined in the registry."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{"url": "http://example.com"}]
@@ -103,7 +103,7 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
     def test_success(self, publish_mock: mock.Mock) -> None:
         """A post request with a valid action returns successfully"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{

@@ -1,14 +1,17 @@
 """Parser for logindex search queries."""
 
 import calendar
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 import re
-import typing
+from typing import Callable
+from typing import Dict
+from typing import Tuple
 from pytz import UTC
 
-Transformer = typing.Callable[[str, str, bool], str]
-PhraseTuple = typing.Tuple[str, ...]
-TermDict = typing.Dict[str, PhraseTuple]
+Transformer = Callable[[str, str, bool], str]
+PhraseTuple = Tuple[str, ...]
+TermDict = Dict[str, PhraseTuple]
 
 
 class Parser():

@@ -2,7 +2,9 @@
 
 import time
 import sched
-import typing
+from typing import Any
+from typing import List
+from typing import Union
 import cherrypy
 
 
@@ -138,8 +140,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     @staticmethod
     def execute(
             name: str,
-            *args: typing.Any,
-            **kwargs: typing.Any
+            *args: Any,
+            **kwargs: Any
     ) -> None:
         """Run a previously-scheduled job."""
         cherrypy.engine.publish(name, *args, **kwargs)  # type: ignore
@@ -147,8 +149,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     def add(
             self,
             delay_seconds: int,
-            *args: typing.Any,
-            **kwargs: typing.Any
+            *args: Any,
+            **kwargs: Any
     ) -> ScheduledEvent:
         """Schedule an event for future execution
 
@@ -176,8 +178,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
     def persist(
             self,
             delay_seconds: int,
-            *args: typing.Any,
-            **kwargs: typing.Any
+            *args: Any,
+            **kwargs: Any
     ) -> ScheduledEvent:
         """Schedule an event and then cache it.
 
@@ -200,7 +202,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
         return event
 
-    def remove(self, event: typing.Union[str, sched.Event]) -> bool:
+    def remove(self, event: Union[str, sched.Event]) -> bool:
         """Cancel a previously-scheduled event.
 
         Event can either be a string or an object.
@@ -225,7 +227,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
     def upcoming(
             self,
             event_filter: str = None
-    ) -> typing.List[sched.Event]:
+    ) -> List[sched.Event]:
         """List upcoming events in the order they will be run."""
 
         return [

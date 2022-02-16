@@ -2,7 +2,8 @@
 
 import mimetypes
 from pathlib import Path
-import typing
+from typing import Tuple
+from typing import cast
 import cherrypy
 from plugins import mixins
 
@@ -51,7 +52,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def hash_from_db(self, target: Path) -> str:
         """Retrieve a published asset's hash."""
 
-        asset_hash = typing.cast(str, self._selectFirst(
+        asset_hash = cast(str, self._selectFirst(
             "SELECT hash FROM assets WHERE extension=? AND path=?",
             (target.suffix.lstrip("."), str(target),)
         ))
@@ -62,7 +63,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def hash_from_fs(target: Path) -> str:
         """Calculate the hash of an asset on the filesystem."""
 
-        return typing.cast(
+        return cast(
             str,
             cherrypy.engine.publish(
                 "hasher:file",
@@ -70,7 +71,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ).pop()
         )
 
-    def asset_from_db(self, target: Path) -> typing.Tuple[bytes, str]:
+    def asset_from_db(self, target: Path) -> Tuple[bytes, str]:
         """Retrieve a published asset and its mimetype."""
 
         row = self._selectOne(
@@ -82,12 +83,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return (b"", "")
 
         return (
-            typing.cast(bytes, row["bytes"]),
-            typing.cast(str, row["mimetype"])
+            cast(bytes, row["bytes"]),
+            cast(str, row["mimetype"])
         )
 
     @staticmethod
-    def asset_from_fs(target: Path) -> typing.Tuple[bytes, str]:
+    def asset_from_fs(target: Path) -> Tuple[bytes, str]:
         """Read an asset from the filesystem."""
 
         asset_bytes = cherrypy.engine.publish(

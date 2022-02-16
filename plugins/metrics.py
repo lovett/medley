@@ -2,7 +2,7 @@
 
 from collections import deque
 import sqlite3
-import typing
+from typing import Iterator
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -73,7 +73,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("scheduler:add", 1, "metrics:pull")
 
     @decorators.log_runtime
-    def inventory(self) -> typing.Iterator[sqlite3.Row]:
+    def inventory(self) -> Iterator[sqlite3.Row]:
         """List all available metrics."""
 
         return self._select_generator(
@@ -98,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (f"-{cutoff_months} month",)
         )
 
-    def dataset(self, key: str) -> typing.Iterator[sqlite3.Row]:
+    def dataset(self, key: str) -> Iterator[sqlite3.Row]:
         """Retrieve records for a single metric."""
 
         return self._select_generator(

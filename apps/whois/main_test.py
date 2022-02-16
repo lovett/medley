@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 import unittest
-import typing
+from typing import Any
 from unittest import mock
 from testing.assertions import ResponseAssertions
 from testing import helpers
@@ -47,7 +47,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     ) -> None:
         """Request lookup of an invalid hostname"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "app_url":
@@ -65,7 +65,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     def test_valid_address_as_hostname(self, publish_mock: mock.Mock) -> None:
         """Request lookup of a valid hostname"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "app_url":
                 return ["/"]
@@ -92,7 +92,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     def test_invalid_address_as_ip(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an invalid IP address"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "app_url":
                 return ["/"]
@@ -110,7 +110,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         whois_fake = {"hello": "world"}
         facts_fake = {"foo": "bar"}
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Overrides to be returned by the mock"""
             if args[0] == "cache:get":
                 return [facts_fake]
@@ -138,7 +138,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
     def test_address_as_ip_nocache(self, publish_mock: mock.Mock) -> None:
         """Request lookup of an uncached IP address"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [None]

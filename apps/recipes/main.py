@@ -3,7 +3,8 @@
 from enum import Enum
 import datetime
 import re
-import typing
+from typing import List
+from typing import Union
 import cherrypy
 import mistletoe
 from pydantic import BaseModel
@@ -13,10 +14,10 @@ from resources.url import Url
 
 
 # pylint: disable=protected-access
-Attachment = typing.Union[
+Attachment = Union[
     None,
     cherrypy._cpreqbody.Part,
-    typing.List[cherrypy._cpreqbody.Part]
+    List[cherrypy._cpreqbody.Part]
 ]
 
 

@@ -1,7 +1,7 @@
 """A Cherrypy tool to make it easier to work with the Accept header."""
 
 import pathlib
-import typing
+from typing import Tuple
 import cherrypy
 
 
@@ -20,7 +20,7 @@ class Tool(cherrypy.Tool):
         )
 
     @staticmethod
-    def provides(formats: typing.Tuple[str]) -> None:
+    def provides(formats: Tuple[str]) -> None:
         """Populate a custom request property with a keyword describing the
         client's desired content format.
 

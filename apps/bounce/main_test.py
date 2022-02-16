@@ -1,6 +1,6 @@
 """Test suite for the whois app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -85,7 +85,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         equivalent URLs for other members of the group
         """
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -157,7 +157,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         """
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -195,7 +195,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_unrecognized_site(self, publish_mock: mock.Mock) -> None:
         """A  URL that does not belong to known group returns a form."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "registry:first:key":
@@ -232,7 +232,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_bookmarklet_url_https(self, publish_mock: mock.Mock) -> None:
         """The bookmarklet URL respects HTTPS."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:key":
                 return [None]
@@ -260,7 +260,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
 
         """
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:key":
                 return ["http://example.com"]
@@ -300,7 +300,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_add_site(self, publish_mock: mock.Mock) -> None:
         """A new site can be added to a group"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function."""
             if args[0] == "registry:replace":
                 return [{"uid": 1, "group": "example"}]
@@ -327,7 +327,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_add_site_invalid_group(self, publish_mock: mock.Mock) -> None:
         """A POST is rejected if the provided group is non-alphanumeric."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function."""
             if args[0] == "app_url":
                 return ["http://example.com"]
@@ -352,7 +352,7 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
     def test_add_site_invalid_name(self, publish_mock: mock.Mock) -> None:
         """A POST is rejected if the provided name is non-alphanumeric."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function."""
             if args[0] == "app_url":
                 return ["http://example.com"]

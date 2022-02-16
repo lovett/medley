@@ -1,6 +1,6 @@
 """Test suite for the speak app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -39,7 +39,7 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
     def test_muted(self, publish_mock: mock.Mock) -> None:
         """If the application is muted, responses are returned with 202"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "speak:muted":
@@ -60,7 +60,7 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
     def test_not_muted(self, publish_mock: mock.Mock) -> None:
         """Valid notifications trigger a speak event"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "speak:muted":

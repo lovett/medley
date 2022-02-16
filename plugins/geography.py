@@ -1,7 +1,11 @@
 """Look up geographic information by various identifiers."""
 
 import re
-import typing
+from typing import Dict
+from typing import Iterable
+from typing import Optional
+from typing import Tuple
+from typing import cast
 import cherrypy
 
 
@@ -38,7 +42,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def state_by_area_code(
             self,
             area_code: str
-    ) -> typing.Tuple[str, typing.Optional[str], typing.Optional[str]]:
+    ) -> Tuple[str, Optional[str], Optional[str]]:
         """Query dbpedia for the geographic location of a North American
         telephone area code. Returns a dictionary with keys for state
         abbreviation, full name, and comment.
@@ -89,7 +93,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def unabbreviate_us_state(
             abbreviation: str
-    ) -> typing.Tuple[str, typing.Optional[str]]:
+    ) -> Tuple[str, Optional[str]]:
         """Query dbpedia for the full name of a U.S. state by its 2-letter
         abbreviation.
 
@@ -130,8 +134,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def country_by_abbreviation(
-            abbreviations: typing.Iterable[str] = ()
-    ) -> typing.Dict[str, str]:
+            abbreviations: Iterable[str] = ()
+    ) -> Dict[str, str]:
         """Query the registry for the name of a country from its 2-letter
         abbreviation.
 
@@ -148,8 +152,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             key_slice=2
         ).pop()
 
-        return typing.cast(
-            typing.Dict[str, str],
+        return cast(
+            Dict[str, str],
             rows
         )
 

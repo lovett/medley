@@ -1,13 +1,16 @@
 """An in-memory cache for frequently accessed values."""
 
-import typing
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 import cherrypy
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for managing an in-memory cache."""
 
-    cache: typing.Dict[str, typing.Any]
+    cache: Dict[str, Any]
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
@@ -26,8 +29,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def get(
             self,
             key: str,
-            default: typing.Optional[str] = None
-    ) -> typing.Tuple[bool, str]:
+            default: Optional[str] = None
+    ) -> Tuple[bool, str]:
         """Retrieve a value from the cache."""
 
         lowercase_key = key.lower()
@@ -36,7 +39,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self.cache.get(lowercase_key, default)
         )
 
-    def set(self, key: str, value: typing.Any) -> None:
+    def set(self, key: str, value: Any) -> None:
         """Store a value in the cache."""
         lowercase_key = key.lower()
 

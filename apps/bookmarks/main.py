@@ -3,7 +3,8 @@
 from enum import Enum
 import json
 import sqlite3
-import typing
+from typing import Dict
+from typing import Iterator
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import ValidationError
@@ -136,8 +137,8 @@ class Controller:
 
     @staticmethod
     def count_by_domain(
-            bookmarks: typing.Iterator[sqlite3.Row]
-    ) -> typing.Dict[str, int]:
+            bookmarks: Iterator[sqlite3.Row]
+    ) -> Dict[str, int]:
         """ Get bookmark counts per domain for a set of bookmarks."""
         counts = {}
 

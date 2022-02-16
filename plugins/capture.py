@@ -2,7 +2,11 @@
 
 import json
 import sqlite3
-import typing
+from typing import Any
+from typing import Optional
+from typing import List
+from typing import Tuple
+from typing import cast
 import cherrypy
 from . import mixins
 
@@ -43,8 +47,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("capture:prune", self.prune)
 
     def add(self,
-            request: typing.Any,
-            response: typing.Any) -> bool:
+            request: Any,
+            response: Any) -> bool:
         """Store a single HTTP request and response pair.
 
         This is usually invoked from the capture Cherrypy tool.
@@ -84,10 +88,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def search(
             self,
-            path: typing.Optional[str] = None,
+            path: Optional[str] = None,
             offset: int = 0,
             limit: int = 10
-    ) -> typing.Tuple[int, typing.List[sqlite3.Row]]:
+    ) -> Tuple[int, List[sqlite3.Row]]:
         """Locate previously stored requests by path."""
 
         search_clause = ""
@@ -116,7 +120,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return (count, result)
 
-    def get(self, rowid: int) -> typing.Optional[sqlite3.Row]:
+    def get(self, rowid: int) -> Optional[sqlite3.Row]:
         """Locate previously stored requests by ID."""
 
         sql = """SELECT rowid, request_line, request as 'request [json]',
@@ -125,8 +129,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM captures
         WHERE rowid=?"""
 
-        return typing.cast(
-            typing.Optional[sqlite3.Row],
+        return cast(
+            Optional[sqlite3.Row],
             self._selectOne(sql, (rowid,))
         )
 

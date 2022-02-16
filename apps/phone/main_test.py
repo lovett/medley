@@ -1,6 +1,6 @@
 """Test suite for the phone app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -41,7 +41,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     def test_no_number(self, publish_mock: mock.Mock) -> None:
         """An HTML request with no number displays the search form"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
@@ -57,7 +57,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     def test_invalid_number_as_html(self, publish_mock: mock.Mock) -> None:
         """An HTML request with an invalid number redirects with a message"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
@@ -73,7 +73,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.engine.publish")
     def test_valid_number(self, publish_mock: mock.Mock) -> None:
         """A valid number lookup performs a state abbreviation lookup"""
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             value_map = {
                 "cache:get": [None],
@@ -100,7 +100,7 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     @mock.patch("cherrypy.engine.publish")
     def test_valid_number_cached(self, publish_mock: mock.Mock) -> None:
         """Successful number lookups are cached"""
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "cache:get":
                 return [{

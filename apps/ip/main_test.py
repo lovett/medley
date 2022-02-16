@@ -1,6 +1,6 @@
 """Test suite for the ip app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -16,10 +16,12 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
 
     @classmethod
     def setUpClass(cls) -> None:
+        """Start a faux cherrypy server"""
         helpers.start_server(apps.ip.main.Controller)
 
     @classmethod
     def tearDownClass(cls) -> None:
+        """Shut down the faux server"""
         helpers.stop_server()
 
     def test_allow(self) -> None:
@@ -39,7 +41,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
     def test_returns_html(self, publish_mock: mock.Mock) -> None:
         """GET returns text/html by default"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -66,7 +68,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
     def test_returns_json(self, publish_mock: mock.Mock) -> None:
         """GET returns application/json if requested"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -89,7 +91,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
     def test_returns_text(self, publish_mock: mock.Mock) -> None:
         """GET returns text/plain if requested"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -105,7 +107,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
     def test_honors_xreal_ip(self, publish_mock: mock.Mock) -> None:
         """The X-Real-IP header takes precedence over Remote-Addr"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get":

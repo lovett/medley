@@ -8,7 +8,13 @@ import http.client
 import math
 from pathlib import Path
 import sqlite3
-import typing
+from typing import Any
+from typing import Callable
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import cast
 import urllib
 from datetime import datetime, timedelta
 import json
@@ -69,7 +75,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def load_template(
             target: str
-    ) -> typing.Optional[typing.Tuple[str, str, typing.Callable]]:
+    ) -> Optional[Tuple[str, str, Callable]]:
         """Load the specified template from the asset database.
 
         This is an alternative to loading templates from the
@@ -79,8 +85,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         template_path = Path(target)
 
-        asset_bytes, _ = typing.cast(
-            typing.Tuple[bytes, str],
+        asset_bytes, _ = cast(
+            Tuple[bytes, str],
             cherrypy.engine.publish(
                 "assets:get",
                 template_path
@@ -109,7 +115,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("jinja:render", self.render)
         self.bus.subscribe("jinja:autolink", self.autolink_filter)
 
-    def render(self, template_name: str, **kwargs: typing.Any) -> bytes:
+    def render(self, template_name: str, **kwargs: Any) -> bytes:
         """Populate a Jinja template."""
 
         template = self.env.get_template(template_name)
@@ -135,7 +141,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cherrypy.response.headers["Content-Type"] = "text/html;charset=utf-8"
 
-        rendered_template = typing.cast(str, template.render(**data))
+        rendered_template = cast(str, template.render(**data))
 
         return rendered_template.encode()
 
@@ -143,7 +149,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def date_filter(value: float, local: bool = False) -> datetime:
         """Convert a timestamp to a date."""
 
-        return typing.cast(
+        return cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:from_timestamp",
@@ -156,7 +162,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def dateformat_filter(dt: datetime, fmt: str) -> str:
         """Format a datetime instance to a string."""
 
-        return typing.cast(
+        return cast(
             str,
             cherrypy.engine.publish("clock:format", dt, fmt).pop()
         )
@@ -177,7 +183,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return "\n".join(unindented)
 
     @staticmethod
-    def status_message_filter(code: typing.Union[str, int]) -> str:
+    def status_message_filter(code: Union[str, int]) -> str:
         """Returns the standard status code message for the given integer"""
         return http.client.responses.get(int(code), "Unknown")
 
@@ -222,7 +228,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         """
 
-        return typing.cast(
+        return cast(
             str,
             cherrypy.engine.publish(
                 "clock:ago",
@@ -323,7 +329,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.pass_context
-    def cache_bust_filter(_: typing.Any, url: str) -> str:
+    def cache_bust_filter(_: Any, url: str) -> str:
         """Calculate a cache-aware URL to a static asset.
 
         A cache-aware URL contains a unique identifier in its
@@ -344,7 +350,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     @jinja2.pass_context
-    def escapejs_filter(_: typing.Any, val: str) -> str:
+    def escapejs_filter(_: Any, val: str) -> str:
         """Escape special characters in JavaScript when rendered inline with
         markup.
 
@@ -384,7 +390,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> str:
         """Add hyperlinks to a log entry."""
 
-        result = typing.cast(str, record["logline"])
+        result = cast(str, record["logline"])
 
         # ip
         link = f"""<a href="/visitors?query=ip+{record['ip']}"
@@ -424,7 +430,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def autolink_filter(
-            value: typing.Optional[str]
+            value: Optional[str]
     ) -> str:
         """Convert a bare URL to a hyperlink"""
 
@@ -472,7 +478,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url_filter(
             context: jinja2.runtime.Context,
             value: str,
-            query: typing.Dict[str, typing.Any] = None
+            query: Dict[str, Any] = None
     ) -> str:
         """Generate an application URL via the URL plugin."""
 
@@ -485,7 +491,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not publish_response:
             return ''
 
-        url = typing.cast(
+        url = cast(
             str,
             publish_response.pop()
         )
@@ -550,7 +556,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             local=True
         ).pop()
 
-        return typing.cast(
+        return cast(
             bool,
             cherrypy.engine.publish(
                 "clock:same_day",
@@ -567,7 +573,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> bool:
         """Determine if a unix timestamp falls on yesterday's date."""
 
-        now = typing.cast(
+        now = cast(
             datetime,
             cherrypy.engine.publish(
                 "clock:now",
@@ -577,7 +583,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         yesterday = now - timedelta(days=1)
 
-        return typing.cast(
+        return cast(
             bool,
             cherrypy.engine.publish(
                 "clock:same_day",

@@ -1,7 +1,10 @@
 """Store arbitrary values in an SQLite database."""
 
 import json
-import typing
+from typing import Any
+from typing import Iterator
+from typing import Tuple
+from typing import cast
 import cherrypy
 from . import mixins
 
@@ -53,18 +56,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cache:prune", self.prune)
 
     @staticmethod
-    def keysplit(key: str) -> typing.Tuple[str, str]:
+    def keysplit(key: str) -> Tuple[str, str]:
         """Break a key into two parts."""
 
         if ":" in key:
-            return typing.cast(
-                typing.Tuple[str, str],
+            return cast(
+                Tuple[str, str],
                 tuple(key.split(":", 1))
             )
 
         return ("_", key)
 
-    def match(self, prefix: str) -> typing.Iterator[typing.Any]:
+    def match(self, prefix: str) -> Iterator[Any]:
         """Retrieve multiple values based on a common prefix."""
 
         rows = self._select_generator(
@@ -83,7 +86,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             except json.decoder.JSONDecodeError:
                 yield row["value"]
 
-    def get(self, key: str) -> typing.Any:
+    def get(self, key: str) -> Any:
         """Retrieve a value from the store."""
 
         prefix, rest = self.keysplit(key)
@@ -106,7 +109,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def set(
             self,
             key: str,
-            value: typing.Any,
+            value: Any,
             lifespan_seconds: int = 604800
     ) -> bool:
         """Add a value to the store.

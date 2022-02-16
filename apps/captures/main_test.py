@@ -1,6 +1,6 @@
 """Test suite for the captures app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -41,7 +41,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     def test_search_by_path(self, publish_mock: mock.Mock) -> None:
         """Captures can be searched by path"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "capture:search":
                 return [(1, [{}])]
@@ -62,7 +62,7 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
     def test_view_single_capture(self, publish_mock: mock.Mock) -> None:
         """A single capture can be viewed by its ID."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "capture:get":

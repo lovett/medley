@@ -1,7 +1,7 @@
 """Extra assertions to reduce testing boilerplate."""
 
 import re
-import typing
+from typing import Tuple
 import unittest
 from unittest import mock
 from testing.response import Response
@@ -20,7 +20,7 @@ class Subscriber(unittest.TestCase):
     def assert_prefixes(
             self,
             subscribe_mock: mock.Mock,
-            prefixes: typing.Tuple[str, ...]
+            prefixes: Tuple[str, ...]
     ) -> None:
         """All subscribe calls have an expected prefix."""
 
@@ -64,7 +64,7 @@ class ResponseAssertions(unittest.TestCase):
     def assert_allowed(
             self,
             response: Response,
-            expected_verbs: typing.Tuple[str, ...] = ()
+            expected_verbs: Tuple[str, ...] = ()
     ) -> None:
         """The Allow header shouldn't contain any unexpected verbs
 

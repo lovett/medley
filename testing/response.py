@@ -1,6 +1,7 @@
 """Dataclass for working with CherryPy response objects."""
 
-import typing
+from typing import Any
+from typing import Dict
 import dataclasses
 
 
@@ -10,8 +11,8 @@ class Response():
 
     __slots__ = ["headers", "code", "status", "body", "json"]
 
-    headers: typing.Dict[str, str]
+    headers: Dict[str, str]
     code: int
     status: str
     body: str
-    json: typing.Dict[str, typing.Any]
+    json: Dict[str, Any]

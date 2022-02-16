@@ -1,6 +1,6 @@
 """Test suite for the url plugin."""
 
-import typing
+from typing import Any
 import unittest
 from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
@@ -45,7 +45,7 @@ class TestUrl(Subscriber):
     def test_config_fallback(self, publish_mock: Mock) -> None:
         """The base URL is taken from the registry."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com"]
@@ -67,7 +67,7 @@ class TestUrl(Subscriber):
     def test_local_base(self, publish_mock: Mock) -> None:
         """A local base URL is ignored."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com"]

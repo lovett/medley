@@ -2,7 +2,8 @@
 
 from enum import Enum
 import re
-import typing
+from typing import Dict
+from typing import Union
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -228,7 +229,7 @@ class Controller:
 
     def handle_notification(
             self,
-            notification: typing.Dict[str, typing.Union[str, int, float]]
+            notification: Dict[str, Union[str, int, float]]
     ) -> None:
         """Transform a notification to a speech-ready statement."""
 

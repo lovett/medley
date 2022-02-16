@@ -1,10 +1,12 @@
 """Extract the tags in the head section of an HTML document."""
 
-import typing
+from typing import List
+from typing import Optional
+from typing import Tuple
 from html.parser import HTMLParser
 from collections import deque
 
-Attributes = typing.List[typing.Tuple[str, typing.Optional[str]]]
+Attributes = List[Tuple[str, Optional[str]]]
 
 
 class Parser(HTMLParser):  # pylint: disable=abstract-method
@@ -22,7 +24,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
     finished = False
 
-    result: typing.List[str] = []
+    result: List[str] = []
 
     def __init__(self) -> None:
         super().__init__()
@@ -34,7 +36,7 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         self.finished = False
         self.stack.clear()
 
-    def parse(self, markup: str) -> typing.List[str]:
+    def parse(self, markup: str) -> List[str]:
         """Parse an HTML string."""
         self.result = []
 

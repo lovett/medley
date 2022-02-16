@@ -1,7 +1,7 @@
 """Test suite for the geography plugin."""
 
 import json
-import typing
+from typing import Any
 import unittest
 from unittest.mock import Mock, patch, DEFAULT
 import cherrypy
@@ -29,7 +29,7 @@ class TestGeography(Subscriber):
     def test_area_code_valid(self, publish_mock: Mock) -> None:
         """A triple is returned if the area code is valid"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -50,7 +50,7 @@ class TestGeography(Subscriber):
     def test_area_code_invalid(self, publish_mock: Mock) -> None:
         """A triple is returned if the area code is valid"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -72,7 +72,7 @@ class TestGeography(Subscriber):
     def test_state_name_invalid(self, publish_mock: Mock) -> None:
         """An invalid state abbreviation returns Unknown for the state name"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
@@ -92,7 +92,7 @@ class TestGeography(Subscriber):
     def test_state_name_valid(self, publish_mock: Mock) -> None:
         """A valid state abbreviation returns the correct state name"""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":

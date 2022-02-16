@@ -1,6 +1,6 @@
 """Tools for working with text containing HTML markup."""
 
-import typing
+from typing import cast
 import cherrypy
 import parsers.htmltext
 from resources.url import Url
@@ -59,4 +59,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
             parser = parsers.htmltext.Parser(blacklist)
 
-        return typing.cast(str, parser.parse(html))
+        return cast(str, parser.parse(html))

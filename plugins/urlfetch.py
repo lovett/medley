@@ -4,12 +4,16 @@ import json
 import os.path
 import shutil
 import tarfile
-import typing
+from typing import Any
+from typing import Dict
+from typing import Iterable
+from typing import Optional
+from typing import cast
 import urllib.parse
 import requests
 import cherrypy
 
-Kwargs = typing.Dict[str, typing.Any]
+Kwargs = Dict[str, Any]
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -31,8 +35,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def headers(
-            additions: typing.Optional[typing.Dict[str, str]] = None
-    ) -> typing.Dict[str, str]:
+            additions: Optional[Dict[str, str]] = None
+    ) -> Dict[str, str]:
         """Add headers to a default set."""
 
         headers = {
@@ -78,11 +82,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self,
             url: str,
             *,
-            auth: typing.Iterable[str] = (),
-            params: typing.Optional[typing.Dict[str, typing.Any]] = None,
-            headers: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            auth: Iterable[str] = (),
+            params: Optional[Dict[str, Any]] = None,
+            headers: Optional[Dict[str, Any]] = None,
             cache_lifespan: int = 0
-    ) -> typing.Any:
+    ) -> Any:
         """Make a GET request for a JSON resource."""
 
         request_url = url
@@ -143,13 +147,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             url: str,
             as_object: bool = False,
             **kwargs: Kwargs
-    ) -> typing.Any:
+    ) -> Any:
         """Send a GET request"""
 
         auth = kwargs.get("auth")
         headers = self.headers(kwargs.get("headers"))
         params = kwargs.get("params")
-        cache_lifespan = typing.cast(int, kwargs.get("cache_lifespan", 0))
+        cache_lifespan = cast(int, kwargs.get("cache_lifespan", 0))
 
         full_url = url
         if params:
@@ -211,7 +215,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             url: str,
             destination: str,
             as_json: bool = False,
-            **kwargs: typing.Dict[str, typing.Any]
+            **kwargs: Dict[str, Any]
     ) -> None:
         """Send a GET request and save the response to the filesystem."""
 
@@ -250,7 +254,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 ]
 
                 for file_name in file_names:
-                    buffered_reader: typing.Any = tar_file.extractfile(
+                    buffered_reader: Any = tar_file.extractfile(
                         file_name
                     )
 
@@ -277,12 +281,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def post(
             self,
             url: str,
-            data: typing.Any,
+            data: Any,
             as_object: bool = False,
             as_json: bool = False,
             as_bytes: bool = False,
-            **kwargs: typing.Any
-    ) -> typing.Any:
+            **kwargs: Any
+    ) -> Any:
         """Send a POST request."""
 
         auth = kwargs.get("auth")

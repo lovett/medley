@@ -2,7 +2,8 @@
 
 import os
 from pathlib import Path
-import typing
+from typing import Iterator
+from typing import Tuple
 import zipfile
 import cherrypy
 
@@ -57,8 +58,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def walk_zip(
-            extensions: typing.Tuple[str, ...]
-    ) -> typing.Iterator[Path]:
+            extensions: Tuple[str, ...]
+    ) -> Iterator[Path]:
         """Walk the contents of a zipapp and filter by extension."""
 
         archive = Path(cherrypy.config.get("server_root"))
@@ -73,8 +74,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def walk_fs(
-            extensions: typing.Tuple[str, ...]
-    ) -> typing.Iterator[Path]:
+            extensions: Tuple[str, ...]
+    ) -> Iterator[Path]:
         """Walk the filesystem and filter by extension."""
 
         server_root = Path(cherrypy.config.get("server_root"))

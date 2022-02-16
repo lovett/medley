@@ -5,7 +5,16 @@ import os.path
 import pathlib
 import re
 import sqlite3
-import typing
+from typing import Any
+from typing import Dict
+from typing import Iterable
+from typing import Deque
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Union
+from typing import cast
 from collections import deque
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -22,7 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
         self.db_path = self._path("logindex.sqlite")
-        self.queue: typing.Deque[typing.Tuple[datetime, datetime]] = deque()
+        self.queue: Deque[Tuple[datetime, datetime]] = deque()
 
     def setup(self) -> None:
         """Create the database."""
@@ -153,8 +162,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Look up the root path for indexable log files in the registry"""
 
         key = "logindex:root"
-        memorize_hit, memorize_value = typing.cast(
-            typing.Tuple[bool, str],
+        memorize_hit, memorize_value = cast(
+            Tuple[bool, str],
             cherrypy.engine.publish(
                 "memorize:get",
                 key
@@ -193,14 +202,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         if row:
-            return typing.cast(int, row["offset"])
+            return cast(int, row["offset"])
 
         return 0
 
     def file_for_date(
             self,
             log_date: datetime
-    ) -> typing.Optional[str]:
+    ) -> Optional[str]:
         """The filesystem path of the log file for the given date"""
 
         root = self.get_root()
@@ -375,7 +384,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (batch_size,)
         )
 
-        batch: typing.List[typing.Tuple[str, typing.Sequence[typing.Any]]] = []
+        batch: List[Tuple[str, Sequence[Any]]] = []
 
         unreversed_ips = records[0]["value"]
 
@@ -451,9 +460,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         parser = parsers.combined_log.Parser()
 
-        batch: typing.List[typing.Tuple[str, typing.Sequence[typing.Any]]] = []
+        batch: List[Tuple[str, Sequence[Any]]] = []
         ips = set()
-        cache: typing.Dict[str, defaultdict] = {
+        cache: Dict[str, defaultdict] = {
             "ip": defaultdict(),
             "agent": defaultdict()
         }
@@ -547,7 +556,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def insert_line(
             self,
-            records: typing.List[typing.Tuple[str, int, str, str]]
+            records: List[Tuple[str, int, str, str]]
     ) -> None:
         """Write a batch of log lines to the database.
 
@@ -570,7 +579,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def append_line(
             self,
-            records: typing.List[typing.Tuple[str, str]]
+            records: List[Tuple[str, str]]
     ) -> None:
         """Append a string of additional key-value pairs to a logline."""
 
@@ -589,7 +598,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def count_lines(self, source: pathlib.Path) -> int:
         """Tally the number of stored records for the given source file."""
-        return typing.cast(
+        return cast(
             int,
             self._selectFirst(
                 """SELECT count(*)
@@ -603,7 +612,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def query(
             self,
             query: str
-    ) -> typing.Tuple[typing.List[sqlite3.Row], typing.List[str]]:
+    ) -> Tuple[List[sqlite3.Row], List[str]]:
         """Perform a search against parsed log lines."""
 
         parser = parsers.logindex_query.Parser()
@@ -626,8 +635,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     @decorators.log_runtime
     def query_reverse_ip(
             self,
-            ips: typing.Tuple[str, ...] = ()
-    ) -> typing.Dict[str, str]:
+            ips: Tuple[str, ...] = ()
+    ) -> Dict[str, str]:
         """Look up the reverse hostname of an IP address."""
 
         placeholders = ("?, " * len(ips))[:-2]
@@ -693,11 +702,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def count_visit_days(
             self,
             ip_address: str
-    ) -> typing.Dict[str, typing.Union[int, str]]:
+    ) -> Dict[str, Union[int, str]]:
         """Count the number of days an IP appears in the logs."""
 
-        record = typing.cast(
-            typing.Iterable[typing.Tuple[typing.Any, typing.Any]],
+        record = cast(
+            Iterable[Tuple[Any, Any]],
             self._selectOne(
                 """SELECT count(DISTINCT substr(datestamp, 0, 11)) as count,
                 min(datestamp) as 'earliest [date_with_hour]',

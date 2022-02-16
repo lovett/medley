@@ -1,6 +1,6 @@
 """Test suite for the headlines app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -42,7 +42,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_cache_hit_bypasses_fetch(self, publish_mock: mock.Mock) -> None:
         """If headlines have been cached, urlfetch does not occur."""
 
-        def side_effect(*args: str, **_kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **_kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
@@ -67,7 +67,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_cache_miss_triggers_fetch(self, publish_mock: mock.Mock) -> None:
         """A urlfetch occurs when a cached value is not present"""
 
-        def side_effect(*args: str, **kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
@@ -95,7 +95,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_fetch_failure(self, publish_mock: mock.Mock) -> None:
         """An error is returned if the url fetch fails."""
 
-        def side_effect(*args: str, **kwargs: str) -> typing.Any:
+        def side_effect(*args: str, **kwargs: str) -> Any:
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
@@ -120,7 +120,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
     def test_cache_header(self, publish_mock: mock.Mock) -> None:
         """The response sends a Cache-Control header."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]

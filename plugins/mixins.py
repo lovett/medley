@@ -2,7 +2,14 @@
 
 import os.path
 import sqlite3
-import typing
+from typing import Any
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Union
+from typing import cast
 import re
 import cherrypy
 
@@ -49,7 +56,7 @@ class Sqlite:
     def _execute(
             self,
             query: str,
-            params: typing.Sequence[typing.Any] = ()
+            params: Sequence[Any] = ()
     ) -> bool:
         """Issue a single query."""
 
@@ -69,9 +76,9 @@ class Sqlite:
 
     def _multi(
             self,
-            queries: typing.Sequence[typing.Tuple[str, typing.Any]],
-            after_commit: typing.Tuple[str, typing.Any] = None
-    ) -> typing.Union[bool, typing.Iterator[sqlite3.Row]]:
+            queries: Sequence[Tuple[str, Any]],
+            after_commit: Tuple[str, Any] = None
+    ) -> Union[bool, Iterator[sqlite3.Row]]:
         """Issue several queries within a transaction."""
 
         result = True
@@ -104,7 +111,7 @@ class Sqlite:
     def _delete(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
+            values: Sequence[Any] = ()
     ) -> int:
         """Issue a delete query."""
 
@@ -125,7 +132,7 @@ class Sqlite:
     def _count(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
+            values: Sequence[Any] = ()
     ) -> int:
         """Convert a select query to a count query and execute it."""
 
@@ -139,7 +146,7 @@ class Sqlite:
         placeholder_count = count_query.count("?")
         placeholder_values = values[0:placeholder_count]
 
-        return typing.cast(
+        return cast(
             int,
             self._selectFirst(
                 count_query,
@@ -150,8 +157,8 @@ class Sqlite:
     def _select(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
-    ) -> typing.List[sqlite3.Row]:
+            values: Sequence[Any] = ()
+    ) -> List[sqlite3.Row]:
         """Execute a select query."""
 
         result = None
@@ -174,9 +181,9 @@ class Sqlite:
     def _select_generator(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = (),
-            con: typing.Optional[sqlite3.Connection] = None
-    ) -> typing.Iterator[sqlite3.Row]:
+            values: Sequence[Any] = (),
+            con: Optional[sqlite3.Connection] = None
+    ) -> Iterator[sqlite3.Row]:
         """Execute a select query and return results as a generator."""
 
         if not con:
@@ -194,8 +201,8 @@ class Sqlite:
     def _explain(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
-    ) -> typing.List[str]:
+            values: Sequence[Any] = ()
+    ) -> List[str]:
         """Get the query plan for a query."""
 
         generator = self._select_generator(
@@ -215,8 +222,8 @@ class Sqlite:
     def _selectOne(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
-    ) -> typing.Optional[sqlite3.Row]:
+            values: Sequence[Any] = ()
+    ) -> Optional[sqlite3.Row]:
         """Issue a select query and return the first row."""
 
         row = None
@@ -236,8 +243,8 @@ class Sqlite:
     def _selectFirst(
             self,
             query: str,
-            values: typing.Sequence[typing.Any] = ()
-    ) -> typing.Any:
+            values: Sequence[Any] = ()
+    ) -> Any:
         """Issue a select query and return the first value of the first
         row.
 

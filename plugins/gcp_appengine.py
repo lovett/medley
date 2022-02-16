@@ -5,7 +5,10 @@ See https://googleapis.dev/python/storage/latest/client.html
 
 import json
 import pathlib
-import typing
+from typing import Any
+from typing import Iterable
+from typing import List
+from typing import cast
 import cherrypy
 from plugins import decorators
 
@@ -37,7 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             as_path=True
         ).pop()
 
-        return typing.cast(pathlib.Path, storage_root / path)
+        return cast(pathlib.Path, storage_root / path)
 
     def ingest_file(
             self,
@@ -86,7 +89,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return 0
 
         line_count = 0
-        batch: typing.List[typing.Any] = []
+        batch: List[Any] = []
         with open(log_path, "r", encoding="utf-8") as file_handle:
             while True:
                 line = file_handle.readline()
@@ -148,7 +151,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return f'{key}="{quoteless_value}"'
         return ""
 
-    def json_to_combined(self, payload: typing.Any) -> str:
+    def json_to_combined(self, payload: Any) -> str:
         """Format a JSON-formatted string in combined log format."""
 
         resource = " ".join((
@@ -189,7 +192,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return " ".join(fields).strip()
 
     @staticmethod
-    def publish_lines(batch: typing.Iterable[str]) -> None:
+    def publish_lines(batch: Iterable[str]) -> None:
         """Send a batch of request logs in combined format to the logindex
         plugin.
 

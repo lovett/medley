@@ -1,6 +1,6 @@
 """Test suite for the whois app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -41,7 +41,7 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
     def test_returns_html(self, publish_mock: mock.Mock) -> None:
         """GET returns text/html by default"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]

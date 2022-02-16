@@ -1,6 +1,6 @@
 """Test suite for the transform app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -39,7 +39,7 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
     def test_lowercase_html(self, publish_mock: mock.Mock) -> None:
         """Input is converted to lowercase and returned as HTML"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
             if args[0] == "app_url":

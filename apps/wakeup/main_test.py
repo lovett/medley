@@ -1,6 +1,6 @@
 """Test suite for the wakeup app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -39,7 +39,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
     def test_get(self, publish_mock: mock.Mock) -> None:
         """The default view is a list of wake-able hosts."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{"host1": "mac1", "host2": "mac2"}]
@@ -84,7 +84,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
     def test_post_rejects_unknown_host(self, publish_mock: mock.Mock) -> None:
         """WOL packets are not sent if the host is unknown."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]
@@ -102,7 +102,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
     def test_post_accepts_known_host(self, publish_mock: mock.Mock) -> None:
         """WOL packets are sent if the host is known."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
@@ -122,7 +122,7 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
     def test_post_sends_text(self, publish_mock: mock.Mock) -> None:
         """A plain-text response is sent with a success message."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]

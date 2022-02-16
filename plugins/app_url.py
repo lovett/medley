@@ -1,6 +1,8 @@
 """Work out an app URL from a controller instance."""
 
-import typing
+from typing import Any
+from typing import Dict
+from typing import Optional
 import cherrypy
 from resources.url import Url
 
@@ -21,7 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def app_url(
             path: str = "",
-            query: typing.Optional[typing.Dict[str, typing.Any]] = None,
+            query: Optional[Dict[str, Any]] = None,
     ) -> str:
         """Build an absolute internal URL."""
 

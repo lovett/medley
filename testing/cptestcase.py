@@ -12,7 +12,8 @@ Originally from https://bitbucket.org/Lawouach/cherrypy-recipes/
 """
 
 from io import BytesIO
-import typing
+from typing import Dict
+from typing import Optional
 import unittest
 import urllib.parse
 import json
@@ -40,10 +41,10 @@ class BaseCherryPyTestCase(unittest.TestCase):
     def request(
             request_path: str = "/",
             method: str = "GET",
-            data: typing.Optional[bytes] = None,
-            headers: typing.Optional[typing.Dict[str, str]] = None,
+            data: Optional[bytes] = None,
+            headers: Optional[Dict[str, str]] = None,
             accept: str = "*/*",
-            json_body: typing.Optional[object] = None,
+            json_body: Optional[object] = None,
             **kwargs: str
     ) -> testing.response.Response:
         """Send a request to the faux server."""

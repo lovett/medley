@@ -2,13 +2,18 @@
 
 from collections import deque
 import sqlite3
-import typing
+from typing import Any
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import cast
 import cherrypy
 from plugins import mixins
 from plugins import decorators
 
-SearchResult = typing.Tuple[
-    typing.List[sqlite3.Row], int, typing.List[str]
+SearchResult = Tuple[
+    List[sqlite3.Row], int, List[str]
 ]
 
 
@@ -57,11 +62,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def newest(
             self,
             source: str
-    ) -> typing.Optional[str]:
+    ) -> Optional[str]:
         """Retrieve messages by key."""
 
-        return typing.cast(
-            typing.Optional[str],
+        return cast(
+            Optional[str],
             self._selectFirst(
                 """SELECT message FROM applog
                 WHERE source=? ORDER BY created DESC LIMIT 1""",
@@ -90,7 +95,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._multi(queries)
 
-    def add(self, source: str, message: typing.Any) -> None:
+    def add(self, source: str, message: Any) -> None:
         """Accept a log message for storage."""
 
         self.queue.append((
@@ -130,7 +135,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def view(self, **kwargs: typing.Any) -> SearchResult:
+    def view(self, **kwargs: Any) -> SearchResult:
         """View records in reverse chronological order."""
 
         offset: int = kwargs.get("offset", 0)
@@ -151,7 +156,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
     @decorators.log_runtime
-    def search(self, source: str, **kwargs: typing.Any) -> SearchResult:
+    def search(self, source: str, **kwargs: Any) -> SearchResult:
         """View records from a source in reverse chronological order."""
 
         offset: int = kwargs.get("offset", 0)
@@ -172,7 +177,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._explain(sql, placeholders)
         )
 
-    def list_sources(self) -> typing.Iterator[sqlite3.Row]:
+    def list_sources(self) -> Iterator[sqlite3.Row]:
         """List all available sources."""
 
         sql = """SELECT distinct source

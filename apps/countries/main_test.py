@@ -1,6 +1,6 @@
 """Test suite for the countries app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -71,7 +71,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     def test_registry_save(self, publish_mock: mock.Mock) -> None:
         """Country codes are saved to the registry"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [self.fixture]
@@ -93,7 +93,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     def test_skip_record_without_name(self, publish_mock: mock.Mock) -> None:
         """A record without a name field is skipped."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function."""
 
             if args[0] == "cache:get":
@@ -113,7 +113,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
     def test_url_fetched_if_not_cached(self, publish_mock: mock.Mock) -> None:
         """The JSON file is fetched if it is not already in the cache"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [self.fixture]
@@ -138,7 +138,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         fetched
         """
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [None]

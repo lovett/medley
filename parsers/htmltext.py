@@ -1,11 +1,15 @@
 """Extract the plain text of an HTML string."""
 
-import typing
+from typing import Deque
+from typing import Optional
+from typing import List
+from typing import Tuple
+from typing import cast
 from html.parser import HTMLParser
 from html.entities import name2codepoint
 from collections import deque
 
-ParserAttrs = typing.List[typing.Tuple[str, typing.Optional[str]]]
+ParserAttrs = List[Tuple[str, Optional[str]]]
 
 
 class Parser(HTMLParser):  # pylint: disable=abstract-method
@@ -16,23 +20,23 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
     """
 
-    stack: typing.Deque[str] = deque([], 50)
+    stack: Deque[str] = deque([], 50)
 
     always_ignored = ("br", "img")
 
-    blacklist: typing.Tuple[str, ...] = ()
+    blacklist: Tuple[str, ...] = ()
 
-    whitelist: typing.Tuple[str, ...] = (
+    whitelist: Tuple[str, ...] = (
         "p", "span", "li", "div", "td", "a", "b",
         "strong", "i", "em", "u", "font", "pre", "form"
     )
 
-    result: typing.List[str] = []
+    result: List[str] = []
 
     def __init__(
             self,
-            blacklist: typing.Tuple[str, ...] = (),
-            whitelist: typing.Tuple[str, ...] = ()
+            blacklist: Tuple[str, ...] = (),
+            whitelist: Tuple[str, ...] = ()
     ) -> None:
         if blacklist:
             self.blacklist = blacklist
@@ -63,15 +67,15 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
         if tag not in self.whitelist:
             return
 
-        ids = typing.cast(
-            typing.Tuple[str, ...],
+        ids = cast(
+            Tuple[str, ...],
             tuple(
                 {attr[1] for attr in attrs if attr[0] == "id"}
             )
         )
 
-        classes = typing.cast(
-            typing.Tuple[str, ...],
+        classes = cast(
+            Tuple[str, ...],
             tuple({attr[1] for attr in attrs if attr[0] == "class"})
         )
 

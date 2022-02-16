@@ -2,7 +2,9 @@
 
 import pathlib
 import tempfile
-import typing
+from typing import Any
+from typing import Dict
+from typing import Callable
 from unittest import mock
 import cherrypy
 import plugins.jinja
@@ -15,7 +17,7 @@ def get_fixture(path: str) -> str:
         return handle.read()
 
 
-def start_server(app: typing.Callable) -> None:
+def start_server(app: Callable) -> None:
     """Create a cherrypy server for testing an app.
 
     The app is always mounted at the URL root so that URL references
@@ -63,7 +65,7 @@ def response_is_text(res: cherrypy.response) -> bool:
 
 
 def header_is(
-        headers: typing.Dict[str, str],
+        headers: Dict[str, str],
         name: str,
         expected_value: str
 ) -> bool:
@@ -72,7 +74,7 @@ def header_is(
     return expected_value == header_value
 
 
-def template_var(publish_mock: mock.Mock, key: str) -> typing.Any:
+def template_var(publish_mock: mock.Mock, key: str) -> Any:
     """Retrieve a template variable passed to jinja:render."""
 
     for call in publish_mock.call_args_list:
@@ -84,7 +86,7 @@ def template_var(publish_mock: mock.Mock, key: str) -> typing.Any:
 def find_publish_call(
         publish_mock: mock.Mock,
         subscription_topic: str
-) -> typing.Any:
+) -> Any:
     """Find a topic in the call list of a mock of cherrypy.engine.publish."""
     for call in publish_mock.call_args_list:
         if call[0][0] == subscription_topic:

@@ -2,7 +2,13 @@
 
 from datetime import datetime
 import sqlite3
-import typing
+from typing import Any
+from typing import Iterator
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import cast
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -153,7 +159,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def list_attachments(
             self,
             recipe_id: int
-    ) -> typing.List[sqlite3.Row]:
+    ) -> List[sqlite3.Row]:
         """List the files currently associated with a recipe."""
 
         return self._select(
@@ -169,7 +175,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             recipe_id: int,
             filename: str
-    ) -> typing.Tuple[str, str, bytes]:
+    ) -> Tuple[str, str, bytes]:
         """Retrieve a file attached to a recipe."""
 
         row = self._selectOne(
@@ -185,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return ("", "", b"")
 
-    def all_tags(self) -> typing.Iterator[sqlite3.Row]:
+    def all_tags(self) -> Iterator[sqlite3.Row]:
         """List all known tags.
 
         This is a three-join table to accommodate soft deletion. A
@@ -203,7 +209,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ORDER BY name"""
         )
 
-    def find(self, recipe_id: int) -> typing.Optional[sqlite3.Row]:
+    def find(self, recipe_id: int) -> Optional[sqlite3.Row]:
         """Locate a recipe by its ID."""
 
         return self._selectOne(
@@ -218,7 +224,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (recipe_id,)
         )
 
-    def find_recent(self, limit: int = 12) -> typing.Iterator[sqlite3.Row]:
+    def find_recent(self, limit: int = 12) -> Iterator[sqlite3.Row]:
         """Locate recently-added recipes."""
 
         return self._select_generator(
@@ -233,7 +239,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (limit,)
         )
 
-    def find_starred(self, limit: int = 20) -> typing.Iterator[sqlite3.Row]:
+    def find_starred(self, limit: int = 20) -> Iterator[sqlite3.Row]:
         """Locate starred recipes."""
 
         return self._select_generator(
@@ -250,7 +256,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (limit,)
         )
 
-    def find_by_tag(self, tag: str) -> typing.Iterator[sqlite3.Row]:
+    def find_by_tag(self, tag: str) -> Iterator[sqlite3.Row]:
         """List all recipes associated with a tag."""
 
         return self._select_generator(
@@ -312,7 +318,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             field: str,
             query_date: datetime
-    ) -> typing.Iterator[sqlite3.Row]:
+    ) -> Iterator[sqlite3.Row]:
         """Locate recipes that match a date search."""
 
         month_start = cherrypy.engine.publish(
@@ -339,7 +345,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (month_start, month_end)
         )
 
-    def search_by_keyword(self, query: str) -> typing.Iterator[sqlite3.Row]:
+    def search_by_keyword(self, query: str) -> Iterator[sqlite3.Row]:
         """Locate recipes that match a keyword search."""
 
         return self._select_generator(
@@ -369,8 +375,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def upsert(
             self,
             recipe_id: int,
-            **kwargs: typing.Any
-    ) -> typing.Union[bool, int]:
+            **kwargs: Any
+    ) -> Union[bool, int]:
         """Insert or update a recipe."""
 
         title = kwargs.get("title")
@@ -386,7 +392,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if recipe_id > 0:
             upsert_id = recipe_id
 
-        queries: typing.List[typing.Tuple[str, typing.Tuple]] = []
+        queries: List[Tuple[str, Tuple]] = []
 
         queries.append((
             """CREATE TEMP TABLE IF NOT EXISTS tmp
@@ -460,4 +466,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if isinstance(result, bool):
             return result
 
-        return typing.cast(int, next(result)["value"])
+        return cast(int, next(result)["value"])

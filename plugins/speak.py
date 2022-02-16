@@ -6,7 +6,9 @@ https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-te
 """
 
 import re
-import typing
+from typing import cast
+from typing import Dict
+from typing import List
 import cherrypy
 
 
@@ -93,7 +95,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     @staticmethod
     def muted_temporarily() -> bool:
         """Determine whether a manual mute is in effect."""
-        return typing.cast(
+        return cast(
             bool,
             cherrypy.engine.publish(
                 "registry:first:value",
@@ -120,7 +122,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop()
 
     @staticmethod
-    def voices() -> typing.List[typing.Dict[str, str]]:
+    def voices() -> List[Dict[str, str]]:
         """Get the list of available voices."""
 
         config = cherrypy.engine.publish(
@@ -132,8 +134,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             key_slice=1
         ).pop()
 
-        return typing.cast(
-            typing.List[typing.Dict[str, str]],
+        return cast(
+            List[Dict[str, str]],
             cherrypy.engine.publish(
                 "urlfetch:get:json",
                 config.get("voice_list_url", ""),

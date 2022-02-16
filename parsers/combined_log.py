@@ -1,16 +1,21 @@
 """Parser for logs in combined format."""
 
 from datetime import datetime
-import typing
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import Tuple
+from typing import Union
+from typing import cast
 from pytz import UTC
 from resources.url import Url
 
-OptionalString = typing.Optional[str]
-ConsumeResult = typing.Tuple[OptionalString, str]
-ExtrasDict = typing.Dict[str, OptionalString]
-FieldsDict = typing.Dict[
+OptionalString = Optional[str]
+ConsumeResult = Tuple[OptionalString, str]
+ExtrasDict = Dict[str, OptionalString]
+FieldsDict = Dict[
     str,
-    typing.Union[OptionalString, int, float, ExtrasDict]
+    Union[OptionalString, int, float, ExtrasDict]
 ]
 
 
@@ -18,7 +23,7 @@ class Parser():
     """Break up a log line into its component fields."""
 
     @staticmethod
-    def clean(bag: str) -> typing.Optional[str]:
+    def clean(bag: str) -> Optional[str]:
         """Sanitize a value to a normalized form."""
 
         if isinstance(bag, str):
@@ -30,7 +35,7 @@ class Parser():
         return bag
 
     @staticmethod
-    def parse_timestamp(timestamp: str) -> typing.Optional[datetime]:
+    def parse_timestamp(timestamp: str) -> Optional[datetime]:
         """Parse a timestamp based on known formats."""
 
         timestamp = timestamp.lstrip("[").rstrip("]")
@@ -80,7 +85,7 @@ class Parser():
             after.lstrip()
         )
 
-    def parse(self, logline: str) -> typing.Any:
+    def parse(self, logline: str) -> Any:
         """Convert a log line to a dict.
 
         On top of the standard fields of the combined log format, this
@@ -125,7 +130,7 @@ class Parser():
 
         # Querystring
         if isinstance(fields["uri"], str) and "?" in fields["uri"]:
-            (uri, _, query) = typing.cast(str, fields["uri"]).partition("?")
+            (uri, _, query) = cast(str, fields["uri"]).partition("?")
             fields["uri"] = uri
             fields["query"] = query
 

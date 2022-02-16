@@ -1,6 +1,6 @@
 """Test suite for the jinja plugin."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 import cherrypy
@@ -43,7 +43,7 @@ class TestJinja(Subscriber):
     def test_autolink(self, publish_mock: mock.Mock) -> None:
         """Autolinking detects URLs."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "app_url":
                 return ["/test"]
@@ -70,7 +70,7 @@ class TestJinja(Subscriber):
     def test_betterhtml_link_rewrite(self, publish_mock: mock.Mock) -> None:
         """HTML cleanup should not mangle links."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "app_url":
                 return [""]

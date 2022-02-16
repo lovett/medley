@@ -1,14 +1,15 @@
 """Current and upcoming forecasts"""
 
 from enum import Enum
-import typing
+from typing import Any
+from typing import Dict
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
 from pydantic import Field
 
-Forecast = typing.Dict[str, typing.Any]
-Config = typing.Dict[str, typing.Any]
+Forecast = Dict[str, Any]
+Config = Dict[str, Any]
 
 
 class Subresource(str, Enum):

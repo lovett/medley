@@ -1,6 +1,6 @@
 """Test suite for the later app."""
 
-import typing
+from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
@@ -48,7 +48,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
     def test_populates_tags(self, publish_mock: mock.Mock) -> None:
         """The tags field is prepopulated if provided via querystring"""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["abc123"]
@@ -76,7 +76,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         A period is also added to make the populated value a sentence.
         """
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return ["This is sentence 1. this is sentence 2"]
@@ -102,7 +102,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
         """The comments field of a reddit.com URL is discarded if it came from
         a meta tag."""
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]
@@ -135,7 +135,7 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
 
         """
 
-        def side_effect(*args: str, **_: str) -> typing.Any:
+        def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0].startswith("markup:"):
                 return [args[1]]

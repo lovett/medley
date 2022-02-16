@@ -1,6 +1,9 @@
 """Send messages to a Notifier instance."""
 
-import typing
+from typing import Any
+from typing import Dict
+from typing import Optional
+from typing import cast
 import cherrypy
 
 
@@ -25,7 +28,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("notifier:build", self.build)
 
     @staticmethod
-    def build(**kwargs: str) -> typing.Dict[str, typing.Any]:
+    def build(**kwargs: str) -> Dict[str, Any]:
         """Populate a dict with key value pairs.
 
         This dict can be provided to send() for immediate delivery, or
@@ -45,13 +48,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             for field in fields
         }
 
-        return typing.cast(
-            typing.Dict[str, typing.Any],
+        return cast(
+            Dict[str, Any],
             notification
         )
 
     @staticmethod
-    def send(notification: typing.Dict[str, str]) -> bool:
+    def send(notification: Dict[str, str]) -> bool:
         """Send a message to Notifier"""
 
         config = cherrypy.engine.publish(
@@ -78,7 +81,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return True
 
     @staticmethod
-    def clear(local_id: typing.Optional[str] = None) -> bool:
+    def clear(local_id: Optional[str] = None) -> bool:
         """Send a retraction to Notifier."""
 
         config = cherrypy.engine.publish(
