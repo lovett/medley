@@ -441,7 +441,7 @@ def publish(
         channel: Literal["foodlog:upsert"],
         recipe_id: int,
         **kwargs: Any,
-) -> List[bool]: ...
+) -> List[int]: ...
 
 
 @overload

@@ -74,6 +74,28 @@ class Sqlite:
 
         return result
 
+    def _insert(
+            self,
+            query: str,
+            params: Sequence[Any] = ()
+    ) -> int:
+        """Issue an insert query and return the insert id."""
+
+        insert_id = 0
+        con = self._open()
+
+        try:
+            with con:
+                cur = con.execute(query, params)
+                insert_id = cur.lastrowid
+        except sqlite3.DatabaseError as err:
+            insert_id = -1
+            self._logError(err)
+        finally:
+            con.close()
+
+        return insert_id
+
     def _multi(
             self,
             queries: Sequence[Tuple[str, Any]],

@@ -14,13 +14,19 @@ MEDLEY.foodlog = (function () {
         let payload = new FormData(e.target)
 
         const response = await fetch(e.target.getAttribute('action'), {
+            headers: {'Accept': 'application/json'},
             method: 'POST',
             mode: 'same-origin',
             body: payload
         })
 
         if (response.ok) {
-            MEDLEY.setSuccessMessage('Entry saved.');
+            response.json().then((payload) => {
+                history.replaceState(payload, '', `/foodlog/${payload.uid}/edit`);
+                MEDLEY.setSuccessMessage(`Entry #${payload.uid} ${payload.action}.`);
+                document.getElementById('uid').setAttribute('value', payload.uid);
+
+            });
         } else {
             MEDLEY.setErrorMessage('The entry could not be saved.');
         }

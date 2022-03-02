@@ -1,8 +1,10 @@
 """Track food consumption."""
 
 import datetime
+import json
 from enum import Enum
 import re
+from typing import Optional
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -29,6 +31,7 @@ class GetParams(BaseModel):
     offset: int = 0
     source: str = ""
     per_page: int = 20
+    saved: bool = False
 
 
 class PostParams(BaseModel):
@@ -97,7 +100,8 @@ class Controller:
         return self.index(params)
 
     @staticmethod
-    def POST(uid: int = 0, **kwargs: str) -> None:
+    @cherrypy.tools.provides(formats=("html", "json"))
+    def POST(uid: int = 0, **kwargs: str) -> Optional[bytes]:
         """Add a new entry or update an existing one."""
 
         try:
@@ -118,7 +122,7 @@ class Controller:
             consumed_on
         ).pop()
 
-        result = cherrypy.engine.publish(
+        upsert_uid = cherrypy.engine.publish(
             "foodlog:upsert",
             params.uid,
             consumed_on=consumed_on_utc,
@@ -126,12 +130,21 @@ class Controller:
             overate=params.overate
         ).pop()
 
-        if not result:
-            raise cherrypy.HTTPError(400)
+        if cherrypy.request.wants == "json" and params.uid > 0:
+            return json.dumps({
+                "uid": upsert_uid,
+                "action": "updated"
+            }).encode()
+
+        if cherrypy.request.wants == "json" and params.uid == 0:
+            return json.dumps({
+                "uid": upsert_uid,
+                "action": "saved"
+            }).encode()
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
-            query={"sent": 1}
+            str(upsert_uid)
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)

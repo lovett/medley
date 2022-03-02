@@ -9,9 +9,7 @@
     {{ macros.svgSymbols("arrow-left", "delete", "x", "zap", "calendar", "clock") }}
     <main id="collection">
         <form id="foodlog-form" method="post" action="/foodlog">
-            {% if uid %}
-                <input type="hidden" name="uid" value="{{ uid }}" />
-            {% endif %}
+            <input id="uid" type="hidden" name="uid" value="{{ uid }}" />
             <div class="field-group">
                 <div class="field">
                     <label for="consume_date">

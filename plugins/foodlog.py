@@ -160,7 +160,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             entry_id: int,
             **kwargs: Any
-    ) -> bool:
+    ) -> int:
         """Insert or update an entry."""
 
         consumed_on = kwargs.get("consumed_on")
@@ -168,14 +168,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         overate = int(kwargs.get("overate", 0))
 
         if entry_id == 0:
-            return self._execute(
+            upsert_id = self._insert(
                 """INSERT INTO foodlog (consumed_on, foods_eaten, overate)
                 VALUES (?, ?, ?)""",
                 (consumed_on, foods_eaten, overate)
             )
 
-        return self._execute(
-            """UPDATE foodlog SET consumed_on=?, foods_eaten=?, overate=?
-            WHERE id=?""",
-            (consumed_on, foods_eaten, overate, entry_id)
-        )
+        if entry_id > 0:
+            self._execute(
+                """UPDATE foodlog SET consumed_on=?, foods_eaten=?, overate=?
+                WHERE id=?""",
+                (consumed_on, foods_eaten, overate, entry_id)
+            )
+            upsert_id = entry_id
+
+        return upsert_id
