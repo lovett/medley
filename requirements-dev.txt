@@ -13,5 +13,5 @@ pytest-timeout==2.1.0
 requests-mock==1.9.3
 responses==0.20.0
 types-pytz==2021.3.6
-types-requests==2.27.16
+types-requests==2.27.17
 typing-extensions==4.1.1
