@@ -25,6 +25,7 @@ MEDLEY.foodlog = (function () {
                 history.replaceState(payload, '', `/foodlog/${payload.uid}/edit`);
                 MEDLEY.setSuccessMessage(`Entry #${payload.uid} ${payload.action}.`);
                 document.getElementById('uid').setAttribute('value', payload.uid);
+                document.getElementById('add-record').removeAttribute('hidden');
 
             });
         } else {

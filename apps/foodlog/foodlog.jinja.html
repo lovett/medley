@@ -3,17 +3,15 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
+        <a id="add-record" href="{{ add_url }}" {% if uid == 0 %}hidden{% endif %}>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Add
+        </a>
+
         {% if uid is defined %}
         <a class="cancel" href="{{ app_url }}">
             <svg class="icon"><use xlink:href="#icon-x"></use></svg>
             Cancel
-        </a>
-        {% endif %}
-
-        {% if add_url %}
-        <a id="add-record" href="{{ add_url }}">
-            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-            Add
         </a>
         {% endif %}
 

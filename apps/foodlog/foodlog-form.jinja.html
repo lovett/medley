@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("arrow-left", "delete", "x", "zap", "calendar", "clock") }}
+    {{ macros.svgSymbols("new-item", "arrow-left", "delete", "x", "zap", "calendar", "clock") }}
     <main id="collection">
         <form id="foodlog-form" method="post" action="/foodlog">
             <input id="uid" type="hidden" name="uid" value="{{ uid }}" />

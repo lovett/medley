@@ -208,10 +208,15 @@ class Controller:
             foods_eaten = entry["foods_eaten"]
             overate = entry["overate"]
 
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "0/new"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/foodlog/foodlog-form.jinja.html",
-            add_url="",
+            add_url=add_url,
             delete_url=delete_url,
             uid=params.uid,
             entry_date=entry_date,
@@ -250,6 +255,11 @@ class Controller:
             {"q": params.q}
         ).pop()
 
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "0/new"
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/foodlog/foodlog-index.jinja.html",
@@ -259,4 +269,5 @@ class Controller:
             offset=params.offset,
             per_page=params.per_page,
             pagination_url=pagination_url,
+            add_url=add_url,
         ).pop()
