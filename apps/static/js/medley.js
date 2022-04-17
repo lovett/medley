@@ -58,6 +58,12 @@ var MEDLEY = (function () {
             return;
         }
 
+        if (e.key === 'U') {
+            const tag = document.querySelector('meta[name=medley-app-home]');
+            window.location.href = tag.getAttribute('content');
+            return;
+        }
+
         if (!isNaN(parseInt(e.key, 10))) {
             const tag = document.querySelector(`a[data-numeric-shortcut="${e.key}"]`);
             if (tag) {
