@@ -1,6 +1,7 @@
 CherryPy==18.6.1
 Jinja2==3.1.1
 PyJWT~=1.7
+feedparser==6.0.8
 geoip2==4.5.0
 httplib2==0.20.4
 importlib-resources==5.7.0

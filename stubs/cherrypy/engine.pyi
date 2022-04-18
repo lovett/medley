@@ -1056,6 +1056,13 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["urlfetch:get:feed"],
+        url: str,
+) -> List[Any]: ...
+
+
+@overload
+def publish(
         channel: Literal["urlfetch:get:json"],
         url: str,
         *,

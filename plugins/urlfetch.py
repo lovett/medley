@@ -8,8 +8,8 @@ from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import Optional
-from typing import cast
 import urllib.parse
+import feedparser
 import requests
 import cherrypy
 
@@ -31,6 +31,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("urlfetch:get", self.get)
         self.bus.subscribe("urlfetch:get:json", self.get_json)
         self.bus.subscribe("urlfetch:get:file", self.get_file)
+        self.bus.subscribe("urlfetch:get:feed", self.get_feed)
         self.bus.subscribe("urlfetch:post", self.post)
 
     @staticmethod
@@ -77,6 +78,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         return True
+
+    def get_feed(
+            self,
+            url: str,
+    ) -> Any:
+        """Make a GET request for an RSS/Atom resource or similar."""
+
+        raw_feed = self.get(
+            url,
+            as_object=False,
+            cache_lifespan=3000,
+        )
+
+        return feedparser.parse(raw_feed)
 
     def get_json(
             self,
@@ -146,6 +161,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self,
             url: str,
             as_object: bool = False,
+            cache_lifespan: int = 0,
             **kwargs: Kwargs
     ) -> Any:
         """Send a GET request"""
@@ -153,7 +169,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         auth = kwargs.get("auth")
         headers = self.headers(kwargs.get("headers"))
         params = kwargs.get("params")
-        cache_lifespan = cast(int, kwargs.get("cache_lifespan", 0))
 
         full_url = url
         if params:
