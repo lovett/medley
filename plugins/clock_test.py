@@ -1,6 +1,7 @@
 """Test suite for the clock plugin."""
 
 from datetime import datetime
+import time
 from typing import Any
 from typing import cast
 import unittest
@@ -81,6 +82,34 @@ class TestClock(Subscriber):
         self.assertIsInstance(result, datetime)
         self.assertEqual(result.month, 1)
         self.assertTrue(result.tzinfo, pytz.UTC)
+
+    def test_from_struct_local(self) -> None:
+        """clock:from_struct returns local datetimes for local values."""
+
+        now = time.localtime()
+        result = self.plugin.from_struct(now)
+
+        self.assertIsInstance(result, datetime)
+        self.assertEqual(now.tm_year, result.year)
+        self.assertEqual(now.tm_mon, result.month)
+        self.assertEqual(now.tm_mday, result.day)
+        self.assertEqual(now.tm_hour, result.hour)
+        self.assertEqual(now.tm_min, result.minute)
+        self.assertEqual(now.tm_sec, result.second)
+
+    def test_from_struct_utc(self) -> None:
+        """clock:from_struct returns UTC datetimes for UTC values."""
+
+        now = time.gmtime()
+        result = self.plugin.from_struct(now)
+
+        self.assertIsInstance(result, datetime)
+        self.assertEqual(now.tm_year, result.year)
+        self.assertEqual(now.tm_mon, result.month)
+        self.assertEqual(now.tm_mday, result.day)
+        self.assertEqual(now.tm_hour, result.hour)
+        self.assertEqual(now.tm_min, result.minute)
+        self.assertEqual(now.tm_sec, result.second)
 
     def test_from_format(self) -> None:
         """clock:from_format handles valid and invalid formats."""

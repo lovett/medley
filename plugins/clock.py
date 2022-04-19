@@ -2,6 +2,7 @@
 
 import calendar
 from datetime import datetime, timedelta, date
+from time import struct_time
 from typing import Optional
 from typing import List
 from typing import Union
@@ -35,6 +36,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:format", self.format)
         self.bus.subscribe("clock:from_timestamp", self.from_timestamp)
         self.bus.subscribe("clock:from_format", self.from_format)
+        self.bus.subscribe("clock:from_struct", self.from_struct)
         self.bus.subscribe("clock:shift", self.shift)
         self.bus.subscribe("clock:local", self.local)
         self.bus.subscribe("clock:day:remaining", self.day_remaining)
@@ -95,6 +97,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return dt
         except ValueError:
             return None
+
+    @staticmethod
+    def from_struct(
+            time_struct: struct_time,
+    ) -> datetime:
+        """Parse a time tuple into a datetime."""
+        return datetime(*time_struct[:6])
 
     def now(self, local: bool = False) -> datetime:
         """The current date and time in UTC."""

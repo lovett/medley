@@ -19,6 +19,7 @@ from plugins.applog import SearchResult
 from plugins.foodlog import SearchResult as FoodLogSearchResult
 from plugins.scheduler import ScheduledEvent
 from resources.url import Url
+from time import struct_time
 
 
 def block() -> None: ...
@@ -332,6 +333,13 @@ def publish(
         value: str,
         fmt: str,
         local: Optional[bool] = False
+) -> List[datetime]: ...
+
+
+@overload
+def publish(
+        channel: Literal["clock:from_struct"],
+        struct: struct_time
 ) -> List[datetime]: ...
 
 
@@ -1058,7 +1066,7 @@ def publish(
 def publish(
         channel: Literal["urlfetch:get:feed"],
         url: str,
-) -> List[Any]: ...
+) -> List[Dict[str, Any]]: ...
 
 
 @overload
