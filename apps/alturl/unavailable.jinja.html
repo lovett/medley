@@ -4,6 +4,18 @@
 
     <p>The URL is not available.</p>
 
+    {% if status %}
+        <p>HTTP Status: {{ status }}</p>
+    {% endif %}
+
+    {% if message %}
+        <p>Message: {{ message }}</p>
+    {% endif %}
+
+    {% if line %}
+        <p>Line: {{ line }}</p.
+    {% endif %}
+
     <p><a href="{{ applog_url }}" target="_blank">View the error message</a></p>
 
 {% endblock %}

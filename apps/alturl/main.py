@@ -5,6 +5,7 @@ from pydantic import ValidationError
 import cherrypy
 from resources.url import Url
 import apps.alturl.reddit
+import apps.alturl.feed
 
 
 class PostParams(BaseModel):
@@ -55,6 +56,10 @@ class Controller:
             site_specific_template, view_vars = apps.alturl.reddit.view(
                 url
             )
+
+        site_specific_template, view_vars = apps.alturl.feed.view(
+            url
+        )
 
         if not site_specific_template:
             return cherrypy.engine.publish(

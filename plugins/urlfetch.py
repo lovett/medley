@@ -82,13 +82,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def get_feed(
             self,
             url: str,
-    ) -> Any:
+    ) -> Dict[str, Any]:
         """Make a GET request for an RSS/Atom resource or similar."""
 
         raw_feed = self.get(
             url,
             as_object=False,
-            cache_lifespan=3000,
+            cache_lifespan=3600,
         )
 
         return feedparser.parse(raw_feed)
