@@ -180,13 +180,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             memorize=True
         ).pop()
 
+        if not dt.tzinfo:
+            dt = dt.replace(tzinfo=UTC)
+
         try:
             dt = dt.astimezone(
                 timezone(local_timezone)
             )
         except UnknownTimeZoneError:
             dt = dt.astimezone(
-                datetime.now().astimezone().tzinfo
+                datetime.now(UTC).astimezone().tzinfo
             )
 
         return dt

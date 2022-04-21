@@ -86,30 +86,28 @@ class TestClock(Subscriber):
     def test_from_struct_local(self) -> None:
         """clock:from_struct returns local datetimes for local values."""
 
-        now = time.localtime()
-        result = self.plugin.from_struct(now)
+        result = self.plugin.from_struct(time.localtime())
+        now = datetime.now(pytz.timezone('America/New_York'))
 
         self.assertIsInstance(result, datetime)
-        self.assertEqual(now.tm_year, result.year)
-        self.assertEqual(now.tm_mon, result.month)
-        self.assertEqual(now.tm_mday, result.day)
-        self.assertEqual(now.tm_hour, result.hour)
-        self.assertEqual(now.tm_min, result.minute)
-        self.assertEqual(now.tm_sec, result.second)
+        self.assertEqual(now.year, result.year)
+        self.assertEqual(now.month, result.month)
+        self.assertEqual(now.day, result.day)
+        self.assertEqual(now.hour, result.hour)
+        self.assertEqual(now.minute, result.minute)
 
     def test_from_struct_utc(self) -> None:
         """clock:from_struct returns UTC datetimes for UTC values."""
 
-        now = time.gmtime()
-        result = self.plugin.from_struct(now)
+        result = self.plugin.from_struct(time.gmtime())
+        now = datetime.now(pytz.UTC)
 
         self.assertIsInstance(result, datetime)
-        self.assertEqual(now.tm_year, result.year)
-        self.assertEqual(now.tm_mon, result.month)
-        self.assertEqual(now.tm_mday, result.day)
-        self.assertEqual(now.tm_hour, result.hour)
-        self.assertEqual(now.tm_min, result.minute)
-        self.assertEqual(now.tm_sec, result.second)
+        self.assertEqual(now.year, result.year)
+        self.assertEqual(now.month, result.month)
+        self.assertEqual(now.day, result.day)
+        self.assertEqual(now.hour, result.hour)
+        self.assertEqual(now.minute, result.minute)
 
     def test_from_format(self) -> None:
         """clock:from_format handles valid and invalid formats."""
@@ -243,12 +241,6 @@ class TestClock(Subscriber):
         start = datetime(2011, 1, 1, hour=00, tzinfo=tz)
         result = self.plugin.local(start)
 
-        now = datetime.now().astimezone()
-
-        self.assertEqual(
-            result.strftime("%Z"),
-            now.strftime("%Z")
-        )
         self.assertEqual(result.day, 31)
         self.assertEqual(result.year, 2010)
         self.assertEqual(result.month, 12)
