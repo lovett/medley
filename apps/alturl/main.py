@@ -57,9 +57,10 @@ class Controller:
                 url
             )
 
-        site_specific_template, view_vars = apps.alturl.feed.view(
-            url
-        )
+        if not site_specific_template:
+            site_specific_template, view_vars = apps.alturl.feed.view(
+                url
+            )
 
         if not site_specific_template:
             return cherrypy.engine.publish(
