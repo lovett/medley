@@ -1,0 +1,31 @@
+<VirtualHost *:80>
+    ServerName {{ medley_hostname }}
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName {{ medley_hostname }}
+
+    SSLEngine on
+    SSLCertificateFile {{ medley_ssl_certificate }}
+    SSLCertificateKeyFile {{ medley_ssl_key }}
+
+    RequestHeader set X-Real-IP %{REMOTE_ADDR}s
+    RequestHeader set Host localhost
+
+    ProxyRequests off
+    ProxyPreserveHost on
+
+    ErrorLog "/var/log/httpd/medley-error.log"
+    CustomLog "/var/log/httpd/medley-access.log" combined
+
+    RewriteEngine On
+    ProxyPass / http://127.0.0.1:8085/ connectiontimeout=300
+
+</VirtualHost>
+
+# Local Variables:
+# mode: apache
+# End:

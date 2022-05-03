@@ -10,7 +10,7 @@ Group=medley
 Environment=MEDLEY_notify_systemd=True
 Environment=MEDLEY_database_dir={{ project_root }}/db
 WorkingDirectory={{ project_root }}
-ExecStart={{ project_root }}/medley
+ExecStart=/usr/local/bin/medley
 
 [Install]
 WantedBy=multi-user.target

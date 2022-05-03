@@ -24,19 +24,7 @@
         createhome=no
         system=yes
         append=yes
-        groups="{{ project_user }},audio"
-      tags:
-        - firstrun
-
-    - name: Set application user groups
-      become: true
-      user:
-        name="{{ ansible_user }}"
-        group="{{ item }}"
-        append=yes
-      with_items:
-        - "{{ project_user }}"
-        - "systemd-journal"
+        groups="{{ project_user }},audio,systemd-journal"
       tags:
         - firstrun
 
@@ -57,13 +45,13 @@
 
     - name: Install system packages
       become: true
-      apt:
+      package:
         name:
           - alsa-utils
           - python3
           - python3-cryptography
-          - nginx-light
-        state: latest
+          - httpd
+        state: present
       tags:
         - firstrun
 
@@ -71,7 +59,7 @@
       become: true
       copy:
         src: "../medley"
-        dest: "{{ project_root }}/medley"
+        dest: "/usr/local/bin/medley"
         owner: "{{ project_user }}"
         group: "{{ project_group }}"
         mode: 0775
@@ -84,19 +72,12 @@
         owner: "{{ project_user }}"
         group: "{{ project_group }}"
 
-    - name: Install nginx vhost
+    - name: Install Apache vhost
       become: true
       template:
-        src: "templates/medley-vhost.j2"
-        dest: "/etc/nginx/sites-available/medley"
-      notify: Restart Nginx
-
-    - name: Symlink nginx vhost
-      become: true
-      file:
-        src: "/etc/nginx/sites-available/medley"
-        dest: "/etc/nginx/sites-enabled/medley"
-        state: link
+        src: "templates/medley-vhost.conf.j2"
+        dest: "/etc/httpd/conf.d/medley.conf"
+      notify: Restart Apache
 
     - name: Install primary systemd service
       become: true
@@ -133,7 +114,7 @@
         enabled: yes
         masked: no
         name: "{{ item }}"
-        state: started
+        state: restarted
       with_items:
         - medley-geodb.timer
         - medley-maintenance.timer
@@ -150,8 +131,8 @@
       delay: 10
 
   handlers:
-    - name: Restart Nginx
+    - name: Restart Apache
       become: true
       service:
-        name: nginx
+        name: httpd
         state: restarted

@@ -61,8 +61,7 @@ print-%:
 # See https://github.com/pypa/virtualenv/pull/1379/commits
 venv:
 	@echo "Creating a new virtual environment..."
-	@/usr/bin/env python3.7 -m venv --system-site-packages venv
-	@sed -i'' 's/$$_OLD_FISH_PROMPT_OVERRIDE"$$/$$_OLD_FISH_PROMPT_OVERRIDE" \&\& functions -q _old_fish_prompt/' venv/bin/activate.fish
+	@/usr/bin/env python3 -m venv --system-site-packages venv
 
 # Install third-party Python libraries
 setup: venv
@@ -90,7 +89,7 @@ medley: setup
 		--upgrade
 	find build -depth -type d -name '*.dist-info' -exec rm -rf {} \;
 	find build -depth -type d -name 'test*' -exec rm -rf {} \;
-	/usr/bin/env python3.7 -m zipapp -p "/usr/bin/env python3.7" -o medley build
+	/usr/bin/env python3 -m zipapp -p "/usr/bin/env python3" -o medley build
 	./medley --publish
 
 # Install the application on the production host
