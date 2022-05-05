@@ -2,10 +2,10 @@
 Description=Timer for Medley geodb app
 
 [Timer]
-# Second Monday of the month at 1 AM
-OnCalendar=Monday *-*-8..14 01:00:00
+# Second Sunday of the month at 7:16 AM
+OnCalendar=Sunday *-*-8..14 07:16:00
 
-# Catch up if schedule was missed
+# Do not skip missed runs
 Persistent=true
 
 [Install]

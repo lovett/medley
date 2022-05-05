@@ -2,10 +2,10 @@
 Description=Timer for Medley database maintenance
 
 [Timer]
-# Daily at 6:03 AM
-OnCalendar=06:03
+# First Sunday of the month at 7:45 AM
+OnCalendar=Sunday *-*-1..7 07:45:00
 
-# Don't catch up on missed runs
+# Skip missed runs
 Persistent=false
 
 [Install]

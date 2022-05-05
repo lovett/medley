@@ -2,11 +2,10 @@
 Description=Timer for Medley bucketpull app
 
 [Timer]
-# Hourly at 15 minutes past the hour with a break for maintenance
-# from 6AM to 8AM.
-OnCalendar=00..05:15:00
-OnCalendar=08..23:15:00
+# Hourly between 7:22 AM and 11:22 PM
+OnCalendar=07..23:22:00
 
+# Skip missed runs
 Persistent=false
 
 [Install]

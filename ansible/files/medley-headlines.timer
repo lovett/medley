@@ -2,10 +2,10 @@
 Description=Timer for Medley headlines precache
 
 [Timer]
-# Daily at 7:00 AM
-OnCalendar=07:00
+# Daily at 7:15 AM
+OnCalendar=07:15
 
-# Catch up if schedule was missed
+# Do not skip missed runs
 Persistent=true
 
 [Install]
