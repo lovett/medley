@@ -261,7 +261,7 @@ Submit text to be spoken by the server.
 
 #+NAME: speak_post
 #+BEGIN_SRC sh :wrap EXPORT http
-curl -i -d "statement=hello world" -d "name=en-IN-NeerjaNeural" -d "locale=en-IN" -d "gender=Female" "$host/speak"
+curl -i -d "statement=hello world" -d "name=en-IN-NeerjaNeural" -d "locale=en-IN" -d "gender=female" "https://medley.blovett.com/speak"
 #+END_SRC
 
 #+NAME: speak_post_confirmation
