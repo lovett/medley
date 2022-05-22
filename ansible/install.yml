@@ -2,7 +2,6 @@
 - hosts: medley
   vars:
     project_name: medley
-    project_user: "{{ project_name }}"
     project_group: "{{ project_name }}"
     project_root: "/var/{{ project_name }}"
 
@@ -15,25 +14,11 @@
       tags:
         - firstrun
 
-    - name: Create application user
-      become: true
-      user:
-        state=present
-        name="{{ project_user }}"
-        home="{{ project_root }}"
-        createhome=no
-        system=yes
-        append=yes
-        groups="{{ project_user }},audio,systemd-journal"
-      tags:
-        - firstrun
-
     - name: Create application directories
       become: true
       file:
         path="{{ item }}"
         state=directory
-        owner="{{ project_user }}"
         group="{{ project_group }}"
         mode=0775
       with_items:
@@ -60,7 +45,6 @@
       copy:
         src: "../medley"
         dest: "/usr/local/bin/medley"
-        owner: "{{ project_user }}"
         group: "{{ project_group }}"
         mode: 0775
 
@@ -69,7 +53,6 @@
       copy:
         src: "../db/assets.sqlite"
         dest: "{{ project_root }}/db/assets.sqlite"
-        owner: "{{ project_user }}"
         group: "{{ project_group }}"
 
     - name: Install Apache vhost
@@ -83,11 +66,11 @@
       become: true
       template:
         src: "templates/medley.service.j2"
-        dest: "/etc/systemd/system/medley.service"
+        dest: "/etc/systemd/user/medley.service"
 
     - name: Install supplemental systemd services
       become: true
-      copy: src={{ item }} dest=/etc/systemd/system/
+      copy: src={{ item }} dest=/etc/systemd/user/
       with_items:
         - files/medley-geodb.service
         - files/medley-geodb.timer
@@ -98,37 +81,37 @@
         - files/medley-bucketpull.service
         - files/medley-bucketpull.timer
 
-    - name: Enable primary systemd service
-      become: true
-      systemd:
-        daemon_reload: yes
-        enabled: yes
-        masked: no
-        name: medley
-        state: restarted
+    # - name: Enable primary systemd service
+    #   become: true
+    #   systemd:
+    #     daemon_reload: yes
+    #     enabled: yes
+    #     masked: no
+    #     name: medley
+    #     state: restarted
 
-    - name: Enable systemd timers
-      become: true
-      systemd:
-        daemon_reload: yes
-        enabled: yes
-        masked: no
-        name: "{{ item }}"
-        state: restarted
-      with_items:
-        - medley-geodb.timer
-        - medley-maintenance.timer
-        - medley-headlines.timer
-        - medley-bucketpull.timer
+    # - name: Enable systemd timers
+    #   become: true
+    #   systemd:
+    #     daemon_reload: yes
+    #     enabled: yes
+    #     masked: no
+    #     name: "{{ item }}"
+    #     state: restarted
+    #   with_items:
+    #     - medley-geodb.timer
+    #     - medley-maintenance.timer
+    #     - medley-headlines.timer
+    #     - medley-bucketpull.timer
 
-    - name: Check server availability
-      uri:
-        url: "http://localhost:8085/"
-        status_code: 200
-      register: this
-      until: this.status == 200
-      retries: 6
-      delay: 10
+    # - name: Check server availability
+    #   uri:
+    #     url: "http://localhost:8085/"
+    #     status_code: 200
+    #   register: this
+    #   until: this.status == 200
+    #   retries: 6
+    #   delay: 10
 
   handlers:
     - name: Restart Apache

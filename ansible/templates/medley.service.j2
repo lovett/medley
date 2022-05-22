@@ -5,15 +5,13 @@ After=network.target
 [Service]
 Type=notify
 NotifyAccess=all
-User=medley
-Group=medley
 Environment=MEDLEY_notify_systemd=True
 Environment=MEDLEY_database_dir={{ project_root }}/db
 WorkingDirectory={{ project_root }}
 ExecStart=/usr/local/bin/medley
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 
 # Local Variables:
 # mode: conf
