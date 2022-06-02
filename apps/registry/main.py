@@ -223,7 +223,7 @@ class Controller:
 
         add_url = cherrypy.engine.publish(
             "app_url",
-            "new"
+            "0/new"
         ).pop()
 
         export_url = cherrypy.engine.publish(
