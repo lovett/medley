@@ -63,26 +63,6 @@ class TestUrl(Subscriber):
         result = self.plugin.app_url("/hello/world")
         self.assertEqual(result, "http://example.com:12345/hello/world/")
 
-    @patch("cherrypy.engine.publish")
-    def test_local_base(self, publish_mock: Mock) -> None:
-        """A local base URL is ignored."""
-
-        def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
-            if args[0] == "registry:first:value":
-                return ["http://example.com"]
-            return DEFAULT
-
-        publish_mock.side_effect = side_effect
-
-        cherrypy.request.base = "http://localhost/test"
-        result = self.plugin.app_url("/local/url")
-        self.assertEqual(result, "http://example.com/local/url/")
-
-        cherrypy.request.base = "http://127.0.0.1/test"
-        result = self.plugin.app_url("/local/url")
-        self.assertEqual(result, "http://example.com/local/url/")
-
     def test_querystring(self) -> None:
         """Querystring parameters account for trailing slashes."""
 

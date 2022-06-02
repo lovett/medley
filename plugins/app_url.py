@@ -33,9 +33,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if headers.get("X-Forwarded-Proto", "").lower() == "https":
             base = base.replace("http://", "https://")
 
-        if Url(base).is_loopback():
-            base = ""
-
         if not base:
             base = cherrypy.engine.publish(
                 "registry:first:value",
