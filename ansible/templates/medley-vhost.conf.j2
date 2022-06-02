@@ -13,7 +13,6 @@
     SSLCertificateKeyFile {{ medley_ssl_key }}
 
     RequestHeader set X-Real-IP %{REMOTE_ADDR}s
-    RequestHeader set Host localhost
 
     ProxyRequests off
     ProxyPreserveHost on
