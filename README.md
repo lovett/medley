@@ -1,19 +1,14 @@
 # Medley
 
-A collection of small, single-purpose web applications that share
-services but are otherwise independent.
-
-Medley is build on the CherryPy framework.
+A collection of small web applications.
 
 ## Development Setup
 
-Medley targets the current version of Python 3 in Debian stable, currently
-3.7. Setup is driven by `make`.
+Medley is written in Python and targets version 3.10. Setup is driven by `make`.
 
 ```sh
-# Create a Python virtual environment
+# Create a virtual environment
 make venv
-source venv/bin/activate
 
 # Install third-party libraries
 make setup
@@ -22,12 +17,19 @@ make setup
 make serve
 ```
 
-## Configuration
+## SELinux Configuration
 
-The server's default configuration can be adjusted using the following
-environment variables.
+```sh
+sudo semanage port -a -t http_port_t -p tcp 8085
+setsebool -P httpd_can_network_relay 1
+```
 
-`MEDLEY_access_log`: The file path to use for site-wide request
+## Application Configuration
+
+Medley's default configuration can be adjusted through environment
+variables.
+
+`MEDLEY_access_log`: The file path for site-wide request
 logging. Default: Not set
 
 `MEDLEY_autoreload`: Whether the server should watch for changes to
@@ -35,15 +37,15 @@ application files and restart itself. Only useful during
 development. Default: `False`
 
 `MEDLEY_daemonize`: Whether the server should run as a daemon.
-Unnecessary when the server is being manged by systemd and probably
-not useful during development. Default: `False`
+Unnecessary when the server is being manged by systemd and useful
+during development. Default: `False`
 
-`MEDLEY_database_dir`: The directory path to use for SQLite
+`MEDLEY_database_dir`: The directory path for SQLite
 databases. Default: `./db`
 
-`MEDLEY_error_log`: The file path to use for site-wide error
-logging. Probably not needed when the server is being managed by
-systemd (view errors via `journalctl` instead). Default: Not set
+`MEDLEY_error_log`: The file path for site-wide error
+logging. Unnecessary when the server is being managed by
+systemd (use `journalctl` instead). Default: Not set
 
 `MEDLEY_etags`: Whether to use `ETag` HTTP headers for caching.
 Default: `True`
@@ -64,9 +66,9 @@ production but not in development. Default: `True`
 `MEDLEY_notify_systemd`: Whether the server should let systemd know it
 has started and is ready to receive requests. Default: `False`
 
-`MEDLEY_prefetch`: Whether applications are allowed to make HTTP
-requests on a recurring basis so that they can be served more quickly
-from cache when needed. Default: `True`
+`MEDLEY_prefetch`: Whether the server is allowed to poll certain
+external URLs on a recurring basis so that they can be served more
+quickly from cache when needed. Default: `True`
 
 `MEDLEY_server_host`: The IP the server should listen
 on. Default: `127.0.0.1`
