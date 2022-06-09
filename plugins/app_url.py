@@ -19,14 +19,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         This plugin owns the app_url prefix.
         """
         self.bus.subscribe("app_url", self.app_url)
+        self.bus.subscribe("app_url:base", self.base_url)
 
     @staticmethod
-    def app_url(
-            path: str = "",
-            query: Optional[Dict[str, Any]] = None,
-    ) -> str:
-        """Build an absolute internal URL."""
-
+    def base_url() -> str:
         base = cherrypy.request.base
 
         headers = cherrypy.request.headers
@@ -38,6 +34,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "registry:first:value",
                 "config:base_url"
             ).pop()
+
+        return base
+
+    def app_url(
+            self,
+            path: str = "",
+            query: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """Build an absolute internal URL."""
+
+        base = self.base_url()
 
         # A non-root path is treated as a sub-path of the current app.
         if not path.startswith("/"):

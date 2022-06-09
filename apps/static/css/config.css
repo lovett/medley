@@ -1,0 +1,39 @@
+DT {
+    font-weight: bold;
+}
+
+DD {
+    word-break: break-word;
+    padding-bottom: 1em;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+    SECTION {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        row-gap: 2em;
+    }
+
+    DD {
+        padding-bottom: 0;
+    }
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    SECTION {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+    SECTION {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
