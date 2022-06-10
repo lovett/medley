@@ -51,13 +51,15 @@
             {% set ns = namespace(tags_found=False) %}
             <ul>
                 {% for tag in tags %}
-                    {% set ns.tags_found = True %}
-                    <li>
-                        <a href="/recipes/?tag={{ tag["name"]|urlencode }}">
-                            <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                            {{ tag["name"] }}
-                        </a>
-                    </li>
+                    {% if tag["name"] %}
+                        {% set ns.tags_found = True %}
+                        <li>
+                            <a href="/recipes/?tag={{ tag["name"]|urlencode }}">
+                                <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                                {{ tag["name"] }}
+                            </a>
+                        </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
 

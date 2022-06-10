@@ -20,6 +20,7 @@
             {{ target_date|dateformat("%B %-d, %Y") }}
         </time>
 
+        {% if recipe["tags"] %}
         <p class="tags">
             {% for recipe_tag in recipe["tags"] if recipe_tag != tag %}
                 <a href="/recipes/?tag={{ recipe_tag|urlencode }}">
@@ -28,5 +29,6 @@
                 </a>
             {% endfor %}
         </p>
+        {% endif %}
     </div>
 </li>
