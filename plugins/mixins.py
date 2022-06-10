@@ -87,7 +87,7 @@ class Sqlite:
         try:
             with con:
                 cur = con.execute(query, params)
-                insert_id = cur.lastrowid
+                insert_id = cur.lastrowid or 0
         except sqlite3.DatabaseError as err:
             insert_id = -1
             self._logError(err)

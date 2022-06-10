@@ -244,7 +244,12 @@ class Controller:
             attachments=attachment_list
         ).pop()
 
-        raise cherrypy.HTTPRedirect(f"/recipes/{upsert_id}")
+        redirect_url = cherrypy.engine.publish(
+            "app_url",
+            str(upsert_id)
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
     def attachment(params: GetParams) -> bytes:
