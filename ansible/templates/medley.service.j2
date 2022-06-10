@@ -6,9 +6,9 @@ After=network.target
 Type=notify
 NotifyAccess=all
 Environment=MEDLEY_notify_systemd=True
-Environment=MEDLEY_database_dir={{ project_root }}/db
-WorkingDirectory={{ project_root }}
-ExecStart=/usr/local/bin/medley
+Environment=MEDLEY_database_dir={{ medley_root }}/db
+WorkingDirectory={{ medley_root }}
+ExecStart={{ medley_root }}/medley
 
 [Install]
 WantedBy=default.target

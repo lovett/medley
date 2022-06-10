@@ -1,32 +1,26 @@
 ---
+# This playbook makes the following assumptions about the global
+# Ansible configuration:
+#
+# - The production host is associated with a role called "medley".
+# - The following host variables have been defined:
+#    - medley_root: absolute path to the install directory
+#    - medley_hostname: The URL of the production instance
+#    - medley_ssl_certificate: Absolute path to use for SSLCertificateFile in the Apache vhost.
+#    - medley_ssl_key: Absolute path to use for SSLCertificateKeyFile in the Apache vhost.
+
 - hosts: medley
-  vars:
-    project_name: medley
-    project_group: "{{ project_name }}"
-    project_root: "/var/{{ project_name }}"
 
   tasks:
-    - name: Create application group
-      become: true
-      group:
-        state=present
-        name="{{ project_group }}"
-      tags:
-        - firstrun
-
     - name: Create application directories
-      become: true
       file:
         path="{{ item }}"
         state=directory
-        group="{{ project_group }}"
-        mode=0775
+        mode=0700
       with_items:
-        - "{{ project_root }}"
-        - "{{ project_root }}/db"
-        - "{{ project_root }}/storage"
-      tags:
-        - firstrun
+        - "{{ medley_root }}"
+        - "{{ medley_root }}/db"
+        - "{{ medley_root }}/storage"
 
     - name: Install system packages
       become: true
@@ -37,23 +31,18 @@
           - python3-cryptography
           - httpd
         state: present
-      tags:
-        - firstrun
 
     - name: Copy zipapp
-      become: true
       copy:
         src: "../medley"
-        dest: "/usr/local/bin/medley"
-        group: "{{ project_group }}"
-        mode: 0775
+        dest: "{{ medley_root }}/medley"
+        mode: 0700
 
     - name: Copy asset database
-      become: true
       copy:
         src: "../db/assets.sqlite"
-        dest: "{{ project_root }}/db/assets.sqlite"
-        group: "{{ project_group }}"
+        dest: "{{ medley_root }}/db/assets.sqlite"
+        mode: 0600
 
     - name: Install Apache vhost
       become: true
@@ -63,14 +52,15 @@
       notify: Restart Apache
 
     - name: Install primary systemd service
-      become: true
       template:
         src: "templates/medley.service.j2"
-        dest: "/etc/systemd/user/medley.service"
+        dest: "~/.config/systemd/user/medley.service"
+        mode: 0600
 
     - name: Install supplemental systemd services
-      become: true
-      copy: src={{ item }} dest=/etc/systemd/user/
+      copy:
+        src: "{{ item }}"
+        dest: ".config/systemd/user/"
       with_items:
         - files/medley-geodb.service
         - files/medley-geodb.timer
@@ -81,37 +71,37 @@
         - files/medley-bucketpull.service
         - files/medley-bucketpull.timer
 
-    # - name: Enable primary systemd service
-    #   become: true
-    #   systemd:
-    #     daemon_reload: yes
-    #     enabled: yes
-    #     masked: no
-    #     name: medley
-    #     state: restarted
+    - name: Enable primary systemd service
+      systemd:
+        daemon_reload: yes
+        scope: "user"
+        enabled: yes
+        masked: no
+        name: medley
+        state: restarted
 
-    # - name: Enable systemd timers
-    #   become: true
-    #   systemd:
-    #     daemon_reload: yes
-    #     enabled: yes
-    #     masked: no
-    #     name: "{{ item }}"
-    #     state: restarted
-    #   with_items:
-    #     - medley-geodb.timer
-    #     - medley-maintenance.timer
-    #     - medley-headlines.timer
-    #     - medley-bucketpull.timer
+    - name: Enable systemd timers
+      systemd:
+        daemon_reload: yes
+        scope: "user"
+        enabled: yes
+        masked: no
+        name: "{{ item }}"
+        state: restarted
+      with_items:
+        - medley-geodb.timer
+        - medley-maintenance.timer
+        - medley-headlines.timer
+        - medley-bucketpull.timer
 
-    # - name: Check server availability
-    #   uri:
-    #     url: "http://localhost:8085/"
-    #     status_code: 200
-    #   register: this
-    #   until: this.status == 200
-    #   retries: 6
-    #   delay: 10
+    - name: Check server availability
+      uri:
+        url: "http://localhost:8085/"
+        status_code: 200
+      register: this
+      until: this.status == 200
+      retries: 6
+      delay: 10
 
   handlers:
     - name: Restart Apache
