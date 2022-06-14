@@ -45,6 +45,12 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["app_url:base"],
+) -> List[str]: ...
+
+
+@overload
+def publish(
         channel: Literal["applog:add"],
         source: str,
         message: Any,

@@ -30,17 +30,14 @@ class GetParams(StatusParams):
 
 class PostParams(StatusParams):
     """Parameters for POST requests."""
-    ...
 
 
 class PutParams(StatusParams):
     """Parameters for PUT requests."""
-    ...
 
 
 class DeleteParams(StatusParams):
     """Parameters for DELETE requests."""
-    ...
 
 
 class Controller:

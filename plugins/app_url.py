@@ -23,6 +23,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def base_url() -> str:
+        """Determine the root URL of the application."""
         base = cherrypy.request.base
 
         headers = cherrypy.request.headers
