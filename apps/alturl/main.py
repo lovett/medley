@@ -103,7 +103,12 @@ class Controller:
 
         target_url = Url(params.url)
 
-        raise cherrypy.HTTPRedirect(target_url.alt)
+        redirect_url = cherrypy.engine.publish(
+            "app_url",
+            target_url.alt
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
     def on_registry_changed(key: str) -> None:
