@@ -41,8 +41,13 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
-            if args[0] == "registry:first:value":
-                return ["Column 1, Column 2, Column 3\nlayout=month"]
+            if args[0] == "registry:search":
+                return [
+                    (-1, iter([{
+                        "rowid": "1",
+                        "value": "Column 1, Column 2, Column 3\nlayout=month"
+                    }]))
+                ]
             if args[0] == "clock:from_format":
                 return [datetime.now()]
             if args[0] == "clock:now":
@@ -84,8 +89,8 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
-            if args[0] == "registry:first:value":
-                return [None]
+            if args[0] == "registry:search":
+                return [(-1, iter([]))]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

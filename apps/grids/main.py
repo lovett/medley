@@ -2,6 +2,7 @@
 
 from datetime import date
 import calendar
+from typing import List
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -71,14 +72,14 @@ class Controller:
     def show(params: GetParams) -> bytes:
         """Display a grid."""
 
-        (_, rows) = cherrypy.engine.publish(
+        (_, grids) = cherrypy.engine.publish(
             "registry:search",
             f"grids:{params.grid}",
             exact=True,
             include_count=False
         ).pop()
 
-        grid = next(rows, None)
+        grid = next(grids, None)
 
         if not grid:
             raise cherrypy.HTTPError(404, "Grid not found")
@@ -97,12 +98,13 @@ class Controller:
             option_config.split(",")
         ])
 
-        rows = []
+        rows: List[List[str]] = []
         if options.get("layout") == "month":
             headers = ["Date", "Day"] + headers
 
             options["this_month"] = cherrypy.engine.publish(
-                "clock:now"
+                "clock:now",
+                local=True,
             ).pop()
 
             options["last_month"] = cherrypy.engine.publish(
