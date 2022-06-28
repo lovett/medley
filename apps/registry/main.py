@@ -28,6 +28,7 @@ class GetParams(BaseModel):
     key: str = Field("", strip_whitespace=True, min_length=1)
     value: str = Field("", strip_whitespace=True, min_length=1)
     format: str = ""
+    back: str = Field("", strip_whitespace=True, min_length=1)
 
 
 class PostParams(BaseModel):
@@ -159,6 +160,9 @@ class Controller:
             submit_url = f"/registry/{params.uid}"
             cancel_url = f"/registry?q={params.key}"
             subview_title = "Update"
+
+        if params.back:
+            cancel_url = params.back
 
         return cherrypy.engine.publish(
             "jinja:render",

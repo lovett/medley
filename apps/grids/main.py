@@ -47,9 +47,23 @@ class Controller:
             for row in rows
         )
 
+        app_url = cherrypy.engine.publish(
+            "app_url"
+        ).pop()
+
+        add_url = cherrypy.engine.publish(
+            "app_url",
+            "/registry/0/new",
+            {
+                "key": "grids:NAME",
+                "back": app_url
+             }
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/grids/grids-index.jinja.html",
+            add_url=add_url,
             grid_names=grid_names
         ).pop()
 
@@ -57,15 +71,19 @@ class Controller:
     def show(params: GetParams) -> bytes:
         """Display a grid."""
 
-        grid = cherrypy.engine.publish(
-            "registry:first:value",
-            f"grids:{params.grid}"
+        (_, rows) = cherrypy.engine.publish(
+            "registry:search",
+            f"grids:{params.grid}",
+            exact=True,
+            include_count=False
         ).pop()
+
+        grid = next(rows, None)
 
         if not grid:
             raise cherrypy.HTTPError(404, "Grid not found")
 
-        header_config, option_config = grid.split("\n")
+        header_config, option_config = grid["value"].split("\n")
 
         headers = [
             value.strip()
@@ -114,9 +132,22 @@ class Controller:
                 row[1] = day.strftime("%A")
                 rows.append(row)
 
+        app_url = cherrypy.engine.publish(
+            "app_url",
+            params.grid
+        ).pop()
+
+        edit_url = cherrypy.engine.publish(
+            "app_url",
+            f"/registry/{grid['rowid']}/edit",
+            {
+                "back": app_url
+            }
+        ).pop()
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/grids/grids.jinja.html",
+            edit_url=edit_url,
             headers=headers,
             name=params.grid,
             options=options,

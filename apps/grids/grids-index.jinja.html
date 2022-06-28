@@ -1,11 +1,21 @@
 {% extends "apps/static/templates/base.jinja.html" %}
 {% import "apps/static/templates/macros.jinja.html" as macros -%}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a id="add-record" href="{{ add_url }}">
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Add
+        </a>
+    </nav>
+{% endblock %}
+
 {% block stylesheets %}
     {{ macros.asset("css/grids.css") }}
 {% endblock %}
 
 {% block page_body %}
+    {{ macros.svgSymbols("new-item") }}
     <main id="collection">
         <ul>
             {% for name in grid_names %}
