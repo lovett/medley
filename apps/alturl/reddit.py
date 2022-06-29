@@ -14,14 +14,21 @@ from resources.url import Url
 ViewAndData = Tuple[str, Dict[str, Any]]
 
 
-def view(url: Url) -> ViewAndData:
+def view(url: Url, search: str = "") -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     cache_lifespan = 900
 
+    request_url = f"{url.address}/.json"
+    params = None
+    if search:
+        request_url = f"{url.address}/search/.json"
+        params = {"q": search, "sort": "new", "restrict_sr": 1}
+
     response = cherrypy.engine.publish(
         "urlfetch:get:json",
-        f"{url.address}/.json",
+        request_url,
+        params=params,
         cache_lifespan=cache_lifespan
     ).pop()
 

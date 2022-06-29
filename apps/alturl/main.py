@@ -11,6 +11,7 @@ import apps.alturl.feed
 class PostParams(BaseModel):
     """Parameters for POST requests."""
     url: str
+    q: str = ""
 
 
 class Controller:
@@ -26,7 +27,7 @@ class Controller:
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(*args: str, **_kwargs: str) -> bytes:
+    def GET(*args: str, **kwargs: str) -> bytes:
         """Dispatch to a site-specific handler."""
 
         _, registry_rows = cherrypy.engine.publish(
@@ -54,7 +55,8 @@ class Controller:
         site_specific_template = ""
         if url.domain.endswith("reddit.com"):
             site_specific_template, view_vars = apps.alturl.reddit.view(
-                url
+                url,
+                kwargs.get("q", "")
             )
 
         if not site_specific_template:
@@ -71,6 +73,8 @@ class Controller:
                 bookmarks=bookmarks
             ).pop()
 
+        view_vars["q"] = kwargs.get("q", "")
+
         view_vars["active_bookmark"] = next((
             bookmark
             for bookmark in bookmarks
@@ -84,7 +88,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(url: str) -> None:
+    def POST(url: str, q: str = "") -> None:
         """Redirect to a site-specific display view.
 
         This is for the benefit of the form shown on the default view,
@@ -96,7 +100,8 @@ class Controller:
 
         try:
             params = PostParams(
-                url=url
+                url=url,
+                q=q
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
@@ -105,7 +110,8 @@ class Controller:
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
-            target_url.alt
+            target_url.alt,
+            {"q": params.q}
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
