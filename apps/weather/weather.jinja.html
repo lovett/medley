@@ -78,16 +78,16 @@
                 </div>
             </div>
 
-            {% if "rain" in forecast.currently.weather_groups %}
+            {% if "rain" in forecast.currently.weather_groups and forecast.currently.rain %}
                 <div class="card">
                     <svg class="icon"><use xlink:href="#icon-umbrella"/></svg>
                     <div>
-                        {{ forecast.currently.rain.get("1h") }} mm in past hour
+                        {{ forecast.currently.get("1h") }} mm in past hour
                     </div>
                 </div>
             {% endif %}
 
-            {% if "snow" in forecast.currently.weather_groups %}
+            {% if "snow" in forecast.currently.weather_groups and forecast.currently.snow %}
                 <div class="card">
                     <svg class="icon"><use xlink:href="#icon-snow"/></svg>
                     <div>
