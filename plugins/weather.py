@@ -62,10 +62,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         location_name = ""
-        if not latitude and not longitude:
-            latitude, longitude, location_name = config.get(
-                "latlong:default", ""
-            ).split(",", 2)
+        default_latlong = config.get("latlong:default", "")
+        if not latitude and not longitude and default_latlong:
+            latitude, longitude, location_name = default_latlong.split(",", 2)
 
         if not location_name:
             location_name = next((

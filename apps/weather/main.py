@@ -63,7 +63,20 @@ class Controller:
         ).pop()
 
         if "openweather_api_key" not in config:
-            raise cherrypy.HTTPError(500, "No api key")
+            app_url = cherrypy.engine.publish(
+                "app_url",
+            ).pop()
+
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+                "/registry/0/new",
+                {
+                    "key": "weather:openweather_api_key",
+                    "back": app_url
+                }
+            ).pop()
+
+            raise cherrypy.HTTPRedirect(redirect_url)
 
         forecast = cherrypy.engine.publish(
             "weather:forecast",
