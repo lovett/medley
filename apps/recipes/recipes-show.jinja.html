@@ -43,7 +43,7 @@
             <ul>
                 {% for tag in tags %}
                     <li>
-                        <a href="/recipes/tag/{{ tag|urlencode }}">
+                        <a href="/recipes/?tag={{ tag|urlencode }}">
                             <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
                             {{ tag }}
                         </a>
