@@ -62,11 +62,13 @@ class Controller:
             params.longitude
         ).pop()
 
-        if "openweather_api_key" not in config:
-            app_url = cherrypy.engine.publish(
-                "app_url",
-            ).pop()
+        app_url = cherrypy.engine.publish(
+            "app_url",
+        ).pop()
 
+        redirect_url = ""
+
+        if "openweather_api_key" not in config:
             redirect_url = cherrypy.engine.publish(
                 "app_url",
                 "/registry/0/new",
@@ -76,6 +78,17 @@ class Controller:
                 }
             ).pop()
 
+        if "latlong:default" not in config and not redirect_url:
+            redirect_url = cherrypy.engine.publish(
+                "app_url",
+                "/registry/0/new",
+                {
+                    "key": "weather:latlong:default",
+                    "back": app_url
+                }
+            ).pop()
+
+        if redirect_url:
             raise cherrypy.HTTPRedirect(redirect_url)
 
         forecast = cherrypy.engine.publish(
