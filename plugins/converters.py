@@ -35,6 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
         register_converter("comma_delimited", self.comma_delimited)
+        register_converter("slug", self.slug)
         register_converter("url", self.url)
 
     @staticmethod
@@ -175,6 +176,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Parse a value stored as JSON."""
 
         return json.loads(value.decode("utf-8"))
+
+    @staticmethod
+    def slug(value: bytes) -> str:
+        """Generate the slug of a string."""
+
+        return re.sub(r" ", "-", value.decode("utf-8")).lower()
 
     @staticmethod
     def url(value: bytes) -> Url:
