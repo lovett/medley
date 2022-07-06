@@ -16,7 +16,7 @@ class DeleteParams(BaseModel):
     uid: float = Field(0, gt=0)
 
 
-class PostParams(BaseModel):
+class GetPostParams(BaseModel):
     """Parameters for POST requests."""
     message: str = Field("", strip_whitespace=True)
     badge: str = Field("", strip_whitespace=True)
@@ -89,8 +89,13 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(**_kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display scheduled reminders, and a form to create new ones."""
+
+        try:
+            params = GetPostParams(**kwargs)
+        except ValidationError as error:
+            raise cherrypy.HTTPError(400) from error
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
@@ -131,17 +136,22 @@ class Controller:
             "apps/reminder/reminder.jinja.html",
             registry_url=registry_url,
             templates=templates,
-            upcoming=upcoming
+            upcoming=upcoming,
+            message=params.message,
+            hours=params.hours,
+            minutes=params.minutes,
+            comments=params.comments,
+            notification_id=params.notification_id,
+            badge=params.badge,
+            url=params.url
         ).pop()
 
     @staticmethod
     def POST(**kwargs: str) -> None:
         """Queue a new reminder for delivery."""
 
-        print(kwargs)
-
         try:
-            params = PostParams(**kwargs)
+            params = GetPostParams(**kwargs)
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 

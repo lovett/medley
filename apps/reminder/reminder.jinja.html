@@ -91,37 +91,37 @@
             <div>
                 <div class="field">
                     <label for="message">Message</label>
-                    <input type="text" id="message" name="message" required />
+                    <input type="text" id="message" name="message" value="{{ message }}" required />
                 </div>
 
 
                 <div class="field">
                     <label for="message">Timeframe</label>
-                    <input type="number" class="inline" id="hours" name="hours" />
+                    <input type="number" class="inline" id="hours" name="hours" value="{{ hours }}" />
                     hours
 
-                    <input type="number" class="inline" id="minutes" name="minutes"/>
+                    <input type="number" class="inline" id="minutes" name="minutes" value="{{ minutes }}"/>
                     minutes
                 </div>
                 <div class="field">
                     <label for="comments">Comments</label>
-                    <textarea id="comments" name="comments"></textarea>
+                    <textarea id="comments" name="comments">{{ comments }}</textarea>
                 </div>
 
                 <div class="field-group">
                     <div class="field">
                         <label for="notification_id">Notification ID</label>
-                        <input type="text" id="notification_id" name="notification_id" />
+                        <input type="text" id="notification_id" name="notification_id" value="{{ notification_id }}"/>
                     </div>
                     <div class="field">
                         <label for="badge">Badge</label>
-                        <input type="text" id="badge" name="badge" />
+                        <input type="text" id="badge" name="badge" value="{{ badge }}"/>
                     </div>
                 </div>
 
                 <div class="field">
                     <label for="url">URL</label>
-                    <input type="text" id="url" name="url" />
+                    <input type="text" id="url" name="url" value="{{ url }}"/>
                     <div class="shortcuts">
                         <a href="#" data-field="url" data-shortcut="set-value" data-value="{{ app_url }}">this page</a>
                     </div>
