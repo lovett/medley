@@ -784,7 +784,9 @@ TEXTAREA {
         padding: 0;
     }
 
-
+    #page-title {
+        margin-bottom: 1em;
+    }
 
     #page-header {
         display: none;

@@ -2,16 +2,20 @@
 
 from enum import Enum
 import datetime
+import sqlite3
 import re
 from typing import List
+from typing import Tuple
 from typing import Union
 import cherrypy
 import mistletoe
+import spacy
 from pydantic import BaseModel
 from pydantic import ValidationError
 from pydantic import Field
 from resources.url import Url
 
+nlp = spacy.load("en_core_web_sm")
 
 # pylint: disable=protected-access
 Attachment = Union[
@@ -453,39 +457,33 @@ class Controller:
         if not recipe:
             raise cherrypy.HTTPError(404)
 
-        attachments = cherrypy.engine.publish(
-            "recipes:attachment:list",
-            recipe_id=params.uid
-        ).pop()
+        markdown = recipe["body"]
+        markdown = self.format_fractions(markdown)
+        markdown = self.format_temperatures(markdown)
 
-        body_html = mistletoe.markdown(recipe["body"])
+        ingredients_text, body_text = self.isolate_ingredients(markdown)
 
-        for search, replace in self.fractions:
-            body_html = body_html.replace(search, replace)
+        body_text = self.add_reminder_links(body_text, recipe)
 
-        body_html = re.sub(r"([0-9]{2,})F", r"\1° F", body_html).strip()
-
-        if body_html.startswith("<ul>"):
-            end_of_first_list = body_html.index("</ul>") + 5
-
-            ingredients = body_html[0:end_of_first_list]
-
-            rest = body_html[end_of_first_list:]
-        else:
-            ingredients = ""
-            rest = body_html
+        ingredients_html = mistletoe.markdown(ingredients_text)
+        body_html = mistletoe.markdown(body_text)
 
         url = None
         if recipe["url"]:
             url = Url(recipe["url"])
+
+        attachments = cherrypy.engine.publish(
+            "recipes:attachment:list",
+            recipe_id=params.uid
+        ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-show.jinja.html",
             title=recipe["title"],
             recipe_id=recipe["id"],
-            ingredients=ingredients,
-            body=rest,
+            ingredients=ingredients_html,
+            body=body_html,
             tags=recipe["tags"] or [],
             updated=recipe["updated"],
             added=recipe["created"],
@@ -495,3 +493,91 @@ class Controller:
             subview_title=recipe["title"],
             attachments=attachments
         ).pop()
+
+    @staticmethod
+    def isolate_ingredients(text: str) -> Tuple[str, str]:
+        """Separate the list of ingredients from the rest of the recipe."""
+
+        ingredients = ""
+        rest = ""
+
+        for line in text.splitlines():
+            if line.strip().startswith("-") and not rest:
+                ingredients += line + "\n"
+            else:
+                rest += line + "\n"
+
+        return (ingredients, rest)
+
+    def format_fractions(self, html: str) -> str:
+        """Display fractions as single characters."""
+        result = html
+        for search, replace in self.fractions:
+            result = result.replace(search, replace)
+        return result
+
+    def add_reminder_links(self, text: str, recipe: sqlite3.Row) -> str:
+        """Decorate time durations with links to the reminders app."""
+
+        doc = nlp(text)
+
+        for ent in doc.ents:
+            if ent.label_ != "TIME":
+                continue
+
+            reminder_params = {
+                "notification_id": recipe["slug"],
+                "message": f"Timer for {recipe['title']} has finished.",
+                "comments": re.sub(r"\s+", " ", ent.sent.text, re.DOTALL),
+                "url": cherrypy.engine.publish(
+                    "app_url",
+                    str(recipe["id"])
+                ).pop()
+            }
+
+            quantities = dict(zip(
+                [token.lemma_ for token in ent
+                 if token.lemma_ in ("hour", "minute")],
+                [token.text for token in ent
+                 if token.is_digit]
+            ))
+
+            if not quantities:
+                continue
+
+            reminder_params["minutes"] = quantities.get("minute")
+            reminder_params["hours"] = quantities.get("hour")
+
+            duration = ", ".join([f"{v} {k}" for k, v in quantities.items()])
+
+            reminder_url = cherrypy.engine.publish(
+                "app_url",
+                "/reminder",
+                reminder_params
+            ).pop()
+
+            reminder_link = '<a %s %s %s href="%s">%s</a>' % (
+                'target="_blank"',
+                'class="reminder"',
+                f'title="Set a {duration} timer"',
+                reminder_url,
+                ent
+            )
+
+            updated_sentence = ent.sent.text.replace(
+                ent.text,
+                reminder_link,
+                1
+            )
+
+            text = text.replace(
+                ent.sent.text,
+                updated_sentence
+            )
+
+        return text
+
+    @staticmethod
+    def format_temperatures(html: str) -> str:
+        """Display Fahrenheit temperatures with degree symbol."""
+        return re.sub(r"([0-9]{2,})F", r"\1° F", html).strip()

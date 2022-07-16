@@ -213,7 +213,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate a recipe by its ID."""
 
         return self._selectOne(
-            """SELECT id, title, body, url, domain,
+            """SELECT id, title, title as 'slug [slug]', body, url, domain,
             created as 'created [local_datetime]',
             updated as 'updated [local_datetime]',
             starred as 'starred [local_datetime]',
