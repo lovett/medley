@@ -6,8 +6,8 @@ import shutil
 import tarfile
 from typing import Any
 from typing import Dict
-from typing import Iterable
 from typing import Optional
+from typing import Tuple
 import urllib.parse
 import feedparser
 import requests
@@ -97,7 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self,
             url: str,
             *,
-            auth: Iterable[str] = (),
+            auth: Optional[Tuple[str, str]] = None,
             params: Optional[Dict[str, Any]] = None,
             headers: Optional[Dict[str, Any]] = None,
             cache_lifespan: int = 0
@@ -160,13 +160,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def get(
             self,
             url: str,
+            *,
+            auth: Optional[Tuple[str, str]] = None,
             as_object: bool = False,
             cache_lifespan: int = 0,
             **kwargs: Kwargs
     ) -> Any:
         """Send a GET request"""
 
-        auth = kwargs.get("auth")
         headers = self.headers(kwargs.get("headers"))
         params = kwargs.get("params")
 
@@ -229,7 +230,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             self,
             url: str,
             destination: str,
+            *,
             as_json: bool = False,
+            auth: Optional[Tuple[str, str]] = None,
             **kwargs: Dict[str, Any]
     ) -> None:
         """Send a GET request and save the response to the filesystem."""
@@ -250,7 +253,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         res = requests.get(
             url,
-            auth=kwargs.get("auth"),
+            auth=auth,
             headers=headers,
             params=params,
             stream=True

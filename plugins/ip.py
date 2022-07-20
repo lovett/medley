@@ -146,7 +146,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             # Reverse by IPv4 quads (12.34.56.78 becomes 78.56.34.21)
             quads = ip_address.split(".")
             reversed_ip = ".".join(quads[::-1])
-            zero_filled_quads = tuple(map(lambda x: x.zfill(3), quads))
+            zero_filled_quads = (x.zfill(30) for x in quads)
+            dotted_quads = ".".join(zero_filled_quads)
+            undotted_quads = dotted_quads.replace(".", "")
 
             ip_representations = {
                 ip_address,
@@ -157,8 +159,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 reversed_ip,
                 reversed_ip.replace(".", ""),
                 reversed_ip.replace(".", "-"),
-                ".".join(zero_filled_quads),
-                "".join(zero_filled_quads),
+                dotted_quads,
+                undotted_quads,
             }
 
             filtered_reverse_host = reverse_host
