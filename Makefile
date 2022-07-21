@@ -67,7 +67,6 @@ venv:
 setup: venv
 	./venv/bin/python -m pip install --quiet --upgrade pip setuptools
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements.txt
-	./venv/bin/python -m spacy download en_core_web_sm
 
 # Install dev-specific third-party Python libraries
 #
