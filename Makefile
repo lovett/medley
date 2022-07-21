@@ -78,7 +78,6 @@ setup-dev: setup
 # Build the application as a zipapp
 medley: setup
 	rsync -a --filter='merge .rsync-build-filters' --delete --delete-excluded . build/
-	mv build/medley.py build/__main__.py
 	./venv/bin/python -m compileall -j 0 -q build
 	./venv/bin/python -m pip install --compile \
 		--disable-pip-version-check \
@@ -89,7 +88,7 @@ medley: setup
 		--upgrade
 	find build -depth -type d -name '*.dist-info' -exec rm -rf {} \;
 	find build -depth -type d -name 'test*' -exec rm -rf {} \;
-	/usr/bin/env python3 -m zipapp -p "/usr/bin/env python3" -o medley build
+	shiv --site-packages build -p "/usr/bin/env python3" -o medley -e medley.main
 	./medley --publish
 
 # Install the application on the production host

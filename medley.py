@@ -314,7 +314,8 @@ def setup() -> None:
     cherrypy.engine.start()
 
 
-if __name__ == '__main__':
+def main():
+    """The entry point for the application."""
     argparser = argparse.ArgumentParser()
 
     argparser.add_argument(
@@ -344,3 +345,6 @@ if __name__ == '__main__':
     cherrypy.engine.publish("assets:publish")
     cherrypy.engine.publish("server:ready")
     cherrypy.engine.block()
+
+if __name__ == '__main__':
+    main()
