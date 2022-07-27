@@ -47,18 +47,17 @@ class Controller:
 
         reports = {}
 
-        if not cherrypy.config["zipapp"]:
-            if pathlib.Path("apps/static/mypy").is_dir():
-                reports["MyPy"] = cherrypy.engine.publish(
-                    "app_url",
-                    "/static/mypy/index.html"
-                ).pop()
+        if pathlib.Path("apps/static/mypy").is_dir():
+            reports["MyPy"] = cherrypy.engine.publish(
+                "app_url",
+                "/static/mypy/index.html"
+            ).pop()
 
-            if pathlib.Path("apps/static/coverage").is_dir():
-                reports["Code Coverage"] = cherrypy.engine.publish(
-                    "app_url",
-                    "/static/coverage/index.html"
-                ).pop()
+        if pathlib.Path("apps/static/coverage").is_dir():
+            reports["Code Coverage"] = cherrypy.engine.publish(
+                "app_url",
+                "/static/coverage/index.html"
+            ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",

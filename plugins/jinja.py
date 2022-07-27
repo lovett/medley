@@ -93,9 +93,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).pop()
         )
 
-        if cherrypy.config.get("zipapp"):
-            return (asset_bytes.decode(), target, lambda: True)
-
         mtime = 0.0
         if template_path.is_file():
             mtime = template_path.stat().st_mtime

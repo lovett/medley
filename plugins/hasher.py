@@ -1,6 +1,7 @@
 """Generate hashes of values and files."""
 
 import hashlib
+from pathlib import Path
 from typing import Union
 from typing import cast
 import cherrypy
@@ -55,7 +56,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         hasher = hashlib.new(algorithm)
 
-        with open(path, "rb") as handle:
+        target = Path(path)
+        if not target.is_absolute():
+            target = Path(cherrypy.config.get("server_root")) / target
+
+        with open(target, "rb") as handle:
             for line in handle:
                 hasher.update(line)
 

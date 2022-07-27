@@ -15,7 +15,6 @@ import logging
 import os
 import os.path
 import sys
-import zipfile
 import cherrypy
 import portend
 import sdnotify
@@ -81,7 +80,6 @@ ServerConfig = TypedDict("ServerConfig", {
     "server_port": int,
     "server_root": str,
     "tracebacks": bool,
-    "zipapp": bool,
 })
 
 # The parts of CherryPy's configuration that use dot notation. Mapping
@@ -159,7 +157,6 @@ def setup() -> None:
         server_port=env_integer("server_port", 8085),
         server_root=server_root,
         tracebacks=env_boolean("tracebacks", False),
-        zipapp=not os.path.isdir(server_root)
     )
 
     cherrypy.config.update(config)
@@ -199,21 +196,11 @@ def setup() -> None:
     cherrypy.tools.provides = tools.provides.Tool()
 
     # Mount the apps
-    if cherrypy.config["zipapp"]:
-        with zipfile.ZipFile(server_root) as archive:
-            apps = [
-                name.split("/")[1]
-                for name in archive.namelist()
-                if name.endswith("main.py")
-                and name.startswith("apps/")
-            ]
-
-    else:
-        apps = [
-            entry.name
-            for entry in os.scandir(app_root)
-            if entry.name.isalpha()
-        ]
+    apps = [
+        entry.name
+        for entry in os.scandir(app_root)
+        if entry.name.isalpha()
+    ]
 
     for app in apps:
         # Must not end in a slash. For the root, must be an empty
@@ -222,10 +209,10 @@ def setup() -> None:
         if app == "homepage":
             app_path = ""
 
-        main = importlib.import_module(f"apps.{app}.main")
+        app_main = importlib.import_module(f"apps.{app}.main")
 
         cherrypy.tree.mount(
-            main.Controller(),  # type: ignore
+            app_main.Controller(),  # type: ignore
             app_path,
             {
                 "/": {
@@ -314,7 +301,7 @@ def setup() -> None:
     cherrypy.engine.start()
 
 
-def main():
+def main() -> None:
     """The entry point for the application."""
     argparser = argparse.ArgumentParser()
 
@@ -345,6 +332,7 @@ def main():
     cherrypy.engine.publish("assets:publish")
     cherrypy.engine.publish("server:ready")
     cherrypy.engine.block()
+
 
 if __name__ == '__main__':
     main()

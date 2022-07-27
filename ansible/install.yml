@@ -32,7 +32,7 @@
           - httpd
         state: present
 
-    - name: Copy zipapp
+    - name: Copy application
       copy:
         src: "../medley"
         dest: "{{ medley_root }}/medley"
