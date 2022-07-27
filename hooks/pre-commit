@@ -41,7 +41,7 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
     fi
 
     if [[ "$FILE_EXTENSION" == "py" ]]; then
-        LINTABLE=$(curl --silent --show-error "http://localhost:8085/lintable/$STAGED_FILE")
+        LINTABLE=$(/usr/bin/env python3 medley.py --lintcheck "$STAGED_FILE")
 
         if [[ "$LINTABLE" == "yes" ]]; then
             echo "Linting $STAGED_FILE with mypy..."
@@ -53,7 +53,7 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
             echo "Linting $STAGED_FILE with pylint..."
             ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"
 
-            curl --silent --show-error -X PUT -d "" "http://localhost:8085/lintable/$STAGED_FILE"
+            /usr/bin/env python3 medley.py --lintpass "$STAGED_FILE"
         fi
     fi
 done

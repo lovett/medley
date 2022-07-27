@@ -93,26 +93,6 @@ curl -i -I "$host/"
 curl -i -I -H "If-None-Match: e3e5f241ef61db2c61aa327dc1c0394c" "$host/"
 #+END_SRC
 
-* Lintable
-** GET
-Ask the server to compare the current hash of a file to the last
-stored value. Returns "yes" if the file should be linted or "no" if it
-should not. The file path is provided on the URL and should be
-relative to the application root.
-
-#+NAME: lintable_get
-#+BEGIN_SRC sh :wrap EXPORT html
-curl -H "Accept: $json" "$host/lintable/apps/lintable/main.py"
-#+END_SRC
-
-** PUT
-Ask the server to store the current hash of a file. Same setup as for
-GET: the file path is provided on the URL.
-
-#+NAME: lintable_put
-#+BEGIN_SRC sh :wrap EXPORT html
-curl -i -X PUT -d" " "$host/lintable/apps/lintable/main.py"
-#+END_SRC
 * Logindex
 ** POST bucket
 Ask the server to ingest an hourly log file downloaded from a GCP

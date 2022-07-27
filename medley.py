@@ -306,25 +306,41 @@ def main() -> None:
     argparser = argparse.ArgumentParser()
 
     argparser.add_argument(
-        "--publish",
-        help='publish static assets',
-        action="store_true"
+        "--lintcheck",
+        help="determine if a file should be linted"
     )
 
-    argparser.set_defaults(publish=False)
+    argparser.add_argument(
+        "--lintpass",
+        help="mark a file as successfully linted"
+    )
+
     args = argparser.parse_args()
 
-    cherrypy.config.update({"serverless": args.publish})
+    if args.lintpass:
+        hasher = plugins.hasher.Plugin(cherrypy.engine)
+        current_hash = hasher.hash_value(args.lintpass)
+
+        plugins.cache.Plugin(cherrypy.engine).set(
+            f"lintcheck:{args.lintpass}",
+            current_hash,
+            86400 * 365
+        )
+        sys.exit()
+
+    if args.lintcheck:
+        hasher = plugins.hasher.Plugin(cherrypy.engine)
+        cache = plugins.cache.Plugin(cherrypy.engine)
+        current_hash = hasher.hash_value(args.lintcheck)
+        stored_hash = cache.get(f"lintcheck:{args.lintcheck}")
+
+        if current_hash != stored_hash:
+            print("yes")
+        else:
+            print("no")
+        sys.exit()
 
     setup()
-
-    if args.publish:
-        cherrypy.engine.publish(
-            "assets:publish",
-            reset=True
-        )
-        cherrypy.engine.exit()
-        sys.exit()
 
     if cherrypy.config.get("notify_systemd"):
         sdnotify.SystemdNotifier().notify("READY=1")
