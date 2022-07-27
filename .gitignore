@@ -18,3 +18,4 @@ storage
 venv
 medley
 build
+flycheck_*
