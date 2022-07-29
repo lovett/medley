@@ -29,6 +29,7 @@
           - alsa-utils
           - python3
           - python3-cryptography
+          - python3-evdev
           - httpd
         state: present
 

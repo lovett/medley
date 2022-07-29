@@ -866,6 +866,12 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["registry:ready"],
+) -> List[None]: ...
+
+
+@overload
+def publish(
         channel: Literal["registry:remove:id"],
         rowid: int,
 ) -> List[int]: ...

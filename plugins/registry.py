@@ -37,6 +37,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
+        cherrypy.engine.publish("registry:ready")
+
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
