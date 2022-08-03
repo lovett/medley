@@ -34,6 +34,7 @@ class Plugin(cherrypy.process.plugins.Monitor):
             if "keyboard" not in device.name.lower():
                 continue
             self.selector.register(device, EVENT_READ)
+            cherrypy.log(f"[input] Listening for input from {device.name}")
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for and start running the
@@ -52,20 +53,23 @@ class Plugin(cherrypy.process.plugins.Monitor):
         """Check for input."""
 
         for key, _ in self.selector.select():
-            for input_event in key.fileobj.read():  # type: ignore
-                data = categorize(input_event)
-                if not hasattr(data, "keycode"):
-                    continue
+            try:
+                for input_event in key.fileobj.read():  # type: ignore
+                    data = categorize(input_event)
+                    if not hasattr(data, "keycode"):
+                        continue
 
-                if not data.keystate == 1:
-                    continue
+                    if not data.keystate == 1:
+                        continue
 
-                if isinstance(data.keycode, str):
-                    self.fire(data.keycode)
+                    if isinstance(data.keycode, str):
+                        self.fire(data.keycode)
 
-                if isinstance(data.keycode, list):
-                    for keycode in data.keycode:
-                        self.fire(keycode)
+                    if isinstance(data.keycode, list):
+                        for keycode in data.keycode:
+                            self.fire(keycode)
+            except OSError:
+                pass
 
     def get_triggers(self) -> None:
         """Look up input triggers in the registry."""
