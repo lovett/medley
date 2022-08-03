@@ -60,8 +60,12 @@ class Plugin(cherrypy.process.plugins.Monitor):
                 if not data.keystate == 1:
                     continue
 
-                if data.keycode in self.triggers.keys():
-                    self.fire(self.triggers[data.keycode])
+                if isinstance(data.keycode, str):
+                    self.fire(data.keycode)
+
+                if isinstance(data.keycode, list):
+                    for keycode in data.keycode:
+                        self.fire(keycode)
 
     def get_triggers(self) -> None:
         """Look up input triggers in the registry."""
@@ -80,25 +84,30 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
         self.get_triggers()
 
-    def fire(self, endpoint_spec: str) -> None:
+    def fire(self, keycode: str) -> None:
         """Perform the action associated with a trigger."""
 
-        spec_lines = [
+        command = self.triggers.get(keycode)
+
+        if not command:
+            return
+
+        command_lines = [
             line.strip()
             for line
-            in endpoint_spec.split("\n")
+            in command.split("\n")
         ]
 
-        (method, endpoint) = spec_lines[0].split(" ")
+        (method, endpoint) = command_lines[0].split(" ")
 
         # pylint: disable=consider-using-f-string
         url = "http://%s:%s/%s" % (
-            cherrypy.config["server_host"],
-            cherrypy.config["server_port"],
+            cherrypy.config.get("server_host", ""),
+            cherrypy.config.get("server_port", ""),
             endpoint.lstrip("/")
         )
 
-        data = urllib.parse.parse_qs(spec_lines[1])
+        data = urllib.parse.parse_qs(command_lines[1])
 
         if method.lower() == "post":
             cherrypy.engine.publish(
