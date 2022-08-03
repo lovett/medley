@@ -1,13 +1,26 @@
 ---
-# This playbook makes the following assumptions about the global
-# Ansible configuration:
+# This is a playbook for installing Medley on a production host.
 #
-# - The production host is associated with a role called "medley".
-# - The following host variables have been defined:
-#    - medley_root: absolute path to the install directory
-#    - medley_hostname: The URL of the production instance
-#    - medley_ssl_certificate: Absolute path to use for SSLCertificateFile in the Apache vhost.
-#    - medley_ssl_key: Absolute path to use for SSLCertificateKeyFile in the Apache vhost.
+# Whatever host runs this playbook should have the following in its
+# global Ansible configuration:
+#
+# - A role called "medley" which the production host is part of.
+#
+# - A host variable "medley_root" set to the absolute path on the
+#   production host of the install directory.
+#
+# - A host variable "medley_hostname" set to the URL of the
+#   production instance.
+#
+# - A host variable "medley_ssl_certificate" set to the absolute path
+#   on the production host of the SSL certificate (ie SSLCertificateFile
+#   in the Apache vhost).
+#
+# - A host variable "medley_ssl_key" set to the absolute path on the production host
+#   of the SSL key (ie SSLCertificatekeyfile in the Apache vhost).
+#
+# - A host variable "medley_user" set to the user on the production host that will
+#    be running the application.
 
 - hosts: medley
 
@@ -94,6 +107,13 @@
         - medley-maintenance.timer
         - medley-headlines.timer
         - medley-bucketpull.timer
+
+    - name: Group membership
+      become: true
+      user:
+        name: "{{ medley_user }}"
+        groups: input,audio
+        append: yes
 
     - name: Check server availability
       uri:
