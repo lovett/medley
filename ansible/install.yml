@@ -52,12 +52,6 @@
         dest: "{{ medley_root }}/medley"
         mode: 0700
 
-    - name: Copy asset database
-      copy:
-        src: "../db/assets.sqlite"
-        dest: "{{ medley_root }}/db/assets.sqlite"
-        mode: 0600
-
     - name: Install Apache vhost
       become: true
       template:

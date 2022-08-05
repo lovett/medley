@@ -11,28 +11,6 @@ from plugins import mixins
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     """A CherryPy plugin for serving static files from Sqlite."""
 
-    def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
-        cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
-
-        self.db_path = self._path("assets.sqlite")
-
-        self._create("""
-        PRAGMA journal_mode=WAL;
-        PRAGMA foreign_keys=ON;
-
-        CREATE TABLE IF NOT EXISTS assets (
-            extension TEXT,
-            path TEXT,
-            mimetype TEXT,
-            hash TEXT,
-            bytes BLOB
-        );
-
-        CREATE INDEX IF NOT EXISTS index_extension
-            ON assets(extension);
-
-        """)
-
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
