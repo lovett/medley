@@ -1,6 +1,7 @@
 {% extends "apps/static/templates/base.jinja.html" %}
 {% import "apps/static/templates/macros.jinja.html" as macros -%}
 
+{% set datetime_format = "%-I:%M %p %A" %}
 {% set time_format = "%-I:%M %p" %}
 
 {% block stylesheets %}
@@ -47,11 +48,18 @@
 
         {% if forecast.alerts %}
             <div class="weather-alerts">
-                {% for alert in forecast.alerts %}
+                {% for _, alert in forecast.alerts.items() %}
                     <details class="weather-alert">
                         <summary class="title">
-                            <svg class="icon"><use xlink:href="#icon-alert"></use></svg>
-                            {{ alert.event }} until {{ alert.end|dateformat(time_format) }}
+                            {% if alert.icon == "temperature" %}
+                                <svg class="icon"><use xlink:href="#icon-thermometer"></use></svg>
+                            {% elif alert.icon == "water" %}
+                                <svg class="icon"><use xlink:href="#icon-umbrella"></use></svg>
+                            {% else %}
+                                <svg class="icon"><use xlink:href="#icon-alert"></use></svg>
+                            {% endif %}
+                            <span>{{ alert.event }}</span>
+                            until {{ alert.end|dateformat(datetime_format) }}
                         </summary>
 
                         <div class="body">
@@ -162,13 +170,19 @@
                         {% for record in forecast.hourly %}
                         <tr>
                             <th>{{ record.dt|date(local=True)|dateformat(time_format) }}</th>
-                            <td nowrap>{{ record.temp|round|int }}° F</td>
+                            <td nowrap>
+                                {{ record.temp|round|int }}° F
+                            </td>
                             <td>
                                 <p>
                                     {% for group in record.weather %}
                                         {{ group.description|capitalize }}.
                                     {% endfor %}
                                 </p>
+
+                                {% if (record.feels_like - record.temp)|abs > 2 %}
+                                    <p>Feels like {{ record.feels_like|round|int }}° F</p>
+                                {% endif %}
 
                                 {% if record.get("pop", 0) > 0 %}
                                     <p>{{ record.get("pop")|percentage }} chance of precipitation.</p>
@@ -181,7 +195,7 @@
             </div>
             <div>
                 {% if forecast.hourly_tomorrow %}
-                    <h2>Tomorrow Morning</h2>
+                    <h2>Tomorrow</h2>
 
                     <table>
                         <colgroup>

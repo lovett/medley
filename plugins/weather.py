@@ -229,7 +229,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         result["hourly"] = hourly[0:end_hour_index]
 
         hourly_tomorrow = hourly[end_hour_index:end_hour_index+24]
-        result["hourly_tomorrow"] = hourly_tomorrow[6:13]
+        result["hourly_tomorrow"] = hourly_tomorrow[6:21]
         result["today"] = daily[0]
         result["upcoming"] = daily[1:]
 
@@ -245,7 +245,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             in currently["weather"]
         ])
 
-        result["alerts"] = []
+        result["alerts"] = {}
 
         if forecast.get("alerts"):
             now_unix = cherrypy.engine.publish(
@@ -258,6 +258,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             ).pop()
 
             for alert in forecast.get("alerts", []):
+                event = alert["event"]
                 seconds_remaining = int(alert["end"] - now_unix)
 
                 if seconds_remaining < 0:
@@ -265,7 +266,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 alert["seconds_remaining"] = seconds_remaining
 
-                if alert["event"] in blacklist:
+                if event in blacklist:
                     continue
 
                 for key in ["start", "end"]:
@@ -277,7 +278,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
                 alert["hash"] = cherrypy.engine.publish(
                     "hasher:value",
-                    alert["event"]
+                    event
                 ).pop()
 
                 alert["description"] = re.sub(
@@ -298,7 +299,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 tags = [tag.lower() for tag in alert.get("tags", [])]
                 if "flood" in tags:
                     alert["icon"] = "water"
+                if "extreme temperature value" in tags:
+                    alert["icon"] = "temperature"
 
-                result["alerts"].append(alert)
+                # For multiple alerts with the same event, prefer the one
+                # that ends latest.
+                if event in result["alerts"]:
+                    if result["alerts"][event]["end"] > alert["end"]:
+                        continue
+
+                result["alerts"][alert["event"]] = alert
 
         return result
