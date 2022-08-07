@@ -13,7 +13,7 @@ MEDLEY.clipboard = (function () {
         const copyId = e.target.dataset.targetId;
         if (copyId) {
             const target = document.getElementById(copyId);
-            surrogate.value = target.innerHTML;
+            surrogate.value = target.innerText;
         }
 
         surrogate.select();
