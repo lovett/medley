@@ -13,7 +13,6 @@ import spacy
 from pydantic import BaseModel
 from pydantic import ValidationError
 from pydantic import Field
-from resources.url import Url
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -225,6 +224,7 @@ class Controller:
         if params.attachments and not isinstance(params.attachments, list):
             params.attachments = [params.attachments]
 
+        # pylint: disable=E1101
         if params.attachments:
             attachment_list = [
                 (
@@ -468,10 +468,6 @@ class Controller:
         ingredients_html = mistletoe.markdown(ingredients_text)
         body_html = mistletoe.markdown(body_text)
 
-        url = None
-        if recipe["url"]:
-            url = Url(recipe["url"])
-
         attachments = cherrypy.engine.publish(
             "recipes:attachment:list",
             recipe_id=params.uid
@@ -488,7 +484,7 @@ class Controller:
             updated=recipe["updated"],
             added=recipe["created"],
             starred=recipe["starred"],
-            url=url,
+            url=recipe["url"],
             last_made=recipe["last_made"],
             subview_title=recipe["title"],
             attachments=attachments
@@ -556,13 +552,9 @@ class Controller:
                 reminder_params
             ).pop()
 
-            reminder_link = '<a %s %s %s href="%s">%s</a>' % (
-                'target="_blank"',
-                'class="reminder"',
-                f'title="Set a {duration} timer"',
-                reminder_url,
-                ent
-            )
+            reminder_link = f'<a target="_blank" class="reminder" ' \
+                f'title="Set a {duration} timer" href="{reminder_url}">' \
+                f'{ent}</a>'
 
             updated_sentence = ent.sent.text.replace(
                 ent.text,

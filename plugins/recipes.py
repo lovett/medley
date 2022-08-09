@@ -213,7 +213,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate a recipe by its ID."""
 
         return self._selectOne(
-            """SELECT id, title, title as 'slug [slug]', body, url, domain,
+            """SELECT id, title, title as 'slug [slug]', body, domain,
+            url as 'url [url]',
             created as 'created [local_datetime]',
             updated as 'updated [local_datetime]',
             starred as 'starred [local_datetime]',
@@ -228,7 +229,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate recently-added recipes."""
 
         return self._select_generator(
-            """SELECT id, title, url, domain,
+            """SELECT id, title, url as 'url [url]', domain,
             created as 'created [local_datetime]',
             updated as 'updated [local_datetime]',
             last_made as 'last_made [date]',
@@ -243,7 +244,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate starred recipes."""
 
         return self._select_generator(
-            """SELECT id, title, url, domain,
+            """SELECT id, title, url as 'url [url]', domain,
             created as 'created [local_datetime]',
             updated as 'updated [local_datetime]',
             starred as 'starred [local_datetime]',
@@ -260,7 +261,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """List all recipes associated with a tag."""
 
         return self._select_generator(
-            """SELECT id, title, url, domain,
+            """SELECT id, title, url as 'url [url]', domain,
             created as 'created [local_datetime]',
             updated as 'updated [local_datetime]',
             last_made as 'last_made [date]',
@@ -334,7 +335,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ).pop()
 
         return self._select_generator(
-            f"""SELECT r.id, r.title, r.body, r.url, r.domain,
+            f"""SELECT r.id, r.title, r.body, r.url as 'url [url]', r.domain,
             r.created as 'created [local_datetime]',
             r.updated as 'updated [local_datetime]',
             r.last_made as 'last_made [date]',
@@ -349,7 +350,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate recipes that match a keyword search."""
 
         return self._select_generator(
-            """SELECT r.id, r.title, r.body, r.url, r.domain,
+            """SELECT r.id, r.title, r.body, r.url as 'url [url]', r.domain,
             r.created as 'created [local_datetime]',
             r.updated as 'updated [local_datetime]',
             r.last_made as 'last_made [date]',
@@ -401,8 +402,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ))
 
         queries.append((
-            """INSERT INTO recipes (id, title, body, domain, url, created, last_made)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """INSERT INTO recipes (
+                id, title, body,
+                domain, url, created,
+                last_made
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
             title=excluded.title,
             body=excluded.body,
@@ -451,8 +455,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         for attachment in attachments:
             queries.append((
-                """INSERT INTO attachments (recipe_id, filename, mime_type, content)
-                VALUES (
+                """INSERT INTO attachments (
+                    recipe_id, filename, mime_type, content
+                ) VALUES (
                     (SELECT value FROM tmp WHERE key="recipe_id"),
                     ?, ?, ?
                 )""",
