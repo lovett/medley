@@ -198,8 +198,8 @@ class Controller:
                 )
 
             if part == "alerts":
-                for alert in forecast.get("alerts", []):
-                    statements.append(f"A {alert['event']} is in effect")
+                for event in forecast["alerts"].keys():
+                    statements.append(f"A {event} is in effect")
 
         for statement in statements:
             cherrypy.engine.publish(
