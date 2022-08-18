@@ -341,6 +341,10 @@ TEXTAREA {
     font-weight: normal;
 }
 
+#page-title {
+    margin-bottom: 0.75em;
+}
+
 #page-title H2 {
     font-size: 1.5em;
 }
@@ -747,10 +751,6 @@ TEXTAREA {
         flex-flow: row wrap;
         justify-content: space-between;
         align-items: center;
-    }
-
-    #page-title {
-        margin-bottom: 1em;
     }
 
     #page-title UL {
