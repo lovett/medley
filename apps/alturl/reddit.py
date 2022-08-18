@@ -74,7 +74,11 @@ def view_index(url: Url, response: Any) -> ViewAndData:
     """Render a list of story links."""
 
     stories = []
-    for child in response.get("data").get("children"):
+
+    container = response.get("data", {})
+    children = container.get("children", [])
+
+    for child in children:
         if child.get("kind") != "t3":
             continue
 
