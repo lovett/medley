@@ -4,6 +4,7 @@
 - /***/__pycache__
 - /apps/static/coverage
 - /apps/static/mypy
+- /testing
 + /medley.py
 + /apps/***
 + /plugins/***

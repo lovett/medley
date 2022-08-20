@@ -87,7 +87,6 @@ medley: setup
 		--target build \
 		--upgrade
 	find build -depth -type d -name '*.dist-info' -exec rm -rf {} \;
-	find build -depth -type d -name 'test*' -exec rm -rf {} \;
 	./venv/bin/python -m shiv --site-packages build -p "/usr/bin/env python3" -o medley -e medley.main
 
 # Install the application on the production host
