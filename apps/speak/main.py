@@ -18,18 +18,10 @@ class Action(str, Enum):
     UNMUTE = "unmute"
 
 
-class Gender(str, Enum):
-    """Values for the gender parameter in POST requests."""
-    MALE = "male"
-    FEMALE = "female"
-
-
 class Subresource(str, Enum):
     """Valid keywords for the first URL path segment of this application."""
     NONE = ""
     NOTIFICATION = "notification"
-    VOICE = "voice"
-    VOICES = "voices"
 
 
 class GetParams(BaseModel):
@@ -41,9 +33,6 @@ class PostParams(BaseModel):
     """Parameters for POST requests."""
     subresource: Subresource = Subresource.NONE
     statement: str = Field("", strip_whitespace=True)
-    name: str = Field("Guy", strip_whitespace=True)
-    locale: str = Field("en-US", strip_whitespace=True)
-    gender: Gender = Gender.MALE
     action: Action = Action.NONE
     confirm: bool = False
 
@@ -78,42 +67,7 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, subresource: str = "", **_kwargs: str) -> bytes:
-        """Dispatch to a subhandler based on the URL path."""
-
-        try:
-            params = GetParams(subresource=subresource)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
-
-        if params.subresource == Subresource.VOICES:
-            return self.list_voices()
-
-        return self.status()
-
-    @staticmethod
-    def list_voices() -> bytes:
-        """List available voices."""
-
-        default_voice = cherrypy.engine.publish(
-            "registry:first:value",
-            "speak:default_name",
-        ).pop()
-
-        voices = cherrypy.engine.publish(
-            "speak:voices"
-        ).pop()
-
-        return cherrypy.engine.publish(
-            "jinja:render",
-            "apps/speak/speak-voices.jinja.html",
-            voices=voices,
-            default_voice=default_voice,
-            subview_title="Voice List"
-        ).pop()
-
-    @staticmethod
-    def status() -> bytes:
+    def GET(self, **_kwargs: str) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         muted_temporarily = cherrypy.engine.publish(
@@ -160,33 +114,6 @@ class Controller:
         if params.subresource == Subresource.NOTIFICATION:
             self.handle_notification(cherrypy.request.json)
 
-        if params.subresource == Subresource.VOICE:
-            self.set_default_voice(params)
-
-    @staticmethod
-    def set_default_voice(params: PostParams) -> None:
-        """Write default voice values to the registry."""
-
-        cherrypy.engine.publish(
-            "registry:replace",
-            "speak:default_locale",
-            params.locale
-        )
-
-        cherrypy.engine.publish(
-            "registry:replace",
-            "speak:default_gender",
-            params.gender
-        )
-
-        cherrypy.engine.publish(
-            "registry:replace",
-            "speak:default_name",
-            params.name
-        )
-
-        cherrypy.response.status = 204
-
     @staticmethod
     def handle_post_vars(params: PostParams) -> None:
         """Transform POST parameters to speech-ready statement."""
@@ -219,10 +146,7 @@ class Controller:
 
         cherrypy.engine.publish(
             "speak",
-            params.statement,
-            params.locale,
-            params.gender,
-            params.name,
+            params.statement
         )
 
         cherrypy.response.status = 204

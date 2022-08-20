@@ -44,6 +44,8 @@
           - python3-cryptography
           - python3-evdev
           - httpd
+          - g++
+          - python3-devel
         state: present
 
     - name: Copy application

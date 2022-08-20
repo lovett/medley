@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("edit", "muted", "unmuted", "list") }}
+    {{ macros.svgSymbols("edit", "muted", "unmuted") }}
 
     <main>
         <div id="status">
@@ -67,13 +67,6 @@
                 <button>
                     <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
                     Edit schedule
-                </button>
-            </form>
-
-            <form method="GET" action="{{ app_url }}/voices">
-                <button>
-                    <svg class="icon"><use xlink:href="#icon-list"></use></svg>
-                    Voice List
                 </button>
             </form>
         </div>

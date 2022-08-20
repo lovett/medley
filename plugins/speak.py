@@ -1,46 +1,77 @@
-"""Perform text-to-speech synthesis via Azure.
+"""Text-to-speech synthesis via Mimic3.
 
 See:
-https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/how-to-text-to-speech
-https://docs.microsoft.com/en-us/azure/cognitive-services/speech-service/rest-text-to-speech
+https://github.com/MycroftAI/mimic3/blob/master/mimic3_http/synthesis.py
 """
 
+import io
 import re
 from typing import cast
-from typing import Dict
-from typing import List
+from typing import Optional
+import wave
 import cherrypy
+from mimic3_tts import (
+    AudioResult,
+    Mimic3Settings,
+    Mimic3TextToSpeechSystem,
+    SSMLSpeaker,
+)
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for text-to-speech."""
 
+    speech_engine: Optional[Mimic3TextToSpeechSystem]
+
+    speaker: str
+
+    voice: str
+
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+        self.speech_engine = None
+        self.speaker = ""
+        self.voice = ""
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
         This plugin owns the speak prefix.
         """
+
         self.bus.subscribe("speak:muted", self.muted)
         self.bus.subscribe("speak:muted:scheduled", self.muted_by_schedule)
         self.bus.subscribe("speak:muted:temporarily", self.muted_temporarily)
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
-        self.bus.subscribe("speak:voices", self.voices)
         self.bus.subscribe("speak", self.speak)
+
+    def start_engine(self) -> None:
+        """Initialize the Mimic3 speech engine based on registry config."""
+
+        config = cherrypy.engine.publish(
+            "registry:search:dict",
+            keys=(
+                "speak:mimic3:speaker",
+                "speak:mimic3:voice",
+            ),
+            key_slice=2
+        ).pop()
+
+        self.voice = config.get("voice", "en_US/cmu-arctic_low")
+        self.speaker = config.get("speaker", "gka")
+
+        self.speech_engine = Mimic3TextToSpeechSystem(
+            Mimic3Settings(
+                voice=self.voice,
+                speaker=self.speaker,
+            )
+        )
 
     @staticmethod
     def adjust_pronunciation(statement: str) -> str:
         """Replace words that are prone to mispronunciation with
-        better-sounding equivalents.
-
-        The MS Speech Service documentation alludes to this
-        capability, but lacks details on how to make use of it. This
-        is a local approach that achieves similar ends and allows for
-        custom SSML markup.
-        """
+        better-sounding equivalents."""
 
         adjustments = cherrypy.engine.publish(
             "registry:search:valuelist",
@@ -62,27 +93,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return replaced_statement
 
-    @staticmethod
-    def ssml(
-            statement: str,
-            name: str,
-            locale: str,
-            gender: str
-    ) -> bytes:
+    def ssml(self, statement: str) -> str:
         """Build an SSML document representing the text to be spoken."""
 
         document = f"""
         <?xml version="1.0" ?>
-        <speak version="1.0" xml:lang="{locale}">
-          <voice
-            name="{name}"
-            xml:gender="{gender}"
-            xml:lang="{locale}"
-          >{statement}</voice>
+        <speak version="1.0" voice="{self.voice}/{self.speaker}">
+            <s>{statement}</s>
         </speak>
         """
 
-        return document.strip().encode("utf-8")
+        return document.strip()
 
     def muted(self) -> bool:
         """Determine whether the application has been muted for any reason."""
@@ -121,90 +142,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             schedules
         ).pop()
 
-    @staticmethod
-    def voices() -> List[Dict[str, str]]:
-        """Get the list of available voices."""
-
-        config = cherrypy.engine.publish(
-            "registry:search:dict",
-            keys=(
-                "speak:azure_key",
-                "speak:voice_list_url",
-            ),
-            key_slice=1
-        ).pop()
-
-        return cast(
-            List[Dict[str, str]],
-            cherrypy.engine.publish(
-                "urlfetch:get:json",
-                config.get("voice_list_url", ""),
-                cache_lifespan=1800,
-                headers={"Ocp-Apim-Subscription-Key": config.get("azure_key")},
-            ).pop()
-        )
-
     def speak(
             self,
-            statement: str,
-            locale: str = "en-GB",
-            gender: str = "Male",
-            name: str = "en-GB-RyanNeural",
+            statement: str
     ) -> bool:
         """Speak a statement in one of the supported voices."""
 
-        config = cherrypy.engine.publish(
-            "registry:search:dict",
-            keys=(
-                "speak:azure_key",
-                "speak:synthesize_url",
-                "speak:token_request_url",
-                "speak:default_gender",
-                "speak:default_locale",
-                "speak:default_name",
-            ),
-            key_slice=1
-        ).pop()
+        if not self.speech_engine:
+            self.start_engine()
 
-        if "default_gender" in config and not gender:
-            gender = config.get("default_gender", "")
-
-        if "default_locale" in config and not locale:
-            locale = config.get("default_locale", "")
-
-        if "default_name" in config and not name:
-            name = config.get("default_name", "")
-
-        if "azure_key" not in config:
-            config = {}
-            cherrypy.engine.publish(
-                "applog:add",
-                "speak:config",
-                "Missing azure_key"
-            )
-
-        if "synthesize_url" not in config:
-            config = {}
-            cherrypy.engine.publish(
-                "applog:add",
-                "speak:config",
-                "Missing synthesize_url"
-            )
-
-        if "token_request_url" not in config:
-            config = {}
-            cherrypy.engine.publish(
-                "applog:add",
-                "speak:config",
-                "Missing token_request_url"
-            )
-
-        if not config:
+        if not self.speech_engine:
             return False
 
         adjusted_statement = self.adjust_pronunciation(statement)
 
-        ssml_string = self.ssml(adjusted_statement, name, locale, gender)
+        ssml_string = self.ssml(adjusted_statement)
 
         hash_digest = cherrypy.engine.publish(
             "hasher:value",
@@ -213,77 +165,51 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         cache_key = f"speak:{hash_digest}"
 
-        cached_wave = cherrypy.engine.publish(
+        cached_wav = cherrypy.engine.publish(
             "cache:get",
             cache_key
         ).pop()
 
-        if cached_wave:
+        if cached_wav:
             cherrypy.engine.publish(
                 "scheduler:add",
                 1,
                 "audio:play_bytes",
-                cached_wave
+                cached_wav
             )
 
             return True
 
-        auth_response = cherrypy.engine.publish(
-            "urlfetch:post",
-            config.get("token_request_url", ""),
-            None,
-            headers={"Ocp-Apim-Subscription-Key": config.get("azure_key", "")}
-        ).pop()
+        results = SSMLSpeaker(self.speech_engine).speak(ssml_string)
 
-        if not auth_response:
-            return False
+        with io.BytesIO() as wav_io:
+            wav_file: wave.Wave_write = wave.open(wav_io, "wb")
 
-        audio_bytes = cherrypy.engine.publish(
-            "urlfetch:post",
-            config.get("synthesize_url", ""),
-            ssml_string,
-            as_bytes=True,
-            headers={
-                "Content-type": "application/ssml+xml",
-                "X-Microsoft-OutputFormat": "riff-16khz-16bit-mono-pcm",
-                "Authorization": "Bearer " + auth_response,
-                "X-Seaorch-AppId": "07D3234E49CE426DAA29772419F436CA",
-                "X-Search-ClientID": "1ECFAE91408841A480F00935DC390960",
-                "User-Agent": "medley"
-            }
-        ).pop()
+            for result in results:
+                if not isinstance(result, AudioResult):
+                    continue
 
-        if not audio_bytes:
-            # The post request failed to return audio.
+                wav_file.setframerate(result.sample_rate_hz)
+                wav_file.setsampwidth(result.sample_width_bytes)
+                wav_file.setnchannels(result.num_channels)
+
+                wav_file.writeframes(result.audio_bytes)
+
             cherrypy.engine.publish(
-                "applog:add",
-                "speak:speak",
-                "No audio generated"
+                "scheduler:add",
+                1,
+                "audio:play_bytes",
+                wav_io.getvalue()
             )
 
-            return False
+            cherrypy.engine.publish(
+                "cache:set",
+                cache_key,
+                wav_io.getvalue(),
+                lifespan_seconds=2592000  # 1 month
+            )
 
-        kilobytes = round(len(audio_bytes) / 1024)
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak:speak",
-            f"Generated {kilobytes}k of audio"
-        )
-
-        cherrypy.engine.publish(
-            "cache:set",
-            cache_key,
-            audio_bytes,
-            lifespan_seconds=2592000  # 1 month
-        )
-
-        cherrypy.engine.publish(
-            "scheduler:add",
-            1,
-            "audio:play_bytes",
-            audio_bytes
-        )
+            wav_file.close()
 
         return True
 

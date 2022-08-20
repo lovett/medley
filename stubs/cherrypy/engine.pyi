@@ -999,9 +999,6 @@ def publish(
 def publish(
         channel: Literal["speak"],
         statement: str,
-        locale: Optional[str] = "en-GB",
-        gender: Optional[str] = "Male",
-        name: Optional[str] = "en-GB-RyanNeural",
 ) -> List[bool]: ...
 
 
