@@ -4,7 +4,7 @@
 
 {% macro commentBlock(comment) %}
     {% if comment.author %}
-        <details open class="comment {% if comment.author == story.author %}from-author{% endif %}">
+        <details id="t1_{{ comment.id }}" open class="comment {% if comment.author == story.author %}from-author{% endif %}">
             <summary>
                 <time>{{ comment.created_utc|date(local=True)|dateformat(default_date_format) }}</time>
                 by
@@ -14,6 +14,14 @@
                     {% endif %}
                     {{ comment.author }}
                 </a>
+
+                {% if comment.parent_id.startswith("t1") %}
+                    <a class="jump" href="#{{ comment.parent_id }}">
+                        <svg class="icon"><use xlink:href="#icon-arrow-up"></use></svg>
+                        parent
+                    </a>
+                {% endif %}
+
             </summary>
             <div class="body">
                 {{ comment.body_html|unescape|better_html|retarget_html|safe }}

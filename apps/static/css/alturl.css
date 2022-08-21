@@ -86,6 +86,10 @@ code {
     font-size: .75em;
 }
 
+.comment summary .jump {
+    float: right;
+}
+
 .comment summary:hover {
     cursor: pointer;
 }
