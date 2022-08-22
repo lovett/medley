@@ -45,6 +45,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak", self.speak)
+        self.bus.subscribe("registry:updated", self.restart_engine)
 
     def start_engine(self) -> None:
         """Initialize the Mimic3 speech engine based on registry config."""
@@ -58,8 +59,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             key_slice=2
         ).pop()
 
-        self.voice = config.get("voice", "en_US/cmu-arctic_low")
-        self.speaker = config.get("speaker", "gka")
+        self.voice = config.get("voice", "en_US/hifi-tts_low")
+        self.speaker = config.get("speaker", "9017")
 
         self.speech_engine = Mimic3TextToSpeechSystem(
             Mimic3Settings(
@@ -67,6 +68,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 speaker=self.speaker,
             )
         )
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "speak:start",
+            f"Started speech engine with {self.voice}/{self.speaker}"
+        )
+
+
+    def restart_engine(self, key: str) -> None:
+        """Re-query the speech engine if registry configuration changes."""
+
+        if not key.startswith("speak:mimic3"):
+            return
+
+        self.start_engine()
+
+        cherrypy.engine.publish(
+            "applog:add",
+            "speak:restart",
+            f"Restarted speech engine due to registry change of {key}"
+        )
+
 
     @staticmethod
     def adjust_pronunciation(statement: str) -> str:
