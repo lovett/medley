@@ -18,8 +18,8 @@
     {{ macros.svgSymbols("new-item") }}
     <main id="collection">
         <ul>
-            {% for name in grid_names %}
-            <li><a href="{{ app_url }}/{{ name }}">{{ name }}</li>
+            {% for name, url in grids.items() %}
+            <li><a href="{{ url }}">{{ name }}</li>
             {% endfor %}
         </ul>
     </main>

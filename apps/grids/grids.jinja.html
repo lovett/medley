@@ -8,15 +8,15 @@
 {% block main_toolbar %}
     {% if options["layout"] == "month" %}
         <nav id="main-toolbar">
-            <a href="{{ app_url }}/{{ name }}?start={{ options["last_month"]|dateformat("%Y-%m-%d") }}">
+            <a href="{{ options.last_month_url }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                {{ options.last_month|dateformat("%B") }}
+                {{ options.last_month_name }}
             </a>
-            <a href="{{ app_url }}/{{ name }}?start={{ options["next_month"]|dateformat("%Y-%m-%d") }}">
+            <a href="{{ options.next_month_url }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                {{ options.next_month|dateformat("%B") }}
+                {{ options.next_month_name }}
             </a>
-            <a href="{{ app_url }}/{{ name }}?start={{ options["this_month"]|dateformat("%Y-%m-%d") }}">
+            <a href="{{ options.this_month_url }}">
                 <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
                 Now
             </a>

@@ -3,6 +3,7 @@
 from datetime import date
 import calendar
 from typing import List
+from typing import Optional
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -11,7 +12,7 @@ from pydantic import ValidationError
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     grid: str = ""
-    start: date = date.today().replace(day=1)
+    start: Optional[date] = None
 
 
 class Controller:
@@ -38,15 +39,16 @@ class Controller:
     def index() -> bytes:
         """List available grids."""
 
-        _, rows = cherrypy.engine.publish(
-            "registry:search",
-            "grids:*",
+        grids = cherrypy.engine.publish(
+            "registry:search:dict",
+            "grids",
+            key_slice=1
         ).pop()
 
-        grid_names = (
-            row["key"].split(":").pop()
-            for row in rows
-        )
+        for key in grids.keys():
+            grids[key] = cherrypy.engine.publish(
+                "app_url", key
+            ).pop()
 
         app_url = cherrypy.engine.publish(
             "app_url"
@@ -65,7 +67,7 @@ class Controller:
             "jinja:render",
             "apps/grids/grids-index.jinja.html",
             add_url=add_url,
-            grid_names=grid_names
+            grids=grids
         ).pop()
 
     @staticmethod
@@ -107,16 +109,67 @@ class Controller:
                 local=True,
             ).pop()
 
+            ymd = cherrypy.engine.publish(
+                "clock:format",
+                options["this_month"].replace(day=1),
+                "%Y-%m-%d"
+            ).pop()
+
+            options["this_month_url"] = cherrypy.engine.publish(
+                "app_url",
+                params.grid,
+                query={"start": ymd}
+            ).pop()
+
+            if not params.start:
+                params.start = options["this_month"].replace(day=1)
+
             options["last_month"] = cherrypy.engine.publish(
                 "clock:shift",
                 params.start,
                 "month_previous"
             ).pop()
 
+            options["last_month_name"] = cherrypy.engine.publish(
+                "clock:format",
+                options["last_month"],
+                "%B"
+            ).pop()
+
+            ymd = cherrypy.engine.publish(
+                "clock:format",
+                options["last_month"],
+                "%Y-%m-%d"
+            ).pop()
+
+            options["last_month_url"] = cherrypy.engine.publish(
+                "app_url",
+                params.grid,
+                query={"start": ymd}
+            ).pop()
+
             options["next_month"] = cherrypy.engine.publish(
                 "clock:shift",
                 params.start,
                 "month_next"
+            ).pop()
+
+            options["next_month_name"] = cherrypy.engine.publish(
+                "clock:format",
+                options["next_month"],
+                "%B"
+            ).pop()
+
+            ymd = cherrypy.engine.publish(
+                "clock:format",
+                options["next_month"],
+                "%Y-%m-%d"
+            ).pop()
+
+            options["next_month_url"] = cherrypy.engine.publish(
+                "app_url",
+                params.grid,
+                query={"start": ymd}
             ).pop()
 
             cal = calendar.Calendar()
