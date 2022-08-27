@@ -27,11 +27,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     voice: str
 
+    speed: float
+
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
-        self.speech_engine = None
-        self.speaker = ""
-        self.voice = ""
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
@@ -55,17 +54,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             keys=(
                 "speak:mimic3:speaker",
                 "speak:mimic3:voice",
+                "speak:mimic3:speed",
             ),
             key_slice=2
         ).pop()
 
         self.voice = config.get("voice", "en_US/hifi-tts_low")
         self.speaker = config.get("speaker", "9017")
+        self.speed = config.get("speed", 1.5)
 
         self.speech_engine = Mimic3TextToSpeechSystem(
             Mimic3Settings(
                 voice=self.voice,
                 speaker=self.speaker,
+                length_scale=self.speed
             )
         )
 
@@ -74,7 +76,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "speak:start",
             f"Started speech engine with {self.voice}/{self.speaker}"
         )
-
 
     def restart_engine(self, key: str) -> None:
         """Re-query the speech engine if registry configuration changes."""
@@ -89,7 +90,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "speak:restart",
             f"Restarted speech engine due to registry change of {key}"
         )
-
 
     @staticmethod
     def adjust_pronunciation(statement: str) -> str:
