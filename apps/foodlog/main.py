@@ -70,7 +70,10 @@ class Controller:
         raise cherrypy.HTTPError(404)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, uid: int = 0, subresource: str = "", **kwargs: str) -> bytes:
+    def GET(self,
+            uid: str = "0",
+            subresource: str = "",
+            **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
@@ -251,7 +254,7 @@ class Controller:
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
-            "/foodlog/search",
+            "",
             {"q": params.q}
         ).pop()
 
