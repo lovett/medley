@@ -21,16 +21,13 @@ from mimic3_tts import (
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for text-to-speech."""
 
-    speech_engine: Optional[Mimic3TextToSpeechSystem]
-
-    speaker: str
-
-    voice: str
-
-    speed: float
-
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
+
+        self.speech_engine: Optional[Mimic3TextToSpeechSystem] = None
+        self.speaker = "9017"
+        self.voice = "en_US/hifi-tts_low"
+        self.speed = 1.5
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
@@ -59,9 +56,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             key_slice=2
         ).pop()
 
-        self.voice = config.get("voice", "en_US/hifi-tts_low")
-        self.speaker = config.get("speaker", "9017")
-        self.speed = config.get("speed", 1.5)
+        if config.get("voice"):
+            self.voice = config["voice"]
+
+        if config.get("speaker"):
+            self.speaker = config["speaker"]
+
+        if config.get("speed"):
+            self.speed = config["speed"]
 
         self.speech_engine = Mimic3TextToSpeechSystem(
             Mimic3Settings(
