@@ -46,7 +46,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("weather:config", self.get_config)
 
     @staticmethod
-    def get_config(latitude: str, longitude: str) -> Config:
+    def get_config(latitude: str = "", longitude: str = "") -> Config:
         """Load the application configuration."""
 
         config: Config = cherrypy.engine.publish(
@@ -98,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
             return
 
-        config = self.get_config("", "")
+        config = self.get_config()
 
         if "openweather_api_key" not in config:
             return
@@ -124,7 +124,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "/weather"
         ).pop()
 
-        for alert in forecast.get("alerts", []):
+        for event, alert in forecast["alerts"].items():
             if alert["hash"] in cached_hashes:
                 continue
 
