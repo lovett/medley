@@ -123,7 +123,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         document = f"""
         <?xml version="1.0" ?>
-        <speak version="1.0" voice="{self.voice}/{self.speaker}">
+        <speak version="1.0" voice="{self.voice}/{self.speaker}"
+            speed="{self.speed}">
             <s>{statement}</s>
         </speak>
         """
