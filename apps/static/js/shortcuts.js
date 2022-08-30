@@ -7,6 +7,10 @@ MEDLEY.shortcuts = (function () {
         return result;
     }
 
+    function standardTimeString(d) {
+        return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+    }
+
     function adjustQueryDate(query, dayStep) {
         const matches = query.match(/date (.*)/);
 
@@ -111,6 +115,11 @@ MEDLEY.shortcuts = (function () {
             return;
         }
 
+        if (shortcut === 'clear') {
+            field.value = '';
+        }
+
+
         if (shortcut === 'set-value') {
             field.value = e.target.dataset.value;
         }
@@ -180,6 +189,16 @@ MEDLEY.shortcuts = (function () {
 
         if (shortcut === 'today') {
             field.value = standardDateString(new Date());
+        }
+
+        if (shortcut === 'now') {
+            field.value = standardTimeString(new Date());
+        }
+
+        if (shortcut === 'yesterday') {
+            const dt = new Date();
+            dt.setDate(dt.getDate() - 1);
+            field.value = standardDateString(dt);
         }
 
         if (e.target.nodeName === 'BUTTON') {
