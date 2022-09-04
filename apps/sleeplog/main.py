@@ -282,7 +282,6 @@ class Controller:
             history_chart = cherrypy.engine.publish(
                 "plotter:sleep",
                 (history,),
-                y_legend="Hours",
                 data_key="hours",
                 label_key="date",
                 label_date_format="%A %b %d",
