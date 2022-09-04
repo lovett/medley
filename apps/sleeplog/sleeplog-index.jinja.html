@@ -1,0 +1,186 @@
+{% extends "apps/sleeplog/sleeplog.jinja.html" %}
+{% import "apps/static/templates/macros.jinja.html" as macros -%}
+
+{% set datetime_format = "%-I:%M %p %A" %}
+{% set time_format = "%-I:%M %p" %}
+
+{% block stylesheets %}
+    {{ macros.asset("css/sleeplog.css") }}
+    {{ macros.asset("css/plots.css") }}
+{% endblock %}
+
+{% block scripts %}
+    {{ macros.asset("js/delete.js") }}
+{% endblock %}
+
+{% block content %}
+    <main>
+        <section class="page-actions">
+
+            {% if active_session_count == 0 %}
+                <form method="post" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="start" />
+                    <input id="uid" type="hidden" name="uid" value="0" />
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-moon"></use></svg>
+                        Sleep now
+                    </button>
+                </form>
+            {% endif %}
+            {% for session in active_sessions %}
+                <form method="post" action="{{ app_url }}">
+                    <input type="hidden" name="action" value="end" />
+                    <input id="uid" type="hidden" name="uid" value="{{ session.id }}" />
+                    <button>
+                        <svg class="icon"><use xlink:href="#icon-sun"></use></svg>
+                        Wakeup
+                    </button>
+                </form>
+            {% endfor %}
+
+            <a href="{{ add_url }}">
+                <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+                Add session
+            </a>
+        </section>
+
+        <section class="inprogress">
+            {% if active_session_count > 0 %}
+                {% for session in active_sessions %}
+                    <svg class="icon"><use xlink:href="#icon-moon"></use></svg>
+                    <p>
+                        Session in progress since {{ session.start|dateformat(datetime_format) }}
+                    </p>
+                {% endfor %}
+            {% endif %}
+        </section>
+
+        {% if history_chart %}
+        <section>
+            <h1>Sleep Hours Per Day, Past {{ days }} Days</h1>
+            {{ history_chart|safe }}
+        </section>
+        {% endif %}
+
+
+        <section>
+            {% if query %}
+                <h1>Search Results</h1>
+            {% else %}
+                <h1>Session Details</h1>
+            {% endif %}
+
+            <ul id="stats">
+                <li>
+                    <span class="primary">
+                        {{ stats.good_percent|percentage }}
+                    </span>
+
+                    <span class="secondary">good</span>
+                    –
+                    {{ stats["good_days"]|pluralize("day", "days") }}
+                </li>
+                <li>
+                    <span class="primary">
+                        {{ stats.surplus_percent|percentage }}
+                    </span>
+
+                    <span class="secondary">surplus</span>
+                    –
+                    {{ stats["days_with_surplus"]|pluralize("day", "days") }}
+                </li>
+                <li>
+                    <span class="primary">
+                        {{ stats.deficit_percent|percentage }}
+                    </span>
+
+                    <span class="secondary">deficit</span>
+                    –
+                    {{ stats["days_with_deficit"]|pluralize("day", "days") }}
+                </li>
+            </ul>
+
+            <form method="get" action="{{ app_url }}">
+                <div class="field">
+                    <input
+                        autocapitalize="none"
+                        autocomplete="off"
+                        id="q"
+                        name="q"
+                        placeholder="Search"
+                        type="search"
+                        value="{{ query }}"
+                    />
+                </div>
+            </form>
+
+            {% if entry_count == 0 %}
+                <p clas="warning">No entries found.</p>
+            {% endif %}
+
+            {% if entry_count > 0 %}
+                <p>
+                    {{ offset + 1 }}–{{ offset + entries|count }}
+                    of {{ entry_count|pluralize("match", "matches") }}
+                </p>
+                <table class="sessions">
+                    <thead>
+                        <tr>
+                            <th class="verdict"></th>
+                            <th>Date</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                            <tr>
+                                {% if not entry.surplus.startswith("0") %}
+                                    <td class="verdict surplus">
+                                        <svg class="icon"><use xlink:href="#icon-meh"></use></svg>
+                                    </td>
+                                {% elif not entry.deficit.startswith("0") %}
+                                    <td class="verdict deficit">
+                                        <svg class="icon"><use xlink:href="#icon-frown"></use></svg>
+                                    </td>
+                                {% else %}
+                                    <td class="verdict ok">
+                                        <svg class="icon ok"><use xlink:href="#icon-smile"></use></svg>
+                                    </td>
+                                {% endif %}
+                                <td nowrap>
+                                    <p>
+                                        <a href="{{ app_url }}/{{ entry.id }}/edit">
+                                            {{ entry.end|dateformat("%B %-d, %Y") }}
+                                        </a>
+                                    </p>
+                                    <p>{{ entry.end|dateformat("%A") }}</p>
+                                </td>
+                                <td class="details">
+                                    <p>{{ entry.duration }}</p>
+                                    <p>
+                                        {{ entry.start|dateformat("%-I:%M %p") }} to
+                                        {{ entry.end|dateformat("%-I:%M %p") }}
+                                    </p>
+
+                                    {% if not entry.surplus.startswith("0") %}
+                                        <p>{{ entry.surplus }} surplus</p>
+                                    {% endif %}
+
+                                    {% if not entry.deficit.startswith("0") %}
+                                        <p>{{ entry.deficit }} deficit</p>
+                                    {% endif %}
+
+                                    {% if entry.notes %}
+                                        <p>{{ entry.notes }}</p>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {{ macros.pagination(pagination_url, offset, per_page, entry_count) }}
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}

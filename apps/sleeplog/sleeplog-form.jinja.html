@@ -1,0 +1,121 @@
+{% extends "apps/sleeplog/sleeplog.jinja.html" %}
+
+{% block scripts %}
+    {{ macros.asset("js/sleeplog.js") }}
+    {{ macros.asset("js/shortcuts.js") }}
+    {{ macros.asset("js/delete.js") }}
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("new-item", "arrow-left", "delete", "x", "zap", "calendar", "clock") }}
+    <main id="collection">
+        <form id="sleeplog-form" method="post" action="{{ app_url }}">
+            <input id="uid" type="hidden" name="uid" value="{{ uid }}" />
+            <div class="field-group">
+                <div class="field">
+                    <label for="start_date">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Start Date
+                    </label>
+                    <input
+                        type="date"
+                        id="start_date"
+                        name="start_date"
+                        value="{{ start|dateformat('%Y-%m-%d') }}"
+                        required
+                    />
+                    <div class="shortcuts">
+                        <a href="#" data-field="start_date" data-shortcut="yesterday">
+                            Yesterday
+                        </a>
+                        <a href="#" data-field="start_date" data-shortcut="today">
+                            Today
+                        </a>
+
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="start_time">
+                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
+                        Start Time
+                    </label>
+                    <input
+                        type="time"
+                        id="start_time"
+                        name="start_time"
+                        value="{{ start|dateformat('%H:%M') }}"
+                        required
+                    />
+                </div>
+                <div class="field">
+                    <label for="end_date">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        End Date
+                    </label>
+                    <input
+                        type="date"
+                        id="end_date"
+                        name="end_date"
+                        {% if end %}
+                            value="{{ end|dateformat('%Y-%m-%d') }}"
+                        {% else %}
+                            value="{{ start|dateformat('%Y-%m-%d') }}"
+                        {% endif %}
+                    />
+                    <div class="shortcuts">
+                        <a href="#" data-field="start_date" data-shortcut="yesterday">
+                            Yesterday
+                        </a>
+                        <a href="#" data-field="end_date" data-shortcut="today">
+                            Today
+                        </a>
+                        <a href="#" data-field="end_date" data-shortcut="clear">
+                            Clear
+                        </a>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="end_time">
+                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
+                        End Time
+                    </label>
+                    <input
+                        type="time"
+                        id="end_time"
+                        name="end_time"
+                        {% if end %}
+                            value="{{ end|dateformat('%H:%M') }}"
+                        {% else %}
+                            value=""
+                        {% endif %}
+                    />
+                    <div class="shortcuts">
+                        <a href="#" data-field="end_time" data-shortcut="now">
+                            Now
+                        </a>
+                        <a href="#" data-field="end_time" data-shortcut="clear">
+                            Clear
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="field">
+                <label for="notes">
+                    Notes
+                </label>
+                <textarea
+                    id="notes"
+                    name="notes"
+                >{{ notes }}</textarea>
+            </div>
+
+
+
+            <div class="field">
+                <button data-default-label="Save" data-progress-label="Please wait">Save</button>
+            </div>
+        </form>
+    </main>
+{% endblock %}

@@ -1,0 +1,158 @@
+.inprogress {
+    font-size: 1em;
+    font-style: italic;
+    text-align: center;
+}
+
+
+.page-actions LI:last-of-type {
+    grid-column: auto / span 2;
+}
+
+.sleeplog circle.highlight {
+    fill: red;
+}
+
+.sleeplog polyline {
+    stroke: black;
+    fill: none;
+}
+
+.sleeplog .ideal {
+    fill: green;
+    opacity: 0.5;
+}
+
+.sessions {
+    max-width: 80vw;
+    margin: auto;
+}
+
+.sessions .verdict .icon {
+    width: 30px;
+    height: 30px;
+}
+
+.sessions .verdict {
+    border-left: 0.5em solid var(--black);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.sessions .verdict.surplus {
+    border-left-color: gold;
+    background-color: lemonchiffon;
+}
+
+.sessions .verdict.deficit {
+    border-left-color: crimson;
+    background-color: lightcoral;
+}
+
+.sessions .verdict.ok {
+    border-left-color: green;
+    background-color: palegreen;
+}
+
+#stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-column-gap: 1em;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#stats SPAN.primary {
+    color: var(--accent);
+    font-weight: bold;
+    font-size: 2em;
+}
+
+#stats SPAN.secondary {
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+
+.panels {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-column-gap: 3em;
+    grid-row-gap: 3em;
+}
+
+.panels H2 {
+    margin-bottom: .5em;
+}
+
+.panels > div:nth-of-type(2) {
+    order: -1;
+}
+
+
+.notes {
+    font-style: italic;
+}
+
+TD P {
+    margin: 0.25em;
+}
+
+.details *:last-child {
+    margin-bottom: 0;
+}
+
+#quick-actions {
+    text-align: center;
+}
+
+#quick-actions FORM {
+    display: inline-grid;
+    grid-column-gap: 1em;
+    align-items: center;
+    justify-content: center;
+    grid-template-columns: auto auto auto;
+    margin: 0 auto;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+    #stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    .inprogress {
+        font-size: 1.5em;
+    }
+
+    .page-actions LI:last-of-type {
+        grid-column: auto / auto;
+    }
+
+    #stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    #stats SPAN.primary {
+        font-size: 3em;
+    }
+
+    #stats SPAN.secondary {
+        font-size: 1.5em;
+    }
+
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+    #stats {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}

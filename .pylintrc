@@ -118,7 +118,7 @@ docstring-min-length=-1
 function-rgx=(([a-z][a-z0-9_]{2,30})|(_[a-z0-9_]*))$
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=q,u,uid,i,j,k,ex,Run,_,dt,tz,fmt
+good-names=q,u,uid,i,j,k,ex,Run,_,dt,tz,fmt,y,x,x1,x2,y1,y2
 
 # Include a hint for the correct naming format with invalid-name
 include-naming-hint=no

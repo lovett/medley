@@ -17,6 +17,7 @@ from typing_extensions import Literal
 import sched
 from plugins.applog import SearchResult
 from plugins.foodlog import SearchResult as FoodLogSearchResult
+from plugins.sleeplog import SearchResult as SleepLogSearchResult
 from plugins.scheduler import ScheduledEvent
 from resources.url import Url
 from time import struct_time
@@ -719,6 +720,19 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["plotter:sleep"],
+        datasets: Tuple[Any],
+        data_key: str,
+        label_key: str,
+        label_date_format: str = "",
+        y_legend: str = "",
+        x_legend: str = "",
+        ideal_minmax: Union[Tuple[()], Tuple[int, int]] = ()
+) -> List[str]: ...
+
+
+@overload
+def publish(
         channel: Literal["recipes:attachment:list"],
         recipe_id: int,
 ) -> List[List[Row]]: ...
@@ -993,6 +1007,69 @@ def publish(
 def publish(
         channel: Literal["server:ready"],
 ) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:find"],
+        entry_id: int,
+) -> List[Optional[Row]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:start"],
+) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:end"],
+        uid: int,
+) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:remove"],
+        entry_id: int,
+) -> List[bool]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:active"],
+        **kwargs: Any,
+) -> List[SleepLogSearchResult]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:history"],
+        days: int,
+) -> List[List[Row]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:upsert"],
+        entry_id: int,
+        **kwargs: Any,
+) -> List[int]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:search:keyword"],
+        **kwargs: Any,
+) -> List[SleepLogSearchResult]: ...
+
+
+@overload
+def publish(
+        channel: Literal["sleeplog:search:date"],
+        **kwargs: Any,
+) -> List[SleepLogSearchResult]: ...
 
 
 @overload

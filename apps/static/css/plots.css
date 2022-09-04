@@ -1,0 +1,56 @@
+.chart line {
+    stroke: #666;
+    stroke-width: 0.25;
+}
+
+.chart .legend {
+    font-size: .25em;
+    text-transform: uppercase;
+}
+
+.chart .labels text {
+    font-size: .5em;
+    text-anchor: middle;
+    transform: translateY(.2em);
+}
+
+.chart .x.labels text:first-of-type {
+    text-anchor: start;
+}
+
+.chart .x.labels text:last-of-type {
+    text-anchor: end;
+}
+
+.chart .y.labels text {
+    text-anchor: end;
+    alignment-baseline: middle;
+}
+
+.chart .y.legend {
+    text-anchor: middle;
+}
+
+.chart .y.grid {
+    stroke: #ddd;
+}
+
+/* Small devices */
+@media (min-width: 576px) {
+}
+
+/* Medium devices */
+@media (min-width: 768px) {
+}
+
+/* Large devices */
+@media (min-width: 992px) {
+    .chart .labels text {
+        font-size: .3em;
+        transform: translateY(0);
+    }
+}
+
+/* Extra large devices */
+@media (min-width: 1200px) {
+}

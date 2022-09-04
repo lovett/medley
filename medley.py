@@ -47,9 +47,11 @@ import plugins.memorize
 import plugins.metrics
 import plugins.mixins
 import plugins.notifier
+import plugins.plotter
 import plugins.recipes
 import plugins.registry
 import plugins.scheduler
+import plugins.sleeplog
 import plugins.speak
 import plugins.urlfetch
 import plugins.weather
@@ -252,8 +254,10 @@ def setup() -> None:
     plugins.memorize.Plugin(cherrypy.engine).subscribe()
     plugins.metrics.Plugin(cherrypy.engine).subscribe()
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
+    plugins.plotter.Plugin(cherrypy.engine).subscribe()
     plugins.recipes.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
+    plugins.sleeplog.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()
     plugins.urlfetch.Plugin(cherrypy.engine).subscribe()
     plugins.weather.Plugin(cherrypy.engine).subscribe()
