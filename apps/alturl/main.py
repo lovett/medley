@@ -52,6 +52,9 @@ class Controller:
 
         url = Url("https://" + "/".join(args))
 
+        if "." not in url.domain:
+            raise cherrypy.HTTPError(400)
+
         site_specific_template = ""
         if url.domain.endswith("reddit.com"):
             site_specific_template, view_vars = apps.alturl.reddit.view(
