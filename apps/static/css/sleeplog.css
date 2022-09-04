@@ -4,6 +4,9 @@
     text-align: center;
 }
 
+.page-actions BUTTON.wakeup {
+    background-color: var(--accent);
+}
 
 .page-actions LI:last-of-type {
     grid-column: auto / span 2;
@@ -23,9 +26,8 @@
     opacity: 0.5;
 }
 
-.sessions {
-    max-width: 80vw;
-    margin: auto;
+.sessions td {
+    white-space: nowrap;
 }
 
 .sessions .verdict .icon {
@@ -34,23 +36,20 @@
 }
 
 .sessions .verdict {
-    border-left: 0.5em solid var(--black);
+    width: 5em;
     text-align: center;
     vertical-align: middle;
 }
 
-.sessions .verdict.surplus {
-    border-left-color: gold;
+td.neutral {
     background-color: lemonchiffon;
 }
 
-.sessions .verdict.deficit {
-    border-left-color: crimson;
+td.negative {
     background-color: lightcoral;
 }
 
-.sessions .verdict.ok {
-    border-left-color: green;
+td.positive {
     background-color: palegreen;
 }
 
@@ -147,7 +146,6 @@ TD P {
     #stats SPAN.secondary {
         font-size: 1.5em;
     }
-
 }
 
 /* Extra large devices */

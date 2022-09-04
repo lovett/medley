@@ -3,15 +3,9 @@
     stroke-width: 0.25;
 }
 
-.chart .legend {
-    font-size: .25em;
-    text-transform: uppercase;
-}
-
 .chart .labels text {
     font-size: .5em;
     text-anchor: middle;
-    transform: translateY(.2em);
 }
 
 .chart .x.labels text:first-of-type {
@@ -46,8 +40,7 @@
 /* Large devices */
 @media (min-width: 992px) {
     .chart .labels text {
-        font-size: .3em;
-        transform: translateY(0);
+        font-size: .25em;
     }
 }
 

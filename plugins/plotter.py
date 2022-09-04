@@ -29,7 +29,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                    data_key: str,
                    label_key: str,
                    label_date_format: str = "",
-                   ideal_minmax: Union[Tuple[()], Tuple[int, int]] = ()
+                   ideal_duration: Union[Tuple[()], Tuple[int, int]] = ()
                    ) -> str:
         """A graph with datasets drawn as lines."""
         circle_radius = 1.5
@@ -71,7 +71,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 y = max_y + x_tick_height + x_label_offset
                 add_label = i == 0
                 add_label = add_label or i == x_tick_count - 1
-                add_label = add_label or i == (x_tick_count - 1) / 2
+                add_label = add_label or i == x_tick_count / 2
 
                 if add_label:
                     x_labels += f"""<text x="{x}" y="{y}">{label}</text>"""
@@ -105,7 +105,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                                  y2="{y}" />"""
 
         polylines = ""
-        circles = ""
         for dataset in datasets:
             points = []
             for i in range(x_tick_count):
@@ -115,22 +114,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 y = max_y - (offset_from_min / data_span) * (max_y - min_y)
                 points.append(f"{x},{y}")
 
-                if ideal_minmax and item[data_key] < ideal_minmax[0]:
-                    circles += f"""<circle class="highlight"
-                                           cx="{x}"
-                                           cy="{y}"
-                                           r="{circle_radius}" />"""
-
             polylines += f"""<polyline class="dataset"
                                      points="{" ".join(points)}"
                             />"""
 
         ideal_rect = ""
-        if ideal_minmax:
+        if ideal_duration:
             x = min_x
             width = max_x - min_x
-            lower_offset = abs(ideal_minmax[0] - data_min)
-            upper_offset = abs(ideal_minmax[1] - data_min)
+            lower_offset = abs(ideal_duration[0] - data_min)
+            upper_offset = abs(ideal_duration[1] - data_min)
             y1 = max_y - (lower_offset / data_span) * (max_y - min_y)
             y2 = max_y - (upper_offset / data_span) * (max_y - min_y)
             height = abs(y2 - y1)
@@ -171,8 +164,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             {ideal_rect}
 
             {polylines}
-
-            {circles}
 
             <g class="x labels">{x_labels}</g>
             <g class="y labels">{y_labels}</g>

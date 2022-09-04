@@ -51,8 +51,8 @@ class PostParams(BaseModel):
     """Parameters for POST requests."""
     end_date: Optional[datetime.date]
     end_time: Optional[datetime.time]
-    start_date: datetime.date
-    start_time: datetime.time
+    start_date: Optional[datetime.date]
+    start_time: Optional[datetime.time]
     notes: Optional[str]
     uid: int = Field(0, gt=-1)
     action: Action = Action.NONE
@@ -213,11 +213,17 @@ class Controller:
             key_slice=1
         ).pop()
 
-        config["ideal_minmax"] = [
+        config["ideal_duration"] = [
             int(x)
             for x in
-            config.get("ideal", "7,9").split(",")
+            config.get("ideal:duration_minmax", "7,9").split(",")
         ]
+
+        config["ideal_start"] = cherrypy.engine.publish(
+            "clock:from_format",
+            config.get("ideal:start", "11:00 pm"),
+            "%I:%M %p"
+        ).pop()
 
         return config
 
@@ -228,40 +234,63 @@ class Controller:
 
         config = self.get_config()
 
-        active_sessions: List[sqlite3.Row] = []
-        active_session_count = 0
+        active_session = None
         if params.q:
             (entries, entry_count) = cherrypy.engine.publish(
                 "sleeplog:search:keyword",
                 query=params.q,
                 offset=params.offset,
                 limit=days,
-                ideal_minmax=config["ideal_minmax"],
+                ideal_duration=config["ideal_duration"],
             ).pop()
 
         if not params.q:
-            (active_sessions, active_session_count) = cherrypy.engine.publish(
+            active_session = cherrypy.engine.publish(
                 "sleeplog:active"
             ).pop()
 
             (entries, entry_count) = cherrypy.engine.publish(
                 "sleeplog:search:date",
-                ideal_minmax=config["ideal_minmax"]
+                ideal_duration=config["ideal_duration"]
             ).pop()
 
+        start_verdict: DefaultDict[datetime, int] = defaultdict(int)
+        duration_verdict: DefaultDict[datetime, int] = defaultdict(int)
         stats: DefaultDict[str, int] = defaultdict(int)
         for entry in entries:
             stats["total_days"] += 1
+
+            local_start = cherrypy.engine.publish(
+                "clock:local",
+                entry["start"]
+            ).pop()
+
+            ideal_start = config["ideal_start"].replace(
+                year=local_start.year,
+                month=local_start.month,
+                day=local_start.day,
+                tzinfo=local_start.tzinfo
+            )
+
+            if config["ideal_start"].hour > 12 and local_start.hour < 12:
+                ideal_start -= datetime.timedelta(days=1)
+
+            if ideal_start > local_start:
+                stats["good_start"] += 1
+                start_verdict[entry["start"]] = 1
+
+            if (local_start - ideal_start) < datetime.timedelta(minutes=5):
+                stats["good_start"] += 1
+                start_verdict[entry["start"]] = 1
+
             if not entry["surplus"].startswith("0"):
                 stats["days_with_surplus"] += 1
-            elif not entry["deficit"].startswith("0"):
-                stats["days_with_deficit"] += 1
-            else:
+                duration_verdict[entry["start"]] = 1
+            elif entry["deficit"].startswith("0"):
                 stats["good_days"] += 1
-
-        stats["deficit_percent"] = round(
-            stats["days_with_deficit"] / stats["total_days"] * 100
-        )
+                duration_verdict[entry["start"]] = 0
+            else:
+                duration_verdict[entry["start"]] = -1
 
         stats["surplus_percent"] = round(
             stats["days_with_surplus"] / stats["total_days"] * 100
@@ -269,6 +298,10 @@ class Controller:
 
         stats["good_percent"] = round(
             stats["good_days"] / stats["total_days"] * 100
+        )
+
+        stats["good_start_percent"] = round(
+            stats["good_start"] / stats["total_days"] * 100
         )
 
         history = []
@@ -285,7 +318,7 @@ class Controller:
                 data_key="hours",
                 label_key="date",
                 label_date_format="%A %b %d",
-                ideal_minmax=config["ideal_minmax"],
+                ideal_duration=config["ideal_duration"],
             ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -309,12 +342,13 @@ class Controller:
             offset=params.offset,
             per_page=days,
             add_url=add_url,
-            active_sessions=active_sessions,
-            active_session_count=active_session_count,
+            active_session=active_session,
             history=history,
             history_chart=history_chart,
             query=params.q,
-            stats=stats
+            stats=stats,
+            duration_verdict=duration_verdict,
+            start_verdict=start_verdict,
         ).pop()
 
     @staticmethod

@@ -86,7 +86,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("sleeplog:start", self.start_session)
         self.bus.subscribe("sleeplog:end", self.end_session)
         self.bus.subscribe("sleeplog:remove", self.remove)
-        self.bus.subscribe("sleeplog:active", self.active_sessions)
+        self.bus.subscribe("sleeplog:active", self.active_session)
         self.bus.subscribe("sleeplog:history", self.history)
         self.bus.subscribe("sleeplog:upsert", self.upsert)
         self.bus.subscribe("sleeplog:search:keyword", self.search_by_keyword)
@@ -112,18 +112,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (entry_id,)
         )
 
-    def active_sessions(self) -> SearchResult:
-        """Sleep records with a start date but not an end date."""
+    def active_session(self) -> Optional[sqlite3.Row]:
+        """The first sleep record with a start date but not an end date."""
 
         sql = """SELECT id, start_utc as 'start [local_datetime]', notes
         FROM sleeplog
         WHERE end_utc IS NULL
-        ORDER BY start_utc DESC"""
+        LIMIT 1"""
 
-        return (
-            self._select(sql),
-            self._count(sql)
-        )
+        return self._selectOne(sql)
 
     def search_by_date(self, **kwargs: Any) -> SearchResult:
         """Sessions by reverse-chronological date."""
@@ -133,7 +130,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         offset = int(kwargs.get("offset", 0))
         (ideal_min, ideal_max) = [
             val * 3600
-            for val in kwargs.get("ideal_minmax", [])
+            for val in kwargs.get("ideal_duration", [])
         ]
 
         ideal_sql = ""
@@ -171,7 +168,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         query = kwargs.get("query", "")
         (ideal_min, ideal_max) = [
             val * 3600
-            for val in kwargs.get("ideal_minmax", [])
+            for val in kwargs.get("ideal_duration", [])
         ]
 
         ideal_sql = ""
@@ -186,6 +183,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         sql = f"""SELECT s.id, s.start_utc as 'start [local_datetime]',
         end_utc as 'end [local_datetime]',
+        duration_seconds AS 'duration [duration]',
         s.notes {ideal_sql}
         FROM sleeplog AS s, sleeplog_fts
         WHERE s.id=sleeplog_fts.rowid

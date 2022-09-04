@@ -725,7 +725,7 @@ def publish(
         data_key: str,
         label_key: str,
         label_date_format: str = "",
-        ideal_minmax: Union[Tuple[()], Tuple[int, int]] = ()
+        ideal_duration: Union[Tuple[()], Tuple[int, int]] = ()
 ) -> List[str]: ...
 
 

@@ -17,7 +17,7 @@
     <main>
         <section class="page-actions">
 
-            {% if active_session_count == 0 %}
+            {% if not active_session %}
                 <form method="post" action="{{ app_url }}">
                     <input type="hidden" name="action" value="start" />
                     <input id="uid" type="hidden" name="uid" value="0" />
@@ -27,16 +27,16 @@
                     </button>
                 </form>
             {% endif %}
-            {% for session in active_sessions %}
+            {% if active_session %}
                 <form method="post" action="{{ app_url }}">
                     <input type="hidden" name="action" value="end" />
-                    <input id="uid" type="hidden" name="uid" value="{{ session.id }}" />
-                    <button>
+                    <input id="uid" type="hidden" name="uid" value="{{ active_session.id }}" />
+                    <button class="wakeup">
                         <svg class="icon"><use xlink:href="#icon-sun"></use></svg>
                         Wakeup
                     </button>
                 </form>
-            {% endfor %}
+            {% endif %}
 
             <a href="{{ add_url }}">
                 <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
@@ -45,38 +45,43 @@
         </section>
 
         <section class="inprogress">
-            {% if active_session_count > 0 %}
-                {% for session in active_sessions %}
-                    <svg class="icon"><use xlink:href="#icon-moon"></use></svg>
-                    <p>
-                        Session in progress since {{ session.start|dateformat(datetime_format) }}
-                    </p>
-                {% endfor %}
+            {% if active_session %}
+                <svg class="icon"><use xlink:href="#icon-moon"></use></svg>
+                <p>
+                    Session in progress since {{ active_session.start|dateformat(datetime_format) }}
+                </p>
             {% endif %}
         </section>
 
         {% if history_chart %}
-        <section>
-            <h1>Sleep Hours Per Day, Past {{ days }} Days</h1>
-            {{ history_chart|safe }}
-        </section>
+            <section>
+                <h1>Sleep Hours Per Day</h1>
+                {{ history_chart|safe }}
+            </section>
         {% endif %}
 
 
         <section>
             {% if query %}
                 <h1>Search Results</h1>
-            {% else %}
-                <h1>Session Details</h1>
             {% endif %}
 
             <ul id="stats">
                 <li>
                     <span class="primary">
-                        {{ stats.good_percent|percentage }}
+                        {{ stats.good_start_percent|percentage }}
                     </span>
 
-                    <span class="secondary">good</span>
+                    <span class="secondary">good start</span>
+                    –
+                    {{ stats["good_start"]|pluralize("day", "days") }}
+                </li>
+                <li>
+                    <span class="primary">
+                        {{ stats.good_start_percent|percentage }}
+                    </span>
+
+                    <span class="secondary">good duration</span>
                     –
                     {{ stats["good_days"]|pluralize("day", "days") }}
                 </li>
@@ -85,18 +90,9 @@
                         {{ stats.surplus_percent|percentage }}
                     </span>
 
-                    <span class="secondary">surplus</span>
+                    <span class="secondary">surplus days</span>
                     –
                     {{ stats["days_with_surplus"]|pluralize("day", "days") }}
-                </li>
-                <li>
-                    <span class="primary">
-                        {{ stats.deficit_percent|percentage }}
-                    </span>
-
-                    <span class="secondary">deficit</span>
-                    –
-                    {{ stats["days_with_deficit"]|pluralize("day", "days") }}
                 </li>
             </ul>
 
@@ -123,62 +119,84 @@
                     {{ offset + 1 }}–{{ offset + entries|count }}
                     of {{ entry_count|pluralize("match", "matches") }}
                 </p>
-                <table class="sessions">
-                    <thead>
-                        <tr>
-                            <th class="verdict"></th>
-                            <th>Date</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in entries %}
+
+                <div class="table-sleeve">
+                    <table class="sessions">
+                        <thead>
                             <tr>
-                                {% if not entry.surplus.startswith("0") %}
-                                    <td class="verdict surplus">
-                                        <svg class="icon"><use xlink:href="#icon-meh"></use></svg>
-                                    </td>
-                                {% elif not entry.deficit.startswith("0") %}
-                                    <td class="verdict deficit">
-                                        <svg class="icon"><use xlink:href="#icon-frown"></use></svg>
-                                    </td>
-                                {% else %}
-                                    <td class="verdict ok">
-                                        <svg class="icon ok"><use xlink:href="#icon-smile"></use></svg>
-                                    </td>
-                                {% endif %}
-                                <td nowrap>
-                                    <p>
-                                        <a href="{{ app_url }}/{{ entry.id }}/edit">
-                                            {{ entry.end|dateformat("%B %-d, %Y") }}
-                                        </a>
-                                    </p>
-                                    <p>{{ entry.end|dateformat("%A") }}</p>
-                                </td>
-                                <td class="details">
-                                    <p>{{ entry.duration }}</p>
-                                    <p>
-                                        {{ entry.start|dateformat("%-I:%M %p") }} to
-                                        {{ entry.end|dateformat("%-I:%M %p") }}
-                                    </p>
-
-                                    {% if not entry.surplus.startswith("0") %}
-                                        <p>{{ entry.surplus }} surplus</p>
-                                    {% endif %}
-
-                                    {% if not entry.deficit.startswith("0") %}
-                                        <p>{{ entry.deficit }} deficit</p>
-                                    {% endif %}
-
-                                    {% if entry.notes %}
-                                        <p>{{ entry.notes }}</p>
-                                    {% endif %}
-
-                                </td>
+                                <th>Start</th>
+                                <th>Duration</th>
+                                <th>Date</th>
+                                <th>Details</th>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {% for entry in entries %}
+                                <tr>
+                                    {% if start_verdict[entry.start] == 0 %}
+                                        <td class="verdict negative">
+                                            <svg class="icon"><use xlink:href="#icon-frown"></use></svg>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if start_verdict[entry.start] == 1 %}
+                                        <td class="verdict positive">
+                                            <svg class="icon ok"><use xlink:href="#icon-smile"></use></svg>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if duration_verdict[entry.start] == 1 %}
+                                        <td class="verdict neutral">
+                                            <svg class="icon"><use xlink:href="#icon-meh"></use></svg>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if duration_verdict[entry.start] == -1 %}
+                                        <td class="verdict negative">
+                                            <svg class="icon"><use xlink:href="#icon-frown"></use></svg>
+                                        </td>
+                                    {% endif %}
+
+                                    {% if duration_verdict[entry.start] == 0 %}
+                                        <td class="verdict positive">
+                                            <svg class="icon ok"><use xlink:href="#icon-smile"></use></svg>
+                                        </td>
+                                    {% endif %}
+
+                                    <td nowrap>
+                                        <p>
+                                            <a href="{{ app_url }}/{{ entry.id }}/edit">
+                                                {{ entry.end|dateformat("%B %-d, %Y") }}
+                                            </a>
+                                        </p>
+                                        <p>{{ entry.end|dateformat("%A") }}</p>
+                                    </td>
+                                    <td class="details">
+                                        <p>{{ entry.duration }}</p>
+                                        <p>
+                                            {{ entry.start|dateformat("%-I:%M %p") }} to
+                                            {{ entry.end|dateformat("%-I:%M %p") }}
+                                        </p>
+
+                                        {% if not entry.surplus.startswith("0") %}
+                                            <p>{{ entry.surplus }} surplus</p>
+                                        {% endif %}
+
+                                        {% if not entry.deficit.startswith("0") %}
+                                            <p>{{ entry.deficit }} deficit</p>
+                                        {% endif %}
+
+                                        {% if entry.notes %}
+                                            <p>{{ entry.notes }}</p>
+                                        {% endif %}
+
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
                 {{ macros.pagination(pagination_url, offset, per_page, entry_count) }}
             {% endif %}
         </section>
