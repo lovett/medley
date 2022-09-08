@@ -317,7 +317,7 @@ class Controller:
                 (history,),
                 data_key="hours",
                 label_key="date",
-                label_date_format="%A %b %d",
+                label_date_format="%b %-d",
                 ideal_duration=config["ideal_duration"],
             ).pop()
 

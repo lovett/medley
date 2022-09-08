@@ -149,7 +149,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         notes {ideal_sql}
         FROM sleeplog
         WHERE end_utc IS NOT NULL
-        AND end_utc >= date('now', '-{days} days')
         ORDER BY end_utc DESC
         LIMIT ? OFFSET ?"""
 

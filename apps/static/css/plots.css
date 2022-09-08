@@ -12,10 +12,6 @@
     text-anchor: start;
 }
 
-.chart .x.labels text:last-of-type {
-    text-anchor: end;
-}
-
 .chart .y.labels text {
     text-anchor: end;
     alignment-baseline: middle;
@@ -41,6 +37,10 @@
 @media (min-width: 992px) {
     .chart .labels text {
         font-size: .25em;
+    }
+
+    .chart .x.labels text {
+        transform: translateY(-4px);
     }
 }
 

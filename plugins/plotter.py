@@ -41,7 +41,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         min_y = 5
         max_y = 110.0
         x_label_height = 10
-        x_label_offset = 8
+        x_label_offset = 10
         y_label_offset = 4
         x_tick_height = 2
         x_tick_count = len(datasets[0])
@@ -69,11 +69,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 label = label.strftime(label_date_format)
                 x = min_x + (i * x_step)
                 y = max_y + x_tick_height + x_label_offset
-                add_label = i == 0
-                add_label = add_label or i == x_tick_count - 1
-                add_label = add_label or i == x_tick_count / 2
 
-                if add_label:
+                if i % 3 == 0:
                     x_labels += f"""<text x="{x}" y="{y}">{label}</text>"""
 
         y_ticks = ""
@@ -88,6 +85,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         y_labels = ""
         for i in range(y_tick_count + 1):
+            if y_tick_count > 5 and i % 2 > 0:
+                continue
+
             text = round(data_min + (data_span / y_tick_count) * i)
             x = min_x - y_label_offset
             y = max_y - (i * y_step)
