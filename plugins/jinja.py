@@ -30,8 +30,6 @@ from resources.url import Url
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for rendering Jinja2 templates."""
 
-    env: jinja2.Environment
-
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
 
         self.env = jinja2.Environment(

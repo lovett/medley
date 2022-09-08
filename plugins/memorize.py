@@ -10,11 +10,9 @@ import cherrypy
 class Plugin(cherrypy.process.plugins.SimplePlugin):
     """A CherryPy plugin for managing an in-memory cache."""
 
-    cache: Dict[str, Any]
-
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
-        self.cache = {}
+        self.cache: Dict[str, Any] = {}
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.

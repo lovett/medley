@@ -13,9 +13,6 @@ class Plugin(cherrypy.process.plugins.Monitor):
     Like the scheduler plugin, this is a subclass of Monitor so that
     it can operate as a background task."""
 
-    triggers: Dict[str, str]
-    selector: DefaultSelector
-
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.Monitor.__init__(
             self,
@@ -24,6 +21,8 @@ class Plugin(cherrypy.process.plugins.Monitor):
             0.5,
             "MedleyInput"
         )
+
+        self.triggers: Dict[str, str] = {}
 
         # Listen to events from any keyboard, because a single
         # physical device may show up more than once.

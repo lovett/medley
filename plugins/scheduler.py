@@ -13,8 +13,6 @@ class ScheduledEvent():
 
     """
 
-    event: sched.Event
-
     def __init__(self, event: sched.Event) -> None:
         self.event = event
 
