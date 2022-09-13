@@ -124,7 +124,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "/weather"
         ).pop()
 
-        for event, alert in forecast["alerts"].items():
+        for event, alert in forecast.get("alerts", {}).items():
             if alert["hash"] in cached_hashes:
                 continue
 
@@ -202,11 +202,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "clock:scheduled",
             schedules
         ).pop()
-
-    @staticmethod
-    def forecast_unavailable() -> Forecast:
-        """Provide an object that tells the caller the forecast is
-        unavailable."""
 
     @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:
