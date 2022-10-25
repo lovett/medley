@@ -36,6 +36,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         data_max = ceil(max([x[data_key] for x in datasets[0]]))
         data_min = floor(min([x[data_key] for x in datasets[0]]))
         data_span = data_max - data_min
+
+        if data_span == 0:
+            return ""
+
         min_x = 12.0
         max_x = 300.0
         min_y = 5

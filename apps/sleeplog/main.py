@@ -4,10 +4,8 @@ from collections import defaultdict
 import datetime
 import json
 from enum import Enum
-import sqlite3
 from typing import Any
 from typing import Dict
-from typing import List
 from typing import DefaultDict
 from typing import Optional
 import cherrypy
