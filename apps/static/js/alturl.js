@@ -59,6 +59,15 @@ MEDLEY.alturl = (function () {
 
     }
 
+    function jumpToAnchor(e) {
+        if (e.target.classList.contains('jump')) {
+            e.preventDefault();
+            document.querySelector(e.target.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+    }
+
     return {
         init: function () {
             const saveLink = document.getElementById('add-record');
@@ -67,6 +76,8 @@ MEDLEY.alturl = (function () {
             }
 
             document.addEventListener('click', filterStories);
+
+            document.addEventListener('click', jumpToAnchor);
         }
     }
 })();
