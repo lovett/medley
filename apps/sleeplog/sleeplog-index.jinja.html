@@ -69,21 +69,21 @@
             <ul id="stats">
                 <li>
                     <span class="primary">
-                        {{ stats.good_start_percent|percentage }}
-                    </span>
-
-                    <span class="secondary">good start</span>
-                    –
-                    {{ stats["good_start"]|pluralize("day", "days") }}
-                </li>
-                <li>
-                    <span class="primary">
                         {{ stats.good_percent|percentage }}
                     </span>
 
                     <span class="secondary">good duration</span>
                     –
                     {{ stats["good_days"]|pluralize("day", "days") }}
+                </li>
+                <li>
+                    <span class="primary">
+                        {{ stats.good_start_percent|percentage }}
+                    </span>
+
+                    <span class="secondary">good start</span>
+                    –
+                    {{ stats["good_start"]|pluralize("day", "days") }}
                 </li>
                 <li>
                     <span class="primary">
