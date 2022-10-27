@@ -11,13 +11,13 @@
         <p id="redirection-status">Redirect in progress.</p>
 
         <script defer>
-            const destination = window.location.search.replace(/^\?u=/, '') + window.location.hash;
+            const destination = window.location.search.replace(/^\?u=/, '');
             const status = document.getElementById('redirection-status');
 
             if (destination.startsWith('http') === false) {
                 status.innerHTML = 'Cannot redirect because a URL was not provided.';
             } else {
-                window.location.replace(destination);
+                window.location.replace(decodeURIComponent(destination) + window.location.hash);
             }
         </script>
     </main>
