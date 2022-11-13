@@ -19,6 +19,8 @@
 .sleeplog polyline {
     stroke: black;
     fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .sleeplog .ideal {
