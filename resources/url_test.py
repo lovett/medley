@@ -34,3 +34,10 @@ class TestUrlResource(unittest.TestCase):
         for pair in candidates:
             url = Url(pair[0])
             self.assertEqual(url.base_address, pair[1])
+
+    def test_path_case_preservation(self) -> None:
+        """Paths are allowed to be case-sensitive."""
+
+        address = "http://example.com/ThisIsMyPath"
+        url = Url(address)
+        self.assertEqual(url.address, address)

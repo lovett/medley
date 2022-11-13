@@ -25,7 +25,7 @@ class Url():
     etag_key: str = field(init=False, default="")
 
     def __post_init__(self) -> None:
-        self.address = self.address.lower().strip()
+        self.address = self.address.strip()
 
         if self.query:
             nonempty_query = {
