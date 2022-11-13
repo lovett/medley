@@ -199,7 +199,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Total duration by day for the past n days."""
 
         sql = """WITH RECURSIVE calendar(days_ago, dt) AS
-        (SELECT 0, date('now')
+        (SELECT 1, date('now', '-1 day')
         UNION ALL SELECT days_ago+1, date(dt, '-1 day')
         FROM calendar LIMIT ?)
         SELECT days_ago, dt as 'date [date]',
