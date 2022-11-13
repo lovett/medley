@@ -26,11 +26,7 @@ MEDLEY.sleeplog = (function () {
 
         if (response.ok) {
             response.json().then((payload) => {
-                history.replaceState(payload, '', `/sleeplog/${payload.uid}/edit`);
-                MEDLEY.setSuccessMessage(`Entry #${payload.uid} ${payload.action}.`);
-                document.getElementById('uid').setAttribute('value', payload.uid);
-                document.getElementById('add-record').removeAttribute('hidden');
-
+                window.location.href = payload.redirect;
             });
         } else {
             MEDLEY.setErrorMessage('The entry could not be saved.');

@@ -182,22 +182,21 @@ class Controller:
             notes=params.notes
         ).pop()
 
-        if cherrypy.request.wants == "json" and params.uid > 0:
-            return json.dumps({
-                "uid": upsert_uid,
-                "action": "updated"
-            }).encode()
-
-        if cherrypy.request.wants == "json" and params.uid == 0:
-            return json.dumps({
-                "uid": upsert_uid,
-                "action": "saved"
-            }).encode()
-
         redirect_url = cherrypy.engine.publish(
             "app_url",
             str(upsert_uid)
-        ).pop()
+        ).pop() + "#history"
+
+        if cherrypy.request.wants == "json":
+            action = "saved"
+            if params.uid > 0:
+                action = "updated"
+
+            return json.dumps({
+                "uid": upsert_uid,
+                "action": action,
+                "redirect": redirect_url
+            }).encode()
 
         raise cherrypy.HTTPRedirect(redirect_url)
 
