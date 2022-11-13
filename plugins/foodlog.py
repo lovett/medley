@@ -51,7 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         END;
 
         CREATE TRIGGER IF NOT EXISTS foodlog_after_update
-        AFTER UPDATE OF foods_eated ON foodlog
+        AFTER UPDATE OF foods_eaten ON foodlog
         BEGIN
         INSERT INTO foodlog_fts (foodlog_fts, rowid, foods_eaten)
             VALUES ('delete', old.rowid, old.foods_eaten);
