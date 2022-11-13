@@ -66,6 +66,7 @@
                 <h1>Search Results</h1>
             {% endif %}
 
+            {% if stats.total_days > 0 %}
             <ul id="stats">
                 <li>
                     <span class="primary">
@@ -95,6 +96,7 @@
                     {{ stats["days_with_surplus"]|pluralize("day", "days") }}
                 </li>
             </ul>
+            {% endif %}
         </section>
         <section>
             <form method="get" action="{{ app_url }}">

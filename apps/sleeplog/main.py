@@ -286,17 +286,18 @@ class Controller:
             else:
                 duration_verdict[entry["start"]] = -1
 
-        stats["surplus_percent"] = round(
-            stats["days_with_surplus"] / stats["total_days"] * 100
-        )
+        if stats["total_days"] > 0:
+            stats["surplus_percent"] = round(
+                stats["days_with_surplus"] / stats["total_days"] * 100
+            )
 
-        stats["good_percent"] = round(
-            stats["good_days"] / stats["total_days"] * 100
-        )
+            stats["good_percent"] = round(
+                stats["good_days"] / stats["total_days"] * 100
+            )
 
-        stats["good_start_percent"] = round(
-            stats["good_start"] / stats["total_days"] * 100
-        )
+            stats["good_start_percent"] = round(
+                stats["good_start"] / stats["total_days"] * 100
+            )
 
         history = []
         history_chart = ""
