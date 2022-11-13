@@ -277,10 +277,6 @@ class Controller:
                 stats["good_start"] += 1
                 start_verdict[entry["start"]] = 1
 
-            if (local_start - ideal_start) < datetime.timedelta(minutes=5):
-                stats["good_start"] += 1
-                start_verdict[entry["start"]] = 1
-
             if not entry["surplus"].startswith("0"):
                 stats["days_with_surplus"] += 1
                 duration_verdict[entry["start"]] = 1
