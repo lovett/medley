@@ -125,7 +125,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search_by_date(self, **kwargs: Any) -> SearchResult:
         """Sessions by reverse-chronological date."""
 
-        days = int(kwargs.get("days", 14))
         limit = int(kwargs.get("limit", 20))
         offset = int(kwargs.get("offset", 0))
         (ideal_min, ideal_max) = [

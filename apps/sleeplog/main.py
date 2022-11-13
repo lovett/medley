@@ -1,7 +1,7 @@
 """Track sleep"""
 
 from collections import defaultdict
-import datetime
+from datetime import datetime, timedelta, date, time
 import json
 from enum import Enum
 from typing import Any
@@ -47,10 +47,10 @@ class GetParams(BaseModel):
 
 class PostParams(BaseModel):
     """Parameters for POST requests."""
-    end_date: Optional[datetime.date]
-    end_time: Optional[datetime.time]
-    start_date: Optional[datetime.date]
-    start_time: Optional[datetime.time]
+    end_date: Optional[date]
+    end_time: Optional[time]
+    start_date: Optional[date]
+    start_time: Optional[time]
     notes: Optional[str]
     uid: int = Field(0, gt=-1)
     action: Action = Action.NONE
@@ -152,7 +152,7 @@ class Controller:
             )
             raise cherrypy.HTTPRedirect(app_url)
 
-        start = datetime.datetime.combine(
+        start = datetime.combine(
             params.start_date,
             params.start_time
         )
@@ -164,7 +164,7 @@ class Controller:
 
         end_utc = None
         if params.end_date and params.end_time:
-            end = datetime.datetime.combine(
+            end = datetime.combine(
                 params.end_date,
                 params.end_time
             )
@@ -249,6 +249,7 @@ class Controller:
 
             (entries, entry_count) = cherrypy.engine.publish(
                 "sleeplog:search:date",
+                offset=params.offset,
                 ideal_duration=config["ideal_duration"]
             ).pop()
 
@@ -271,7 +272,7 @@ class Controller:
             )
 
             if config["ideal_start"].hour > 12 and local_start.hour < 12:
-                ideal_start -= datetime.timedelta(days=1)
+                ideal_start -= timedelta(days=1)
 
             if ideal_start > local_start:
                 stats["good_start"] += 1
