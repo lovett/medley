@@ -1,0 +1,47 @@
+.activity-chart {
+    margin: auto;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: repeat(auto-fit, 1fr);
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 0.5rem;
+    grid-auto-flow: column;
+    font-size: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.activity-chart > DIV, .activity-chart A {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    background-color: steelblue;
+    border-radius: 3px;
+    border: 1px solid #e5e5e5;
+}
+
+.activity-chart .column-heading {
+    background-color: inherit;
+    border: 0;
+    white-space: nowrap;
+    box-shadow: none;
+}
+
+.activity-chart .row-heading {
+    background-color: transparent;
+    text-align: right;
+    border-radius: 0;
+    width: auto;
+    border: 0;
+}
+
+.activity-chart > .tally0 {
+    background-color: aliceblue;
+}
+
+.activity-chart > .tally1 {
+    background-color: powderblue;
+}
+
+.activity-chart > .tally2 {
+    background: deepskyblue;
+}

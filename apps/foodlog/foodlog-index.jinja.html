@@ -1,5 +1,9 @@
 {% extends "apps/foodlog/foodlog.jinja.html" %}
 
+{% block stylesheets %}
+    {{ macros.asset("css/activity.css") }}
+{% endblock %}
+
 {% block content %}
     <main>
         <header id="app-nav">
@@ -22,6 +26,35 @@
                 </div>
             </form>
         </header>
+
+        {% if activity %}
+            <section class="table-sleeve">
+                <div class="activity-chart">
+                    <div class="column-heading"></div>
+                    <div class="row-heading">Sun</div>
+                    <div class="row-heading">Mon</div>
+                    <div class="row-heading">Tue</div>
+                    <div class="row-heading">Wed</div>
+                    <div class="row-heading">Thu</div>
+                    <div class="row-heading">Fri</div>
+                    <div class="row-heading">Sat</div>
+
+                    {% for record in activity %}
+                        {% if loop.first or loop.index0 % 21 == 0 %}
+                            <div class="column-heading">{{ record['date']|dateformat('%b') }}</div>
+                        {% elif loop.index0 % 7 == 0 %}
+                            <div class="column-heading"></div>
+                        {% endif %}
+
+                        {% if record['tally'] == 0 %}
+                            <div class="tally0"></div>
+                        {% else  %}
+                            <a href="#" title="{{ record['tally'] }}x on {{ record['date']|dateformat('%b %-d, %Y') }}" class="{{ 'tally' ~ record['tally']}}"></a>
+                        {% endif %}
+
+                    {% endfor %}
+            </section>
+        {% endif %}
 
         <section class="table-sleeve">
             {% if entry_count == 0 %}

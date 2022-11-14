@@ -231,6 +231,8 @@ class Controller:
     def search(params: GetParams) -> bytes:
         """Display entries matching a search."""
 
+        activity = None
+
         if re.fullmatch(r"\d{4}-\w{2}-\d{2}", params.q):
             search_term = cherrypy.engine.publish(
                 "clock:from_format",
@@ -250,6 +252,11 @@ class Controller:
                 query=params.q,
                 offset=params.offset,
                 limit=params.per_page
+            ).pop()
+
+            activity = cherrypy.engine.publish(
+                "foodlog:activity",
+                query=params.q,
             ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -273,4 +280,5 @@ class Controller:
             per_page=params.per_page,
             pagination_url=pagination_url,
             add_url=add_url,
+            activity=activity,
         ).pop()

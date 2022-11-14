@@ -450,6 +450,12 @@ def publish(
         **kwargs: Any,
 ) -> List[FoodLogSearchResult]: ...
 
+@overload
+def publish(
+        channel: Literal["foodlog:activity"],
+        **kwargs: Any,
+) -> List[Iterator[Row]]: ...
+
 
 @overload
 def publish(

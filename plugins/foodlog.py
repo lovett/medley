@@ -76,6 +76,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("foodlog:find", self.find)
+        self.bus.subscribe("foodlog:activity", self.activity)
         self.bus.subscribe("foodlog:remove", self.remove)
         self.bus.subscribe("foodlog:search:date", self.search_by_date)
         self.bus.subscribe("foodlog:search:keyword", self.search_by_keyword)
@@ -134,6 +135,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._select_generator(sql, placeholders),
             self._count(sql, placeholders)
         )
+
+    def activity(self, **kwargs: Any) -> Iterator[sqlite3.Row]:
+        """Visualize a keyword search as an GitHub-style activity chart."""
+
+        query = kwargs.get("query", "")
+
+        sql = """WITH RECURSIVE calendar(days_ago, dt) AS
+        (SELECT 0, datetime('now')
+         UNION ALL SELECT days_ago+1, datetime(dt, '-1 day')
+         FROM calendar LIMIT 364)
+        SELECT days_ago, dt as 'date [local_datetime]', (
+            SELECT count(*) FROM foodlog, foodlog_fts
+            WHERE foodlog.id=foodlog_fts.rowid
+            AND date(foodlog.consumed_on)=date(dt)
+            AND foodlog_fts MATCH ?
+        ) as tally
+        FROM calendar
+        ORDER BY days_ago DESC
+        """
+
+        placeholders = (query,)
+
+        return self._select_generator(sql, placeholders)
 
     def search_by_keyword(self, **kwargs: Any) -> SearchResult:
         """Locate entries that match a keyword search."""
