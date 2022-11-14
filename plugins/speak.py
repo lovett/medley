@@ -27,7 +27,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.speech_engine: Optional[Mimic3TextToSpeechSystem] = None
         self.speaker = "9017"
         self.voice = "en_US/hifi-tts_low"
-        self.speed = 1.5
+        self.length_scale = 1.5
+        self.noise_scale = 0.4
+        self.noise_w = 0.33
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
@@ -51,7 +53,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             keys=(
                 "speak:mimic3:speaker",
                 "speak:mimic3:voice",
-                "speak:mimic3:speed",
+                "speak:mimic3:length_scale",
+                "speak:mimic3:noise_scale",
             ),
             key_slice=2
         ).pop()
@@ -62,14 +65,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if config.get("speaker"):
             self.speaker = config["speaker"]
 
-        if config.get("speed"):
-            self.speed = config["speed"]
+        if config.get("length_scale"):
+            self.length_scale = config["length_scale"]
+
+        if config.get("noise_scale"):
+            self.noise_scale = config["noise_scale"]
+
+        if config.get("noise_w"):
+            self.noise_w = config["noise_w"]
 
         self.speech_engine = Mimic3TextToSpeechSystem(
             Mimic3Settings(
                 voice=self.voice,
                 speaker=self.speaker,
-                length_scale=self.speed
+                length_scale=self.length_scale,
+                noise_scale=self.noise_scale,
+                noise_w=self.noise_w
             )
         )
 
@@ -109,6 +120,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ]
 
         replaced_statement = statement
+
+        replaced_statement = re.sub(
+            rf"\([^)]+\)\s*",
+            "",
+            replaced_statement
+        )
+
         for search, replace in adjustment_pairs:
             replaced_statement = re.sub(
                 rf"\b{search}\b",
@@ -116,17 +134,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 replaced_statement
             )
 
-        return replaced_statement
+        return replaced_statement.strip()
 
     def ssml(self, statement: str) -> str:
         """Build an SSML document representing the text to be spoken."""
 
         document = f"""
         <?xml version="1.0" ?>
-        <speak version="1.0" voice="{self.voice}/{self.speaker}"
-            speed="{self.speed}">
-            <s>{statement}</s>
-        </speak>
+        <speak>{statement}</speak>
         """
 
         return document.strip()
@@ -215,9 +230,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 if not isinstance(result, AudioResult):
                     continue
 
-                wav_file.setframerate(result.sample_rate_hz)
-                wav_file.setsampwidth(result.sample_width_bytes)
-                wav_file.setnchannels(result.num_channels)
+                try:
+                    wav_file.setframerate(result.sample_rate_hz)
+                    wav_file.setsampwidth(result.sample_width_bytes)
+                    wav_file.setnchannels(result.num_channels)
+                except wave.Error:
+                    pass
 
                 wav_file.writeframes(result.audio_bytes)
 
