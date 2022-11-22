@@ -69,5 +69,6 @@ class Controller:
             headlines=headlines,
             walk_start=params.start,
             walk_stop=(params.start + params.count - 1),
-            bing=Url("https://www.bing.com")
+            bing=Url("https://www.bing.com"),
+            ms_rewards=Url("https://rewards.bing.com/?signin=1")
         ).pop()
