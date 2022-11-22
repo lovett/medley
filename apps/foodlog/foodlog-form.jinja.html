@@ -2,6 +2,7 @@
 
 {% block scripts %}
     {{ macros.asset("js/foodlog.js") }}
+    {{ macros.asset("js/shortcuts.js") }}
     {{ macros.asset("js/delete.js") }}
 {% endblock %}
 
@@ -10,35 +11,6 @@
     <main id="collection">
         <form id="foodlog-form" method="post" action="/foodlog">
             <input id="uid" type="hidden" name="uid" value="{{ uid }}" />
-            <div class="field-group">
-                <div class="field">
-                    <label for="consume_date">
-                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                        Date
-                    </label>
-                    <input
-                        type="date"
-                        id="consume_date"
-                        name="consume_date"
-                        value="{{ entry_date|dateformat('%Y-%m-%d') }}"
-                        required
-                    />
-                </div>
-                <div class="field">
-                    <label for="consume_time">
-                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
-                        Time
-                    </label>
-                    <input
-                        type="time"
-                        id="consume_time"
-                        name="consume_time"
-                        value="{{ entry_date|dateformat('%H:%M') }}"
-                        required
-                    />
-                </div>
-            </div>
-
             <div class="field">
                 <label for="foods_eaten">
                     Foods Eaten
@@ -60,7 +32,43 @@
                         {% if overate %}checked="checked"{% endif %}
                     />
                     Overate
-                </label>            </div>
+                </label>
+            </div>
+
+            <div class="field-group">
+                <div class="field">
+                    <label for="consume_date">
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        Date
+                    </label>
+                    <input
+                        type="date"
+                        id="consume_date"
+                        name="consume_date"
+                        value="{{ entry_date|dateformat('%Y-%m-%d') }}"
+                        required
+                    />
+                    <div class="shortcuts">
+                        <a href="#" data-field="consume_date" data-shortcut="yesterday">
+                            Yesterday
+                        </a>
+                    </div>
+
+                </div>
+                <div class="field">
+                    <label for="consume_time">
+                        <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
+                        Time
+                    </label>
+                    <input
+                        type="time"
+                        id="consume_time"
+                        name="consume_time"
+                        value="{{ entry_date|dateformat('%H:%M') }}"
+                        required
+                    />
+                </div>
+            </div>
 
             <div class="field">
                 <button data-default-label="Save" data-progress-label="Please wait">Save</button>
