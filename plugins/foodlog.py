@@ -1,11 +1,11 @@
 """Storage for food log entries."""
 
+import re
 import sqlite3
 from typing import Any
 from typing import Iterator
 from typing import Optional
 from typing import Tuple
-from typing import cast
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -78,8 +78,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("foodlog:find", self.find)
         self.bus.subscribe("foodlog:activity", self.activity)
         self.bus.subscribe("foodlog:remove", self.remove)
-        self.bus.subscribe("foodlog:search:date", self.search_by_date)
-        self.bus.subscribe("foodlog:search:keyword", self.search_by_keyword)
+        self.bus.subscribe("foodlog:search", self.search)
         self.bus.subscribe("foodlog:upsert", self.upsert)
 
     def find(self, entry_id: int) -> Optional[sqlite3.Row]:
@@ -100,40 +99,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return self._execute(
             "DELETE FROM foodlog WHERE id=?",
             (entry_id,)
-        )
-
-    def search_by_date(self, **kwargs: Any) -> SearchResult:
-        """Locate entries that match a date search."""
-
-        query = kwargs.get("query", "")
-        limit = int(kwargs.get("limit", 20))
-        offset = int(kwargs.get("offset", 0))
-
-        consumed_on = ""
-        where_clause = ""
-        if query:
-            consumed_on = cherrypy.engine.publish(
-                "clock:format",
-                query,
-                "%Y-%m-%d"
-            ).pop()
-
-            where_clause = "WHERE date(consumed_on) = ?"
-
-        sql = f"""SELECT id, foods_eaten, overate,
-        consumed_on as 'consumed_on [local_datetime]'
-        FROM foodlog
-        {where_clause}
-        ORDER BY consumed_on DESC
-        LIMIT ? OFFSET ?"""
-
-        placeholders = cast(Any, (limit, offset))
-        if query:
-            placeholders = (consumed_on, limit, offset)
-
-        return (
-            self._select_generator(sql, placeholders),
-            self._count(sql, placeholders)
         )
 
     def activity(self, **kwargs: Any) -> Iterator[sqlite3.Row]:
@@ -159,22 +124,108 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return self._select_generator(sql, placeholders)
 
-    def search_by_keyword(self, **kwargs: Any) -> SearchResult:
+    def search(self, **kwargs: Any) -> SearchResult:
         """Locate entries that match a keyword search."""
 
         limit = int(kwargs.get("limit", 20))
         offset = int(kwargs.get("offset", 20))
         query = kwargs.get("query", "")
 
-        sql = """SELECT f.id, f.foods_eaten, f.overate,
-        f.consumed_on as 'consumed_on [local_datetime]'
-        FROM foodlog AS f, foodlog_fts
-        WHERE f.id=foodlog_fts.rowid
-        AND foodlog_fts MATCH ?
-        ORDER BY f.consumed_on DESC
-        LIMIT ? OFFSET ?"""
+        date_range = None
+        date_match = re.search(r"\d{4}-\d{2}-\d{2}", query)
+        if date_match:
+            start_date = date_match.group(0)
+            end_date = start_date
+            query = query.replace(start_date, "")
+            date_range = (start_date, end_date)
 
-        placeholders = (query, limit, offset)
+        if not date_range:
+            date_match = re.search(r"\d{4}-\d{2}", query)
+            if date_match:
+                start_date = cherrypy.engine.publish(
+                    "clock:from_format",
+                    date_match.group(0),
+                    "%Y-%m"
+                ).pop()
+
+                end_date = cherrypy.engine.publish(
+                    "clock:shift",
+                    start_date,
+                    "month_end"
+                ).pop()
+
+                date_range = (
+                    cherrypy.engine.publish(
+                        "clock:format",
+                        start_date,
+                        "%Y-%m-%d"
+                    ).pop(),
+                    cherrypy.engine.publish(
+                        "clock:format",
+                        end_date,
+                        "%Y-%m-%d"
+                    ).pop()
+                )
+                query = query.replace(date_match.group(0), "")
+
+        if not date_range:
+            date_match = re.search(r"\d{4}", query)
+            if date_match:
+                year = date_match.group(0)
+                date_range = (
+                    year + "-01-01",
+                    year + "-12-31"
+                )
+
+                query = query.replace(year, "")
+
+        date_range_sql = ""
+        if date_range:
+            date_range_sql = "AND date(consumed_on) BETWEEN ? AND ?"
+
+        sql = ""
+        if date_range and query:
+            sql = f"""SELECT f.id, f.foods_eaten, f.overate,
+            f.consumed_on as 'consumed_on [local_datetime]'
+            FROM foodlog AS f, foodlog_fts
+            WHERE f.id=foodlog_fts.rowid
+            AND foodlog_fts MATCH ?
+            {date_range_sql}
+            ORDER BY f.consumed_on DESC
+            LIMIT ? OFFSET ?"""
+
+            placeholders = (query.strip(),) + date_range + (limit, offset)
+
+        if date_range and not query:
+            sql = f"""SELECT f.id, f.foods_eaten, f.overate,
+            f.consumed_on as 'consumed_on [local_datetime]'
+            FROM foodlog AS f
+            WHERE 1=1
+            {date_range_sql}
+            ORDER BY f.consumed_on DESC
+            LIMIT ? OFFSET ?"""
+
+            placeholders = date_range + (limit, offset)
+
+        if query and not date_range:
+            sql = """SELECT f.id, f.foods_eaten, f.overate,
+            f.consumed_on as 'consumed_on [local_datetime]'
+            FROM foodlog AS f, foodlog_fts
+            WHERE f.id=foodlog_fts.rowid
+            AND foodlog_fts MATCH ?
+            ORDER BY f.consumed_on DESC
+            LIMIT ? OFFSET ?"""
+
+            placeholders = (query.strip(), limit, offset)
+
+        if not sql:
+            sql = """SELECT f.id, f.foods_eaten, f.overate,
+            f.consumed_on as 'consumed_on [local_datetime]'
+            FROM foodlog AS f
+            ORDER BY f.consumed_on DESC
+            LIMIT ? OFFSET ?"""
+            placeholders = (limit, offset)
+
         return (
             self._select_generator(sql, placeholders),
             self._count(sql, placeholders)

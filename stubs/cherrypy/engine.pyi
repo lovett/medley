@@ -439,14 +439,7 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["foodlog:search:date"],
-        **kwargs: Any,
-) -> List[FoodLogSearchResult]: ...
-
-
-@overload
-def publish(
-        channel: Literal["foodlog:search:keyword"],
+        channel: Literal["foodlog:search"],
         **kwargs: Any,
 ) -> List[FoodLogSearchResult]: ...
 

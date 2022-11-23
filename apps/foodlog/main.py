@@ -157,7 +157,7 @@ class Controller:
         """The application's default view."""
 
         (entries, entry_count) = cherrypy.engine.publish(
-            "foodlog:search:date",
+            "foodlog:search",
             offset=params.offset
         ).pop()
 
@@ -233,31 +233,17 @@ class Controller:
 
         activity = None
 
-        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", params.q):
-            search_term = cherrypy.engine.publish(
-                "clock:from_format",
-                params.q,
-                "%Y-%m-%d"
-            ).pop()
+        (entries, entry_count) = cherrypy.engine.publish(
+            "foodlog:search",
+            query=params.q,
+            offset=params.offset,
+            limit=params.per_page
+        ).pop()
 
-            (entries, entry_count) = cherrypy.engine.publish(
-                "foodlog:search:date",
-                query=search_term,
-                offset=params.offset,
-                limit=params.per_page
-            ).pop()
-        else:
-            (entries, entry_count) = cherrypy.engine.publish(
-                "foodlog:search:keyword",
-                query=params.q,
-                offset=params.offset,
-                limit=params.per_page
-            ).pop()
-
-            activity = cherrypy.engine.publish(
-                "foodlog:activity",
-                query=params.q,
-            ).pop()
+        activity = cherrypy.engine.publish(
+            "foodlog:activity",
+            query=params.q,
+        ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
