@@ -49,7 +49,11 @@ def view(url: Url) -> ViewAndData:
             created
         ).pop()
 
-        link = Url(story.get("link", ""))
+        story_link = story.get("link", "")
+        if story_link.startswith("/"):
+            story_link = url.base_address + story_link
+
+        link = Url(story_link)
 
         tags = [
             tag.get("term")
