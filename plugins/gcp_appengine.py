@@ -133,7 +133,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return line_count
 
     @staticmethod
-    def combined_quoted(value: str = None) -> str:
+    def combined_quoted(value: str = "") -> str:
         """Wrap a value in quotes unless it is empty."""
 
         if value:
@@ -143,7 +143,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return "-"
 
     @staticmethod
-    def combined_pair(key: str, value: str = None) -> str:
+    def combined_pair(key: str, value: str = "") -> str:
         """Pair a key and its quoted value or suppress both."""
 
         if value:

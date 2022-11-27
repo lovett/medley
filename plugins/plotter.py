@@ -32,7 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                    ideal_duration: Union[Tuple[()], Tuple[int, int]] = ()
                    ) -> str:
         """A graph with datasets drawn as lines."""
-        circle_radius = 1.5
         data_max = ceil(max([x[data_key] for x in datasets[0]]))
         data_min = floor(min([x[data_key] for x in datasets[0]]))
         data_span = data_max - data_min

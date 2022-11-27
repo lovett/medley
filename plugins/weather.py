@@ -124,7 +124,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "/weather"
         ).pop()
 
-        for event, alert in forecast.get("alerts", {}).items():
+        for _, alert in forecast.get("alerts", {}).items():
             if alert["hash"] in cached_hashes:
                 continue
 

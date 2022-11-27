@@ -1,6 +1,5 @@
 """Test suite for the input plugin."""
 
-from typing import Any
 import unittest
 from unittest.mock import patch
 from unittest import mock
@@ -23,19 +22,6 @@ class TestInput(Subscriber):
 
         self.plugin.start()
         self.assert_prefix(subscribe_mock, "registry")
-
-    def test_placeholder(self) -> None:
-        """Placeholder to force pytest to generate a coverage file."""
-        pass   # pylint: disable=unnecessary-pass
-
-    def test_unconfigured_keypress(self) -> None:
-        """Keys with no configuration are ignored."""
-
-        self.plugin.triggers = {}
-
-        self.plugin.fire("KEY_X")
-
-        self.assertTrue(True)
 
     @mock.patch("cherrypy.engine.publish")
     def test_configured_keypress(self, publish_mock: mock.Mock) -> None:

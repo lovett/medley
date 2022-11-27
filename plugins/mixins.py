@@ -99,7 +99,7 @@ class Sqlite:
     def _multi(
             self,
             queries: Sequence[Tuple[str, Any]],
-            after_commit: Tuple[str, Any] = None
+            after_commit: Tuple[Any, ...] = ()
     ) -> Union[bool, Iterator[sqlite3.Row]]:
         """Issue several queries within a transaction."""
 

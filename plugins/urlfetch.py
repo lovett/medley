@@ -8,6 +8,7 @@ from typing import Any
 from typing import Dict
 from typing import Optional
 from typing import Tuple
+from typing import cast
 import urllib.parse
 import feedparser
 import requests
@@ -57,7 +58,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         try:
             res = requests.delete(
                 url,
-                headers=headers
+                headers=headers,
+                timeout=15
             )
 
             res.raise_for_status()
@@ -237,6 +239,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> None:
         """Send a GET request and save the response to the filesystem."""
 
+        timeout = cast(int, kwargs.get("timeout", 30))
         headers = self.headers(kwargs.get("headers"))
 
         params = kwargs.get("params")
@@ -256,7 +259,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             auth=auth,
             headers=headers,
             params=params,
-            stream=True
+            stream=True,
+            timeout=timeout,
         )
 
         res.raise_for_status()

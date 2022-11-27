@@ -31,9 +31,6 @@ class TestMarkup(Subscriber):
         result = self.plugin.plain_text("")
         self.assertEqual(result, "")
 
-        result = self.plugin.plain_text(None)
-        self.assertEqual(result, "")
-
     def test_plain_text_with_blacklist(self) -> None:
         """Site-specific tag blacklists cause text nodes to be dropped."""
         initial = '<div class="reply">hello <em>world</em></div>'

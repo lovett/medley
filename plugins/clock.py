@@ -43,7 +43,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:utc", self.utc)
         self.bus.subscribe("clock:scheduled", self.scheduled)
 
-    def day_remaining(self, dt: datetime = None) -> int:
+    def day_remaining(self, dt: datetime = datetime.now(UTC)) -> int:
         """Calculate how many seconds are left in the day."""
 
         dt = dt or self.now()
@@ -52,7 +52,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return (end - dt).seconds
 
-    def same_day(self, dt1: datetime, dt2: datetime = None) -> bool:
+    def same_day(
+            self,
+            dt1: datetime,
+            dt2: datetime = datetime.now(UTC)
+    ) -> bool:
         """Determine whether two dates fall on the same day."""
 
         dt1 = dt1.replace(tzinfo=None)

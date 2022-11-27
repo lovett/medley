@@ -3,7 +3,6 @@
 import datetime
 import json
 from enum import Enum
-import re
 from typing import Optional
 import cherrypy
 from pydantic import BaseModel

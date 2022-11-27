@@ -6,6 +6,7 @@ from typing import Any
 from typing import Iterator
 from typing import Optional
 from typing import Tuple
+from typing import Union
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -13,6 +14,8 @@ from plugins import decorators
 SearchResult = Tuple[
     Iterator[sqlite3.Row], int
 ]
+
+PlaceholderTuple = Tuple[Union[str, int], ...]
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
@@ -120,7 +123,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY days_ago DESC
         """
 
-        placeholders = (query,)
+        placeholders: PlaceholderTuple = (query,)
 
         return self._select_generator(sql, placeholders)
 
@@ -142,27 +145,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not date_range:
             date_match = re.search(r"\d{4}-\d{2}", query)
             if date_match:
-                start_date = cherrypy.engine.publish(
+                start = cherrypy.engine.publish(
                     "clock:from_format",
                     date_match.group(0),
                     "%Y-%m"
                 ).pop()
 
-                end_date = cherrypy.engine.publish(
+                end = cherrypy.engine.publish(
                     "clock:shift",
-                    start_date,
+                    start,
                     "month_end"
                 ).pop()
 
                 date_range = (
                     cherrypy.engine.publish(
                         "clock:format",
-                        start_date,
+                        start,
                         "%Y-%m-%d"
                     ).pop(),
                     cherrypy.engine.publish(
                         "clock:format",
-                        end_date,
+                        end,
                         "%Y-%m-%d"
                     ).pop()
                 )
@@ -184,6 +187,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             date_range_sql = "AND date(consumed_on) BETWEEN ? AND ?"
 
         sql = ""
+        placeholders: PlaceholderTuple = ()
         if date_range and query:
             sql = f"""SELECT f.id, f.foods_eaten, f.overate,
             f.consumed_on as 'consumed_on [local_datetime]'

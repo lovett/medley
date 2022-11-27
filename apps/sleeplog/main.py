@@ -49,8 +49,8 @@ class PostParams(BaseModel):
     """Parameters for POST requests."""
     end_date: Optional[date]
     end_time: Optional[time]
-    start_date: Optional[date]
-    start_time: Optional[time]
+    start_date: date
+    start_time: time
     notes: Optional[str]
     uid: int = Field(0, gt=-1)
     action: Action = Action.NONE

@@ -191,7 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def pluralize_filter(
             count: int,
             singular: str,
-            plural: str = None,
+            plural: str = "",
             suffix: str = "",
             number_format: str = ',d'
     ) -> str:
@@ -473,7 +473,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url_filter(
             context: jinja2.runtime.Context,
             value: str,
-            query: Dict[str, Any] = None
+            query: Dict[str, Any] = {}
     ) -> str:
         """Generate an application URL via the URL plugin."""
 

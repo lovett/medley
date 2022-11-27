@@ -122,7 +122,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         replaced_statement = statement
 
         replaced_statement = re.sub(
-            rf"\([^)]+\)\s*",
+            r"\([^)]+\)\s*",
             "",
             replaced_statement
         )

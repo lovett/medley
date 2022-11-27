@@ -144,10 +144,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     @decorators.log_runtime
     def add(self,
             url: Url,
-            title: str = None,
-            comments: str = None,
-            tags: str = None,
-            added: str = None) -> bool:
+            title: str = "",
+            comments: str = "",
+            tags: str = "",
+            added: str = "") -> bool:
         """Store a bookmarked URL and its metadata."""
 
         bookmark = self.find_url(url)

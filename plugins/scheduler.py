@@ -224,12 +224,12 @@ class Plugin(cherrypy.process.plugins.Monitor):
 
     def upcoming(
             self,
-            event_filter: str = None
+            event_filter: str = ""
     ) -> List[sched.Event]:
         """List upcoming events in the order they will be run."""
 
         return [
             event for event in self.scheduler.queue
             if event.argument[0] == event_filter
-            or event_filter is None
+            or not event_filter
         ]

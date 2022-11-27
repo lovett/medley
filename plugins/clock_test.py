@@ -68,7 +68,7 @@ class TestClock(Subscriber):
 
         # two dates in present
         dt = datetime.now(tz=pytz.UTC).replace(minute=0)
-        self.assertTrue(self.plugin.same_day(dt, None))
+        self.assertTrue(self.plugin.same_day(dt))
 
     def test_from_timestamp(self) -> None:
         """clock:from_timestamp handles integer and float timestamps."""

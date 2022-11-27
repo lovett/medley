@@ -3,7 +3,6 @@
 from datetime import date
 import calendar
 from typing import List
-from typing import Optional
 import cherrypy
 from pydantic import BaseModel
 from pydantic import ValidationError
@@ -12,7 +11,7 @@ from pydantic import ValidationError
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     grid: str = ""
-    start: Optional[date] = None
+    start: date = date.today().replace(day=1)
 
 
 class Controller:
@@ -120,9 +119,6 @@ class Controller:
                 params.grid,
                 query={"start": ymd}
             ).pop()
-
-            if not params.start:
-                params.start = options["this_month"].replace(day=1)
 
             options["last_month"] = cherrypy.engine.publish(
                 "clock:shift",

@@ -38,7 +38,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return self.reduce_title(reduced_title)
 
     @staticmethod
-    def plain_text(html: str = None, url: Url = Url("")) -> str:
+    def plain_text(html: str = "", url: Url = Url("")) -> str:
         """Remove markup and entities from a string"""
 
         if not html:
