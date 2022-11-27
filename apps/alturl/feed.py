@@ -35,9 +35,13 @@ def view(url: Url) -> ViewAndData:
 
         comments = Url(story.get("comments", ""))
 
+        story_date = story.get("published_parsed", ())
+        if not story_date:
+            story_date = story.get("updated_parsed", ())
+
         created = cherrypy.engine.publish(
             "clock:from_struct",
-            story.get("published_parsed", ())
+            story_date
         ).pop()
 
         created_local = cherrypy.engine.publish(
