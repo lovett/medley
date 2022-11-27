@@ -203,7 +203,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         UNION ALL SELECT days_ago+1, date(dt, '-1 day')
         FROM calendar LIMIT ?)
         SELECT days_ago, dt as 'date [date]',
-        COALESCE(duration_seconds / 3600.0, 0) as hours
+        SUM(COALESCE(duration_seconds / 3600.0, 0)) as hours
         FROM calendar
         LEFT JOIN sleeplog ON date(start_utc)=dt
         AND end_utc IS NOT NULL
