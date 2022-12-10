@@ -49,8 +49,8 @@ class PostParams(BaseModel):
     """Parameters for POST requests."""
     end_date: Optional[date]
     end_time: Optional[time]
-    start_date: date
-    start_time: time
+    start_date: Optional[date]
+    start_time: Optional[time]
     notes: Optional[str]
     uid: int = Field(0, gt=-1)
     action: Action = Action.NONE
@@ -152,15 +152,17 @@ class Controller:
             )
             raise cherrypy.HTTPRedirect(app_url)
 
-        start = datetime.combine(
-            params.start_date,
-            params.start_time
-        )
+        start_utc = None
+        if params.start_date and params.start_time:
+            start = datetime.combine(
+                params.start_date,
+                params.start_time
+            )
 
-        start_utc = cherrypy.engine.publish(
-            "clock:utc",
-            start
-        ).pop()
+            start_utc = cherrypy.engine.publish(
+                "clock:utc",
+                start
+            ).pop()
 
         end_utc = None
         if params.end_date and params.end_time:
