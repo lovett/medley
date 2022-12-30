@@ -1,5 +1,5 @@
 bandit==1.7.4
-coverage==7.0.0
+coverage==7.0.1
 flake8==6.0.0
 flake8-comprehensions==3.10.1
 lxml==4.9.2
