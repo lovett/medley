@@ -1,0 +1,22 @@
+#shell {
+    display: grid;
+    grid-template-columns: 15% 80%;
+    grid-column-gap: 5%;
+    max-width: 75em;
+    margin: auto;
+}
+
+#shell > NAV UL {
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+#shell > NAV LI {
+    margin-bottom: 1em;
+}
+
+
+.active {
+    font-weight: bold;
+}

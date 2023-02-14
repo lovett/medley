@@ -147,6 +147,25 @@ MAIN {
     margin-top: 1em;
 }
 
+NAV.panel UL {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+
+NAV.panel LI {
+    margin-bottom: 1em;
+}
+
+NAV.panel LI:last-of-type {
+    margin-bottom: 0;
+}
+
+NAV.panel A.active {
+    font-weight: bold;
+    text-decoration: none;
+}
+
 NAV.secondary {
     display: flex;
     flex-flow: row wrap;
@@ -489,6 +508,7 @@ TEXTAREA {
 }
 
 #app-nav .options input[type=text],
+#app-nav .options input[type=url],
 #app-nav .options input[type=date],
 #app-nav .options input[type=search],
 #app-nav .options input[type=time],
@@ -575,6 +595,7 @@ TEXTAREA {
 }
 
 .field INPUT[type=text],
+.field INPUT[type=url],
 .field INPUT[type=date],
 .field INPUT[type=search],
 .field INPUT[type=password],
@@ -613,6 +634,25 @@ TEXTAREA {
 .field .note {
     font-size: .75em;
     margin-top: .5em;
+}
+
+.field .validation-message {
+    display: none;
+}
+
+.field.invalid LABEL {
+    font-weight: bold;
+    color: var(--alert);
+}
+
+.field.invalid .validation-message {
+    display: block;
+    color: var(--alert);
+}
+
+.field.invalid INPUT {
+    border: 1px solid var(--alert);
+    outline-color: var(--alert);
 }
 
 .focus-candidate {

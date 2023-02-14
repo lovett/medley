@@ -1,0 +1,97 @@
+<header>
+    <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteTransaction()" [resourceName]="singularResourceName"></app-delete-button>
+</header>
+
+<form (ngSubmit)="save()" [formGroup]="transactionForm">
+    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid">
+        <label for="payee">Payee</label>
+        <input
+            id="payee"
+            type="text"
+            formControlName="payee"
+        />
+
+        <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
+    </div>
+    <div class="field-group">
+        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid">
+            <label for="amount">Amount</label>
+            <input
+                id="amount"
+                type="text"
+                formControlName="amount"
+            />
+
+            <p *ngIf="amount.hasError('required')" class="validation-message">An amount is required.</p>
+            <p *ngIf="amount.hasError('pattern')" class="validation-message">The amount should be numeric.</p>
+            <p *ngIf="amount.hasError('min')" class="validation-message">The amount should be greater than zero.</p>
+        </div>
+    </div>
+    <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid">
+        <label for="accountId">Account</label>
+        <app-account-menu [form]="transactionForm"></app-account-menu>
+        <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
+        <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
+    </div>
+
+    <div formGroupName="dates">
+        <div class="field-group">
+            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)">
+                <label for="occurredOn">Date</label>
+                <input
+                    id="occurredOn"
+                    type="date"
+                    formControlName="occurred_on"
+                    [max]="today"
+                />
+                <p *ngIf="occurredOn.hasError('required')" class="validation-message">A date is required.</p>
+            </div>
+            <div class="field"></div>
+        </div>
+
+        <div class="field">
+            <label for="tranactionCleared">
+                <input
+                    id="tranactionCleared"
+                    type="checkbox"
+                    [checked]="datesExpanded"
+                    (click)="toggleTransactionCleared($event)" /> This transaction has cleared.
+            </label>
+        </div>
+
+        <div *ngIf="datesExpanded" class="field-group">
+            <div class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)">
+                <label for="clearedOn">Cleared On</label>
+                <input
+                    id="clearedOn"
+                    type="date"
+                    formControlName="cleared_on"
+                    [max]="today"
+                />
+
+                <p *ngIf="dates.hasError('daterange')" class="validation-message">The clearance date must be after the transaction date.</p>
+                <p *ngIf="clearedOn.hasError('required')" class="validation-message">The clearance date must be specified.</p>
+                <p *ngIf="clearedOn.hasError('dateinpast')" class="validation-message">The clearance date must be in the past.</p>
+            </div>
+            <div class="field"></div>
+        </div>
+    </div>
+
+    <div class="field" [class.invalid]="(note.dirty || note.touched) && note.invalid">
+        <label for="accountNote">Notes</label>
+        <textarea
+            id="accountNote"
+            type="text"
+            formControlName="note"
+        ></textarea>
+    </div>
+
+    <footer>
+        <button type="submit" [disabled]="!transactionForm.valid || !transactionForm.dirty">Save</button>
+    </footer>
+</form>
+
+<br/>Dirty: {{ transactionForm.dirty }}
+<br/>Touched: {{ transactionForm.touched }}
+<br/>Valid: {{ transactionForm.valid }}
+<br/>Value: {{ transactionForm.value | json }}

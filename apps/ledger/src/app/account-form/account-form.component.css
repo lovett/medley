@@ -1,0 +1,13 @@
+HEADER {
+    display: flex;
+    justify-content: flex-end;
+}
+
+FOOTER {
+    display: flex;
+    align-items: center;
+}
+
+FOOTER > * {
+    margin-right: 1em;
+}

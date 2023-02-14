@@ -1,0 +1,9 @@
+HEADER {
+    display: flex;
+    justify-content: flex-end;
+}
+
+P {
+    padding-top: 0;
+    margin-top: 0;
+}

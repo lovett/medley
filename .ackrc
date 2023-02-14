@@ -12,5 +12,7 @@
 --ignore-file=ext:pyc
 --ignore-file=is:medley
 --ignore-file=is:.coverage
+--ignore-file=is:main.js
+--ignore-file=is:vendor.js
 --type-set=test:match:/_test.py/
 --type-set=controller:match:/main.py/

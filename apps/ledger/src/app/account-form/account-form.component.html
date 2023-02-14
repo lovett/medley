@@ -1,0 +1,82 @@
+<header>
+    <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteAccount()" [resourceName]="singularResourceName"></app-delete-button>
+</header>
+
+<form (ngSubmit)="save()" [formGroup]="accountForm">
+    <div class="field" [class.invalid]="(name.dirty || name.touched) && name.invalid">
+        <label for="accountName">Account Name</label>
+        <input
+            id="accountName"
+            type="text"
+            formControlName="name"
+        />
+
+        <p *ngIf="name.hasError('required')" class="validation-message">The account needs a name.</p>
+        <p *ngIf="name.hasError('minlength')" class="validation-message">The account name isn't long enough.</p>
+    </div>
+
+    <div class="field" [class.invalid]="(url.dirty || url.touched) && url.invalid">
+        <label for="accountUrl">Account URL</label>
+        <input
+            id="accountUrl"
+            type="url"
+            formControlName="url"
+        />
+    </div>
+
+
+    <div formGroupName="dates">
+        <div class="field" [class.invalid]="openedOn.invalid && (openedOn.dirty || openedOn.touched)">
+            <label for="accountOpened">Opened On</label>
+            <input
+                id="accountOpened"
+                type="date"
+                formControlName="opened_on"
+                [max]="today"
+            />
+            <p *ngIf="openedOn.hasError('required')" class="validation-message">The account needs a name.</p>
+        </div>
+
+        <div class="field">
+            <label for="accountClosed">
+                <input
+                    id="accountClosed"
+                    type="checkbox"
+                    [checked]="datesExpanded"
+                    (click)="toggleAccountClosed($event)" /> This account is closed.
+            </label>
+        </div>
+
+        <div *ngIf="datesExpanded" class="field" [class.invalid]="(closedOn.dirty || closedOn.touched) && (closedOn.invalid || dates.invalid)">
+            <label for="accountClosed">Closed On</label>
+            <input
+                id="accountClosed"
+                type="date"
+                formControlName="closed_on"
+                [max]="today"
+            />
+
+            <p *ngIf="dates.hasError('daterange')" class="validation-message">The close date must be after the open date.</p>
+            <p *ngIf="closedOn.hasError('required')" class="validation-message">The close date must be specified.</p>
+            <p *ngIf="closedOn.hasError('dateinpast')" class="validation-message">The close date must be in the past.</p>
+        </div>
+    </div>
+
+    <div class="field" [class.invalid]="(note.dirty || note.touched) && note.invalid">
+        <label for="accountNote">Notes</label>
+        <textarea
+            id="accountNote"
+            type="text"
+            formControlName="note"
+        ></textarea>
+    </div>
+
+    <footer>
+        <button type="submit" [disabled]="!accountForm.valid || !accountForm.dirty">Save</button>
+    </footer>
+</form>
+
+<br/>Dirty: {{ accountForm.dirty }}
+<br/>Touched: {{ accountForm.touched }}
+<br/>Valid: {{ accountForm.valid }}
+<br/>Value: {{ accountForm.value | json }}

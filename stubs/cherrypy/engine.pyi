@@ -1114,6 +1114,82 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["ledger:json:tags"],
+        query: str
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:acknowledgment"],
+        amount: float,
+        payee: str,
+        query: str
+) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:transactions"],
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:accounts"],
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:accounts:single"],
+        uid: int
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:transaction"],
+        uid: int
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:remove:transaction"],
+        uid: int,
+) -> List[bool]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:remove:account"],
+        uid: int,
+) -> List[bool]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:store:transaction"],
+        uid: int,
+        **kwargs: Any
+) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:store:account"],
+        uid: int,
+        name: str,
+        url: str,
+        note: str,
+        opened_on: date,
+        closed_on: Optional[date]
+) -> List[None]: ...
+
+
+@overload
+def publish(
         channel: Literal["urlfetch:delete"],
         url: str,
         **kwargs: Any,

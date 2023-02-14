@@ -1,0 +1,9 @@
+<header>
+    <app-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
+</header>
+
+<p *ngFor="let account of accounts">
+    <a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a>
+</p>
+
+<p *ngIf="accounts.length == 0">There are no accounts.</p>

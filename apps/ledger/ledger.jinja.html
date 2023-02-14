@@ -1,0 +1,18 @@
+{% extends "apps/static/templates/base.jinja.html" %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block scripts %}
+    {{ macros.asset("js/ledger/vendor.js") }}
+    {{ macros.asset("js/ledger/polyfills.js") }}
+    {{ macros.asset("js/ledger/runtime.js") }}
+    {{ macros.asset("js/ledger/main.js") }}
+{% endblock %}
+
+{% block page_body %}
+    {{ macros.svgSymbols("delete", "new-item") }}
+    <main>
+        <app-root></app-root>
+    </main>
+{% endblock %}
