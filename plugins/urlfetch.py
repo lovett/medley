@@ -314,7 +314,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         auth = kwargs.get("auth")
         headers = self.headers(kwargs.get("headers"))
 
-        if as_json:
+        if as_json and "Content-Type" not in headers:
             data = json.dumps(data)
             headers["Content-Type"] = "application/json"
 
