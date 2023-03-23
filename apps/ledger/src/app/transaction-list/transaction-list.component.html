@@ -2,7 +2,7 @@
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
-<table *ngIf="transactions">
+<table *ngIf="transactions.length > 0">
     <thead>
         <tr>
             <th>Date</th>
