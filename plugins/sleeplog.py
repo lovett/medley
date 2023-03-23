@@ -162,7 +162,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Locate entries with notes that match a keyword search."""
 
         limit = int(kwargs.get("limit", 20))
-        offset = int(kwargs.get("offset", 20))
+        offset = int(kwargs.get("offset", 0))
         query = kwargs.get("query", "")
         (ideal_min, ideal_max) = [
             val * 3600
