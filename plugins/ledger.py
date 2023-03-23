@@ -128,11 +128,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.setup)
-        self.bus.subscribe("ledger:acknowledgment", self.acknowledge)
+        # self.bus.subscribe("ledger:acknowledgment", self.acknowledge)
         self.bus.subscribe("ledger:transaction", self.find_transaction)
         self.bus.subscribe("ledger:json:transactions", self.transactions_json)
-        self.bus.subscribe("ledger:json:transactions:single", self.transaction_json)
-        self.bus.subscribe("ledger:json:transactions:new", self.transaction_json_new)
+        self.bus.subscribe(
+            "ledger:json:transactions:single",
+            self.transaction_json
+        )
+        self.bus.subscribe(
+            "ledger:json:transactions:new",
+            self.transaction_json_new
+        )
         self.bus.subscribe("ledger:json:tags", self.tags_json)
         self.bus.subscribe("ledger:json:accounts", self.accounts_json)
         self.bus.subscribe("ledger:json:accounts:single", self.account_json)
@@ -193,7 +199,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self._count(sql, placeholders)
         )
 
-    def account_json_new(self) -> str:
+    def account_new(self) -> dict:
         """A blank account record."""
         today = cherrypy.engine.publish(
             "clock:now",
@@ -206,13 +212,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "%Y-%m-%d"
         ).pop()
 
-        return json.dumps({
+        return {
             "uid": 0,
+            "name": "",
             "opened_on": today_formatted,
             "closed_on": None,
-            "url": None,
-            "note": None
-        })
+            "url": "",
+            "note": ""
+        }
+
+    def account_json_new(self) -> str:
+        """A blank account record as JSON."""
+        return json.dumps(self.account_new())
 
     def account_json(self, uid: int) -> str:
         """A single row from the accounts table as JSON."""
@@ -328,7 +339,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql, (uid,)))
 
-    def transaction_json_new(self) -> str:
+    def transaction_new(self) -> dict:
         """A blank transaction record."""
         today = cherrypy.engine.publish(
             "clock:now",
@@ -341,15 +352,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "%Y-%m-%d"
         ).pop()
 
-        return json.dumps({
+        new_account = self.account_json_new()
+
+        return {
             "uid": 0,
-            "account_id": None,
+            "account": new_account,
             "occurred_on": today_formatted,
             "cleared_on": None,
-            "amount": None,
-            "payee": None,
-            "note": None
-        })
+            "amount": 0,
+            "payee": "",
+            "note": ""
+        }
+
+    def transaction_json_new(self) -> str:
+        """A blank transaction record as JSON."""
+        return json.dumps(self.transaction_new())
 
     def upsert_account(
             self,
@@ -482,8 +499,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._multi(queries, after_commit)
 
-    def acknowledge(
-            self, amount: float, payee: str, source: str
-    ) -> None:
-        """Locate an uncleared transaction and clear it."""
-        pass
+    # def acknowledge(self, amount: float, payee: str, source: str) -> None:
+    #     """Locate an uncleared transaction and clear it."""
+    #     return None
