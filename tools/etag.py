@@ -27,14 +27,36 @@ class Tool(cherrypy.Tool):
         req = cherrypy.request
         return Url(f"{req.script_name}{req.path_info}")
 
+    @staticmethod
+    def content_aware_etag_key(url: Url) -> str:
+        """Scope the etag to a content type.
+
+        Since a URL can have multiple representations, there should
+        be different etags for each one. Although in practice this only
+        comes up with HTML and JSON.
+        """
+
+        candidates = (
+            cherrypy.request.headers.get("Accept", ""),
+            cherrypy.response.headers.get("Content-Type", "")
+        )
+
+        suffix = ""
+        if any("application/json" in candidate for candidate in candidates):
+            suffix = ":json"
+
+        return url.etag_key + suffix
+
     def check_header(self) -> None:
         """Decide if the If-None-Match header is a valid ETag."""
 
         url = self.current_url()
 
+        etag_key = self.content_aware_etag_key(url)
+
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            url.etag_key
+            etag_key
         ).pop()
 
         if not cache_hit:
@@ -66,13 +88,14 @@ class Tool(cherrypy.Tool):
             return
 
         url = self.current_url()
+        etag_key = self.content_aware_etag_key(url)
 
         # There may not have been an If-None-Match on this request,
         # but maybe there was one in a previous request. Don't
         # generate the hash unnecessarily.
         cache_hit, cache_value = cherrypy.engine.publish(
             "memorize:get",
-            url.etag_key
+            etag_key
         ).pop()
 
         if cache_hit:
@@ -86,7 +109,7 @@ class Tool(cherrypy.Tool):
 
         cherrypy.engine.publish(
             "memorize:set",
-            url.etag_key,
+            etag_key,
             content_hash
         )
 
