@@ -237,6 +237,14 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["cache:mget"],
+        prefix: str,
+        key: Tuple[str, ...],
+) -> List[Dict[str, str]]: ...
+
+
+@overload
+def publish(
         channel: Literal["cache:prune"],
 ) -> List[None]: ...
 

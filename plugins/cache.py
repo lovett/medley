@@ -2,6 +2,7 @@
 
 import json
 from typing import Any
+from typing import Dict
 from typing import Iterator
 from typing import Tuple
 from typing import cast
@@ -50,6 +51,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe("server:ready", self.setup)
         self.bus.subscribe("cache:get", self.get)
+        self.bus.subscribe("cache:mget", self.mget)
         self.bus.subscribe("cache:match", self.match)
         self.bus.subscribe("cache:set", self.set)
         self.bus.subscribe("cache:clear", self.clear)
@@ -85,6 +87,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 yield json.loads(row["value"])
             except json.decoder.JSONDecodeError:
                 yield row["value"]
+
+    def mget(self, prefix: str, keys: Tuple[str, ...]) -> Dict[str, str]:
+        """Retrieve multiple values with a common prefix."""
+
+        sql_in = ",".join(["?" for key in keys])
+
+        sql = f"""SELECT key, value
+        FROM unexpired
+        WHERE prefix=? AND key IN ({sql_in})"""
+
+        rows = self._select_generator(sql, (prefix,) + keys)
+
+        return {
+            row["key"]: row["value"]
+            for row in rows
+        }
 
     def get(self, key: str) -> Any:
         """Retrieve a value from the store."""
