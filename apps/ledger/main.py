@@ -13,7 +13,7 @@ from resources.url import Url
 
 
 class Resource(str, Enum):
-    """Valid keywords for the first URL path segment of this application."""
+    """Keywords for the first URL path segment."""
     ACCOUNTS = "accounts"
     ACKNOWLEDGMENT = "acknowledgment"
     NONE = ""
@@ -22,35 +22,38 @@ class Resource(str, Enum):
 
 
 class Subresource(str, Enum):
+    """Keywords for the third URL path segment."""
     NONE = ""
     FORM = "form"
 
 
 class DeleteParams(BaseModel):
     """Parameters for DELETE requests."""
-    uid: int = Field(gt=-1)
+    uid: int = Field(gt=0)
     resource: Resource = Resource.NONE
 
 
 class GetParams(BaseModel):
     """Parameters for GET requests."""
     q: str = Field("", strip_whitespace=True, min_length=3, to_lower=True)
-    uid: Optional[int] = Field(gt=-1)
+    uid: int
     offset: int = 0
     resource: Resource = Resource.NONE
     subresource: Subresource = Subresource.NONE
 
 
 class AccountParams(BaseModel):
+    """Parameters for account requests."""
     uid: int = Field(0, gt=-1)
     name: str
-    opened_on: Optional[str]
-    closed_on: Optional[str]
+    opened_on: Optional[datetime.date]
+    closed_on: Optional[datetime.date]
     url: Optional[str]
     note: Optional[str]
 
 
 class TransactionParams(BaseModel):
+    """Parameters for transaction requests."""
     uid: int = Field(0, gt=-1)
     account_id: int
     occurred_on: datetime.date
@@ -62,6 +65,7 @@ class TransactionParams(BaseModel):
 
 
 class AcknowledgmentParams(BaseModel):
+    """Parameters for acknowledgment requests."""
     amount: float
     payee: str = Field("", strip_whitespace=True, min_length=3, to_lower=True)
     source: str
@@ -73,16 +77,16 @@ class Controller:
     exposed = True
     show_on_homepage = True
 
-    @staticmethod
     @cherrypy.tools.provides(formats=("html", "json"))
     @cherrypy.tools.etag()
     def GET(
-            resource: str = "",
-            uid=None,
-            subresource: Subresource = Subresource.NONE,
+            self,
+            resource: Resource = Resource.NONE,
+            uid: Optional[int] = -1,
+            subresource: Optional[Subresource] = Subresource.NONE,
             **kwargs: str
     ) -> bytes:
-        """Serve the application UI or list transactions."""
+        """Serve the application UI or dispatch to JSON subhandlers."""
 
         try:
             params = GetParams(
@@ -95,97 +99,121 @@ class Controller:
             raise cherrypy.HTTPError(400) from error
 
         if cherrypy.request.wants == "json":
-            if params.resource == Resource.ACCOUNTS:
-                channel = "ledger:json:accounts"
-                publish_args = {}
-                if params.uid == 0:
-                    channel += ":new"
-                if params.uid:
-                    channel += ":single"
-                    publish_args = {
-                        "uid": params.uid
-                    }
-
-                return cherrypy.engine.publish(
-                    channel,
-                    **publish_args
-                ).pop().encode()
-
-            if resource == Resource.TRANSACTIONS:
-                channel = "ledger:json:transactions"
-                publish_args = {
-                    "query": params.q,
-                    "limit": 50
-                }
-                if params.uid == 0:
-                    channel += ":new"
-                    publish_args = {}
-                if params.uid:
-                    channel += ":single"
-                    publish_args = {
-                        "uid": params.uid
-                    }
-
-                return cherrypy.engine.publish(
-                    channel,
-                    **publish_args
-                ).pop().encode()
-
-            if resource == Resource.TAGS:
-                if not params.q:
-                    raise cherrypy.HTTPError(400)
-                return cherrypy.engine.publish(
-                    "ledger:json:tags",
-                    query=params.q,
-                ).pop().encode()
+            return self.get_json(params)
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/ledger/ledger.jinja.html"
         ).pop()
 
+    def get_json(self, params: GetParams) -> bytes:
+        """Dispatch to a JSON subhandler by resource."""
+        if params.resource == Resource.ACCOUNTS:
+            return self.json_accounts(params)
+
+        if params.resource == Resource.TRANSACTIONS:
+            return self.json_transactions(params)
+
+        if params.resource == Resource.TAGS:
+            return self.json_tags(params)
+
+        raise cherrypy.HTTPError(400)
+
+    @staticmethod
+    def json_accounts(params: GetParams) -> bytes:
+        """Render JSON for account resources."""
+        if params.uid == 0:
+            template = cherrypy.engine.publish(
+                "ledger:json:accounts:new",
+            ).pop()
+            return json.dumps(template).encode()
+
+        if params.uid > 0:
+            return cherrypy.engine.publish(
+                "ledger:json:accounts:single",
+                uid=params.uid
+            ).pop().encode()
+
+        return cherrypy.engine.publish(
+            "ledger:json:accounts",
+        ).pop().encode()
+
+    @staticmethod
+    def json_transactions(params: GetParams) -> bytes:
+        """Render JSON for transaction resources."""
+        if params.uid == 0:
+            template = cherrypy.engine.publish(
+                "ledger:json:transactions:new"
+            ).pop()
+            return json.dumps(template).encode()
+
+        if params.uid > 0:
+            return cherrypy.engine.publish(
+                "ledger:json:transactions:single",
+                uid=params.uid
+            ).pop().encode()
+
+        return cherrypy.engine.publish(
+            "ledger:json:transactions",
+            query=params.q,
+            limit=50
+        ).pop().encode()
+
+    @staticmethod
+    def json_tags(params: GetParams) -> bytes:
+        """Render JSON for tag resources."""
+
+        if not params.q:
+            raise cherrypy.HTTPError(400)
+        return cherrypy.engine.publish(
+            "ledger:json:tags",
+            query=params.q,
+        ).pop().encode()
+
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("json",))
     @cherrypy.tools.json_in()
-    def POST(self, resource: str, **kwargs: str) -> None:
+    def POST(self, resource: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            params = AccountParams(**cherrypy.request.json)
-            params.uid = 0
-            self.store_account(params)
+            account = AccountParams(**cherrypy.request.json)
+            account.uid = 0
+            self.store_account(account)
             self.clear_etag(resource)
-            return
+            return None
 
         if resource == Resource.TRANSACTIONS:
-            params = TransactionParams(**cherrypy.request.json)
-            print(params)
-            params.uid = 0
-            self.store_transaction(params)
+            transaction = TransactionParams(**cherrypy.request.json)
+            transaction.uid = 0
+            self.store_transaction(transaction)
             self.clear_etag(resource)
-            return
+            return None
 
         if resource == Resource.ACKNOWLEDGMENT:
-            params = AcknowledgmentParams(**cherrypy.request.json)
-            return self.process_acknowledgment(params)
+            acknowledgment = AcknowledgmentParams(**cherrypy.request.json)
+            self.process_acknowledgment(acknowledgment)
+            return None
 
         raise cherrypy.HTTPError(404)
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("json",))
     @cherrypy.tools.json_in()
-    def PUT(self, resource: str, uid: str, **kwargs: str) -> None:
+    def PUT(self, resource: str, uid: int) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            params = AccountParams(**cherrypy.request.json)
-            self.store_account(params)
+            account = AccountParams(**cherrypy.request.json)
+            account.uid = uid
+            self.store_account(account)
             self.clear_etag(resource)
             return
 
         if resource == Resource.TRANSACTIONS:
-            params = TransactionParams(**cherrypy.request.json)
-            self.store_transaction(params)
+            transaction = TransactionParams(**cherrypy.request.json)
+            transaction.uid = uid
+            self.store_transaction(transaction)
             self.clear_etag(resource)
             return
 
@@ -199,18 +227,18 @@ class Controller:
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
 
-        channel = ""
         if params.resource == Resource.ACCOUNTS:
-            channel = "ledger:remove:account"
+            result = cherrypy.engine.publish(
+                "ledger:remove:transaction",
+                params.uid
+            ).pop()
         elif params.resource == Resource.TRANSACTIONS:
-            channel = "ledger:remove:transaction"
+            result = cherrypy.engine.publish(
+                "ledger:remove:transaction",
+                params.uid
+            ).pop()
         else:
             raise cherrypy.HTTPError(501)
-
-        result = cherrypy.engine.publish(
-            channel,
-            params.uid
-        ).pop()
 
         if not result:
             raise cherrypy.HTTPError(500)
@@ -234,10 +262,11 @@ class Controller:
 
         if params.uid == 0:
             cherrypy.response.status = 201
-            cherrypy.response.headers["Content-Location"] = cherrypy.engine.publish(
+            redirect_url = cherrypy.engine.publish(
                 "app_url",
                 f"accounts/{upsert_id}"
             ).pop()
+            cherrypy.response.headers["Content-Location"] = redirect_url
         else:
             cherrypy.response.status = 204
 

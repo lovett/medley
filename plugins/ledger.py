@@ -383,7 +383,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if uid > 0:
             upsert_id = uid
 
-        return self._insert(
+        insert_id = self._insert(
             """INSERT INTO accounts (
                 id, name, url, opened_on, closed_on, note
             ) VALUES (?, ?, ?, ?, ?, ?)
@@ -396,20 +396,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (upsert_id, name, url, opened_on, closed_on, note)
         )
 
-    def remove_account(self, account_id: int) -> bool:
+        if uid == 0:
+            return insert_id
+        return uid
+
+
+    def remove_account(self, uid: int) -> bool:
         """Delete a row from the accounts table."""
 
         return self._execute(
             "DELETE FROM accounts WHERE id=?",
-            (account_id,)
+            (uid,)
         )
 
-    def remove_transaction(self, transaction_id: int) -> bool:
+    def remove_transaction(self, uid: int) -> bool:
         """Delete a row from the transactions table."""
 
         return self._execute(
             "DELETE FROM transactions WHERE id=?",
-            (transaction_id,)
+            (uid,)
         )
 
     def upsert_transaction(

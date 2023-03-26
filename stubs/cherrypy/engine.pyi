@@ -443,6 +443,7 @@ def publish(
         **kwargs: Any,
 ) -> List[FoodLogSearchResult]: ...
 
+
 @overload
 def publish(
         channel: Literal["foodlog:activity"],
@@ -537,6 +538,88 @@ def publish(
         channel: Literal["jinja:autolink"],
         value: str,
 ) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:acknowledgment"],
+        amount: float,
+        payee: str,
+        source: str
+) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:accounts:single"],
+        uid: int
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:accounts:new"]
+) -> List[Dict[str, Any]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:accounts"],
+) -> List[str]: ...
+
+@overload
+def publish(
+        channel: Literal["ledger:json:transactions:single"],
+        uid: int
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:transactions:new"]
+) -> List[Dict[str, Any]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:json:transactions"],
+        query: str,
+        limit: int
+) -> List[str]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:remove:account"],
+        uid: int
+) -> List[bool]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:remove:transaction"],
+        uid: int
+) -> List[bool]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:store:account"],
+        uid: int,
+        name: str,
+        opened_on: Optional[date],
+        closed_on: Optional[date],
+        url: Optional[str],
+        note: Optional[str],
+) -> List[int]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:store:transaction"],
+        transaction_id: int,
+        **kwargs: Any
+) -> List[None]: ...
 
 
 @overload
@@ -1132,48 +1215,6 @@ def publish(
 def publish(
         channel: Literal["ledger:json:transactions"],
 ) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:accounts"],
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:accounts:single"],
-        uid: int
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:transaction"],
-        uid: int
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:remove:transaction"],
-        uid: int,
-) -> List[bool]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:remove:account"],
-        uid: int,
-) -> List[bool]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:store:transaction"],
-        uid: int,
-        **kwargs: Any
-) -> List[None]: ...
 
 
 @overload
