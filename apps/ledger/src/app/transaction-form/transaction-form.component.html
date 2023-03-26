@@ -2,7 +2,7 @@
     <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteTransaction()" [resourceName]="singularResourceName"></app-delete-button>
 </header>
 
-<form (ngSubmit)="save()" [formGroup]="transactionForm">
+<form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
     <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid">
         <label for="payee">Payee</label>
         <input
@@ -10,6 +10,7 @@
             type="text"
             formControlName="payee"
         />
+        <p *ngIf="autocompletedFrom">Autocompleted from transaction #{{ autocompletedFrom.uid }} of {{ autocompletedFrom.occurred_on }}</p>
 
         <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
     </div>

@@ -113,9 +113,13 @@ class Controller:
 
             if resource == Resource.TRANSACTIONS:
                 channel = "ledger:json:transactions"
-                publish_args = {}
+                publish_args = {
+                    "query": params.q,
+                    "limit": 50
+                }
                 if params.uid == 0:
                     channel += ":new"
+                    publish_args = {}
                 if params.uid:
                     channel += ":single"
                     publish_args = {
@@ -125,12 +129,6 @@ class Controller:
                 return cherrypy.engine.publish(
                     channel,
                     **publish_args
-                ).pop().encode()
-
-            return cherrypy.engine.publish(
-                    "ledger:json:transactions",
-                    query=params.q,
-                    limit=50
                 ).pop().encode()
 
             if resource == Resource.TAGS:

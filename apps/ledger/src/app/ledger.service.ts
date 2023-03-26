@@ -79,4 +79,14 @@ export class LedgerService {
     deleteTransaction(uid: number): Observable<void> {
         return this.http.delete<void>(`/ledger/transactions/${uid}`);
     }
+
+    autocompletePayee(payee: string): Observable<TransactionList> {
+        return this.http.get<TransactionList>(
+            `/ledger/transactions?q=payee:${payee}&limit=1`,
+            {
+                headers: new HttpHeaders({
+                    'Content-Type': 'application/json'
+                }),
+            })
+    }
 }

@@ -3,9 +3,10 @@ import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/fo
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { Transaction } from '../models/transaction';
+import { TransactionList } from '../models/transactionList';
 import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, Subject, switchMap, debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { isObject, omitBy } from "lodash-es"
 
 function dateRange(group: FormGroup): {[key: string]: boolean} | null {
@@ -34,6 +35,7 @@ export class TransactionFormComponent {
     errorMessage = '';
     datesExpanded = false;
     singularResourceName: string;
+    autocompletedFrom: Transaction | null;
 
     constructor(
         private router: Router,
@@ -42,6 +44,7 @@ export class TransactionFormComponent {
         private ledgerService: LedgerService
     ) {
         this.singularResourceName = 'transaction';
+        this.autocompletedFrom = null;
     }
 
     ngOnInit(): void {
@@ -49,7 +52,7 @@ export class TransactionFormComponent {
 
         this.transactionForm = this.formBuilder.group({
             account_id: ['', {validators:Validators.required}],
-            payee: ['', {updatedOn: 'blur', validators: Validators.required}],
+            payee: ['', {validators: Validators.required}],
             amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
             dates: this.formBuilder.group({
                 occurred_on: this.today(),
@@ -63,6 +66,13 @@ export class TransactionFormComponent {
             (err: any) => console.log(err),
             () => console.log('All done getting transaction'),
         );
+
+        this.payee.valueChanges.pipe(
+            filter(value => value && value.length > 2),
+            debounceTime(1000),
+            distinctUntilChanged(),
+            switchMap(payee => this.ledgerService.autocompletePayee(payee)),
+        ).subscribe((result => this.autocomplete(result)));
     }
 
     ngOnDestory(): void {
@@ -76,6 +86,21 @@ export class TransactionFormComponent {
     get clearedOn() { return this.dates.controls['cleared_on'] }
     get note() { return this.transactionForm.controls['note'] }
 
+    autocomplete(searchResult: TransactionList) {
+        if (searchResult.count !== 1) {
+            this.autocompletedFrom = null;
+            return;
+        }
+
+        const transaction = searchResult.transactions[0];
+        this.transactionForm.patchValue({
+            account_id: transaction.account.uid,
+            payee: transaction.payee,
+            amount: transaction.amount,
+            note: transaction.note,
+        });
+        this.autocompletedFrom = transaction;
+    }
 
     today() {
         return formatDate(new Date(), 'yyyy-MM-dd', 'en');
