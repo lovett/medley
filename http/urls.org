@@ -1,4 +1,5 @@
 #+TITLE: Medley Curl Testbench
+#+STARTUP: overview hideblocks
 #+PROPERTY: header-args  :var host="http://localhost:8085"
 #+PROPERTY: header-args+ :var json="application/json"
 #+PROPERTY: header-args+ :var text="text/plain"
@@ -37,11 +38,6 @@ curl -I "$host/geodb"
 #+BEGIN_SRC sh :wrap export http
 curl -i -d "action=update" "$host/geodb"
 #+END_SRC
-
-#+RESULTS: geodb_post
-#+BEGIN_export http
-#+END_export
-
 * Headers
 ** GET
 Display the headers of the request.
@@ -91,6 +87,84 @@ curl -i -I "$host/"
 #+NAME: homepage_head_if_none_match
 #+BEGIN_SRC sh
 curl -i -I -H "If-None-Match: e3e5f241ef61db2c61aa327dc1c0394c" "$host/"
+#+END_SRC
+
+* Ledger
+** Tag
+*** GET tags
+#+NAME: ledger_get_transactions_json
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -H "Accept: $json" "$host/ledger/tags?q=tag1"
+#+END_SRC
+** Transaction
+*** POST transaction
+#+NAME: ledger_post_transaction_input
+#+BEGIN_EXAMPLE
+{
+  "account_id": 1,
+  "occurred_on": "2020-01-01",
+  "cleared_on": "2020-01-02",
+  "amount": 9.99,
+  "payee": "test payee",
+  "note": "test note",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+#+END_EXAMPLE
+
+#+NAME: ledger_post_transaction
+#+HEADER: :stdin ledger_post_transaction_input
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -i --data-binary @- -H "Accept: $json" -H "Content-Type: $json" "$host/ledger/transactions"
+#+END_SRC
+
+*** PUT transaction
+#+NAME: ledger_put_transaction_input
+#+BEGIN_EXAMPLE
+{
+  "uid": 1,
+  "account_id": 1,
+  "occurred_on": "2020-02-01",
+  "cleared_on": "2020-02-02",
+  "amount": 5.55,
+  "payee": "test payee updated",
+  "note": "test note updated",
+  "tags": ["tag4", "tag5"]
+}
+#+END_EXAMPLE
+
+#+NAME: ledger_put_transaction
+#+HEADER: :stdin ledger_put_transaction_input
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -i -X PUT --data-binary @- -H "Accept: $json" -H "Content-Type: $json" "$host/ledger/transactions/1"
+#+END_SRC
+
+*** GET transactions
+#+NAME: ledger_search_transactions_json
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -H "Accept: $json" "$host/ledger/transactions?q=asdf"
+#+END_SRC
+
+*** DELETE transaction
+#+NAME: ledger_delete_transaction
+#+BEGIN_SRC sh :wrap
+curl -i -X DELETE "$host/ledger/transactions/1"
+#+END_SRC
+
+** Acknowledgment
+*** POST acknowledgment
+#+NAME: ledger_post_acknowledgment_input
+#+BEGIN_EXAMPLE
+{
+  "amount": 9.99,
+  "payee": "test"
+  "source": "email",
+}
+#+END_EXAMPLE
+
+#+NAME: ledger_post_acknowledgment_input
+#+HEADER: :stdin ledger_post_acknowledgment_input
+#+BEGIN_SRC sh :wrap EXPORT json
+curl -i --data-binary @- -H "Accept: $json" -H "Content-Type: $json" "$host/ledger/acknowledgment"
 #+END_SRC
 
 * Logindex

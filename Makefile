@@ -37,6 +37,14 @@ RESOURCES := $(basename $(RESOURCES))
 RESOURCES := $(subst _test,,$(RESOURCES))
 RESOURCES := $(addprefix resources., $(RESOURCES))
 
+# A list of HTTP scripts in the form of http.[name of script]".
+HTTP_SCRIPTS := $(wildcard http/*.py)
+HTTP_SCRIPTS := $(notdir $(HTTP_SCRIPTS))
+HTTP_SCRIPTS := $(basename $(HTTP_SCRIPTS))
+HTTP_SCRIPTS := $(subst _shared,,$(HTTP_SCRIPTS))
+HTTP_SCRIPTS := $(addprefix http., $(HTTP_SCRIPTS))
+
+
 SHARED_JS_DIR := $(CURDIR)/apps/static/js
 
 TMUX_SESSION_NAME := medley
@@ -251,6 +259,11 @@ $(PLUGINS):
 # the ".cov" suffix can be omitted.
 $(RESOURCES):
 	@$(MAKE) --no-print-directory $@.cov
+
+
+# Run a single HTTP script
+$(HTTP_SCRIPTS):
+	python http/$(patsubst http.%,%,$@).py | less -R -E -X
 
 
 # Run lint checks across the project
