@@ -322,5 +322,5 @@ class Controller:
 
         cherrypy.engine.publish(
             "memorize:clear",
-            url.etag_key
+            url.etag_key + ":json"
         )
