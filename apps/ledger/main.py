@@ -36,7 +36,7 @@ class DeleteParams(BaseModel):
 
 class GetParams(BaseModel):
     """Parameters for GET requests."""
-    q: str = Field("", strip_whitespace=True, min_length=3, to_lower=True)
+    q: str = Field("", strip_whitespace=True, to_lower=True)
     uid: int
     offset: int = 0
     resource: Resource = Resource.NONE
