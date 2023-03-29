@@ -4,10 +4,10 @@ import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.alturl.main  # type: ignore
+import apps.ledger.main  # type: ignore
 
 
-class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
+class TestLedgerUrl(BaseCherryPyTestCase, ResponseAssertions):
     """
     Tests for the application controller.
     """
@@ -15,7 +15,7 @@ class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
     @classmethod
     def setUpClass(cls) -> None:
         """Start a faux cherrypy server"""
-        helpers.start_server(apps.alturl.main.Controller)
+        helpers.start_server(apps.ledger.main.Controller)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -25,15 +25,15 @@ class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
     def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
         response = self.request("/", method="HEAD")
-        self.assert_allowed(response, ("GET", "POST"))
+        self.assert_allowed(response, ("GET", "POST", "PUT", "DELETE"))
 
     def test_exposed(self) -> None:
         """The application is publicly available."""
-        self.assert_exposed(apps.alturl.main.Controller)
+        self.assert_exposed(apps.ledger.main.Controller)
 
     def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
-        self.assert_show_on_homepage(apps.alturl.main.Controller)
+        self.assert_show_on_homepage(apps.ledger.main.Controller)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from typing import Optional
 from typing import List
 import cherrypy
 from pydantic import BaseModel
+from pydantic import parse_obj_as
 from pydantic import ValidationError
 from pydantic import Field
 from resources.url import Url
@@ -82,8 +83,8 @@ class Controller:
     def GET(
             self,
             resource: Resource = Resource.NONE,
-            uid: Optional[int] = -1,
-            subresource: Optional[Subresource] = Subresource.NONE,
+            uid: int = -1,
+            subresource: Subresource = Subresource.NONE,
             **kwargs: str
     ) -> bytes:
         """Serve the application UI or dispatch to JSON subhandlers."""
@@ -93,7 +94,7 @@ class Controller:
                 resource=resource,
                 uid=uid,
                 subresource=subresource,
-                **kwargs
+                q=kwargs.get("q", "")
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
@@ -177,21 +178,30 @@ class Controller:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            account = AccountParams(**cherrypy.request.json)
+            account = parse_obj_as(
+                AccountParams,
+                cherrypy.request.json
+            )
             account.uid = 0
             self.store_account(account)
             self.clear_etag(resource)
             return None
 
         if resource == Resource.TRANSACTIONS:
-            transaction = TransactionParams(**cherrypy.request.json)
+            transaction = parse_obj_as(
+                TransactionParams,
+                cherrypy.request.json
+            )
             transaction.uid = 0
             self.store_transaction(transaction)
             self.clear_etag(resource)
             return None
 
         if resource == Resource.ACKNOWLEDGMENT:
-            acknowledgment = AcknowledgmentParams(**cherrypy.request.json)
+            acknowledgment = parse_obj_as(
+                AcknowledgmentParams,
+                cherrypy.request.json
+            )
             self.process_acknowledgment(acknowledgment)
             return None
 
@@ -204,22 +214,25 @@ class Controller:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            account = AccountParams(**cherrypy.request.json)
-            account.uid = uid
+            account = parse_obj_as(AccountParams, cherrypy.request.json)
+            account.uid = int(uid)
             self.store_account(account)
             self.clear_etag(resource)
             return
 
         if resource == Resource.TRANSACTIONS:
-            transaction = TransactionParams(**cherrypy.request.json)
-            transaction.uid = uid
+            transaction = parse_obj_as(
+                TransactionParams,
+                cherrypy.request.json
+            )
+            transaction.uid = int(uid)
             self.store_transaction(transaction)
             self.clear_etag(resource)
             return
 
         raise cherrypy.HTTPError(400)
 
-    def DELETE(self, resource: str, uid: int) -> None:
+    def DELETE(self, resource: Resource, uid: int) -> None:
         """Delete a transaction or account."""
 
         try:
@@ -229,7 +242,7 @@ class Controller:
 
         if params.resource == Resource.ACCOUNTS:
             result = cherrypy.engine.publish(
-                "ledger:remove:transaction",
+                "ledger:remove:account",
                 params.uid
             ).pop()
         elif params.resource == Resource.TRANSACTIONS:
