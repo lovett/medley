@@ -13,6 +13,7 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { DeleteButtonComponent } from './delete-button/delete-button.component';
 import { AddButtonComponent } from './add-button/add-button.component';
 import { TransactionFormComponent } from './transaction-form/transaction-form.component';
+import { MoneyPipe } from './money.pipe';
 
 @NgModule({
     declarations: [
@@ -25,7 +26,8 @@ import { TransactionFormComponent } from './transaction-form/transaction-form.co
         PageNotFoundComponent,
         DeleteButtonComponent,
         AddButtonComponent,
-        TransactionFormComponent
+        TransactionFormComponent,
+        MoneyPipe
     ],
     imports: [
         BrowserModule,
@@ -33,7 +35,9 @@ import { TransactionFormComponent } from './transaction-form/transaction-form.co
         AppRoutingModule,
         ReactiveFormsModule
     ],
-    providers: [],
+    providers: [
+        MoneyPipe
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule { }

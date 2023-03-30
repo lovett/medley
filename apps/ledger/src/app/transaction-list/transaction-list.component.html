@@ -15,7 +15,7 @@
         <tr *ngFor="let transaction of transactions">
             <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on }}</a></td>
             <td>{{ transaction.payee }}</td>
-            <td>{{ transaction.amount }}</td>
+            <td>{{ transaction.amount|money }}</td>
             <td><a [routerLink]="['/accounts', transaction.account.uid, 'form']">{{ transaction.account.name }}</a></td>
         </tr>
     </tbody>

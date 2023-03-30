@@ -8,6 +8,7 @@ import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
 import { Observable, Subject, switchMap, debounceTime, distinctUntilChanged, filter } from 'rxjs';
 import { isObject, omitBy } from "lodash-es"
+import { MoneyPipe } from '../money.pipe';
 
 function dateRange(group: FormGroup): {[key: string]: boolean} | null {
     const occurredOn = group.get('occurred_on')!.value;
@@ -41,7 +42,9 @@ export class TransactionFormComponent {
         private router: Router,
         private route: ActivatedRoute,
         private formBuilder: FormBuilder,
-        private ledgerService: LedgerService
+        private ledgerService: LedgerService,
+        private moneyPipe: MoneyPipe
+
     ) {
         this.singularResourceName = 'transaction';
         this.autocompletedFrom = null;
@@ -96,7 +99,7 @@ export class TransactionFormComponent {
         this.transactionForm.patchValue({
             account_id: transaction.account.uid,
             payee: transaction.payee,
-            amount: transaction.amount,
+            amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             note: transaction.note,
         });
         this.autocompletedFrom = transaction;
@@ -111,7 +114,7 @@ export class TransactionFormComponent {
 
         this.transactionForm.patchValue({
             payee: transaction.payee,
-            amount: transaction.amount,
+            amount: transaction.amount/100,
             account: transaction.account,
             dates: {
                 occurred_on: transaction.occurred_on,

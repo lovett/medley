@@ -4,7 +4,7 @@ export type Transaction = {
     uid: number,
     account: Account,
     payee: string,
-    amount: Number,
+    amount: number,
     occurred_on: Date,
     cleared_on?: Date,
     note: string,
