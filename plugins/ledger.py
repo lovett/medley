@@ -214,11 +214,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return {
             "uid": 0,
-            "name": "",
             "opened_on": today_formatted,
-            "closed_on": None,
-            "url": "",
-            "note": ""
         }
 
     def account_json_new(self) -> str:
@@ -352,16 +348,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "%Y-%m-%d"
         ).pop()
 
-        new_account = self.account_json_new()
+        new_account = self.account_new()
 
         return {
             "uid": 0,
             "account": new_account,
             "occurred_on": today_formatted,
-            "cleared_on": None,
-            "amount": 0,
-            "payee": "",
-            "note": ""
         }
 
     def transaction_json_new(self) -> str:

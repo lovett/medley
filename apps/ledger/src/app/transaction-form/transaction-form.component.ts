@@ -110,9 +110,9 @@ export class TransactionFormComponent {
         this.transactionForm.reset();
 
         this.transactionForm.patchValue({
-            account_id: transaction.account?.uid,
             payee: transaction.payee,
             amount: transaction.amount,
+            account: transaction.account,
             dates: {
                 occurred_on: transaction.occurred_on,
                 cleared_on: transaction.cleared_on,

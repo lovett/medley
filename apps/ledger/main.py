@@ -1,7 +1,6 @@
 """Banking transactions"""
 
 import datetime
-import json
 from enum import Enum
 from typing import Optional
 from typing import List
@@ -124,10 +123,9 @@ class Controller:
     def json_accounts(params: GetParams) -> bytes:
         """Render JSON for account resources."""
         if params.uid == 0:
-            template = cherrypy.engine.publish(
+            return cherrypy.engine.publish(
                 "ledger:json:accounts:new",
-            ).pop()
-            return json.dumps(template).encode()
+            ).pop().encode()
 
         if params.uid > 0:
             return cherrypy.engine.publish(
@@ -143,10 +141,9 @@ class Controller:
     def json_transactions(params: GetParams) -> bytes:
         """Render JSON for transaction resources."""
         if params.uid == 0:
-            template = cherrypy.engine.publish(
+            return cherrypy.engine.publish(
                 "ledger:json:transactions:new"
-            ).pop()
-            return json.dumps(template).encode()
+            ).pop().encode()
 
         if params.uid > 0:
             return cherrypy.engine.publish(
