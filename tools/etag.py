@@ -76,6 +76,9 @@ class Tool(cherrypy.Tool):
 
         """
 
+        if cherrypy.request.method != "GET":
+            return
+
         if not cherrypy.config.get("etags"):
             return
 
