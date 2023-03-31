@@ -281,7 +281,7 @@ class Controller:
             cherrypy.response.status = 204
 
     @staticmethod
-    def store_transaction(params: TransactionParams) -> bytes:
+    def store_transaction(params: TransactionParams) -> None:
         """Upsert a transaction record."""
 
         upsert_id = cherrypy.engine.publish(
@@ -296,7 +296,7 @@ class Controller:
             tags=params.tags
         ).pop()
 
-        return json.dumps({"uid": upsert_id}).encode()
+        cherrypy.response.status = 204
 
     @staticmethod
     def process_acknowledgment(params: AcknowledgmentParams) -> None:

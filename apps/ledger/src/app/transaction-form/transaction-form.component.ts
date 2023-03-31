@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
-import { Transaction } from '../models/transaction';
+import { Transaction, TransactionDraft } from '../models/transaction';
 import { TransactionList } from '../models/transactionList';
 import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
@@ -70,12 +70,14 @@ export class TransactionFormComponent {
             () => console.log('All done getting transaction'),
         );
 
-        this.payee.valueChanges.pipe(
-            filter(value => value && value.length > 2),
-            debounceTime(1000),
-            distinctUntilChanged(),
-            switchMap(payee => this.ledgerService.autocompletePayee(payee)),
-        ).subscribe((result => this.autocomplete(result)));
+        if (id === 0) {
+            this.payee.valueChanges.pipe(
+                filter(value => value && value.length > 2),
+                debounceTime(1000),
+                distinctUntilChanged(),
+                switchMap(payee => this.ledgerService.autocompletePayee(payee)),
+            ).subscribe((result => this.autocomplete(result)));
+        }
     }
 
     ngOnDestory(): void {
@@ -114,8 +116,8 @@ export class TransactionFormComponent {
 
         this.transactionForm.patchValue({
             payee: transaction.payee,
-            amount: transaction.amount/100,
-            account: transaction.account,
+            amount: this.moneyPipe.transform(transaction.amount, 'plain'),
+            account_id: transaction.account.uid,
             dates: {
                 occurred_on: transaction.occurred_on,
                 cleared_on: transaction.cleared_on,
@@ -159,24 +161,25 @@ export class TransactionFormComponent {
             return;
         }
 
-        const outboundTransaction: Transaction = {
-            ...this.transaction,
-            ...omitBy(this.transactionForm.value, (v, _) => {
-                return isObject(v);
-            }),
+        const draft: TransactionDraft = {
+            'uid': this.transaction!.uid,
             'account_id': this.accountId.value,
-            ...this.dates.value,
+            'payee': this.payee.value,
+            'amount': this.amount.value * 100,
+            'occurred_on': this.occurredOn.value,
+            'cleared_on': this.clearedOn.value,
+            'note': this.note.value,
         };
 
-        if (outboundTransaction.uid === 0) {
-            this.ledgerService.addTransaction(outboundTransaction).subscribe(
+        if (draft.uid === 0) {
+            this.ledgerService.addTransaction(draft).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );
         }
 
-        if (outboundTransaction.uid > 0) {
-            this.ledgerService.updateTransaction(outboundTransaction).subscribe(
+        if (draft.uid > 0) {
+            this.ledgerService.updateTransaction(draft).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );

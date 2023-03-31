@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Account } from './models/account';
-import { Transaction } from './models/transaction';
+import { Transaction, TransactionDraft } from './models/transaction';
 import { TransactionList } from './models/transactionList';
 
 @Injectable({
@@ -39,7 +39,7 @@ export class LedgerService {
         })
     }
 
-    addTransaction(transaction: Transaction): Observable<Transaction> {
+    addTransaction(transaction: TransactionDraft): Observable<Transaction> {
         console.log(transaction);
         return this.http.post<Transaction>('/ledger/transactions', transaction, {
             headers: new HttpHeaders({
@@ -60,7 +60,7 @@ export class LedgerService {
         return this.http.put<void>(url, account, {headers,});
     }
 
-    updateTransaction(transaction: Transaction): Observable<void> {
+    updateTransaction(transaction: TransactionDraft): Observable<void> {
         const headers = new HttpHeaders({
             'Content-Type': 'application/json'
         });

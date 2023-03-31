@@ -419,7 +419,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         account_id = kwargs.get("account_id")
         occurred_on = kwargs.get("occurred_on")
         cleared_on = kwargs.get("cleared_on", 0)
-        amount = kwargs.get("amount", 0) * 100
+        amount = kwargs.get("amount", 0)
         payee = kwargs.get("payee", "")
         note = kwargs.get("note", "")
         tags = kwargs.get("tags", [])

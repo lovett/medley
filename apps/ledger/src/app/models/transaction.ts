@@ -7,5 +7,9 @@ export type Transaction = {
     amount: number,
     occurred_on: Date,
     cleared_on?: Date,
-    note: string,
+    note?: string,
+}
+
+export type TransactionDraft = Omit<Transaction, "account"> & {
+    account_id: number,
 }
