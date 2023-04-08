@@ -1,5 +1,6 @@
 """Test suite for the clock plugin."""
 
+from collections import namedtuple
 from datetime import datetime
 import time
 from typing import Any
@@ -271,6 +272,43 @@ class TestClock(Subscriber):
 
         result = self.plugin.duration_words(seconds=0)
         self.assertEqual(result, "")
+
+    def test_scheduled_success(self) -> None:
+        """A schedule is active when a datetime is in-range."""
+
+        now = datetime.now()
+
+        Case = namedtuple(
+            "Case",
+            ["schedule", "hour", "minute", "result", "label"])
+
+        cases = (
+            Case("11:00 PM\n9:00 AM", 23, 0, True, "start"),
+            Case("11:00 PM\n9:00 AM", 22, 59, False, "before start"),
+            Case("11:00 PM\n9:00 AM", 23, 1, True, "after start"),
+            Case("11:00 PM\n9:00 AM", 9, 0, True, "end"),
+            Case("11:00 PM\n9:00 AM", 8, 59, True, "before end"),
+            Case("11:00 PM\n9:00 AM", 10, 0, False, "after end"),
+            Case("11:00 PM\n9:00 AM", 0, 0, True, "midnight"),
+            Case("11:00 AM\n12:00 PM", 11, 0, True, "start 2"),
+            Case("11:00 AM\n12:00 PM", 10, 59, False, "before start 2"),
+            Case("11:00 AM\n12:00 PM", 11, 1, True, "after start 2"),
+            Case("11:00 AM\n12:00 PM", 12, 0, True, "end 2"),
+            Case("11:00 AM\n12:00 PM", 11, 59, True, "before end 2"),
+            Case("11:00 AM\n12:00 PM", 12, 1, False, "after end 2"),
+        )
+
+        for case in cases:
+            result = self.plugin.scheduled(
+                [case.schedule],
+                now.replace(
+                    hour=case.hour,
+                    minute=case.minute,
+                    second=0,
+                    microsecond=0
+                )
+            )
+            self.assertEqual(result, case.result, case.label)
 
 
 if __name__ == "__main__":

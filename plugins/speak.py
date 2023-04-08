@@ -10,12 +10,15 @@ from typing import cast
 from typing import Optional
 import wave
 import cherrypy
-from mimic3_tts import (
-    AudioResult,
-    Mimic3Settings,
-    Mimic3TextToSpeechSystem,
-    SSMLSpeaker,
-)
+try:
+    from mimic3_tts import (
+        AudioResult,
+        Mimic3Settings,
+        Mimic3TextToSpeechSystem,
+        SSMLSpeaker,
+    )
+except ImportError:
+    pass
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -147,12 +150,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return document.strip()
 
     def muted(self) -> bool:
-        """Determine whether the application has been muted for any reason."""
-
-        if self.muted_temporarily():
-            return True
-
-        return self.muted_by_schedule()
+        """Whether the application has been muted."""
+        return self.muted_temporarily() or self.muted_by_schedule()
 
     @staticmethod
     def muted_temporarily() -> bool:

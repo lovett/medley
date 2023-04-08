@@ -263,12 +263,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ""
 
     @staticmethod
-    def scheduled(schedules: List[str]) -> bool:
+    def scheduled(schedules: List[str], now: Optional[datetime]) -> bool:
         """Whether the current time falls within a set of ranges."""
 
-        today = date.today()
-        tomorrow = today + timedelta(1)
-        now = datetime.now()
+        if not now:
+            now = datetime.now()
 
         for schedule in schedules:
             schedule_lines = [
@@ -286,14 +285,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 except ValueError:
                     return False
 
-            start = datetime.combine(today, time_range[0].time())
+            start = datetime.combine(now, time_range[0].time())
+            end = datetime.combine(now, time_range[1].time())
 
-            if time_range[1] < time_range[0]:
-                end = datetime.combine(tomorrow, time_range[1].time())
-            else:
-                end = datetime.combine(today, time_range[1].time())
+            if start < end:
+                return start <= now <= end
 
-            if start <= now <= end:
-                return True
+            return start <= now or now <= end
 
         return False
