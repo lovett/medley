@@ -398,6 +398,7 @@ def publish(
 def publish(
         channel: Literal["clock:scheduled"],
         schedules: List[str],
+        now: Optional[datetime]
 ) -> List[bool]: ...
 
 
