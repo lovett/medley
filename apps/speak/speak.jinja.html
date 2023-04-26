@@ -5,6 +5,10 @@
     {{ macros.asset("css/speak.css") }}
 {% endblock %}
 
+{% block scripts %}
+    {{ macros.asset("js/speak.js") }}
+{% endblock %}
+
 {% block page_body %}
     {{ macros.svgSymbols("edit", "muted", "unmuted") }}
 
@@ -68,6 +72,22 @@
                     <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
                     Edit schedule
                 </button>
+            </form>
+        </div>
+
+
+        <div id="tryout">
+            <form method="POST" action="{{ app_url }}">
+                <div class="field">
+                    <textarea
+                        placeholder="Text to speak"
+                        name="statement"></textarea>
+                </div>
+                <div class="field">
+                    <button data-default-label="Save"
+                            data-progress-label="Please wait"
+                    >Speak</button>
+                </div>
             </form>
         </div>
     </main>

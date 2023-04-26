@@ -1,24 +1,9 @@
-"""Text-to-speech synthesis via Mimic3.
+"""Text-to-speech synthesis."""
 
-See:
-https://github.com/MycroftAI/mimic3/blob/master/mimic3_http/synthesis.py
-"""
-
-import io
 import re
+import subprocess
 from typing import cast
-from typing import Optional
-import wave
 import cherrypy
-try:
-    from mimic3_tts import (
-        AudioResult,
-        Mimic3Settings,
-        Mimic3TextToSpeechSystem,
-        SSMLSpeaker,
-    )
-except ImportError:
-    pass
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -26,13 +11,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     def __init__(self, bus: cherrypy.process.wspbus.Bus) -> None:
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
-
-        self.speech_engine: Optional[Mimic3TextToSpeechSystem] = None
-        self.speaker = "9017"
-        self.voice = "en_US/hifi-tts_low"
-        self.length_scale = 1.5
-        self.noise_scale = 0.4
-        self.noise_w = 0.33
 
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
@@ -46,66 +24,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("speak:mute", self.mute)
         self.bus.subscribe("speak:unmute", self.unmute)
         self.bus.subscribe("speak", self.speak)
-        self.bus.subscribe("registry:updated", self.restart_engine)
-
-    def start_engine(self) -> None:
-        """Initialize the Mimic3 speech engine based on registry config."""
-
-        config = cherrypy.engine.publish(
-            "registry:search:dict",
-            keys=(
-                "speak:mimic3:speaker",
-                "speak:mimic3:voice",
-                "speak:mimic3:length_scale",
-                "speak:mimic3:noise_scale",
-            ),
-            key_slice=2
-        ).pop()
-
-        if config.get("voice"):
-            self.voice = config["voice"]
-
-        if config.get("speaker"):
-            self.speaker = config["speaker"]
-
-        if config.get("length_scale"):
-            self.length_scale = config["length_scale"]
-
-        if config.get("noise_scale"):
-            self.noise_scale = config["noise_scale"]
-
-        if config.get("noise_w"):
-            self.noise_w = config["noise_w"]
-
-        self.speech_engine = Mimic3TextToSpeechSystem(
-            Mimic3Settings(
-                voice=self.voice,
-                speaker=self.speaker,
-                length_scale=self.length_scale,
-                noise_scale=self.noise_scale,
-                noise_w=self.noise_w
-            )
-        )
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak:start",
-            f"Started speech engine with {self.voice}/{self.speaker}"
-        )
-
-    def restart_engine(self, key: str) -> None:
-        """Re-query the speech engine if registry configuration changes."""
-
-        if not key.startswith("speak:mimic3"):
-            return
-
-        self.start_engine()
-
-        cherrypy.engine.publish(
-            "applog:add",
-            "speak:restart",
-            f"Restarted speech engine due to registry change of {key}"
-        )
 
     @staticmethod
     def adjust_pronunciation(statement: str) -> str:
@@ -188,71 +106,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     ) -> bool:
         """Speak a statement in one of the supported voices."""
 
-        if not self.speech_engine:
-            self.start_engine()
-
-        if not self.speech_engine:
-            return False
-
         adjusted_statement = self.adjust_pronunciation(statement)
 
-        ssml_string = self.ssml(adjusted_statement)
+        #ssml_string = self.ssml(adjusted_statement)
+        ssml_string = adjusted_statement
 
-        hash_digest = cherrypy.engine.publish(
-            "hasher:value",
-            ssml_string
+        config = cherrypy.engine.publish(
+            "registry:search:dict",
+            "speak:command",
+            key_slice=2
         ).pop()
 
-        cache_key = f"speak:{hash_digest}"
+        tts = subprocess.run(
+            config.get("tts").split(),
+            input=ssml_string.encode(),
+            capture_output=True
+        )
 
-        cached_wav = cherrypy.engine.publish(
-            "cache:get",
-            cache_key
-        ).pop()
-
-        if cached_wav:
-            cherrypy.engine.publish(
-                "scheduler:add",
-                1,
-                "audio:play_bytes",
-                cached_wav
-            )
-
-            return True
-
-        results = SSMLSpeaker(self.speech_engine).speak(ssml_string)
-
-        with io.BytesIO() as wav_io:
-            wav_file: wave.Wave_write = wave.open(wav_io, "wb")
-
-            for result in results:
-                if not isinstance(result, AudioResult):
-                    continue
-
-                try:
-                    wav_file.setframerate(result.sample_rate_hz)
-                    wav_file.setsampwidth(result.sample_width_bytes)
-                    wav_file.setnchannels(result.num_channels)
-                except wave.Error:
-                    pass
-
-                wav_file.writeframes(result.audio_bytes)
-
-            cherrypy.engine.publish(
-                "scheduler:add",
-                1,
-                "audio:play_bytes",
-                wav_io.getvalue()
-            )
-
-            cherrypy.engine.publish(
-                "cache:set",
-                cache_key,
-                wav_io.getvalue(),
-                lifespan_seconds=2592000  # 1 month
-            )
-
-            wav_file.close()
+        subprocess.run(
+            config.get("playback").split(),
+            input=tts.stdout
+        )
 
         return True
 
