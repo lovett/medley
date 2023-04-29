@@ -6,7 +6,6 @@ geoip2==4.6.0
 httplib2==0.22.0
 importlib-resources==5.12.0
 mistletoe==1.0.1
-networkx==3.1
 pydantic==1.10.7
 pytz==2023.3
 requests==2.28.2
