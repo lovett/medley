@@ -263,7 +263,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ""
 
     @staticmethod
-    def scheduled(schedules: List[str], now: Optional[datetime]) -> bool:
+    def scheduled(schedules: List[str], now: Optional[datetime] = None) -> bool:
         """Whether the current time falls within a set of ranges."""
 
         if not now:
