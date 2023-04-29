@@ -9,6 +9,16 @@
     {{ macros.asset("js/speak.js") }}
 {% endblock %}
 
+{% block main_toolbar %}
+    <nav id="main-toolbar">
+        <a id="edit-record" class="template-edit" href="{{ edit_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </nav>
+{% endblock %}
+
+
 {% block page_body %}
     {{ macros.svgSymbols("edit", "muted", "unmuted") }}
 
@@ -75,20 +85,17 @@
             </form>
         </div>
 
-
-        <div id="tryout">
-            <form method="POST" action="{{ app_url }}">
-                <div class="field">
-                    <textarea
-                        placeholder="Text to speak"
-                        name="statement"></textarea>
-                </div>
-                <div class="field">
-                    <button data-default-label="Save"
-                            data-progress-label="Please wait"
-                    >Speak</button>
-                </div>
-            </form>
-        </div>
+        <form id="tryout" method="POST" action="{{ app_url }}">
+            <div class="field">
+                <textarea
+                    placeholder="Text to speak"
+                    name="statement"></textarea>
+            </div>
+            <div class="field">
+                <button data-default-label="Speak"
+                        data-progress-label="Please wait"
+                >Speak</button>
+            </div>
+        </form>
     </main>
 {% endblock %}

@@ -78,8 +78,8 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         self.assertEqual(response.code, 204)
 
         self.assertEqual(
-            publish_mock.call_args[0][1],
-            "hello not muted"
+            publish_mock.call_args[0],
+            ("scheduler:add", 1, "speak", "hello not muted")
         )
 
 

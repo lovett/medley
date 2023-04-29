@@ -89,12 +89,19 @@ class Controller:
             "/registry",
         ).pop()
 
+        edit_url = cherrypy.engine.publish(
+            "app_url",
+            "/registry",
+            {"q": "speak:command"}
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/speak/speak.jinja.html",
             muted_temporarily=muted_temporarily,
             muted_by_schedule=muted_by_schedule,
             registry_url=registry_url,
+            edit_url=edit_url,
             schedules=schedules
         ).pop()
 
@@ -145,6 +152,8 @@ class Controller:
             )
 
         cherrypy.engine.publish(
+            "scheduler:add",
+            1,
             "speak",
             params.statement
         )

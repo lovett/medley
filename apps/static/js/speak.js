@@ -5,6 +5,9 @@ MEDLEY.speak = (function () {
      * Post the form to the speak app.
      */
     async function speakNow(e) {
+        if (e.target.id !== 'tryout') {
+            return;
+        }
         e.preventDefault();
 
         const button = e.target.querySelector('BUTTON')
@@ -19,8 +22,10 @@ MEDLEY.speak = (function () {
             body: payload
         })
 
-        button.removeAttribute('disabled')
-        button.innerText = button.dataset.defaultLabel;
+        setTimeout(() => {
+            button.removeAttribute('disabled');
+            button.innerText = button.dataset.defaultLabel;
+        }, 1000);
     }
 
     return {

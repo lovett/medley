@@ -100,33 +100,42 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             schedules
         ).pop()
 
-    def speak(
-            self,
-            statement: str
-    ) -> bool:
-        """Speak a statement in one of the supported voices."""
+    def speak(self, statement: str) -> bool:
+        """Send text to the configured speech command."""
+
+        commands = cherrypy.engine.publish(
+            "registry:first:value",
+            key="speak:commands",
+            memorize=True,
+            default=False
+        ).pop()
+
+        if not commands:
+            cherrypy.engine.publish(
+                "applog:add",
+                "speak:speak",
+                "Registry key speak:commands not found."
+            )
+            return False
 
         adjusted_statement = self.adjust_pronunciation(statement)
 
-        #ssml_string = self.ssml(adjusted_statement)
-        ssml_string = adjusted_statement
+        proc_in = adjusted_statement.encode()
+        for command in commands.splitlines():
+            try:
+                proc_in = subprocess.check_output(
+                    command.split(),
+                    input=proc_in,
+                )
 
-        config = cherrypy.engine.publish(
-            "registry:search:dict",
-            "speak:command",
-            key_slice=2
-        ).pop()
-
-        tts = subprocess.run(
-            config.get("tts").split(),
-            input=ssml_string.encode(),
-            capture_output=True
-        )
-
-        subprocess.run(
-            config.get("playback").split(),
-            input=tts.stdout
-        )
+            except FileNotFoundError:
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "speak:speak",
+                    ("Cannot perform text-to-speech. "
+                     f"Unable to run TTS command {command}.")
+                )
+                return False
 
         return True
 
