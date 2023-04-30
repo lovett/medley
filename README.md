@@ -4,7 +4,7 @@ A collection of small web applications.
 
 ## Development Setup
 
-Medley is written in Python and targets version 3.10. Setup is driven by `make`.
+Medley is written in Python and targets version 3.11. Setup is driven by `make`.
 
 ```sh
 # Create a virtual environment
