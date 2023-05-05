@@ -100,7 +100,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             schedules
         ).pop()
 
-    def speak(self, statement: str) -> bool:
+    def speak(self, statement: str, noadjust: bool = False) -> bool:
         """Send text to the configured speech command."""
 
         commands = cherrypy.engine.publish(
@@ -118,9 +118,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
             return False
 
-        adjusted_statement = self.adjust_pronunciation(statement)
+        if noadjust:
+            proc_in = statement.encode()
+        else:
+            proc_in = self.adjust_pronunciation(statement).encode()
 
-        proc_in = adjusted_statement.encode()
         for command in commands.splitlines():
             try:
                 proc_in = subprocess.check_output(

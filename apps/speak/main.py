@@ -35,6 +35,7 @@ class PostParams(BaseModel):
     statement: str = Field("", strip_whitespace=True)
     action: Action = Action.NONE
     confirm: bool = False
+    noadjust: bool = False
 
 
 class Controller:
@@ -155,7 +156,8 @@ class Controller:
             "scheduler:add",
             1,
             "speak",
-            params.statement
+            params.statement,
+            noadjust=params.noadjust
         )
 
         cherrypy.response.status = 204
