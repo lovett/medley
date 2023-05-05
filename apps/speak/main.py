@@ -32,7 +32,7 @@ class GetParams(BaseModel):
 class PostParams(BaseModel):
     """Parameters for POST requests."""
     subresource: Subresource = Subresource.NONE
-    statement: str = Field("", strip_whitespace=True)
+    statement: str = Field("", strip_whitespace=True, min_length=1)
     action: Action = Action.NONE
     confirm: bool = False
     noadjust: bool = False

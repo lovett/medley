@@ -103,6 +103,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def speak(self, statement: str, noadjust: bool = False) -> bool:
         """Send text to the configured speech command."""
 
+        if statement.strip() == "":
+            return False
+
         commands = cherrypy.engine.publish(
             "registry:first:value",
             key="speak:commands",

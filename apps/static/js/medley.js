@@ -110,6 +110,13 @@ var MEDLEY = (function () {
             el.innerHTML = `<p>${message}</p>`;
         },
 
+        clearMessage: function() {
+            const el = document.getElementById('app-message');
+            el.setAttribute('hidden', '');
+            el.classList.remove('error')
+            el.innerHTML = '';
+        },
+
         setErrorMessage: function (message) {
             const el = document.getElementById('app-message');
             el.removeAttribute('hidden');

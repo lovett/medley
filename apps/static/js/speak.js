@@ -10,11 +10,17 @@ MEDLEY.speak = (function () {
         }
         e.preventDefault();
 
-        const button = e.target.querySelector('BUTTON')
-        button.setAttribute('disabled', true);
-        button.innerText = button.dataset.progressLabel;
+        MEDLEY.deactivateForm(e.target);
 
         let payload = new FormData(e.target)
+
+        if (payload.get('statement').length < 1) {
+            MEDLEY.setErrorMessage('There was nothing to say.');
+            MEDLEY.reactivateForm(e.target);
+            return;
+        }
+
+        MEDLEY.clearMessage();
 
         const response = await fetch(e.target.getAttribute('action'), {
             method: 'POST',
@@ -22,10 +28,7 @@ MEDLEY.speak = (function () {
             body: payload
         })
 
-        setTimeout(() => {
-            button.removeAttribute('disabled');
-            button.innerText = button.dataset.defaultLabel;
-        }, 1000);
+        setTimeout(() => MEDLEY.reactivateForm(e.target), 1000);
     }
 
     return {
