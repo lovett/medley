@@ -11,16 +11,21 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
+        <a class="template-add" href="{{ pronunciation_url }}">
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Pronunciation Adjustment
+        </a>
+
         <a id="edit-record" class="template-edit" href="{{ edit_url }}">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-            Edit
+            Configuration
         </a>
     </nav>
 {% endblock %}
 
 
 {% block page_body %}
-    {{ macros.svgSymbols("edit", "muted", "unmuted") }}
+    {{ macros.svgSymbols("edit", "muted", "unmuted", "new-item") }}
 
     <main>
         <div id="status">
@@ -94,7 +99,7 @@
             <div class="field">
                 <label for="noadjust">
                     <input id="noadjust" type="checkbox" name="noadjust" value="1" />
-                    Disable adjustments.
+                    Disable pronunciation adjustments.
                 </label>
             </div>
             <div class="field">

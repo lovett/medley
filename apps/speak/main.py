@@ -93,7 +93,13 @@ class Controller:
         edit_url = cherrypy.engine.publish(
             "app_url",
             "/registry",
-            {"q": "speak:command"}
+            {"q": "speak"}
+        ).pop()
+
+        pronunciation_url = cherrypy.engine.publish(
+            "app_url",
+            "/registry/0/new/",
+            {"key": "speak:adjustment"}
         ).pop()
 
         return cherrypy.engine.publish(
@@ -103,6 +109,7 @@ class Controller:
             muted_by_schedule=muted_by_schedule,
             registry_url=registry_url,
             edit_url=edit_url,
+            pronunciation_url=pronunciation_url,
             schedules=schedules
         ).pop()
 
