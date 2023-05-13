@@ -49,10 +49,7 @@ class TestHtmlTextParser(unittest.TestCase):
         self.assertEqual(final, "Hello world hello")
 
     def test_ignore_title_tag(self) -> None:
-        """If there is plain text before or after a whitelisted tag, it is
-        preserved.
-
-        """
+        """The title tag is ignored if not whitelisted."""
 
         initial = """
         <html>
@@ -64,6 +61,18 @@ class TestHtmlTextParser(unittest.TestCase):
         final = self.parser.parse(initial)
 
         self.assertEqual(final, "Hello world")
+
+    def test_handle_blank_class(self) -> None:
+        """If a tag's class attribute has no value, it is ignored."""
+
+        initial = """
+        <p class>No class here</p>
+        </html>
+        """
+
+        final = self.parser.parse(initial)
+
+        self.assertEqual(final, "No class here")
 
     def test_malformed_markup(self) -> None:
         """If the markup is malformed, parsing still works."""

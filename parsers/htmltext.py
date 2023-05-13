@@ -76,7 +76,11 @@ class Parser(HTMLParser):  # pylint: disable=abstract-method
 
         classes = cast(
             Tuple[str, ...],
-            tuple({attr[1] for attr in attrs if attr[0] == "class"})
+            tuple({
+                attr[1]
+                for attr in attrs
+                if attr[0] == "class" and attr[1]
+            })
         )
 
         tag_name = tag
