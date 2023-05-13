@@ -32,8 +32,11 @@ def print_response(response: Response) -> None:
     print("")
 
     if response.content and response.headers:
-        print(highlight(
-            json.dumps(response.json(), indent=4),
-            JsonLexer(),
-            Terminal256Formatter()
-        ))
+        try:
+            print(highlight(
+                json.dumps(response.json(), indent=4),
+                JsonLexer(),
+                Terminal256Formatter()
+            ))
+        except json.decoder.JSONDecodeError:
+            print(response.content.decode())

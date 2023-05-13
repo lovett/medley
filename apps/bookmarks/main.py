@@ -69,7 +69,7 @@ class Controller:
 
         cherrypy.response.status = 204
 
-    @cherrypy.tools.provides(formats=("html",))
+    @cherrypy.tools.provides(formats=("html", "json"))
     def GET(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 

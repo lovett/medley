@@ -126,6 +126,26 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/123", method="DELETE")
         self.assert_status(response, 204)
 
+    @mock.patch("cherrypy.engine.publish")
+    def test_wayback(self, publish_mock: mock.Mock) -> None:
+        """Wayback lookup requests accommodate json."""
+
+        def side_effect(*args: str, **_: str) -> Any:
+            """Side effects local function"""
+            print(args)
+            if args[0] == "urlfetch:get:json":
+                return [{}]
+            return mock.DEFAULT
+
+        publish_mock.side_effect = side_effect
+
+        response = self.request(
+            "/",
+            accept="json",
+            wayback="http://example.com"
+        )
+        self.assert_status(response, 200)
+
 
 if __name__ == "__main__":
     unittest.main()
