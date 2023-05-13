@@ -94,8 +94,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         """)
 
-        self.add_full_text()
-
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
@@ -229,6 +227,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         SELECT url as 'url [url]'
         FROM bookmarks
         WHERE retrieved IS NULL
+        ORDER BY added DESC
         LIMIT 1""")
 
         if not url:
