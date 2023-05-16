@@ -92,6 +92,22 @@
 
             {% endfor %}
         </ul>
+
+        <footer class="pagination">
+            {% if before_url %}
+                <a href="{{ before_url }}" class="previous">
+                    <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+                    Previous
+                </a>
+            {% endif %}
+
+            {% if after_url %}
+                <a href="{{ after_url }}" class="next">
+                    Next
+                    <svg class="icon"><use xlink:href="#icon-arrow-right"></use></svg>
+                </a>
+            {% endif %}
+        </footer>
     </div>
 
 {% endblock %}

@@ -14,21 +14,24 @@ from resources.url import Url
 ViewAndData = Tuple[str, Dict[str, Any]]
 
 
-def view(url: Url, search: str = "") -> ViewAndData:
+def view(url: Url) -> ViewAndData:
     """Dispatch to either the index or story viewer based on URL keywords."""
 
     cache_lifespan = 900
+    request_url = f"{url.base_address}{url.path}/.json"
+    request_params = url.query
 
-    request_url = f"{url.address}/.json"
-    params = None
-    if search:
-        request_url = f"{url.address}/search/.json"
-        params = {"q": search, "sort": "new", "restrict_sr": 1}
+    print(request_params)
+
+    if request_params and "q" in request_params:
+        request_url = f"{url.base_address}{url.path}/search/.json"
+        request_params["sort"] = "new"
+        request_params["restrict_sr"] = 1
 
     response = cherrypy.engine.publish(
         "urlfetch:get:json",
         request_url,
-        params=params,
+        params=request_params,
         cache_lifespan=cache_lifespan
     ).pop()
 
@@ -108,10 +111,36 @@ def view_index(url: Url, response: Any) -> ViewAndData:
         reverse=True
     )
 
+    before_url = ""
+    if container.get("before"):
+        before_url = cherrypy.engine.publish(
+            "app_url",
+            url.alt,
+            query={
+                "q": url.query.get("q") or "",
+                "before": container["before"],
+                "count": len(stories)
+            }
+        ).pop()
+
+    after_url = ""
+    if container.get("after"):
+        after_url = cherrypy.engine.publish(
+            "app_url",
+            url.alt,
+            query={
+                "q": url.query.get("q") or "",
+                "after": container["after"],
+                "count": len(stories)
+            }
+        ).pop()
+
     return ("apps/alturl/reddit-index.jinja.html", {
         "stories": stories,
         "url": url,
-        "subview_title": url.display_domain
+        "subview_title": url.display_domain,
+        "after_url": after_url,
+        "before_url": before_url
     })
 
 

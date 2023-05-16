@@ -50,22 +50,17 @@ class Controller:
                 bookmarks=bookmarks
             ).pop()
 
-        url = Url("https://" + "/".join(args))
+        url = Url("https://" + "/".join(args), query=kwargs)
 
         if "." not in url.domain:
             raise cherrypy.HTTPError(400)
 
         site_specific_template = ""
         if url.domain.endswith("reddit.com"):
-            site_specific_template, view_vars = apps.alturl.reddit.view(
-                url,
-                kwargs.get("q", "")
-            )
+            site_specific_template, view_vars = apps.alturl.reddit.view(url)
 
         if not site_specific_template:
-            site_specific_template, view_vars = apps.alturl.feed.view(
-                url
-            )
+            site_specific_template, view_vars = apps.alturl.feed.view(url)
 
         if not site_specific_template:
             return cherrypy.engine.publish(
