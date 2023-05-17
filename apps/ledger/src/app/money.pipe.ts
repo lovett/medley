@@ -11,6 +11,10 @@ export class MoneyPipe implements PipeTransform {
     });
 
     transform(value: number, style="formatted"): string {
+        if (!value) {
+            return '';
+        }
+
         switch (style) {
             case "plain":
                 return (value / 100).toString();
