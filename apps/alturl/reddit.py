@@ -63,7 +63,7 @@ def unavailable() -> ViewAndData:
         "app_url",
         "/applog",
         {
-            "sources": "exception",
+            "sources": "urlfetch:exception",
             "exclude": 0
         }
     ).pop()
