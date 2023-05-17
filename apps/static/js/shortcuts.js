@@ -119,6 +119,21 @@ MEDLEY.shortcuts = (function () {
             field.value = '';
         }
 
+        if (shortcut === 'append-value') {
+            let value = field.value.trim()
+
+            while (value.endsWith(e.target.dataset.delimiter)) {
+                value = value.slice(0, -1);
+            }
+
+            if (value) {
+                value += e.target.dataset.delimiter + ' ';
+            }
+
+            value += e.target.dataset.value;
+
+            field.value = value;
+        }
 
         if (shortcut === 'set-value') {
             field.value = e.target.dataset.value;

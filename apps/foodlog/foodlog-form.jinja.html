@@ -20,6 +20,19 @@
                     name="foods_eaten"
                     autofocus="autofocus"
                 >{{ foods_eaten }}</textarea>
+
+                {% if shortcuts %}
+                    <div class="shortcuts">
+                        {% for key, value in shortcuts.items() %}
+                            <a href="#"
+                               data-field="foods_eaten"
+                               data-shortcut="append-value"
+                               data-value="{{value}}"
+                               data-delimiter=","
+                            >{{ key }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="field">

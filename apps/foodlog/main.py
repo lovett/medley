@@ -215,6 +215,12 @@ class Controller:
             "0/new"
         ).pop()
 
+        shortcuts = cherrypy.engine.publish(
+            "registry:search:dict",
+            "foodlog:shortcut",
+            key_slice=2
+        ).pop()
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/foodlog/foodlog-form.jinja.html",
@@ -223,7 +229,8 @@ class Controller:
             uid=params.uid,
             entry_date=entry_date,
             foods_eaten=foods_eaten,
-            overate=overate
+            overate=overate,
+            shortcuts=shortcuts
         ).pop()
 
     @staticmethod
