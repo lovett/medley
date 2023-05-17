@@ -2,7 +2,7 @@
     <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteAccount()" [resourceName]="singularResourceName"></app-delete-button>
 </header>
 
-<form (ngSubmit)="save()" [formGroup]="accountForm">
+<form (ngSubmit)="save()" [formGroup]="accountForm" autocomplete="off">
     <div class="field" [class.invalid]="(name.dirty || name.touched) && name.invalid">
         <label for="accountName">Account Name</label>
         <input
