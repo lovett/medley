@@ -3,3 +3,8 @@ HEADER {
     justify-content: flex-end;
     margin-bottom: 1em;
 }
+
+
+.cleared TD {
+    background-color: #d6fdd6;
+}

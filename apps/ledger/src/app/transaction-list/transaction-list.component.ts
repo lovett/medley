@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
-import { TransactionList } from '../models/transactionList';
+import { TransactionList } from '../types/transactionList';
 
 @Component({
   selector: 'app-transaction-list',
@@ -22,12 +22,22 @@ export class TransactionListComponent {
     ngOnInit() {
         this.ledgerService.getTransactions().subscribe(
             (transactionList: TransactionList) => {
-                console.log(transactionList);
                 this.count = transactionList.count;
-                this.transactions = transactionList.transactions;
+                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
             },
             (err: any) => console.log(err),
             () => console.log('All done getting transactions')
         );
     }
+
+    clearTransaction(event: MouseEvent, transaction: Transaction){
+        event.preventDefault();
+        transaction.cleared_on = new Date();
+        this.ledgerService.updateTransaction(transaction.toPrimitive()).subscribe(
+            () => {},
+            (err: any) => console.log(err),
+            () => console.log('Marked transaction as cleared')
+        );
+    }
+
 }

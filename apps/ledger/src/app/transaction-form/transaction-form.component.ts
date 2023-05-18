@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
-import { Transaction, TransactionDraft } from '../models/transaction';
-import { TransactionList } from '../models/transactionList';
+import { TransactionPrimitive } from '../types/transactionPrimitive';
+import { Transaction } from '../models/transaction';
+import { TransactionList } from '../types/transactionList';
 import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
 import { Observable, Subject, switchMap, debounceTime, distinctUntilChanged, filter } from 'rxjs';
@@ -97,7 +98,7 @@ export class TransactionFormComponent {
             return;
         }
 
-        const transaction = searchResult.transactions[0];
+        const transaction = new Transaction(searchResult.transactions[0]);
         this.transactionForm.patchValue({
             account_id: transaction.account.uid,
             payee: transaction.payee,
@@ -161,7 +162,7 @@ export class TransactionFormComponent {
             return;
         }
 
-        const draft: TransactionDraft = {
+        const primitive: TransactionPrimitive = {
             'uid': this.transaction!.uid,
             'account_id': this.accountId.value,
             'payee': this.payee.value,
@@ -171,15 +172,15 @@ export class TransactionFormComponent {
             'note': this.note.value,
         };
 
-        if (draft.uid === 0) {
-            this.ledgerService.addTransaction(draft).subscribe(
+        if (primitive.uid === 0) {
+            this.ledgerService.addTransaction(primitive).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );
         }
 
-        if (draft.uid > 0) {
-            this.ledgerService.updateTransaction(draft).subscribe(
+        if (primitive.uid > 0) {
+            this.ledgerService.updateTransaction(primitive).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );

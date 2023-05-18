@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Account } from './models/account';
-import { Transaction, TransactionDraft } from './models/transaction';
-import { TransactionList } from './models/transactionList';
+import { Transaction } from './models/transaction';
+import { TransactionPrimitive }  from './types/transactionPrimitive';
+import { TransactionList } from './types/transactionList';
 
 @Injectable({
   providedIn: 'root'
@@ -39,9 +40,8 @@ export class LedgerService {
         })
     }
 
-    addTransaction(transaction: TransactionDraft): Observable<Transaction> {
-        console.log(transaction);
-        return this.http.post<Transaction>('/ledger/transactions', transaction, {
+    addTransaction(primitive: TransactionPrimitive): Observable<Transaction> {
+        return this.http.post<Transaction>('/ledger/transactions', primitive, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json'
             }),
@@ -60,15 +60,14 @@ export class LedgerService {
         return this.http.put<void>(url, account, {headers,});
     }
 
-    updateTransaction(transaction: TransactionDraft): Observable<void> {
+    updateTransaction(primitive: TransactionPrimitive): Observable<void> {
         const headers = new HttpHeaders({
             'Content-Type': 'application/json'
         });
 
-        const url = `/ledger/transactions/${transaction.uid}`;
-        console.log(url);
+        const url = `/ledger/transactions/${primitive.uid}`;
 
-        return this.http.put<void>(url, transaction, {headers,});
+        return this.http.put<void>(url, primitive, {headers,});
 
     }
 
