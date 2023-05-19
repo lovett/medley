@@ -19,7 +19,16 @@
             <td>{{ transaction.payee }}</td>
             <td>{{ transaction.amount|money }}</td>
             <td><a [routerLink]="['/accounts', transaction.account.uid, 'form']">{{ transaction.account.name }}</a></td>
-            <td>{{ transaction.note }}</td>
+            <td>
+                {{ transaction.note }}
+
+                <ul class="tag-list" *ngIf="transaction.tags">
+                    <li *ngFor="let tag of transaction.tags">
+                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                        {{ tag }}
+                    </li>
+                </ul>
+            </td>
             <td *ngIf="transaction.cleared_on">
                 <div>Cleared</div>
                 <small>{{ transaction.cleared_on|date:'longDate' }}</small>

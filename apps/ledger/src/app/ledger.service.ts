@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, pipe } from 'rxjs';
 import { Account } from './models/account';
 import { Transaction } from './models/transaction';
 import { TransactionPrimitive }  from './types/transactionPrimitive';
@@ -28,7 +28,9 @@ export class LedgerService {
     }
 
     getTransaction(uid: number): Observable<Transaction> {
-        return this.http.get<Transaction>(`/ledger/transactions/${uid}`);
+        return this.http.get<TransactionPrimitive>(`/ledger/transactions/${uid}`).pipe(
+            map((primitive) => new Transaction(primitive))
+        );
     }
 
     addAccount(account: Account): Observable<Account> {

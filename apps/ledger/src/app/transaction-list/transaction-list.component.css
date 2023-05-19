@@ -8,3 +8,14 @@ HEADER {
 .cleared TD {
     background-color: #d6fdd6;
 }
+
+.tag-list {
+    margin: 1em 0 0 0;
+    padding: 0;
+    list-style-type: none;
+}
+
+.tag-list LI {
+    display: inline;
+    padding-right: 1em;
+}

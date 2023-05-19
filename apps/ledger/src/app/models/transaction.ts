@@ -9,6 +9,7 @@ export class Transaction {
     occurred_on: Date;
     cleared_on?: Date;
     note?: string;
+    tags: string[];
 
     constructor(primitive: TransactionPrimitive) {
         this.uid = primitive.uid;
@@ -22,6 +23,24 @@ export class Transaction {
         if (primitive.note) {
             this.note = primitive.note;
         }
+
+        this.tags = JSON.parse(primitive.tags || '');
+    }
+
+    occurredOnYMD(): string {
+        return this.dateValue(this.occurred_on);
+    }
+
+    clearedOnYMD(): string {
+        return this.dateValue(this.cleared_on);
+    }
+
+    dateValue(d?: Date): string {
+        if (!d) {
+            return '';
+        }
+
+        return d.toISOString().split('T')[0];
     }
 
     toPrimitive(): TransactionPrimitive {

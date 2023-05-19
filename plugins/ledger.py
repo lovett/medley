@@ -156,7 +156,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """SELECT id, occurred_on as 'occurred_on [date]',
             cleared_on as 'cleared_on ['date'], amount, payee,
             note, account_id, accounts.name as account_name,
-            tags as 'tags [comma_delimited]'
+            tags
             FORM extended_transaction_view
             WHERE id=?""",
             (transaction_id,)
@@ -328,7 +328,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         'cleared_on', cleared_on,
         'amount', amount,
         'payee', payee,
-        'note', note)
+        'note', note,
+        'tags', tags)
         AS json_result
         FROM (select * from extended_transactions_view
         WHERE id=?)"""

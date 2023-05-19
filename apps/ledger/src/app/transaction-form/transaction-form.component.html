@@ -78,6 +78,24 @@
         </div>
     </div>
 
+    <div class="field">
+        <label for="tag-">Tags</label>
+        <div class="tag-grid" formArrayName="tags">
+            <div *ngFor="let tags of tags.controls; let i=index">
+                <div class="tag">
+                    <input id="tag-{{ i }}" type="text" [formControlName]="i">
+                </div>
+            </div>
+            <div class="tag">
+                <button type="button" (click)="tagFieldPush()">+ Add</button>
+            </div>
+            <div class="tag" *ngIf="tags.controls.length > 1">
+                <button type="button" (click)="tagFieldPop()">- Remove</button>
+            </div>
+        </div>
+
+    </div>
+
     <div class="field" [class.invalid]="(note.dirty || note.touched) && note.invalid">
         <label for="accountNote">Notes</label>
         <textarea

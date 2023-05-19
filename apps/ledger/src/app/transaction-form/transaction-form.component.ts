@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { FormArray, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { TransactionPrimitive } from '../types/transactionPrimitive';
@@ -62,6 +62,9 @@ export class TransactionFormComponent {
                 occurred_on: this.today(),
                 cleared_on: '',
             }, {validators: dateRange}),
+            tags: this.formBuilder.array([
+                this.formBuilder.control(null),
+            ]),
             note: ['', {updateOn: 'blur'}],
         });
 
@@ -91,6 +94,7 @@ export class TransactionFormComponent {
     get occurredOn() { return this.dates.controls['occurred_on'] }
     get clearedOn() { return this.dates.controls['cleared_on'] }
     get note() { return this.transactionForm.controls['note'] }
+    get tags() { return this.transactionForm.get('tags') as FormArray }
 
     autocomplete(searchResult: TransactionList) {
         if (searchResult.count !== 1) {
@@ -108,6 +112,14 @@ export class TransactionFormComponent {
         this.autocompletedFrom = transaction;
     }
 
+    tagFieldPush(value = '') {
+        this.tags.push(this.formBuilder.control(value));
+    }
+
+    tagFieldPop() {
+        this.tags.controls.pop();
+    }
+
     today() {
         return formatDate(new Date(), 'yyyy-MM-dd', 'en');
     }
@@ -120,11 +132,17 @@ export class TransactionFormComponent {
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             account_id: transaction.account.uid,
             dates: {
-                occurred_on: transaction.occurred_on,
-                cleared_on: transaction.cleared_on,
+                occurred_on: transaction.occurredOnYMD(),
+                cleared_on: transaction.clearedOnYMD(),
             },
             note: transaction.note,
         });
+
+        while (this.tags.controls.length < transaction.tags.length) {
+            this.tagFieldPush();
+        }
+
+        this.tags.patchValue(transaction.tags);
 
         if (transaction.account.closed_on) {
             this.accountId.disable();
@@ -170,6 +188,7 @@ export class TransactionFormComponent {
             'occurred_on': this.occurredOn.value,
             'cleared_on': this.clearedOn.value,
             'note': this.note.value,
+            'tags': this.tags.value,
         };
 
         if (primitive.uid === 0) {
