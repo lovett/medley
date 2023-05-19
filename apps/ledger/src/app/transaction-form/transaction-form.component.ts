@@ -62,9 +62,7 @@ export class TransactionFormComponent {
                 occurred_on: this.today(),
                 cleared_on: '',
             }, {validators: dateRange}),
-            tags: this.formBuilder.array([
-                this.formBuilder.control(null),
-            ]),
+            tags: this.formBuilder.array([]),
             note: ['', {updateOn: 'blur'}],
         });
 
@@ -114,10 +112,12 @@ export class TransactionFormComponent {
 
     tagFieldPush(value = '') {
         this.tags.push(this.formBuilder.control(value));
+        this.transactionForm.markAsDirty();
     }
 
     tagFieldPop() {
-        this.tags.controls.pop();
+        this.tags.removeAt(-1);
+        this.transactionForm.markAsDirty();
     }
 
     today() {

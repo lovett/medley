@@ -24,7 +24,7 @@ export class Transaction {
             this.note = primitive.note;
         }
 
-        this.tags = JSON.parse(primitive.tags || '');
+        this.tags = primitive.tags;
     }
 
     occurredOnYMD(): string {
@@ -52,6 +52,7 @@ export class Transaction {
             occurred_on: this.occurred_on.toISOString().split('T')[0],
             cleared_on: (this.cleared_on)? this.cleared_on.toISOString().split('T')[0] : undefined,
             note: this.note,
+            tags: this.tags,
         };
     }
 }

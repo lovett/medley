@@ -89,7 +89,7 @@
             <div class="tag">
                 <button type="button" (click)="tagFieldPush()">+ Add</button>
             </div>
-            <div class="tag" *ngIf="tags.controls.length > 1">
+            <div class="tag" *ngIf="tags.controls.length > 0">
                 <button type="button" (click)="tagFieldPop()">- Remove</button>
             </div>
         </div>

@@ -9,5 +9,5 @@ export type TransactionPrimitive = {
     occurred_on: string;
     cleared_on?: string;
     note?: string;
-    tags?: string;
+    tags: string[];
 }

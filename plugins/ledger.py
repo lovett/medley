@@ -155,9 +155,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return self._selectOne(
             """SELECT id, occurred_on as 'occurred_on [date]',
             cleared_on as 'cleared_on ['date'], amount, payee,
-            note, account_id, accounts.name as account_name,
-            tags
-            FORM extended_transaction_view
+            note, account_id, accounts.name as account_name
+            FROM extended_transaction_view
             WHERE id=?""",
             (transaction_id,)
         )
@@ -282,7 +281,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 'amount', amount,
                 'payee', payee,
                 'note', note,
-                'tags', tags
+                'tags', json(tags)
             )
         )) AS json_result
         FROM (@FROM@ ORDER BY @ORDER@ LIMIT ? OFFSET ?)"""
@@ -329,7 +328,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         'amount', amount,
         'payee', payee,
         'note', note,
-        'tags', tags)
+        'tags', json(tags))
         AS json_result
         FROM (select * from extended_transactions_view
         WHERE id=?)"""
@@ -355,6 +354,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "uid": 0,
             "account": new_account,
             "occurred_on": today_formatted,
+            "tags": [],
         }
 
     def transaction_json_new(self) -> str:
