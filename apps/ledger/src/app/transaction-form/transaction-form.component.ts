@@ -37,7 +37,7 @@ export class TransactionFormComponent {
     errorMessage = '';
     datesExpanded = false;
     singularResourceName: string;
-    autocompletedFrom: Transaction | null;
+    autocompleteFrom: Transaction | null;
 
     constructor(
         private router: Router,
@@ -48,7 +48,7 @@ export class TransactionFormComponent {
 
     ) {
         this.singularResourceName = 'transaction';
-        this.autocompletedFrom = null;
+        this.autocompleteFrom = null;
     }
 
     ngOnInit(): void {
@@ -96,25 +96,32 @@ export class TransactionFormComponent {
 
     autocomplete(searchResult: TransactionList) {
         if (searchResult.count !== 1) {
-            this.autocompletedFrom = null;
+            this.autocompleteFrom = null;
             return;
         }
 
-        const transaction = new Transaction(searchResult.transactions[0]);
-        while (this.tags.controls.length < transaction.tags.length) {
+        this.autocompleteFrom = new Transaction(searchResult.transactions[0]);
+    }
+
+    applyAutocompletedTransaction(e: MouseEvent) {
+        e.preventDefault();
+        if (!this.autocompleteFrom) {
+            return;
+        }
+
+        while (this.tags.controls.length < this.autocompleteFrom.tags.length) {
             this.tagFieldPush();
         }
 
         this.transactionForm.patchValue({
-            account_id: transaction.account.uid,
-            payee: transaction.payee,
-            amount: this.moneyPipe.transform(transaction.amount, 'plain'),
-            note: transaction.note,
-            tags: transaction.tags,
-        });
+            account_id: this.autocompleteFrom.account.uid,
+            payee: this.autocompleteFrom.payee,
+            amount: this.moneyPipe.transform(this.autocompleteFrom.amount, 'plain'),
+            note: this.autocompleteFrom.note,
+            tags: this.autocompleteFrom.tags,
+        }, { emitEvent: false});
 
-
-        this.autocompletedFrom = transaction;
+        this.autocompleteFrom = null;
     }
 
     tagFieldPush(value = '') {
