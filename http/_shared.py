@@ -1,17 +1,24 @@
 import json
-from httpx import Client, Response
+from httpx import Client, Response, Timeout, HTTPTransport
 from pygments import highlight
 from pygments.lexers import JsonLexer
 from pygments.formatters import Terminal256Formatter
 
+transport = HTTPTransport(retries=5)
+timeout = Timeout(5.0, connect=10.0)
+
 BASE = "http://localhost:8085"
 
 basic_client = Client(
-    base_url=BASE
+    base_url=BASE,
+    timeout=timeout,
+    transport=transport,
 )
 
 json_client = Client(
     base_url=BASE,
+    timeout=timeout,
+    transport=transport,
     headers={
         "Accept": "application/json"
     }
