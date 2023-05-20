@@ -24,7 +24,7 @@ export class Transaction {
             this.note = primitive.note;
         }
 
-        this.tags = primitive.tags;
+        this.tags = primitive.tags.filter((tag) => tag);
     }
 
     occurredOnYMD(): string {
