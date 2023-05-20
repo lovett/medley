@@ -15,6 +15,7 @@ import { AddButtonComponent } from './add-button/add-button.component';
 import { TransactionFormComponent } from './transaction-form/transaction-form.component';
 import { MoneyPipe } from './money.pipe';
 import { ContentTypeInterceptor } from './interceptors/content-type.interceptor';
+import { CacheInterceptor } from './interceptors/cache.interceptor';
 
 @NgModule({
     declarations: [
@@ -39,6 +40,7 @@ import { ContentTypeInterceptor } from './interceptors/content-type.interceptor'
     providers: [
         MoneyPipe,
         {provide: HTTP_INTERCEPTORS, useClass: ContentTypeInterceptor, multi: true},
+        {provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true},
     ],
     bootstrap: [AppComponent]
 })

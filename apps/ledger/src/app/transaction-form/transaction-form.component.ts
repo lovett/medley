@@ -75,8 +75,7 @@ export class TransactionFormComponent {
         if (id === 0) {
             this.payee.valueChanges.pipe(
                 filter(value => value && value.length > 2),
-                debounceTime(1000),
-                distinctUntilChanged(),
+                debounceTime(500),
                 switchMap(payee => this.ledgerService.autocompletePayee(payee)),
             ).subscribe((result => this.autocomplete(result)));
         }
