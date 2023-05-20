@@ -354,6 +354,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "uid": 0,
             "account": new_account,
             "occurred_on": today_formatted,
+            "cleared_on": None,
             "tags": [],
         }
 

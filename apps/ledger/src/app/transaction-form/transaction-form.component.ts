@@ -164,7 +164,7 @@ export class TransactionFormComponent {
         }
 
         this.transaction = transaction;
-        this.datesExpanded = (transaction.cleared_on !== null);
+        this.datesExpanded = (transaction.cleared_on instanceof Date);
     }
 
     toggleTransactionCleared(event: Event) {
@@ -199,7 +199,7 @@ export class TransactionFormComponent {
             'payee': this.payee.value,
             'amount': this.amount.value * 100,
             'occurred_on': this.occurredOn.value,
-            'cleared_on': this.clearedOn.value,
+            'cleared_on': this.clearedOn.value || null,
             'note': this.note.value,
             'tags': this.tags.value,
         };
