@@ -10,7 +10,7 @@
             type="text"
             formControlName="payee"
         />
-        <p *ngIf="autocompletedFrom">Autocompleted from transaction #{{ autocompletedFrom.uid }} of {{ autocompletedFrom.occurred_on }}</p>
+        <p *ngIf="autocompletedFrom">Autocompleted from transaction #{{ autocompletedFrom.uid }} of {{ autocompletedFrom.occurred_on |date:'longDate' }}</p>
 
         <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
     </div>

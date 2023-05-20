@@ -101,12 +101,19 @@ export class TransactionFormComponent {
         }
 
         const transaction = new Transaction(searchResult.transactions[0]);
+        while (this.tags.controls.length < transaction.tags.length) {
+            this.tagFieldPush();
+        }
+
         this.transactionForm.patchValue({
             account_id: transaction.account.uid,
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             note: transaction.note,
+            tags: transaction.tags,
         });
+
+
         this.autocompletedFrom = transaction;
     }
 
