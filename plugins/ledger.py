@@ -153,8 +153,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Retrieve a transaction by its ID."""
 
         return self._selectOne(
-            """SELECT id, occurred_on as 'occurred_on [date]',
-            cleared_on as 'cleared_on ['date'], amount, payee,
+            """SELECT id, occurred_on as 'occurred_on [datetime]',
+            cleared_on as 'cleared_on [datetime]', amount, payee,
             note, account_id, accounts.name as account_name
             FROM extended_transaction_view
             WHERE id=?""",
@@ -208,12 +208,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         today_formatted = cherrypy.engine.publish(
             "clock:format",
             today,
-            "%Y-%m-%d"
+            "%Y-%m-%d 00:00:00"
         ).pop()
 
         return {
             "uid": 0,
             "opened_on": today_formatted,
+            "closed_on": None
         }
 
     def account_json_new(self) -> str:
@@ -276,8 +277,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                                'name', account_name,
                                'closed_on', account_closed_on),
                 'account_name', account_name,
-                'occurred_on', occurred_on,
-                'cleared_on', cleared_on,
+                'occurred_on', datetime(occurred_on),
+                'cleared_on', datetime(cleared_on),
                 'amount', amount,
                 'payee', payee,
                 'note', note,
@@ -345,7 +346,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         today_formatted = cherrypy.engine.publish(
             "clock:format",
             today,
-            "%Y-%m-%d"
+            "%Y-%m-%d 00:00:00"
         ).pop()
 
         new_account = self.account_new()
