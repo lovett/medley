@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -14,6 +14,7 @@ import { DeleteButtonComponent } from './delete-button/delete-button.component';
 import { AddButtonComponent } from './add-button/add-button.component';
 import { TransactionFormComponent } from './transaction-form/transaction-form.component';
 import { MoneyPipe } from './money.pipe';
+import { ContentTypeInterceptor } from './interceptors/content-type.interceptor';
 
 @NgModule({
     declarations: [
@@ -36,7 +37,8 @@ import { MoneyPipe } from './money.pipe';
         ReactiveFormsModule
     ],
     providers: [
-        MoneyPipe
+        MoneyPipe,
+        {provide: HTTP_INTERCEPTORS, useClass: ContentTypeInterceptor, multi: true},
     ],
     bootstrap: [AppComponent]
 })
