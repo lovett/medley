@@ -4,7 +4,6 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { TransactionTableComponent } from './transaction-table/transaction-table.component';
 import { AccountMenuComponent } from './account-menu/account-menu.component';
 import { TransactionListComponent } from './transaction-list/transaction-list.component';
 import { AccountListComponent } from './account-list/account-list.component';
@@ -20,7 +19,6 @@ import { CacheInterceptor } from './interceptors/cache.interceptor';
 @NgModule({
     declarations: [
         AppComponent,
-        TransactionTableComponent,
         AccountMenuComponent,
         TransactionListComponent,
         AccountListComponent,

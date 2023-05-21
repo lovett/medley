@@ -8,7 +8,7 @@ import { TransactionList } from '../types/transactionList';
   templateUrl: './transaction-list.component.html',
   styleUrls: ['./transaction-list.component.css']
 })
-export class TransactionListComponent {
+export class TransactionListComponent implements OnInit {
     count = 0;
     transactions: Transaction[] = [];
     singularResourceName: string;
@@ -20,24 +20,21 @@ export class TransactionListComponent {
     }
 
     ngOnInit() {
-        this.ledgerService.getTransactions().subscribe(
-            (transactionList: TransactionList) => {
+        this.ledgerService.getTransactions().subscribe({
+            next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
                 this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
             },
-            (err: any) => console.log(err),
-            () => console.log('All done getting transactions')
-        );
+            error: (err: any) => console.log(err),
+        });
     }
 
     clearTransaction(event: MouseEvent, transaction: Transaction){
         event.preventDefault();
         transaction.cleared_on = new Date();
-        this.ledgerService.updateTransaction(transaction.toPrimitive()).subscribe(
-            () => {},
-            (err: any) => console.log(err),
-            () => console.log('Marked transaction as cleared')
-        );
+        this.ledgerService.updateTransaction(transaction.toPrimitive()).subscribe({
+            error: (err: any) => console.log(err),
+        });
     }
 
 }

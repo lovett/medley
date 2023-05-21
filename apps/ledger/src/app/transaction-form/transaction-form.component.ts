@@ -1,14 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormArray, FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { TransactionPrimitive } from '../types/transactionPrimitive';
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/transactionList';
 import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
-import { Observable, Subject, switchMap, debounceTime, distinctUntilChanged, filter } from 'rxjs';
-import { isObject, omitBy } from "lodash-es"
+import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
 
 function dateRange(group: FormGroup): {[key: string]: boolean} | null {
@@ -31,7 +30,7 @@ function dateRange(group: FormGroup): {[key: string]: boolean} | null {
   templateUrl: './transaction-form.component.html',
   styleUrls: ['./transaction-form.component.css']
 })
-export class TransactionFormComponent {
+export class TransactionFormComponent implements OnInit {
     transactionForm!: FormGroup;
     transaction: Transaction | undefined;
     errorMessage = '';
@@ -55,21 +54,26 @@ export class TransactionFormComponent {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.transactionForm = this.formBuilder.group({
-            account_id: ['', {validators:Validators.required}],
-            payee: ['', {validators: Validators.required}],
-            amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
-            dates: this.formBuilder.group({
-                occurred_on: this.today(),
-                cleared_on: '',
-            }, {validators: dateRange}),
-            tags: this.formBuilder.array([]),
-            note: ['', {updateOn: 'blur'}],
+            controls: {
+                account_id: [null, {validators:Validators.required}],
+                payee: ['', {validators: Validators.required}],
+                amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
+                dates: this.formBuilder.group({
+                    controls: {
+                        occurred_on: this.today(),
+                        cleared_on: '',
+                    },
+                    options: {
+                        validators: dateRange
+                    },
+                }),
+                tags: this.formBuilder.array([]),
+                note: [null, {updateOn: 'blur'}],
+            }
         });
 
         this.ledgerService.getTransaction(id).subscribe(
-            (transaction: Transaction) => this.populate(transaction),
-            (err: any) => console.log(err),
-            () => console.log('All done getting transaction'),
+            (transaction: Transaction) => this.populate(transaction)
         );
 
         if (id === 0) {
@@ -79,9 +83,6 @@ export class TransactionFormComponent {
                 switchMap(payee => this.ledgerService.autocompletePayee(payee)),
             ).subscribe((result => this.autocomplete(result)));
         }
-    }
-
-    ngOnDestory(): void {
     }
 
     get accountId() { return this.transactionForm.controls['account_id'] }
@@ -205,17 +206,17 @@ export class TransactionFormComponent {
         };
 
         if (primitive.uid === 0) {
-            this.ledgerService.addTransaction(primitive).subscribe(
-                () => this.saved(),
-                (err) => this.errorMessage = err,
-            );
+            this.ledgerService.addTransaction(primitive).subscribe({
+                next: () => this.saved(),
+                error: (err) => this.errorMessage = err,
+            });
         }
 
         if (primitive.uid > 0) {
-            this.ledgerService.updateTransaction(primitive).subscribe(
-                () => this.saved(),
-                (err) => this.errorMessage = err,
-            );
+            this.ledgerService.updateTransaction(primitive).subscribe({
+                next: () => this.saved(),
+                error: (err) => this.errorMessage = err,
+            });
         }
     }
 
@@ -242,9 +243,9 @@ export class TransactionFormComponent {
             return;
         }
 
-        this.ledgerService.deleteTransaction(this.transaction.uid).subscribe(
-            () => this.deleted(),
-            (err) => this.errorMessage = err,
-        );
+        this.ledgerService.deleteTransaction(this.transaction.uid).subscribe({
+            next: () => this.deleted(),
+            error: (err) => this.errorMessage = err,
+        });
     }
 }
