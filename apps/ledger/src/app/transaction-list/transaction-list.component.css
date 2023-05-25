@@ -1,8 +1,14 @@
 HEADER {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     margin-bottom: 1em;
 }
+
+FORM {
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
 
 
 .cleared TD {

@@ -46,7 +46,7 @@ BUTTON, INPUT[type=reset] {
     background-color: var(--primary);
     color: var(--white);
     padding: .5em 1em;
-    height: 2.25em;
+    height: 2.35em;
     line-height: 1;
     vertical-align: middle;
     box-sizing: border-box;

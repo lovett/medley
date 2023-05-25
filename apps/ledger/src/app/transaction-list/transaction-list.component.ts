@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/transactionList';
@@ -9,14 +10,20 @@ import { TransactionList } from '../types/transactionList';
   styleUrls: ['./transaction-list.component.css']
 })
 export class TransactionListComponent implements OnInit {
+    searchForm: FormGroup;
     count = 0;
     transactions: Transaction[] = [];
     singularResourceName: string;
 
     constructor(
-        private ledgerService: LedgerService
+        private ledgerService: LedgerService,
+        private formBuilder: FormBuilder
     ) {
         this.singularResourceName = 'transaction';
+
+        this.searchForm = this.formBuilder.group({
+            query: [null, {validators: Validators.required}],
+        });
     }
 
     ngOnInit() {
@@ -27,6 +34,12 @@ export class TransactionListComponent implements OnInit {
             },
             error: (err: any) => console.log(err),
         });
+    }
+
+    get query() { return this.searchForm.controls['query'] };
+
+    search() {
+        alert(this.query.value);
     }
 
     clearTransaction(event: MouseEvent, transaction: Transaction){

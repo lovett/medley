@@ -1,4 +1,12 @@
 <header>
+    <form (ngSubmit)="search()" [formGroup]="searchForm" autocomplete="off">
+        <div class="field">
+            <input type="search" formControlName="query"/>
+        </div>
+        <div class="field">
+            <button [disabled]="searchForm.invalid">Search</button>
+        </div>
+    </form>
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
