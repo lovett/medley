@@ -24,18 +24,15 @@ export class CacheInterceptor implements HttpInterceptor {
         }
 
         if (req.method !== 'GET') {
-            // TODO: add invalidation
+            this.cacheService.clear(req.url);
             return next.handle(req);
         }
 
         const cachedResponse = this.cacheService.get(req.url);
 
         if (cachedResponse) {
-            console.log('Cache hit', req.url);
             return of(cachedResponse);
         }
-
-        console.log('Cache miss', req.url);
 
         return next.handle(req)
             .pipe(
