@@ -56,18 +56,25 @@ export class TransactionFormComponent implements OnInit {
         this.transactionForm = this.formBuilder.group({
             account_id: [null, {validators:Validators.required}],
             payee: ['', {validators: Validators.required}],
-            amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
+            amount: ['', {validators: [Validators.required, Validators.min(0.01)]}],
             dates: this.formBuilder.group({
                 occurred_on: [this.today()],
                 cleared_on: [null],
             }, {validators: dateRange}),
             tags: this.formBuilder.array([]),
-            note: [null, {updateOn: 'blur'}],
+            note: [null, {}],
         });
 
         this.ledgerService.getTransaction(id).subscribe(
             (transaction: Transaction) => this.populate(transaction)
         );
+
+        this.amount.valueChanges.subscribe({
+            next: (value) => {
+                if (!value) return;
+                this.amount.setValue(value.replace(/[^0-9.]/, ''), {emitEvent: false});
+            },
+        });
 
         if (id === 0) {
             this.payee.valueChanges.pipe(
