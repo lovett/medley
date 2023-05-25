@@ -3,7 +3,7 @@
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
-    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid">
+    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid" [class.valid]="payee.valid">
         <label for="payee">Payee</label>
         <input
             id="payee"
@@ -15,7 +15,7 @@
         <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
     </div>
     <div class="field-group">
-        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid">
+        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid" [class.valid]="amount.valid">
             <label for="amount">Amount</label>
             <input
                 id="amount"
@@ -28,7 +28,7 @@
             <p *ngIf="amount.hasError('min')" class="validation-message">The amount should be greater than zero.</p>
         </div>
     </div>
-    <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid">
+    <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
         <label for="accountId">Account</label>
         <app-account-menu [form]="transactionForm"></app-account-menu>
         <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
@@ -37,7 +37,7 @@
 
     <div formGroupName="dates">
         <div class="field-group">
-            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)">
+            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)" [class.valid]="occurredOn.valid">
                 <label for="occurredOn">Date</label>
                 <input
                     id="occurredOn"
@@ -61,7 +61,7 @@
         </div>
 
         <div *ngIf="datesExpanded" class="field-group">
-            <div class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)">
+            <div class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)" [class.valid]="clearedOn.valid">
                 <label for="clearedOn">Cleared On</label>
                 <input
                     id="clearedOn"
@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    <div class="field">
+    <div class="field" [class.valid]="tags.length > 0 && !tags.value.includes('')">
         <label for="tag-">Tags</label>
         <div class="tag-grid" formArrayName="tags">
             <div *ngFor="let tags of tags.controls; let i=index">

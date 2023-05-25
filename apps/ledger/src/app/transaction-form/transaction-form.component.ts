@@ -54,7 +54,7 @@ export class TransactionFormComponent implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.transactionForm = this.formBuilder.group({
-            account_id: [null, {validators:Validators.required}],
+            account_id: [null, {validators: [Validators.required, Validators.min(1)]}],
             payee: ['', {validators: Validators.required}],
             amount: ['', {validators: [Validators.required, Validators.min(0.01)]}],
             dates: this.formBuilder.group({
