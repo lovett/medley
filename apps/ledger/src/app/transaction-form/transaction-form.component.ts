@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormArray, FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { TransactionPrimitive } from '../types/transactionPrimitive';
@@ -10,7 +10,7 @@ import { LedgerService } from '../ledger.service';
 import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
 
-function dateRange(group: FormGroup): {[key: string]: boolean} | null {
+function dateRange(group: AbstractControl): ValidationErrors | null {
     const occurredOn = group.get('occurred_on')!.value;
     const clearedOn = group.get('cleared_on')!.value;
 
@@ -54,22 +54,15 @@ export class TransactionFormComponent implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.transactionForm = this.formBuilder.group({
-            controls: {
-                account_id: [null, {validators:Validators.required}],
-                payee: ['', {validators: Validators.required}],
-                amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
-                dates: this.formBuilder.group({
-                    controls: {
-                        occurred_on: this.today(),
-                        cleared_on: '',
-                    },
-                    options: {
-                        validators: dateRange
-                    },
-                }),
-                tags: this.formBuilder.array([]),
-                note: [null, {updateOn: 'blur'}],
-            }
+            account_id: [null, {validators:Validators.required}],
+            payee: ['', {validators: Validators.required}],
+            amount: ['', {updatedOn: 'blur', validators: [Validators.required, Validators.pattern('[0-9.]+'), Validators.min(0.01)]}],
+            dates: this.formBuilder.group({
+                occurred_on: [this.today()],
+                cleared_on: [null],
+            }, {validators: dateRange}),
+            tags: this.formBuilder.array([]),
+            note: [null, {updateOn: 'blur'}],
         });
 
         this.ledgerService.getTransaction(id).subscribe(
