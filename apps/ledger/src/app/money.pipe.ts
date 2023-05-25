@@ -17,7 +17,7 @@ export class MoneyPipe implements PipeTransform {
 
         switch (style) {
             case "plain":
-                return (value / 100).toString();
+                return (value / 100).toFixed(2);
             default:
                 return this.numberFormat.format(value/100);
         }
