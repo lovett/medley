@@ -9,10 +9,18 @@ FORM {
     grid-template-columns: 1fr auto;
 }
 
+TR, TD {
+    border-left: 0;
+    border-right: 0;
+}
 
+TD.indicator {
+    width: 1%;
+    background-color: #ccc;
+}
 
-.cleared TD {
-    background-color: #d6fdd6;
+TR.cleared TD.indicator {
+    background-color: SeaGreen;
 }
 
 .tag-list {

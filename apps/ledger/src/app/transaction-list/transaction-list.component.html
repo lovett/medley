@@ -18,7 +18,7 @@
             <th>Amount</th>
             <th>Account</th>
             <th>Note</th>
-            <th>Status</th>
+            <th colspan="2">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -44,6 +44,7 @@
             <td *ngIf="!transaction.cleared_on">
                 <a title="Clear now" href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Uncleared</a>
             </td>
+            <td class="indicator"></td>
         </tr>
     </tbody>
 </table>
