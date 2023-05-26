@@ -38,8 +38,27 @@ export class TransactionListComponent implements OnInit {
 
     get query() { return this.searchForm.controls['query'] };
 
+    clearSearch(event: Event) {
+        event.preventDefault();
+        this.query.setValue('');
+        this.ledgerService.getTransactions().subscribe({
+            next: (transactionList: TransactionList) => {
+                this.count = transactionList.count;
+                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
+            },
+            error: (err: any) => console.log(err),
+        });
+    }
+
     search() {
-        alert(this.query.value);
+        console.log('search', this.query.value);
+        this.ledgerService.getTransactions(this.query.value).subscribe({
+            next: (transactionList: TransactionList) => {
+                this.count = transactionList.count;
+                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
+            },
+            error: (err: any) => console.log(err),
+        });
     }
 
     clearTransaction(event: MouseEvent, transaction: Transaction){

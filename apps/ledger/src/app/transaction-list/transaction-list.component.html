@@ -6,6 +6,9 @@
         <div class="field">
             <button [disabled]="searchForm.invalid">Search</button>
         </div>
+        <div *ngIf="query.value" class="field reset">
+            <a href="#" (click)="clearSearch($event)">Clear Search</a>
+        </div>
     </form>
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
@@ -14,21 +17,29 @@
     <thead>
         <tr>
             <th>Date</th>
-            <th>Payee</th>
-            <th>Amount</th>
+            <th>Status</th>
             <th>Account</th>
-            <th>Note</th>
-            <th colspan="2">Status</th>
+            <th>Details</th>
+            <th class="align-right">Amount</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
             <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
-            <td>{{ transaction.payee }}</td>
-            <td>{{ transaction.amount|money }}</td>
+            <td *ngIf="transaction.cleared_on">
+                <div>Cleared</div>
+                <small>{{ transaction.cleared_on|date:'longDate' }}</small>
+            </td>
+            <td *ngIf="!transaction.cleared_on">
+                <a title="Clear now" href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Uncleared</a>
+            </td>
             <td><a [routerLink]="['/accounts', transaction.account.uid, 'form']">{{ transaction.account.name }}</a></td>
             <td>
-                {{ transaction.note }}
+                {{ transaction.payee }}
+                <p *ngIf="transaction.note">
+                    <em>{{ transaction.note }}</em>
+                </p>
 
                 <ul class="tag-list" *ngIf="transaction.tags">
                     <li *ngFor="let tag of transaction.tags">
@@ -37,13 +48,7 @@
                     </li>
                 </ul>
             </td>
-            <td *ngIf="transaction.cleared_on">
-                <div>Cleared</div>
-                <small>{{ transaction.cleared_on|date:'longDate' }}</small>
-            </td>
-            <td *ngIf="!transaction.cleared_on">
-                <a title="Clear now" href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Uncleared</a>
-            </td>
+            <td class="align-right">{{ transaction.amount|money }}</td>
             <td class="indicator"></td>
         </tr>
     </tbody>

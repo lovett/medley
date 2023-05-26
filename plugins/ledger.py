@@ -161,43 +161,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (transaction_id,)
         )
 
-    def search_by_keyword(self, **kwargs: Any) -> SearchResult:
-        """Locate entries with note that match a keyword search."""
-
-        limit = int(kwargs.get("limit", 20))
-        offset = int(kwargs.get("offset", 20))
-        query = kwargs.get("query", "")
-        (ideal_min, ideal_max) = [
-            val * 3600
-            for val in kwargs.get("ideal_duration", [])
-        ]
-
-        ideal_sql = ""
-        if ideal_min and ideal_max:
-            ideal_sql += f"""
-            , IIF({ideal_min} - s.duration_seconds > 0,
-                  {ideal_min} - s.duration_seconds,
-                  0) as 'deficit [duration]'
-            , IIF(s.duration_seconds - {ideal_max} > 0,
-                s.duration_seconds - {ideal_max},
-                0) as 'surplus [duration]'"""
-
-        sql = f"""SELECT s.id, s.start_utc as 'start [local_datetime]',
-        end_utc as 'end [local_datetime]',
-        duration_seconds AS 'duration [duration]',
-        s.note {ideal_sql}
-        FROM sleeplog AS s, sleeplog_fts
-        WHERE s.id=sleeplog_fts.rowid
-        AND sleeplog_fts MATCH ?
-        ORDER BY s.end_utc DESC
-        LIMIT ? OFFSET ?"""
-
-        placeholders = (query, limit, offset)
-        return (
-            self._select(sql, placeholders),
-            self._count(sql, placeholders)
-        )
-
     def account_new(self) -> dict:
         """A blank account record."""
         today = cherrypy.engine.publish(
@@ -304,6 +267,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = sql.replace("@COUNT@", count_sql)
         sql = sql.replace("@FROM@", from_sql)
         sql = sql.replace("@ORDER@", order_sql)
+
+        print(query)
 
         if query:
             result = self._selectFirst(

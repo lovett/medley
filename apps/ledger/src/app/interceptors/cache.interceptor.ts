@@ -28,6 +28,10 @@ export class CacheInterceptor implements HttpInterceptor {
             return next.handle(req);
         }
 
+        if (req.params) {
+            return next.handle(req);
+        }
+
         const cachedResponse = this.cacheService.get(req.url);
 
         if (cachedResponse) {

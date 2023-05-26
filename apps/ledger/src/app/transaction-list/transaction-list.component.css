@@ -6,12 +6,21 @@ HEADER {
 
 FORM {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
+}
+
+FORM .field.reset A {
+    margin-left: 1em;
+    line-height: 2.25em;
 }
 
 TR, TD {
     border-left: 0;
     border-right: 0;
+}
+
+.align-right {
+    text-align: right;
 }
 
 TD.indicator {
