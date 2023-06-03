@@ -2,12 +2,12 @@ CherryPy==18.8.0
 Jinja2==3.1.2
 PyJWT~=1.7
 feedparser==6.0.10
-geoip2==4.6.0
+geoip2==4.7.0
 httplib2==0.22.0
 importlib-resources==5.12.0
 mistletoe==1.0.1
-pydantic==1.10.7
+pydantic==1.10.8
 pytz==2023.3
-requests==2.30.0
+requests==2.31.0
 sdnotify==0.3.2
 shiv==1.0.3
