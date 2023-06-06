@@ -48,13 +48,13 @@ export class AccountFormComponent implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.accountForm = this.formBuilder.group({
-            name: [null, {updateOn: 'blur', validators: [Validators.required, Validators.minLength(3)]}],
-            url: [null, {updatedOn: 'blur'}],
+            name: [null, {validators: [Validators.required]}],
+            url: [null],
             dates: this.formBuilder.group({
                 opened_on: this.today(),
                 closed_on: null,
             }, {validators: dateRange}),
-            note: ['', {updateOn: 'blur'}],
+            note: [''],
         });
 
         this.ledgerService.getAccount(id).subscribe(
@@ -133,14 +133,14 @@ export class AccountFormComponent implements OnInit {
             name: account.name,
             url: account.url,
             dates: {
-                opened_on: account.opened_on,
-                closed_on: account.closed_on,
+                opened_on: account.openedOnYMD(),
+                closed_on: account.closedOnYMD(),
             },
             note: account.note,
         });
 
         this.account = account;
-        this.datesExpanded = (account.closed_on !== null);
+        this.datesExpanded = account.closed_on instanceof Date;
     }
 
     toggleAccountClosed(event: Event) {

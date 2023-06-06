@@ -4,6 +4,7 @@ import { Observable, map } from 'rxjs';
 import { Account } from './models/account';
 import { Transaction } from './models/transaction';
 import { TransactionPrimitive }  from './types/transactionPrimitive';
+import { AccountPrimitive }  from './types/accountPrimitive';
 import { TransactionList } from './types/transactionList';
 
 @Injectable({
@@ -29,7 +30,9 @@ export class LedgerService {
     }
 
     getAccount(uid: number): Observable<Account> {
-        return this.http.get<Account>(`/ledger/accounts/${uid}`);
+        return this.http.get<AccountPrimitive>(`/ledger/accounts/${uid}`).pipe(
+            map((primitive) => new Account(primitive))
+        );
     }
 
     getTransaction(uid: number): Observable<Transaction> {

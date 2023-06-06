@@ -25,6 +25,22 @@ export class Account {
         }
     }
 
+    openedOnYMD(): string {
+        return this.dateValue(this.opened_on);
+    }
+
+    closedOnYMD(): string {
+        return this.dateValue(this.closed_on);
+    }
+
+    dateValue(d?: Date): string {
+        if (!d) {
+            return '';
+        }
+
+        return d.toISOString().split('T')[0];
+    }
+
     toPrimitive(): AccountPrimitive {
         return {
             uid: this.uid,
