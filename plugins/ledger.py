@@ -40,6 +40,37 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             note TEXT
         );
 
+        CREATE VIRTUAL TABLE IF NOT EXISTS accounts_fts USING fts5 (
+            name, opened_on, closed_on, note,
+            content='accounts',
+            content_rowid='id',
+            tokenize=trigram
+        );
+
+        CREATE TRIGGER IF NOT EXISTS accounts_after_insert
+        AFTER INSERT ON accounts
+        BEGIN
+            INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
+            VALUES (new.rowid, new.name, new.opened_on, new.closed_on, new.note);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS accounts_after_delete
+        AFTER DELETE ON accounts
+        BEGIN
+          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on, closed_on, note)
+          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on, old.note);
+        END;
+
+        CREATE TRIGGER IF NOT EXISTS accounts_after_update
+        AFTER UPDATE ON accounts
+        BEGIN
+          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on, closed_on, note)
+          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on, old.note);
+
+          INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
+          VALUES (new.rowid, new.name, new.opened_on, new.closed_on, new.note);
+        END;
+
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY,
             account_id INTEGER,
@@ -47,78 +78,54 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cleared_on TEXT,
             amount INTEGER,
             payee TEXT,
+            tags TEXT,
             note TEXT,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
             ON DELETE CASCADE
         );
 
-        CREATE TABLE IF NOT EXISTS tags (
-            id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
-        );
-
-        CREATE UNIQUE INDEX IF NOT EXISTS tag_name
-            ON tags(name);
-
-        CREATE TABLE IF NOT EXISTS transaction_tag (
-            transaction_id INT NOT NULL,
-            tag_id INT NOT NULL,
-            PRIMARY KEY (transaction_id, tag_id),
-            FOREIGN KEY (transaction_id) REFERENCES transactions(id)
-                ON DELETE CASCADE,
-            FOREIGN KEY (tag_id) REFERENCES tags(id)
-                ON DELETE CASCADE
-        );
-
         CREATE VIRTUAL TABLE IF NOT EXISTS transactions_fts USING fts5 (
-            payee, note,
-            content=transactions,
-            tokenize=porter
+            occurred_on, amount, payee, note, tags,
+            content='transactions',
+            content_rowid='id',
+            tokenize='trigram'
         );
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_insert
         AFTER INSERT ON transactions
         BEGIN
-        INSERT INTO transactions_fts (rowid, payee, note)
-        VALUES (new.rowid, new.payee, new.note);
-        END;
-
-        CREATE TRIGGER IF NOT EXISTS transactions_after_update
-        AFTER UPDATE ON transactions
-        BEGIN
-        INSERT INTO transactions_fts (transactions_fts, rowid, payee, note)
-            VALUES ('delete', old.rowid, old.payee, old.note);
-        INSERT INTO transactions_fts (rowid, payee, note)
-            VALUES (new.rowid, new.payee, new.note);
+            INSERT INTO transactions_fts(
+                rowid, occurred_on, amount, payee, note, tags
+            ) VALUES (
+                new.rowid, new.occurred_on, new.amount, new.payee, new.note, new.tags
+            );
         END;
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_delete
         AFTER DELETE ON transactions
         BEGIN
-        INSERT INTO transactions_fts(transactions_fts, rowid, payee, note)
-            VALUES ('delete', old.rowid, old.payee, old.note);
+            INSERT INTO transactions_fts(
+                transactions_fts, rowid, occurred_on, amount, payee, note, tags
+            ) VALUES (
+                'delete', old.rowid, old.occurred_on, old.amount, old.payee, old.note, old.tags
+            );
         END;
 
-        CREATE TRIGGER IF NOT EXISTS transaction_tag_after_delete
-        AFTER DELETE ON transaction_tag
+        CREATE TRIGGER IF NOT EXISTS transactions_after_update
+        AFTER UPDATE ON transactions
         BEGIN
-        DELETE FROM tags
-            WHERE id not in (SELECT DISTINCT tag_id FROM transaction_tag);
-        END;
+          INSERT INTO transactions_fts(
+              transactions_fts, rowid, occurred_on, amount, payee, note, tags
+          ) VALUES (
+              'delete', old.rowid, old.occurred_on, old.amount, old.payee, old.note, old.tags
+          );
 
-        CREATE VIEW IF NOT EXISTS extended_transactions_view AS
-            SELECT t.id, t.occurred_on, t.cleared_on, t.amount,
-                t.payee, t.note, t.account_id, a.name as account_name,
-                a.closed_on as account_closed_on,
-                json_group_array(tags.name) as tags
-            FROM transactions t
-            JOIN accounts a ON t.account_id=a.id
-            LEFT JOIN transaction_tag tt
-                ON t.id=tt.transaction_id
-            LEFT JOIN tags
-                ON tt.tag_id=tags.id
-            GROUP BY t.id
-            ORDER BY t.occurred_on DESC;
+          INSERT INTO transactions_fts(
+              rowid, occurred_on, amount, payee, note, tags
+          ) VALUES (
+              new.rowid, new.occurred_on, new.amount, new.payee, new.note, new.tags
+          );
+        END;
         """)
 
     def start(self) -> None:
@@ -153,10 +160,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Retrieve a transaction by its ID."""
 
         return self._selectOne(
-            """SELECT id, occurred_on as 'occurred_on [datetime]',
-            cleared_on as 'cleared_on [datetime]', amount, payee,
-            note, account_id, accounts.name as account_name
-            FROM extended_transaction_view
+            """SELECT t.id, t.occurred_on as 'occurred_on [datetime]',
+            t.cleared_on as 'cleared_on [datetime]', t.amount, t.payee,
+            t.note, t.tags, t.account_id, a.name as account_name
+            FROM transactions t, accounts a
+            WHERE t.account_id=a.id
             WHERE id=?""",
             (transaction_id,)
         )
@@ -223,6 +231,17 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql, placeholders))
 
+    def count_transactions(self, query: str = "") -> int:
+        """Count of rows from the transactions table."""
+        if query:
+            return self._selectFirst(
+                """SELECT count(*)
+                FROM transactions_fts
+                WHERE transactions_fts MATCH ?""",
+                (query,))
+
+        return self._selectFirst("SELECT count(*) FROM transactions")
+
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
 
@@ -230,74 +249,83 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         offset = int(kwargs.get("offset", 0))
         query = kwargs.get("query", "")
 
-        sql = """SELECT json_object(
-        'count', (@COUNT@),
-        'transactions', json_group_array(
-
-        json_object(
-                'uid', id,
-                'account', json_object('uid', account_id,
-                               'name', account_name,
-                               'closed_on', account_closed_on),
-                'account_name', account_name,
-                'occurred_on', datetime(occurred_on),
-                'cleared_on', datetime(cleared_on),
-                'amount', amount,
-                'payee', payee,
-                'note', note,
-                'tags', json(tags)
-            )
-        )) AS json_result
-        FROM (@FROM@ ORDER BY @ORDER@ LIMIT ? OFFSET ?)"""
+        count = self.count_transactions(query)
 
         if query:
-            count_sql = """SELECT count(*) FROM extended_transactions_view t
+            select_sql = """
+            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on, t.amount, t.payee,
+                IFNULL(t.tags, '[]') as tags, t.note,
+                a.name as account_name, a.closed_on as account_closed_on
+            FROM transactions t
+            JOIN accounts a ON t.account_id=a.id
             JOIN transactions_fts ON t.id=transactions_fts.rowid
-            WHERE transactions_fts MATCH ?"""
-
-            from_sql = count_sql.replace("count(*)", "*")
-            order_sql = "t.occurred_on DESC"
-
+            WHERE transactions_fts MATCH ?
+            LIMIT ? OFFSET ?"""
+            select_placeholders = (query, limit, offset)
         else:
-            count_sql = "SELECT count(*) FROM extended_transactions_view t"
+            select_sql = """
+            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on, t.amount, t.payee,
+                IFNULL(t.tags, '[]') as tags, t.note,
+                a.name as account_name, a.closed_on as account_closed_on
+            FROM transactions t
+            JOIN accounts a ON t.account_id=a.id
+            LIMIT ? OFFSET ?"""
+            select_placeholders = (limit, offset)
 
-            from_sql = count_sql.replace("count(*)", "*")
-            order_sql = "occurred_on DESC, id DESC"
-
-        sql = sql.replace("@COUNT@", count_sql)
-        sql = sql.replace("@FROM@", from_sql)
-        sql = sql.replace("@ORDER@", order_sql)
-
-        print(query)
-
-        if query:
-            result = self._selectFirst(
-                sql,
-                (query, query, limit, offset)
+        sql = f"""SELECT json_object(
+            'count', ?,
+            'transactions', json_group_array(
+                json_object(
+                    'uid', id,
+                    'account', json_object(
+                        'uid', account_id,
+                        'name', account_name,
+                        'closed_on', account_closed_on
+                    ),
+                    'occurred_on', datetime(occurred_on),
+                    'cleared_on', datetime(cleared_on),
+                    'amount', amount,
+                    'payee', payee,
+                    'note', note,
+                    'tags', json(tags)
+                )
             )
-        else:
-            result = self._selectFirst(
-                sql,
-                (limit, offset)
-            )
+        ) FROM ({select_sql})
+        """
+
+        result = self._selectFirst(
+            sql,
+            (count,) + select_placeholders
+        )
 
         return cast(str, result)
 
     def transaction_json(self, uid: int) -> str:
         """A single row form the transactions table as JSON."""
-        sql = """SELECT json_object('uid', id,
-        'account', json_object('uid', account_id,
-                               'name', account_name,
-                               'closed_on', account_closed_on),
-        'occurred_on', occurred_on,
-        'cleared_on', cleared_on,
-        'amount', amount,
-        'payee', payee,
-        'note', note,
-        'tags', json(tags))
-        AS json_result
-        FROM (select * from extended_transactions_view
-        WHERE id=?)"""
+        sql = """
+        SELECT json_object(
+            'uid', id,
+            'account', json_object(
+                'uid', account_id,
+                'name', account_name,
+                'closed_on', account_closed_on
+            ),
+            'occurred_on', occurred_on,
+            'cleared_on', cleared_on,
+            'amount', amount,
+            'payee', payee,
+            'note', note,
+            'tags', json(tags)
+        )
+        FROM (
+            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on,
+                t.amount, t.payee, t.note,
+                IFNULL(t.tags, '[]') as tags,
+                a.name as account_name, a.closed_on as account_closed_on
+            FROM transactions t JOIN accounts a ON t.account_id=a.id
+            WHERE t.id=?
+        )
+        """
 
         return cast(str, self._selectFirst(sql, (uid,)))
 
@@ -381,7 +409,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             transaction_id: int,
             **kwargs: Any
-    ) -> None:
+    ) -> int:
         """Insert or update a transactions."""
 
         account_id = kwargs.get("account_id")
@@ -396,73 +424,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if transaction_id > 0:
             upsert_id = transaction_id
 
-        queries: List[Tuple[str, Tuple]] = []
-
-        queries.append((
-            """CREATE TEMP TABLE IF NOT EXISTS tmp
-            (key TEXT, value TEXT)""",
-            ()
-        ))
-
-        queries.append((
-            """INSERT INTO transactions (
-                id, account_id, occurred_on,
-                cleared_on, amount, payee, note
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT (id) DO UPDATE SET
+        return self._insert("""
+        INSERT INTO transactions (
+            id, account_id, occurred_on,
+            cleared_on, amount, payee, note, tags
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT (id) DO UPDATE SET
             account_id=excluded.account_id,
             occurred_on=excluded.occurred_on,
             cleared_on=excluded.cleared_on,
             amount=excluded.amount,
             payee=excluded.payee,
-            note=excluded.note""",
-            (upsert_id,
-             account_id,
-             occurred_on,
-             cleared_on,
-             amount,
-             payee,
-             note)
-        ))
+            note=excluded.note,
+            tags=excluded.tags
+        """, (upsert_id,
+              account_id,
+              occurred_on,
+              cleared_on,
+              amount,
+              payee,
+              note,
+              json.dumps(tags)))
 
-        if upsert_id:
-            queries.append((
-                """INSERT INTO tmp (key, value)
-                VALUES ("transaction_id", ?)""",
-                (upsert_id,)
-            ))
-            queries.append((
-                """DELETE FROM transaction_tag WHERE transaction_id=?""",
-                (upsert_id,)
-            ))
-        else:
-            queries.append((
-                """INSERT INTO tmp (key, value)
-                VALUES ("transaction_id", last_insert_rowid())""",
-                ()
-            ))
-
-        for tag in tags:
-            queries.append((
-                """INSERT OR IGNORE INTO tags (name) VALUES (?)""",
-                (tag,)
-            ))
-
-            queries.append((
-                """INSERT INTO transaction_tag (transaction_id, tag_id)
-                VALUES (
-                (SELECT value FROM tmp WHERE key="transaction_id"),
-                (SELECT id FROM tags WHERE name=?)
-                )""",
-                (tag,)
-            ))
-
-        after_commit = (
-            "SELECT value FROM tmp WHERE key='transaction_id'",
-            ()
-        )
-
-        self._multi(queries, after_commit)
 
     # def acknowledge(self, amount: float, payee: str, source: str) -> None:
     #     """Locate an uncleared transaction and clear it."""
