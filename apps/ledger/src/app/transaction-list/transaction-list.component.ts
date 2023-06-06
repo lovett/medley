@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/transactionList';
+import { ActivatedRoute}  from '@angular/router';
 
 @Component({
   selector: 'app-transaction-list',
@@ -17,13 +18,10 @@ export class TransactionListComponent implements OnInit {
 
     constructor(
         private ledgerService: LedgerService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private route:ActivatedRoute,
     ) {
         this.singularResourceName = 'transaction';
-
-        this.searchForm = this.formBuilder.group({
-            query: [null, {validators: Validators.required}],
-        });
     }
 
     ngOnInit() {
@@ -33,6 +31,13 @@ export class TransactionListComponent implements OnInit {
                 this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
             },
             error: (err: any) => console.log(err),
+        });
+
+        this.searchForm = this.formBuilder.group({
+            query: [
+                route.snapshot.queryParams['q'] || '',
+                {validators: Validators.required}
+            ],
         });
     }
 

@@ -42,3 +42,7 @@ TR.cleared TD.indicator {
     display: inline;
     padding-right: 1em;
 }
+
+.tag-list LI .icon {
+    margin-right: .5em;
+}

@@ -44,7 +44,7 @@
                 <ul class="tag-list" *ngIf="transaction.tags">
                     <li *ngFor="let tag of transaction.tags">
                         <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
-                        {{ tag }}
+                        <a [routerLink]="['/transactions']" [queryParams]="{q: 'tags:' + tag}">{{ tag }}</a>
                     </li>
                 </ul>
             </td>
