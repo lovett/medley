@@ -3,7 +3,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/transactionList';
-import { ActivatedRoute}  from '@angular/router';
+import { Router, ActivatedRoute}  from '@angular/router';
 
 @Component({
   selector: 'app-transaction-list',
@@ -13,56 +13,70 @@ import { ActivatedRoute}  from '@angular/router';
 export class TransactionListComponent implements OnInit {
     searchForm: FormGroup;
     count = 0;
+    limit = 50;
+    offset = 0;
+    nextOffset = 0;
+    previousOffset = 0;
     transactions: Transaction[] = [];
     singularResourceName: string;
 
     constructor(
         private ledgerService: LedgerService,
         private formBuilder: FormBuilder,
-        private route:ActivatedRoute,
+        private router: Router,
+        private route: ActivatedRoute
     ) {
         this.singularResourceName = 'transaction';
-    }
-
-    ngOnInit() {
-        this.ledgerService.getTransactions().subscribe({
-            next: (transactionList: TransactionList) => {
-                this.count = transactionList.count;
-                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
-            },
-            error: (err: any) => console.log(err),
-        });
 
         this.searchForm = this.formBuilder.group({
             query: [
-                route.snapshot.queryParams['q'] || '',
+                '',
                 {validators: Validators.required}
             ],
         });
+
+        this.route.queryParams.subscribe((queryParams) => {
+            this.offset = Number(queryParams['offset'] || 0);
+            this.query.setValue(queryParams['q']);
+            this.getTransactions();
+            window.scrollTo(0, 0);
+        });
+
+    }
+
+    ngOnInit() {
+        this.getTransactions();
     }
 
     get query() { return this.searchForm.controls['query'] };
 
-    clearSearch(event: Event) {
-        event.preventDefault();
-        this.query.setValue('');
-        this.ledgerService.getTransactions().subscribe({
+
+    getTransactions() {
+        this.ledgerService.getTransactions(this.query.value, this.limit, this.offset).subscribe({
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
                 this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
+                this.nextOffset = Math.min(this.offset + this.transactions.length, this.count);
+                this.previousOffset = Math.max(0, this.offset - this.transactions.length);
             },
             error: (err: any) => console.log(err),
         });
     }
 
+    clearSearch(event: Event) {
+        event.preventDefault();
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {q: null },
+            queryParamsHandling: 'merge',
+        });
+    }
+
     search() {
-        console.log('search', this.query.value);
-        this.ledgerService.getTransactions(this.query.value).subscribe({
-            next: (transactionList: TransactionList) => {
-                this.count = transactionList.count;
-                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
-            },
-            error: (err: any) => console.log(err),
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { q: this.query.value },
+            queryParamsHandling: 'merge',
         });
     }
 

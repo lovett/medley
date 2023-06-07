@@ -13,6 +13,18 @@
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
+<div class="pager">
+    <p *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</p>
+    <p *ngIf="previousOffset >= 0">
+        <a [routerLink]="[]" [queryParams]="{offset: previousOffset}" queryParamsHandling="merge">Previous</a>
+    </p>
+    <p *ngIf="nextOffset <= count">
+        <a [routerLink]="[]" [queryParams]="{offset: nextOffset}" queryParamsHandling="merge">Next</a>
+    </p>
+</div>
+
+
+
 <table *ngIf="transactions.length > 0">
     <thead>
         <tr>

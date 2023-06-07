@@ -20,11 +20,12 @@ export class LedgerService {
         return this.http.get<Account[]>('/ledger/accounts');
     }
 
-    getTransactions(query?: string): Observable<TransactionList> {
-        let params = {};
-        if (query) {
-            params = {q: query};
-        }
+    getTransactions(query: string, limit: number, offset: number): Observable<TransactionList> {
+         let params = {
+             limit,
+             offset,
+             q: query || '',
+         };
 
         return this.http.get<TransactionList>('/ledger/transactions', {params,});
     }

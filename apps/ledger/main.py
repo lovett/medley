@@ -37,7 +37,8 @@ class GetParams(BaseModel):
     """Parameters for GET requests."""
     q: str = Field("", strip_whitespace=True, to_lower=True)
     uid: int
-    offset: int = 0
+    offset: int = Field(0, gte=0)
+    limit: int = Field(50, gt=0, lte=100)
     resource: Resource = Resource.NONE
     subresource: Subresource = Subresource.NONE
 
@@ -93,7 +94,9 @@ class Controller:
                 resource=resource,
                 uid=uid,
                 subresource=subresource,
-                q=kwargs.get("q", "")
+                q=kwargs.get("q", ""),
+                limit=kwargs.get("limit", 50),
+                offset=kwargs.get("offset", 0)
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
@@ -154,7 +157,8 @@ class Controller:
         return cherrypy.engine.publish(
             "ledger:json:transactions",
             query=params.q,
-            limit=50
+            limit=params.limit,
+            offset=params.offset
         ).pop().encode()
 
     @staticmethod
