@@ -1,5 +1,5 @@
-<div [formGroup]="form">
-    <select formControlName="account_id">
+<div>
+    <select [formControl]="control">
          <option value=""></option>
          <option [ngValue]="account.uid" *ngFor="let account of accounts">{{ account.name }}</option>
     </select>

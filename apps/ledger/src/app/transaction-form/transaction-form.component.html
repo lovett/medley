@@ -14,6 +14,7 @@
 
         <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
     </div>
+
     <div class="field-group">
         <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid" [class.valid]="amount.valid">
             <label for="amount">Amount</label>
@@ -28,11 +29,15 @@
             <p *ngIf="amount.hasError('min')" class="validation-message">The amount should be greater than zero.</p>
         </div>
     </div>
-    <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
-        <label for="accountId">Account</label>
-        <app-account-menu [form]="transactionForm"></app-account-menu>
-        <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
-        <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
+
+    <div class="field">
+        <label for="transactionCleared">
+            <input
+                id="transactionCleared"
+                type="checkbox"
+                [checked]="datesExpanded"
+                (click)="toggleTransactionCleared($event)" /> This transaction has cleared.
+        </label>
     </div>
 
     <div formGroupName="dates">
@@ -47,21 +52,8 @@
                 />
                 <p *ngIf="occurredOn.hasError('required')" class="validation-message">A date is required.</p>
             </div>
-            <div class="field"></div>
-        </div>
 
-        <div class="field">
-            <label for="tranactionCleared">
-                <input
-                    id="tranactionCleared"
-                    type="checkbox"
-                    [checked]="datesExpanded"
-                    (click)="toggleTransactionCleared($event)" /> This transaction has cleared.
-            </label>
-        </div>
-
-        <div *ngIf="datesExpanded" class="field-group">
-            <div class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)" [class.valid]="clearedOn.valid">
+            <div *ngIf="datesExpanded" class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)" [class.valid]="clearedOn.valid">
                 <label for="clearedOn">Cleared On</label>
                 <input
                     id="clearedOn"
@@ -74,9 +66,38 @@
                 <p *ngIf="clearedOn.hasError('required')" class="validation-message">The clearance date must be specified.</p>
                 <p *ngIf="clearedOn.hasError('dateinpast')" class="validation-message">The clearance date must be in the past.</p>
             </div>
-            <div class="field"></div>
+
+            <div *ngIf="!datesExpanded" class="field"></div>
         </div>
     </div>
+
+    <div class="field">
+        <label for="transferToggle">
+            <input
+                id="transferToggle"
+                type="checkbox"
+                [checked]="transferExpanded"
+                (click)="toggleTransfer($event)" /> This is a transfer.
+        </label>
+    </div>
+
+    <div class="field-group">
+        <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
+            <label *ngIf="!transferExpanded" for="accountId">Account</label>
+            <label *ngIf="transferExpanded" for="accountId">Source Account</label>
+            <app-account-menu [control]="accountId"></app-account-menu>
+            <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
+            <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
+        </div>
+
+        <div class="field" *ngIf="transferExpanded">
+            <label for="accountId">Destination Account</label>
+            <app-account-menu [control]="destinationId"></app-account-menu>
+        </div>
+
+        <div *ngIf="!transferExpanded" class="field"></div>
+    </div>
+
 
     <div class="field" [class.valid]="tags.length > 0 && !tags.value.includes('')">
         <label for="tag-">Tags</label>

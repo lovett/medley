@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, flatMap } from 'rxjs';
 import { Account } from './models/account';
 import { Transaction } from './models/transaction';
 import { TransactionPrimitive }  from './types/transactionPrimitive';
@@ -17,7 +17,9 @@ export class LedgerService {
     ) {}
 
     getAccounts(): Observable<Account[]> {
-        return this.http.get<Account[]>('/ledger/accounts');
+        return this.http.get<AccountPrimitive[]>('/ledger/accounts').pipe(
+            map(primitives => primitives.map(primitive => new Account(primitive)))
+        );
     }
 
     getTransactions(query: string, limit: number, offset: number): Observable<TransactionList> {
@@ -42,18 +44,17 @@ export class LedgerService {
         );
     }
 
-    addAccount(account: Account): Observable<Account> {
-        console.log(account);
-        return this.http.post<Account>('/ledger/accounts', account)
+    addAccount(primitive: AccountPrimitive): Observable<Account> {
+        return this.http.post<Account>('/ledger/accounts', primitive)
     }
 
     addTransaction(primitive: TransactionPrimitive): Observable<Transaction> {
         return this.http.post<Transaction>('/ledger/transactions', primitive);
     }
 
-    updateAccount(account: Account): Observable<void> {
-        const url = `/ledger/accounts/${account.uid}`;
-        return this.http.put<void>(url, account);
+    updateAccount(primitive: AccountPrimitive): Observable<void> {
+        const url = `/ledger/accounts/${primitive.uid}`;
+        return this.http.put<void>(url, primitive);
     }
 
     updateTransaction(primitive: TransactionPrimitive): Observable<void> {

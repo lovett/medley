@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormArray, FormGroup, FormControl, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { TransactionPrimitive } from '../types/transactionPrimitive';
@@ -35,6 +35,7 @@ export class TransactionFormComponent implements OnInit {
     transaction: Transaction | undefined;
     errorMessage = '';
     datesExpanded = false;
+    transferExpanded = false;
     singularResourceName: string;
     autocompleteFrom: Transaction | null;
 
@@ -55,6 +56,7 @@ export class TransactionFormComponent implements OnInit {
 
         this.transactionForm = this.formBuilder.group({
             account_id: [null, {validators: [Validators.required, Validators.min(1)]}],
+            destination_id: [null],
             payee: ['', {validators: Validators.required}],
             amount: ['', {validators: [Validators.required, Validators.min(0.01)]}],
             dates: this.formBuilder.group({
@@ -85,7 +87,8 @@ export class TransactionFormComponent implements OnInit {
         }
     }
 
-    get accountId() { return this.transactionForm.controls['account_id'] }
+    get accountId() { return this.transactionForm.controls['account_id'] as FormControl }
+    get destinationId() { return this.transactionForm.controls['destination_id'] as FormControl }
     get payee() { return this.transactionForm.controls['payee'] }
     get amount() { return this.transactionForm.controls['amount'] }
     get dates() { return this.transactionForm.controls['dates'] as FormGroup }
@@ -95,7 +98,7 @@ export class TransactionFormComponent implements OnInit {
     get tags() { return this.transactionForm.get('tags') as FormArray }
 
     autocomplete(searchResult: TransactionList) {
-        if (searchResult.count !== 1) {
+        if (searchResult.count === 0) {
             this.autocompleteFrom = null;
             return;
         }
@@ -166,7 +169,16 @@ export class TransactionFormComponent implements OnInit {
 
         this.transaction = transaction;
         this.datesExpanded = (transaction.cleared_on instanceof Date);
+        this.transferExpanded = (transaction.destination !== undefined);
     }
+
+    toggleTransfer(event: Event) {
+        this.transferExpanded = (event.target as HTMLInputElement).checked;
+        this.transactionForm.markAsDirty();
+
+        this.destinationId.setValue(null);
+    }
+
 
     toggleTransactionCleared(event: Event) {
         this.datesExpanded = (event.target as HTMLInputElement).checked;

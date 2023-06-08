@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/fo
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { Account } from '../models/account';
+import { AccountPrimitive } from '../types/accountPrimitive';
 import { LedgerService } from '../ledger.service';
 import { Observable, switchMap } from 'rxjs';
 import { isObject, omitBy } from "lodash-es"
@@ -49,6 +50,7 @@ export class AccountFormComponent implements OnInit {
 
         this.accountForm = this.formBuilder.group({
             name: [null, {validators: [Validators.required]}],
+            isCredit: [false],
             url: [null],
             dates: this.formBuilder.group({
                 opened_on: this.today(),
@@ -72,31 +74,33 @@ export class AccountFormComponent implements OnInit {
     get openedOn() { return this.dates.controls['opened_on'] }
     get closedOn() { return this.dates.controls['closed_on'] }
     get note() { return this.accountForm.controls['note'] }
-    get url() { return this.accountForm.get('url')!; }
+    get url() { return this.accountForm.controls['url'] }
+    get isCredit() { return this.accountForm.controls['isCredit'] }
 
     today() {
         return formatDate(new Date(), 'yyyy-MM-dd', 'en');
     }
 
     save(): void {
-        const outboundAccount: Account = {
-            ...this.account,
-            ...omitBy(this.accountForm.value, (v, _) => {
-                return isObject(v);
-            }),
-            ...this.dates.value,
-        };
+        const primitive: AccountPrimitive = {
+            uid: this.account!.uid,
+            name: this.name.value,
+            opened_on: this.openedOn.value || null,
+            closed_on: this.closedOn.value || null,
+            note: this.note.value,
+            url: this.url.value,
+            is_credit: this.isCredit.value
+        }
 
-        if (outboundAccount.uid === 0) {
-            console.log('yes');
-            this.ledgerService.addAccount(outboundAccount).subscribe(
+        if (primitive.uid === 0) {
+            this.ledgerService.addAccount(primitive).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );
         }
 
-        if (outboundAccount.uid > 0) {
-            this.ledgerService.updateAccount(outboundAccount).subscribe(
+        if (primitive.uid > 0) {
+            this.ledgerService.updateAccount(primitive).subscribe(
                 () => this.saved(),
                 (err) => this.errorMessage = err,
             );
@@ -132,6 +136,7 @@ export class AccountFormComponent implements OnInit {
         this.accountForm.patchValue({
             name: account.name,
             url: account.url,
+            isCredit: account.isCredit,
             dates: {
                 opened_on: account.openedOnYMD(),
                 closed_on: account.closedOnYMD(),

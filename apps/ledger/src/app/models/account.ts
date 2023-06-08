@@ -3,26 +3,33 @@ import { AccountPrimitive } from '../types/accountPrimitive';
 export class Account {
     uid: number;
     name: string;
-    opened_on: Date;
+    opened_on?: Date;
     closed_on?: Date;
     url?: string;
     note?: string;
+    isCredit: boolean;
 
     constructor(primitive: AccountPrimitive) {
         this.uid = primitive.uid;
         this.name = primitive.name;
-        this.opened_on = new Date(primitive.opened_on);
+
+        if (primitive.opened_on) {
+            this.opened_on = new Date(primitive.opened_on);
+        }
+
         if (primitive.closed_on) {
             this.closed_on = new Date(primitive.closed_on);
         }
 
-        if (this.url) {
+        if (primitive.url) {
             this.url = primitive.url;
         }
 
-        if (this.note) {
+        if (primitive.note) {
             this.note = primitive.note;
         }
+
+        this.isCredit = Boolean(primitive.is_credit)
     }
 
     openedOnYMD(): string {
@@ -34,20 +41,10 @@ export class Account {
     }
 
     dateValue(d?: Date): string {
-        if (!d) {
-            return '';
+        if (d) {
+            return d.toISOString().split('T')[0];
         }
 
-        return d.toISOString().split('T')[0];
-    }
-
-    toPrimitive(): AccountPrimitive {
-        return {
-            uid: this.uid,
-            name: this.name,
-            opened_on: this.opened_on.toISOString().split('T')[0],
-            closed_on: (this.closed_on)? this.closed_on.toISOString().split('T')[0] : undefined,
-            note: this.note,
-        }
+        return '';
     }
 }

@@ -1,15 +1,15 @@
 import { Attribute, Component, Input, OnInit, EventEmitter } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
 
 @Component({
-  selector: 'app-account-menu',
+  selector: 'app-account-menu[control]',
   templateUrl: './account-menu.component.html',
   styleUrls: ['./account-menu.component.css'],
 })
 export class AccountMenuComponent implements OnInit {
-    @Input() form!: FormGroup;
+    @Input() control!: FormControl;
     @Input() account?: Account;
     accounts: Account[] = [];
 

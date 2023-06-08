@@ -4,6 +4,7 @@
 
 <p *ngFor="let account of accounts">
     <a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a>
+    <span *ngIf="account.isCredit"> (Credit card)</span>
 </p>
 
 <p *ngIf="accounts.length == 0">There are no accounts.</p>
