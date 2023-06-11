@@ -1,25 +1,25 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "newProjectRoot": "projects",
+  "newProjectRoot": "apps",
   "projects": {
     "ledger": {
       "projectType": "application",
       "schematics": {},
-      "root": "",
-      "sourceRoot": "src",
-      "prefix": "app",
+      "root": "apps/ledger",
+      "sourceRoot": "apps/ledger/src",
+      "prefix": "ledger",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "../static/js/ledger",
+            "outputPath": "apps/static/js/ledger",
             "index": "",
-            "main": "src/main.ts",
+            "main": "apps/ledger/src/main.ts",
             "polyfills": [
               "zone.js"
             ],
-            "tsConfig": "tsconfig.app.json",
+            "tsConfig": "apps/ledger/tsconfig.app.json",
             "assets": [
             ],
             "styles": [
@@ -79,7 +79,7 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "tsconfig.spec.json",
+            "tsConfig": "apps/ledger/tsconfig.spec.json",
             "assets": [
             ],
             "styles": [
