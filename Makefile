@@ -341,7 +341,10 @@ workspace:
 	tmux new-window -a -t "$(TMUX_SESSION_NAME)" "$$SHELL"
 	tmux send-keys -t "$(TMUX_SESSION_NAME)" "source $(VENV_ACTIVATE)" C-m
 
-# 2: Dev server
+# 2: Npm
+	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "npm" "npm run ledger-watch"
+
+# 3: Dev server
 	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "devserver" "source $(VENV_ACTIVATE); make serve"
 	tmux select-window -t "$(TMUX_SESSION_NAME)":0
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
