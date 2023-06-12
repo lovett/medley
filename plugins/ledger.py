@@ -75,12 +75,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY,
             account_id INTEGER,
+            destination_id INTEGER DEFAULT 0,
             occurred_on TEXT,
             cleared_on TEXT,
             amount INTEGER,
             payee TEXT,
             tags TEXT,
             note TEXT,
+            related_transaction_id INTEGER DEFAULT 0,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
             ON DELETE CASCADE
         );
@@ -411,8 +413,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Delete a row from the transactions table."""
 
         return self._execute(
-            "DELETE FROM transactions WHERE id=?",
-            (uid,)
+            "DELETE FROM transactions WHERE id=? OR related_transaction_id=?",
+            (uid, uid)
         )
 
     def upsert_transaction(
@@ -423,39 +425,58 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Insert or update a transactions."""
 
         account_id = kwargs.get("account_id")
+        destination_id = kwargs.get("destination_id", 0)
         occurred_on = kwargs.get("occurred_on")
         cleared_on = kwargs.get("cleared_on", 0)
         amount = kwargs.get("amount", 0)
         payee = kwargs.get("payee", "")
         note = kwargs.get("note", "")
-        tags = kwargs.get("tags", [])
+        tags = json.dumps(kwargs.get("tags", []))
 
-        upsert_id = None
+        queries = []
+        if transaction_id == 0:
+            queries.append(("""INSERT INTO transactions
+            (account_id, destination_id, occurred_on, cleared_on,
+            amount, payee, note, tags)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (account_id, destination_id, occurred_on, cleared_on,
+                  amount, payee, note, tags)))
+
+            if destination_id > 0:
+                queries.append(("""INSERT INTO transactions
+                (account_id, destination_id, occurred_on, cleared_on,
+                amount, payee, note, tags, related_transaction_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, last_insert_rowid())
+                """, (destination_id, account_id, occurred_on, cleared_on,
+                      amount * -1, payee, note, tags)))
+
+                queries.append(("""UPDATE transactions
+                SET related_transaction_id=last_insert_rowid()
+                WHERE id=(SELECT related_transaction_id
+                FROM transactions WHERE id=last_insert_rowid())""",
+                ()))
+
         if transaction_id > 0:
-            upsert_id = transaction_id
+            queries.append(("""UPDATE transactions
+            SET account_id=?, destination_id=?, occurred_on=?,
+            cleared_on=?, amount=?, payee=?, note=?, tags=?
+            WHERE id=?""", (
+                account_id, destination_id, occurred_on, cleared_on,
+                amount, payee, note, tags)))
 
-        return self._insert("""
-        INSERT INTO transactions (
-            id, account_id, occurred_on,
-            cleared_on, amount, payee, note, tags
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT (id) DO UPDATE SET
-            account_id=excluded.account_id,
-            occurred_on=excluded.occurred_on,
-            cleared_on=excluded.cleared_on,
-            amount=excluded.amount,
-            payee=excluded.payee,
-            note=excluded.note,
-            tags=excluded.tags
-        """, (upsert_id,
-              account_id,
-              occurred_on,
-              cleared_on,
-              amount,
-              payee,
-              note,
-              json.dumps(tags or [])))
+            if destination_id > 0:
+                queries.append(("""DELETE FROM transactions WHERE
+                related_id=?""", (transaction_id,)))
 
+                queries.append(("""INSERT INTO transactions
+                (account_id, destination_id, occurred_on, cleared_on,
+                amount, payee, note, tags, related_transaction_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (destination_id, account_id, occurred_on, cleared_on,
+                 amount * -1, payee, note, tags, transaction_id)))
+
+        print(queries)
+        self._multi(queries)
 
     # def acknowledge(self, amount: float, payee: str, source: str) -> None:
     #     """Locate an uncleared transaction and clear it."""

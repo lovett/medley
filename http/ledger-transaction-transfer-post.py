@@ -6,11 +6,12 @@ response = json_client.post(
     "/ledger/transactions",
     json={
         "occurred_on": "2020-01-01",
-        "payee": "My Test Payee",
-        "amount": 12345,
+        "payee": "transfer test",
+        "amount": 666,
         "account_id": 1,
+        "destination_id": 5,
         "note": "This is my note",
-        "tags": ["apple", "banana", "orange"]
+        "tags": ["transfer"]
     }
 )
 

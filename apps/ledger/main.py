@@ -58,6 +58,7 @@ class TransactionParams(BaseModel):
     """Parameters for transaction requests."""
     uid: int = Field(0, gt=-1)
     account_id: int
+    destination_id: Optional[int] = 0
     occurred_on: datetime.date
     cleared_on: Optional[datetime.date]
     amount: float
@@ -290,16 +291,17 @@ class Controller:
     def store_transaction(params: TransactionParams) -> None:
         """Upsert a transaction record."""
 
-        upsert_id = cherrypy.engine.publish(
+        cherrypy.engine.publish(
             "ledger:store:transaction",
             params.uid,
             account_id=params.account_id,
+            destination_id=params.destination_id,
             occurred_on=params.occurred_on,
             cleared_on=params.cleared_on,
             amount=params.amount,
             payee=params.payee,
             note=params.note,
-            tags=params.tags
+            tags=params.tags,
         ).pop()
 
         cherrypy.response.status = 204
