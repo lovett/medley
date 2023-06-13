@@ -148,6 +148,7 @@ export class TransactionFormComponent implements OnInit {
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             account_id: transaction.account.uid,
+            destination_id: transaction.destination?.uid || 0,
             dates: {
                 occurred_on: transaction.occurredOnYMD(),
                 cleared_on: transaction.clearedOnYMD(),
@@ -209,6 +210,7 @@ export class TransactionFormComponent implements OnInit {
         const primitive: TransactionPrimitive = {
             'uid': this.transaction!.uid,
             'account_id': this.accountId.value,
+            'destination_id': this.destinationId.value,
             'payee': this.payee.value,
             'amount': this.amount.value * 100,
             'occurred_on': this.occurredOn.value,

@@ -1,5 +1,5 @@
 <div>
-    <select [formControl]="control">
+    <select id="{{ fieldId }}" [formControl]="control">
          <option value=""></option>
          <option [ngValue]="account.uid" *ngFor="let account of accounts">{{ account.name }}</option>
     </select>

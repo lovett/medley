@@ -259,24 +259,28 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if query:
             select_sql = """
-            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on, t.amount,
+            SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
                 t.payee, IFNULL(t.tags, '[]') as tags, t.note,
                 a.name as account_name, a.closed_on as account_closed_on,
-                a.is_credit as account_is_credit
+                a.is_credit as account_is_credit,
+                a2.name as destination_name
             FROM transactions t
             JOIN accounts a ON t.account_id=a.id
             JOIN transactions_fts ON t.id=transactions_fts.rowid
+            LEFT JOIN accounts a2 ON t.destination_id=a2.id
             WHERE transactions_fts MATCH ?
             LIMIT ? OFFSET ?"""
             select_placeholders = (query, limit, offset)
         else:
             select_sql = """
-            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on, t.amount,
+            SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
                 t.payee, IFNULL(t.tags, '[]') as tags, t.note,
                 a.name as account_name, a.closed_on as account_closed_on,
+                a2.name as destination_name,
                 a.is_credit as account_is_credit
             FROM transactions t
             JOIN accounts a ON t.account_id=a.id
+            LEFT JOIN accounts a2 ON t.destination_id=a2.id
             LIMIT ? OFFSET ?"""
             select_placeholders = (limit, offset)
 
@@ -290,6 +294,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'name', account_name,
                         'is_credit', account_is_credit,
                         'closed_on', account_closed_on
+                    ),
+                    'destination', json_object(
+                        'uid', destination_id,
+                        'name', destination_name
                     ),
                     'occurred_on', datetime(occurred_on),
                     'cleared_on', datetime(cleared_on),
@@ -319,6 +327,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 'name', account_name,
                 'closed_on', account_closed_on
             ),
+            'destination', json_object(
+                'uid', destination_id,
+                'name', destination_name
+            ),
             'occurred_on', occurred_on,
             'cleared_on', cleared_on,
             'amount', amount,
@@ -327,11 +339,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             'tags', json(tags)
         )
         FROM (
-            SELECT t.id, t.account_id, t.occurred_on, t.cleared_on,
-                t.amount, t.payee, t.note,
+            SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
+                t.cleared_on, t.amount, t.payee, t.note,
                 IFNULL(t.tags, '[]') as tags,
-                a.name as account_name, a.closed_on as account_closed_on
-            FROM transactions t JOIN accounts a ON t.account_id=a.id
+                a.name as account_name, a.closed_on as account_closed_on,
+                a2.name as destination_name
+            FROM transactions t
+            JOIN accounts a ON t.account_id=a.id
+            LEFT JOIN accounts a2 ON t.destination_id=a2.id
             WHERE t.id=?
         )
         """
@@ -356,6 +371,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return {
             "uid": 0,
             "account": new_account,
+            "destination": new_account,
             "occurred_on": today_formatted,
             "cleared_on": None,
             "tags": [],
@@ -462,11 +478,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cleared_on=?, amount=?, payee=?, note=?, tags=?
             WHERE id=?""", (
                 account_id, destination_id, occurred_on, cleared_on,
-                amount, payee, note, tags)))
+                amount, payee, note, tags, transaction_id)))
 
             if destination_id > 0:
                 queries.append(("""DELETE FROM transactions WHERE
-                related_id=?""", (transaction_id,)))
+                related_transaction_id=?""", (transaction_id,)))
 
                 queries.append(("""INSERT INTO transactions
                 (account_id, destination_id, occurred_on, cleared_on,
@@ -475,7 +491,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 (destination_id, account_id, occurred_on, cleared_on,
                  amount * -1, payee, note, tags, transaction_id)))
 
-        print(queries)
         self._multi(queries)
 
     # def acknowledge(self, amount: float, payee: str, source: str) -> None:

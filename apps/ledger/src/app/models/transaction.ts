@@ -4,7 +4,7 @@ import { TransactionPrimitive } from '../types/transactionPrimitive';
 export class Transaction {
     uid: number;
     account: Account
-    destination?: Account
+    destination: Account
     payee: string;
     amount: number;
     occurred_on: Date;
@@ -16,6 +16,7 @@ export class Transaction {
         this.uid = primitive.uid;
 
         this.account = new Account(primitive.account!);
+        this.destination = new Account(primitive.destination!);
 
         if (primitive.destination) {
             this.destination = new Account(primitive.destination);
