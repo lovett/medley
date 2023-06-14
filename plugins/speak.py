@@ -100,7 +100,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             schedules
         ).pop()
 
-    def speak(self, statement: str, noadjust: bool = False) -> bool:
+    def speak(
+            self,
+            statement: str,
+            noadjust: bool = False,
+            retries_remaining: int = 3
+    ) -> bool:
         """Send text to the configured speech command."""
 
         if statement.strip() == "":
@@ -132,6 +137,29 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                     command.split(),
                     input=proc_in,
                 )
+
+            except subprocess.CalledProcessError:
+                applog_message = "Text-to-speech was unsuccessful."
+                if retries_remaining == 0:
+                    applog_message += " Will not retry."
+                else:
+                    applog_message += " Will retry."
+
+                cherrypy.engine.publish(
+                    "applog:add",
+                    "speak:speak",
+                    applog_message
+                )
+
+                cherrypy.engine.publish(
+                    "scheduler:add",
+                    10,
+                    "speak",
+                    statement,
+                    noadjust,
+                    retries_remaining - 1
+                )
+                return False
 
             except FileNotFoundError:
                 cherrypy.engine.publish(
