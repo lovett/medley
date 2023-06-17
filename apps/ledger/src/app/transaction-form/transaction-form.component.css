@@ -13,7 +13,8 @@ HEADER {
     max-width: 10em;
 }
 
-.valid label:before {
-    content: '🆗';
-    padding-right: .25em;
+.valid label:after {
+    content: '✓';
+    color: green;
+    padding-left: .25em;
 }
