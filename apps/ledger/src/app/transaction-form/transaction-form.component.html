@@ -89,7 +89,7 @@
         </div>
 
         <div class="field" *ngIf="transferExpanded">
-            <app-account-menu fieldId="destinationId" [control]="destinationId" label="Transfer To"></app-account-menu>
+            <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Transfer To"></app-account-menu>
         </div>
 
         <div *ngIf="!transferExpanded" class="field"></div>

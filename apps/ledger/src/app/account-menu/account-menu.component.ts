@@ -13,6 +13,8 @@ export class AccountMenuComponent implements OnInit {
     @Input() fieldId?: string;
     @Input() label?: string;
     @Input() account?: Account;
+    @Input() disabledValue?: string;
+
     accounts: Account[] = [];
 
     constructor(

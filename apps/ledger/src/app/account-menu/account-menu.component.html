@@ -2,6 +2,10 @@
     <label *ngIf="label" for="{{ fieldId}} ">{{ label }}</label>
     <select id="{{ fieldId }}" name="{{ fieldId }}" [formControl]="control">
          <option value=""></option>
-         <option [ngValue]="account.uid" *ngFor="let account of accounts">{{ account.name }}</option>
+         <option
+             [ngValue]="account.uid"
+             [disabled]="account.uid.toString() == disabledValue"
+             *ngFor="let account of accounts"
+         >{{ account.name }}</option>
     </select>
 </div>
