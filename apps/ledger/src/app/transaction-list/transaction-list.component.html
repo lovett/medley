@@ -29,23 +29,15 @@
     <thead>
         <tr>
             <th>Date</th>
-            <th>Status</th>
             <th>Account</th>
             <th>Details</th>
             <th class="align-right">Amount</th>
-            <th></th>
+            <th class="align-right">Status</th>
         </tr>
     </thead>
     <tbody>
         <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
             <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
-            <td *ngIf="transaction.cleared_on">
-                <div>Cleared</div>
-                <small>{{ transaction.cleared_on|date:'longDate' }}</small>
-            </td>
-            <td *ngIf="!transaction.cleared_on">
-                <a title="Clear now" href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Uncleared</a>
-            </td>
             <td><a [routerLink]="['/accounts', transaction.account.uid, 'form']">{{ transaction.account.name }}</a></td>
             <td>
                 {{ transaction.payee }}
@@ -61,7 +53,14 @@
                 </ul>
             </td>
             <td class="align-right">{{ transaction.amount|money }}</td>
-            <td class="indicator"></td>
+            <td class="align-right" *ngIf="transaction.cleared_on">
+                <div class="minibanner">Cleared</div>
+                <p>{{ transaction.cleared_on|date:'longDate' }}</p>
+            </td>
+            <td class="align-right" *ngIf="!transaction.cleared_on">
+                <div class="minibanner">Pending</div>
+                <p><a href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Clear Now</a></p>
+            </td>
         </tr>
     </tbody>
 </table>

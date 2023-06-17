@@ -23,13 +23,8 @@ TR, TD {
     text-align: right;
 }
 
-TD.indicator {
-    width: 1%;
-    background-color: #ccc;
-}
-
-TR.cleared TD.indicator {
-    background-color: SeaGreen;
+.align-center {
+    text-align: center;
 }
 
 .tag-list {
@@ -45,4 +40,21 @@ TR.cleared TD.indicator {
 
 .tag-list LI .icon {
     margin-right: .5em;
+}
+
+.minibanner {
+    display: inline-block;
+    text-transform: uppercase;
+    padding: .5em;
+    text-align: center;
+    font-weight: bold;
+    background-color: lemonchiffon;
+}
+
+.minibanner + P {
+    margin-top: 0.75em;
+}
+
+TR.cleared .minibanner {
+    background-color: lightgreen;
 }
