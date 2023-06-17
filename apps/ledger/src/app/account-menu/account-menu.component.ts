@@ -11,6 +11,7 @@ import { Account } from '../models/account';
 export class AccountMenuComponent implements OnInit {
     @Input() control!: FormControl;
     @Input() fieldId?: string;
+    @Input() label?: string;
     @Input() account?: Account;
     accounts: Account[] = [];
 

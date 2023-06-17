@@ -83,16 +83,13 @@
 
     <div class="field-group">
         <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
-            <label *ngIf="!transferExpanded" for="accountId">Account</label>
-            <label *ngIf="transferExpanded" for="accountId">Source Account</label>
-            <app-account-menu fieldId="accountId" [control]="accountId"></app-account-menu>
+            <app-account-menu fieldId="accountId" [control]="accountId" label="Account"></app-account-menu>
             <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
             <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
         </div>
 
         <div class="field" *ngIf="transferExpanded">
-            <label for="destinationId">Destination Account</label>
-            <app-account-menu fieldId="destinationId" [control]="destinationId"></app-account-menu>
+            <app-account-menu fieldId="destinationId" [control]="destinationId" label="Transfer To"></app-account-menu>
         </div>
 
         <div *ngIf="!transferExpanded" class="field"></div>
