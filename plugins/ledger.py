@@ -480,7 +480,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 account_id, destination_id, occurred_on, cleared_on,
                 amount, payee, note, tags, transaction_id)))
 
-            if destination_id > 0:
+            if destination_id and destination_id > 0:
                 queries.append(("""DELETE FROM transactions WHERE
                 related_transaction_id=?""", (transaction_id,)))
 

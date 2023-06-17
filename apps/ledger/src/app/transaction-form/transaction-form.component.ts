@@ -170,7 +170,7 @@ export class TransactionFormComponent implements OnInit {
 
         this.transaction = transaction;
         this.datesExpanded = (transaction.cleared_on instanceof Date);
-        this.transferExpanded = (transaction.destination !== undefined);
+        this.transferExpanded = (transaction.destination.uid > 0);
     }
 
     toggleTransfer(event: Event) {
