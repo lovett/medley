@@ -114,22 +114,6 @@ serve: export MEDLEY_prefetch=False
 serve:
 	ls apps/**/main.py plugins/*.py tools/*.py parsers/*.py medley.py | entr python medley.py
 
-# A temporary target to help with building out mypy stubs
-stubdev:
-	ls apps/**/*.py | entr mypy apps
-
-# Profile function calls.
-profile:
-	python -m cProfile -o medley.prof medley.py
-
-# Profile memory usage.
-profilemem:
-	mprof run  --include-children --multiprocess medley.py
-
-# Display profiled memory usage.
-profilestats:
-	echo 'sort cumtime\nstats' | python -m pstats medley.prof | less
-
 # Rename coverage files to comply with coverage utility's
 # expectations.
 #
