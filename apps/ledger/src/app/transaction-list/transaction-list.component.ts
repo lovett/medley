@@ -67,7 +67,7 @@ export class TransactionListComponent implements OnInit {
         event.preventDefault();
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {q: null },
+            queryParams: {q: null, offet: 0 },
             queryParamsHandling: 'merge',
         });
     }
@@ -75,7 +75,7 @@ export class TransactionListComponent implements OnInit {
     search() {
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { q: this.query.value },
+            queryParams: { q: this.query.value, offset: 0 },
             queryParamsHandling: 'merge',
         });
     }
