@@ -269,6 +269,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             JOIN transactions_fts ON t.id=transactions_fts.rowid
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
             WHERE transactions_fts MATCH ?
+            ORDER BY t.occurred_on DESC
             LIMIT ? OFFSET ?"""
             select_placeholders = (query, limit, offset)
         else:
@@ -281,6 +282,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             FROM transactions t
             JOIN accounts a ON t.account_id=a.id
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
+            ORDER BY t.occurred_on DESC
             LIMIT ? OFFSET ?"""
             select_placeholders = (limit, offset)
 
