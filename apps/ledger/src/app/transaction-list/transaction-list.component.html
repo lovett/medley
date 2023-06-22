@@ -14,13 +14,25 @@
 </header>
 
 <div class="pager">
-    <p *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</p>
-    <p *ngIf="previousOffset >= 0">
-        <a [routerLink]="[]" [queryParams]="{offset: previousOffset}" queryParamsHandling="merge">Previous</a>
-    </p>
-    <p *ngIf="nextOffset <= count">
-        <a [routerLink]="[]" [queryParams]="{offset: nextOffset}" queryParamsHandling="merge">Next</a>
-    </p>
+    <div>
+        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: 0}" queryParamsHandling="merge">
+            ⏪️  <span>Newest</span>
+        </a>
+        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: previousOffset}" queryParamsHandling="merge">
+            ⬅️  <span>Newer</span>
+        </a>
+    </div>
+
+    <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</div>
+
+    <div>
+        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: nextOffset}" queryParamsHandling="merge">
+            <span>Older</span> ➡️
+        </a>
+        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: count - transactions.length}" queryParamsHandling="merge">
+            <span>Oldest</span> ⏩
+        </a>
+    </div>
 </div>
 
 
@@ -38,7 +50,12 @@
     <tbody>
         <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
             <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
-            <td><a [routerLink]="['/accounts', transaction.account.uid, 'form']">{{ transaction.account.name }}</a></td>
+            <td>
+                <div>{{ transaction.account.name }}</div>
+                <div *ngIf="transaction.destination.uid > 0">
+                    ↳ to {{ transaction.destination.name }}
+                </div>
+            </td>
             <td>
                 {{ transaction.payee }}
                 <p *ngIf="transaction.note">

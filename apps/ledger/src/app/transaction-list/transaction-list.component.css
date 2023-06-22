@@ -55,6 +55,31 @@ TR, TD {
     margin-top: 0.75em;
 }
 
+.pager {
+    display: grid;
+    grid-template-columns: 175px 1fr 175px;
+    padding: .5em 0;
+    text-align: center;
+}
+
+.pager > div:not(:nth-child(2)) {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+.pager A:hover {
+    text-decoration: none;
+}
+
+.pager A:hover SPAN {
+    text-decoration: underline;
+}
+
+.pager SPAN {
+    padding: 0 0.25em;
+}
+
 TR.cleared .minibanner {
     background-color: lightgreen;
 }
