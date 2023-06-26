@@ -12,13 +12,6 @@
 # - A host variable "medley_hostname" set to the URL of the
 #   production instance.
 #
-# - A host variable "medley_ssl_certificate" set to the absolute path
-#   on the production host of the SSL certificate (ie SSLCertificateFile
-#   in the Apache vhost).
-#
-# - A host variable "medley_ssl_key" set to the absolute path on the production host
-#   of the SSL key (ie SSLCertificatekeyfile in the Apache vhost).
-#
 # - A host variable "medley_user" set to the user on the production host that will
 #    be running the application.
 

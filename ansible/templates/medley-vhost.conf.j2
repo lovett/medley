@@ -8,10 +8,6 @@
 <VirtualHost *:443>
     ServerName {{ medley_hostname }}
 
-    SSLEngine on
-    SSLCertificateFile {{ medley_ssl_certificate }}
-    SSLCertificateKeyFile {{ medley_ssl_key }}
-
     RequestHeader set X-Real-IP %{REMOTE_ADDR}s
     RequestHeader set X-Forwarded-Proto https
 
