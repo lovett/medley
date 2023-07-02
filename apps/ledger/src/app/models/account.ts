@@ -7,7 +7,6 @@ export class Account {
     closed_on?: Date;
     url?: string;
     note?: string;
-    isCredit: boolean;
 
     constructor(primitive: AccountPrimitive) {
         this.uid = primitive.uid;
@@ -28,8 +27,6 @@ export class Account {
         if (primitive.note) {
             this.note = primitive.note;
         }
-
-        this.isCredit = Boolean(primitive.is_credit)
     }
 
     openedOnYMD(): string {

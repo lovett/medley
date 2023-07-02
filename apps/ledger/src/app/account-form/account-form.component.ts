@@ -50,7 +50,6 @@ export class AccountFormComponent implements OnInit {
 
         this.accountForm = this.formBuilder.group({
             name: [null, {validators: [Validators.required]}],
-            isCredit: [false],
             url: [null],
             dates: this.formBuilder.group({
                 opened_on: this.today(),
@@ -75,7 +74,6 @@ export class AccountFormComponent implements OnInit {
     get closedOn() { return this.dates.controls['closed_on'] }
     get note() { return this.accountForm.controls['note'] }
     get url() { return this.accountForm.controls['url'] }
-    get isCredit() { return this.accountForm.controls['isCredit'] }
 
     today() {
         return formatDate(new Date(), 'yyyy-MM-dd', 'en');
@@ -89,7 +87,6 @@ export class AccountFormComponent implements OnInit {
             closed_on: this.closedOn.value || null,
             note: this.note.value,
             url: this.url.value,
-            is_credit: this.isCredit.value
         }
 
         if (primitive.uid === 0) {
@@ -136,7 +133,6 @@ export class AccountFormComponent implements OnInit {
         this.accountForm.patchValue({
             name: account.name,
             url: account.url,
-            isCredit: account.isCredit,
             dates: {
                 opened_on: account.openedOnYMD(),
                 closed_on: account.closedOnYMD(),

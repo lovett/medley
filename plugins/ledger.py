@@ -37,7 +37,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             opened_on TEXT,
             closed_on TEXT,
             url TEXT DEFAULT NULL,
-            is_credit INT DEFAULT 0,
             note TEXT
         );
 
@@ -189,7 +188,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             "uid": 0,
             "opened_on": today_formatted,
             "closed_on": None,
-            "is_credit": 0,
         }
 
     def account_json_new(self) -> str:
@@ -202,7 +200,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'name', name,
                         'opened_on', opened_on,
                         'closed_on', closed_on,
-                        'is_credit', is_credit,
                         'url', url,
                         'note', note)
             AS json_result
@@ -219,7 +216,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'name', name,
                         'opened_on', opened_on,
                         'closed_on', closed_on,
-                        'is_credit', is_credit,
                         'url', url,
                         'note', note)
             ) AS json_result
@@ -262,7 +258,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
                 t.payee, IFNULL(t.tags, '[]') as tags, t.note,
                 a.name as account_name, a.closed_on as account_closed_on,
-                a.is_credit as account_is_credit,
                 a2.name as destination_name
             FROM transactions t
             JOIN accounts a ON t.account_id=a.id
@@ -277,8 +272,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
                 t.payee, IFNULL(t.tags, '[]') as tags, t.note,
                 a.name as account_name, a.closed_on as account_closed_on,
-                a2.name as destination_name,
-                a.is_credit as account_is_credit
+                a2.name as destination_name
             FROM transactions t
             JOIN accounts a ON t.account_id=a.id
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
@@ -294,7 +288,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                     'account', json_object(
                         'uid', account_id,
                         'name', account_name,
-                        'is_credit', account_is_credit,
                         'closed_on', account_closed_on
                     ),
                     'destination', json_object(
@@ -391,7 +384,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             closed_on: Optional[date],
             url: Optional[str],
             note: Optional[str],
-            is_credit: bool
     ) -> int:
         """Insert or update an account."""
 
@@ -401,17 +393,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         insert_id = self._insert(
             """INSERT INTO accounts (
-                id, name, url, opened_on, closed_on, note, is_credit
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                id, name, url, opened_on, closed_on, note
+            ) VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
             name=excluded.name,
             url=excluded.url,
             opened_on=excluded.opened_on,
             closed_on=excluded.closed_on,
-            note=excluded.note,
-            is_credit=excluded.is_credit
+            note=excluded.note
             """,
-            (upsert_id, name, url, opened_on, closed_on, note, int(is_credit))
+            (upsert_id, name, url, opened_on, closed_on, note)
         )
 
         if uid == 0:

@@ -16,7 +16,6 @@ export class Transaction {
         this.uid = primitive.uid;
 
         this.account = new Account(primitive.account!);
-        this.destination = new Account(primitive.destination!);
 
         if (primitive.destination) {
             this.destination = new Account(primitive.destination);
@@ -25,9 +24,6 @@ export class Transaction {
         this.payee = primitive.payee;
 
         this.amount = primitive.amount
-        if (this.account.isCredit) {
-            this.amount *= -1;
-        }
 
         this.occurred_on = new Date(primitive.occurred_on);
 

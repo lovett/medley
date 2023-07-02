@@ -14,15 +14,6 @@
         <p *ngIf="name.hasError('required')" class="validation-message">The account needs a name.</p>
     </div>
 
-    <div class="field">
-        <label for="isCredit">
-            <input
-                id="isCredit"
-                type="checkbox"
-                formControlName="isCredit" /> This is a credit account.
-        </label>
-    </div>
-
     <div class="field" [class.invalid]="(url.dirty || url.touched) && url.invalid">
         <label for="accountUrl">Account URL</label>
         <input

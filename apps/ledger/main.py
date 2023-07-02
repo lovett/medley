@@ -51,7 +51,6 @@ class AccountParams(BaseModel):
     closed_on: Optional[datetime.date]
     url: Optional[str]
     note: Optional[str]
-    is_credit: bool
 
 
 class TransactionParams(BaseModel):
@@ -273,8 +272,7 @@ class Controller:
             opened_on=params.opened_on,
             closed_on=params.closed_on,
             url=params.url,
-            note=params.note,
-            is_credit=params.is_credit
+            note=params.note
         ).pop()
 
         if params.uid == 0:
