@@ -14,6 +14,7 @@ export class AccountMenuComponent implements OnInit {
     @Input() label?: string;
     @Input() account?: Account;
     @Input() disabledValue?: string;
+    @Input() locked?: boolean;
 
     accounts: Account[] = [];
 

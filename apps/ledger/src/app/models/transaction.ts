@@ -48,6 +48,10 @@ export class Transaction {
         return this.destination?.uid || 0;
     }
 
+    get locked(): boolean {
+        return !!this.cleared_on;
+    }
+
     occurredOnYMD(): string {
         return this.dateValue(this.occurred_on);
     }

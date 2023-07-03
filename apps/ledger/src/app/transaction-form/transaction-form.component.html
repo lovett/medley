@@ -3,12 +3,13 @@
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
-    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid" [class.valid]="payee.valid">
+    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid" [class.valid]="payee.valid" [class.locked]="locked">
         <label for="payee">Payee</label>
         <input
             id="payee"
             type="text"
             formControlName="payee"
+            [attr.disabled]="locked"
         />
         <p *ngIf="autocompleteFrom"><a href="#" (click)="applyAutocompletedTransaction($event)">Autocomplete</a> from transaction #{{ autocompleteFrom.uid }} of {{ autocompleteFrom.occurred_on |date:'longDate' }}</p>
 
@@ -16,12 +17,13 @@
     </div>
 
     <div class="field-group">
-        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid" [class.valid]="amount.valid">
+        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid" [class.valid]="amount.valid" [class.locked]="locked">
             <label for="amount">Amount</label>
             <input
                 id="amount"
                 type="text"
                 formControlName="amount"
+                [attr.disabled]="locked"
             />
 
             <p *ngIf="amount.hasError('required')" class="validation-message">An amount is required.</p>
@@ -42,13 +44,14 @@
 
     <div formGroupName="dates">
         <div class="field-group">
-            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)" [class.valid]="occurredOn.valid">
+            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)" [class.valid]="occurredOn.valid" [class.locked]="locked">
                 <label for="occurredOn">Date</label>
                 <input
                     id="occurredOn"
                     type="date"
                     formControlName="occurred_on"
                     [max]="today"
+                    [attr.disabled]="locked"
                 />
                 <p *ngIf="occurredOn.hasError('required')" class="validation-message">A date is required.</p>
             </div>
@@ -73,17 +76,16 @@
 
     <div class="field-group">
         <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
-            <app-account-menu fieldId="accountId" [control]="accountId" label="Withdraw from"></app-account-menu>
+            <app-account-menu fieldId="accountId" [control]="accountId" label="Withdraw from" [locked]="locked"></app-account-menu>
             <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
             <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
         </div>
 
         <div class="field">
-            <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Deposit To"></app-account-menu>
+            <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Deposit To" [locked]="locked"></app-account-menu>
         </div>
 
     </div>
-
 
     <div class="field" [class.valid]="tags.length > 0 && !tags.value.includes('')">
         <label for="tag-">Tags</label>

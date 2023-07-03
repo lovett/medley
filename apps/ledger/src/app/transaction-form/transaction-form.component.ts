@@ -37,6 +37,7 @@ export class TransactionFormComponent implements OnInit {
     datesExpanded = false;
     singularResourceName: string;
     autocompleteFrom: Transaction | null;
+    locked = false;
 
     constructor(
         private router: Router,
@@ -169,6 +170,8 @@ export class TransactionFormComponent implements OnInit {
 
         this.transaction = transaction;
         this.datesExpanded = (transaction.cleared_on instanceof Date);
+
+        this.locked = this.transaction.locked;
     }
 
     toggleTransfer(event: Event) {

@@ -1,6 +1,6 @@
-<div>
+<div [class.locked]="locked">
     <label *ngIf="label" for="{{ fieldId}} ">{{ label }}</label>
-    <select id="{{ fieldId }}" name="{{ fieldId }}" [formControl]="control">
+    <select id="{{ fieldId }}" name="{{ fieldId }}" [formControl]="control" [attr.disabled]="locked">
          <option value=""></option>
          <option
              [ngValue]="account.uid"
