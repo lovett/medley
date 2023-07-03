@@ -11,7 +11,7 @@ const routes: Routes = [
     { path: 'accounts/:id/form', component: AccountFormComponent },
     { path: 'transactions', component: TransactionListComponent },
     { path: 'transactions/:id/form', component: TransactionFormComponent },
-    { path: '', redirectTo: 'transactions', pathMatch: 'full' },
+    { path: '', redirectTo: 'accounts', pathMatch: 'full' },
     { path: '**', component: PageNotFoundComponent },
 ];
 
