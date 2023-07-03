@@ -1,9 +1,50 @@
 HEADER {
     display: flex;
     justify-content: flex-end;
+    margin-bottom: 1em;
 }
 
-P {
-    padding-top: 0;
-    margin-top: 0;
+.accounts {
+    padding-bottom: 2em;
+}
+
+.accounts H1 {
+    font-size: 1.5em;
+    font-weight: normal;
+}
+
+.accounts.inactive .card {
+    background-color: #ccc;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    gap: 2em;
+}
+
+.card {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.card .title {
+    padding: 1em;
+    background-color: #e5e5e5;
+}
+
+.card ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 1em;
+}
+
+.card li {
+    margin: 0;
+    padding: 0;
+}
+
+.card footer {
+    padding: 1em;
 }

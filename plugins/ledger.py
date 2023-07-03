@@ -217,10 +217,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'opened_on', opened_on,
                         'closed_on', closed_on,
                         'url', url,
-                        'note', note)
+                        'note', note,
+                        'balance', cleared_deposits - cleared_withdrawls,
+                        'total_pending', pending_deposits - pending_withdrawls
+                       )
             ) AS json_result
-            FROM (SELECT * FROM accounts
-                  ORDER BY name)"""
+            FROM (
+            SELECT a.*,
+                (SELECT COALESCE(sum(amount), 0)
+                 FROM transactions t
+                 WHERE t.destination_id=a.id
+                 AND t.cleared_on IS NOT NULL) as cleared_deposits,
+                (SELECT COALESCE(sum(amount), 0)
+                 FROM transactions t
+                 WHERE t.destination_id=a.id
+                 AND t.cleared_on IS NULL) as pending_deposits,
+                (SELECT COALESCE(sum(amount), 0)
+                 FROM transactions t
+                 WHERE t.account_id=a.id
+                 AND t.cleared_on IS NOT NULL) as cleared_withdrawls,
+                (SELECT COALESCE(sum(amount), 0)
+                 FROM transactions t
+                 WHERE t.account_id=a.id
+                 AND t.cleared_on IS NULL) as pending_withdrawls
+            FROM accounts a
+            ORDER BY a.name
+            )"""
 
         return cast(str, self._selectFirst(sql))
 

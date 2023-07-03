@@ -11,8 +11,8 @@ export class MoneyPipe implements PipeTransform {
     });
 
     transform(value: number, style="formatted"): string {
-        if (!value) {
-            return '';
+        if (value === 0) {
+            return this.numberFormat.format(value);
         }
 
         switch (style) {

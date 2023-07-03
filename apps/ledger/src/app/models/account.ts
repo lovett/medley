@@ -7,10 +7,14 @@ export class Account {
     closed_on?: Date;
     url?: string;
     note?: string;
+    balance?: number;
+    total_pending?: number;
 
     constructor(primitive: AccountPrimitive) {
         this.uid = primitive.uid;
         this.name = primitive.name;
+        this.balance = primitive.balance;
+        this.total_pending = primitive.total_pending;
 
         if (primitive.opened_on) {
             this.opened_on = new Date(primitive.opened_on);

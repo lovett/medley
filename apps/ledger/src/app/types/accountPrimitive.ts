@@ -5,4 +5,6 @@ export type AccountPrimitive = {
     closed_on?: string,
     url?: string,
     note?: string,
+    balance?: number,
+    total_pending?: number,
 }

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
+import { MoneyPipe } from '../money.pipe';
 
 @Component({
   selector: 'app-account-list',
@@ -23,5 +24,21 @@ export class AccountListComponent {
             (err: any) => console.log(err),
             () => console.log('All done getting accounts')
         );
+    }
+
+    *activeAccounts(): Iterable<Account> {
+        for (const account of this.accounts) {
+            if (!account.closed_on) {
+                yield account;
+            }
+        }
+    }
+
+    *inactiveAccounts(): Iterable<Account> {
+        for (const account of this.accounts) {
+            if (account.closed_on) {
+                yield account;
+            }
+        }
     }
 }

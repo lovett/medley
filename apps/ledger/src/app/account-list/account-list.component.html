@@ -2,8 +2,45 @@
     <app-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
-<p *ngFor="let account of accounts">
-    <a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a>
-</p>
+<section class="accounts">
+    <h1>Active Accounts</h1>
+    <div class="cards">
+        <div class="card" *ngFor="let account of activeAccounts()">
+            <div class="title"><a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a></div>
+
+            <ul>
+                <li>Balance: {{ account.balance!|money }}</li>
+                <li *ngIf="account.total_pending! > 0">Pending: {{ account.total_pending!|money }}</li>
+                <li *ngIf="account.opened_on">Opened {{ account.opened_on|date:'longDate' }}</li>
+                <li *ngIf="account.closed_on">Closed {{ account.closed_on|date:'longDate' }}</li>
+                <li *ngIf="account.note">{{ account.note }}</li>
+            </ul>
+
+            <footer>
+                <div>Transactions</div>
+                <div><a *ngIf="account.url" href="{{ account.url }}" target="_blank" rel="noopener noreferer">Visit</a></div>
+            </footer>
+        </div>
+    </div>
+</section>
+
+<section class="accounts inactive">
+    <h1>Inactive Accounts</h1>
+    <div class="cards">
+        <div class="card" *ngFor="let account of inactiveAccounts()">
+            <div class="title"><a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a></div>
+
+            <ul>
+                <li *ngIf="account.closed_on">Closed {{ account.closed_on|date:'longDate' }}</li>
+                <li *ngIf="account.note">{{ account.note }}</li>
+            </ul>
+
+            <footer>
+                <div>Transactions</div>
+                <div><a *ngIf="account.url" href="{{ account.url }}" target="_blank" rel="noopener noreferer">Visit</a></div>
+            </footer>
+        </div>
+    </div>
+</section>
 
 <p *ngIf="accounts.length == 0">There are no accounts.</p>
