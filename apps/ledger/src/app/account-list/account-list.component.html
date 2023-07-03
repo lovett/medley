@@ -6,7 +6,10 @@
     <h1>Active Accounts</h1>
     <div class="cards">
         <div class="card" *ngFor="let account of activeAccounts()">
-            <div class="title"><a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a></div>
+            <div class="title">
+                <a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a>
+                <div *ngIf="account.last_active">as of {{ account.last_active|date:'longDate' }}</div>
+            </div>
 
             <ul>
                 <li>Balance: {{ account.balance!|money }}</li>

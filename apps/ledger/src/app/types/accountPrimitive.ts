@@ -7,4 +7,5 @@ export type AccountPrimitive = {
     note?: string,
     balance?: number,
     total_pending?: number,
+    last_active?: string,
 }

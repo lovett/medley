@@ -9,6 +9,7 @@ export class Account {
     note?: string;
     balance?: number;
     total_pending?: number;
+    last_active?: Date;
 
     constructor(primitive: AccountPrimitive) {
         this.uid = primitive.uid;
@@ -22,6 +23,10 @@ export class Account {
 
         if (primitive.closed_on) {
             this.closed_on = new Date(primitive.closed_on);
+        }
+
+        if (primitive.last_active) {
+            this.last_active = new Date(primitive.last_active);
         }
 
         if (primitive.url) {

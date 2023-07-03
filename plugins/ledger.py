@@ -219,7 +219,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'url', url,
                         'note', note,
                         'balance', cleared_deposits - cleared_withdrawls,
-                        'total_pending', pending_deposits - pending_withdrawls
+                        'total_pending', pending_deposits - pending_withdrawls,
+                        'last_active', last_active
                        )
             ) AS json_result
             FROM (
@@ -239,7 +240,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 (SELECT COALESCE(sum(amount), 0)
                  FROM transactions t
                  WHERE t.account_id=a.id
-                 AND t.cleared_on IS NULL) as pending_withdrawls
+                 AND t.cleared_on IS NULL) as pending_withdrawls,
+                (SELECT occurred_on
+                 FROM transactions t
+                 WHERE t.account_id=a.id OR t.destination_id=a.id
+                 ORDER BY occurred_on DESC LIMIT 1) as last_active
             FROM accounts a
             ORDER BY a.name
             )"""
