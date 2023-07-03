@@ -71,16 +71,6 @@
         </div>
     </div>
 
-    <div class="field">
-        <label for="transferToggle">
-            <input
-                id="transferToggle"
-                type="checkbox"
-                [checked]="transferExpanded"
-                (click)="toggleTransfer($event)" /> This is a transfer.
-        </label>
-    </div>
-
     <div class="field-group">
         <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
             <app-account-menu fieldId="accountId" [control]="accountId" label="Account"></app-account-menu>
@@ -88,11 +78,10 @@
             <p *ngIf="accountId.hasError('required')" class="validation-message">An account is required.</p>
         </div>
 
-        <div class="field" *ngIf="transferExpanded">
+        <div class="field">
             <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Transfer To"></app-account-menu>
         </div>
 
-        <div *ngIf="!transferExpanded" class="field"></div>
     </div>
 
 

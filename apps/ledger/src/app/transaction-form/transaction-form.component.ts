@@ -35,7 +35,6 @@ export class TransactionFormComponent implements OnInit {
     transaction: Transaction | undefined;
     errorMessage = '';
     datesExpanded = false;
-    transferExpanded = false;
     singularResourceName: string;
     autocompleteFrom: Transaction | null;
 
@@ -117,7 +116,7 @@ export class TransactionFormComponent implements OnInit {
         }
 
         this.transactionForm.patchValue({
-            account_id: this.autocompleteFrom.account.uid,
+            account_id: this.autocompleteFrom.account?.uid || 0,
             payee: this.autocompleteFrom.payee,
             amount: this.moneyPipe.transform(this.autocompleteFrom.amount, 'plain'),
             note: this.autocompleteFrom.note,
@@ -147,7 +146,7 @@ export class TransactionFormComponent implements OnInit {
         this.transactionForm.patchValue({
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
-            account_id: transaction.account.uid,
+            account_id: transaction.account?.uid || 0,
             destination_id: transaction.destination?.uid || 0,
             dates: {
                 occurred_on: transaction.occurredOnYMD(),
@@ -162,7 +161,7 @@ export class TransactionFormComponent implements OnInit {
 
         this.tags.patchValue(transaction.tags);
 
-        if (transaction.account.closed_on) {
+        if (transaction.account?.closed_on) {
             this.accountId.disable();
         } else {
             this.accountId.enable();
@@ -170,11 +169,9 @@ export class TransactionFormComponent implements OnInit {
 
         this.transaction = transaction;
         this.datesExpanded = (transaction.cleared_on instanceof Date);
-        this.transferExpanded = (transaction.destination.uid > 0);
     }
 
     toggleTransfer(event: Event) {
-        this.transferExpanded = (event.target as HTMLInputElement).checked;
         this.transactionForm.markAsDirty();
 
         this.destinationId.setValue(null);

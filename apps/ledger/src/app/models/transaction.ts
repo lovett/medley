@@ -3,8 +3,8 @@ import { TransactionPrimitive } from '../types/transactionPrimitive';
 
 export class Transaction {
     uid: number;
-    account: Account
-    destination: Account
+    account?: Account
+    destination?: Account
     payee: string;
     amount: number;
     occurred_on: Date;
@@ -15,7 +15,9 @@ export class Transaction {
     constructor(primitive: TransactionPrimitive) {
         this.uid = primitive.uid;
 
-        this.account = new Account(primitive.account!);
+        if (primitive.account) {
+            this.account = new Account(primitive.account);
+        }
 
         if (primitive.destination) {
             this.destination = new Account(primitive.destination);
@@ -39,14 +41,11 @@ export class Transaction {
     }
 
     get accountId(): number {
-        return this.account.uid;
+        return this.account?.uid || 0;
     }
 
     get destinationId(): number {
-        if (this.destination) {
-            return this.destination.uid;
-        }
-        return 0;
+        return this.destination?.uid || 0;
     }
 
     occurredOnYMD(): string {

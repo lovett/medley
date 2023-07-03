@@ -2,7 +2,7 @@
 
 from _shared import json_client, print_response
 
-response = json_client.get("/ledger/transactions?q=tags:apple")
+response = json_client.get("/ledger/transactions?q=apple")
 
 print_response(response)
 

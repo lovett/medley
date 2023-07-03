@@ -259,9 +259,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 t.payee, IFNULL(t.tags, '[]') as tags, t.note,
                 a.name as account_name, a.closed_on as account_closed_on,
                 a2.name as destination_name
-            FROM transactions t
-            JOIN accounts a ON t.account_id=a.id
-            JOIN transactions_fts ON t.id=transactions_fts.rowid
+            FROM transactions_fts
+            JOIN transactions t ON transactions_fts.rowid=t.id
+            LEFT JOIN accounts a ON t.account_id=a.id
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
             WHERE transactions_fts MATCH ?
             ORDER BY t.occurred_on DESC
@@ -274,7 +274,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 a.name as account_name, a.closed_on as account_closed_on,
                 a2.name as destination_name
             FROM transactions t
-            JOIN accounts a ON t.account_id=a.id
+            LEFT JOIN accounts a ON t.account_id=a.id
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
             ORDER BY t.occurred_on DESC
             LIMIT ? OFFSET ?"""
@@ -340,7 +340,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 a.name as account_name, a.closed_on as account_closed_on,
                 a2.name as destination_name
             FROM transactions t
-            JOIN accounts a ON t.account_id=a.id
+            LEFT JOIN accounts a ON t.account_id=a.id
             LEFT JOIN accounts a2 ON t.destination_id=a2.id
             WHERE t.id=?
         )

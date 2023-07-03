@@ -51,8 +51,8 @@
         <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
             <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
             <td>
-                <div>{{ transaction.account.name }}</div>
-                <div *ngIf="transaction.destination.uid > 0">
+                <div *ngIf="transaction.account">{{ transaction.account.name }}</div>
+                <div *ngIf="transaction.destination">
                     ↳ to {{ transaction.destination.name }}
                 </div>
             </td>
