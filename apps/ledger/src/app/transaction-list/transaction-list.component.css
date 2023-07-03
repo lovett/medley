@@ -14,6 +14,10 @@ FORM .field.reset A {
     line-height: 2.25em;
 }
 
+TABLE {
+    margin-bottom: 0;
+}
+
 TR, TD {
     border-left: 0;
     border-right: 0;

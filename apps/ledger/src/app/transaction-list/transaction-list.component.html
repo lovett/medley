@@ -14,28 +14,10 @@
 </header>
 
 <div class="pager">
-    <div>
-        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: 0}" queryParamsHandling="merge">
-            ⏪️  <span>Newest</span>
-        </a>
-        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: previousOffset}" queryParamsHandling="merge">
-            ⬅️  <span>Newer</span>
-        </a>
-    </div>
-
+    <div></div>
     <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</div>
-
-    <div>
-        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: nextOffset}" queryParamsHandling="merge">
-            <span>Older</span> ➡️
-        </a>
-        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: count - transactions.length}" queryParamsHandling="merge">
-            <span>Oldest</span> ⏩
-        </a>
-    </div>
+    <div></div>
 </div>
-
-
 
 <table *ngIf="transactions.length > 0">
     <thead>
@@ -81,5 +63,28 @@
         </tr>
     </tbody>
 </table>
+
+<div class="pager">
+    <div>
+        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: 0}" queryParamsHandling="merge">
+            ⏪️  <span>Newest</span>
+        </a>
+        <a *ngIf="this.offset > 0" [routerLink]="[]" [queryParams]="{offset: previousOffset}" queryParamsHandling="merge">
+            ⬅️  <span>Newer</span>
+        </a>
+    </div>
+    <div></div>
+    <div>
+        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: nextOffset}" queryParamsHandling="merge">
+            <span>Older</span> ➡️
+        </a>
+        <a *ngIf="nextOffset < count" [routerLink]="[]" [queryParams]="{offset: count - transactions.length}" queryParamsHandling="merge">
+            <span>Oldest</span> ⏩
+        </a>
+    </div>
+</div>
+
+
+
 
 <p *ngIf="transactions.length == 0">There are no transactions.</p>
