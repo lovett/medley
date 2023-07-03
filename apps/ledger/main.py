@@ -166,11 +166,8 @@ class Controller:
     def json_tags(params: GetParams) -> bytes:
         """Render JSON for tag resources."""
 
-        if not params.q:
-            raise cherrypy.HTTPError(400)
         return cherrypy.engine.publish(
-            "ledger:json:tags",
-            query=params.q,
+            "ledger:json:tags"
         ).pop().encode()
 
     @cherrypy.tools.capture()

@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, flatMap } from 'rxjs';
 import { Account } from './models/account';
+import { Tag } from './models/tag';
+import { TagPrimitive } from './types/tagPrimitive';
 import { Transaction } from './models/transaction';
 import { TransactionPrimitive }  from './types/transactionPrimitive';
 import { AccountPrimitive }  from './types/accountPrimitive';
@@ -19,6 +21,12 @@ export class LedgerService {
     getAccounts(): Observable<Account[]> {
         return this.http.get<AccountPrimitive[]>('/ledger/accounts').pipe(
             map(primitives => primitives.map(primitive => new Account(primitive)))
+        );
+    }
+
+    getTags(): Observable<Tag[]> {
+        return this.http.get<TagPrimitive[]>('/ledger/tags').pipe(
+            map(primitives => primitives.map(primitive => new Tag(primitive)))
         );
     }
 

@@ -5,12 +5,14 @@ import { TransactionListComponent } from './transaction-list/transaction-list.co
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { AccountFormComponent } from './account-form/account-form.component';
 import { TransactionFormComponent } from './transaction-form/transaction-form.component';
+import { TagListComponent } from './tag-list/tag-list.component';
 
 const routes: Routes = [
     { path: 'accounts', component: AccountListComponent },
     { path: 'accounts/:id/form', component: AccountFormComponent },
     { path: 'transactions', component: TransactionListComponent },
     { path: 'transactions/:id/form', component: TransactionFormComponent },
+    { path: 'tags', component: TagListComponent },
     { path: '', redirectTo: 'accounts', pathMatch: 'full' },
     { path: '**', component: PageNotFoundComponent },
 ];

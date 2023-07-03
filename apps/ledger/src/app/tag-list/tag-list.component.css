@@ -1,0 +1,12 @@
+.tags {
+    columns: 20em auto;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.tags LI {
+    margin: 0;
+    padding: 0;
+    line-height: 2;
+}

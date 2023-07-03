@@ -251,14 +251,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql))
 
-    def tags_json(self, query: str) -> str:
-        """Rows from the tags table as JSON."""
-        sql = """SELECT json_group_array(name)
-        FROM tags WHERE name like ?"""
+    def tags_json(self) -> str:
+        """All known tags as JSON."""
+        sql = """SELECT json_group_array(
+            json_object(
+                'name', name,
+                'transaction_count', transaction_count
+            )
+        )
+        AS json_result
+        FROM (SELECT json_each.value as name, count(*) as transaction_count
+        FROM transactions t, json_each(t.tags)
+        GROUP BY json_each.value
+        ORDER BY lower(json_each.value))"""
 
-        placeholders = (f"{query}%",)
-
-        return cast(str, self._selectFirst(sql, placeholders))
+        return cast(str, self._selectFirst(sql,))
 
     def count_transactions(self, query: str = "") -> int:
         """Count of rows from the transactions table."""

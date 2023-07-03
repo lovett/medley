@@ -31,10 +31,12 @@
     </thead>
     <tbody>
         <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
-            <td><a [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
+            <td><a class="unbroken" [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
             <td>
-                <div *ngIf="transaction.accountId > 0">{{ transaction.account!.name }} withdrawl</div>
-                <div *ngIf="transaction.destinationId > 0">
+                <div class="unbroken" *ngIf="transaction.accountId > 0">
+                    {{ transaction.account!.name }} withdrawl
+                </div>
+                <div class="unbroken" *ngIf="transaction.destinationId > 0">
                     {{ transaction.destination!.name }} deposit
                 </div>
             </td>
@@ -45,20 +47,20 @@
                 </p>
 
                 <ul class="tag-list" *ngIf="transaction.tags">
-                    <li *ngFor="let tag of transaction.tags">
-                        <svg class="icon"><use xlink:href="#icon-tag"></use></svg>
+                    <li *ngFor="let tag of transaction.tags; first as isFirst">
+                        <svg *ngIf="isFirst" class="icon"><use xlink:href="#icon-tag"></use></svg>
                         <a [routerLink]="['/transactions']" [queryParams]="{q: 'tags:' + tag}">{{ tag }}</a>
                     </li>
                 </ul>
             </td>
-            <td class="align-right">{{ transaction.amount|money }}</td>
+            <td class="align-right unbroken">{{ transaction.amount|money }}</td>
             <td class="align-right" *ngIf="transaction.cleared_on">
                 <div class="minibanner">Cleared</div>
-                <p>{{ transaction.cleared_on|date:'longDate' }}</p>
+                <p class="unbroken">{{ transaction.cleared_on|date:'longDate' }}</p>
             </td>
             <td class="align-right" *ngIf="!transaction.cleared_on">
                 <div class="minibanner">Pending</div>
-                <p><a href="#" *ngIf="!transaction.cleared_on" (click)="clearTransaction($event, transaction)">Clear Now</a></p>
+                <p *ngIf="!transaction.cleared_on"><a href="#" (click)="clearTransaction($event, transaction)">Clear Now</a></p>
             </td>
         </tr>
     </tbody>
