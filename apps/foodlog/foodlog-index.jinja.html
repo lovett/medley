@@ -65,23 +65,22 @@
             <table id="matches">
                 <thead>
                     <tr>
-                        <th width="15%">Date</th>
-                        <th width="10%">Time</th>
+                        <th width="25%">Date</th>
                         <th>Foods Eaten</th>
-                        <th width"10%">Overate?</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for entry in entries %}
                         <tr>
-                            <td><a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%B %d, %Y") }}</a></td>
-                            <td>{{ entry.consumed_on|dateformat("%-I:%M %p") }}</td>
-                            <td>{{ entry.foods_eaten }}</td>
-                            {% if entry.overate %}
-                                <td class="warning">Yes</td>
-                            {% else %}
-                                <td>No</td>
-                            {% endif %}
+                            <td>
+                                <a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%B %d, %Y") }}</a>
+                                <br/>
+                                {{ entry.consumed_on|dateformat("%-I:%M %p") }}
+                            </td>
+                            <td>
+                                <div>{{ entry.foods_eaten }}</div>
+                                {% if entry.overate %}<div class="warning badge">Overate</div>{% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

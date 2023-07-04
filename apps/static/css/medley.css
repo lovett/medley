@@ -531,6 +531,20 @@ TEXTAREA {
     padding-right: .5em;
 }
 
+.badge {
+    text-transform: uppercase;
+    margin-top: .5em;
+}
+
+.warning.badge {
+    display: inline-block;
+    color: var(--white);
+    background-color: var(--alert);
+    font-weight: bold;
+    padding: .25em .5em;
+}
+
+
 .clipboard-button a:hover {
     background-color: var(--success);
 }
