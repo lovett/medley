@@ -11,6 +11,7 @@ import { Router, ActivatedRoute}  from '@angular/router';
   styleUrls: ['./transaction-list.component.css']
 })
 export class TransactionListComponent implements OnInit {
+    account = 0;
     searchForm: FormGroup;
     count = 0;
     limit = 50;
@@ -36,6 +37,7 @@ export class TransactionListComponent implements OnInit {
         });
 
         this.route.queryParams.subscribe((queryParams) => {
+            this.account = Number(queryParams['account'] || 0);
             this.offset = Number(queryParams['offset'] || 0);
             this.query.setValue(queryParams['q']);
             this.getTransactions();
@@ -52,7 +54,7 @@ export class TransactionListComponent implements OnInit {
 
 
     getTransactions() {
-        this.ledgerService.getTransactions(this.query.value, this.limit, this.offset).subscribe({
+        this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account).subscribe({
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
                 this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));

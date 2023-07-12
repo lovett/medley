@@ -51,21 +51,26 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         AFTER INSERT ON accounts
         BEGIN
             INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
-            VALUES (new.rowid, new.name, new.opened_on, new.closed_on, new.note);
+            VALUES (new.rowid, new.name, new.opened_on, new.closed_on,
+                new.note);
         END;
 
         CREATE TRIGGER IF NOT EXISTS accounts_after_delete
         AFTER DELETE ON accounts
         BEGIN
-          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on, closed_on, note)
-          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on, old.note);
+          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on,
+              closed_on, note)
+          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on,
+              old.note);
         END;
 
         CREATE TRIGGER IF NOT EXISTS accounts_after_update
         AFTER UPDATE ON accounts
         BEGIN
-          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on, closed_on, note)
-          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on, old.note);
+          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on,
+              closed_on, note)
+          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on,
+              old.note);
 
           INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
           VALUES (new.rowid, new.name, new.opened_on, new.closed_on, new.note);
@@ -99,8 +104,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             INSERT INTO transactions_fts(
                 rowid, occurred_on, amount, payee, note, tags
             ) VALUES (
-                new.rowid, new.occurred_on, new.amount, new.payee, new.note, new.tags
-            );
+                new.rowid, new.occurred_on, new.amount, new.payee, new.note,
+                new.tags);
         END;
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_delete
@@ -109,8 +114,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             INSERT INTO transactions_fts(
                 transactions_fts, rowid, occurred_on, amount, payee, note, tags
             ) VALUES (
-                'delete', old.rowid, old.occurred_on, old.amount, old.payee, old.note, old.tags
-            );
+                'delete', old.rowid, old.occurred_on, old.amount, old.payee,
+                old.note, old.tags);
         END;
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_update
@@ -119,14 +124,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
           INSERT INTO transactions_fts(
               transactions_fts, rowid, occurred_on, amount, payee, note, tags
           ) VALUES (
-              'delete', old.rowid, old.occurred_on, old.amount, old.payee, old.note, old.tags
-          );
+              'delete', old.rowid, old.occurred_on, old.amount, old.payee,
+              old.note, old.tags);
 
           INSERT INTO transactions_fts(
               rowid, occurred_on, amount, payee, note, tags
           ) VALUES (
-              new.rowid, new.occurred_on, new.amount, new.payee, new.note, new.tags
-          );
+              new.rowid, new.occurred_on, new.amount, new.payee, new.note,
+              new.tags);
         END;
         """)
 
@@ -284,35 +289,39 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
         query = kwargs.get("query", "")
+        account = int(kwargs.get("account", 0))
 
         count = self.count_transactions(query)
 
+        from_sql = "FROM transactions t"
+        where_sql = "WHERE 1=1"
+        placeholders: Tuple[int | str, ...] = ()
+
+        if account > 0:
+            where_sql += " AND (a.id=? OR a2.id=?)"
+            placeholders += (account, account)
+
         if query:
-            select_sql = """
-            SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
-                t.payee, IFNULL(t.tags, '[]') as tags, t.note,
-                a.name as account_name, a.closed_on as account_closed_on,
-                a2.name as destination_name
+            from_sql = """
             FROM transactions_fts
             JOIN transactions t ON transactions_fts.rowid=t.id
-            LEFT JOIN accounts a ON t.account_id=a.id
-            LEFT JOIN accounts a2 ON t.destination_id=a2.id
-            WHERE transactions_fts MATCH ?
-            ORDER BY t.occurred_on DESC
-            LIMIT ? OFFSET ?"""
-            select_placeholders = (query, limit, offset)
-        else:
-            select_sql = """
-            SELECT t.id, t.account_id, t.destination_id, t.occurred_on, t.cleared_on, t.amount,
-                t.payee, IFNULL(t.tags, '[]') as tags, t.note,
-                a.name as account_name, a.closed_on as account_closed_on,
-                a2.name as destination_name
-            FROM transactions t
-            LEFT JOIN accounts a ON t.account_id=a.id
-            LEFT JOIN accounts a2 ON t.destination_id=a2.id
-            ORDER BY t.occurred_on DESC
-            LIMIT ? OFFSET ?"""
-            select_placeholders = (limit, offset)
+            """
+            where_sql += " AND transactions_fts MATCH ?"
+            placeholders += (query,)
+
+        select_sql = f"""
+        SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
+            t.cleared_on, t.amount,
+        t.payee, IFNULL(t.tags, '[]') as tags, t.note,
+            a.name as account_name, a.closed_on as account_closed_on,
+            a2.name as destination_name
+        {from_sql}
+        LEFT JOIN accounts a ON t.account_id=a.id
+        LEFT JOIN accounts a2 ON t.destination_id=a2.id
+        {where_sql}
+        ORDER BY t.occurred_on DESC
+        LIMIT ? OFFSET ?"""
+        placeholders += (limit, offset)
 
         sql = f"""SELECT json_object(
             'count', ?,
@@ -343,7 +352,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         result = self._selectFirst(
             sql,
-            (count,) + select_placeholders
+            (count,) + placeholders
         )
 
         return cast(str, result)
@@ -446,7 +455,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             return insert_id
         return uid
 
-
     def remove_account(self, uid: int) -> bool:
         """Delete a row from the accounts table."""
 
@@ -467,7 +475,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             transaction_id: int,
             **kwargs: Any
-    ) -> int:
+    ) -> None:
         """Insert or update a transactions."""
 
         account_id = kwargs.get("account_id")

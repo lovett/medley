@@ -2,12 +2,14 @@
     <app-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
-<section class="accounts">
+<section class="accounts" *ngIf="accounts.length > 0">
     <h1>Active Accounts</h1>
     <div class="cards">
         <div class="card" *ngFor="let account of activeAccounts()">
             <div class="title">
-                <a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a>
+                <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                    {{account.name}}
+                </a>
                 <div *ngIf="account.last_active">as of {{ account.last_active|date:'longDate' }}</div>
             </div>
 
@@ -20,7 +22,12 @@
             </ul>
 
             <footer>
-                <div>Transactions</div>
+                <div>
+                    <a [routerLink]="['/accounts', account.uid, 'form']">
+                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                        Edit
+                    </a>
+                </div>
                 <div><a *ngIf="account.url" href="{{ account.url }}" target="_blank" rel="noopener noreferer">Visit</a></div>
             </footer>
         </div>
@@ -31,16 +38,23 @@
     <h1>Inactive Accounts</h1>
     <div class="cards">
         <div class="card" *ngFor="let account of inactiveAccounts()">
-            <div class="title"><a [routerLink]="['/accounts', account.uid, 'form']">{{account .name}}</a></div>
-
+            <div class="title">
+                <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                    {{account.name}}
+                </a>
+            </div>
             <ul>
                 <li *ngIf="account.closed_on">Closed {{ account.closed_on|date:'longDate' }}</li>
                 <li *ngIf="account.note">{{ account.note }}</li>
             </ul>
 
             <footer>
-                <div>Transactions</div>
-                <div><a *ngIf="account.url" href="{{ account.url }}" target="_blank" rel="noopener noreferer">Visit</a></div>
+                <div>
+                    <a [routerLink]="['/accounts', account.uid, 'form']">
+                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                        Edit
+                    </a>
+                </div>
             </footer>
         </div>
     </div>

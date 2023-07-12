@@ -8,7 +8,7 @@ import { MoneyPipe } from '../money.pipe';
   templateUrl: './account-list.component.html',
   styleUrls: ['./account-list.component.css']
 })
-export class AccountListComponent {
+export class AccountListComponent implements OnInit {
     accounts: Account[] = [];
     singularResourceName: string;
 
@@ -26,19 +26,11 @@ export class AccountListComponent {
         );
     }
 
-    *activeAccounts(): Iterable<Account> {
-        for (const account of this.accounts) {
-            if (!account.closed_on) {
-                yield account;
-            }
-        }
+    activeAccounts(): Account[] {
+        return this.accounts.filter(account => !account.closed_on);
     }
 
-    *inactiveAccounts(): Iterable<Account> {
-        for (const account of this.accounts) {
-            if (account.closed_on) {
-                yield account;
-            }
-        }
+    inactiveAccounts(): Iterable<Account> {
+        return this.accounts.filter(account => account.closed_on);
     }
 }

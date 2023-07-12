@@ -39,6 +39,7 @@ class GetParams(BaseModel):
     uid: int
     offset: int = Field(0, gte=0)
     limit: int = Field(50, gt=0, lte=100)
+    account: int = Field(0)
     resource: Resource = Resource.NONE
     subresource: Subresource = Subresource.NONE
 
@@ -97,7 +98,8 @@ class Controller:
                 subresource=subresource,
                 q=kwargs.get("q", ""),
                 limit=kwargs.get("limit", 50),
-                offset=kwargs.get("offset", 0)
+                offset=kwargs.get("offset", 0),
+                account=kwargs.get("account", 0)
             )
         except ValidationError as error:
             raise cherrypy.HTTPError(400) from error
@@ -112,6 +114,7 @@ class Controller:
 
     def get_json(self, params: GetParams) -> bytes:
         """Dispatch to a JSON subhandler by resource."""
+
         if params.resource == Resource.ACCOUNTS:
             return self.json_accounts(params)
 
@@ -159,7 +162,8 @@ class Controller:
             "ledger:json:transactions",
             query=params.q,
             limit=params.limit,
-            offset=params.offset
+            offset=params.offset,
+            account=params.account
         ).pop().encode()
 
     @staticmethod
