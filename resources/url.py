@@ -41,10 +41,13 @@ class Url():
                     self.address += "?"
                 self.address += urlencode(nonempty_query)
 
-        if "://" not in self.address:
-            parsed_url = urlparse(f"http://{self.address}")
-        else:
-            parsed_url = urlparse(self.address)
+        try:
+            if "://" not in self.address:
+                parsed_url = urlparse(f"http://{self.address}")
+            else:
+                parsed_url = urlparse(self.address)
+        except ValueError:
+            return
 
         self.anonymized = self.address
         if parsed_url.scheme in ("http", "https"):

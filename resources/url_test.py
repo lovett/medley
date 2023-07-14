@@ -41,3 +41,10 @@ class TestUrlResource(unittest.TestCase):
         address = "http://example.com/ThisIsMyPath"
         url = Url(address)
         self.assertEqual(url.address, address)
+
+    def test_urlparse_exception(self) -> None:
+        """Exceptions from urlparse are handled."""
+
+        address = "[DOUBLEQUOTE]"
+        url = Url(address)
+        self.assertEqual(url.domain, "")
