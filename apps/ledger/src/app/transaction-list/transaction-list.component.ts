@@ -90,4 +90,26 @@ export class TransactionListComponent implements OnInit {
         });
     }
 
+    toggleSelection(transaction: Transaction) {
+        transaction.selected = !transaction.selected;
+    }
+
+    selectionSize() {
+        return this.transactions.reduce((acc, t) => {
+            if (t.selected) {
+                acc += 1;
+            }
+            return acc;
+        }, 0);
+    }
+
+    selectionTotal() {
+        return this.transactions.reduce((acc, t) => {
+            if (t.selected) {
+                acc += t.amount
+            }
+            return acc;
+        }, 0);
+    }
+
 }

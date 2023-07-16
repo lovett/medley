@@ -11,6 +11,7 @@ export class Transaction {
     cleared_on?: Date;
     note?: string;
     tags: string[];
+    selected: boolean;
 
     constructor(primitive: TransactionPrimitive) {
         this.uid = primitive.uid;
@@ -38,6 +39,8 @@ export class Transaction {
         }
 
         this.tags = (primitive.tags || []).filter((tag) => tag);
+
+        this.selected = false
     }
 
     get accountId(): number {

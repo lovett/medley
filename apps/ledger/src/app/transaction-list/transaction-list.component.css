@@ -96,3 +96,11 @@ TR, TD {
 TR.cleared .minibanner {
     background-color: lightgreen;
 }
+
+TABLE TR.selected TD {
+    background-color: lemonchiffon;
+}
+
+.selection-summary > div {
+    padding: 1em 0;
+}

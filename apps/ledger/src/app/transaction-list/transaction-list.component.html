@@ -13,6 +13,16 @@
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
+<div class="selection-summary" [ngPlural]="selectionSize()">
+    <ng-template ngPluralCase="=0"></ng-template>
+    <ng-template ngPluralCase="=1">
+        <div>1 transaction selected totaling {{ selectionTotal()|money }}</div>
+    </ng-template>
+    <ng-template ngPluralCase="other">
+        <div>{{ selectionSize() }} transactions selected totaling {{ selectionTotal()|money }}</div>
+    </ng-template>
+</div>
+
 <div class="pager">
     <div></div>
     <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</div>
@@ -30,7 +40,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let transaction of transactions" [class.cleared]="transaction.cleared_on">
+        <tr *ngFor="let transaction of transactions"
+            [class.cleared]="transaction.cleared_on"
+            [class.selected]="transaction.selected"
+            (click)="toggleSelection(transaction)">
             <td><a class="unbroken" [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
             <td>
                 <div class="unbroken" *ngIf="transaction.accountId > 0">
