@@ -37,6 +37,7 @@ class GetParams(BaseModel):
     """Parameters for GET requests."""
     q: str = Field("", strip_whitespace=True, to_lower=True)
     uid: int
+    tag: str = Field("", strip_whitespace=True, to_lower=True)
     offset: int = Field(0, gte=0)
     limit: int = Field(50, gt=0, lte=100)
     account: int = Field(0)
@@ -97,6 +98,7 @@ class Controller:
                 uid=uid,
                 subresource=subresource,
                 q=kwargs.get("q", ""),
+                tag=kwargs.get("tag", ""),
                 limit=kwargs.get("limit", 50),
                 offset=kwargs.get("offset", 0),
                 account=kwargs.get("account", 0)
@@ -161,6 +163,7 @@ class Controller:
         result = cherrypy.engine.publish(
             "ledger:json:transactions",
             query=params.q,
+            tag=params.tag,
             limit=params.limit,
             offset=params.offset,
             account=params.account

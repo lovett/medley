@@ -13,6 +13,11 @@
     <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
+<section>
+<h1 *ngIf="tag">Transactions tagged with "{{ tag }}"</h1>
+<h1 *ngIf="activeQuery">Search Results</h1>
+<h1 *ngIf="!tag && !activeQuery">All Transactions</h1>
+
 <div class="selection-summary" [ngPlural]="selectionSize()">
     <ng-template ngPluralCase="=0"></ng-template>
     <ng-template ngPluralCase="=1">
@@ -62,7 +67,7 @@
                 <ul class="tag-list" *ngIf="transaction.tags">
                     <li *ngFor="let tag of transaction.tags; first as isFirst">
                         <svg *ngIf="isFirst" class="icon"><use xlink:href="#icon-tag"></use></svg>
-                        <a [routerLink]="['/transactions']" [queryParams]="{q: 'tags:' + tag}">{{ tag }}</a>
+                        <a [routerLink]="['/transactions']" [queryParams]="{tag: tag}">{{ tag }}</a>
                     </li>
                 </ul>
             </td>
@@ -103,3 +108,4 @@
 
 
 <p *ngIf="transactions.length == 0">There are no transactions.</p>
+</section>

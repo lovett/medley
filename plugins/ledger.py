@@ -272,7 +272,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql,))
 
-    def count_transactions(self, query: str = "") -> int:
+    def count_transactions(self, query: str = "", tag: str = "") -> int:
         """Count of rows from the transactions table."""
         if query:
             return self._selectFirst(
@@ -281,17 +281,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 WHERE transactions_fts MATCH ?""",
                 (query,))
 
+        if tag:
+            return self._selectFirst(
+                """SELECT count(*)
+                FROM transactions t, json_each(t.tags)
+                WHERE json_each.value=?""",
+                (tag,))
+
         return self._selectFirst("SELECT count(*) FROM transactions")
 
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
 
+        tag = kwargs.get("tag")
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
         query = kwargs.get("query", "")
         account = int(kwargs.get("account", 0))
 
-        count = self.count_transactions(query)
+        count = self.count_transactions(query, tag)
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
@@ -300,6 +308,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if account > 0:
             where_sql += " AND (a.id=? OR a2.id=?)"
             placeholders += (account, account)
+
+        if tag:
+            from_sql += ", json_each(t.tags)"
+            where_sql += " AND json_each.value=?"
+            placeholders += (tag,)
 
         if query:
             from_sql = """

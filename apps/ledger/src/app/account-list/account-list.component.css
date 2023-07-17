@@ -8,11 +8,6 @@ HEADER {
     padding-bottom: 2em;
 }
 
-.accounts H1 {
-    font-size: 1.5em;
-    font-weight: normal;
-}
-
 .accounts.inactive .card {
     background-color: #ccc;
 }

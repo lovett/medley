@@ -30,11 +30,12 @@ export class LedgerService {
         );
     }
 
-    getTransactions(query: string, limit: number, offset: number, account: number): Observable<TransactionList> {
+    getTransactions(query: string, limit: number, offset: number, account: number, tag: string): Observable<TransactionList> {
          let params = {
              limit,
              offset,
              account,
+             tag: tag || '',
              q: query || '',
          };
 

@@ -13,6 +13,8 @@ import { Router, ActivatedRoute}  from '@angular/router';
 export class TransactionListComponent implements OnInit {
     account = 0;
     searchForm: FormGroup;
+    tag = '';
+    activeQuery= '';
     count = 0;
     limit = 50;
     offset = 0;
@@ -39,7 +41,9 @@ export class TransactionListComponent implements OnInit {
         this.route.queryParams.subscribe((queryParams) => {
             this.account = Number(queryParams['account'] || 0);
             this.offset = Number(queryParams['offset'] || 0);
+            this.tag = queryParams['tag'];
             this.query.setValue(queryParams['q']);
+            this.activeQuery = queryParams['q'];
             this.getTransactions();
             window.scrollTo(0, 0);
         });
@@ -52,9 +56,8 @@ export class TransactionListComponent implements OnInit {
 
     get query() { return this.searchForm.controls['query'] };
 
-
     getTransactions() {
-        this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account).subscribe({
+        this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account, this.tag).subscribe({
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
                 this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
@@ -69,7 +72,7 @@ export class TransactionListComponent implements OnInit {
         event.preventDefault();
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {q: null, offet: 0 },
+            queryParams: {q: null, tag: null, offset: null },
             queryParamsHandling: 'merge',
         });
     }
