@@ -158,13 +158,19 @@ class Controller:
                 uid=params.uid
             ).pop().encode()
 
-        return cherrypy.engine.publish(
+        result = cherrypy.engine.publish(
             "ledger:json:transactions",
             query=params.q,
             limit=params.limit,
             offset=params.offset,
             account=params.account
-        ).pop().encode()
+        ).pop()
+
+        if not result:
+            result = ""
+
+        return result.encode()
+
 
     @staticmethod
     def json_tags(params: GetParams) -> bytes:
