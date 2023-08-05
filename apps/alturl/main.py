@@ -1,17 +1,9 @@
 """Web page reformatting"""
 
-from pydantic import BaseModel
-from pydantic import ValidationError
 import cherrypy
 from resources.url import Url
 import apps.alturl.reddit
 import apps.alturl.feed
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    url: str
-    q: str = ""
 
 
 class Controller:
@@ -86,7 +78,7 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def POST(url: str, q: str = "") -> None:
+    def POST(**kwargs: str) -> None:
         """Redirect to a site-specific display view.
 
         This is for the benefit of the form shown on the default view,
@@ -96,20 +88,15 @@ class Controller:
 
         """
 
-        try:
-            params = PostParams(
-                url=url,
-                q=q
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        url = kwargs.get("url", "")
+        q = kwargs.get("q", "")
 
-        target_url = Url(params.url)
+        target_url = Url(url)
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
             target_url.alt,
-            {"q": params.q}
+            {"q": q}
         ).pop()
 
         raise cherrypy.HTTPRedirect(redirect_url)
