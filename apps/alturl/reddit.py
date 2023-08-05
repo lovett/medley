@@ -111,13 +111,17 @@ def view_index(url: Url, response: Any) -> ViewAndData:
         reverse=True
     )
 
+    q = ""
+    if url.query:
+        q = url.query.get("q", "")
+
     before_url = ""
     if container.get("before"):
         before_url = cherrypy.engine.publish(
             "app_url",
             url.alt,
             query={
-                "q": url.query.get("q") or "",
+                "q": q,
                 "before": container["before"],
                 "count": len(stories)
             }
@@ -129,7 +133,7 @@ def view_index(url: Url, response: Any) -> ViewAndData:
             "app_url",
             url.alt,
             query={
-                "q": url.query.get("q") or "",
+                "q": q,
                 "after": container["after"],
                 "count": len(stories)
             }
