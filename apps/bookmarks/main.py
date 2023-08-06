@@ -5,10 +5,6 @@ import json
 import sqlite3
 from typing import Dict
 from typing import Iterator
-from pydantic import BaseModel
-from pydantic import Field
-from pydantic import ValidationError
-from pydantic import HttpUrl
 import cherrypy
 from resources.url import Url
 
@@ -19,31 +15,6 @@ class Subresource(str, Enum):
     TAGLIST = "taglist"
 
 
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    subresource: Subresource = Subresource.NONE
-    q: str = Field("", strip_whitespace=True, min_length=1)
-    wayback: str = Field("", strip_whitespace=True, min_length=1)
-    offset: int = 0
-    max_days: int = 180
-    per_page: int = 20
-    order: str = Field("rank", strip_whitespace=True, min_length=1)
-
-
-class DeleteParams(BaseModel):
-    """Parameters for DELETE requests."""
-    uid: int = Field(0, gt=0)
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    url: HttpUrl
-    title: str = Field("", strip_whitespace=True)
-    tags: str = Field("", strip_whitespace=True)
-    comments: str = Field("", strip_whitespace=True)
-    added: str = Field("", strip_whitespace=True)
-
-
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
@@ -51,17 +22,12 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: int) -> None:
+    def DELETE(uid: str) -> None:
         """Discard a previously bookmarked URL."""
-
-        try:
-            params = DeleteParams(uid=uid)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
 
         deleted_rows = cherrypy.engine.publish(
             "bookmarks:remove",
-            params.uid
+            int(uid)
         ).pop()
 
         if not deleted_rows:
@@ -73,46 +39,42 @@ class Controller:
     def GET(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        try:
-            params = GetParams(
-                subresource=subresource,
-                **kwargs
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        q = kwargs.get("q", "")
+        wayback = kwargs.get("wayback", "")
+        offset = int(kwargs.get("offset", 0))
+        max_days = int(kwargs.get("max_days", 180))
+        per_page = int(kwargs.get("per_page", 20))
+        order = kwargs.get("order", "rank")
 
-        if params.q:
-            return self.search(params)
+        if q:
+            return self.search(q, per_page, offset, order)
 
-        if params.wayback:
-            return self.check_wayback_availability(params)
+        if wayback:
+            return self.check_wayback_availability(wayback)
 
-        if params.subresource == Subresource.TAGLIST:
+        if subresource == Subresource.TAGLIST:
             return self.taglist()
 
-        return self.index(params)
+        return self.index(per_page, offset, order, max_days)
 
     @staticmethod
     def POST(url: str, **kwargs: str) -> None:
         """Add a new bookmark, or update an existing one."""
 
-        try:
-            params = PostParams(
-                url=url,
-                **kwargs
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        title = kwargs.get("title", "")
+        tags = kwargs.get("tags", "")
+        comments = kwargs.get("comments", "")
+        added = kwargs.get("added", "")
 
         result = cherrypy.engine.publish(
             "scheduler:add",
             2,
             "bookmarks:add",
-            Url(params.url),
-            params.title,
-            params.comments,
-            params.tags,
-            params.added
+            Url(url),
+            title,
+            comments,
+            tags,
+            added
         ).pop()
 
         if not result:
@@ -121,13 +83,13 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def check_wayback_availability(params: GetParams) -> bytes:
+    def check_wayback_availability(wayback: str) -> bytes:
         """See if an archived copy of the URL is available."""
 
         response = cherrypy.engine.publish(
             "urlfetch:get:json",
             "http://archive.org/wayback/available",
-            params={"url": params.wayback},
+            params={"url": wayback},
             cache_lifespan=86400
         ).pop() or {}
 
@@ -152,14 +114,20 @@ class Controller:
 
         return counts
 
-    def index(self, params: GetParams) -> bytes:
+    def index(
+            self,
+            per_page: int,
+            offset: int,
+            order: str,
+            max_days: int
+    ) -> bytes:
         """Display recently-added bookmarks."""
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
             "bookmarks:recent",
-            limit=params.per_page,
-            offset=params.offset,
-            max_days=params.max_days
+            limit=per_page,
+            offset=offset,
+            max_days=max_days
         ).pop()
 
         domain_counts = self.count_by_domain(bookmarks)
@@ -174,36 +142,36 @@ class Controller:
             "apps/bookmarks/bookmarks.jinja.html",
             bookmarks=bookmarks,
             domain_counts=domain_counts,
-            max_days=params.max_days,
+            max_days=max_days,
             total_records=total_records,
-            order=params.order,
-            per_page=params.per_page,
+            order=order,
+            per_page=per_page,
             query_plan=query_plan,
-            offset=params.offset,
+            offset=offset,
             pagination_url=pagination_url
         ).pop()
 
-    def search(self, params: GetParams) -> bytes:
+    def search(self, q: str, per_page: int, offset: int, order: str) -> bytes:
         """Find bookmarks matching a search query."""
 
         (bookmarks, total_records, query_plan) = cherrypy.engine.publish(
             "bookmarks:search",
-            params.q,
-            limit=params.per_page,
-            offset=params.offset,
-            order=params.order
+            q,
+            limit=per_page,
+            offset=offset,
+            order=order
         ).pop()
 
         domain_counts = {}
-        if "site:" not in params.q:
+        if "site:" not in q:
             domain_counts = self.count_by_domain(bookmarks)
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/bookmarks",
             {
-                "q": params.q,
-                "order": params.order
+                "q": q,
+                "order": order
             }
         ).pop()
 
@@ -212,14 +180,14 @@ class Controller:
             "apps/bookmarks/bookmarks.jinja.html",
             bookmarks=bookmarks,
             domain_counts=domain_counts,
-            offset=params.offset,
-            order=params.order,
+            offset=offset,
+            order=order,
             pagination_url=pagination_url,
-            per_page=params.per_page,
-            q=params.q,
+            per_page=per_page,
+            q=q,
             query_plan=query_plan,
             total_records=total_records,
-            subview_title=params.q
+            subview_title=q
         ).pop()
 
     @staticmethod
