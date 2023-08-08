@@ -71,8 +71,13 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
-            if args[0] == "registry:first:value":
-                return ["Column 4, Column 5, Column 6\nlayout=month"]
+            if args[0] == "registry:search":
+                return [
+                    (-1, iter([{
+                        "rowid": "1",
+                        "value": "Column 4, Column 5, Column 6\nlayout=month"
+                    }]))
+                ]
             if args[0] == "clock:from_format":
                 return [None]
             return mock.DEFAULT
