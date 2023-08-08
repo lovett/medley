@@ -1,15 +1,7 @@
 """News headlines via News API"""
 
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
 from resources.url import Url
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    start: int = 1
-    count: int = 40
 
 
 class Controller:
@@ -23,10 +15,8 @@ class Controller:
     def GET(**kwargs: str) -> bytes:
         """Display a list of headlines."""
 
-        try:
-            params = GetParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        start = int(kwargs.get("start", 1))
+        count = int(kwargs.get("count", 40))
 
         cache_lifespan = cherrypy.engine.publish(
             "clock:day:remaining"
@@ -67,8 +57,8 @@ class Controller:
             "jinja:render",
             "apps/headlines/headlines.jinja.html",
             headlines=headlines,
-            walk_start=params.start,
-            walk_stop=(params.start + params.count - 1),
+            walk_start=start,
+            walk_stop=(start + count - 1),
             bing=Url("https://www.bing.com"),
             ms_rewards=Url("https://rewards.bing.com/?signin=1")
         ).pop()
