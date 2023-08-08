@@ -1,18 +1,7 @@
 """Web page head tag viewer"""
 
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-from pydantic import HttpUrl
 import parsers.htmlhead
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    url: HttpUrl = Field(strip_whitespace=True)
-    username: str = ""
-    password: str = ""
 
 
 class Controller:
@@ -38,21 +27,20 @@ class Controller:
         section.
         """
 
-        try:
-            params = PostParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        url = kwargs.get("url", "")
+        username = kwargs.get("username", "")
+        password = kwargs.get("password", "")
 
         status_code = None
         request_failed = False
 
         auth = None
-        if params.username and params.password:
-            auth = (params.username, params.password)
+        if username and password:
+            auth = (username, password)
 
         response = cherrypy.engine.publish(
             "urlfetch:get",
-            params.url,
+            url,
             as_object=True,
             auth=auth,
         ).pop()
@@ -79,8 +67,8 @@ class Controller:
             "apps/htmlhead/htmlhead.jinja.html",
             failure_message=failure_message,
             status_code=status_code,
-            url=params.url,
+            url=url,
             tags=head_tags,
-            username=params.username,
-            password=params.password
+            username=username,
+            password=password
         ).pop()
