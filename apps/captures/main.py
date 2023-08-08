@@ -2,9 +2,6 @@
 
 from enum import Enum
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
 
 
 class Subresource(str, Enum):
@@ -12,32 +9,6 @@ class Subresource(str, Enum):
     NONE = ""
     STATUS = "status"
     SHOW = "show"
-
-
-class StatusParams(BaseModel):
-    """Base class for status URLs across all HTTP verbs."""
-    status: int = 0
-    subresource: Subresource = Subresource.NONE
-
-
-class GetParams(StatusParams):
-    """Parameters for GET requests."""
-    per_page: int = 20
-    offset: int = 0
-    q: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
-    uid: int = Field(0, gt=-1)
-
-
-class PostParams(StatusParams):
-    """Parameters for POST requests."""
-
-
-class PutParams(StatusParams):
-    """Parameters for PUT requests."""
-
-
-class DeleteParams(StatusParams):
-    """Parameters for DELETE requests."""
 
 
 class Controller:
@@ -56,34 +27,31 @@ class Controller:
     ) -> bytes:
         """Dispatch GET requests to a subhandler based on the URL path."""
 
-        try:
-            params = GetParams(subresource=subresource, uid=uid, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        per_page = int(kwargs.get("per_page", 20))
+        offset = int(kwargs.get("offset", 0))
+        q = kwargs.get("q", "").lower()
+        status = int(kwargs.get("status", 0))
 
-        if params.subresource == Subresource.STATUS:
-            cherrypy.response.status = self.capture(params)
+        if subresource == Subresource.STATUS:
+            cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
-        if params.q:
-            return self.search(params)
+        if q:
+            return self.search(q, per_page, offset)
 
-        if params.subresource == Subresource.SHOW:
-            return self.show(params)
+        if subresource == Subresource.SHOW:
+            return self.show(int(uid))
 
-        return self.index(params)
+        return self.index(per_page, offset)
 
     @cherrypy.tools.capture()
     def POST(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch POST requests to a subhandler based on the URL path."""
 
-        try:
-            params = PostParams(subresource=subresource, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        status = int(kwargs.get("status", 0))
 
-        if params.subresource == Subresource.STATUS:
-            cherrypy.response.status = self.capture(params)
+        if subresource == Subresource.STATUS:
+            cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
@@ -92,13 +60,10 @@ class Controller:
     def PUT(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch PUT requests to a subhandler based on the URL path."""
 
-        try:
-            params = PutParams(subresource=subresource, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        status = int(kwargs.get("status", 0))
 
-        if params.subresource == Subresource.STATUS:
-            cherrypy.response.status = self.capture(params)
+        if subresource == Subresource.STATUS:
+            cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
@@ -107,45 +72,42 @@ class Controller:
     def DELETE(self, subresource: str = "", **kwargs: str) -> bytes:
         """Dispatch DELETE requests to a subhandler based on the URL path."""
 
-        try:
-            params = DeleteParams(subresource=subresource, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        status = int(kwargs.get("status", 0))
 
-        if params.subresource == Subresource.STATUS:
-            cherrypy.response.status = self.capture(params)
+        if subresource == Subresource.STATUS:
+            cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
         raise cherrypy.NotFound()
 
     @staticmethod
-    def capture(params: StatusParams) -> int:
+    def capture(status: int) -> int:
         """Capture a request and return the status code indicated by the
         URL.
 
         """
 
-        if 400 <= params.status <= 500:
-            raise cherrypy.HTTPError(params.status)
+        if 400 <= status <= 500:
+            raise cherrypy.HTTPError(status)
 
-        if 300 <= params.status <= 308:
+        if 300 <= status <= 308:
             destination = cherrypy.engine.publish(
                 "app_url",
                 "/"
             ).pop()
 
-            raise cherrypy.HTTPRedirect(destination, params.status)
+            raise cherrypy.HTTPRedirect(destination, status)
 
-        return params.status
+        return status
 
     @staticmethod
-    def index(params: GetParams) -> bytes:
+    def index(per_page: int, offset: int) -> bytes:
         """List captures in reverse-chronological order."""
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
-            offset=params.offset,
-            limit=params.per_page
+            offset=offset,
+            limit=per_page
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
@@ -158,28 +120,28 @@ class Controller:
             "apps/captures/captures.jinja.html",
             captures=captures,
             total_records=total_records,
-            per_page=params.per_page,
-            offset=params.offset,
+            per_page=per_page,
+            offset=offset,
             pagination_url=pagination_url
         ).pop()
 
         return response
 
     @staticmethod
-    def search(params: GetParams) -> bytes:
+    def search(q: str, per_page: int, offset: int) -> bytes:
         """Locate captures by request path."""
 
         (total_records, captures) = cherrypy.engine.publish(
             "capture:search",
-            path=params.q,
-            offset=params.offset,
-            limit=params.per_page
+            path=q,
+            offset=offset,
+            limit=per_page
         ).pop()
 
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "/captures",
-            {"q": params.q}
+            {"q": q}
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
@@ -187,29 +149,29 @@ class Controller:
             "apps/captures/captures.jinja.html",
             captures=captures,
             total_records=total_records,
-            per_page=params.per_page,
-            offset=params.offset,
-            q=params.q,
+            per_page=per_page,
+            offset=offset,
+            q=q,
             pagination_url=pagination_url,
-            subview_title=params.q
+            subview_title=q
         ).pop()
 
         return response
 
     @staticmethod
-    def show(params: GetParams) -> bytes:
+    def show(uid: int) -> bytes:
         """Display a single capture."""
 
         capture = cherrypy.engine.publish(
             "capture:get",
-            params.uid
+            uid
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/captures/captures.jinja.html",
             captures=(capture,),
-            subview_title=params.uid
+            subview_title=uid
         ).pop()
 
         return response
