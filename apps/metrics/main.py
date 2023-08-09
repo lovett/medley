@@ -4,14 +4,6 @@ from datetime import datetime, timedelta, timezone
 from math import ceil
 import pathlib
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    metric: str = Field("", strip_whitespace=True, to_lower=True)
 
 
 class Controller:
@@ -21,19 +13,11 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, *args: str, **_kwargs: str) -> bytes:
+    def GET(self, metric: str = "", **_kwargs: str) -> bytes:
         """Dispatch to a sub-handler."""
 
-        try:
-            metric = ""
-            if args:
-                metric = args[0]
-            params = GetParams(metric=metric)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
-
-        if params.metric:
-            return self.plot(params)
+        if metric:
+            return self.plot(metric)
 
         return self.list_metrics()
 
@@ -67,12 +51,12 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def plot(params: GetParams) -> bytes:
+    def plot(metric: str) -> bytes:
         """Display a single metric as a scatter plot."""
 
         dataset = cherrypy.engine.publish(
             "metrics:dataset",
-            key=params.metric
+            key=metric
         ).pop()
 
         points = []
@@ -148,7 +132,7 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/metrics/metrics.jinja.html",
-            metric=params.metric,
+            metric=metric,
             x_range=x_range,
             x_ticks=x_ticks,
             x_labels=x_labels,
@@ -158,5 +142,5 @@ class Controller:
             y_unit=y_unit,
             y_legend=y_legend,
             points=points,
-            subview_title=params.metric
+            subview_title=metric
         ).pop()
