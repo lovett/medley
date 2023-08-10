@@ -2,14 +2,6 @@
 
 import re
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    number: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -26,22 +18,19 @@ class Controller:
         look up a number
         """
 
-        try:
-            params = GetParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        number = kwargs.get("number", "").strip()
 
-        if not params.number:
+        if not number:
             default_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "apps/phone/phone.jinja.html"
             ).pop()
             return default_response
 
-        params.number = re.sub(r"\D", "", params.number)
-        params.number = re.sub(r"^1(\d{10})", r"\1", params.number)
+        number = re.sub(r"\D", "", number)
+        number = re.sub(r"^1(\d{10})", r"\1", number)
 
-        if not params.number:
+        if not number:
             search_response: bytes = cherrypy.engine.publish(
                 "jinja:render",
                 "apps/phone/phone.jinja.html",
@@ -50,7 +39,7 @@ class Controller:
             ).pop()
             return search_response
 
-        area_code = params.number[:3]
+        area_code = number[:3]
 
         location = cherrypy.engine.publish(
             "cache:get",
@@ -82,7 +71,7 @@ class Controller:
 
         call_history, _ = cherrypy.engine.publish(
             "cdr:history",
-            params.number
+            number
         ).pop()
 
         sparql = [
@@ -95,12 +84,12 @@ class Controller:
             "jinja:render",
             "apps/phone/phone.jinja.html",
             history=call_history,
-            number=params.number,
+            number=number,
             state_abbreviation=state_lookup[1],
             comment=state_lookup[2],
             state_name=state_name_lookup[1],
             sparql=sparql,
-            subview_title=params.number
+            subview_title=number
         ).pop()
 
         return response
