@@ -2,16 +2,13 @@
 
 from enum import Enum
 import datetime
-import sqlite3
 import re
 from typing import List
 from typing import Tuple
 from typing import Union
 import cherrypy
 import mistletoe
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
+
 
 # pylint: disable=protected-access
 Attachment = Union[
@@ -27,42 +24,6 @@ class Subresource(str, Enum):
     NEW = "new"
     EDIT = "edit"
     ATTACHMENTS = "attachments"
-
-
-class DeleteParams(BaseModel):
-    """Parameters for DELETE requests."""
-    uid: int = Field(0, gt=0)
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    uid: int = Field(0, gt=-1)
-    subresource: Subresource = Subresource.NONE
-    q: str = Field("", strip_whitespace=True, min_length=1)
-    resource: str = Field("", strip_whitespace=True)
-    tag: str = Field("", strip_whitespace=True)
-
-
-class PatchParams(BaseModel):
-    """Parameters for PATCH requests."""
-    uid: int = Field(0, gt=-1)
-    toggle: str = ""
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    uid: int = Field(0, gt=-1)
-    title: str = Field(strip_whitespace=True)
-    body: str = Field(strip_whitespace=True)
-    url: str = Field("", strip_whitespace=True)
-    tags: str = Field(strip_whitespace=True, to_lower=True)
-    last_made: str = Field("", strip_whitespace=True)
-    created: str = Field("", strip_whitespace=True)
-    attachments: Attachment
-
-    class Config:
-        """Custom model configuration."""
-        arbitrary_types_allowed = True
 
 
 class Controller:
@@ -123,34 +84,26 @@ class Controller:
     ) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        try:
-            params = GetParams(
-                uid=uid,
-                subresource=subresource,
-                resource=resource,
-                **kwargs
-            )
+        q = kwargs.get("q", "").strip()
+        tag = kwargs.get("tag", "").strip()
 
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        if int(uid) > 0 and subresource == Subresource.NONE:
+            return self.show(int(uid))
 
-        if params.uid and params.subresource == Subresource.NONE:
-            return self.show(params)
+        if tag:
+            return self.by_tag(tag, resource)
 
-        if params.tag:
-            return self.by_tag(params)
+        if subresource == Subresource.NEW:
+            return self.form(int(uid))
 
-        if params.subresource == Subresource.NEW:
-            return self.form(params)
+        if subresource == Subresource.EDIT:
+            return self.form(int(uid))
 
-        if params.subresource == Subresource.EDIT:
-            return self.form(params)
+        if q:
+            return self.search(q)
 
-        if params.q:
-            return self.search(params)
-
-        if params.subresource == Subresource.ATTACHMENTS:
-            return self.attachment(params)
+        if subresource == Subresource.ATTACHMENTS:
+            return self.attachment(int(uid), resource)
 
         return self.index()
 
@@ -158,15 +111,12 @@ class Controller:
     def PATCH(uid: str = "0", **kwargs: str) -> None:
         """Handle updates for toggle fields."""
 
-        try:
-            params = PatchParams(uid=uid, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        toggle = kwargs.get("toggle", "")
 
-        if params.toggle == "star":
+        if toggle == "star":
             cherrypy.engine.publish(
                 "recipes:toggle:star",
-                recipe_id=params.uid
+                recipe_id=int(uid)
             )
 
             cherrypy.response.status = 204
@@ -177,38 +127,41 @@ class Controller:
     def POST(self, uid: str, **kwargs: str) -> None:
         """Save changes to an existing recipe, or add a new one."""
 
-        try:
-            params = PostParams(uid=uid, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        title = kwargs.get("title", "").strip()
+        body = kwargs.get("body", "").strip()
+        url = kwargs.get("url", "").strip()
+        tags = kwargs.get("tags", "").strip().lower()
+        last_made = kwargs.get("last_made", "").strip()
+        created = kwargs.get("created", "").strip()
+        attachments: Attachment = kwargs.get("attachments")
 
-        tag_list = params.tags.split(",")
+        tag_list = tags.split(",")
         tag_list = [
             re.sub(r"\s+", "-", tag.strip())
             for tag in tag_list
         ]
 
-        params.title = re.sub(r"\s*&\s*", " and ", params.title)
+        title = re.sub(r"\s*&\s*", " and ", title)
 
         for replace, search in self.fractions:
-            params.body = params.body.replace(search, replace)
+            body = body.replace(search, replace)
 
-        params.body = re.sub(r"(\d+)\s*°\s*F", r"\g<1>F", params.body)
+        body = re.sub(r"(\d+)\s*°\s*F", r"\g<1>F", body)
 
         if not tag_list:
             tag_list = ["untagged"]
 
         last_made_date = None
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", params.last_made):
-            last_made_date = params.last_made.strip()
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_made):
+            last_made_date = last_made.strip()
 
         created_date = cherrypy.engine.publish(
             "clock:now",
         ).pop()
 
-        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", params.created):
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", created):
             created_date = datetime.datetime.strptime(
-                f"{params.created} 00:00",
+                f"{created} 00:00",
                 "%Y-%m-%d %H:%M",
             )
 
@@ -218,27 +171,27 @@ class Controller:
             ).pop()
 
         attachment_list = []
-        if params.attachments and not isinstance(params.attachments, list):
-            params.attachments = [params.attachments]
+        if attachments and not isinstance(attachments, list):
+            attachments = [attachments]
 
         # pylint: disable=E1101
-        if params.attachments:
+        if attachments:
             attachment_list = [
                 (
                     attachment.filename.lower(),
                     attachment.content_type.value,
                     attachment.file.read()
                 )
-                for attachment in params.attachments
+                for attachment in attachments
                 if attachment.file
             ]
 
         upsert_id = cherrypy.engine.publish(
             "recipes:upsert",
-            params.uid,
-            title=params.title,
-            body=params.body,
-            url=params.url,
+            int(uid),
+            title=title,
+            body=body,
+            url=url,
             tags=tag_list,
             last_made=last_made_date,
             created=created_date,
@@ -253,13 +206,13 @@ class Controller:
         raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
-    def attachment(params: GetParams) -> bytes:
+    def attachment(uid: int, resource: str) -> bytes:
         """Display a single attachment."""
 
         (_, mime_type, content) = cherrypy.engine.publish(
             "recipes:attachment:view",
-            recipe_id=params.uid,
-            filename=params.resource
+            recipe_id=uid,
+            filename=resource
         ).pop()
 
         if not content:
@@ -269,20 +222,20 @@ class Controller:
         return content
 
     @staticmethod
-    def by_tag(params: GetParams) -> bytes:
+    def by_tag(tag: str, resource: str) -> bytes:
         """Display recipes associated with a tag."""
 
         recipes = cherrypy.engine.publish(
             "recipes:find:tag",
-            params.tag
+            tag
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
-            tag=params.tag,
-            subview_title=params.resource
+            tag=tag,
+            subview_title=resource
         ).pop()
 
     @staticmethod
@@ -305,22 +258,22 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def form(params: GetParams) -> bytes:
+    def form(uid: int) -> bytes:
         """Display a form for adding or updating a recipe."""
 
         title = ""
         body = ""
         tags = ""
         url = ""
-        submit_url = f"/recipes/{params.uid}"
+        submit_url = f"/recipes/{uid}"
         last_made = ""
         created = ""
         attachments = []
 
-        if params.uid:
+        if uid > 0:
             recipe = cherrypy.engine.publish(
                 "recipes:find",
-                params.uid
+                uid
             ).pop()
 
             if not recipe:
@@ -337,7 +290,7 @@ class Controller:
                 recipe["created"],
                 "%Y-%m-%d"
             ).pop()
-            submit_url = f"/recipes/{params.uid}"
+            submit_url = f"/recipes/{uid}"
 
             if recipe["last_made"]:
                 last_made = cherrypy.engine.publish(
@@ -348,13 +301,13 @@ class Controller:
 
             attachments = cherrypy.engine.publish(
                 "recipes:attachment:list",
-                params.uid
+                uid
             ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-form.jinja.html",
-            recipe_id=params.uid,
+            recipe_id=uid,
             title=title,
             attachments=attachments,
             body=body,
@@ -397,30 +350,30 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def search(params: GetParams) -> bytes:
+    def search(q: str) -> bytes:
         """Display recipes and tags matching a search."""
 
         query_date = None
 
-        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", params.q):
+        if re.fullmatch(r"\d{4}-\w{2}-\d{2}", q):
             query_date = cherrypy.engine.publish(
                 "clock:from_format",
-                params.q,
+                q,
                 "%Y-%m-%d"
             ).pop()
 
-        if re.fullmatch(r"\d{4}-\d{2}", params.q):
+        if re.fullmatch(r"\d{4}-\d{2}", q):
             query_date = cherrypy.engine.publish(
                 "clock:from_format",
-                params.q,
+                q,
                 "%Y-%m"
             ).pop()
 
-        if "." in params.q:
-            params.q = re.sub(
+        if "." in q:
+            q = re.sub(
                 r"\b(\w+)\.(\w+)\b",
                 r"NEAR(\g<1> \g<2>)",
-                params.q
+                q
             )
 
         if query_date:
@@ -432,23 +385,23 @@ class Controller:
         else:
             recipes = cherrypy.engine.publish(
                 "recipes:search:keyword",
-                params.q
+                q
             ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-list.jinja.html",
             recipes=recipes,
-            query=params.q,
-            subview_title=params.q,
+            query=q,
+            subview_title=q,
         ).pop()
 
-    def show(self, params: GetParams) -> bytes:
+    def show(self, uid: int) -> bytes:
         """Display a single recipe."""
 
         recipe = cherrypy.engine.publish(
             "recipes:find",
-            params.uid
+            uid
         ).pop()
 
         if not recipe:
@@ -465,7 +418,7 @@ class Controller:
 
         attachments = cherrypy.engine.publish(
             "recipes:attachment:list",
-            recipe_id=params.uid
+            recipe_id=uid
         ).pop()
 
         return cherrypy.engine.publish(
@@ -506,13 +459,6 @@ class Controller:
         for search, replace in self.fractions:
             result = result.replace(search, replace)
         return result
-
-    def add_reminder_links(self, text: str, recipe: sqlite3.Row) -> str:
-        """Decorate time durations with links to the reminders app."""
-
-        # TODO: Spacy was previously used for this, but later determined to
-        # be not worth the hassle. Replace with something simpler.
-        return text
 
     @staticmethod
     def format_temperatures(html: str) -> str:
