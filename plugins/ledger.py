@@ -2,6 +2,7 @@
 
 from datetime import date
 import json
+import re
 import sqlite3
 from typing import Any
 from typing import List
@@ -142,7 +143,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.setup)
-        # self.bus.subscribe("ledger:acknowledgment", self.acknowledge)
+        self.bus.subscribe("ledger:ack", self.ack)
         self.bus.subscribe("ledger:transaction", self.find_transaction)
         self.bus.subscribe("ledger:json:transactions", self.transactions_json)
         self.bus.subscribe(
@@ -544,6 +545,49 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self._multi(queries)
 
-    # def acknowledge(self, amount: float, payee: str, source: str) -> None:
-    #     """Locate an uncleared transaction and clear it."""
-    #     return None
+    @staticmethod
+    def extract_amount(value: str) -> int:
+        """Convert a dollar amount to integer cents."""
+        result = re.sub("[^0-9.]", "", value)
+        if "." in result:
+            return int(float(result) * 100)
+
+        return int(amount)
+
+    def ack(self, **kwargs) -> None:
+        """Locate an uncleared transaction and clear it."""
+
+        raw_date = kwargs.get("date", "")
+        raw_account = kwargs.get("account", "")
+        raw_amount = kwargs.get("amount", "")
+        raw_payee =kwargs.get("payee", "")
+
+        sql = """
+        SELECT t.id, t.account_id, t.destination_id, t.cleared_on, t.amount,
+        t.payee, t.tags, t.note
+        FROM transactions_fts
+        JOIN transactions t ON transactions_fts.rowid=t.id
+        WHERE transactions_fts MATCH (?)
+        ORDER BY t.occurred_on DESC
+        LIMIT 1"""
+
+        # Match on payee and amount
+        search = ""
+
+        if raw_payee:
+            search = f"payee:{raw_payee}"
+
+            if amount:
+                amount = self.extract_amount(raw_amount)
+                search += f" and amount:{amount}"
+
+        result = self._selectOne(
+            sql,
+            (search,)
+        )
+
+        if result:
+            amount = self.extract_amount(raw_amount)
+            print("match found", result)
+        else:
+            print("no match found")
