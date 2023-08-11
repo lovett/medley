@@ -1,6 +1,5 @@
 """A collection of recipes"""
 
-from enum import Enum
 import datetime
 import re
 from typing import List
@@ -16,14 +15,6 @@ Attachment = Union[
     cherrypy._cpreqbody.Part,
     List[cherrypy._cpreqbody.Part]
 ]
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    NEW = "new"
-    EDIT = "edit"
-    ATTACHMENTS = "attachments"
 
 
 class Controller:
@@ -77,46 +68,56 @@ class Controller:
     @cherrypy.tools.provides(formats=("html",))
     def GET(
             self,
-            uid: str = "0",
+            uid: str = "",
             subresource: str = "",
             resource: str = "",
             **kwargs: str
     ) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
         q = kwargs.get("q", "").strip()
         tag = kwargs.get("tag", "").strip()
 
-        if int(uid) > 0 and subresource == Subresource.NONE:
-            return self.show(int(uid))
+        if record_id > 0 and subresource == "":
+            return self.show(record_id)
 
         if tag:
             return self.by_tag(tag, resource)
 
-        if subresource == Subresource.NEW:
-            return self.form(int(uid))
+        if subresource == "new":
+            return self.form(record_id)
 
-        if subresource == Subresource.EDIT:
-            return self.form(int(uid))
+        if subresource == "edit":
+            return self.form(record_id)
 
         if q:
             return self.search(q)
 
-        if subresource == Subresource.ATTACHMENTS:
-            return self.attachment(int(uid), resource)
+        if subresource == "attachments":
+            return self.attachment(record_id, resource)
 
         return self.index()
 
     @staticmethod
-    def PATCH(uid: str = "0", **kwargs: str) -> None:
+    def PATCH(uid: str, **kwargs: str) -> None:
         """Handle updates for toggle fields."""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         toggle = kwargs.get("toggle", "")
 
         if toggle == "star":
             cherrypy.engine.publish(
                 "recipes:toggle:star",
-                recipe_id=int(uid)
+                recipe_id=record_id
             )
 
             cherrypy.response.status = 204
@@ -126,6 +127,11 @@ class Controller:
 
     def POST(self, uid: str, **kwargs: str) -> None:
         """Save changes to an existing recipe, or add a new one."""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         title = kwargs.get("title", "").strip()
         body = kwargs.get("body", "").strip()
@@ -188,7 +194,7 @@ class Controller:
 
         upsert_id = cherrypy.engine.publish(
             "recipes:upsert",
-            int(uid),
+            record_id,
             title=title,
             body=body,
             url=url,
@@ -206,12 +212,12 @@ class Controller:
         raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
-    def attachment(uid: int, resource: str) -> bytes:
+    def attachment(record_id: int, resource: str) -> bytes:
         """Display a single attachment."""
 
         (_, mime_type, content) = cherrypy.engine.publish(
             "recipes:attachment:view",
-            recipe_id=uid,
+            recipe_id=record_id,
             filename=resource
         ).pop()
 
@@ -258,22 +264,22 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def form(uid: int) -> bytes:
+    def form(record_id: int) -> bytes:
         """Display a form for adding or updating a recipe."""
 
         title = ""
         body = ""
         tags = ""
         url = ""
-        submit_url = f"/recipes/{uid}"
+        submit_url = f"/recipes/{record_id}"
         last_made = ""
         created = ""
         attachments = []
 
-        if uid > 0:
+        if record_id > 0:
             recipe = cherrypy.engine.publish(
                 "recipes:find",
-                uid
+                record_id
             ).pop()
 
             if not recipe:
@@ -290,7 +296,7 @@ class Controller:
                 recipe["created"],
                 "%Y-%m-%d"
             ).pop()
-            submit_url = f"/recipes/{uid}"
+            submit_url = f"/recipes/{record_id}"
 
             if recipe["last_made"]:
                 last_made = cherrypy.engine.publish(
@@ -301,13 +307,13 @@ class Controller:
 
             attachments = cherrypy.engine.publish(
                 "recipes:attachment:list",
-                uid
+                record_id
             ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/recipes/recipes-form.jinja.html",
-            recipe_id=uid,
+            recipe_id=record_id,
             title=title,
             attachments=attachments,
             body=body,
@@ -396,12 +402,12 @@ class Controller:
             subview_title=q,
         ).pop()
 
-    def show(self, uid: int) -> bytes:
+    def show(self, record_id: int) -> bytes:
         """Display a single recipe."""
 
         recipe = cherrypy.engine.publish(
             "recipes:find",
-            uid
+            record_id
         ).pop()
 
         if not recipe:
@@ -418,7 +424,7 @@ class Controller:
 
         attachments = cherrypy.engine.publish(
             "recipes:attachment:list",
-            recipe_id=uid
+            recipe_id=record_id
         ).pop()
 
         return cherrypy.engine.publish(
