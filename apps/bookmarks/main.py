@@ -1,18 +1,11 @@
 """Saved webpages"""
 
-from enum import Enum
 import json
 import sqlite3
 from typing import Dict
 from typing import Iterator
 import cherrypy
 from resources.url import Url
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the first URL path segment of this application."""
-    NONE = ""
-    TAGLIST = "taglist"
 
 
 class Controller:
@@ -25,9 +18,14 @@ class Controller:
     def DELETE(uid: str) -> None:
         """Discard a previously bookmarked URL."""
 
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
         deleted_rows = cherrypy.engine.publish(
             "bookmarks:remove",
-            int(uid)
+            record_id
         ).pop()
 
         if not deleted_rows:
@@ -52,7 +50,7 @@ class Controller:
         if wayback:
             return self.check_wayback_availability(wayback)
 
-        if subresource == Subresource.TAGLIST:
+        if subresource == "taglist":
             return self.taglist()
 
         return self.index(per_page, offset, order, max_days)
