@@ -1,69 +1,14 @@
 """Track sleep"""
 
 from collections import defaultdict
-from datetime import datetime, timedelta, date, time
+from datetime import datetime, timedelta
 import json
-from enum import Enum
 from typing import Any
 from typing import Dict
 from typing import DefaultDict
-from typing import Optional
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-from pydantic import validator
 
 Config = Dict[str, Any]
-
-
-class Action(str, Enum):
-    """Values for the action parameter in POST requests."""
-    NONE = ""
-    START = "start"
-    END = "end"
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    NEW = "new"
-    EDIT = "edit"
-
-
-class DeleteParams(BaseModel):
-    """Parameters for DELETE requests."""
-    uid: int = Field(0, gt=-1)
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    uid: int = Field(0, gt=-1)
-    q: str = Field("", strip_whitespace=True, min_length=1, to_lower=True)
-    offset: int = 0
-    subresource: Subresource = Subresource.NONE
-    saved: bool = False
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    end_date: Optional[date]
-    end_time: Optional[time]
-    start_date: Optional[date]
-    start_time: Optional[time]
-    notes: Optional[str]
-    uid: int = Field(0, gt=-1)
-    action: Action = Action.NONE
-
-    @validator("end_date", "end_time", pre=True)
-    def drop_empty_fields(
-            cls: Any,  # pylint: disable=unused-argument
-            value: str
-    ) -> Optional[str]:
-        """Skip blanks."""
-        if not value.strip():
-            return None
-        return value
 
 
 class Controller:
@@ -73,134 +18,65 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: int) -> None:
+    def DELETE(uid: str) -> None:
         """Remove an entry from the database."""
 
         try:
-            params = DeleteParams(uid=uid)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         result = cherrypy.engine.publish(
             "sleeplog:remove",
-            params.uid
+            record_id
         ).pop()
 
-        if result:
-            cherrypy.response.status = 204
-            return
+        if not result:
+            raise cherrypy.HTTPError(404)
 
-        raise cherrypy.HTTPError(404)
+        cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("html",))
     def GET(self,
-            uid: str = "0",
+            uid: str = "",
             subresource: str = "",
             **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
-            params = GetParams(
-                uid=uid,
-                subresource=subresource,
-                **kwargs
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+            record_id = int(uid or 0)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
-        if params.uid > 0 and params.subresource == Subresource.EDIT:
-            return self.form(params)
+        if record_id > 0 and subresource == "edit":
+            return self.form(record_id)
 
-        if params.uid == 0 and params.subresource == Subresource.NEW:
-            return self.form(params)
+        if record_id == 0 and subresource == "new":
+            return self.form(record_id)
 
-        if cherrypy.request.path_info != "/":
-            redirect_url = cherrypy.engine.publish(
-                "app_url",
-            ).pop()
-            raise cherrypy.HTTPRedirect(redirect_url)
+        if cherrypy.request.path_info == "/":
+            return self.index(**kwargs)
 
-        return self.index(params)
+        raise cherrypy.NotFound()
 
-    @staticmethod
     @cherrypy.tools.provides(formats=("html", "json"))
-    def POST(uid: str, **kwargs: str) -> Optional[bytes]:
+    def POST(self, uid: str, **kwargs: str) -> bytes:
         """Add a new entry or update an existing one."""
 
         try:
-            params = PostParams(
-                uid=uid,
-                **kwargs
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
-        app_url = cherrypy.engine.publish(
-            "app_url",
-        ).pop()
+        action = kwargs.get("action")
 
-        if params.action == Action.END:
-            cherrypy.engine.publish(
-                "sleeplog:end",
-                params.uid
-            )
-            raise cherrypy.HTTPRedirect(app_url)
+        if action == "start":
+            return self.start_session()
 
-        if params.action == Action.START:
-            cherrypy.engine.publish(
-                "sleeplog:start",
-            )
-            raise cherrypy.HTTPRedirect(app_url)
+        if action == "end":
+            return self.end_session(record_id)
 
-        start_utc = None
-        if params.start_date and params.start_time:
-            start = datetime.combine(
-                params.start_date,
-                params.start_time
-            )
-
-            start_utc = cherrypy.engine.publish(
-                "clock:utc",
-                start
-            ).pop()
-
-        end_utc = None
-        if params.end_date and params.end_time:
-            end = datetime.combine(
-                params.end_date,
-                params.end_time
-            )
-
-            end_utc = cherrypy.engine.publish(
-                "clock:utc",
-                end
-            ).pop()
-
-        upsert_uid = cherrypy.engine.publish(
-            "sleeplog:upsert",
-            params.uid,
-            start_utc=start_utc,
-            end_utc=end_utc,
-            notes=params.notes
-        ).pop()
-
-        redirect_url = cherrypy.engine.publish(
-            "app_url",
-            str(upsert_uid)
-        ).pop() + "#history"
-
-        if cherrypy.request.wants == "json":
-            action = "saved"
-            if params.uid > 0:
-                action = "updated"
-
-            return json.dumps({
-                "uid": upsert_uid,
-                "action": action,
-                "redirect": redirect_url
-            }).encode()
-
-        raise cherrypy.HTTPRedirect(redirect_url)
+        return self.save_session(record_id, **kwargs)
 
     @staticmethod
     def get_config() -> Config:
@@ -218,39 +94,39 @@ class Controller:
             config.get("ideal:duration_minmax", "7,9").split(",")
         ]
 
-        config["ideal_start"] = cherrypy.engine.publish(
-            "clock:from_format",
-            config.get("ideal:start", "11:00 pm"),
+        config["ideal_start"] = datetime.strptime(
+            config.get("ideal:start", "11:00 PM"),
             "%I:%M %p"
-        ).pop()
+        )
 
         return config
 
-    def index(self, params: GetParams) -> bytes:
-        """The application's default view."""
+    def index(self, **kwargs: str) -> bytes:
+        """The default view."""
 
-        days = 14
+        q = kwargs.get("q", "").strip().lower()
+        limit = 14
+        offset = int(kwargs.get("offset", 0))
 
         config = self.get_config()
 
-        active_session = None
-        if params.q:
+        if q:
+            active_session = None
             (entries, entry_count) = cherrypy.engine.publish(
                 "sleeplog:search:keyword",
-                query=params.q,
-                offset=params.offset,
-                limit=days,
+                query=q,
+                offset=offset,
+                limit=limit,
                 ideal_duration=config["ideal_duration"],
             ).pop()
-
-        if not params.q:
+        else:
             active_session = cherrypy.engine.publish(
                 "sleeplog:active"
             ).pop()
 
             (entries, entry_count) = cherrypy.engine.publish(
                 "sleeplog:search:date",
-                offset=params.offset,
+                offset=offset,
                 ideal_duration=config["ideal_duration"]
             ).pop()
 
@@ -303,10 +179,10 @@ class Controller:
 
         history = []
         history_chart = ""
-        if not params.q:
+        if not q:
             history = cherrypy.engine.publish(
                 "sleeplog:history",
-                days=days,
+                days=limit,
             ).pop()
 
             history_chart = cherrypy.engine.publish(
@@ -321,7 +197,7 @@ class Controller:
         pagination_url = cherrypy.engine.publish(
             "app_url",
             "",
-            {"q": params.q}
+            {"q": q}
         ).pop()
 
         add_url = cherrypy.engine.publish(
@@ -332,24 +208,24 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/sleeplog/sleeplog-index.jinja.html",
-            days=days,
+            days=limit,
             entries=entries,
             entry_count=entry_count,
             pagination_url=pagination_url,
-            offset=params.offset,
-            per_page=days,
+            offset=offset,
+            per_page=limit,
             add_url=add_url,
             active_session=active_session,
             history=history,
             history_chart=history_chart,
-            query=params.q,
+            query=q,
             stats=stats,
             duration_verdict=duration_verdict,
             start_verdict=start_verdict,
         ).pop()
 
     @staticmethod
-    def form(params: GetParams) -> bytes:
+    def form(uid: int) -> bytes:
         """Display a form for adding or updating an entry."""
 
         start = cherrypy.engine.publish(
@@ -361,15 +237,15 @@ class Controller:
         notes = ""
 
         delete_url = ""
-        if params.uid:
+        if uid:
             entry = cherrypy.engine.publish(
                 "sleeplog:find",
-                params.uid
+                uid
             ).pop()
 
             delete_url = cherrypy.engine.publish(
                 "app_url",
-                str(params.uid)
+                str(uid)
             ).pop()
 
             if not entry:
@@ -391,8 +267,88 @@ class Controller:
             "apps/sleeplog/sleeplog-form.jinja.html",
             add_url=add_url,
             delete_url=delete_url,
-            uid=params.uid,
+            uid=uid,
             start=start,
             end=end,
             notes=notes
         ).pop()
+
+    @staticmethod
+    def start_session() -> bytes:
+        """Create a new in-progress record."""
+
+        cherrypy.engine.publish(
+            "sleeplog:start",
+        )
+
+        app_url = cherrypy.engine.publish(
+            "app_url",
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(app_url)
+
+    @staticmethod
+    def end_session(uid: int) -> bytes:
+        """End an in-progress record."""
+
+        cherrypy.engine.publish(
+            "sleeplog:end",
+            uid
+        )
+
+        app_url = cherrypy.engine.publish(
+            "app_url",
+        ).pop()
+
+        raise cherrypy.HTTPRedirect(app_url)
+
+    @staticmethod
+    def save_session(uid: int, **kwargs: str) -> bytes:
+        start_date = kwargs.get("start_date", "")
+        start_time = kwargs.get("start_time", "")
+        end_date = kwargs.get("end_date", "")
+        end_time = kwargs.get("end_time", "")
+        notes = kwargs.get("notes", "")
+        date_format = "%Y-%m-%d %H:%M"
+
+        if start_date and start_time:
+            start = datetime.strptime(
+                f"{start_date} {start_time}",
+                date_format
+            )
+        else:
+            raise cherrypy.HTTPError(400, "Invalid start")
+
+        end = None
+        if end_date and end_time:
+            end = datetime.strptime(
+                f"{end_date} {end_time}",
+                date_format
+            )
+
+            if end < start:
+                raise cherrypy.HTTPError(
+                    400,
+                    "The start and end dates are mixed up."
+                )
+
+        upsert_id = cherrypy.engine.publish(
+            "sleeplog:upsert",
+            uid,
+            start=start,
+            end=end,
+            notes=notes
+        ).pop()
+
+        redirect_url = cherrypy.engine.publish(
+            "app_url",
+            "#history"
+        ).pop()
+
+        if cherrypy.request.wants == "json":
+            return json.dumps({
+                "uid": upsert_id,
+                "redirect": redirect_url
+            }).encode()
+
+        raise cherrypy.HTTPRedirect(redirect_url)

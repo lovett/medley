@@ -13,16 +13,12 @@ MEDLEY.sleeplog = (function () {
 
         let payload = new FormData(e.target)
 
-        console.log(payload);
-
         const response = await fetch(e.target.getAttribute('action'), {
             headers: {'Accept': 'application/json'},
             method: 'POST',
             mode: 'same-origin',
             body: payload
         })
-
-
 
         if (response.ok) {
             response.json().then((payload) => {

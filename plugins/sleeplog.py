@@ -239,24 +239,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> int:
         """Insert or update an entry."""
 
-        start_utc = kwargs.get("start_utc")
-        end_utc = kwargs.get("end_utc")
+        start = kwargs.get("start")
+        end = kwargs.get("end")
         notes = kwargs.get("notes")
 
         if entry_id == 0:
             upsert_id = self._insert(
                 """INSERT INTO sleeplog (start_utc, end_utc, notes)
-                VALUES (datetime(?), datetime(?), ?)""",
-                (start_utc, end_utc, notes)
+                VALUES (datetime(?, 'utc'), datetime(?, 'utc'), ?)""",
+                (start, end, notes)
             )
 
         if entry_id > 0:
             self._execute(
-                """UPDATE sleeplog SET start_utc=datetime(?),
-                end_utc=datetime(?),
+                """UPDATE sleeplog SET start_utc=datetime(?, 'utc'),
+                end_utc=datetime(?, 'utc'),
                 notes=?
                 WHERE id=?""",
-                (start_utc, end_utc, notes, entry_id)
+                (start, end, notes, entry_id)
             )
             upsert_id = entry_id
 
