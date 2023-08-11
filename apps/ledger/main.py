@@ -15,12 +15,6 @@ class Resource(str, Enum):
     TRANSACTIONS = "transactions"
 
 
-class Subresource(str, Enum):
-    """Keywords for the third URL path segment."""
-    NONE = ""
-    FORM = "form"
-
-
 class Controller:
     """Dispatch application requests based on HTTP verb."""
 
@@ -32,11 +26,15 @@ class Controller:
     def GET(
             self,
             resource: Resource = Resource.NONE,
-            uid: str = "-1",
-            subresource: Subresource = Subresource.NONE,
+            uid: str = "",
             **kwargs: str
     ) -> bytes:
         """Serve the application UI or dispatch to JSON subhandlers."""
+
+        try:
+            record_id = int(uid or 0)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         q = kwargs.get("q", "").strip().lower()
         tag = kwargs.get("tag", "").strip()
@@ -46,10 +44,10 @@ class Controller:
 
         if cherrypy.request.wants == "json":
             if resource == Resource.ACCOUNTS:
-                return self.json_accounts(int(uid))
+                return self.json_accounts(record_id)
             if resource == Resource.TRANSACTIONS:
                 return self.json_transactions(
-                    int(uid),
+                    record_id,
                     q,
                     tag,
                     account,
@@ -68,17 +66,17 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def json_accounts(uid: int) -> bytes:
+    def json_accounts(record_id: int) -> bytes:
         """Render JSON for account resources."""
-        if uid == 0:
+        if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:accounts:new",
             ).pop().encode()
 
-        if uid > 0:
+        if record_id > 0:
             return cherrypy.engine.publish(
                 "ledger:json:accounts:single",
-                uid=uid
+                account_id=record_id
             ).pop().encode()
 
         return cherrypy.engine.publish(
@@ -87,7 +85,7 @@ class Controller:
 
     @staticmethod
     def json_transactions(
-            uid: int,
+            record_id: int,
             q: str,
             tag: str,
             account: int,
@@ -95,15 +93,15 @@ class Controller:
             limit: int
     ) -> bytes:
         """Render JSON for transaction resources."""
-        if uid == 0:
+        if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:transactions:new"
             ).pop().encode()
 
-        if uid > 0:
+        if record_id > 0:
             return cherrypy.engine.publish(
                 "ledger:json:transactions:single",
-                uid=uid
+                transaction_id=record_id
             ).pop().encode()
 
         result = cherrypy.engine.publish(
@@ -161,34 +159,44 @@ class Controller:
     def PUT(self, resource: str, uid: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
         if resource == Resource.ACCOUNTS:
             account = cherrypy.request.json
-            account["uid"] = int(uid)
+            account["uid"] = record_id
             self.store_account(account)
             self.clear_etag(resource)
             return
 
         if resource == Resource.TRANSACTIONS:
             transaction = cherrypy.request.json
-            transaction.uid = int(uid)
+            transaction.uid = record_id
             self.store_transaction(transaction)
             self.clear_etag(resource)
             return
 
         raise cherrypy.HTTPError(400)
 
-    def DELETE(self, resource: Resource, uid: int) -> None:
+    def DELETE(self, resource: Resource, uid: str) -> None:
         """Delete a transaction or account."""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         if resource == Resource.ACCOUNTS:
             result = cherrypy.engine.publish(
                 "ledger:remove:account",
-                uid
+                record_id
             ).pop()
         elif resource == Resource.TRANSACTIONS:
             result = cherrypy.engine.publish(
                 "ledger:remove:transaction",
-                uid
+                record_id
             ).pop()
         else:
             raise cherrypy.HTTPError(501)
@@ -205,7 +213,7 @@ class Controller:
 
         upsert_id = cherrypy.engine.publish(
             "ledger:store:account",
-            uid=fields.get("uid"),
+            account_id=fields.get("uid"),
             name=fields.get("name"),
             opened_on=fields.get("opened_on"),
             closed_on=fields.get("closed_on"),

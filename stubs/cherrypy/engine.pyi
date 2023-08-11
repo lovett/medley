@@ -561,7 +561,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["ledger:json:accounts:single"],
-        uid: int
+        account_id: int
 ) -> List[str]: ...
 
 
@@ -579,7 +579,7 @@ def publish(
 @overload
 def publish(
         channel: Literal["ledger:json:transactions:single"],
-        uid: int
+        transaction_id: int
 ) -> List[str]: ...
 
 
@@ -600,21 +600,21 @@ def publish(
 @overload
 def publish(
         channel: Literal["ledger:remove:account"],
-        uid: int
+        account_id: int
 ) -> List[bool]: ...
 
 
 @overload
 def publish(
         channel: Literal["ledger:remove:transaction"],
-        uid: int
+        transaction_id: int
 ) -> List[bool]: ...
 
 
 @overload
 def publish(
         channel: Literal["ledger:store:account"],
-        uid: int,
+        account_id: int,
         name: str,
         opened_on: Optional[date],
         closed_on: Optional[date],

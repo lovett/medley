@@ -200,7 +200,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """A blank account record as JSON."""
         return json.dumps(self.account_new())
 
-    def account_json(self, uid: int) -> str:
+    def account_json(self, account_id: int) -> str:
         """A single row from the accounts table as JSON."""
         sql = """SELECT json_object('uid', id,
                         'name', name,
@@ -212,7 +212,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             FROM (SELECT * FROM accounts
                   WHERE id=?)"""
 
-        return cast(str, self._selectFirst(sql, (uid,)))
+        return cast(str, self._selectFirst(sql, (account_id,)))
 
     def accounts_json(self) -> str:
         """Rows from the accounts table as JSON."""
@@ -371,7 +371,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, result)
 
-    def transaction_json(self, uid: int) -> str:
+    def transaction_json(self, transaction_id: int) -> str:
         """A single row form the transactions table as JSON."""
         sql = """
         SELECT json_object(
@@ -405,7 +405,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
         """
 
-        return cast(str, self._selectFirst(sql, (uid,)))
+        return cast(str, self._selectFirst(sql, (transaction_id,)))
 
     def transaction_new(self) -> dict:
         """A blank transaction record."""
@@ -438,7 +438,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def upsert_account(
             self,
-            uid: int,
+            account_id: int,
             name: str,
             opened_on: Optional[date],
             closed_on: Optional[date],
@@ -448,8 +448,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Insert or update an account."""
 
         upsert_id = None
-        if uid > 0:
-            upsert_id = uid
+        if account_id > 0:
+            upsert_id = account_id
 
         insert_id = self._insert(
             """INSERT INTO accounts (
@@ -465,24 +465,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (upsert_id, name, url, opened_on, closed_on, note)
         )
 
-        if uid == 0:
+        if account_id == 0:
             return insert_id
-        return uid
+        return account_id
 
-    def remove_account(self, uid: int) -> bool:
+    def remove_account(self, account_id: int) -> bool:
         """Delete a row from the accounts table."""
 
         return self._execute(
             "DELETE FROM accounts WHERE id=?",
-            (uid,)
+            (account_id,)
         )
 
-    def remove_transaction(self, uid: int) -> bool:
+    def remove_transaction(self, transaction_id: int) -> bool:
         """Delete a row from the transactions table."""
 
         return self._execute(
             "DELETE FROM transactions WHERE id=? OR related_transaction_id=?",
-            (uid, uid)
+            (transaction_id, transaction_id)
         )
 
     def upsert_transaction(
