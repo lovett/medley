@@ -1,14 +1,6 @@
 """Review HTTP requests and responses"""
 
-from enum import Enum
 import cherrypy
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    STATUS = "status"
-    SHOW = "show"
 
 
 class Controller:
@@ -32,15 +24,20 @@ class Controller:
         q = kwargs.get("q", "").lower()
         status = int(kwargs.get("status", 0))
 
-        if subresource == Subresource.STATUS:
+        try:
+            record_id = int(uid or 0)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
+        if subresource == "status":
             cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
         if q:
             return self.search(q, per_page, offset)
 
-        if subresource == Subresource.SHOW:
-            return self.show(int(uid))
+        if subresource == "show":
+            return self.show(record_id)
 
         return self.index(per_page, offset)
 
@@ -50,7 +47,7 @@ class Controller:
 
         status = int(kwargs.get("status", 0))
 
-        if subresource == Subresource.STATUS:
+        if subresource == "status":
             cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
@@ -62,7 +59,7 @@ class Controller:
 
         status = int(kwargs.get("status", 0))
 
-        if subresource == Subresource.STATUS:
+        if subresource == "status":
             cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
@@ -74,7 +71,7 @@ class Controller:
 
         status = int(kwargs.get("status", 0))
 
-        if subresource == Subresource.STATUS:
+        if subresource == "status":
             cherrypy.response.status = self.capture(status)
             return str(cherrypy.response.status).encode()
 
@@ -159,19 +156,19 @@ class Controller:
         return response
 
     @staticmethod
-    def show(uid: int) -> bytes:
+    def show(record_id: int) -> bytes:
         """Display a single capture."""
 
         capture = cherrypy.engine.publish(
             "capture:get",
-            uid
+            record_id
         ).pop()
 
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/captures/captures.jinja.html",
             captures=(capture,),
-            subview_title=uid
+            subview_title=record_id
         ).pop()
 
         return response
