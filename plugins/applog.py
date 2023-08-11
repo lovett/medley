@@ -13,7 +13,7 @@ from plugins import mixins
 from plugins import decorators
 
 SearchResult = Tuple[
-    List[sqlite3.Row], int, List[str]
+    List[sqlite3.Row], int
 ]
 
 
@@ -152,7 +152,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return (
             self._select(sql, placeholders),
             self._count(sql, placeholders),
-            self._explain(sql, placeholders)
         )
 
     @decorators.log_runtime
@@ -174,7 +173,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         return (
             self._select(sql, placeholders),
             self._count(sql, placeholders),
-            self._explain(sql, placeholders)
         )
 
     def list_sources(self) -> Iterator[sqlite3.Row]:

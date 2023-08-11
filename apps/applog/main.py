@@ -23,14 +23,14 @@ class Controller:
         ).pop()
 
         if source:
-            records, total, query_plan = cherrypy.engine.publish(
+            records, total = cherrypy.engine.publish(
                 "applog:search",
                 source=source,
                 offset=offset,
                 limit=per_page
             ).pop()
         else:
-            records, total, query_plan = cherrypy.engine.publish(
+            records, total = cherrypy.engine.publish(
                 "applog:view",
                 source=source,
                 offset=offset,
@@ -49,7 +49,6 @@ class Controller:
             records=records,
             total=total,
             source=source,
-            query_plan=query_plan,
             pagination_url=pagination_url,
             offset=offset,
             total_records=total,
