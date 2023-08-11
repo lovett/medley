@@ -1,15 +1,7 @@
 """General-purpose key-value store"""
 
-from enum import Enum
 import json
 import cherrypy
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    NEW = "new"
-    EDIT = "edit"
 
 
 class Controller:
@@ -19,33 +11,40 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: str = "0") -> None:
+    def DELETE(uid: str) -> None:
         """Remove an existing entry by its id."""
 
-        cherrypy.engine.publish("registry:remove:id", int(uid))
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
+        cherrypy.engine.publish("registry:remove:id", record_id)
 
         cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("html", "json"))
     def GET(
             self,
-            uid: str = "0",
+            uid: str = "",
             subresource: str = "",
             **kwargs: str
     ) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
+        try:
+            record_id = int(uid or 0)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
+
+        if record_id > 0 and subresource == "edit":
+            return self.form(record_id, **kwargs)
+
+        if record_id == 0 and subresource == "new":
+            return self.form(record_id, **kwargs)
+
         q = kwargs.get("q", "").strip()
-        key = kwargs.get("key", "").strip()
-        value = kwargs.get("value", "").strip()
-        back = kwargs.get("back", "").strip()
-
-        if int(uid) > 0 and subresource == Subresource.EDIT:
-            return self.form(int(uid), key, value, back)
-
-        if int(uid) == 0 and subresource == Subresource.NEW:
-            return self.form(int(uid), key, value, back)
-
         if q:
             return self.search(q)
 
@@ -58,8 +57,13 @@ class Controller:
         return self.index()
 
     @staticmethod
-    def POST(uid: str = "0", **kwargs: str) -> None:
+    def POST(uid: str, **kwargs: str) -> None:
         """Store a new entry in the database or update an existing entry"""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         key = kwargs.get("key", "").strip()
         value = kwargs.get("value", "").strip()
@@ -72,10 +76,10 @@ class Controller:
                 key,
                 value
             )
-        elif int(uid) > 0:
+        elif record_id > 0:
             cherrypy.engine.publish(
                 "registry:update",
-                int(uid),
+                record_id,
                 key,
                 value
             )
@@ -98,8 +102,12 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def form(uid: int, key: str, value: str, back: str) -> bytes:
+    def form(record_id: int, **kwargs) -> bytes:
         """Display a form for adding or updating a record."""
+
+        key = kwargs.get("key", "").strip()
+        value = kwargs.get("value", "").strip()
+        back = kwargs.get("back", "").strip()
 
         submit_url = "/registry"
         cancel_url = "/registry"
@@ -111,10 +119,10 @@ class Controller:
         if cherrypy.request.wants == "json":
             raise cherrypy.HTTPError(404)
 
-        if uid:
+        if record_id:
             record = cherrypy.engine.publish(
                 "registry:find",
-                uid
+                record_id
             ).pop()
 
             if not record:
@@ -122,7 +130,7 @@ class Controller:
 
             key = record["key"]
             value = record["value"]
-            submit_url = f"/registry/{uid}"
+            submit_url = f"/registry/{record_id}"
             cancel_url = f"/registry?q={key}"
             subview_title = "Update"
 
@@ -132,7 +140,7 @@ class Controller:
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/registry/registry-form.jinja.html",
-            rowid=uid,
+            rowid=record_id,
             key=key,
             value=value,
             submit_url=submit_url,
