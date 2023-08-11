@@ -1,17 +1,9 @@
 """Track food consumption."""
 
-import datetime
+from datetime import datetime
 import json
-from enum import Enum
 from typing import Optional
 import cherrypy
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    NEW = "new"
-    EDIT = "edit"
 
 
 class Controller:
@@ -21,12 +13,17 @@ class Controller:
     show_on_homepage = True
 
     @staticmethod
-    def DELETE(uid: str = "0") -> None:
+    def DELETE(uid: str) -> None:
         """Remove an entry from the database."""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         result = cherrypy.engine.publish(
             "foodlog:remove",
-            int(uid)
+            record_id
         ).pop()
 
         if result:
@@ -37,23 +34,25 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html",))
     def GET(self,
-            uid: str = "0",
+            uid: str = "",
             subresource: str = "",
             **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        q = kwargs.get("q", "").lower()
-        offset = int(kwargs.get("offset", 0))
-        per_page = int(kwargs.get("per_page", 20))
+        try:
+            record_id = int(uid or 0)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
-        if int(uid) > 0 and subresource == Subresource.EDIT:
-            return self.form(int(uid))
+        if record_id > 0 and subresource == "edit":
+            return self.form(record_id)
 
-        if int(uid) == 0 and subresource == Subresource.NEW:
+        if record_id == 0 and subresource == "new":
             return self.form(0)
 
+        q = kwargs.get("q", "").lower()
         if q:
-            return self.search(q, offset, per_page)
+            return self.search(**kwargs)
 
         if cherrypy.request.path_info != "/":
             redirect_url = cherrypy.engine.publish(
@@ -61,43 +60,43 @@ class Controller:
             ).pop()
             raise cherrypy.HTTPRedirect(redirect_url)
 
-        return self.index(offset, per_page)
+        return self.index(**kwargs)
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html", "json"))
-    def POST(uid: int = 0, **kwargs: str) -> Optional[bytes]:
+    def POST(uid: str, **kwargs: str) -> Optional[bytes]:
         """Add a new entry or update an existing one."""
+
+        try:
+            record_id = int(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
 
         consume_date = kwargs.get("consume_date")
         consume_time = kwargs.get("consume_time")
         foods_eaten = kwargs.get("foods_eaten", "")
         overate = int(kwargs.get("overate", 0))
 
-        consumed_on = datetime.datetime.combine(
-            consume_date,
-            consume_time
+        consumed_on = datetime.strptime(
+            f"{consume_date} {consume_time}",
+            "%Y-%m-%d %H:%M"
         )
-
-        consumed_on_utc = cherrypy.engine.publish(
-            "clock:utc",
-            consumed_on
-        ).pop()
 
         upsert_uid = cherrypy.engine.publish(
             "foodlog:upsert",
-            uid,
-            consumed_on=consumed_on_utc,
+            record_id,
+            consumed_on=consumed_on,
             foods_eaten=foods_eaten,
             overate=overate
         ).pop()
 
-        if cherrypy.request.wants == "json" and uid > 0:
+        if cherrypy.request.wants == "json" and record_id > 0:
             return json.dumps({
                 "uid": upsert_uid,
                 "action": "updated"
             }).encode()
 
-        if cherrypy.request.wants == "json" and uid == 0:
+        if cherrypy.request.wants == "json" and record_id == 0:
             return json.dumps({
                 "uid": upsert_uid,
                 "action": "saved"
@@ -111,8 +110,11 @@ class Controller:
         raise cherrypy.HTTPRedirect(redirect_url)
 
     @staticmethod
-    def index(offset: int, per_page: int) -> bytes:
+    def index(**kwargs: str) -> bytes:
         """The application's default view."""
+
+        offset = int(kwargs.get("offset", 0))
+        limit = int(kwargs.get("per_page", 20))
 
         (entries, entry_count) = cherrypy.engine.publish(
             "foodlog:search",
@@ -135,12 +137,12 @@ class Controller:
             entry_count=entry_count,
             pagination_url=pagination_url,
             offset=offset,
-            per_page=per_page,
+            per_page=limit,
             add_url=add_url
         ).pop()
 
     @staticmethod
-    def form(uid: int) -> bytes:
+    def form(record_id: int) -> bytes:
         """Display a form for adding or updating an entry."""
 
         entry_date = cherrypy.engine.publish(
@@ -151,15 +153,15 @@ class Controller:
         delete_url = ""
         foods_eaten = ""
         overate = False
-        if uid:
+        if record_id > 0:
             entry = cherrypy.engine.publish(
                 "foodlog:find",
-                uid
+                record_id
             ).pop()
 
             delete_url = cherrypy.engine.publish(
                 "app_url",
-                str(uid)
+                str(record_id)
             ).pop()
 
             if not entry:
@@ -185,7 +187,7 @@ class Controller:
             "apps/foodlog/foodlog-form.jinja.html",
             add_url=add_url,
             delete_url=delete_url,
-            uid=uid,
+            uid=record_id,
             entry_date=entry_date,
             foods_eaten=foods_eaten,
             overate=overate,
@@ -193,16 +195,18 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def search(q: str, offset: int, per_page: int) -> bytes:
+    def search(**kwargs: str) -> bytes:
         """Display entries matching a search."""
 
-        activity = None
+        q = kwargs.get("q", "").lower()
+        offset = int(kwargs.get("offset", 0))
+        limit = int(kwargs.get("per_page", 20))
 
         (entries, entry_count) = cherrypy.engine.publish(
             "foodlog:search",
             query=q,
             offset=offset,
-            limit=per_page
+            limit=limit
         ).pop()
 
         activity = cherrypy.engine.publish(
@@ -228,7 +232,7 @@ class Controller:
             entry_count=entry_count,
             query=q,
             offset=offset,
-            per_page=per_page,
+            per_page=limit,
             pagination_url=pagination_url,
             add_url=add_url,
             activity=activity,
