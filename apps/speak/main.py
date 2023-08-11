@@ -1,41 +1,7 @@
 """Text to speech"""
 
-from enum import Enum
 import re
-from typing import Dict
-from typing import Union
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class Action(str, Enum):
-    """Values for the action parameter in POST requests."""
-    NONE = ""
-    TOGGLE = "toggle"
-    MUTE = "mute"
-    UNMUTE = "unmute"
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the first URL path segment of this application."""
-    NONE = ""
-    NOTIFICATION = "notification"
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    subresource: Subresource = Subresource.NONE
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    subresource: Subresource = Subresource.NONE
-    statement: str = Field("", strip_whitespace=True, min_length=1)
-    action: Action = Action.NONE
-    confirm: bool = False
-    noadjust: bool = False
 
 
 class Controller:
@@ -118,34 +84,38 @@ class Controller:
     def POST(self, subresource: str = "", **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
-        try:
-            params = PostParams(subresource=subresource, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        if subresource == "":
+            self.handle_post_vars(**kwargs)
 
-        if params.subresource == Subresource.NONE:
-            self.handle_post_vars(params)
-
-        if params.subresource == Subresource.NOTIFICATION:
-            self.handle_notification(cherrypy.request.json)
+        if subresource == "notification":
+            self.handle_notification()
 
     @staticmethod
-    def handle_post_vars(params: PostParams) -> None:
+    def handle_post_vars(**kwargs) -> None:
         """Transform POST parameters to speech-ready statement."""
+
+        statement = kwargs.get("statement", "").strip()
+
+        if not statement:
+            raise cherrypy.HTTPError(400, "Missing statement")
+
+        action = kwargs.get("action", "")
+        confirm = bool(kwargs.get("bool", False))
+        noadjust = bool(kwargs.get("noadjust", False))
 
         app_url = cherrypy.engine.publish(
             "app_url"
         ).pop()
 
-        if params.action == Action.TOGGLE:
+        if action == "toggle":
             muted_temporarily = cherrypy.engine.publish("speak:muted").pop()
-            params.action = Action.UNMUTE if muted_temporarily else Action.MUTE
+            action = "unmute" if muted_temporarily else "mute"
 
-        if params.action == Action.MUTE:
+        if action == "mute":
             cherrypy.engine.publish("speak:mute")
             raise cherrypy.HTTPRedirect(app_url)
 
-        if params.action == Action.UNMUTE:
+        if action == "unmute":
             cherrypy.engine.publish("speak:unmute")
             raise cherrypy.HTTPRedirect(app_url)
 
@@ -153,7 +123,7 @@ class Controller:
             cherrypy.response.status = 202
             return
 
-        if params.confirm:
+        if confirm:
             cherrypy.engine.publish(
                 "audio:play:asset",
                 "attention"
@@ -163,17 +133,16 @@ class Controller:
             "scheduler:add",
             1,
             "speak",
-            params.statement,
-            noadjust=params.noadjust
+            statement,
+            noadjust=noadjust
         )
 
         cherrypy.response.status = 204
 
-    def handle_notification(
-            self,
-            notification: Dict[str, Union[str, int, float]]
-    ) -> None:
+    def handle_notification(self) -> None:
         """Transform a notification to a speech-ready statement."""
+
+        notification = cherrypy.request.json
 
         muted = cherrypy.engine.publish("speak:muted").pop()
 
