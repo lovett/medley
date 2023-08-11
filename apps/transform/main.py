@@ -5,9 +5,6 @@ import json
 import urllib.parse
 import re
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
 
 
 class Transforms(str, Enum):
@@ -21,12 +18,6 @@ class Transforms(str, Enum):
     URLDECODE = "urldecode"
     URLENCODE = "urlencode"
     LINK = "link"
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    transform: Transforms
-    value: str = Field("", strip_whitespace=True)
 
 
 class Controller:
@@ -52,39 +43,44 @@ class Controller:
     def POST(**kwargs: str) -> bytes:
         """Perform a transformation and display the result"""
 
-        try:
-            params = PostParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        transform = kwargs.get("transform", "")
+
+        if not transform:
+            raise cherrypy.HTTPError(400, "Missing transform")
+
+        value = kwargs.get("value", "").strip()
 
         result = ""
 
-        if params.transform == Transforms.CAPITALIZE:
-            result = params.value.capitalize()
+        if transform == Transforms.CAPITALIZE:
+            result = value.capitalize()
 
-        if params.transform == Transforms.FLATTEN:
-            result = re.sub("[\r\n]+", "", params.value)
+        if transform == Transforms.FLATTEN:
+            result = re.sub("[\r\n]+", "", value)
 
-        if params.transform == Transforms.LOWER:
-            result = params.value.lower()
+        if transform == Transforms.LOWER:
+            result = value.lower()
 
-        if params.transform == Transforms.TITLE:
-            result = params.value.title()
+        if transform == Transforms.TITLE:
+            result = value.title()
 
-        if params.transform == Transforms.UPPER:
-            result = params.value.upper()
+        if transform == Transforms.UPPER:
+            result = value.upper()
 
-        if params.transform == Transforms.URLDECODE:
-            result = urllib.parse.unquote_plus(params.value)
+        if transform == Transforms.URLDECODE:
+            result = urllib.parse.unquote_plus(value)
 
-        if params.transform == Transforms.URLENCODE:
-            result = urllib.parse.quote_plus(params.value)
+        if transform == Transforms.URLENCODE:
+            result = urllib.parse.quote_plus(value)
 
-        if params.transform == Transforms.LINK:
+        if transform == Transforms.LINK:
             result = cherrypy.engine.publish(
                 "jinja:autolink",
-                params.value
+                value
             ).pop()
+
+        if not result:
+            raise cherrypy.HTTPError(400, "Invalid transform")
 
         if cherrypy.request.wants == "json":
             return json.dumps({"result": result}).encode()
@@ -96,7 +92,7 @@ class Controller:
             "jinja:render",
             "apps/transform/transform.jinja.html",
             result=result,
-            current_transform=params.transform,
+            current_transform=transform,
             transforms=Transforms,
-            value=params.value
+            value=value
         ).pop()
