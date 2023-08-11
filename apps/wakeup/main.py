@@ -3,19 +3,6 @@
 import socket
 import struct
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    sent: bool = False
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    host: str = Field(strip_whitespace=True)
 
 
 class Controller:
@@ -29,10 +16,7 @@ class Controller:
     def GET(*_args: str, **kwargs: str) -> bytes:
         """Display the list of hosts eligible for wakeup."""
 
-        try:
-            params = GetParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        sent = bool(kwargs.get("sent", False))
 
         hosts = cherrypy.engine.publish(
             "registry:search:dict",
@@ -51,22 +35,22 @@ class Controller:
             "apps/wakeup/wakeup.jinja.html",
             hosts=hosts,
             registry_url=registry_url,
-            sent=params.sent
+            sent=sent
         ).pop()
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html", "text"))
-    def POST(*_args: str, **kwargs: str) -> bytes:
+    def POST(**kwargs: str) -> bytes:
         """Send a WoL packet to the mac address of the specified host."""
 
-        try:
-            params = PostParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        host = kwargs.get("host", "").strip()
+
+        if not host:
+            raise cherrypy.HTTPError(400, "Missing host")
 
         mac_address = cherrypy.engine.publish(
             "registry:first:value",
-            key=f"wakeup:{params.host}"
+            key=f"wakeup:{host}"
         ).pop()
 
         if not mac_address:
