@@ -16,6 +16,11 @@ class Controller:
     def DELETE(uid: str) -> None:
         """Remove a previously-scheduled reminder."""
 
+        try:
+            record_id = float(uid)
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Invalid uid")
+
         scheduled_events = cherrypy.engine.publish(
             "scheduler:upcoming",
             "notifier:send"
@@ -23,7 +28,7 @@ class Controller:
 
         wanted_events = [
             event for event in scheduled_events
-            if event.time == float(uid)
+            if event.time == record_id
         ]
 
         if not wanted_events:
