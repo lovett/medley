@@ -1,29 +1,8 @@
 """Browser homepage"""
 
-from enum import Enum
 from textwrap import dedent
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
 from parsers.startpage import Parser
-
-
-class Subresource(str, Enum):
-    """Valid keywords for the second URL path segment of this application."""
-    NONE = ""
-    EDIT = "edit"
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    uid: str = "default"
-    subresource: Subresource = Subresource.NONE
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    uid: str
-    page_content: str
 
 
 class Controller:
@@ -39,47 +18,31 @@ class Controller:
     @cherrypy.tools.etag()
     def GET(
             self,
-            uid: str = "default",
+            page: str = "default",
             subresource: str = "",
             **_kwargs: str
     ) -> bytes:
         """Render a page or present the edit form."""
 
-        try:
-            params = GetParams(
-                uid=uid,
-                subresource=subresource
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        if subresource == "edit":
+            return self.edit_page(page)
 
-        if params.subresource == Subresource.EDIT:
-            return self.edit_page(params)
-
-        return self.render_page(params)
+        return self.render_page(page)
 
     @staticmethod
-    def POST(uid: str, page_content: str) -> None:
+    def POST(page: str, page_content: str) -> None:
         """Create or update the INI version of a page."""
-
-        try:
-            params = PostParams(
-                uid=uid,
-                page_content=page_content,
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
 
         cherrypy.engine.publish(
             "registry:replace",
-            f"startpage:{params.uid}",
-            params.page_content
+            f"startpage:{page}",
+            page_content
         )
 
-        if params.uid != "default":
+        if page != "default":
             redirect_url = cherrypy.engine.publish(
                 "app_url",
-                params.uid
+                page
             ).pop()
         else:
             redirect_url = cherrypy.engine.publish(
@@ -88,7 +51,7 @@ class Controller:
 
         raise cherrypy.HTTPRedirect(redirect_url)
 
-    def edit_page(self, params: GetParams) -> bytes:
+    def edit_page(self, page: str) -> bytes:
         """Present a form for editing the contents of a page."""
 
         post_url = cherrypy.engine.publish(
@@ -97,12 +60,12 @@ class Controller:
 
         cancel_url = cherrypy.engine.publish(
             "app_url",
-            params.uid,
+            page,
         ).pop()
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
-            f"startpage:{params.uid}",
+            f"startpage:{page}",
             limit=1,
             exact=True,
         ).pop()
@@ -120,7 +83,7 @@ class Controller:
             "apps/startpage/startpage-form.jinja.html",
             button_label=button_label,
             cancel_url=cancel_url,
-            uid=params.uid,
+            page=page,
             page_content=page_content,
             post_url=post_url,
             subview_title="Edit"
@@ -148,11 +111,11 @@ class Controller:
         mount_point = __package__.split(".").pop()
 
         if key.startswith("startpage:"):
-            uid = key.split(":")[1]
+            page = key.split(":")[1]
 
-            view_path = uid
-            edit_path = f"{uid}/edit"
-            if uid == "default":
+            view_path = page
+            edit_path = f"{page}/edit"
+            if page == "default":
                 view_path = ""
 
             cherrypy.engine.publish(
@@ -166,24 +129,24 @@ class Controller:
             )
 
     @staticmethod
-    def render_page(params: GetParams) -> bytes:
+    def render_page(page: str) -> bytes:
         """Render INI page content to HTML."""
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
-            f"startpage:{params.uid}",
+            f"startpage:{page}",
             limit=1,
             exact=True
         ).pop()
 
         try:
-            page = next(rows)
+            row = next(rows)
         except StopIteration:
             # Redirect to the edit form when a non-existent page
             # is requested.
             redirect_url = cherrypy.engine.publish(
                 "app_url",
-                f"{params.uid}/edit"
+                f"{page}/edit"
             ).pop()
 
             raise cherrypy.HTTPRedirect(redirect_url) from StopIteration
@@ -197,17 +160,17 @@ class Controller:
 
         parser = Parser(anonymizer_url, local_domains)
 
-        page_content = parser.parse(page["value"])
+        page_content = parser.parse(row["value"])
 
         edit_url = cherrypy.engine.publish(
             "app_url",
-            f"{params.uid}/edit"
+            f"{page}/edit"
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/startpage/startpage.jinja.html",
-            created=page["created"],
+            created=row["created"],
             anonymizer_url=anonymizer_url,
             edit_url=edit_url,
             page=page_content
