@@ -13,7 +13,7 @@ class Controller:
     @cherrypy.tools.provides(formats=("html",))
     def GET(
             self,
-            uid: str = "0",
+            uid: str = "",
             subresource: str = "",
             **kwargs: str
     ) -> bytes:
