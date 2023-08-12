@@ -1,21 +1,9 @@
 """Trigger indexing of log files."""
 
-from datetime import date, datetime
-import pathlib
-from typing import Optional
-import cherrypy
-from pydantic import BaseModel
-from pydantic import Field
-from pydantic import ValidationError
+from datetime import datetime
 import pytz
-
-
-class PostParams(BaseModel):
-    """Parameters for POST requests."""
-    start: date
-    end: Optional[date]
-    origin: str = Field("", strip_whitespace=True)
-    path: str = Field("", strip_whitespace=True)
+import pathlib
+import cherrypy
 
 
 class Controller:
@@ -24,55 +12,46 @@ class Controller:
     exposed = True
     show_on_homepage = False
 
-    def POST(self, *args: str, **kwargs: str) -> None:
+    def POST(self, **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
-        try:
-            params = PostParams(
-                origin="/".join(args[1:]),
-                **kwargs
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        start = kwargs.get("start", "")
+        end = kwargs.get("end", start)
+        origin = kwargs.get("origin", "").strip()
+        path = kwargs.get("path", "").strip()
 
-        if params.start:
-            self.index_by_date(params)
+        if start:
+            self.index_by_date(start, end)
             cherrypy.response.status = 204
             return
 
-        if params.origin == "gcp/appengine":
-            self.index_by_gcp_file(params)
+        if origin == "gcp/appengine":
+            self.index_by_gcp_file(path)
             cherrypy.response.status = 204
             return
 
         cherrypy.response.status = 404
 
     @staticmethod
-    def index_by_date(params: PostParams) -> None:
+    def index_by_date(start: str, end: str) -> None:
         """Index logs in combined format based on a date range."""
 
-        start_date = datetime(
-            params.start.year,
-            params.start.month,
-            params.start.day,
-            0,
-            0,
-            tzinfo=pytz.timezone("UTC")
-        )
+        fmt = "%Y-%m-%d"
 
-        end_date = start_date
-        if params.end:
-            end_date = datetime(
-                params.end.year,
-                params.end.month,
-                params.end.day,
-                0,
-                0,
-                tzinfo=pytz.timezone("UTC")
-            )
+        try:
+            start_date = datetime.strptime(f"{start}", fmt)
+            start_date = start_date.replace(tzinfo=pytz.timezone("UTC"))
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Bad format for start")
+
+        try:
+            end_date = datetime.strptime(f"{end}", fmt)
+            end_date = end_date.replace(tzinfo=pytz.timezone("UTC"))
+        except ValueError:
+            raise cherrypy.HTTPError(400, "Bad format for end")
 
         if start_date > end_date:
-            raise cherrypy.HTTPError(400, "Invalid range")
+            raise cherrypy.HTTPError(400, "Invalid start/end range")
 
         cherrypy.engine.publish(
             "logindex:enqueue",
@@ -81,7 +60,7 @@ class Controller:
         )
 
     @staticmethod
-    def index_by_gcp_file(params: PostParams) -> None:
+    def index_by_gcp_file(path: str) -> None:
         """Index a GCP log file by its path."""
 
         storage_root = cherrypy.engine.publish(
@@ -92,7 +71,7 @@ class Controller:
 
         try:
             # Is the file within the storage root?
-            bucket_path = storage_root.joinpath(params.path)
+            bucket_path = storage_root.joinpath(path)
             bucket_path.relative_to(storage_root)
         except ValueError as err:
             raise cherrypy.HTTPError(400, "Invalid path") from err
@@ -102,5 +81,5 @@ class Controller:
 
         cherrypy.engine.publish(
             "gcp:appengine:ingest_file",
-            pathlib.Path(params.path)
+            pathlib.Path(path)
         )

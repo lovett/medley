@@ -69,9 +69,6 @@ class TestLater(BaseCherryPyTestCase, ResponseAssertions):
             end="2017-01-03"
         )
 
-        for call in publish_mock.call_args_list:
-            print(call)
-
         self.assertEqual(
             helpers.find_publish_call(publish_mock, "logindex:enqueue"),
             mock.call(
