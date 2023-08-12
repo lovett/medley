@@ -1,10 +1,12 @@
 """Banking transactions"""
 
 from enum import Enum
+from datetime import datetime
 from typing import Dict
 import cherrypy
 from resources.url import Url
 
+Json = Dict[str, str|int|float]
 
 class Resource(str, Enum):
     """Keywords for the first URL path segment."""
@@ -28,7 +30,7 @@ class Controller:
             resource: Resource = Resource.NONE,
             uid: str = "",
             **kwargs: str
-    ) -> bytes:
+    ) -> bytes | str:
         """Serve the application UI or dispatch to JSON subhandlers."""
 
         try:
@@ -36,24 +38,11 @@ class Controller:
         except ValueError:
             raise cherrypy.HTTPError(400, "Invalid uid")
 
-        q = kwargs.get("q", "").strip().lower()
-        tag = kwargs.get("tag", "").strip()
-        offset = int(kwargs.get("offset", 0))
-        limit = int(kwargs.get("limit", 50))
-        account = int(kwargs.get("account", 0))
-
         if cherrypy.request.wants == "json":
             if resource == Resource.ACCOUNTS:
                 return self.json_accounts(record_id)
             if resource == Resource.TRANSACTIONS:
-                return self.json_transactions(
-                    record_id,
-                    q,
-                    tag,
-                    account,
-                    offset,
-                    limit,
-                )
+                return self.json_transactions(record_id, **kwargs)
 
             if resource == Resource.TAGS:
                 return self.json_tags()
@@ -66,47 +55,47 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def json_accounts(record_id: int) -> bytes:
+    def json_accounts(record_id: int) -> str:
         """Render JSON for account resources."""
         if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:accounts:new",
-            ).pop().encode()
+            ).pop()
 
         if record_id > 0:
             return cherrypy.engine.publish(
                 "ledger:json:accounts:single",
                 account_id=record_id
-            ).pop().encode()
+            ).pop()
 
         return cherrypy.engine.publish(
             "ledger:json:accounts",
-        ).pop().encode()
+        ).pop()
 
     @staticmethod
-    def json_transactions(
-            record_id: int,
-            q: str,
-            tag: str,
-            account: int,
-            offset: int,
-            limit: int
-    ) -> bytes:
+    def json_transactions(record_id: int, **kwargs: str) -> str:
         """Render JSON for transaction resources."""
+
+        q = kwargs.get("q", "").strip().lower()
+        tag = kwargs.get("tag", "").strip()
+        limit = int(kwargs.get("limit", 50))
+        offset = int(kwargs.get("offset", 0))
+        account = int(kwargs.get("account", 0))
+
         if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:transactions:new"
-            ).pop().encode()
+            ).pop()
 
         if record_id > 0:
             return cherrypy.engine.publish(
                 "ledger:json:transactions:single",
                 transaction_id=record_id
-            ).pop().encode()
+            ).pop()
 
         result = cherrypy.engine.publish(
             "ledger:json:transactions",
-            query=q,
+            q=q,
             tag=tag,
             limit=limit,
             offset=offset,
@@ -116,15 +105,15 @@ class Controller:
         if not result:
             result = ""
 
-        return result.encode()
+        return result
 
     @staticmethod
-    def json_tags() -> bytes:
+    def json_tags() -> str:
         """Render JSON for tag resources."""
 
         return cherrypy.engine.publish(
             "ledger:json:tags"
-        ).pop().encode()
+        ).pop()
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("json",))
@@ -133,24 +122,18 @@ class Controller:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            account = cherrypy.request.json
-            account["uid"] = 0
-            self.store_account(account)
-            self.clear_etag(resource)
+            self.store_account(0, cherrypy.request.json)
             return None
 
         if resource == Resource.TRANSACTIONS:
-            transaction = cherrypy.request.json
-            transaction["uid"] = 0
-            self.store_transaction(transaction)
-            self.clear_etag(resource)
+            self.store_transaction(0, cherrypy.request.json)
             return None
 
         if resource == Resource.ACK:
-            acknowledgment = cherrypy.request.json
-            self.process_acknowledgment(acknowledgment)
+            self.process_acknowledgment(cherrypy.request.json)
             return None
 
+        self.clear_etag(resource)
         raise cherrypy.HTTPError(404)
 
     @cherrypy.tools.capture()
@@ -165,16 +148,12 @@ class Controller:
             raise cherrypy.HTTPError(400, "Invalid uid")
 
         if resource == Resource.ACCOUNTS:
-            account = cherrypy.request.json
-            account["uid"] = record_id
-            self.store_account(account)
+            self.store_account(record_id, cherrypy.request.json)
             self.clear_etag(resource)
             return
 
         if resource == Resource.TRANSACTIONS:
-            transaction = cherrypy.request.json
-            transaction.uid = record_id
-            self.store_transaction(transaction)
+            self.store_transaction(record_id, cherrypy.request.json)
             self.clear_etag(resource)
             return
 
@@ -208,50 +187,89 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def store_account(fields: Dict[str, int | str]) -> None:
+    def store_account(account_id: int, json: Json) -> None:
         """Upsert an account record."""
+
+        name = str(json.get("name", ""))
+        opened_on = str(json.get("opened_on", ""))
+        closed_on = str(json.get("closed_on", ""))
+        url = str(json.get("url", ""))
+        note = str(json.get("note", ""))
+        date_format = "%Y-%m-%d"
+
+        opened = None
+        if opened:
+            try:
+                opened = datetime.strptime(opened_on, date_format)
+            except ValueError:
+                raise cherrypy.HTTPError(400, "Invalid open date")
+
+        closed = None
+        if closed_on:
+            try:
+                closed = datetime.strptime(closed_on, date_format)
+            except ValueError:
+                raise cherrypy.HTTPError(400, "Invalid close date")
 
         upsert_id = cherrypy.engine.publish(
             "ledger:store:account",
-            account_id=fields.get("uid"),
-            name=fields.get("name"),
-            opened_on=fields.get("opened_on"),
-            closed_on=fields.get("closed_on"),
-            url=fields.get("url"),
-            note=fields.get("note"),
+            account_id=account_id,
+            name=name,
+            opened=opened,
+            closed=closed,
+            url=url,
+            note=note,
         ).pop()
 
-        if fields.get("uid") == 0:
+        if account_id == 0:
             cherrypy.response.status = 201
             redirect_url = cherrypy.engine.publish(
                 "app_url",
                 f"accounts/{upsert_id}"
             ).pop()
-            cherrypy.response.headers["Content-Location"] = redirect_url
+            raise cherrypy.HTTPRedirect(redirect_url)
         else:
             cherrypy.response.status = 204
 
     @staticmethod
-    def store_transaction(fields: Dict[str, str | int]) -> None:
+    def store_transaction(transaction_id: int, json: Json) -> None:
         """Upsert a transaction record."""
+
+        account_id = int(json.get("account_id", 0))
+        destination_id = int(json.get("destination_id", 0))
+        occurred_on = str(json.get("occurred_on", ""))
+        cleared_on =  str(json.get("cleared_on", ""))
+        amount =  int(json.get("amount", 0))
+        payee = json.get("payee", "")
+        note = json.get("note", "")
+        tags = json.get("tags", "")
+        date_format = "%Y-%m-%d"
+
+        occurred = None
+        if occurred_on:
+            occurred = datetime.strptime(occurred_on, date_format)
+
+        cleared = None
+        if cleared_on:
+            cleared =  datetime.strptime(cleared_on, date_format)
 
         cherrypy.engine.publish(
             "ledger:store:transaction",
-            fields.get("uid"),
-            account_id=fields.get("account_id"),
-            destination_id=fields.get("destination_id") or 0,
-            occurred_on=fields.get("occurred_on"),
-            cleared_on=fields.get("cleared_on"),
-            amount=fields.get("amount", 0),
-            payee=fields.get("payee"),
-            note=fields.get("note"),
-            tags=fields.get("tags"),
+            transaction_id,
+            account_id=account_id,
+            destination_id=destination_id,
+            occurred=occurred,
+            cleared=cleared,
+            amount=amount,
+            payee=payee,
+            note=note,
+            tags=tags
         ).pop()
 
         cherrypy.response.status = 204
 
     @staticmethod
-    def process_acknowledgment(fields: Dict[str, str | int]) -> None:
+    def process_acknowledgment(json: Json) -> None:
         """Upsert a transaction record based on a transaction.
 
         The following fields are required:
@@ -260,12 +278,17 @@ class Controller:
 
         """
 
+        date = str(json.get("date", ""))
+        account = str(json.get("account", ""))
+        amount = float(json.get("amount", 0.00))
+        payee = str(json.get("payee", ""))
+
         cherrypy.engine.publish(
-            "ledger:ack",
-            date=fields.date,
-            account=fields.account,
-            amount=fields.amount,
-            payee=fields.payee
+            "ledger:acknowledgment",
+            date=date,
+            account=account,
+            amount=amount,
+            payee=payee
         ).pop()
 
         cherrypy.response.status = 204

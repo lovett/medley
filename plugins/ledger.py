@@ -143,7 +143,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.setup)
-        self.bus.subscribe("ledger:ack", self.ack)
+        self.bus.subscribe("ledger:acknowledgment", self.acknowledgment)
         self.bus.subscribe("ledger:transaction", self.find_transaction)
         self.bus.subscribe("ledger:json:transactions", self.transactions_json)
         self.bus.subscribe(
@@ -273,34 +273,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql,))
 
-    def count_transactions(self, query: str = "", tag: str = "") -> int:
+    def count_transactions(self, q: str = "", tag: str = "") -> int:
         """Count of rows from the transactions table."""
-        if query:
-            return self._selectFirst(
+        if q:
+            return int(self._selectFirst(
                 """SELECT count(*)
                 FROM transactions_fts
                 WHERE transactions_fts MATCH ?""",
-                (query,))
+                (q,)))
 
         if tag:
-            return self._selectFirst(
+            return int(self._selectFirst(
                 """SELECT count(*)
                 FROM transactions t, json_each(t.tags)
                 WHERE json_each.value=?""",
-                (tag,))
+                (tag,)))
 
-        return self._selectFirst("SELECT count(*) FROM transactions")
+        return int(self._selectFirst("SELECT count(*) FROM transactions"))
 
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
 
-        tag = kwargs.get("tag")
+        tag = kwargs.get("tag", "")
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
-        query = kwargs.get("query", "")
+        q = kwargs.get("q", "")
         account = int(kwargs.get("account", 0))
 
-        count = self.count_transactions(query, tag)
+        count = self.count_transactions(q, tag)
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
@@ -315,13 +315,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             where_sql += " AND json_each.value=?"
             placeholders += (tag,)
 
-        if query:
+        if q:
             from_sql = """
             FROM transactions_fts
             JOIN transactions t ON transactions_fts.rowid=t.id
             """
             where_sql += " AND transactions_fts MATCH ?"
-            placeholders += (query,)
+            placeholders += (q,)
 
         select_sql = f"""
         SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
@@ -440,10 +440,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             account_id: int,
             name: str,
-            opened_on: Optional[date],
-            closed_on: Optional[date],
-            url: Optional[str],
-            note: Optional[str],
+            opened: Optional[date],
+            closed: Optional[date],
+            url: str,
+            note: str
     ) -> int:
         """Insert or update an account."""
 
@@ -462,7 +462,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             closed_on=excluded.closed_on,
             note=excluded.note
             """,
-            (upsert_id, name, url, opened_on, closed_on, note)
+            (upsert_id, name, url, opened, closed, note)
         )
 
         if account_id == 0:
@@ -494,20 +494,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         account_id = kwargs.get("account_id")
         destination_id = kwargs.get("destination_id", 0)
-        occurred_on = kwargs.get("occurred_on")
-        cleared_on = kwargs.get("cleared_on", 0)
+        occurred = kwargs.get("occurred")
+        cleared = kwargs.get("cleared")
         amount = kwargs.get("amount", 0)
         payee = kwargs.get("payee", "")
         note = kwargs.get("note", "")
         tags = json.dumps(kwargs.get("tags", []))
 
-        queries = []
+        queries: List[Tuple[str, Any]] = []
         if transaction_id == 0:
             queries.append(("""INSERT INTO transactions
             (account_id, destination_id, occurred_on, cleared_on,
             amount, payee, note, tags)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (account_id, destination_id, occurred_on, cleared_on,
+            """, (account_id, destination_id, occurred, cleared,
                   amount, payee, note, tags)))
 
             if destination_id > 0:
@@ -515,21 +515,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 (account_id, destination_id, occurred_on, cleared_on,
                 amount, payee, note, tags, related_transaction_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, last_insert_rowid())
-                """, (destination_id, account_id, occurred_on, cleared_on,
+                """, (destination_id, account_id, occurred, cleared,
                       amount * -1, payee, note, tags)))
 
                 queries.append(("""UPDATE transactions
                 SET related_transaction_id=last_insert_rowid()
                 WHERE id=(SELECT related_transaction_id
-                FROM transactions WHERE id=last_insert_rowid())""",
-                ()))
+                FROM transactions WHERE id=last_insert_rowid())
+                """, ()))
 
         if transaction_id > 0:
             queries.append(("""UPDATE transactions
             SET account_id=?, destination_id=?, occurred_on=?,
             cleared_on=?, amount=?, payee=?, note=?, tags=?
             WHERE id=?""", (
-                account_id, destination_id, occurred_on, cleared_on,
+                account_id, destination_id, occurred, cleared,
                 amount, payee, note, tags, transaction_id)))
 
             if destination_id and destination_id > 0:
@@ -540,7 +540,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 (account_id, destination_id, occurred_on, cleared_on,
                 amount, payee, note, tags, related_transaction_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (destination_id, account_id, occurred_on, cleared_on,
+                (destination_id, account_id, occurred, cleared,
                  amount * -1, payee, note, tags, transaction_id)))
 
         self._multi(queries)
@@ -552,15 +552,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if "." in result:
             return int(float(result) * 100)
 
-        return int(amount)
+        return int(result)
 
-    def ack(self, **kwargs) -> None:
+    def acknowledgment(self, **kwargs: str) -> None:
         """Locate an uncleared transaction and clear it."""
 
-        raw_date = kwargs.get("date", "")
-        raw_account = kwargs.get("account", "")
-        raw_amount = kwargs.get("amount", "")
-        raw_payee =kwargs.get("payee", "")
+        date = kwargs.get("date", "")
+        account = kwargs.get("account", "")
+        amount = kwargs.get("amount", "")
+        payee = kwargs.get("payee", "")
 
         sql = """
         SELECT t.id, t.account_id, t.destination_id, t.cleared_on, t.amount,
@@ -574,20 +574,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         # Match on payee and amount
         search = ""
 
-        if raw_payee:
-            search = f"payee:{raw_payee}"
+        if payee:
+            search = f"payee:{payee}"
 
             if amount:
-                amount = self.extract_amount(raw_amount)
-                search += f" and amount:{amount}"
+                numeric_amount = self.extract_amount(amount)
+                search += f" and amount:{numeric_amount}"
 
         result = self._selectOne(
             sql,
             (search,)
         )
-
-        if result:
-            amount = self.extract_amount(raw_amount)
-            print("match found", result)
-        else:
-            print("no match found")
