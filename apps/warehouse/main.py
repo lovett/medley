@@ -5,41 +5,6 @@ from pathlib import Path
 from typing import Iterator
 from typing import Union
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class DeleteParams(BaseModel):
-    """Parameters for DELETE requests."""
-    path: Path
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    path: Path
-    added: str = Field("", strip_whitespace=True)
-    failure: str = ""
-
-
-class PutParams(BaseModel):
-    """Parameters for PUT requests."""
-    storage_path: Path
-    content_type: str = Field(
-        "",
-        strip_whitespace=True,
-        to_lower=True,
-    )
-    content: cherrypy._cpreqbody.Part
-
-    class Config:
-        """Custom model configuration."""
-        arbitrary_types_allowed = True
-
-
-class PostParams(PutParams):
-    """Parameters for POST requests."""
-    uid: int = Field(0, gt=-1)
 
 
 class Controller:
@@ -48,23 +13,14 @@ class Controller:
     show_on_homepage = True
     exposed = True
 
-    def DELETE(
-            self,
-            *args: str,
-            **kwargs: str
-    ) -> None:
+    def DELETE(self, *args: str) -> None:
         """Discard a previously-uploaded file."""
 
         path = Path(*args)
 
-        try:
-            params = DeleteParams(path=path, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
-
         cherrypy.engine.publish(
             "warehouse:remove",
-            params.path
+            path
         ).pop()
 
         self.clear_etag()
@@ -81,65 +37,47 @@ class Controller:
 
         path = Path(*args)
 
-        try:
-            params = GetParams(path=path, **kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        if path.as_posix() != ".":
+            return self.serve_file(path)
 
-        if params.path.as_posix() != ".":
-            return self.serve_file(params)
-
-        return self.index(params)
+        return self.index(**kwargs)
 
     def POST(
             self,
-            uid: str = "",
             *,
             storage_path: str = "",
             content: cherrypy._cpreqbody.Part
     ) -> None:
         """Accept a file for storage."""
 
-        try:
-            params = PostParams(
-                uid=uid,
-                storage_path=storage_path,
-                content=content,
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
-
-        if not params.content.file:
+        if not content.file:
             redirect_url = cherrypy.engine.publish(
                 "app_url",
                 "",
-                {
-                    "failure": "nofile"
-                }
+                {"failure": "nofile"}
             ).pop()
             raise cherrypy.HTTPRedirect(redirect_url)
 
-        params.content_type = "application/octet-stream"
+        destination = Path(storage_path)
+        content_type = "application/octet-stream"
         guessed_type, _ = mimetypes.guess_type(
-            params.storage_path.as_posix()
+            destination.as_posix()
         )
 
         if guessed_type:
-            params.content_type = guessed_type
+            content_type = guessed_type
 
-        if params.storage_path.as_posix() == ".":
-            params.storage_path = Path(
+        if destination.as_posix() == ".":
+            destination = Path(
                 content.filename.lower().replace(" ", "-")
             )
 
-        self.ingest_file(params)
+        self.ingest_file(content, destination, content_type)
 
         redirect_url = cherrypy.engine.publish(
             "app_url",
             "",
-            {
-                "added": params.storage_path.as_posix()
-            }
+            {"added": destination.as_posix()}
         ).pop()
         raise cherrypy.HTTPRedirect(redirect_url)
 
@@ -151,57 +89,54 @@ class Controller:
     ) -> None:
         """Accept a file for storage."""
 
-        try:
-            params = PutParams(
-                storage_path=Path(*args),
-                content_type=content_type,
-                content=content,
-            )
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        destination = Path(*args)
 
-        if not params.content_type:
+        if not content_type:
             guessed_type, _ = mimetypes.guess_type(
-                params.storage_path.as_posix()
+                destination.as_posix()
             )
 
             if guessed_type:
-                params.content_type = guessed_type
+                content_type = guessed_type
 
-        self.ingest_file(params)
+        self.ingest_file(content, destination, content_type)
 
-        cherrypy.response.status = 204
-
-    def ingest_file(self, params: PutParams) -> None:
+    def ingest_file(
+            self,
+            content: cherrypy._cpreqbody.Part,
+            destination: Path,
+            content_type: str
+    ) -> None:
         """Storage of a newly-uploaded file."""
 
         cherrypy.engine.publish(
             "warehouse:remove",
-            params.storage_path
+            destination
         )
 
         while True:
-            data: bytes = params.content.file.read(8192)
+            data: bytes = content.file.read(8192)
 
             if not data:
                 break
 
             cherrypy.engine.publish(
                 "warehouse:add:chunk",
-                path=params.storage_path,
-                content_type=params.content_type,
+                path=destination,
+                content_type=content_type,
                 chunk=data
             )
 
         self.clear_etag()
+        cherrypy.response.status = 204
 
     @staticmethod
-    def serve_file(params: GetParams) -> Iterator[bytes]:
+    def serve_file(path: Path) -> Iterator[bytes]:
         """Send back a previously-stored file."""
 
         content_type = cherrypy.engine.publish(
             "warehouse:get:type",
-            params.path
+            path
         ).pop()
 
         if not content_type:
@@ -212,12 +147,15 @@ class Controller:
 
         return cherrypy.engine.publish(
             "warehouse:get:chunks",
-            params.path
+            path
         ).pop()
 
     @staticmethod
-    def index(params: GetParams) -> bytes:
+    def index(**kwargs: str) -> bytes:
         """List all available files."""
+
+        added = kwargs.get("added", "").strip()
+        failure = kwargs.get("failure", "")
 
         files = cherrypy.engine.publish(
             "warehouse:list"
@@ -229,15 +167,14 @@ class Controller:
 
         upload_url = cherrypy.engine.publish(
             "app_url",
-            "0"
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/warehouse/warehouse-list.jinja.html",
             files=files,
-            added_file=params.added,
-            failure=params.failure,
+            added_file=added,
+            failure=failure,
             upload_url=upload_url,
             app_url=app_url
         ).pop()
