@@ -249,7 +249,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if entry_id == 0:
             upsert_id = self._insert(
                 """INSERT INTO foodlog (consumed_on, foods_eaten, overate)
-                VALUES (?, ?, ?)""",
+                VALUES (datetime(?, 'utc'), ?, ?)""",
                 (consumed_on, foods_eaten, overate)
             )
 
