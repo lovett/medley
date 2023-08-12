@@ -7,14 +7,6 @@ from typing import Dict
 from typing import List
 from typing import Union
 import cherrypy
-from pydantic import BaseModel
-from pydantic import ValidationError
-from pydantic import Field
-
-
-class GetParams(BaseModel):
-    """Parameters for GET requests."""
-    query: str = Field("", strip_whitespace=True, min_length=1)
 
 
 class Controller:
@@ -27,10 +19,7 @@ class Controller:
     def GET(self, **kwargs: str) -> bytes:
         """Display a search interface, and the results of the default query"""
 
-        try:
-            params = GetParams(**kwargs)
-        except ValidationError as error:
-            raise cherrypy.HTTPError(400) from error
+        query = kwargs.get("query", "")
 
         site_domains = cherrypy.engine.publish(
             "registry:search:valuelist",
@@ -48,12 +37,12 @@ class Controller:
             "/registry"
         ).pop()
 
-        if "default" in saved_queries.keys() and not params.query:
-            params.query = saved_queries["default"]
+        if "default" in saved_queries.keys() and not query:
+            query = saved_queries["default"]
 
         log_records, query_plan = cherrypy.engine.publish(
             "logindex:query",
-            params.query
+            query
         ).pop() or []
 
         reversed_ips = None
@@ -85,10 +74,10 @@ class Controller:
             "jinja:render",
             "apps/visitors/visitors.jinja.html",
             flagless_countries=("AP", None, ""),
-            query=params.query,
+            query=query,
             query_plan=query_plan,
             reversed_ips=reversed_ips,
-            active_date=self.get_active_date(log_records, params.query),
+            active_date=self.get_active_date(log_records, query),
             results=log_records,
             country_names=country_names,
             registry_url=registry_url,
