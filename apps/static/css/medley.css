@@ -386,7 +386,8 @@ TEXTAREA {
 #page-header {
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-between;
+    gap: 2em;
+    justify-content: flex-end;
     background: linear-gradient(45deg, var(--accent) 0%, var(--black) 100%);
     color: var(--white);
     padding: 0 0.75em;
@@ -401,6 +402,7 @@ TEXTAREA {
 }
 
 #page-header H1 {
+    flex-grow: 1;
     font-size: 1em;
     margin: 0;
     font-weight: normal;
@@ -431,7 +433,6 @@ TEXTAREA {
 
 #main-toolbar A {
     color: inherit;
-    display: inline-flex;
     align-items: center;
     margin-right: 2em;
 }
@@ -453,6 +454,7 @@ TEXTAREA {
 #main-toolbar svg {
     fill: currentColor;
     margin-right: .5em;
+    vertical-align: middle;
 }
 
 .action-button {
@@ -809,7 +811,6 @@ TEXTAREA {
     #page-header {
         display: flex;
         flex-flow: row wrap;
-        justify-content: space-between;
         align-items: center;
     }
 }

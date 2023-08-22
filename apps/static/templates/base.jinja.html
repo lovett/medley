@@ -44,6 +44,12 @@
             {% block main_toolbar %}
             {% endblock %}
 
+            {% block cache_status %}
+                {% if cached_on %}
+                    <div>As of {{ cached_on|dateformat("%-I:%M %p") }}</div>
+                {% endif %}
+            {% endblock %}
+
         </header>
 
         {% block app_message -%}
