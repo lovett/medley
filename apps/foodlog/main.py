@@ -19,7 +19,7 @@ class Controller:
         try:
             record_id = int(uid)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+            raise cherrypy.HTTPError(400, "Invalid uid") from None
 
         result = cherrypy.engine.publish(
             "foodlog:remove",
@@ -42,7 +42,7 @@ class Controller:
         try:
             record_id = int(uid or 0)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+            raise cherrypy.HTTPError(400, "Invalid uid") from None
 
         if record_id > 0 and subresource == "edit":
             return self.form(record_id)
@@ -64,13 +64,13 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html", "json"))
-    def POST(uid: str, **kwargs: str) -> Optional[bytes]:
+    def POST(uid: str = "", **kwargs: str) -> Optional[bytes]:
         """Add a new entry or update an existing one."""
 
         try:
             record_id = int(uid)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+            record_id = 0
 
         consume_date = kwargs.get("consume_date")
         consume_time = kwargs.get("consume_time")

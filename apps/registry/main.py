@@ -17,7 +17,7 @@ class Controller:
         try:
             record_id = int(uid)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+            raise cherrypy.HTTPError(400, "Invalid uid") from None
 
         cherrypy.engine.publish("registry:remove:id", record_id)
 
@@ -35,8 +35,7 @@ class Controller:
         try:
             record_id = int(uid or 0)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
-
+            raise cherrypy.HTTPError(400, "Invalid uid") from None
 
         if record_id > 0 and subresource == "edit":
             return self.form(record_id, **kwargs)
@@ -57,13 +56,13 @@ class Controller:
         return self.index()
 
     @staticmethod
-    def POST(uid: str, **kwargs: str) -> None:
+    def POST(uid: str = "", **kwargs: str) -> None:
         """Store a new entry in the database or update an existing entry"""
 
         try:
             record_id = int(uid)
         except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+            record_id = 0
 
         key = kwargs.get("key", "").strip()
         value = kwargs.get("value", "").strip()
@@ -102,7 +101,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def form(record_id: int, **kwargs) -> bytes:
+    def form(record_id: int, **kwargs: str) -> bytes:
         """Display a form for adding or updating a record."""
 
         key = kwargs.get("key", "").strip()
