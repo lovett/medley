@@ -21,8 +21,8 @@ class Controller:
 
         try:
             record_id = int(uid)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         result = cherrypy.engine.publish(
             "sleeplog:remove",
@@ -43,8 +43,8 @@ class Controller:
 
         try:
             record_id = int(uid or 0)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if record_id > 0 and subresource == "edit":
             return self.form(record_id)
@@ -63,8 +63,8 @@ class Controller:
 
         try:
             record_id = int(uid)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         action = kwargs.get("action")
 
@@ -146,7 +146,7 @@ class Controller:
                 tzinfo=local_start.tzinfo
             )
 
-            if config["ideal_start"].hour > 12 and local_start.hour < 12:
+            if local_start.hour < 12 < config["ideal_start"].hour:
                 ideal_start -= timedelta(days=1)
 
             if ideal_start > local_start:
@@ -302,6 +302,7 @@ class Controller:
 
     @staticmethod
     def save_session(uid: int, **kwargs: str) -> bytes:
+        """Store a record."""
         start_date = kwargs.get("start_date", "")
         start_time = kwargs.get("start_time", "")
         end_date = kwargs.get("end_date", "")

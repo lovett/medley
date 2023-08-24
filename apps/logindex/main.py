@@ -1,8 +1,8 @@
 """Trigger indexing of log files."""
 
 from datetime import datetime
-import pytz
 import pathlib
+import pytz
 import cherrypy
 
 
@@ -39,14 +39,14 @@ class Controller:
         try:
             start_date = datetime.strptime(f"{start}", fmt)
             start_date = start_date.replace(tzinfo=pytz.timezone("UTC"))
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Bad format for start")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Bad format for start") from exc
 
         try:
             end_date = datetime.strptime(f"{end}", fmt)
             end_date = end_date.replace(tzinfo=pytz.timezone("UTC"))
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Bad format for end")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Bad format for end") from exc
 
         if start_date > end_date:
             raise cherrypy.HTTPError(400, "Invalid start/end range")
@@ -71,8 +71,8 @@ class Controller:
             # Is the file within the storage root?
             bucket_path = storage_root.joinpath(path)
             bucket_path.relative_to(storage_root)
-        except ValueError as err:
-            raise cherrypy.HTTPError(400, "Invalid path") from err
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid path") from exc
 
         if not bucket_path.is_file():
             raise cherrypy.HTTPError(400, "Path is not a file")

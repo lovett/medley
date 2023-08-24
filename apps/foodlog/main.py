@@ -16,8 +16,8 @@ class Controller:
 
         try:
             record_id = int(uid)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid") from None
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         result = cherrypy.engine.publish(
             "foodlog:remove",
@@ -39,8 +39,8 @@ class Controller:
 
         try:
             record_id = int(uid or 0)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid") from None
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if record_id > 0 and subresource == "edit":
             return self.form(record_id)

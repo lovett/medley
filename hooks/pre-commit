@@ -48,7 +48,7 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
             ./venv/bin/mypy "$WORK_DIR/$STAGED_FILE"
 
             echo "Linting $STAGED_FILE with flake8..."
-            ./venv/bin/flake8 "$WORK_DIR/$STAGED_FILE"
+            ./venv/bin/flake8 --color=never "$WORK_DIR/$STAGED_FILE"
 
             echo "Linting $STAGED_FILE with pylint..."
             ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"

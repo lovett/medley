@@ -42,9 +42,9 @@ class Controller:
                     address_parsed.domain
                 )
                 ip_address = result[2][0]
-            except OSError as err:
+            except OSError as exc:
                 redirect_url = cherrypy.engine.publish("app_url").pop()
-                raise cherrypy.HTTPRedirect(redirect_url) from err
+                raise cherrypy.HTTPRedirect(redirect_url) from exc
 
         whois = cherrypy.engine.publish(
             "urlfetch:get:json",

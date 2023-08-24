@@ -3,10 +3,12 @@
 from enum import Enum
 from datetime import datetime
 from typing import Dict
+from typing import Union
 import cherrypy
 from resources.url import Url
 
-Json = Dict[str, str|int|float]
+Json = Dict[str, Union[str, int, float]]
+
 
 class Resource(str, Enum):
     ACCOUNTS = "accounts"
@@ -32,8 +34,8 @@ class Controller:
 
         try:
             record_id = int(uid or 0)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if cherrypy.request.wants == "json":
             if resource == Resource.ACCOUNTS:
@@ -141,8 +143,8 @@ class Controller:
 
         try:
             record_id = int(uid)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if resource == Resource.ACCOUNTS:
             self.store_account(record_id, cherrypy.request.json)
@@ -161,8 +163,8 @@ class Controller:
 
         try:
             record_id = int(uid)
-        except ValueError:
-            raise cherrypy.HTTPError(400, "Invalid uid")
+        except ValueError as exc:
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if resource == Resource.ACCOUNTS:
             result = cherrypy.engine.publish(
@@ -198,15 +200,15 @@ class Controller:
         if opened:
             try:
                 opened = datetime.strptime(opened_on, date_format)
-            except ValueError:
-                raise cherrypy.HTTPError(400, "Invalid open date")
+            except ValueError as exc:
+                raise cherrypy.HTTPError(400, "Invalid open date") from exc
 
         closed = None
         if closed_on:
             try:
                 closed = datetime.strptime(closed_on, date_format)
-            except ValueError:
-                raise cherrypy.HTTPError(400, "Invalid close date")
+            except ValueError as exc:
+                raise cherrypy.HTTPError(400, "Invalid close date") from exc
 
         upsert_id = cherrypy.engine.publish(
             "ledger:store:account",
@@ -225,8 +227,8 @@ class Controller:
                 f"accounts/{upsert_id}"
             ).pop()
             raise cherrypy.HTTPRedirect(redirect_url)
-        else:
-            cherrypy.response.status = 204
+
+        cherrypy.response.status = 204
 
     @staticmethod
     def store_transaction(transaction_id: int, json: Json) -> None:
@@ -235,8 +237,8 @@ class Controller:
         account_id = int(json.get("account_id", 0))
         destination_id = int(json.get("destination_id", 0))
         occurred_on = str(json.get("occurred_on", ""))
-        cleared_on =  str(json.get("cleared_on", ""))
-        amount =  int(json.get("amount", 0))
+        cleared_on = str(json.get("cleared_on", ""))
+        amount = int(json.get("amount", 0))
         payee = json.get("payee", "")
         note = json.get("note", "")
         tags = json.get("tags", "")
@@ -248,7 +250,7 @@ class Controller:
 
         cleared = None
         if cleared_on:
-            cleared =  datetime.strptime(cleared_on, date_format)
+            cleared = datetime.strptime(cleared_on, date_format)
 
         cherrypy.engine.publish(
             "ledger:store:transaction",
