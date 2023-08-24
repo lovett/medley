@@ -9,7 +9,6 @@ from plugins import decorators
 
 
 class Controller:
-
     exposed = True
     show_on_homepage = True
 

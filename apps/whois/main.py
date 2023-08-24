@@ -9,8 +9,6 @@ from resources.url import Url
 
 
 class Controller:
-    """Dispatch application requests based on HTTP verb."""
-
     exposed = True
     show_on_homepage = True
 

@@ -8,7 +8,6 @@ import cherrypy
 
 
 class Transforms(str, Enum):
-    """Parameters for POST requests."""
     NONE = ""
     CAPITALIZE = "capitalize"
     FLATTEN = "flatten"
@@ -21,8 +20,6 @@ class Transforms(str, Enum):
 
 
 class Controller:
-    """Dispatch application requests based on HTTP verb."""
-
     exposed = True
     show_on_homepage = True
 

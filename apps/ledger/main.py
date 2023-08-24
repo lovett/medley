@@ -9,7 +9,6 @@ from resources.url import Url
 Json = Dict[str, str|int|float]
 
 class Resource(str, Enum):
-    """Keywords for the first URL path segment."""
     ACCOUNTS = "accounts"
     ACK = "ack"
     NONE = ""
@@ -18,8 +17,6 @@ class Resource(str, Enum):
 
 
 class Controller:
-    """Dispatch application requests based on HTTP verb."""
-
     exposed = True
     show_on_homepage = True
 
