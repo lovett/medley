@@ -23,6 +23,9 @@ class Url():
     escaped_address: str = field(init=False, default="")
     base_address: str = field(init=False, default="")
     etag_key: str = field(init=False, default="")
+    content_type: str = ""
+    status: int = 0
+    exception: Optional[Exception] = None
 
     def __post_init__(self) -> None:
         self.address = self.address.strip()
@@ -89,6 +92,17 @@ class Url():
             if self.domain.startswith(candidate):
                 return True
         return False
+
+    def is_valid(self) -> bool:
+        """Whether the URL seems reasonable."""
+
+        if self.is_loopback():
+            return True
+
+        if "." not in self.domain:
+            return False
+
+        return True
 
     def __repr__(self) -> str:
         return self.address
