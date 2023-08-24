@@ -28,7 +28,7 @@
         </form>
     </header>
 
-    {% if not active_bookmark %}
+    {% if not is_bookmarked %}
         <p>
             <a id="add-record" href="#" data-url="{{ url.address }}">
                 <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>

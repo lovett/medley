@@ -1,5 +1,6 @@
 """Make HTTP requests to external services."""
 
+from datetime import datetime
 import json
 import os.path
 import shutil
@@ -13,6 +14,7 @@ import urllib.parse
 import feedparser
 import requests
 import cherrypy
+from resources.url import Url
 
 Kwargs = Dict[str, Any]
 
@@ -30,6 +32,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("urlfetch:delete", self.delete)
         self.bus.subscribe("urlfetch:get", self.get)
+        self.bus.subscribe("urlfetch:header", self.get_header)
         self.bus.subscribe("urlfetch:get:json", self.get_json)
         self.bus.subscribe("urlfetch:get:file", self.get_file)
         self.bus.subscribe("urlfetch:get:feed", self.get_feed)
@@ -81,19 +84,46 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return True
 
+    def get_header(self, url: str, header: str) -> str:
+        """Extract a value from a HEAD request."""
+
+        cache_key = f"header:{url}:{header}"
+        lifespan_seconds = 86400
+
+        cached_value = cherrypy.engine.publish(
+            "cache:get",
+            cache_key
+        ).pop() or ""
+
+        if cached_value:
+            return cached_value
+
+        response = self.get(url, head_request=True, as_object=True)
+
+        value = str(response.headers.get(header, ""))
+
+        cherrypy.engine.publish(
+            "cache:set",
+            cache_key,
+            value,
+            lifespan_seconds=lifespan_seconds
+        )
+
+        return value
+
     def get_feed(
             self,
-            url: str,
-    ) -> Dict[str, Any]:
+            url: Url,
+    ) -> Tuple[Dict[str, Any], Optional[datetime]]:
         """Make a GET request for an RSS/Atom resource or similar."""
 
-        raw_feed = self.get(
-            url,
+        raw_feed, cached_on = self.get(
+            url.address,
             as_object=False,
             cache_lifespan=3600,
         )
 
-        return feedparser.parse(raw_feed)
+        return (feedparser.parse(raw_feed), cached_on)
 
     def get_json(
             self,
@@ -107,17 +137,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Make a GET request for a JSON resource."""
 
         request_url = url
+
         if params:
             request_url = f"{url}?{urllib.parse.urlencode(params)}"
 
         if cache_lifespan > 0:
-            cached_response = cherrypy.engine.publish(
+            cached_response, cache_date = cherrypy.engine.publish(
                 "cache:get",
-                request_url
+                request_url,
+                include_cache_date=True
             ).pop()
 
             if cached_response:
-                return cached_response
+                return (cached_response, cache_date)
 
         request_headers = self.headers(headers)
 
@@ -157,7 +189,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 lifespan_seconds=cache_lifespan
             )
 
-        return res.json()
+        return (res.json(), None)
 
     def get(
             self,
@@ -166,6 +198,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             auth: Optional[Tuple[str, str]] = None,
             as_object: bool = False,
             cache_lifespan: int = 0,
+            head_request: bool = False,
             **kwargs: Kwargs
     ) -> Any:
         """Send a GET request"""
@@ -178,22 +211,34 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             full_url = f"{url}?{urllib.parse.urlencode(params)}"
 
         if cache_lifespan > 0:
-            cached_response = cherrypy.engine.publish(
+            cached_response, cache_date = cherrypy.engine.publish(
                 "cache:get",
-                full_url
+                full_url,
+                include_cache_date=True
             ).pop()
 
             if cached_response:
-                return cached_response
+                return (cached_response, cache_date)
 
         try:
-            res = requests.get(
-                url,
-                auth=auth,
-                timeout=15,
-                headers=headers,
-                params=params
-            )
+            if head_request:
+                res = requests.head(
+                    url,
+                    auth=auth,
+                    timeout=15,
+                    headers=headers,
+                    params=params,
+                    allow_redirects=True
+                )
+            else:
+                res = requests.get(
+                    url,
+                    auth=auth,
+                    timeout=15,
+                    headers=headers,
+                    params=params,
+                    allow_redirects=True
+                )
 
             res.raise_for_status()
 
@@ -212,9 +257,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             f"{res.status_code} {url}"
         )
 
-        if as_object:
-            return res
-
         if res.status_code == 204:
             return True
 
@@ -226,7 +268,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 lifespan_seconds=cache_lifespan
             )
 
-        return res.text
+        if as_object:
+            return res
+
+        return (res.text, None)
 
     def get_file(
             self,

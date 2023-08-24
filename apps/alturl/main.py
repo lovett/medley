@@ -1,13 +1,14 @@
 """Web page reformatting"""
 
+from typing import Any, Dict, Iterator
 import cherrypy
 from resources.url import Url
 import apps.alturl.reddit
 import apps.alturl.feed
+from plugins import decorators
 
 
 class Controller:
-    """Dispatch application requests based on HTTP verb."""
 
     exposed = True
     show_on_homepage = True
@@ -16,66 +17,19 @@ class Controller:
         cherrypy.engine.subscribe("registry:added", self.on_registry_changed)
         cherrypy.engine.subscribe("registry:removed", self.on_registry_changed)
 
-    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(*args: str, **kwargs: str) -> bytes:
-        """Dispatch to a site-specific handler."""
-
-        _, registry_rows = cherrypy.engine.publish(
-            "registry:search",
-            "alturl:bookmark",
-            exact=True,
-            sort_by_value=True,
-            limit=0,
-        ).pop()
-
-        bookmarks = [
-            Url(row["value"], "", row["rowid"])
-            for row in registry_rows
-        ]
-
+    def GET(self, *args: str, **kwargs: str) -> bytes:
+        """Topmost dispatcher for GET requests."""
         if not args:
-            return cherrypy.engine.publish(
-                "jinja:render",
-                "apps/alturl/alturl.jinja.html",
-                bookmarks=bookmarks
-            ).pop()
+            return self.render_index()
 
         url = Url("https://" + "/".join(args), query=kwargs)
 
-        if "." not in url.domain:
-            raise cherrypy.HTTPError(400)
+        if not url.is_valid():
+            return self.render_unavailable(url, reason="bad_url")
 
-        site_specific_template = ""
-        if url.domain.endswith("reddit.com"):
-            site_specific_template, view_vars = apps.alturl.reddit.view(url)
-
-        if not site_specific_template:
-            site_specific_template, view_vars = apps.alturl.feed.view(url)
-
-        if not site_specific_template:
-            return cherrypy.engine.publish(
-                "jinja:render",
-                "apps/alturl/alturl.jinja.html",
-                unrecognized=True,
-                url=url,
-                bookmarks=bookmarks
-            ).pop()
-
-        view_vars["q"] = kwargs.get("q", "")
-
-        view_vars["active_bookmark"] = next((
-            bookmark
-            for bookmark in bookmarks
-            if bookmark == url
-        ), None)
-
-        return cherrypy.engine.publish(
-            "jinja:render",
-            site_specific_template,
-            **view_vars
-        ).pop()
+        return self.render_url(url)
 
     @staticmethod
     def POST(**kwargs: str) -> None:
@@ -88,18 +42,88 @@ class Controller:
 
         """
 
-        url = kwargs.get("url", "")
+        url = Url(kwargs.get("url", ""))
         q = kwargs.get("q", "")
 
-        target_url = Url(url)
-
-        redirect_url = cherrypy.engine.publish(
+        destination = cherrypy.engine.publish(
             "app_url",
-            target_url.alt,
+            url.alt,
             {"q": q}
         ).pop()
 
-        raise cherrypy.HTTPRedirect(redirect_url)
+        raise cherrypy.HTTPRedirect(destination)
+
+    @decorators.log_runtime
+    def render_url(self, url: Url) -> bytes:
+        """Dispatcher for GET requests that specify a URL."""
+
+        view_vars: Dict[str, Any] = {
+            "is_bookmarked": self.is_bookmarked(url)
+        }
+
+        if url.domain.endswith("reddit.com"):
+            return apps.alturl.reddit.render(url, **view_vars)
+
+        url.content_type = cherrypy.engine.publish(
+            "urlfetch:header",
+            url.address,
+            "content-type"
+        ).pop()
+
+        if "xml" in url.content_type:
+            try:
+                return apps.alturl.feed.render(url, **view_vars)
+            except ValueError:
+                return self.render_unavailable(url)
+
+        return self.render_unavailable(url, reason="format")
+
+    @staticmethod
+    def render_unavailable(url: Url, *, reason: str = "") -> bytes:
+        """Display an error page."""
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/alturl/unavailable.jinja.html",
+            url=url,
+            reason=reason
+        ).pop()
+
+    @decorators.log_runtime
+    def render_index(self) -> bytes:
+        """Display bookmarked URLs."""
+
+        bookmarks = self.get_bookmarks()
+
+        return cherrypy.engine.publish(
+            "jinja:render",
+            "apps/alturl/alturl.jinja.html",
+            bookmarks=bookmarks
+        ).pop()
+
+    @staticmethod
+    @decorators.log_runtime
+    def get_bookmarks() -> Iterator[Url]:
+        """Pull bookmarked URLs from the registry."""
+
+        _, rows = cherrypy.engine.publish(
+            "registry:search",
+            "alturl:bookmark",
+            exact=True,
+            sort_by_value=True,
+            limit=0
+        ).pop()
+
+        for row in rows:
+            yield Url(row["value"], "", row["rowid"])
+
+    def is_bookmarked(self, url: Url) -> bool:
+        """Has the specified URL been bookmarked?"""
+
+        return any((
+            bookmark == url
+            for bookmark in self.get_bookmarks()
+        ))
 
     @staticmethod
     def on_registry_changed(key: str) -> None:

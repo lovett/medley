@@ -6,29 +6,26 @@ See https://www.reddit.com/dev/api
 import re
 from typing import Any
 from typing import Dict
-from typing import Tuple
 import cherrypy
 import mistletoe
 from resources.url import Url
 
-ViewAndData = Tuple[str, Dict[str, Any]]
 
-
-def view(url: Url) -> ViewAndData:
+def render(url: Url, **kwargs: str) -> bytes:
     """Dispatch to either the index or story viewer based on URL keywords."""
+
+    view_vars = kwargs
 
     cache_lifespan = 900
     request_url = f"{url.base_address}{url.path}/.json"
     request_params = url.query
-
-    print(request_params)
 
     if request_params and "q" in request_params:
         request_url = f"{url.base_address}{url.path}/search/.json"
         request_params["sort"] = "new"
         request_params["restrict_sr"] = 1
 
-    response = cherrypy.engine.publish(
+    response, cached_on = cherrypy.engine.publish(
         "urlfetch:get:json",
         request_url,
         params=request_params,
@@ -36,7 +33,9 @@ def view(url: Url) -> ViewAndData:
     ).pop()
 
     if not response:
-        return unavailable()
+        return render_unavailable()
+
+    view_vars["cached_on"] = cached_on
 
     cherrypy.engine.publish(
         "scheduler:add",
@@ -51,29 +50,21 @@ def view(url: Url) -> ViewAndData:
     )
 
     if match and match.group("comments"):
-        return view_story(response)
+        return render_story(response, **view_vars)
 
-    return view_index(url, response)
+    return render_index(url, response, **view_vars)
 
 
-def unavailable() -> ViewAndData:
+def render_unavailable() -> bytes:
     """Display a message saying the URL could not be retrieved."""
 
-    applog_url = cherrypy.engine.publish(
-        "app_url",
-        "/applog",
-        {
-            "sources": "urlfetch:exception",
-            "exclude": 0
-        }
+    return cherrypy.engine.publish(
+        "jinja:render",
+        "apps/alturl/unavailable.jinja.html"
     ).pop()
 
-    return ("apps/alturl/unavailable.jinja.html", {
-        "applog_url": applog_url
-    })
 
-
-def view_index(url: Url, response: Any) -> ViewAndData:
+def render_index(url: Url, response: Dict[str, Any], **kwargs: str) -> bytes:
     """Render a list of story links."""
 
     stories = []
@@ -139,16 +130,19 @@ def view_index(url: Url, response: Any) -> ViewAndData:
             }
         ).pop()
 
-    return ("apps/alturl/reddit-index.jinja.html", {
-        "stories": stories,
-        "url": url,
-        "subview_title": url.display_domain,
-        "after_url": after_url,
-        "before_url": before_url
-    })
+    return cherrypy.engine.publish(
+        "jinja:render",
+        "apps/alturl/reddit-index.jinja.html",
+        stories=stories,
+        url=url,
+        subview_title=url.display_domain,
+        after_url=after_url,
+        before_url=before_url,
+        **kwargs
+    ).pop()
 
 
-def view_story(response: Any) -> ViewAndData:
+def render_story(response: Any, **kwargs: str) -> bytes:
     """Render the comments of a single story."""
 
     listing = response[0].get("data", {})
@@ -194,12 +188,15 @@ def view_story(response: Any) -> ViewAndData:
         f"reddit.com/r/{subreddit}"
     ).pop()
 
-    return ("apps/alturl/reddit-story.jinja.html", {
-        "intro": intro,
-        "story": story,
-        "comments": comments,
-        "subreddit": subreddit,
-        "subreddit_alturl": subreddit_alturl,
-        "crossposts": crossposts,
-        "subview_title": story["title"]
-    })
+    return cherrypy.engine.publish(
+        "jinja:render",
+        "apps/alturl/reddit-story.jinja.html",
+        intro=intro,
+        story=story,
+        comments=comments,
+        subreddit=subreddit,
+        subreddit_alturl=subreddit_alturl,
+        crossposts=crossposts,
+        subview_title=story["title"],
+        **kwargs
+    ).pop()

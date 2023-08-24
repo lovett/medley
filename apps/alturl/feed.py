@@ -3,31 +3,29 @@
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Tuple
 import cherrypy
 from resources.url import Url
 
-ViewAndData = Tuple[str, Dict[str, Any]]
+Story = Dict[str, Any]
+Stories = List[Story]
 
 
-def view(url: Url) -> ViewAndData:
+def render(url: Url, **kwargs: str) -> bytes:
     """Render a feed."""
-    feed = cherrypy.engine.publish(
+
+    feed, cached_on = cherrypy.engine.publish(
         "urlfetch:get:feed",
-        url.address
+        url
     ).pop()
 
     if feed.get("bozo_exception"):
-        err = feed.get("bozo_exception", Exception)
-        return malformed(
-            feed.get("status", 0),
-            err.getMessage(), err.getLineNumber()
-        )
+        url.exception = feed.get("bozo_exception", Exception)
+        url.status = int(feed.get("status", 0))
+        raise ValueError("Invalid feed", url)
 
-    stories: List[Dict[str, Any]] = []
+    stories: Stories = []
 
     for story in feed.get("entries", []):
-
         authors = [
             author.get("name", "")
             for author in story.get("authors", [])
@@ -72,28 +70,12 @@ def view(url: Url) -> ViewAndData:
             "authors": authors,
         })
 
-    return ("apps/alturl/feed.jinja.html", {
-        "stories": stories,
-        "feed_title": feed.get("feed", {}).get("title"),
-        "url": url,
-    })
-
-
-def malformed(http_status: int, message: str, line: int) -> ViewAndData:
-    """Display a message saying the URL could not be parsed."""
-
-    applog_url = cherrypy.engine.publish(
-        "app_url",
-        "/applog",
-        {
-            "sources": "exception",
-            "exclude": 0
-        }
+    return cherrypy.engine.publish(
+        "jinja:render",
+        "apps/alturl/feed.jinja.html",
+        stories=stories,
+        feed_title=feed.get("feed", {}).get("title"),
+        url=url,
+        cached_on=cached_on,
+        **kwargs
     ).pop()
-
-    return ("apps/alturl/unavailable.jinja.html", {
-        "applog_url": applog_url,
-        "status": http_status,
-        "message": message,
-        "linu": line,
-    })

@@ -1,8 +1,9 @@
 """Store arbitrary values in an SQLite database."""
 
+from datetime import datetime
 import json
 from typing import Any
-from typing import Dict
+from typing import List
 from typing import Iterator
 from typing import Tuple
 from typing import cast
@@ -36,7 +37,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON cache(prefix, key);
 
         CREATE VIEW IF NOT EXISTS unexpired AS
-            SELECT prefix, key, value
+            SELECT prefix, key, value, created
             FROM cache
             WHERE expires > datetime('now');
         """)
@@ -88,39 +89,59 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             except json.decoder.JSONDecodeError:
                 yield row["value"]
 
-    def mget(self, prefix: str, keys: Tuple[str, ...]) -> Dict[str, str]:
-        """Retrieve multiple values with a common prefix."""
+    def mget(self, keys: Tuple[str, ...]) -> Iterator[Tuple[Any, datetime]]:
+        """Retrieve multiple values."""
 
-        sql_in = ",".join(["?" for key in keys])
+        filters = []
+        placeholders: List[str] = []
+        for key in keys:
+            prefix, rest = self.keysplit(key)
+            placeholders.append(prefix)
+            placeholders.append(rest)
+            filters.append("(prefix=? AND key=?)")
 
-        sql = f"""SELECT key, value
+        sql = f"""SELECT key, value, created as 'created [local_datetime]'
         FROM unexpired
-        WHERE prefix=? AND key IN ({sql_in})"""
+        WHERE {" or ".join(filters)}"""
 
-        rows = self._select_generator(sql, (prefix,) + keys)
+        rows = self._select_generator(sql, placeholders)
 
-        return {
-            row["key"]: row["value"]
-            for row in rows
-        }
+        for row in rows:
+            key, value, created = row
+            if not isinstance(value, str):
+                yield (value, created)
+                continue
+            try:
+                yield (json.loads(value), created)
+            except json.decoder.JSONDecodeError:
+                yield (value, created)
 
-    def get(self, key: str) -> Any:
+    def get(self, key: str, include_cache_date: bool = False) -> Any:
         """Retrieve a value from the store."""
 
         prefix, rest = self.keysplit(key)
 
-        value = self._selectFirst(
-            """SELECT value
+        row = self._selectOne(
+            """SELECT value, created as 'created [local_datetime]'
             FROM unexpired
             WHERE prefix=? AND key=?""",
             (prefix, rest)
         )
 
+        value = None
+        created = None
+        if row:
+            value = row["value"]
+            created = row["created"]
+
         if isinstance(value, str):
             try:
-                return json.loads(value)
+                value = json.loads(value)
             except json.decoder.JSONDecodeError:
                 pass
+
+        if include_cache_date:
+            return (value, created)
 
         return value
 

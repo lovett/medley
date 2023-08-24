@@ -225,6 +225,7 @@ def publish(
 def publish(
         channel: Literal["cache:get"],
         key: str,
+        include_cache_date: Optional[bool] = False
 ) -> List[Any]: ...
 
 
@@ -238,9 +239,8 @@ def publish(
 @overload
 def publish(
         channel: Literal["cache:mget"],
-        prefix: str,
         key: Tuple[str, ...],
-) -> List[Dict[str, str]]: ...
+) -> List[Iterator[Any]]: ...
 
 
 @overload
@@ -1255,6 +1255,14 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["urlfetch:header"],
+        url: str,
+        header: str,
+) -> List[str]: ...
+
+
+@overload
+def publish(
         channel: Literal["urlfetch:get"],
         url: str,
 ) -> List[Any]: ...
@@ -1272,8 +1280,8 @@ def publish(
 @overload
 def publish(
         channel: Literal["urlfetch:get:feed"],
-        url: str,
-) -> List[Dict[str, Any]]: ...
+        url: Url,
+) -> List[Tuple[Dict[str, Any], Optional[datetime]]]: ...
 
 
 @overload

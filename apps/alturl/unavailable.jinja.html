@@ -2,8 +2,14 @@
 
 {% block content %}
 
-    <p>The URL is not available.</p>
+    {% if url.exception %}
+        <p>{{ url.exception.getMessage() }}</p>
+    {% else %}
 
-    <p><a href="{{ applog_url }}" target="_blank">Applog</a></p>
+    <p>
+        <a href="{{ url.address }}" rel="noopener noreferrer">{{ url.address }}</a>
+        is in an unsupported format, {{ url.content_type }}
+    </p>
+    {% endif %}
 
 {% endblock %}
