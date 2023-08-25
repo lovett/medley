@@ -1,4 +1,4 @@
-"""Web page reformatting"""
+"""Feed reader"""
 
 from typing import Any, Dict, Iterator
 import cherrypy

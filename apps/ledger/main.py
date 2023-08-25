@@ -1,4 +1,4 @@
-"""Banking transactions"""
+"""Banking database"""
 
 from enum import Enum
 from datetime import datetime

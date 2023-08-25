@@ -1,4 +1,4 @@
-"""Phone number metadata"""
+"""Area code lookup"""
 
 import re
 import cherrypy

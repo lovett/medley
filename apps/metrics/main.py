@@ -1,4 +1,4 @@
-"""Application performance graphs"""
+"""Metrics database"""
 
 from datetime import datetime, timedelta, timezone
 from math import ceil

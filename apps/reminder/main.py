@@ -1,4 +1,4 @@
-"""Scheduled notifications"""
+"""Notification templates"""
 
 import random
 import string

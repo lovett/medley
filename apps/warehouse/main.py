@@ -1,4 +1,4 @@
-"""File storage."""
+"""File storage"""
 
 import mimetypes
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""IP and domain metadata"""
+"""IP and domain lookup"""
 
 import ipaddress
 import re

@@ -1,4 +1,4 @@
-"""General-purpose key-value store"""
+"""Configuration database"""
 
 import json
 import cherrypy

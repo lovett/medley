@@ -1,4 +1,4 @@
-"""Web page head tag viewer"""
+"""HTML head tag viewer"""
 
 import cherrypy
 import parsers.htmlhead

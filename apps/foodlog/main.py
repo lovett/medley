@@ -1,4 +1,4 @@
-"""Track food consumption."""
+"""Diet database"""
 
 from datetime import datetime
 import json

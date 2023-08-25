@@ -1,4 +1,4 @@
-"""Website traffic viewer"""
+"""Website traffic database"""
 
 from datetime import date, datetime
 import re

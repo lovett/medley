@@ -1,4 +1,4 @@
-"""Review HTTP requests and responses"""
+"""HTTP traffic database"""
 
 import cherrypy
 

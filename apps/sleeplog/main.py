@@ -1,4 +1,4 @@
-"""Track sleep"""
+"""Sleep database"""
 
 from collections import defaultdict
 from datetime import datetime, timedelta

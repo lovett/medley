@@ -1,4 +1,4 @@
-"""Redirection between domains"""
+"""Domain redirection"""
 
 from typing import List
 import cherrypy

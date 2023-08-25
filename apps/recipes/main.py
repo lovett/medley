@@ -1,4 +1,4 @@
-"""A collection of recipes"""
+"""Recipe database"""
 
 import datetime
 import re

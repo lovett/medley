@@ -1,4 +1,4 @@
-"""News headlines via News API"""
+"""News stories"""
 
 import cherrypy
 from resources.url import Url

@@ -1,4 +1,4 @@
-"""Printable pages for data entry."""
+"""Data entry templates"""
 
 from datetime import date
 import calendar

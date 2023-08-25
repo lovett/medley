@@ -1,4 +1,4 @@
-"""Wake-on-LAN dispatcher"""
+"""Wake-on-LAN service"""
 
 import socket
 import struct

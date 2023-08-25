@@ -1,4 +1,4 @@
-"""HTTP request headers"""
+"""HTTP viewer"""
 
 import json
 import cherrypy

@@ -1,4 +1,4 @@
-"""Site-wide status and activity"""
+"""Event viewer"""
 
 import cherrypy
 

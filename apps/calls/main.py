@@ -1,4 +1,4 @@
-"""Phone call metadata"""
+"""Phone call database"""
 
 import cherrypy
 
