@@ -36,7 +36,7 @@ class TestGeography(Subscriber):
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-area-success.json")
                 )
-                return [fixture]
+                return [(fixture, None)]
             return DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -57,7 +57,7 @@ class TestGeography(Subscriber):
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-area-fail.json")
                 )
-                return [fixture]
+                return [(fixture, None)]
             return DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -79,7 +79,7 @@ class TestGeography(Subscriber):
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-state-fail.json")
                 )
-                return [fixture]
+                return [(fixture, None)]
             return DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -99,7 +99,7 @@ class TestGeography(Subscriber):
                 fixture = json.loads(
                     helpers.get_fixture("dbpedia-state-success.json")
                 )
-                return [fixture]
+                return [(fixture, None)]
             return DEFAULT
 
         publish_mock.side_effect = side_effect

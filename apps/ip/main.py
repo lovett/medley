@@ -18,7 +18,7 @@ class Controller:
         if "X-Real-Ip" in cherrypy.request.headers:
             client_ip = cherrypy.request.headers["X-Real-Ip"]
 
-        api_response = cherrypy.engine.publish(
+        api_response, cached_on = cherrypy.engine.publish(
             "urlfetch:get:json",
             "https://api.ipify.org",
             params={"format": "json"},
@@ -43,4 +43,5 @@ class Controller:
             "apps/ip/ip.jinja.html",
             client_ip=client_ip,
             external_ip=external_ip,
+            cached_on=cached_on
         ).pop()

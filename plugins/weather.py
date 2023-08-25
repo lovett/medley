@@ -165,7 +165,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         longitude = config.get("longitude")
         api_key = config.get("openweather_api_key")
 
-        api_response = cherrypy.engine.publish(
+        api_response, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             "https://api.openweathermap.org/data/2.5/onecall",
             params={

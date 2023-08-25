@@ -87,7 +87,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         access_token = grant_response.json().get("access_token")
 
-        bucket = cherrypy.engine.publish(
+        bucket, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             (
                 "https://storage.googleapis.com/storage/v1/b/"

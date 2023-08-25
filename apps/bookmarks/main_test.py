@@ -132,9 +132,8 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
 
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
-            print(args)
             if args[0] == "urlfetch:get:json":
-                return [{}]
+                return [({}, None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

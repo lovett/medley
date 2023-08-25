@@ -46,7 +46,7 @@ class Controller:
                 redirect_url = cherrypy.engine.publish("app_url").pop()
                 raise cherrypy.HTTPRedirect(redirect_url) from exc
 
-        whois = cherrypy.engine.publish(
+        whois, cached_on = cherrypy.engine.publish(
             "urlfetch:get:json",
             f"http://whois.arin.net/rest/ip/{ip_address}",
             cache_lifespan=86400
@@ -99,5 +99,6 @@ class Controller:
             earliest_visit=visit_days.get("earliest"),
             latest_visit=visit_days.get("latest"),
             visit_days_count=visit_days.get("count", 0),
-            subview_title=address_clean
+            subview_title=address_clean,
+            cached_on=cached_on
         ).pop()

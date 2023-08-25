@@ -23,7 +23,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         helpers.stop_server()
 
     def setUp(self) -> None:
-        self.fixture = [{
+        self.fixture = ([{
             "CLDR display name": "US",
             "Capital": "Washington",
             "Continent": "NA",
@@ -52,7 +52,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
             "name": "US",
             "official_name_en": "USA",
             "official_name_fr": "États-Unis d'Amérique"
-        }]
+        }], None)
 
     def test_allow(self) -> None:
         """Verify the controller's supported HTTP methods"""
@@ -96,11 +96,11 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function."""
 
-            if args[0] == "cache:get":
-                return [[{
+            if args[0] == "urlfetch:get:json":
+                return [([{
                     "Capital": "Fake",
                     "Continent": "X",
-                }]]
+                }], None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -141,7 +141,7 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
             if args[0] == "urlfetch:get:json":
-                return [None]
+                return [(None, None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect

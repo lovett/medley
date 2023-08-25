@@ -82,7 +82,7 @@ class Controller:
     def check_wayback_availability(wayback: str) -> bytes:
         """See if an archived copy of the URL is available."""
 
-        response = cherrypy.engine.publish(
+        response, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             "http://archive.org/wayback/available",
             params={"url": wayback},

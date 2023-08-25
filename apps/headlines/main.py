@@ -28,8 +28,9 @@ class Controller:
             key_slice=1
         ).pop()
 
+        cached_on = None
         for category in settings["category"]:
-            response = cherrypy.engine.publish(
+            response, cached_on = cherrypy.engine.publish(
                 "urlfetch:get:json",
                 "https://newsapi.org/v2/top-headlines",
                 params={
@@ -39,6 +40,7 @@ class Controller:
                 },
                 cache_lifespan=cache_lifespan
             ).pop()
+
 
             if not response:
                 raise cherrypy.HTTPError(503)
@@ -58,5 +60,6 @@ class Controller:
             walk_start=start,
             walk_stop=(start + count - 1),
             bing=Url("https://www.bing.com"),
-            ms_rewards=Url("https://rewards.bing.com/?signin=1")
+            ms_rewards=Url("https://rewards.bing.com/?signin=1"),
+            cached_on=cached_on
         ).pop()

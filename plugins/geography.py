@@ -63,7 +63,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         }} LIMIT 1
         """
 
-        response = cherrypy.engine.publish(
+        response, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             "http://dbpedia.org/sparql",
             headers={
@@ -110,7 +110,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         LIMIT 1
         """
 
-        response = cherrypy.engine.publish(
+        response, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             "http://dbpedia.org/sparql",
             headers={

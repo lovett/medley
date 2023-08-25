@@ -1,12 +1,14 @@
 """Test suite for the ip app."""
 
+# pylint: disable=import-error
+
 from typing import Any
 import unittest
 from unittest import mock
 from testing.assertions import ResponseAssertions
-from testing import helpers
+from testing import helpers  # pylint: disable=import-error
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.ip.main  # type: ignore
+import apps.ip.main
 
 
 class TestIp(BaseCherryPyTestCase, ResponseAssertions):
@@ -45,7 +47,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
-                return [{"ip": "1.1.1.1"}]
+                return [({"ip": "1.1.1.1"}, None)]
             if args[0] == "jinja:render":
                 return [""]
 
@@ -72,7 +74,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
-                return [{"ip": "1.1.1.1"}]
+                return [({"ip": "1.1.1.1"}, None)]
 
             return mock.DEFAULT
 
@@ -95,7 +97,7 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
             """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
-                return [{"ip": "1.1.1.1"}]
+                return [({"ip": "1.1.1.1"}, None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -110,8 +112,8 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         def side_effect(*args: str, **_: str) -> Any:
             """Side effects local function"""
 
-            if args[0] == "urlfetch:get":
-                return [{"ip": "1.1.1.1"}]
+            if args[0] == "urlfetch:get:json":
+                return [({"ip": "1.1.1.1"}, None)]
             if args[0] == "jinja:render":
                 return [""]
 

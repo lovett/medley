@@ -72,7 +72,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] in ("ip:facts", "logindex:count_visit_days"):
                 return [{}]
             if args[0] in ("cache:get", "urlfetch:get:json"):
-                return [None]
+                return [(None, None)]
             if args[0] == "ip:reverse":
                 return [defaultdict()]
             if args[0] == "jinja:render":
@@ -115,7 +115,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "cache:get":
                 return [facts_fake]
             if args[0] == "urlfetch:get:json":
-                return [whois_fake]
+                return [(whois_fake, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -145,7 +145,7 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "ip:facts":
                 return [{"hello": "world"}]
             if args[0] == "urlfetch:get:json":
-                return [{"foo": "bar"}]
+                return [({"foo": "bar"}, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

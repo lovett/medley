@@ -107,7 +107,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
                 }]
 
             if args[0] == "urlfetch:get:json":
-                return [None]
+                return [(None, None)]
             return mock.DEFAULT
 
         publish_mock.side_effect = side_effect
@@ -125,7 +125,7 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
             if args[0] == "clock:day:remaining":
                 return [1]
             if args[0] == "urlfetch:get:json":
-                return [None]
+                return [(None, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

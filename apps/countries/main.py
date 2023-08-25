@@ -16,7 +16,7 @@ class Controller:
             "/core/country-codes/country-codes_json/data" \
             "/471a2e653140ecdd7243cdcacfd66608/country-codes_json.json"
 
-        country_codes = cherrypy.engine.publish(
+        country_codes, _ = cherrypy.engine.publish(
             "urlfetch:get:json",
             source_url,
             cache_lifespan=86400
