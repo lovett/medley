@@ -15,7 +15,7 @@ from typing import Optional
 from typing import Tuple
 from typing import Union
 from typing import cast
-import urllib
+from urllib.parse import quote
 from datetime import datetime, timedelta
 import json
 import re
@@ -211,7 +211,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def urlencode_filter(value: str) -> str:
         """Apply URL encoding to a value."""
 
-        return urllib.parse.quote(value)
+        return quote(value)
 
     @staticmethod
     def ago_filter(value: datetime) -> str:
@@ -247,6 +247,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Construct an offsite search URL for a term."""
 
         escaped_value = html.escape(value)
+
+        url = None
 
         if engine == "google":
             url = Url(
@@ -473,7 +475,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def internal_url_filter(
             context: jinja2.runtime.Context,
             value: str,
-            query: Dict[str, Any] = {}
+            query: Optional[Dict[str, Any]] = None
     ) -> str:
         """Generate an application URL via the URL plugin."""
 

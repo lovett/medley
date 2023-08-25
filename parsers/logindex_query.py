@@ -42,7 +42,7 @@ class Parser():
 
     date_fields = ("datestamp",)
     numeric_fields = ("statusCode",)
-    subquery_fields = ("reverse_domain")
+    subquery_fields = ("reverse_domain",)
 
     def parse(self, query: str) -> str:
         """Convert a search query to an SQL phrase."""

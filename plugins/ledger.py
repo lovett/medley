@@ -536,12 +536,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 queries.append(("""DELETE FROM transactions WHERE
                 related_transaction_id=?""", (transaction_id,)))
 
-                queries.append(("""INSERT INTO transactions
-                (account_id, destination_id, occurred_on, cleared_on,
-                amount, payee, note, tags, related_transaction_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (destination_id, account_id, occurred, cleared,
-                 amount * -1, payee, note, tags, transaction_id)))
+                queries.append(
+                    ("""INSERT INTO transactions
+                    (account_id, destination_id, occurred_on, cleared_on,
+                    amount, payee, note, tags, related_transaction_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                     (destination_id, account_id, occurred, cleared,
+                      amount * -1, payee, note, tags, transaction_id))
+                )
 
         self._multi(queries)
 
@@ -557,8 +559,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def acknowledgment(self, **kwargs: str) -> None:
         """Locate an uncleared transaction and clear it."""
 
-        date = kwargs.get("date", "")
-        account = kwargs.get("account", "")
+        # date = kwargs.get("date", "")
+        # account = kwargs.get("account", "")
         amount = kwargs.get("amount", "")
         payee = kwargs.get("payee", "")
 
@@ -585,3 +587,5 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             sql,
             (search,)
         )
+
+        print(result)

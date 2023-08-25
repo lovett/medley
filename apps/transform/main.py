@@ -8,6 +8,7 @@ import cherrypy
 
 
 class Transforms(str, Enum):
+    """The names of available transform functions."""
     NONE = ""
     CAPITALIZE = "capitalize"
     FLATTEN = "flatten"

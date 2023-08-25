@@ -32,7 +32,7 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, **_kwargs: str) -> bytes:
+    def GET(self) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         muted_temporarily = cherrypy.engine.publish(
@@ -89,7 +89,7 @@ class Controller:
             self.handle_notification()
 
     @staticmethod
-    def handle_post_vars(**kwargs) -> None:
+    def handle_post_vars(**kwargs: str) -> None:
         """Transform POST parameters to speech-ready statement."""
 
         statement = kwargs.get("statement", "").strip()

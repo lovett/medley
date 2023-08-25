@@ -263,7 +263,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return ""
 
     @staticmethod
-    def scheduled(schedules: List[str], now: Optional[datetime] = None) -> bool:
+    def scheduled(
+            schedules: List[str],
+            now: Optional[datetime] = None
+    ) -> bool:
         """Whether the current time falls within a set of ranges."""
 
         if not now:
@@ -275,6 +278,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 for line in schedule.split("\n")
             ]
 
+            time_range = None
             for time_format in ("%I:%M %p", "%H:%M"):
                 try:
                     time_range = [
@@ -285,12 +289,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 except ValueError:
                     return False
 
-            start = datetime.combine(now, time_range[0].time())
-            end = datetime.combine(now, time_range[1].time())
+            start = None
+            end = None
+            if time_range:
+                start = datetime.combine(now, time_range[0].time())
+                end = datetime.combine(now, time_range[1].time())
 
-            if start < end:
-                return start <= now <= end
-
-            return start <= now or now <= end
+            if start and end:
+                if start < end:
+                    return start <= now <= end
+                return start <= now or now <= end
 
         return False

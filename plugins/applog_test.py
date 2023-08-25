@@ -77,9 +77,9 @@ class TestApplog(Subscriber):
         """Messages can be provided as exceptions."""
 
         try:
-            raise Exception("test")
-        except Exception as exception:  # pylint: disable=broad-except
-            self.plugin.add("exception test", exception)
+            raise Exception("test")  # pylint: disable=broad-exception-raised
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            self.plugin.add("exception test", exc)
             self.plugin.pull()
 
         self.assertEqual(

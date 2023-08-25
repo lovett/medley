@@ -19,7 +19,7 @@ class Controller:
         try:
             record_id = int(uid)
         except ValueError as exc:
-            raise cherrypy.HTTPError(400, "Invalid uid") from ecx
+            raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         deleted_rows = cherrypy.engine.publish(
             "bookmarks:remove",
