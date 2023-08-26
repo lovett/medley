@@ -40,7 +40,6 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         Day, even though these are not otherwise specified in the template"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search":
                 return [
                     (-1, iter([{
@@ -70,7 +69,6 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         """An invalid start date for a monthly layout is handled gracefully"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search":
                 return [
                     (-1, iter([{
@@ -93,7 +91,6 @@ class TestGrids(BaseCherryPyTestCase, ResponseAssertions):
         """An invalid grid name is handled gracefully"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search":
                 return [(-1, iter([]))]
             return mock.DEFAULT

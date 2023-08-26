@@ -39,7 +39,6 @@ class TestClock(Subscriber):
         """clock:now can return a local time."""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["America/New_York"]
             return DEFAULT
@@ -210,7 +209,6 @@ class TestClock(Subscriber):
         """clock:local performs timezone conversion using a configured zone."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["America/New_York"]
             return DEFAULT
@@ -231,7 +229,6 @@ class TestClock(Subscriber):
         """clock:local performs timezone conversion using the system zone."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]
             return DEFAULT

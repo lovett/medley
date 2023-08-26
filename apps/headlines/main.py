@@ -41,7 +41,6 @@ class Controller:
                 cache_lifespan=cache_lifespan
             ).pop()
 
-
             if not response:
                 raise cherrypy.HTTPError(503)
 

@@ -43,7 +43,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         """If headlines have been cached, urlfetch does not occur."""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
             if args[0] == "jinja:render":
@@ -68,7 +67,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         """A urlfetch occurs when a cached value is not present"""
 
         def side_effect(*args: str, **kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
@@ -96,7 +94,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         """An error is returned if the url fetch fails."""
 
         def side_effect(*args: str, **kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
             if "key" in kwargs and kwargs["key"] == "newsapi:*":
@@ -121,7 +118,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         """The response sends a Cache-Control header."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "clock:day:remaining":
                 return [1]
             if args[0] == "urlfetch:get:json":

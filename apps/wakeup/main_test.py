@@ -40,7 +40,6 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         """The default view is a list of wake-able hosts."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{"host1": "mac1", "host2": "mac2"}]
 
@@ -85,7 +84,6 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         """WOL packets are not sent if the host is unknown."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return [None]
             if args[0] == "jinja:render":
@@ -103,7 +101,6 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         """WOL packets are sent if the host is known."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
             if args[0] == "app_url":
@@ -123,7 +120,6 @@ class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
         """A plain-text response is sent with a success message."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["00:00:00:00:00"]
             if args[0] == "app_url":

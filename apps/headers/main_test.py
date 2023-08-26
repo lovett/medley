@@ -42,7 +42,6 @@ class TestHeaders(BaseCherryPyTestCase, ResponseAssertions):
         """GET returns text/html by default"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

@@ -72,7 +72,6 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         """Country codes are saved to the registry"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [self.fixture]
             return mock.DEFAULT
@@ -114,7 +113,6 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         """The JSON file is fetched if it is not already in the cache"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [self.fixture]
             return mock.DEFAULT
@@ -139,7 +137,6 @@ class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
         """
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [(None, None)]
             return mock.DEFAULT

@@ -70,7 +70,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """GET supports text/x-org output."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
             return mock.DEFAULT
@@ -86,7 +85,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         apps, not just the ones meant for display on the homepage."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
             return mock.DEFAULT
@@ -101,7 +99,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """A valid etag produces a 304 response."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc123")]
             return mock.DEFAULT
@@ -117,7 +114,6 @@ class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
         """An invalid etag produces a 200 response."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "memorize:get":
                 return [(True, "abc456")]
             if args[0] == "jinja:render":

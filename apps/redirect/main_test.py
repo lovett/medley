@@ -40,7 +40,6 @@ class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
         """If no URL is provided, no redirect occurs."""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
 

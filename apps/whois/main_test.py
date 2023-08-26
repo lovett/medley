@@ -48,7 +48,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """Request lookup of an invalid hostname"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "app_url":
                 return ["/"]
@@ -66,7 +65,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """Request lookup of a valid hostname"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "app_url":
                 return ["/"]
             if args[0] in ("ip:facts", "logindex:count_visit_days"):
@@ -93,7 +91,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """Request lookup of an invalid IP address"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "app_url":
                 return ["/"]
             return mock.DEFAULT
@@ -139,7 +136,6 @@ class TestWhois(BaseCherryPyTestCase, ResponseAssertions):
         """Request lookup of an uncached IP address"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "cache:get":
                 return [None]
             if args[0] == "ip:facts":

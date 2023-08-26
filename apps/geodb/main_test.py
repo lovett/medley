@@ -74,7 +74,6 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         """The download URL must be defined in the registry."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{}]
             return mock.DEFAULT
@@ -89,7 +88,6 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         """The license key must be defined in the registry."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{"url": "http://example.com"}]
             return mock.DEFAULT
@@ -104,7 +102,6 @@ class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
         """A post request with a valid action returns successfully"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:dict":
                 return [{
                     "url": "http://example.com",

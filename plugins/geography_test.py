@@ -30,7 +30,6 @@ class TestGeography(Subscriber):
         """A triple is returned if the area code is valid"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
@@ -51,7 +50,6 @@ class TestGeography(Subscriber):
         """A triple is returned if the area code is valid"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
@@ -73,7 +71,6 @@ class TestGeography(Subscriber):
         """An invalid state abbreviation returns Unknown for the state name"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 fixture = json.loads(
@@ -93,7 +90,6 @@ class TestGeography(Subscriber):
         """A valid state abbreviation returns the correct state name"""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 fixture = json.loads(

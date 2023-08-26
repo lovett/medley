@@ -44,7 +44,6 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         """GET returns text/html by default"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 return [({"ip": "1.1.1.1"}, None)]
@@ -71,7 +70,6 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         """GET returns application/json if requested"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 return [({"ip": "1.1.1.1"}, None)]
@@ -94,7 +92,6 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         """GET returns text/plain if requested"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 return [({"ip": "1.1.1.1"}, None)]
@@ -110,7 +107,6 @@ class TestIp(BaseCherryPyTestCase, ResponseAssertions):
         """The X-Real-IP header takes precedence over Remote-Addr"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get:json":
                 return [({"ip": "1.1.1.1"}, None)]

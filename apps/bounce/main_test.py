@@ -86,7 +86,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "registry:first:key":
                 return ["http://example.com"]
@@ -158,7 +157,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "registry:first:key":
                 return ["example"]
@@ -196,7 +194,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """A  URL that does not belong to known group returns a form."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "registry:first:key":
                 return [None]
@@ -233,7 +230,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """The bookmarklet URL respects HTTPS."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:key":
                 return [None]
 
@@ -261,7 +257,6 @@ class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
         """
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:key":
                 return ["http://example.com"]
 

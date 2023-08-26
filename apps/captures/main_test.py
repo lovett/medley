@@ -42,7 +42,6 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """Captures can be searched by path"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "capture:search":
                 return [(1, [{}])]
             if args[0] == "jinja:render":
@@ -63,7 +62,6 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """A single capture can be viewed by its ID."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "capture:get":
                 return [None]

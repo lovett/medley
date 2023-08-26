@@ -46,7 +46,6 @@ class TestSpeak(Subscriber):
         """Muted by schedule if a schedule is in range."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:valuelist":
                 return ["11:00 PM\n9:00 AM"]
             if args[0] == "clock:scheduled":
@@ -64,7 +63,6 @@ class TestSpeak(Subscriber):
         """Not muted by schedule if there are no schedules."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:valuelist":
                 return [None]
             return mock.DEFAULT
@@ -79,7 +77,6 @@ class TestSpeak(Subscriber):
         """Not muted by schedule if no schedules are in range."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search:valuelist":
                 return ["11:00 PM\n9:00 AM"]
             if args[0] == "clock:scheduled":
@@ -97,7 +94,6 @@ class TestSpeak(Subscriber):
         """Muted temporarily if registry says so."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             print(args)
             if args[0] == "registry:first:value":
                 return [1]
@@ -113,7 +109,6 @@ class TestSpeak(Subscriber):
         """Not muted temporarily if registry doesn't say so."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             print(args)
             if args[0] == "registry:first:value":
                 return [None]

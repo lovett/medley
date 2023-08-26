@@ -42,7 +42,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         """An HTML request with no number displays the search form"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -58,7 +57,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
         """An HTML request with an invalid number redirects with a message"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -74,7 +72,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     def test_valid_number(self, publish_mock: mock.Mock) -> None:
         """A valid number lookup performs a state abbreviation lookup"""
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             value_map = {
                 "cache:get": [None],
                 "geography:state_by_area_code": [
@@ -101,7 +98,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
     def test_valid_number_cached(self, publish_mock: mock.Mock) -> None:
         """Successful number lookups are cached"""
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "cache:get":
                 return [{
                     "state_lookup": ("query placeholder", "XY", None),

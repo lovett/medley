@@ -42,7 +42,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """If the database is empty, a no-records message is returned"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "bookmarks:recent":
                 return [[[], 0, _]]
             if args[0] == "jinja:render":
@@ -66,7 +65,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """A URL can be added to the database"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "scheduler:add":
                 return [True]
             if args[0] == "jinja:render":
@@ -85,7 +83,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """URLs must be well-formed"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "scheduler:add":
                 return [False]
             return mock.DEFAULT
@@ -101,7 +98,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """Deletion fails if the URL is not found"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "bookmarks:remove":
                 return [0]
             return mock.DEFAULT
@@ -116,7 +112,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """Successful deletion sends no response"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "bookmarks:remove":
                 return [1]
             return mock.DEFAULT
@@ -131,7 +126,6 @@ class TestBookmarks(BaseCherryPyTestCase, ResponseAssertions):
         """Wayback lookup requests accommodate json."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "urlfetch:get:json":
                 return [({}, None)]
             return mock.DEFAULT

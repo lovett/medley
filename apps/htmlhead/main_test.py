@@ -45,7 +45,6 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         """When a URL is provided, it is parsed for tags in the head."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get":
                 responses.add(
@@ -78,7 +77,6 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
         """When a URL is provided, it is parsed for tags in the head."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "urlfetch:get":
                 responses.add(

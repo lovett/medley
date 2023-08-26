@@ -46,7 +46,6 @@ class TestUrl(Subscriber):
         """The base URL is taken from the registry."""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:first:value":
                 return ["http://example.com"]
             return DEFAULT

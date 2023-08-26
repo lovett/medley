@@ -40,7 +40,6 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         """If the application is muted, responses are returned with 202"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "speak:muted":
                 return [True]
@@ -61,7 +60,6 @@ class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
         """Valid notifications trigger a speak event"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "speak:muted":
                 return [False]

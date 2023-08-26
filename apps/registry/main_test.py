@@ -42,7 +42,6 @@ class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
         """Records can be searched by key"""
 
         def side_effect(*args: str, **_kwargs: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search":
                 return [(1, [{"key": "abc456", "value": "test"}])]
             if args[0] == "jinja:render":

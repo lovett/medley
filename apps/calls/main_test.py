@@ -39,7 +39,6 @@ class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
     def test_exclusion(self, publish_mock: mock.Mock) -> None:
         """Source and destination numbers are skipped"""
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "registry:search":
                 return [(2, (
                     {"key": "src", "value": "test"},

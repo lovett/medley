@@ -44,7 +44,6 @@ class TestJinja(Subscriber):
         """Autolinking detects URLs."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "app_url":
                 return ["/test"]
 
@@ -71,7 +70,6 @@ class TestJinja(Subscriber):
         """HTML cleanup should not mangle links."""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
             if args[0] == "app_url":
                 return [""]
 

@@ -40,7 +40,6 @@ class TestTransform(BaseCherryPyTestCase, ResponseAssertions):
         """Input is converted to lowercase and returned as HTML"""
 
         def side_effect(*args: str, **_: str) -> Any:
-            """Side effects local function"""
 
             if args[0] == "app_url":
                 return ["/"]
