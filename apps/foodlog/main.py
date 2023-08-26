@@ -143,10 +143,7 @@ class Controller:
     def form(record_id: int) -> bytes:
         """Display a form for adding or updating an entry."""
 
-        entry_date = cherrypy.engine.publish(
-            "clock:now",
-            local=True
-        ).pop()
+        entry_date = datetime.now()
 
         delete_url = ""
         foods_eaten = ""
