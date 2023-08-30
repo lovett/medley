@@ -47,6 +47,7 @@ class Controller:
             headlines[category] = [
                 Url(article["url"], article["title"])
                 for article in response["articles"]
+                if article.get("url")
             ]
 
         cache_control = f"private, max-age={cache_lifespan}"
