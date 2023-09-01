@@ -4,8 +4,8 @@ PyJWT~=1.7
 feedparser==6.0.10
 geoip2==4.7.0
 httplib2==0.22.0
-importlib-resources==6.0.0
-mistletoe==1.1.0
+importlib-resources==6.0.1
+mistletoe==1.2.1
 pytz==2023.3
 requests==2.31.0
 sdnotify==0.3.2
