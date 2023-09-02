@@ -50,6 +50,7 @@ import plugins.mixins
 import plugins.notifier
 import plugins.plotter
 import plugins.recipes
+import plugins.reddit
 import plugins.registry
 import plugins.scheduler
 import plugins.sleeplog
@@ -258,6 +259,7 @@ def setup() -> None:
     plugins.notifier.Plugin(cherrypy.engine).subscribe()
     plugins.plotter.Plugin(cherrypy.engine).subscribe()
     plugins.recipes.Plugin(cherrypy.engine).subscribe()
+    plugins.reddit.Plugin(cherrypy.engine).subscribe()
     plugins.registry.Plugin(cherrypy.engine).subscribe()
     plugins.sleeplog.Plugin(cherrypy.engine).subscribe()
     plugins.speak.Plugin(cherrypy.engine).subscribe()

@@ -1,7 +1,7 @@
 """Data class for URLs."""
 
 from dataclasses import dataclass, field
-from urllib.parse import urlparse, quote, urlencode
+from urllib.parse import urlparse, quote, urlencode, parse_qs
 from typing import Dict, Any, Optional
 
 
@@ -26,6 +26,7 @@ class Url():
     content_type: str = ""
     status: int = 0
     exception: Optional[Exception] = None
+    derived_from: Optional['Url'] = None
 
     def __post_init__(self) -> None:
         self.address = self.address.strip()
@@ -51,6 +52,8 @@ class Url():
                 parsed_url = urlparse(self.address)
         except ValueError:
             return
+
+        self.parsed_query = parse_qs(parsed_url.query)
 
         self.anonymized = self.address
         if parsed_url.scheme in ("http", "https"):
@@ -103,6 +106,19 @@ class Url():
             return False
 
         return True
+
+    def to_reddit_endpoint(self, **kwargs: str | int) -> Optional['Url']:
+        if "reddit.com" not in self.domain:
+            return None
+
+        resource = "/.json"
+        if "q" in self.parsed_query:
+            resource = "/search/.json"
+        return Url(
+            f"{self.base_address}{self.path}{resource}",
+            query=self.parsed_query | kwargs,
+            derived_from=self
+        )
 
     def __repr__(self) -> str:
         return self.address

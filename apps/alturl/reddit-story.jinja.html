@@ -6,9 +6,9 @@
     {% if comment.author %}
         <details id="t1_{{ comment.id }}" open class="comment {% if comment.author == story.author %}from-author{% endif %}">
             <summary>
-                <time>{{ comment.created_utc|date(local=True)|dateformat(default_date_format) }}</time>
+                <time>{{ comment.created_utc }}</time>
                 by
-                <a rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ comment.author|lower }}">
+                <a rel="noopeneer noreferrer" href="{{ comment.author_url.alt }}">
                     {% if comment.author == story.author %}
                         <svg class="icon"><use xlink:href="#icon-user"></use></svg>
                     {% endif %}
@@ -38,10 +38,6 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a href="{{ subreddit_alturl }}">
-            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
-            r/{{ subreddit }}
-        </a>
     </nav>
 {% endblock %}
 
@@ -49,9 +45,14 @@
     <div class="intro">
         <h2 class="title" v-pre>{{ story.title|safe }}</h2>
 
+        <a href="{{ story.subreddit_url.alt }}" class="info">
+            <svg class="icon"><use xlink:href="#icon-arrow-left"></use></svg>
+            r/{{ story.subreddit }}
+        </a>
+
         <time class="info">
             <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-            {{ story.created_utc|date(local=True)|dateformat(default_date_format) }}
+            {{ story.created }}
         </time>
 
         {% if story.num_comments > 0 %}
@@ -61,7 +62,7 @@
             </span>
         {% endif %}
 
-        <a class="info" rel="noopeneer noreferrer" href="{{ app_url }}/reddit.com/u/{{ story.author|lower }}">
+        <a class="info" rel="noopeneer noreferrer" href="{{ story.author_url.alt }}">
             <svg class="icon"><use xlink:href="#icon-user"></use></svg>
             {{ story.author }}
         </a>
@@ -75,15 +76,8 @@
             {% endif %}
         </a>
 
-        {% for subreddit, url in crossposts %}
-            <a class="info" href="{{ url }}">
-                <svg class="icon"><use xlink:href="#icon-duplicate"></use></svg>
-                {{ subreddit }} crosspost
-            </a>
-        {% endfor %}
-
-        {% if intro %}
-            {{ intro|better_html|unescape|retarget_html|safe }}
+        {% if story.intro %}
+            {{ story.intro|better_html|unescape|retarget_html|safe }}
         {% endif %}
 
     </div>

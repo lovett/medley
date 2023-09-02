@@ -32,6 +32,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """
         self.bus.subscribe("urlfetch:delete", self.delete)
         self.bus.subscribe("urlfetch:get", self.get)
+        self.bus.subscribe("urlfetch:precache", self.precache)
         self.bus.subscribe("urlfetch:header", self.get_header)
         self.bus.subscribe("urlfetch:get:json", self.get_json)
         self.bus.subscribe("urlfetch:get:file", self.get_file)
@@ -191,6 +192,45 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return (res.json(), None)
 
+    def precache(
+        self,
+        url: Url,
+        *,
+        cache_lifespan: int = 900,
+        **kwargs: Kwargs
+    ) -> bool:
+        """Cache a URL without returning it."""
+
+        cached = cherrypy.engine.publish(
+            "cache:check",
+            url.address
+        ).pop()
+
+        if cached:
+            return True
+
+        result, _ = self.get(
+            url.address, **kwargs
+        )
+
+        if not result:
+            return False
+
+        if url.derived_from:
+            cherrypy.engine.publish(
+                "scheduler:add",
+                cache_lifespan,
+                "memorize:clear",
+                url.derived_from.address
+            )
+
+        return cherrypy.engine.publish(
+            "cache:set",
+            url.address,
+            result,
+            lifespan_seconds=cache_lifespan
+        ).pop()
+
     def get(
             self,
             url: str,
@@ -249,7 +289,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 exception
             )
 
-            return None
+            return (None, None)
 
         cherrypy.engine.publish(
             "applog:add",
@@ -258,7 +298,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
         if res.status_code == 204:
-            return True
+            return (True, None)
 
         if cache_lifespan > 0:
             cherrypy.engine.publish(

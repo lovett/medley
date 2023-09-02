@@ -3,7 +3,6 @@
 from typing import Any, Dict, Iterator
 import cherrypy
 from resources.url import Url
-import apps.alturl.reddit
 import apps.alturl.feed
 from plugins import decorators
 
@@ -20,6 +19,7 @@ class Controller:
     @cherrypy.tools.etag()
     def GET(self, *args: str, **kwargs: str) -> bytes:
         """Topmost dispatcher for GET requests."""
+
         if not args:
             return self.render_index()
 
@@ -61,7 +61,11 @@ class Controller:
         }
 
         if url.domain.endswith("reddit.com"):
-            return apps.alturl.reddit.render(url, **view_vars)
+            return cherrypy.engine.publish(
+                "reddit:render",
+                url=url,
+                **view_vars
+            ).pop()
 
         url.content_type = cherrypy.engine.publish(
             "urlfetch:header",

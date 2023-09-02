@@ -48,3 +48,75 @@ class TestUrlResource(unittest.TestCase):
         address = "[DOUBLEQUOTE]"
         url = Url(address)
         self.assertEqual(url.domain, "")
+
+    def test_querystring_create(self) -> None:
+        """A querystring can be created."""
+
+        url = Url("https://example.com", query={"hello": "world"})
+
+        self.assertEqual(
+            "https://example.com?hello=world",
+            url.address
+        )
+
+    def test_querystring_add(self) -> None:
+        """Extra values can be added to an existing querystring."""
+
+        url = Url(
+            "https://example.com?hello=world",
+            query={"this": "that"}
+        )
+
+        self.assertEqual(
+            "https://example.com?hello=world&this=that",
+            url.address
+        )
+
+    def test_querystring_drop_empty(self) -> None:
+        """Empty values are dropped during querystring append."""
+
+        url = Url(
+            "https://example.com?hello=world",
+            query={"empty": None}
+        )
+
+        self.assertEqual(
+            "https://example.com?hello=world",
+            url.address
+        )
+
+    def test_reddit_endpoint(self) -> None:
+        """A Reddit URL can be translated to a JSON API endpoint."""
+
+        base = "https://reddit.com/r/"
+
+        samples = (
+            # plain
+            ("example",
+             "example/.json"),
+            # query
+            ("example?sort=new",
+             "example/.json?sort=new"),
+            # search and empty param
+            ("example?q=searchterm&sort=new&empty=",
+             "example/search/.json?q=searchterm&sort=new")
+        )
+
+        for before, after in samples:
+            url = Url(base + before)
+            endpoint = url.to_reddit_endpoint()
+
+            print(endpoint.query)
+
+            self.assertEqual(
+                base + after,
+                endpoint.address
+            )
+
+    def test_reddit_endpoint_other_domain(self) -> None:
+        """A non-Reddit URL cannot convert to an API endpoint."""
+
+        url = Url("http://example.com")
+        self.assertIsNone(
+            url.to_reddit_endpoint()
+        )

@@ -2,12 +2,15 @@
 
 from datetime import datetime
 import json
+from sqlite3 import Row
 from typing import Any
 from typing import List
 from typing import Iterator
 from typing import Tuple
+from typing import Dict
 from typing import cast
 import cherrypy
+from resources.url import Url
 from . import mixins
 
 
@@ -37,7 +40,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ON cache(prefix, key);
 
         CREATE VIEW IF NOT EXISTS unexpired AS
-            SELECT prefix, key, value, created
+            SELECT prefix, key, value, expires, created
             FROM cache
             WHERE expires > datetime('now');
         """)
@@ -51,7 +54,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """
 
         self.bus.subscribe("server:ready", self.setup)
+        self.bus.subscribe("cache:info", self.info)
         self.bus.subscribe("cache:get", self.get)
+        self.bus.subscribe("cache:reddit:index", self.reddit_index)
+        self.bus.subscribe("cache:reddit:story", self.reddit_story)
+        self.bus.subscribe(
+            "cache:reddit:pagination",
+            self.reddit_pagination
+        )
+        self.bus.subscribe("cache:check", self.check)
         self.bus.subscribe("cache:mget", self.mget)
         self.bus.subscribe("cache:match", self.match)
         self.bus.subscribe("cache:set", self.set)
@@ -69,6 +80,27 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             )
 
         return ("_", key)
+
+    def info(self, key: str) -> Dict[str, Any]:
+        """Date and age details for a cached value."""
+
+        prefix, rest = self.keysplit(key)
+
+        row = self._selectOne(
+            """SELECT
+            created as 'cached_on [local_datetime]',
+            expires as 'cached_until [local_datetime]',
+            unixepoch() - unixepoch(created) as cache_age_sec,
+            unixepoch(expires) - unixepoch() as cache_remaining_sec
+            FROM unexpired
+            WHERE prefix=? AND key=?""",
+            (prefix, rest)
+        )
+
+        if row:
+            return dict(row)
+
+        return {}
 
     def match(self, prefix: str) -> Iterator[Any]:
         """Retrieve multiple values based on a common prefix."""
@@ -115,6 +147,139 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 yield (json.loads(value), created)
             except json.decoder.JSONDecodeError:
                 yield (value, created)
+
+    def check(self, key: str) -> bool:
+        """Determine if a key exists in the check."""
+
+        prefix, rest = self.keysplit(key)
+
+        return bool(self._selectFirst(
+            """SELECT count(*)
+            FROM unexpired
+            WHERE prefix=? AND key=?""",
+            (prefix, rest)
+        ))
+
+    def reddit_pagination(self, url: Url) -> Dict[str, Any]:
+        """Extract values needed to build Reddit pagination links."""
+
+        prefix, rest = self.keysplit(url.address)
+
+        row = self._selectOne(
+            """SELECT
+            json_extract(u.value, '$.data.before') as before,
+            json_extract(u.value, '$.data.after') as after,
+            json_extract(u.value, '$.data.dist') as count
+            FROM unexpired u
+            WHERE u.prefix=? AND u.key=?""",
+            (prefix, rest)
+        )
+
+        if row:
+            return dict(row)
+        return {}
+
+    def reddit_index(self, endpoint: Url) -> Iterator[Row]:
+        """Render a list of stories."""
+
+        prefix, rest = self.keysplit(endpoint.address)
+
+        return self._select_generator(
+            """SELECT
+            j.value ->> '$.data.title' as title,
+            j.value ->> '$.data.url' as 'url [url]',
+            j.value ->> '$.data.domain' as domain,
+            FORMAT('https://reddit.com%s', j.value ->> '$.data.permalink')
+              AS 'permalink [url]',
+            j.value ->> '$.data.num_comments' as 'num_comments',
+            LENGTH(IFNULL(j.value ->> '$.data.selftext', '')) > 0 as selftext,
+            FORMAT('https://reddit.com/r/%s', j.value ->> '$.data.subreddit')
+              AS 'subreddit [url]',
+            datetime(j.value ->> '$.data.created_utc', 'unixepoch')
+              AS 'created [local_datetime]'
+            FROM unexpired u, json_each(u.value, '$.data.children') j
+            WHERE u.prefix=? AND u.key=?
+            AND json_extract(u.value, j.fullkey || '.kind') == 't3'
+            ORDER BY j.value ->> '$.data.created_utc' DESC
+            """,
+            (prefix, rest)
+        )
+
+    def reddit_story(
+            self,
+            endpoint: Url
+    ) -> Tuple[Dict[str, Any], Iterator[Row]]:
+        """Render a story discussion."""
+
+        prefix, rest = self.keysplit(endpoint.address)
+
+        story_rows = self._select_generator(
+            """SELECT
+            CASE
+              WHEN j.key='created_utc'
+                THEN 'created'
+              ELSE j.key
+            END as key,
+            CASE
+              WHEN j.key='created_utc'
+                THEN datetime(j.value, 'unixepoch', 'localtime')
+              ELSE
+                  j.value
+              END as value
+            FROM unexpired u,
+                 json_each(u.value, '$[0].data.children[0].data') j
+            WHERE u.prefix=? AND u.key=?
+            AND j.key IN (
+                'selftext',
+                'created_utc',
+                'url',
+                'subreddit',
+                'title',
+                'num_comments',
+                'author',
+                'domain',
+                'num_crossposts'
+            )
+            UNION
+            SELECT
+              'author_url',
+              FORMAT('https://reddit.com/u/%s',
+                u.value ->> '$[0].data.children[0].data.author')
+              FROM unexpired u
+              WHERE u.prefix=? AND u.key=?
+            UNION
+            SELECT
+              'subreddit_url',
+              FORMAT('https://reddit.com/r/%s',
+                u.value ->> '$[0].data.children[0].data.subreddit')
+              FROM unexpired u
+              WHERE u.prefix=? AND u.key=?
+            """,
+            (prefix, rest) * 3
+        )
+
+        story = {row["key"]: row["value"] for row in story_rows}
+
+        comments = self._select_generator(
+            """SELECT
+            j.value ->> '$.id' AS id,
+            j.value ->> '$.author' AS author,
+            FORMAT('https://reddit.com/u/%s', j.value ->> '$.author')
+              AS 'author_url [url]',
+            datetime(j.value ->> '$.created_utc', 'unixepoch', 'localtime')
+              AS created_utc,
+            j.value ->> '$.parent_id' as parent_id,
+            j.value ->> '$.body_html' as body_html
+            FROM unexpired u, json_tree(u.value, '$[1].data.children') j
+            WHERE u.prefix=? AND u.key=?
+            AND j.key='data'
+            AND j.value ->> '$.id' <> ''
+            AND j.value ->> '$.author' != 'AutoModerator'
+            """,
+            (prefix, rest)
+        )
+
+        return (story, comments)
 
     def get(self, key: str, include_cache_date: bool = False) -> Any:
         """Retrieve a value from the store."""

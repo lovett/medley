@@ -223,10 +223,24 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["cache:check"],
+        key: str,
+) -> List[Literal[True]]: ...
+
+
+@overload
+def publish(
         channel: Literal["cache:get"],
         key: str,
         include_cache_date: Optional[bool] = False
 ) -> List[Any]: ...
+
+
+@overload
+def publish(
+        channel: Literal["cache:info"],
+        key: str,
+) -> List[Row]: ...
 
 
 @overload
@@ -247,6 +261,27 @@ def publish(
 def publish(
         channel: Literal["cache:prune"],
 ) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["cache:reddit:index"],
+        endpoint: Url
+) -> List[Iterator[Row]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["cache:reddit:story"],
+        endpoint: Url
+) -> List[Tuple[Dict[str, Any], Iterator[Row]]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["cache:reddit:pagination"],
+        url: Url
+) -> List[Dict[str, Any]]: ...
 
 
 @overload
@@ -1238,6 +1273,14 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["reddit:render"],
+        url: Url,
+        **kwargs: Any
+) -> List[bytes]: ...
+
+
+@overload
+def publish(
         channel: Literal["urlfetch:delete"],
         url: str,
         **kwargs: Any,
@@ -1246,9 +1289,23 @@ def publish(
 
 @overload
 def publish(
+        channel: Literal["urlfetch:precache"],
+        url: Url,
+        cache_lifespan: int = 900,
+        etag_key: str = "",
+        **kwargs: Any,
+) -> List[bool]: ...
+
+
+@overload
+def publish(
         channel: Literal["urlfetch:get"],
         url: str,
-        as_object: Literal[True],
+        auth: Optional[Tuple[str, str]] = None,
+        as_object: bool = False,
+        cache_lifespan: int = 0,
+        precache: bool = False,
+        head_request: bool = False,
         **kwargs: Any,
 ) -> List[Any]: ...
 
@@ -1259,13 +1316,6 @@ def publish(
         url: str,
         header: str,
 ) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["urlfetch:get"],
-        url: str,
-) -> List[Any]: ...
 
 
 @overload
