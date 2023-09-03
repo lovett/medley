@@ -261,7 +261,6 @@ $(HTTP_SCRIPTS):
 # are only applied to changed files.
 lint: dummy
 	mypy --html-report apps/static/mypy apps parsers plugins testing tools medley.py
-	curl -X DELETE 'http://localhost:8085/maintenance/memorize'
 	ruff apps parsers plugins testing tools medley.py
 	pylint --rcfile=.pylintrc apps parsers plugins testing tools medley.py
 
