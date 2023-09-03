@@ -1,6 +1,6 @@
 """Data entry templates"""
 
-from datetime import date
+from datetime import datetime, date, timedelta
 import calendar
 from typing import List
 import cherrypy
@@ -17,25 +17,23 @@ class Controller:
         if not grid_name:
             return self.index()
 
-        start = kwargs.get("start")
+        start_date = datetime.today().replace(day=1)
 
-        if start:
-            start_date = cherrypy.engine.publish(
-                "clock:from_format",
-                start,
-                "%Y-%m-%d"
-            ).pop()
-
-            if not start_date:
-                raise cherrypy.HTTPError(400, "Invalid start date")
-
-        else:
-            start_date = cherrypy.engine.publish(
-                "clock:now",
-                local=True
-            ).pop()
-
+        if kwargs.get("relstart") == "nextmonth":
+            start_date += timedelta(days=32)
             start_date = start_date.replace(day=1)
+
+        if kwargs.get("start"):
+            try:
+                start_date = datetime.strptime(
+                    kwargs.get("start"),
+                    "%Y-%m-%d"
+                )
+            except ValueError:
+                start_date = None
+
+        if not start_date:
+            raise cherrypy.HTTPError(400, "Invalid start date")
 
         return self.show(grid_name, start_date)
 
