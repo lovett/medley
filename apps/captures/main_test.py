@@ -10,9 +10,6 @@ import apps.captures.main  # type: ignore
 
 
 class TestRegistry(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

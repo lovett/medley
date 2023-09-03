@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestSleeplog(Subscriber):
-    """Tests for the sleeplog plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.sleeplog.Plugin(cherrypy.engine)

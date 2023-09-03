@@ -14,7 +14,6 @@ from testing.assertions import Subscriber
 
 
 class TestClock(Subscriber):
-    """Tests for the clock plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.clock.Plugin(cherrypy.engine)

@@ -8,9 +8,6 @@ import apps.metrics.main  # type: ignore
 
 
 class TestMetrics(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

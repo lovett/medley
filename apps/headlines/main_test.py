@@ -10,9 +10,6 @@ import apps.headlines.main  # type: ignore
 
 
 class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

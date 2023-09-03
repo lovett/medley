@@ -8,9 +8,6 @@ import apps.alturl.main  # type: ignore
 
 
 class TestAltUrl(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

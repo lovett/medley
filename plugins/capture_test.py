@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestCapture(Subscriber):
-    """Tests for the capture plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.capture.Plugin(cherrypy.engine)

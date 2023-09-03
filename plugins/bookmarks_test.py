@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestBookmarks(Subscriber):
-    """Tests for the bookmarks plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.bookmarks.Plugin(cherrypy.engine)

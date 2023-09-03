@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestCdr(Subscriber):
-    """Tests for the cdr plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.cdr.Plugin(cherrypy.engine)

@@ -8,9 +8,6 @@ import apps.config.main  # type: ignore
 
 
 class TestConfig(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

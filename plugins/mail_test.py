@@ -8,9 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestMail(Subscriber):
-    """
-    Tests for the mail plugin.
-    """
 
     def setUp(self) -> None:
         self.plugin = plugins.mail.Plugin(cherrypy.engine)

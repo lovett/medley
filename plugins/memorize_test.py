@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestMemorize(Subscriber):
-    """Tests for the memorize plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.memorize.Plugin(cherrypy.engine)

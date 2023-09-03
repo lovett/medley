@@ -9,7 +9,6 @@ from resources.url import Url
 
 
 class TestReddit(Subscriber):
-    """Tests for the reddit plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.reddit.Plugin(cherrypy.engine)

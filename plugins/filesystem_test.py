@@ -10,7 +10,6 @@ from testing.assertions import Subscriber
 
 
 class TestFilesystem(Subscriber):
-    """Tests for the filesystem plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.filesystem.Plugin(cherrypy.engine)

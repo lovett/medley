@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestGcpApengine(Subscriber):
-    """Tests for the gcp_appengine plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.gcp_appengine.Plugin(cherrypy.engine)

@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestScheduler(Subscriber):
-    """Tests for the scheduler plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.scheduler.Plugin(cherrypy.engine)

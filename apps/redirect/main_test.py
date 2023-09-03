@@ -10,7 +10,6 @@ import apps.redirect.main  # type: ignore
 
 
 class TestRedirect(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

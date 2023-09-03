@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestAssets(Subscriber):
-    """Tests for the assets plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.assets.Plugin(cherrypy.engine)

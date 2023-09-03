@@ -8,9 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestUrlfetch(Subscriber):
-    """
-    Tests for the urlfetch plugin.
-    """
 
     def setUp(self) -> None:
         self.plugin = plugins.urlfetch.Plugin(cherrypy.engine)

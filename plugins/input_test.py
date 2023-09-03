@@ -9,7 +9,6 @@ from testing.assertions import Subscriber
 
 
 class TestInput(Subscriber):
-    """Tests for the input plugin."""
 
     def setUp(self) -> None:
         cherrypy.config["server_host"] = "example.com"

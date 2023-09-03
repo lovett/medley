@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestRecipes(Subscriber):
-    """Tests for the recipes plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.recipes.Plugin(cherrypy.engine)

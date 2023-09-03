@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestPlotter(Subscriber):
-    """Tests for the plotter plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.plotter.Plugin(cherrypy.engine)

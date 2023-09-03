@@ -8,7 +8,6 @@ import apps.foodlog.main  # type: ignore
 
 
 class TestFoodlog(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

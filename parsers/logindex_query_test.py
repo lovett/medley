@@ -5,7 +5,6 @@ import parsers.logindex_query
 
 
 class TestLogindexQueryParser(unittest.TestCase):
-    """Tests for the logindex_query parser."""
 
     parser: parsers.logindex_query.Parser
 

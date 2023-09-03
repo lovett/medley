@@ -11,9 +11,6 @@ from testing.assertions import Subscriber
 
 
 class TestGeography(Subscriber):
-    """
-    Tests for the geography plugin.
-    """
 
     def setUp(self) -> None:
         self.plugin = plugins.geography.Plugin(cherrypy.engine)

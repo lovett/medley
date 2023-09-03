@@ -9,7 +9,6 @@ import plugins.app_url
 
 
 class TestUrl(Subscriber):
-    """Tests for the url plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.app_url.Plugin(cherrypy.engine)

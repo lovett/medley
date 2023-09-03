@@ -8,7 +8,6 @@ import apps.sleeplog.main  # type: ignore
 
 
 class TestSleeplog(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

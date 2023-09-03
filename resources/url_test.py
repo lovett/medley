@@ -5,7 +5,6 @@ from resources.url import Url
 
 
 class TestUrlResource(unittest.TestCase):
-    """Tests for the Url resource."""
 
     def test_base_address(self) -> None:
         """The address can be reduced to a root URL."""

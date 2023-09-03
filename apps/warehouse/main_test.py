@@ -8,9 +8,6 @@ import apps.warehouse.main  # type: ignore
 
 
 class TestShared(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

@@ -8,9 +8,6 @@ import apps.reminder.main  # type: ignore
 
 
 class TestReminder(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

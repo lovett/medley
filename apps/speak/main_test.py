@@ -10,7 +10,6 @@ import apps.speak.main  # type: ignore
 
 
 class TestSpeak(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

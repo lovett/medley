@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestGcpStorage(Subscriber):
-    """Tests for the gcp_storage plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.gcp_storage.Plugin(cherrypy.engine)

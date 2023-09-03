@@ -10,9 +10,6 @@ import apps.countries.main  # type: ignore
 
 
 class TestCountries(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

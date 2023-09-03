@@ -10,9 +10,6 @@ import apps.phone.main  # type: ignore
 
 
 class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

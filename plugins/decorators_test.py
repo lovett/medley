@@ -4,7 +4,6 @@ import unittest
 
 
 class TestDecorators(unittest.TestCase):
-    """Tests for the decorators plugin."""
 
     def setUp(self) -> None:
         pass

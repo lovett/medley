@@ -9,7 +9,6 @@ from resources.url import Url
 
 
 class TestMarkup(Subscriber):
-    """Tests for the markup plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.markup.Plugin(cherrypy.engine)

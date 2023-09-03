@@ -8,7 +8,6 @@ import apps.weather.main  # type: ignore
 
 
 class TestWeather(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

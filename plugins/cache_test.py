@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestCache(Subscriber):
-    """Tests for the cache plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.cache.Plugin(cherrypy.engine)

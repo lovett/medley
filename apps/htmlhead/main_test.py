@@ -12,9 +12,6 @@ import apps.htmlhead.main  # type: ignore
 
 
 class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

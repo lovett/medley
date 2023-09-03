@@ -8,7 +8,6 @@ import apps.bucketpull.main  # type: ignore
 
 
 class TestBucketpull(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

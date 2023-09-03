@@ -9,7 +9,6 @@ from testing.assertions import Subscriber
 
 
 class TestSpeak(Subscriber):
-    """Tests for the speak plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.speak.Plugin(cherrypy.engine)

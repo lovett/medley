@@ -8,9 +8,6 @@ import apps.recipes.main  # type: ignore
 
 
 class TestRecipes(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

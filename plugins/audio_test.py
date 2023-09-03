@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestAudio(Subscriber):
-    """Tests for the audio plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.audio.Plugin(cherrypy.engine)

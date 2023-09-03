@@ -12,9 +12,6 @@ import apps.ip.main
 
 
 class TestIp(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

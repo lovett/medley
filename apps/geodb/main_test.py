@@ -15,9 +15,6 @@ import apps.geodb.main  # type: ignore
 
 
 class TestGeodb(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     temp_dir = ""
     temp_file = ""

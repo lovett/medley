@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestLogindex(Subscriber):
-    """Tests for the logindex plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.logindex.Plugin(cherrypy.engine)

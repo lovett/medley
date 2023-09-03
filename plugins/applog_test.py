@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestApplog(Subscriber):
-    """Tests for the applog plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.applog.Plugin(cherrypy.engine)

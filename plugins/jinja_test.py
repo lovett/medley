@@ -9,7 +9,6 @@ from testing.assertions import Subscriber
 
 
 class TestJinja(Subscriber):
-    """Tests for the jinja plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.jinja.Plugin(cherrypy.engine)

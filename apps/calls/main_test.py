@@ -10,7 +10,6 @@ import apps.calls.main  # type: ignore
 
 
 class TestCalls(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

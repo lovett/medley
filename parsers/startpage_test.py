@@ -5,7 +5,6 @@ import parsers.startpage
 
 
 class TestStartpageParser(unittest.TestCase):
-    """Tests for the startpage parser."""
 
     parser: parsers.startpage.Parser
     anon_parser: parsers.startpage.Parser

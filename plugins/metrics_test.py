@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestMetrics(Subscriber):
-    """Tests for the metrics plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.metrics.Plugin(cherrypy.engine)

@@ -8,9 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestIp(Subscriber):
-    """
-    Tests for the ip plugin.
-    """
 
     def setUp(self) -> None:
         self.plugin = plugins.ip.Plugin(cherrypy.engine)

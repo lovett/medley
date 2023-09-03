@@ -11,7 +11,6 @@ import apps.homepage.main  # type: ignore
 
 
 class TestHomepage(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

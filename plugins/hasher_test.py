@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestHasher(Subscriber):
-    """Tests for the hasher plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.hasher.Plugin(cherrypy.engine)

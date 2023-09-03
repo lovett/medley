@@ -10,7 +10,6 @@ import apps.bounce.main  # type: ignore
 
 
 class TestBounce(BaseCherryPyTestCase, ResponseAssertions):
-    """Tests for the application controller."""
 
     @classmethod
     def setUpClass(cls) -> None:

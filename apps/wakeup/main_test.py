@@ -10,9 +10,6 @@ import apps.wakeup.main  # type: ignore
 
 
 class TestWakeup(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

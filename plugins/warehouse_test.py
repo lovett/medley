@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestWarehouse(Subscriber):
-    """Tests for the warehouse plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.warehouse.Plugin(cherrypy.engine)

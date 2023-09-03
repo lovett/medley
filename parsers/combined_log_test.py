@@ -6,7 +6,6 @@ from testing import helpers
 
 
 class TestCombinedLogParser(unittest.TestCase):
-    """Tests for the combined_log parser."""
 
     parser: parsers.combined_log.Parser
 

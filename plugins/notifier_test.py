@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestNotifier(Subscriber):
-    """Tests for the notifier plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.notifier.Plugin(cherrypy.engine)

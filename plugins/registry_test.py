@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestRegistry(Subscriber):
-    """Tests for the registry plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.registry.Plugin(cherrypy.engine)

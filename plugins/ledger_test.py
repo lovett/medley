@@ -8,7 +8,6 @@ from testing.assertions import Subscriber
 
 
 class TestLedger(Subscriber):
-    """Tests for the ledger plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.ledger.Plugin(cherrypy.engine)

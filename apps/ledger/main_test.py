@@ -8,9 +8,6 @@ import apps.ledger.main  # type: ignore
 
 
 class TestLedgerUrl(BaseCherryPyTestCase, ResponseAssertions):
-    """
-    Tests for the application controller.
-    """
 
     @classmethod
     def setUpClass(cls) -> None:

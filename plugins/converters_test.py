@@ -6,7 +6,6 @@ import plugins.converters
 
 
 class TestConverters(unittest.TestCase):
-    """Tests for the converters plugin."""
 
     def setUp(self) -> None:
         self.plugin = plugins.converters.Plugin(cherrypy.engine)

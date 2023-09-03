@@ -5,7 +5,6 @@ import plugins.jinja_cache
 
 
 class TestJinja(unittest.TestCase):
-    """Tests for the jinja plugin."""
 
     def setUp(self) -> None:
         self.cache = plugins.jinja_cache.Cache()
