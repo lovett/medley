@@ -709,8 +709,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             Iterable[Tuple[Any, Any]],
             self._selectOne(
                 """SELECT count(DISTINCT substr(datestamp, 0, 11)) as count,
-                min(datestamp) as 'earliest [date_with_hour]',
-                max(datestamp) as 'latest [date_with_hour]'
+                min(unix_timestamp) as earliest,
+                max(unix_timestamp) as latest
                 FROM logs
                 WHERE ip=?""",
                 (ip_address,)

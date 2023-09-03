@@ -3,7 +3,7 @@
 Based on sample code from https://bitbucket.org/Lawouach/cherrypy-recipes.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 import html
 import http.client
 import math
@@ -41,7 +41,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.env.filters["date"] = self.date_filter
         self.env.filters["dateformat"] = self.dateformat_filter
-        self.env.filters["ago"] = self.ago_filter
         self.env.filters["unindent"] = self.unindent_filter
         self.env.filters["status_message"] = self.status_message_filter
         self.env.filters["nl2br"] = self.nl2br_filter
@@ -213,24 +212,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         """Apply URL encoding to a value."""
 
         return quote(value)
-
-    @staticmethod
-    def ago_filter(value: datetime) -> str:
-        """Calculate a human-readable time delta between a date in the past
-        and now.
-
-        If the date provided as an integer or float, it is treated as
-        a unix timestamp.
-
-        """
-
-        return cast(
-            str,
-            cherrypy.engine.publish(
-                "clock:ago",
-                value
-            ).pop()
-        )
 
     @staticmethod
     def json_filter(value: object) -> str:
@@ -542,7 +523,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return value
 
     @staticmethod
-    def is_today(value: datetime) -> bool:
+    def is_today(value: float) -> bool:
         """Deterime if a unix timestamp falls on the current date."""
 
         delta = date.today() - date.fromtimestamp(value)

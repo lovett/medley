@@ -696,7 +696,7 @@ def publish(
 def publish(
         channel: Literal["logindex:count_visit_days"],
         ip_address: str,
-) -> List[Dict[str, Union[int, str]]]: ...
+) -> List[Dict[str, float]]: ...
 
 
 @overload

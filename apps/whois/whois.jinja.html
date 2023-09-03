@@ -94,9 +94,9 @@
                         <dt>Activity</dt>
                         <dd>
                             {{ visit_days_count|pluralize("visit", "visits") }}
-                            since {{ earliest_visit|dateformat("%B %d, %Y") }}.
+                            since {{ earliest_visit|relative_datetime }}.
 
-                            <p>Last seen {{ latest_visit|ago }}.
+                            <p>Last seen {{ latest_visit|relative_datetime }}.
                         </dd>
                     {% endif %}
 
