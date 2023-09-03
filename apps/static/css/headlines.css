@@ -3,16 +3,6 @@
     grid-gap: 2em;
 }
 
-#app-nav {
-    max-width: inherit;
-}
-
-#app-nav FORM {
-    display: block;
-    margin-bottom: 2em;
-}
-
-
 ol {
     margin-top: 0;
     padding-left: 0;

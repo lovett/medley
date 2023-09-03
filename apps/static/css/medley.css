@@ -418,7 +418,7 @@ TEXTAREA {
 }
 
 #page-title {
-    margin-bottom: 0.75em;
+    padding: 1em 0;
 }
 
 #page-title H2 {
@@ -494,9 +494,10 @@ TEXTAREA {
 
 #app-nav {
     display: flex;
+    flex-flow: row wrap;
     align-items: center;
-    gap: 2em;
-    padding-bottom: 2em;
+    gap: 1em 3em;
+    padding: 1em 0;
 }
 
 #app-nav > form {

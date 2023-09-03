@@ -9,30 +9,22 @@
     {{ macros.asset("js/headlines.js") }}
 {% endblock %}
 
-{% block main_toolbar %}
-    <nav id="main-toolbar">
-        <a href="{{ ms_rewards.anonymized }}" rel="noreferrer" target="_blank">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            MS Rewards
-        </a>
-        <a href="{{ bing.anonymized }}" rel="noreferrer" target="_blank">
-            <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-            Bing
-        </a>
-    </nav>
-{% endblock %}
-
-
 {% block page_body %}
     {{ macros.svgSymbols("globe") }}
     <main>
         <header id="app-nav">
-            <form action="#">
-                <button
-                    data-walk-start="{{ walk_start }}"
-                    data-walk-stop="{{ walk_stop }}"
-                >Walk links {{ walk_start }} – {{ walk_stop }}</button>
-            </form>
+            <a href="{{ ms_rewards.anonymized }}" rel="noreferrer" target="_blank">
+                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                MS Rewards
+            </a>
+            <a href="{{ bing.anonymized }}" rel="noreferrer" target="_blank">
+                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                Bing
+            </a>
+            <button
+                data-walk-start="{{ walk_start }}"
+                data-walk-stop="{{ walk_stop }}"
+            >Walk links {{ walk_start }} – {{ walk_stop }}</button>
         </header>
 
         <section id="headlines">
