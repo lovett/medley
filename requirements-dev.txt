@@ -1,7 +1,5 @@
 bandit==1.7.5
 coverage==7.3.0
-flake8==6.1.0
-flake8-comprehensions==3.14.0
 httpx==0.24.1
 lxml==4.9.3
 memory-profiler==0.61.0
