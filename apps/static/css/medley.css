@@ -35,7 +35,6 @@ BODY {
     display: flex;
     flex-direction: column;
     margin: 0;
-    font-size: 18px;
     background-color: var(--offwhite);
 }
 
@@ -902,5 +901,11 @@ TEXTAREA {
 
     #page-header {
         display: none;
+    }
+}
+
+@media (resolution:96dpi) {
+    BODY {
+        font-size: 18px;
     }
 }
