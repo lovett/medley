@@ -3,6 +3,7 @@
 Based on sample code from https://bitbucket.org/Lawouach/cherrypy-recipes.
 """
 
+from datetime import date, datetime, timedelta
 import html
 import http.client
 import math
@@ -16,7 +17,6 @@ from typing import Tuple
 from typing import Union
 from typing import cast
 from urllib.parse import quote
-from datetime import datetime, timedelta
 import json
 import re
 import cherrypy
@@ -64,9 +64,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["internal_url"] = self.internal_url_filter
         self.env.filters["better_html"] = self.better_html_filter
         self.env.filters["is_today"] = self.is_today
-        self.env.filters["is_yesterday"] = self.is_yesterday
         self.env.filters["retarget_html"] = self.retarget_html_filter
         self.env.filters["filesize"] = self.filesize_filter
+        self.env.filters["local_datetime"] = self.local_datetime_filter
+        self.env.filters["relative_datetime"] = self.relative_datetime_filter
 
         cherrypy.process.plugins.SimplePlugin.__init__(self, bus)
 
@@ -541,53 +542,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return value
 
     @staticmethod
-    @jinja2.pass_context
-    def is_today(
-            _: jinja2.runtime.Context,
-            value: datetime
-    ) -> bool:
+    def is_today(value: datetime) -> bool:
         """Deterime if a unix timestamp falls on the current date."""
 
-        now = cherrypy.engine.publish(
-            "clock:now",
-            local=True
-        ).pop()
-
-        return cast(
-            bool,
-            cherrypy.engine.publish(
-                "clock:same_day",
-                value,
-                now
-            ).pop()
-        )
-
-    @staticmethod
-    @jinja2.pass_context
-    def is_yesterday(
-            _: jinja2.runtime.Context,
-            value: datetime
-    ) -> bool:
-        """Determine if a unix timestamp falls on yesterday's date."""
-
-        now = cast(
-            datetime,
-            cherrypy.engine.publish(
-                "clock:now",
-                local=True
-            ).pop()
-        )
-
-        yesterday = now - timedelta(days=1)
-
-        return cast(
-            bool,
-            cherrypy.engine.publish(
-                "clock:same_day",
-                value,
-                yesterday
-            ).pop()
-        )
+        delta = date.today() - date.fromtimestamp(value)
+        return delta.days == 0
 
     @staticmethod
     def retarget_html_filter(value: str) -> str:
@@ -622,3 +581,36 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 return f"{math.ceil(value / limit)} {label}"
 
         return f"{value} B"
+
+    @staticmethod
+    def local_datetime_filter(value: float) -> str:
+        """Localize and format a Unix timestamp.
+
+        Value should be UTC. fromtimestamp() will convert to the local
+        (server) timezone. The datetime received by strftime() is
+        naieve.
+
+        """
+
+        fmt = "%b %-d, %Y %-I:%M %p"
+        return datetime.fromtimestamp(value).strftime(fmt)
+
+    @staticmethod
+    def relative_datetime_filter(value: float) -> str:
+        """Format a Unix timestamp in relative terms."""
+
+        dt = datetime.fromtimestamp(value)
+        timestamp = dt.strftime("%-I:%M %p")
+
+        delta = date.today() - date.fromtimestamp(value)
+
+        if delta.days == 0:
+            return f"today at {timestamp}"
+
+        if delta.days == 1:
+            return f"yesterday at {timestamp}"
+
+        if dt.year == date.today().year:
+            return dt.strftime("%B %-d")
+
+        return dt.strftime("%B %-d, %Y")

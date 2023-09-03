@@ -1,5 +1,6 @@
 """Format a feed as HTML."""
 
+from time import mktime
 from typing import Any
 from typing import Dict
 from typing import List
@@ -37,15 +38,7 @@ def render(url: Url, **kwargs: str) -> bytes:
         if not story_date:
             story_date = story.get("updated_parsed", ())
 
-        created = cherrypy.engine.publish(
-            "clock:from_struct",
-            story_date
-        ).pop()
-
-        created_local = cherrypy.engine.publish(
-            "clock:local",
-            created
-        ).pop()
+        created = mktime(story_date)
 
         story_link = story.get("link", "")
         if story_link.startswith("/"):
@@ -64,7 +57,7 @@ def render(url: Url, **kwargs: str) -> bytes:
             "title": title,
             "link": link,
             "comments": comments,
-            "created": created_local,
+            "created": created,
             "created_raw": story.get("published"),
             "tags": tags,
             "authors": authors,

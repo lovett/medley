@@ -6,7 +6,7 @@
     {% if comment.author %}
         <details id="t1_{{ comment.id }}" open class="comment {% if comment.author == story.author %}from-author{% endif %}">
             <summary>
-                <time>{{ comment.created_utc }}</time>
+                <time>{{ comment.created_utc|relative_datetime }}</time>
                 by
                 <a rel="noopeneer noreferrer" href="{{ comment.author_url.alt }}">
                     {% if comment.author == story.author %}
@@ -52,7 +52,7 @@
 
         <time class="info">
             <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-            {{ story.created }}
+            {{ story.created_utc|relative_datetime }}
         </time>
 
         {% if story.num_comments > 0 %}

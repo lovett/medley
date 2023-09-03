@@ -20,26 +20,15 @@
     <div id="collection">
         <ul>
             {% for story in stories %}
-                {% set is_today = story.created|is_today %}
-                {% set is_yesterday = story.created|is_yesterday %}
-                <li class="headline {% if is_today %}today{% endif %}">
+                <li class="headline {% if story.created|is_today %}today{% endif %}">
                     <h2 class="title">
                         <a href="{{ story.link.anonymized }}" target="_blank" rel="noopener noreferrer">
                             {{ story.title|safe|truncate(100) }}
                         </a>
                     </h2>
                     <time class="info">
-
-                        {% if is_today %}
-                            <svg class="icon"><use xlink:href="#icon-clock"></use></svg>
-                            {{ story.created|dateformat("%-I:%M %p") }}
-                        {% elif is_yesterday %}
-                            <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                            yesterday at {{ story.created|dateformat("%-I:%M %p") }}
-                        {% else %}
-                            <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                            {{ story.created|dateformat("%Y-%m-%d %-I:%M %p") }}
-                        {% endif %}
+                        <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
+                        {{ story.created|relative_datetime }}
                     </time>
                     {% if story.comments.address %}
                     <span class="info">

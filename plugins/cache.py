@@ -195,8 +195,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             LENGTH(IFNULL(j.value ->> '$.data.selftext', '')) > 0 as selftext,
             FORMAT('https://reddit.com/r/%s', j.value ->> '$.data.subreddit')
               AS 'subreddit [url]',
-            datetime(j.value ->> '$.data.created_utc', 'unixepoch')
-              AS 'created [local_datetime]'
+            j.value ->> '$.data.created_utc' as created_utc
             FROM unexpired u, json_each(u.value, '$.data.children') j
             WHERE u.prefix=? AND u.key=?
             AND json_extract(u.value, j.fullkey || '.kind') == 't3'
@@ -215,17 +214,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         story_rows = self._select_generator(
             """SELECT
-            CASE
-              WHEN j.key='created_utc'
-                THEN 'created'
-              ELSE j.key
-            END as key,
-            CASE
-              WHEN j.key='created_utc'
-                THEN datetime(j.value, 'unixepoch', 'localtime')
-              ELSE
-                  j.value
-              END as value
+            j.key, j.value
             FROM unexpired u,
                  json_each(u.value, '$[0].data.children[0].data') j
             WHERE u.prefix=? AND u.key=?
@@ -266,8 +255,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             j.value ->> '$.author' AS author,
             FORMAT('https://reddit.com/u/%s', j.value ->> '$.author')
               AS 'author_url [url]',
-            datetime(j.value ->> '$.created_utc', 'unixepoch', 'localtime')
-              AS created_utc,
+            j.value ->> '$.created_utc' AS created_utc,
             j.value ->> '$.parent_id' as parent_id,
             j.value ->> '$.body_html' as body_html
             FROM unexpired u, json_tree(u.value, '$[1].data.children') j
