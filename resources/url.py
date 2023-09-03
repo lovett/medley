@@ -43,7 +43,7 @@ class Url():
                     self.address += "&"
                 else:
                     self.address += "?"
-                self.address += urlencode(nonempty_query)
+                self.address += urlencode(nonempty_query, doseq=True)
 
         try:
             if "://" not in self.address:
@@ -123,8 +123,11 @@ class Url():
     def __repr__(self) -> str:
         return self.address
 
+    def __str__(self) -> str:
+        return self.address
+
     def __bool__(self) -> bool:
         return self.address != ""
 
     def __eq__(self, other: object) -> bool:
-        return self.schemeless_address == other
+        return self.address.lower() == other.address.lower()

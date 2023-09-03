@@ -1,7 +1,36 @@
 MEDLEY.alturl = (function () {
     'use strict';
 
-    async function saveFavorite(e) {
+    const addId = 'add-bookmark';
+    const removeId = 'remove-bookmark';
+
+    async function removeBookmark(e) {
+        if (e.target.id !== removeId) {
+            return;
+        }
+
+        e.preventDefault();
+        const id = e.target.dataset.bookmarkId;
+
+        const response = await fetch(`/registry/${id}`, {
+            method: 'DELETE',
+            mode: 'same-origin'
+        });
+
+        if (response.ok) {
+            MEDLEY.setSuccessMessage('Bookmark removed');
+            e.target.hidden = true;
+            document.getElementById(addId).hidden = false;
+        } else {
+            MEDLEY.setErrorMessage('The bookmark count not be removed');
+        }
+    }
+
+    async function addBookmark(e) {
+        if (e.target.id !== addId) {
+            return;
+        }
+
         e.preventDefault();
         const url = e.target.dataset.url;
 
@@ -9,18 +38,26 @@ MEDLEY.alturl = (function () {
         payload.set('key', 'alturl:bookmark');
         payload.set('value', url.toLowerCase());
         payload.set('skip_redirect', true);
+        payload.set('return_id', true);
 
         const response = await fetch('/registry', {
             method: 'POST',
             mode: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+            },
             body: payload
-        })
+        });
 
         if (response.ok) {
-            MEDLEY.setSuccessMessage('URL bookmarked');
+            MEDLEY.setSuccessMessage('Bookmark added');
             e.target.hidden = true;
+            const json = await response.json();
+            document.getElementById(addId).dataset.bookmarkId = json.rowid;
+
+            document.getElementById(removeId).hidden = false;
         } else {
-            MEDLEY.setErrorMessage('The URL could not be bookmarked');
+            MEDLEY.setErrorMessage('A bookmark could not be added');
         }
     }
 
@@ -70,10 +107,9 @@ MEDLEY.alturl = (function () {
 
     return {
         init: function () {
-            const saveLink = document.getElementById('add-record');
-            if (saveLink) {
-                saveLink.addEventListener('click', saveFavorite)
-            }
+            document.addEventListener('click', addBookmark);
+
+            document.addEventListener('click', removeBookmark);
 
             document.addEventListener('click', filterStories);
 

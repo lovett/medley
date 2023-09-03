@@ -1,6 +1,6 @@
 """Feed reader"""
 
-from typing import Any, Dict, Iterator
+from typing import Any, Dict, Iterator, Optional
 import cherrypy
 from resources.url import Url
 import apps.alturl.feed
@@ -57,7 +57,7 @@ class Controller:
         """Dispatcher for GET requests that specify a URL."""
 
         view_vars: Dict[str, Any] = {
-            "is_bookmarked": self.is_bookmarked(url)
+            "bookmark_id": self.get_bookmark_id(url)
         }
 
         if url.domain.endswith("reddit.com"):
@@ -120,13 +120,13 @@ class Controller:
         for row in rows:
             yield Url(row["value"], "", row["rowid"])
 
-    def is_bookmarked(self, url: Url) -> bool:
-        """Has the specified URL been bookmarked?"""
+    def get_bookmark_id(self, url: Url) -> int:
+        """The bookmark for Has the specified URL been bookmarked?"""
 
-        return any((
-            bookmark == url
-            for bookmark in self.get_bookmarks()
-        ))
+        for bookmark in self.get_bookmarks():
+            if bookmark == url:
+                return bookmark.id
+        return 0
 
     @staticmethod
     def on_registry_changed(key: str) -> None:

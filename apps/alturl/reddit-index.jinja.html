@@ -9,6 +9,16 @@
     </header>
 
     <header id="app-nav">
+        <a id="remove-bookmark" href="#" data-bookmark-id="{{ bookmark_id }}" {% if bookmark_id == 0 %}hidden{% endif %}>
+            <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+            Remove bookmark
+        </a>
+
+        <a id="add-bookmark" href="#" data-url="{{ url.address }}" {% if bookmark_id > 0 %}hidden{% endif %}>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Bookmark
+        </a>
+
         <form method="post" action="{{ app_url }}">
             <input type="hidden" name="url" value="{{ url.address }}" />
             <div class="field">
@@ -17,7 +27,6 @@
                     autocomplete="off"
                     id="q"
                     name="q"
-                    placeholder="Search terms"
                     type="search"
                     value="{{ q }}"
                 />
@@ -27,15 +36,6 @@
             </div>
         </form>
     </header>
-
-    {% if not is_bookmarked %}
-        <p>
-            <a id="add-record" href="#" data-url="{{ url.address }}">
-                <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-                Bookmark
-            </a>
-        </p>
-    {% endif %}
 
     <div id="collection">
         <ul>

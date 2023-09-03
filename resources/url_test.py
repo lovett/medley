@@ -91,13 +91,8 @@ class TestUrlResource(unittest.TestCase):
         base = "https://reddit.com/r/"
 
         samples = (
-            # plain
-            ("example",
-             "example/.json"),
-            # query
-            ("example?sort=new",
-             "example/.json?sort=new"),
-            # search and empty param
+            ("example", "example/.json"),
+            ("example?sort=new", "example/.json?sort=new"),
             ("example?q=searchterm&sort=new&empty=",
              "example/search/.json?q=searchterm&sort=new")
         )

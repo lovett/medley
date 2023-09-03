@@ -81,6 +81,21 @@ var MEDLEY = (function () {
         });
     };
 
+    function clearMessage(e) {
+        if (e && e.target.id !== 'app-message-close') {
+            return;
+        }
+
+        if (e) {
+            e.preventDefault();
+        }
+
+        const el = document.getElementById('app-message');
+        el.setAttribute('hidden', '');
+        el.classList.remove('error')
+        el.innerHTML = '';
+    }
+
     return {
         reactivateForm: function (form) {
             const buttons = form.querySelectorAll('button');
@@ -104,18 +119,15 @@ var MEDLEY = (function () {
 
         setSuccessMessage: function (message) {
             const el = document.getElementById('app-message');
+            const template = document.getElementById('app-message-template');
+            el.innerHTML = template.innerHTML;
             el.removeAttribute('hidden');
             el.classList.remove('error')
             el.classList.add('success')
-            el.innerHTML = `<p>${message}</p>`;
+            el.querySelector('p').innerHTML = message;
         },
 
-        clearMessage: function() {
-            const el = document.getElementById('app-message');
-            el.setAttribute('hidden', '');
-            el.classList.remove('error')
-            el.innerHTML = '';
-        },
+        clearMessage: clearMessage,
 
         setErrorMessage: function (message) {
             const el = document.getElementById('app-message');
@@ -126,6 +138,7 @@ var MEDLEY = (function () {
         },
 
         init: function () {
+            document.addEventListener('click', clearMessage);
             document.addEventListener(
                 'keydown',
                 globalShortcuts

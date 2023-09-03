@@ -138,7 +138,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         params: Tuple[Any, ...] = ()
 
         sql = """
-        SELECT rowid, key, value, created as 'created [timestamp]'
+        SELECT rowid, key, value, unixepoch(created) as created
         FROM registry
         WHERE (1) """
 

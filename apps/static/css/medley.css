@@ -273,7 +273,17 @@ TEXTAREA {
 }
 
 #app-message {
+    display: flex;
+    justify-content: space-between;
+}
+
+#app-message:not(:empty) {
     padding: 1em;
+}
+
+#app-message-close {
+    color: currentColor;
+    text-decoration: none;
 }
 
 #app-message p {
@@ -483,14 +493,14 @@ TEXTAREA {
 }
 
 #app-nav {
-    margin: auto;
-    margin-bottom: 1em;
-    max-width: 40em;
+    display: flex;
+    align-items: center;
+    gap: 2em;
+    padding-bottom: 2em;
 }
 
 #app-nav > form {
-    width: 100%;
-    display: grid;
+    display: inline-grid;
     grid-template-columns: 1fr auto;
     grid-column-gap: 1em;
     grid-row-gap: 1em;

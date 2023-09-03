@@ -54,6 +54,7 @@ class Controller:
         return self.index()
 
     @staticmethod
+    @cherrypy.tools.provides(formats=("json"))
     def POST(uid: str = "", **kwargs: str) -> None:
         """Store a new entry in the database or update an existing entry"""
 
@@ -95,6 +96,18 @@ class Controller:
             ).pop()
 
             raise cherrypy.HTTPRedirect(redirect_url)
+
+        if cherrypy.request.wants == "json":
+
+            _, rows = cherrypy.engine.publish(
+                "registry:search",
+                key,
+                limit=1
+            ).pop()
+
+            row = next(rows)
+
+            return json.dumps(dict(row)).encode()
 
         cherrypy.response.status = 204
 
