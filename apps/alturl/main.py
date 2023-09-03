@@ -1,6 +1,6 @@
 """Feed reader"""
 
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator
 import cherrypy
 from resources.url import Url
 import apps.alturl.feed

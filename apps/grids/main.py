@@ -26,14 +26,11 @@ class Controller:
         if kwargs.get("start"):
             try:
                 start_date = datetime.strptime(
-                    kwargs.get("start"),
+                    kwargs.get("start", ""),
                     "%Y-%m-%d"
                 )
-            except ValueError:
-                start_date = None
-
-        if not start_date:
-            raise cherrypy.HTTPError(400, "Invalid start date")
+            except ValueError as exc:
+                raise cherrypy.HTTPError(400, "Invalid start date") from exc
 
         return self.show(grid_name, start_date)
 

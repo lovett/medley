@@ -9,7 +9,7 @@ from typing import Dict, Any, Optional
 class Url():
     """Assorted representations of a URL."""
 
-    address: str
+    address: str = ""
     text: str = ""
     id: int = 0
     query: Optional[Dict[str, Any]] = None
@@ -124,10 +124,10 @@ class Url():
         return self.address
 
     def __str__(self) -> str:
-        return self.address
+        return self.address.lower()
 
     def __bool__(self) -> bool:
         return self.address != ""
 
-    def __eq__(self, other: object) -> bool:
-        return self.address.lower() == other.address.lower()
+    def __eq__(self, o: object) -> bool:
+        return self.address.lower() == o

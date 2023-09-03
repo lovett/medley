@@ -74,7 +74,7 @@ class Controller:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
-            record_id = int(uid)
+            record_id = int(uid or 0)
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 

@@ -1,6 +1,7 @@
 """Configuration database"""
 
 import json
+from typing import Optional
 import cherrypy
 
 
@@ -54,8 +55,8 @@ class Controller:
         return self.index()
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("json"))
-    def POST(uid: str = "", **kwargs: str) -> None:
+    @cherrypy.tools.provides(formats=("json",))
+    def POST(uid: str = "", **kwargs: str) -> Optional[bytes]:
         """Store a new entry in the database or update an existing entry"""
 
         try:
@@ -110,6 +111,7 @@ class Controller:
             return json.dumps(dict(row)).encode()
 
         cherrypy.response.status = 204
+        return None
 
     @staticmethod
     def form(record_id: int, **kwargs: str) -> bytes:
