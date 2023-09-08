@@ -5,33 +5,6 @@ MEDLEY.startpage = (function () {
     let pageLinks = [];
 
     /**
-     * Show the last-modified time of the data file as a date-and-time
-     * string.
-     */
-    function displayLastModified() {
-        const node = document.getElementById('modified');
-
-        if (!node) {
-            return;
-        }
-
-        const modifiedDate = Date.parse(node.getAttribute('datetime'));
-
-        const dateString = new Intl.DateTimeFormat(
-            undefined,
-            {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                hour12: true
-            }
-        ).format(modifiedDate);
-
-        node.innerHTML = `Updated ${dateString}`;
-    }
-
-    /**
      * Open multiple links at once.
      */
     function openLinkGroup(e) {
@@ -76,8 +49,6 @@ MEDLEY.startpage = (function () {
 
     return {
         init: function () {
-            displayLastModified();
-
             pageLinks = document.getElementsByTagName('A');
 
             // Determine the anonymizer URL
