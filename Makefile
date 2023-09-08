@@ -314,7 +314,7 @@ favicon: dummy
 	cd apps/static && optipng -quiet -o 3 *.png
 
 
-# Automation for setting up a tmux session
+# Tmux automation
 workspace:
 # 0: Editor
 	tmux new-session -d -s "$(TMUX_SESSION_NAME)" "$$SHELL"
@@ -332,6 +332,14 @@ workspace:
 	tmux select-window -t "$(TMUX_SESSION_NAME)":0
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
 
+satellite:
+	tmux new-session -d -s "$(TMUX_SESSION_NAME)-satellite"
+	tmux link-window -s '$(TMUX_SESSION_NAME):npm' -t '$(TMUX_SESSION_NAME)-satellite:1'
+	tmux link-window -s '$(TMUX_SESSION_NAME):devserver' -t '$(TMUX_SESSION_NAME)-satellite:2'
+	tmux kill-window -t :0
+
+	# tmux select-window -t "$(TMUX_SESSION_NAME)-satellite":2
+	tmux attach-session -t "$(TMUX_SESSION_NAME)-satellite"
 
 # Perform sundry cleanup tasks.
 reset:
