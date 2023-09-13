@@ -42,7 +42,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if not precached:
             return cherrypy.engine.publish(
                 "jinja:render",
-                "apps/alturl/unavailable.jinja.html"
+                "apps/alturl/unavailable.jinja.html",
+                url=url,
             ).pop()
 
         cache_info = cherrypy.engine.publish(

@@ -43,8 +43,16 @@ class TestReddit(Subscriber):
         self.assertEqual(1, len(calls))
         self.assertEqual(kwargs, calls[0][1])
 
-    def test_render_story(self) -> None:
+    @patch("cherrypy.engine.publish")
+    def test_render_story(self, publish_mock: Mock) -> None:
         """The story renderer is invoked when viewing a story."""
+
+        def side_effect(*args: str, **_: str) -> Any:
+            if args[0] == "urlfetch:precache":
+                return [True]
+            return DEFAULT
+
+        publish_mock.side_effect = side_effect
 
         self.plugin.render_story = Mock(  # type: ignore
             return_value=b''

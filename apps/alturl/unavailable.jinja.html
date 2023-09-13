@@ -7,8 +7,7 @@
     {% else %}
 
     <p>
-        <a href="{{ url.address }}" rel="noopener noreferrer">{{ url.address }}</a>
-        is in an unsupported format, {{ url.content_type }}
+        The page at <a href="{{ url.address }}" rel="noopener noreferrer">{{ url.address }}</a> is not available.
     </p>
     {% endif %}
 
