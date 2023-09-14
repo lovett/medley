@@ -221,7 +221,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "scheduler:add",
                 cache_lifespan,
                 "memorize:clear",
-                url.derived_from.address
+                url.derived_from.etag_key,
+                url.derived_from.alt_etag_key
             )
 
         return cherrypy.engine.publish(

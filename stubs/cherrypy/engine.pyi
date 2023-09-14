@@ -772,8 +772,8 @@ def publish(
 @overload
 def publish(
         channel: Literal["memorize:clear"],
-        key: str = ""
-) -> List[bool]: ...
+        *args: str,
+) -> List[None]: ...
 
 
 @overload

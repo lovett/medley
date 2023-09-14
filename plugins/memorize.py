@@ -43,26 +43,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         self.cache[lowercase_key] = value
 
-    def clear(self, key: str = "") -> None:
-        """Remove a value from the cache."""
+    def clear(self, *args: str) -> None:
+        """Remove one or more values value from the cache."""
 
-        lowercase_key = key.lower()
-        applog_key = "memorize:clear"
-
-        if key:
-            self.cache.pop(lowercase_key, None)
+        for arg in args:
+            key = arg.lower()
+            self.cache.pop(key, None)
 
             cherrypy.engine.publish(
                 "applog:add",
-                applog_key,
-                f"Cleared {lowercase_key}"
+                "memorize:clear",
+                f"Cleared {key}"
             )
-            return
 
-        self.cache = {}
+        if not args:
+            self.cache = {}
 
-        cherrypy.engine.publish(
-            "applog:add",
-            applog_key,
-            "Reset"
-        )
+            cherrypy.engine.publish(
+                "applog:add",
+                "memorize:clear",
+                "Reset"
+            )
