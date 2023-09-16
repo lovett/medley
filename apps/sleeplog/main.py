@@ -52,10 +52,11 @@ class Controller:
         if record_id == 0 and subresource == "new":
             return self.form(record_id)
 
-        if cherrypy.request.path_info == "/":
-            return self.index(**kwargs)
+        if subresource:
+            raise cherrypy.NotFound()
 
-        raise cherrypy.NotFound()
+        return self.index(**kwargs)
+
 
     @cherrypy.tools.provides(formats=("html", "json"))
     def POST(self, uid: str, **kwargs: str) -> bytes:
