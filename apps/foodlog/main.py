@@ -48,15 +48,12 @@ class Controller:
         if record_id == 0 and subresource == "new":
             return self.form(0)
 
+        if subresource:
+            raise cherrypy.NotFound()
+
         q = kwargs.get("q", "").lower()
         if q:
             return self.search(**kwargs)
-
-        if cherrypy.request.path_info != "/":
-            redirect_url = cherrypy.engine.publish(
-                "app_url",
-            ).pop()
-            raise cherrypy.HTTPRedirect(redirect_url)
 
         return self.index(**kwargs)
 
