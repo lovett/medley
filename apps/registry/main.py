@@ -55,7 +55,7 @@ class Controller:
         return self.index()
 
     @staticmethod
-    @cherrypy.tools.provides(formats=("json",))
+    @cherrypy.tools.provides(formats=("html", "json"))
     def POST(uid: str = "", **kwargs: str) -> Optional[bytes]:
         """Store a new entry in the database or update an existing entry"""
 
