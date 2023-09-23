@@ -36,7 +36,7 @@ class Controller:
         if username and password:
             auth = (username, password)
 
-        response = cherrypy.engine.publish(
+        response, _ = cherrypy.engine.publish(
             "urlfetch:get",
             url,
             as_object=True,

@@ -233,7 +233,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if not url:
             return
 
-        html = cherrypy.engine.publish(
+        html, _ = cherrypy.engine.publish(
             "urlfetch:get",
             url.address
         ).pop()

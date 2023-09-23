@@ -54,7 +54,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
                     """
                 )
                 response = requests.get("http://example.com", timeout=1)
-                return [response]
+                return [(response, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
@@ -82,7 +82,7 @@ class TestHtmlhead(BaseCherryPyTestCase, ResponseAssertions):
                     status=404
                 )
                 response = requests.get("http://example.com", timeout=1)
-                return [response]
+                return [(response, None)]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT
