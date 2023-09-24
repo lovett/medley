@@ -33,17 +33,6 @@ section {
     margin-bottom: 1em;
 }
 
-section:last-of-type {
-    background-color: var(--grey);
-    margin-bottom: 0;
-    padding: .5em;
-    box-sizing: border-box;
-}
-
-section:last-of-type li {
-    padding: .5em 0;
-}
-
 section a {
     color: var(--alert);
 }

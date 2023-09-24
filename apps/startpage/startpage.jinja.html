@@ -14,7 +14,16 @@
     {% else %}
         <!-- Anonymizer inline style omitted -->
     {% endif %}
+{% endblock %}
 
+{% block main_toolbar %}
+
+    <nav id="main-toolbar">
+        <a id="edit-record" href="{{ edit_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
+        </a>
+    </nav>
 {% endblock %}
 
 {% block page_body %}
@@ -55,20 +64,6 @@
                 </ul>
             </section>
         {% endfor %}
-
-        <section>
-            <ul>
-                <li>
-                   <time>Modified {{ created|relative_datetime }}</time>
-                </li>
-                <li>
-                    <a id="edit-record" href="{{ edit_url }}">
-                        <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                        Edit
-                    </a>
-                </li>
-            </ul>
-        </section>
     </main>
 {% endblock %}
 
