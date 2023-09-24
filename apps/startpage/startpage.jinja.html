@@ -17,15 +17,6 @@
 
 {% endblock %}
 
-{% block page_meta %}
-    {% if anonymizer_url %}
-        <meta name="anonymizer" content="{{ anonymizer_url }}"/>
-    {% else %}
-        <!-- Anonymizer meta tag omitted -->
-    {% endif %}
-{% endblock %}
-
-
 {% block page_body %}
     {{ macros.svgSymbols("edit") }}
     <main id="display">
@@ -68,16 +59,8 @@
         <section>
             <ul>
                 <li>
-                   <time>Last modified {{ created|relative_datetime }}</time>
+                   <time>Modified {{ created|relative_datetime }}</time>
                 </li>
-                {% if anonymizer_url %}
-                    <li>
-                        <label>
-                            <input type="checkbox" id="anonymize" value="1" disabled="disabled" checked="false"/>
-                            Anonymize links
-                        </label>
-                    </li>
-                {% endif %}
                 <li>
                     <a id="edit-record" href="{{ edit_url }}">
                         <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
