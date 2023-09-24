@@ -2,6 +2,12 @@ BODY {
     background-color: var(--white);
 }
 
+#display {
+    column-width: 12rem;
+    gap: 6em;
+    column-count: auto;
+}
+
 #editor {
     display: flex;
 }
@@ -62,7 +68,7 @@ section a.focus-candidate {
 
 
 section h1 {
-    font-size: 1em;
+    font-size: inherit;
     padding: 0;
     line-height: 1.5;
     margin: 0 0 .5em;
@@ -101,36 +107,16 @@ li.group:hover .all {
 
 /* Small devices */
 @media (min-width: 576px) {
-    #display {
-        column-gap: 1em;
-        column-count: 2;
-    }
 }
 
 /* Medium devices */
 @media (min-width: 768px) {
-    #display {
-        column-count: 3;
-        column-gap: 2em;
-        padding: 0 0.75em;
-    }
-
-    section {
-        font-size: .875rem;
-    }
 }
 
 /* Large devices */
 @media (min-width: 992px) {
-    #display {
-        column-count: 4;
-    }
-
 }
 
 /* Extra large devices */
 @media (min-width: 1200px) {
-    #display {
-        column-count: 5;
-    }
 }

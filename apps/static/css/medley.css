@@ -268,10 +268,6 @@ TABLE TD.warning {
     color: var(--white);
 }
 
-TEXTAREA {
-    font-size: 1em;
-}
-
 #app-message {
     display: flex;
     justify-content: space-between;
@@ -629,6 +625,7 @@ TEXTAREA {
 .field INPUT[type=time],
 .field SELECT,
 .field TEXTAREA {
+    font-size: inherit;
     box-sizing: border-box;
     border: 1px solid #ccc;
     padding: .5em;
@@ -649,7 +646,7 @@ TEXTAREA {
 }
 
 .field TEXTAREA {
-    margin-top: .2em;
+    margin-top: 0;
     height: 8em;
 }
 
