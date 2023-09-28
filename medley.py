@@ -69,7 +69,6 @@ import tools.provides
 # It also dictates what can be overriden by environment variables.
 ServerConfig = TypedDict("ServerConfig", {
     "access_log": str,
-    "autoreload": bool,
     "daemonize": bool,
     "database_dir": str,
     "encode": bool,
@@ -92,7 +91,6 @@ ServerConfig = TypedDict("ServerConfig", {
 # the shorter names in the server config to these longer equivalents makes
 # it easeier to use environment variable overrides.
 ServerConfigAliases = TypedDict("ServerConfigAliases", {
-    "engine.autoreload.on": bool,
     "log.access_file": str,
     "log.error_file": str,
     "log.screen": bool,
@@ -148,7 +146,6 @@ def setup() -> None:
     # These are reasonable values for a production environment.
     config = ServerConfig(
         access_log=env_string("access_log", ""),
-        autoreload=env_boolean("autoreload", False),
         daemonize=env_boolean("daemonize", False),
         database_dir=env_string("database_dir", "./db"),
         encode=env_boolean("encode", False),
@@ -171,7 +168,6 @@ def setup() -> None:
 
     # Remap medley configuration to cherrypy configuration.
     aliases = {
-        "engine.autoreload.on": config["autoreload"],
         "log.access_file": config["access_log"],
         "log.error_file": config["error_log"],
         "log.screen": config["log_screen"],

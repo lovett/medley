@@ -32,10 +32,6 @@ variables.
 `MEDLEY_access_log`: The file path for site-wide request
 logging. Default: Not set
 
-`MEDLEY_autoreload`: Whether the server should watch for changes to
-application files and restart itself. Only useful during
-development. Default: `False`
-
 `MEDLEY_daemonize`: Whether the server should run as a daemon.
 Unnecessary when the server is being manged by systemd and useful
 during development. Default: `False`

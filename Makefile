@@ -105,14 +105,13 @@ install: medley
 # Run a local development webserver.
 #
 # The entr utility ensures the server can be restarted if there is a
-# fatal error like bad syntax. It is a backup for CherryPy's autoreload.
-serve: export MEDLEY_autoreload=True
+# fatal error like bad syntax. It is a substitute for CherryPy's autoreload.
 serve: export MEDLEY_memorize_hashes=False
-serve: export MEDLEY_etags=True
+serve: export MEDLEY_etags=False
 serve: export MEDLEY_tracebacks=True
 serve: export MEDLEY_prefetch=False
 serve:
-	ls apps/**/main.py plugins/*.py tools/*.py parsers/*.py medley.py | entr python medley.py
+	ls apps/**/*.html apps/**/main.py plugins/*.py tools/*.py parsers/*.py resources/*.py medley.py | entr -r python medley.py
 
 # Rename coverage files to comply with coverage utility's
 # expectations.

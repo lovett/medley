@@ -35,7 +35,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env = jinja2.Environment(
             loader=jinja2.FunctionLoader(self.load_template),
             autoescape=True,
-            auto_reload=cherrypy.config.get("engine.autoreload.on"),
+            auto_reload=False,
             bytecode_cache=plugins.jinja_cache.Cache()
         )
 
