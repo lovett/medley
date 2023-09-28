@@ -58,6 +58,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("cache:get", self.get)
         self.bus.subscribe("cache:reddit:index", self.reddit_index)
         self.bus.subscribe("cache:reddit:story", self.reddit_story)
+        self.bus.subscribe("cache:headlines", self.headlines)
         self.bus.subscribe(
             "cache:reddit:pagination",
             self.reddit_pagination
@@ -178,6 +179,21 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if row:
             return dict(row)
         return {}
+
+    def headlines(self, endpoint: Url) -> Iterator[Row]:
+        """Render a list of headlines."""
+
+        prefix, rest = self.keysplit(endpoint.address)
+
+        return self._select_generator(
+            """SELECT
+            j.value ->> '$.url' as 'url [url]',
+            j.value ->> '$.title' as title
+            FROM unexpired u, json_each(u.value, '$.articles') j
+            WHERE u.prefix=? AND u.key=?
+            """,
+            (prefix, rest)
+        )
 
     def reddit_index(self, endpoint: Url) -> Iterator[Row]:
         """Render a list of stories."""

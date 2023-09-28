@@ -7,20 +7,15 @@ from resources.url import Url
 class Controller:
     exposed = True
     show_on_homepage = True
+    cache_lifespan = 60 * 60 * 6
 
-    @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(**kwargs: str) -> bytes:
+    @cherrypy.tools.etag()
+    def GET(self, **kwargs: str) -> bytes:
         """Display a list of headlines."""
 
         start = int(kwargs.get("start", 1))
         count = int(kwargs.get("count", 40))
-
-        cache_lifespan = cherrypy.engine.publish(
-            "clock:day:remaining"
-        ).pop()
-
-        headlines = {}
 
         settings = cherrypy.engine.publish(
             "registry:search:multidict",
@@ -28,30 +23,41 @@ class Controller:
             key_slice=1
         ).pop()
 
-        cached_on = None
+        headlines = {
+            category: None
+            for category in settings["category"]
+        }
+
+        cache_info = None
+
         for category in settings["category"]:
-            response, cached_on = cherrypy.engine.publish(
-                "urlfetch:get:json",
+            endpoint = Url(
                 "https://newsapi.org/v2/top-headlines",
-                params={
+                query={
                     "country": settings["country"][0],
                     "apiKey": settings["key"][0],
                     "category": category
-                },
-                cache_lifespan=cache_lifespan
+                }
+            )
+            precached = cherrypy.engine.publish(
+                "urlfetch:precache",
+                endpoint,
+                cache_lifespan=self.cache_lifespan
             ).pop()
 
-            if not response:
+            if not precached:
                 raise cherrypy.HTTPError(503)
 
-            headlines[category] = [
-                Url(article["url"], article["title"])
-                for article in response["articles"]
-                if article.get("url")
-            ]
+            if not cache_info:
+                cache_info = cherrypy.engine.publish(
+                    "cache:info",
+                    endpoint.address,
+                ).pop()
 
-        cache_control = f"private, max-age={cache_lifespan}"
-        cherrypy.response.headers["Cache-Control"] = cache_control
+            headlines[category] = cherrypy.engine.publish(
+                "cache:headlines",
+                endpoint
+            ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -59,7 +65,6 @@ class Controller:
             headlines=headlines,
             walk_start=start,
             walk_stop=(start + count - 1),
-            bing=Url("https://www.bing.com"),
             ms_rewards=Url("https://rewards.bing.com/?signin=1"),
-            cached_on=cached_on
+            **cache_info
         ).pop()

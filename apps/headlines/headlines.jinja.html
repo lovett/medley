@@ -13,18 +13,15 @@
     {{ macros.svgSymbols("globe") }}
     <main>
         <header id="app-nav">
-            <a href="{{ ms_rewards.anonymized }}" rel="noreferrer" target="_blank">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                MS Rewards
-            </a>
-            <a href="{{ bing.anonymized }}" rel="noreferrer" target="_blank">
-                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
-                Bing
-            </a>
             <button
                 data-walk-start="{{ walk_start }}"
                 data-walk-stop="{{ walk_stop }}"
             >Walk links {{ walk_start }} – {{ walk_stop }}</button>
+
+            <a href="{{ ms_rewards.anonymized }}" rel="noreferrer" target="_blank">
+                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                MS Rewards
+            </a>
         </header>
 
         <section id="headlines">
@@ -38,21 +35,23 @@
                             {% set ns.loop_count = ns.loop_count + 1 %}
                             <li>
                                 <a class="title"
-                                   href="{{ article.anonymized }}"
+                                   href="{{ article["url"].anonymized }}"
                                    rel="noreferrer"
-                                   data-search-href="{{ bing }}/search/?q={{ article.text|urlencode }}"
-                                >{{ article.text }}</a>
+                                   data-search-href="{{ bing }}/search/?q={{ article["title"]|urlencode }}"
+                                >{{ article["title"] }}</a>
                             </li>
                         {% endfor %}
                     </ol>
                 </div>
             {% endfor %}
         </section>
-
-        <footer>
-            <p>Powered by <a href="https://newsapi.org">News API</a></p>
-        </footer>
-
     </main>
 
+{% endblock %}
+
+{% block page_footer %}
+    Powered by <a href="https://newsapi.org">News API</a>.
+    {% if cached_until %}
+        Cached until {{ cached_until|dateformat("%-I:%M %p") }}.
+    {% endif %}
 {% endblock %}
