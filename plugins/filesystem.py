@@ -32,20 +32,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def walk_fs(
-            extensions: Tuple[str, ...]
+            wanted_extensions: Tuple[str, ...],
+            excluded_dirs: Tuple[str, ...],
+            excluded_files: Tuple[str, ...]
     ) -> Iterator[Path]:
         """Walk the filesystem and filter by extension."""
 
-        server_root = Path(cherrypy.config.get("server_root"))
+        if not wanted_extensions:
+            return
 
-        app_root = server_root / "apps"
+        if not excluded_dirs:
+            return
 
-        for root, _, files in os.walk(app_root):
-            current_dir = Path(root).relative_to(server_root)
+        server_root = cherrypy.config.get(
+            "server_root",
+            os.getcwd()
+        )
 
-            for name in files:
-                file_path = current_dir / name
-                extension = "".join(file_path.suffixes)
+        for root, dirs, files in os.walk(server_root, topdown=True):
+            dirs[:] = [
+                d for d in dirs
+                if not d.startswith(".") and d not in excluded_dirs
+            ]
 
-                if extension in extensions:
-                    yield file_path
+            for file_name in files:
+                if any(file_name.endswith(item) for item in excluded_files):
+                    continue
+
+                if any(file_name.endswith(ext) for ext in wanted_extensions):
+                    yield Path(root) / file_name
