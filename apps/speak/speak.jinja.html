@@ -11,11 +11,6 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a class="template-add" href="{{ pronunciation_url }}">
-            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-            Pronunciation Adjustment
-        </a>
-
         <a id="edit-record" class="template-edit" href="{{ edit_url }}">
             <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
             Configuration
@@ -25,7 +20,7 @@
 
 
 {% block page_body %}
-    {{ macros.svgSymbols("edit", "muted", "unmuted", "new-item") }}
+    {{ macros.svgSymbols("edit", "muted", "unmuted") }}
 
     <main>
         <div id="status">
@@ -80,14 +75,6 @@
                     <button><svg class="icon"><use xlink:href="#icon-unmuted"></use></svg> Unmute</button>
                 </form>
             {% endif %}
-
-            <form method="GET" action="{{ registry_url }}">
-                <input type="hidden" name="q" value="speak:mute" />
-                <button>
-                    <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
-                    Edit schedule
-                </button>
-            </form>
         </div>
 
         <form id="tryout" method="POST" action="{{ app_url }}">

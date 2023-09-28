@@ -8,9 +8,6 @@
 }
 
 #actions {
-    display: grid;
-    grid-template-columns: auto;
-    grid-row-gap: 2em;
     text-align: center;
 }
 

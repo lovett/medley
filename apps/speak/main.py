@@ -92,14 +92,10 @@ class Controller:
     def handle_post_vars(**kwargs: str) -> None:
         """Transform POST parameters to speech-ready statement."""
 
-        statement = kwargs.get("statement", "").strip()
-
-        if not statement:
-            raise cherrypy.HTTPError(400, "Missing statement")
-
         action = kwargs.get("action", "")
         confirm = bool(kwargs.get("bool", False))
         noadjust = bool(kwargs.get("noadjust", False))
+        statement = kwargs.get("statement", "").strip()
 
         app_url = cherrypy.engine.publish(
             "app_url"
@@ -120,6 +116,9 @@ class Controller:
         if cherrypy.engine.publish("speak:muted").pop():
             cherrypy.response.status = 202
             return
+
+        if not statement:
+            raise cherrypy.HTTPError(400, "Missing statement")
 
         if confirm:
             cherrypy.engine.publish(

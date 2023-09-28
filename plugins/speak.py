@@ -193,7 +193,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 "title": "Medley is muted.",
                 "badge": "medley.svg",
                 "localId": "speak-mute",
-                "url": speak_app_url
+                "url": speak_app_url,
+                "deliveryStyle": "whisper",
             }
         )
 
