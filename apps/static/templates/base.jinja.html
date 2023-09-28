@@ -62,6 +62,11 @@
 
         {% block page_body %}{% endblock %}
 
+        <footer id="page-footer">
+            {% block page_footer %}
+            {% endblock %}
+        </footer>
+
         {{ macros.asset("js/medley.js") }}
 
         {% block scripts %}{% endblock %}

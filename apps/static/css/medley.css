@@ -387,6 +387,11 @@ TABLE TD.warning {
     margin: 0;
 }
 
+#page-footer:not(:empty) {
+    padding: 0.5em;
+    text-align: right;
+    font-size: .85em;
+}
 
 #page-header {
     display: flex;
