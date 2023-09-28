@@ -40,7 +40,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         fields = (
             "title", "body", "group", "badge",
-            "localId", "expiresAt", "url"
+            "localId", "expiresAt", "url",
+            "deliveryStyle"
         )
 
         notification = {
