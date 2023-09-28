@@ -142,7 +142,7 @@ INPUT[type=search] {
 
 MAIN {
     flex: 1;
-    padding: 0 0.75em;
+    padding: 0 0.5em;
     margin-top: 1em;
 }
 
@@ -395,7 +395,7 @@ TABLE TD.warning {
     justify-content: flex-end;
     background: linear-gradient(45deg, var(--accent) 0%, var(--black) 100%);
     color: var(--white);
-    padding: 0 0.75em;
+    padding: 0 0.5em;
     box-shadow: 0px 2px 2px 0px var(--black);
     align-items: center;
     line-height: 2;
