@@ -911,9 +911,3 @@ TABLE TD.warning {
         display: none;
     }
 }
-
-@media (resolution:96dpi) {
-    BODY {
-        font-size: 18px;
-    }
-}
