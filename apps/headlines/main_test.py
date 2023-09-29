@@ -35,5 +35,6 @@ class TestHeadlines(BaseCherryPyTestCase, ResponseAssertions):
         response = self.request("/", method="HEAD")
         self.assert_allowed(response, ("GET",))
 
+
 if __name__ == "__main__":
     unittest.main()
