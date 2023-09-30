@@ -66,5 +66,6 @@ class Controller:
             walk_start=start,
             walk_stop=(start + count - 1),
             ms_rewards=Url("https://rewards.bing.com/?signin=1"),
+            bing=Url("https://www.bing.com"),
             **cache_info
         ).pop()
