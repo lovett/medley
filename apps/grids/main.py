@@ -105,42 +105,6 @@ class Controller:
 
             options["this_month"] = start_date
 
-            ymd = cherrypy.engine.publish(
-                "clock:format",
-                options["this_month"],
-                "%Y-%m-%d"
-            ).pop()
-
-            options["this_month_url"] = cherrypy.engine.publish(
-                "app_url",
-                grid_name,
-                query={"start": ymd}
-            ).pop()
-
-            options["last_month"] = cherrypy.engine.publish(
-                "clock:shift",
-                options["this_month"],
-                "month_previous"
-            ).pop()
-
-            options["last_month_name"] = cherrypy.engine.publish(
-                "clock:format",
-                options["last_month"],
-                "%B"
-            ).pop()
-
-            ymd = cherrypy.engine.publish(
-                "clock:format",
-                options["last_month"],
-                "%Y-%m-%d"
-            ).pop()
-
-            options["last_month_url"] = cherrypy.engine.publish(
-                "app_url",
-                grid_name,
-                query={"start": ymd}
-            ).pop()
-
             options["next_month"] = cherrypy.engine.publish(
                 "clock:shift",
                 options["this_month"],
@@ -153,16 +117,15 @@ class Controller:
                 "%B"
             ).pop()
 
-            ymd = cherrypy.engine.publish(
+            options["next_month_start"] = cherrypy.engine.publish(
                 "clock:format",
                 options["next_month"],
                 "%Y-%m-%d"
             ).pop()
 
-            options["next_month_url"] = cherrypy.engine.publish(
+            options["grid_url"] = cherrypy.engine.publish(
                 "app_url",
                 grid_name,
-                query={"start": ymd}
             ).pop()
 
             cal = calendar.Calendar()

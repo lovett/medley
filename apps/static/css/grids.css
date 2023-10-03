@@ -1,6 +1,15 @@
+#app-nav {
+    justify-content: flex-end;
+}
+
+#app-nav FORM {
+    display: block;
+}
+
 #app-nav p {
     margin-bottom: 0;
 }
+
 
 .grid THEAD TH {
     min-width: 6em;
