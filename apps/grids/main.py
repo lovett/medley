@@ -196,8 +196,7 @@ class Controller:
             "apps/grids/grids.jinja.html",
             edit_url=edit_url,
             headers=headers,
-            name=grid,
             options=options,
             rows=rows,
-            subview_title=grid,
+            subview_title=grid_name.capitalize()
         ).pop()
