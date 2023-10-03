@@ -3,9 +3,9 @@
 
 {% block main_toolbar %}
     <nav id="main-toolbar">
-        <a id="add-record" href="{{ add_url }}">
-            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-            Add
+        <a id="add-record" href="{{ edit_url }}">
+            <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+            Edit
         </a>
     </nav>
 {% endblock %}
@@ -15,8 +15,8 @@
 {% endblock %}
 
 {% block page_body %}
-    {{ macros.svgSymbols("new-item") }}
-    <main id="collection">
+    {{ macros.svgSymbols("edit") }}
+    <main>
         <ul>
             {% for name, url in grids.items() %}
             <li><a href="{{ url }}">{{ name }}</li>

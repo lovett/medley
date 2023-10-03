@@ -53,19 +53,16 @@ class Controller:
             "app_url"
         ).pop()
 
-        add_url = cherrypy.engine.publish(
+        edit_url = cherrypy.engine.publish(
             "app_url",
-            "/registry/0/new",
-            {
-                "key": "grids:NAME",
-                "back": app_url
-             }
+            f"/registry",
+            {"q": "grids"}
         ).pop()
 
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/grids/grids-index.jinja.html",
-            add_url=add_url,
+            edit_url=edit_url,
             grids=grids
         ).pop()
 
