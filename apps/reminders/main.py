@@ -71,14 +71,14 @@ class Controller:
 
         _, rows = cherrypy.engine.publish(
             "registry:search",
-            "reminder:template",
+            "reminders:template",
             exact=True,
         ).pop()
 
         registry_url = cherrypy.engine.publish(
             "app_url",
             "/registry",
-            {"q": "reminder:template"}
+            {"q": "reminders:template"}
         ).pop()
 
         templates = {
@@ -105,7 +105,7 @@ class Controller:
 
         return cherrypy.engine.publish(
             "jinja:render",
-            "apps/reminder/reminder.jinja.html",
+            "apps/reminders/reminders.jinja.html",
             registry_url=registry_url,
             templates=templates,
             upcoming=upcoming,
@@ -122,7 +122,7 @@ class Controller:
 
     @staticmethod
     def POST(**kwargs: str) -> None:
-        """Queue a new reminder for delivery."""
+        """Queue a new reminders for delivery."""
 
         message = kwargs.get("message", "").strip()
         badge = kwargs.get("badge", "").strip()
@@ -138,7 +138,7 @@ class Controller:
         if notification_id and not message:
             templates = cherrypy.engine.publish(
                 "registry:search:valuelist",
-                "reminder:template",
+                "reminders:template",
                 exact=True
             ).pop()
 
@@ -200,7 +200,7 @@ class Controller:
             local_id = notification_id
             notification_title = f"Timer in progress for {local_id}"
 
-        # Send an immediate notification to confirm reminder creation.
+        # Send an immediate notification to confirm reminders creation.
         start_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
@@ -216,7 +216,7 @@ class Controller:
             start_notification
         )
 
-        # Send a future notification when the reminder is due.
+        # Send a future notification when the reminders is due.
         finish_notification = cherrypy.engine.publish(
             "notifier:build",
             group="timer",
@@ -237,7 +237,7 @@ class Controller:
         if remember:
             cherrypy.engine.publish(
                 "registry:add",
-                "reminder:template",
+                "reminders:template",
                 urlencode({
                     "message": message,
                     "minutes": minutes,

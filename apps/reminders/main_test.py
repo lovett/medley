@@ -1,17 +1,17 @@
-"""Test suite for the reminder app."""
+"""Test suite for the reminders app."""
 
 import unittest
 from testing.assertions import ResponseAssertions
 from testing import helpers
 from testing.cptestcase import BaseCherryPyTestCase
-import apps.reminder.main  # type: ignore
+import apps.reminders.main  # type: ignore
 
 
-class TestReminder(BaseCherryPyTestCase, ResponseAssertions):
+class TestReminders(BaseCherryPyTestCase, ResponseAssertions):
 
     @classmethod
     def setUpClass(cls) -> None:
-        helpers.start_server(apps.reminder.main.Controller)
+        helpers.start_server(apps.reminders.main.Controller)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -24,11 +24,11 @@ class TestReminder(BaseCherryPyTestCase, ResponseAssertions):
 
     def test_exposed(self) -> None:
         """The application is publicly available."""
-        self.assert_exposed(apps.reminder.main.Controller)
+        self.assert_exposed(apps.reminders.main.Controller)
 
     def test_show_on_homepage(self) -> None:
         """The application is displayed in the homepage app."""
-        self.assert_show_on_homepage(apps.reminder.main.Controller)
+        self.assert_show_on_homepage(apps.reminders.main.Controller)
 
 
 if __name__ == "__main__":
