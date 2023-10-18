@@ -35,11 +35,12 @@
 
     <main>
         {% if upcoming %}
-            <div id="upcoming">
+            <section id="upcoming">
+                <h1>Upcoming</h1>
                 {% for event in upcoming %}
                     <div class="upcoming-reminder">
                         <div class="actions">
-                            {{ macros.deleteButton("/reminder/" ~ event.time, ".upcoming-reminder", "Delete this reminder") }}
+                            {{ macros.deleteButton("/reminders/" ~ event.time, ".upcoming-reminder", "Delete this reminder") }}
                         </div>
 
                         <div class="summary">
@@ -58,7 +59,7 @@
                         </div>
                     </div>
                 {% endfor %}
-            </div>
+            </section>
         {% endif %}
 
         <form id="reminder-form" method="post" action="{{ app_url }}">

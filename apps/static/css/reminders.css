@@ -1,32 +1,17 @@
 #upcoming {
-    background-color: var(--secondary);
     margin: 0 -1em 1em -1em;
-}
-
-#upcoming > div:not([hidden]) {
-    display: flex;
+    padding: 0 1em;
+    display: grid;
+    gap: 1em;
 }
 
 #upcoming .upcoming-reminder {
-    padding: 0 1em;
-}
-
-#upcoming .upcoming-reminder:first-of-type {
-    margin-top: -1em;
-    padding-top: 1em;
-}
-
-#upcoming .upcoming-reminder:last-of-type {
-    padding-bottom: 1em;
-}
-
-#upcoming .summary {
-    padding: .5em;
+    display: flex;
+    gap: 0 1em;
 }
 
 #upcoming p {
     margin: 0;
-    padding: .25em 0 0 0;
 }
 
 #upcoming time {
