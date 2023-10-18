@@ -3,7 +3,14 @@ MEDLEY.delete = (function () {
     function hideClosest(source, selector) {
         const target = source.closest(selector);
         if (target) {
+            const visibleCount = target.parentNode.querySelectorAll(selector + ':not([hidden])').length;
             target.setAttribute('hidden', true);
+
+            if (visibleCount === 1) {
+                target.parentNode.setAttribute('hidden', true);
+            } else {
+                target.parentNode.removeAttribute('hidden');
+            }
         }
     }
 
@@ -34,6 +41,7 @@ MEDLEY.delete = (function () {
                 }
             }
         }).catch(err => {
+            console.log(err);
             const resourceName = e.target.dataset.deleteResourceName;
             MEDLEY.setErrorMessage(`The ${resourceName} could not be deleted.`);
         });
