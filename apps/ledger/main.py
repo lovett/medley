@@ -29,17 +29,18 @@ class Controller:
             resource: Resource = Resource.NONE,
             uid: str = "",
             **kwargs: str
-    ) -> bytes | str:
+    ) -> bytes:
         """Serve the application UI or dispatch to JSON subhandlers."""
 
         try:
-            record_id = int(uid or 0)
+            record_id = int(uid or -1)
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
         if cherrypy.request.wants == "json":
             if resource == Resource.ACCOUNTS:
                 return self.json_accounts(record_id)
+
             if resource == Resource.TRANSACTIONS:
                 return self.json_transactions(record_id, **kwargs)
 
@@ -54,25 +55,26 @@ class Controller:
         ).pop()
 
     @staticmethod
-    def json_accounts(record_id: int) -> str:
+    def json_accounts(record_id: int) -> bytes:
         """Render JSON for account resources."""
+
+        if record_id < 0:
+            return cherrypy.engine.publish(
+                "ledger:json:accounts",
+            ).pop().encode()
+
         if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:accounts:new",
-            ).pop()
-
-        if record_id > 0:
-            return cherrypy.engine.publish(
-                "ledger:json:accounts:single",
-                account_id=record_id
-            ).pop()
+            ).pop().encode()
 
         return cherrypy.engine.publish(
-            "ledger:json:accounts",
-        ).pop()
+            "ledger:json:accounts:single",
+            account_id=record_id
+        ).pop().encode()
 
     @staticmethod
-    def json_transactions(record_id: int, **kwargs: str) -> str:
+    def json_transactions(record_id: int, **kwargs: str) -> bytes:
         """Render JSON for transaction resources."""
 
         q = kwargs.get("q", "").strip().lower()
@@ -81,38 +83,33 @@ class Controller:
         offset = int(kwargs.get("offset", 0))
         account = int(kwargs.get("account", 0))
 
+        if record_id < 0:
+            return cherrypy.engine.publish(
+                "ledger:json:transactions",
+                q=q,
+                tag=tag,
+                limit=limit,
+                offset=offset,
+                account=account
+            ).pop().encode()
+
         if record_id == 0:
             return cherrypy.engine.publish(
                 "ledger:json:transactions:new"
-            ).pop()
+            ).pop().encode()
 
-        if record_id > 0:
-            return cherrypy.engine.publish(
-                "ledger:json:transactions:single",
-                transaction_id=record_id
-            ).pop()
-
-        result = cherrypy.engine.publish(
-            "ledger:json:transactions",
-            q=q,
-            tag=tag,
-            limit=limit,
-            offset=offset,
-            account=account
-        ).pop()
-
-        if not result:
-            result = ""
-
-        return result
+        return cherrypy.engine.publish(
+            "ledger:json:transactions:single",
+            transaction_id=record_id
+        ).pop().encode()
 
     @staticmethod
-    def json_tags() -> str:
+    def json_tags() -> bytes:
         """Render JSON for tag resources."""
 
         return cherrypy.engine.publish(
             "ledger:json:tags"
-        ).pop()
+        ).pop().encode()
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("json",))
