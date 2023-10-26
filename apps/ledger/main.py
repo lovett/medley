@@ -187,11 +187,11 @@ class Controller:
     def store_account(account_id: int, json: Json) -> None:
         """Upsert an account record."""
 
-        name = str(json.get("name", ""))
-        opened_on = str(json.get("opened_on", ""))
-        closed_on = str(json.get("closed_on", ""))
-        url = str(json.get("url", ""))
-        note = str(json.get("note", ""))
+        name = str(json.get("name") or "")
+        opened_on = str(json.get("opened_on") or "")
+        closed_on = str(json.get("closed_on") or "")
+        url = str(json.get("url") or "")
+        note = str(json.get("note") or "")
         date_format = "%Y-%m-%d"
 
         opened = None
@@ -203,6 +203,7 @@ class Controller:
 
         closed = None
         if closed_on:
+            print("yes")
             try:
                 closed = datetime.strptime(closed_on, date_format)
             except ValueError as exc:
@@ -234,8 +235,8 @@ class Controller:
 
         account_id = int(json.get("account_id", 0))
         destination_id = int(json.get("destination_id", 0))
-        occurred_on = str(json.get("occurred_on", ""))
-        cleared_on = str(json.get("cleared_on", ""))
+        occurred_on = str(json.get("occurred_on") or "")
+        cleared_on = str(json.get("cleared_on") or "")
         amount = int(json.get("amount", 0))
         payee = json.get("payee", "")
         note = json.get("note", "")
