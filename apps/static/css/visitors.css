@@ -6,10 +6,6 @@
     --visitors-moved: LightCyan;
 }
 
-#app-nav form {
-    grid-template-columns: auto;
-}
-
 #delete-saved-query {
     margin-left: 1em;
 }
@@ -68,6 +64,7 @@
 
 .shortcuts {
     display: flex;
+    gap: 1em;
     flex-flow: row wrap;
     align-items: flex-end;
     justify-content: space-between;
