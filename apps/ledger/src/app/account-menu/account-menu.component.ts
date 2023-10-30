@@ -24,7 +24,14 @@ export class AccountMenuComponent implements OnInit {
 
     ngOnInit() {
         this.ledgerService.getAccounts().subscribe(
-            (accounts: Account[]) => this.accounts = accounts,
+            (accounts: Account[]) => {
+                for (let account of accounts) {
+                    if (account.closed_on && account.uid !== this.control.value) {
+                        continue;
+                    }
+                    this.accounts.push(account);
+                }
+            },
             (err: any) => console.log(err),
             () => console.log('All done getting accounts for menu')
         );
