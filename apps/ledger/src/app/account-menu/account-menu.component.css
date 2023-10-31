@@ -1,4 +1,0 @@
-.locked label:after {
-    content: '🔒' !important;
-    padding-left: .25em;
-}

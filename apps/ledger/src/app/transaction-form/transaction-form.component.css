@@ -18,8 +18,3 @@ HEADER {
     color: green;
     padding-left: .25em;
 }
-
-.locked label:after {
-    content: '🔒' !important;
-    padding-left: .25em;
-}
