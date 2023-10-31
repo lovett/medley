@@ -310,11 +310,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             where_sql += " AND (a.id=? OR a2.id=?)"
             placeholders += (account, account)
 
-        if tag:
-            from_sql += ", json_each(t.tags)"
-            where_sql += " AND json_each.value=?"
-            placeholders += (tag,)
-
         if q:
             from_sql = """
             FROM transactions_fts
@@ -322,6 +317,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """
             where_sql += " AND transactions_fts MATCH ?"
             placeholders += (q,)
+
+        if tag:
+            from_sql += ", json_each(t.tags)"
+            where_sql += " AND json_each.value=?"
+            placeholders += (tag,)
 
         select_sql = f"""
         SELECT t.id, t.account_id, t.destination_id, t.occurred_on,

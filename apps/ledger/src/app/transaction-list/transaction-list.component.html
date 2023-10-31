@@ -14,8 +14,7 @@
 </header>
 
 <section>
-<h1 *ngIf="tag">Transactions tagged with "{{ tag }}"</h1>
-<h1 *ngIf="activeQuery">Search Results</h1>
+<h1 *ngIf="tag || activeQuery">Search Results</h1>
 <h1 *ngIf="!tag && !activeQuery">All Transactions</h1>
 
 <div class="selection-summary" [ngPlural]="selectionSize()">
