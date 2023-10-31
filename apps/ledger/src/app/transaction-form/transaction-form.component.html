@@ -118,8 +118,3 @@
         <button type="submit" [disabled]="!transactionForm.valid || !transactionForm.dirty">Save</button>
     </footer>
 </form>
-
-<br/>Dirty: {{ transactionForm.dirty }}
-<br/>Touched: {{ transactionForm.touched }}
-<br/>Valid: {{ transactionForm.valid }}
-<br/>Value: {{ transactionForm.value | json }}

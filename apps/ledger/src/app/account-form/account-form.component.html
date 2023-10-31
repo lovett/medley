@@ -74,8 +74,3 @@
         <button type="submit" [disabled]="!accountForm.valid || !accountForm.dirty">Save</button>
     </footer>
 </form>
-
-<br/>Dirty: {{ accountForm.dirty }}
-<br/>Touched: {{ accountForm.touched }}
-<br/>Valid: {{ accountForm.valid }}
-<br/>Value: {{ accountForm.value | json }}
