@@ -6,24 +6,28 @@
     <h1>Active Accounts</h1>
     <div class="cards">
         <div class="card" *ngFor="let account of activeAccounts()">
-            <a class="title" [routerLink]="['/accounts', account.uid, 'form']">
+            <div class="title">
                 {{account.name}}
-            </a>
+            </div>
 
             <ul>
-                <li>{{ account.balance!|money }}</li>
-                <li *ngIf="account.total_pending! > 0">{{ account.total_pending!|money }} pending</li>
+                <li>
+                    {{ account.balance!|money }}
+                    <span *ngIf="account.total_pending! > 0">/ {{ account.total_pending!|money }} pending</span>
+                </li>
+                <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                    Transactions
+                </a>
             </ul>
 
             <footer>
-                <div>
-                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
-                        Transactions
-                    </a>
-                </div>
-                <div>
-                    <a *ngIf="account.url" href="{{ account.url }}" target="_blank" rel="noopener noreferer">Log In</a>
-                </div>
+                <a [routerLink]="['/accounts', account.uid, 'form']">
+                    Edit
+                </a>
+                <a *ngIf="account.url">
+                    <a href="{{ account.url }}" target="_blank" rel="noopener noreferer">Log In</a>
+                </a>
+
             </footer>
         </div>
     </div>
