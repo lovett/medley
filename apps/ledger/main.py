@@ -195,7 +195,7 @@ class Controller:
         date_format = "%Y-%m-%d"
 
         opened = None
-        if opened:
+        if opened_on:
             try:
                 opened = datetime.strptime(opened_on, date_format)
             except ValueError as exc:
@@ -203,7 +203,6 @@ class Controller:
 
         closed = None
         if closed_on:
-            print("yes")
             try:
                 closed = datetime.strptime(closed_on, date_format)
             except ValueError as exc:
