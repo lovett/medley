@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
@@ -10,7 +10,7 @@ import { Router, ActivatedRoute}  from '@angular/router';
   templateUrl: './transaction-list.component.html',
   styleUrls: ['./transaction-list.component.css']
 })
-export class TransactionListComponent implements OnInit {
+export class TransactionListComponent {
     account = 0;
     searchForm: FormGroup;
     tag = '';
@@ -48,10 +48,6 @@ export class TransactionListComponent implements OnInit {
             window.scrollTo(0, 0);
         });
 
-    }
-
-    ngOnInit() {
-        this.getTransactions();
     }
 
     get query() { return this.searchForm.controls['query'] };
