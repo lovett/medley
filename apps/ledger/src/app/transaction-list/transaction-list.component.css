@@ -64,10 +64,6 @@ TR, TD {
     background-color: lemonchiffon;
 }
 
-.minibanner + P {
-    margin-top: 0.75em;
-}
-
 .pager {
     display: grid;
     grid-template-columns: 175px 1fr 175px;

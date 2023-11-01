@@ -73,7 +73,6 @@
             <td class="align-right unbroken">{{ transaction.amount|money }}</td>
             <td class="align-right" *ngIf="transaction.cleared_on">
                 <div class="minibanner">Cleared</div>
-                <p class="unbroken">{{ transaction.cleared_on|date:'longDate' }}</p>
             </td>
             <td class="align-right" *ngIf="!transaction.cleared_on">
                 <div class="minibanner">Pending</div>
