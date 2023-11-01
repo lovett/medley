@@ -93,7 +93,11 @@ export class TransactionListComponent implements OnInit {
         });
     }
 
-    toggleSelection(transaction: Transaction) {
+    toggleSelection(event: MouseEvent, transaction: Transaction) {
+        const target = event.target as HTMLElement;
+        if (target.tagName === 'A') {
+            return;
+        }
         transaction.selected = !transaction.selected;
     }
 

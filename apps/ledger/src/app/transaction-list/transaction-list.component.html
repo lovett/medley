@@ -47,7 +47,7 @@
         <tr *ngFor="let transaction of transactions"
             [class.cleared]="transaction.cleared_on"
             [class.selected]="transaction.selected"
-            (click)="toggleSelection(transaction)">
+            (click)="toggleSelection($event, transaction)">
             <td><a class="unbroken" [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
             <td>
                 <div class="unbroken" *ngIf="transaction.accountId > 0">
