@@ -275,6 +275,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
     def count_transactions(self, q: str = "", tag: str = "") -> int:
         """Count of rows from the transactions table."""
+        if q and tag:
+            return int(self._selectFirst(
+                """SELECT count(*)
+                FROM transactions_fts, json_each(transactions_fts.tags)
+                WHERE json_each.value=?
+                AND transactions_fts MATCH ?""",
+                (tag, q)))
         if q:
             return int(self._selectFirst(
                 """SELECT count(*)
@@ -325,8 +332,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         select_sql = f"""
         SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
-            t.cleared_on, t.amount,
-        t.payee, IFNULL(t.tags, '[]') as tags, t.note,
+            t.cleared_on, t.amount, t.payee, t.note,
+            IFNULL(t.tags, '[]') as tags,
             a.name as account_name, a.closed_on as account_closed_on,
             a2.name as destination_name
         {from_sql}
