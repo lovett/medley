@@ -1,12 +1,14 @@
 #shell {
     display: grid;
-    grid-template-columns: 10% 85%;
-    grid-column-gap: 5%;
+    grid-template-columns: 15em 1fr;
+    grid-column-gap: 1em;
     max-width: 75em;
     margin: auto;
 }
 
 #shell > NAV UL {
+    position: sticky;
+    top: 1em;
     list-style-type: none;
     margin-left: 0;
     padding-left: 0;

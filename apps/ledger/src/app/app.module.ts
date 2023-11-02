@@ -16,6 +16,7 @@ import { MoneyPipe } from './money.pipe';
 import { ContentTypeInterceptor } from './interceptors/content-type.interceptor';
 import { CacheInterceptor } from './interceptors/cache.interceptor';
 import { TagListComponent } from './tag-list/tag-list.component';
+import { SelectionSummaryComponent } from './selection-summary/selection-summary.component';
 
 @NgModule({
     declarations: [
@@ -29,7 +30,8 @@ import { TagListComponent } from './tag-list/tag-list.component';
         AddButtonComponent,
         TransactionFormComponent,
         MoneyPipe,
-        TagListComponent
+        TagListComponent,
+        SelectionSummaryComponent
     ],
     imports: [
         BrowserModule,

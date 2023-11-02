@@ -8,15 +8,40 @@ import { Transaction } from './models/transaction';
 import { TransactionPrimitive }  from './types/transactionPrimitive';
 import { AccountPrimitive }  from './types/accountPrimitive';
 import { TransactionList } from './types/transactionList';
+import { ReplaySubject } from 'rxjs';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class LedgerService {
+    private selectedSubject = new ReplaySubject<number>();
+    selection$ = this.selectedSubject.asObservable();
+    selectedTransactions: Transaction[] = []
 
     constructor(
         private http: HttpClient
     ) {}
+
+    transactionSelection(target: Transaction|null) {
+        if (target == null) {
+            this.selectedTransactions = [];
+            this.selectedSubject.next(Infinity);
+            return;
+        }
+
+        this.selectedTransactions = this.selectedTransactions.filter(
+            t => t.uid !== target.uid
+        );
+
+        if (target.selected) {
+            this.selectedTransactions.push(target);
+            this.selectedSubject.next(target.amount);
+            return;
+        }
+
+        this.selectedSubject.next(target.amount * -1);
+    }
 
     getAccounts(): Observable<Account[]> {
         return this.http.get<AccountPrimitive[]>('/ledger/accounts').pipe(

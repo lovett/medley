@@ -1,0 +1,10 @@
+<span *ngIf="count > 0" [ngPlural]="count">
+    <ng-template ngPluralCase="=1">
+        1 transaction selected
+    </ng-template>
+    <ng-template ngPluralCase="other">
+        {{ count }} transactions selected
+    </ng-template>
+    <br/>
+    <strong>{{ amount|money }}</strong>
+</span>

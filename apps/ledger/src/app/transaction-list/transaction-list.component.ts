@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
@@ -10,7 +10,9 @@ import { Router, ActivatedRoute}  from '@angular/router';
   templateUrl: './transaction-list.component.html',
   styleUrls: ['./transaction-list.component.css']
 })
-export class TransactionListComponent {
+export class TransactionListComponent implements OnDestroy {
+    @Output() selection = new EventEmitter<Transaction>();
+
     account = 0;
     searchForm: FormGroup;
     tag = '';
@@ -27,7 +29,7 @@ export class TransactionListComponent {
         private ledgerService: LedgerService,
         private formBuilder: FormBuilder,
         private router: Router,
-        private route: ActivatedRoute
+        private route: ActivatedRoute,
     ) {
         this.singularResourceName = 'transaction';
 
@@ -50,13 +52,25 @@ export class TransactionListComponent {
 
     }
 
+    ngOnDestroy() {
+        this.ledgerService.transactionSelection(null);
+    }
+
     get query() { return this.searchForm.controls['query'] };
 
     getTransactions() {
         this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account, this.tag).subscribe({
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
-                this.transactions = transactionList.transactions.map((primitive) => new Transaction(primitive));
+                this.transactions = transactionList.transactions.map((primitive) => {
+                    const t = new Transaction(primitive);
+                    const index = this.ledgerService.selectedTransactions.findIndex(
+                        selectedTransaction => selectedTransaction.uid === t.uid
+                    );
+
+                    t.selected = index > -1;
+                    return t;
+                });
                 this.nextOffset = Math.min(this.offset + this.transactions.length, this.count);
                 this.previousOffset = Math.max(0, this.offset - this.transactions.length);
             },
@@ -95,24 +109,6 @@ export class TransactionListComponent {
             return;
         }
         transaction.selected = !transaction.selected;
+        this.ledgerService.transactionSelection(transaction);
     }
-
-    selectionSize() {
-        return this.transactions.reduce((acc, t) => {
-            if (t.selected) {
-                acc += 1;
-            }
-            return acc;
-        }, 0);
-    }
-
-    selectionTotal() {
-        return this.transactions.reduce((acc, t) => {
-            if (t.selected) {
-                acc += t.amount
-            }
-            return acc;
-        }, 0);
-    }
-
 }

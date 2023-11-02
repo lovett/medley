@@ -17,16 +17,6 @@
 <h1 *ngIf="tag || activeQuery">Search Results</h1>
 <h1 *ngIf="!tag && !activeQuery">All Transactions</h1>
 
-<div class="selection-summary" [ngPlural]="selectionSize()">
-    <ng-template ngPluralCase="=0"></ng-template>
-    <ng-template ngPluralCase="=1">
-        <div>1 transaction selected totaling {{ selectionTotal()|money }}</div>
-    </ng-template>
-    <ng-template ngPluralCase="other">
-        <div>{{ selectionSize() }} transactions selected totaling {{ selectionTotal()|money }}</div>
-    </ng-template>
-</div>
-
 <div class="pager">
     <div></div>
     <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</div>
