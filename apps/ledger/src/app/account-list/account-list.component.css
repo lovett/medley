@@ -8,13 +8,9 @@ HEADER {
     padding-bottom: 2em;
 }
 
-.accounts.inactive .card {
-    background-color: #ccc;
-}
-
 .cards {
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(3, 1fr);
     gap: 2em;
 }
 
@@ -26,11 +22,18 @@ HEADER {
     flex-flow: column nowrap;
 }
 
+.card.inactive {
+    background-color: #ccc;
+}
+
 .card .title {
+    display: flex;
+    justify-content: space-between;
     padding: 1em;
     background-color: #e5e5e5;
     border-radius: 10px 10px 0 0;
     line-height: 1.5;
+    font-weight: bold;
 }
 
 .card ul {
@@ -43,11 +46,18 @@ HEADER {
 .card li {
     margin: 0;
     padding: 0.25em 0;
+    text-align: center;
+}
+
+.card li.balance {
+    font-size: 2em;
+    letter-spacing: .1em;
 }
 
 .card footer {
-    display: grid;
-    grid-template-columns: auto auto;
-    justify-content: space-between;
     padding: 1em;
+}
+
+.card footer details {
+    white-space: pre-line;
 }

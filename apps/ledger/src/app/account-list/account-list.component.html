@@ -2,59 +2,48 @@
     <app-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
 </header>
 
+<p *ngIf="accounts.length == 0">There are no accounts.</p>
+
 <section class="accounts" *ngIf="accounts.length > 0">
     <h1>Active Accounts</h1>
     <div class="cards">
-        <div class="card" *ngFor="let account of activeAccounts()">
+        <div class="card" [class.inactive]="account.closed_on" *ngFor="let account of accounts">
             <div class="title">
                 {{account.name}}
+
+                <a [routerLink]="['/accounts', account.uid, 'form']">
+                    <svg class="icon"><use xlink:href="#icon-edit"></use></svg>
+                </a>
             </div>
 
-            <ul>
-                <li>
-                    {{ account.balance!|money }}
-                    <span *ngIf="account.total_pending! > 0">/ {{ account.total_pending!|money }} pending</span>
-                </li>
-                <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
-                    Transactions
-                </a>
-            </ul>
-
-            <footer>
-                <a [routerLink]="['/accounts', account.uid, 'form']">
-                    Edit
-                </a>
-                <a *ngIf="account.url">
-                    <a href="{{ account.url }}" target="_blank" rel="noopener noreferer">Log In</a>
-                </a>
-
-            </footer>
-        </div>
-    </div>
-</section>
-
-<section class="accounts inactive">
-    <h1>Inactive Accounts</h1>
-    <div class="cards">
-        <div class="card" *ngFor="let account of inactiveAccounts()">
-            <div class="title">
-                <a [routerLink]="['/accounts', account.uid, 'form']">
-                    {{account.name}}
-                </a>
-            </div>
             <ul>
                 <li *ngIf="account.closed_on">Closed {{ account.closed_on|date:'longDate' }}</li>
+
+                <li *ngIf="!account.closed_on" class="balance">
+                    {{ account.balance!|money }}
+                </li>
+
+                <li *ngIf="account.total_pending! > 0">{{ account.total_pending!|money }} pending</li>
+
+                <li>
+                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                    Transactions
+                    </a>
+                </li>
+
+                <li>
+                    <a *ngIf="account.url">
+                        <a href="{{ account.url }}" target="_blank" rel="noopener noreferer">Log In</a>
+                    </a>
+                </li>
             </ul>
 
             <footer>
-                <div>
-                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
-                        Transactions
-                    </a>
-                </div>
+                <details *ngIf="account.note">
+                    <summary>Details</summary>
+                    {{ account.note }}
+                </details>
             </footer>
         </div>
     </div>
 </section>
-
-<p *ngIf="accounts.length == 0">There are no accounts.</p>
