@@ -127,22 +127,6 @@ class TestClock(Subscriber):
 
         self.assertIsNone(result)
 
-    def test_day_remaining(self) -> None:
-        """clock:day:remaining returns seconds until end-of-day regardless of
-        timezone.
-
-        """
-
-        dt = datetime(2000, 1, 1, tzinfo=pytz.timezone("UTC"))
-        result = self.plugin.day_remaining(dt)
-
-        self.assertEqual(result, 86399)
-
-        dt = datetime(2000, 1, 1, tzinfo=pytz.timezone("US/Eastern"))
-        result = self.plugin.day_remaining(dt)
-
-        self.assertEqual(result, 86399)
-
     def test_shift(self) -> None:
         """clock:shift moves forward and backward in time."""
 

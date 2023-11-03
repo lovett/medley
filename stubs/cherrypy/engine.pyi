@@ -357,13 +357,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["clock:day:remaining"],
-        dt: Optional[datetime] = None,
-) -> List[int]: ...
-
-
-@overload
-def publish(
         channel: Literal["clock:duration:words"],
         **kwargs: Union[str, int, float],
 ) -> List[str]: ...

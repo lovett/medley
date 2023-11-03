@@ -1,6 +1,7 @@
 """API interaction with openweathermap.org."""
 
 import re
+from datetime import datetime
 from typing import Any
 from typing import Dict
 from typing import cast
@@ -112,12 +113,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         # Only cache alerts until the end of the day. For multi-day
         # alerts, this will result in multiple notifications which is ok.
-        cache_lifespan = cast(
-            int,
-            cherrypy.engine.publish(
-                "clock:day:remaining"
-            ).pop()
-        )
+        now = datetime.now()
+        end = now.replace(hour=23, minute=59, second=59)
+        cache_lifespan = (end - now).seconds
 
         weather_app_url = cherrypy.engine.publish(
             "app_url",

@@ -39,18 +39,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.bus.subscribe("clock:from_struct", self.from_struct)
         self.bus.subscribe("clock:shift", self.shift)
         self.bus.subscribe("clock:local", self.local)
-        self.bus.subscribe("clock:day:remaining", self.day_remaining)
         self.bus.subscribe("clock:utc", self.utc)
         self.bus.subscribe("clock:scheduled", self.scheduled)
-
-    def day_remaining(self, dt: datetime = datetime.now(UTC)) -> int:
-        """Calculate how many seconds are left in the day."""
-
-        dt = dt or self.now()
-        dt = dt.replace(tzinfo=None)
-        end = dt.replace(hour=23, minute=59, second=59)
-
-        return (end - dt).seconds
 
     def same_day(
             self,
