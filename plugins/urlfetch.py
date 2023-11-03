@@ -99,7 +99,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if cached_value:
             return cached_value
 
-        response = self.get(url, head_request=True, as_object=True)
+        response, _ = self.get(url, head_request=True, as_object=True)
 
         value = str(response.headers.get(header, ""))
 
