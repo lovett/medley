@@ -9,12 +9,15 @@
     </header>
 
     {% if not active_bookmark %}
-        <p>
-            <a id="add-record" href="#" data-url="{{ url.address }}">
-                <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-                Bookmark
-            </a>
-        </p>
+        <a id="remove-bookmark" href="#" data-bookmark-id="{{ bookmark_id }}" {% if bookmark_id == 0 %}hidden{% endif %}>
+            <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+            Remove bookmark
+        </a>
+
+        <a id="add-bookmark" href="#" data-url="{{ url.address }}" {% if bookmark_id > 0 %}hidden{% endif %}>
+            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+            Bookmark
+        </a>
     {% endif %}
 
     <div id="collection">
