@@ -310,7 +310,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             )
 
         if as_object:
-            return res
+            return (res, None)
 
         return (res.text, None)
 
