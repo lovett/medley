@@ -93,7 +93,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         );
 
         CREATE VIRTUAL TABLE IF NOT EXISTS transactions_fts USING fts5 (
-            occurred_on, amount, payee, note, tags,
+            account_id, destination_id, occurred_on, amount, payee, note, tags,
             content='transactions',
             content_rowid='id',
             tokenize='trigram'
@@ -103,36 +103,40 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         AFTER INSERT ON transactions
         BEGIN
             INSERT INTO transactions_fts(
-                rowid, occurred_on, amount, payee, note, tags
+                rowid, account_id, destination_id, occurred_on, amount,
+                payee, note, tags
             ) VALUES (
-                new.rowid, new.occurred_on, new.amount, new.payee, new.note,
-                new.tags);
+                new.rowid, new.account_id, new.destination_id, new.occurred_on,
+                new.amount, new.payee, new.note, new.tags);
         END;
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_delete
         AFTER DELETE ON transactions
         BEGIN
             INSERT INTO transactions_fts(
-                transactions_fts, rowid, occurred_on, amount, payee, note, tags
+                transactions_fts, rowid, account_id, destination_id,
+                occurred_on, amount, payee, note, tags
             ) VALUES (
-                'delete', old.rowid, old.occurred_on, old.amount, old.payee,
-                old.note, old.tags);
+                'delete', old.rowid, old.account_id, old.destination_id,
+                old.occurred_on, old.amount, old.payee, old.note, old.tags);
         END;
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_update
         AFTER UPDATE ON transactions
         BEGIN
           INSERT INTO transactions_fts(
-              transactions_fts, rowid, occurred_on, amount, payee, note, tags
+              transactions_fts, rowid, occurred_on, account_id, destination_id,
+              amount, payee, note, tags
           ) VALUES (
-              'delete', old.rowid, old.occurred_on, old.amount, old.payee,
-              old.note, old.tags);
+              'delete', old.rowid, old.account_id, old.destination_id,
+              old.occurred_on, old.amount, old.payee, old.note, old.tags);
 
           INSERT INTO transactions_fts(
-              rowid, occurred_on, amount, payee, note, tags
+              rowid, account_id, destination_id, occurred_on, amount, payee,
+              note, tags
           ) VALUES (
-              new.rowid, new.occurred_on, new.amount, new.payee, new.note,
-              new.tags);
+              new.rowid, new.account_id, new.destination_id, new.occurred_on,
+              new.amount, new.payee, new.note, new.tags);
         END;
         """)
 
@@ -273,28 +277,33 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return cast(str, self._selectFirst(sql,))
 
-    def count_transactions(self, q: str = "", tag: str = "") -> int:
+    def count_transactions(
+            self,
+            account: int = 0,
+            q: str = "",
+            tag: str = ""
+    ) -> int:
         """Count of rows from the transactions table."""
-        if q and tag:
-            return int(self._selectFirst(
-                """SELECT count(*)
-                FROM transactions_fts, json_each(transactions_fts.tags)
-                WHERE json_each.value=?
-                AND transactions_fts MATCH ?""",
-                (tag, q)))
+
+        match_sql = ""
+
+        if account > 0:
+            match_sql += f" AND (account_id:{account} OR destination_id:{account})"
+
         if q:
-            return int(self._selectFirst(
-                """SELECT count(*)
-                FROM transactions_fts
-                WHERE transactions_fts MATCH ?""",
-                (q,)))
+            match_sql += f" AND (payee:{q} OR note:{q})"
 
         if tag:
+            match_sql += f" AND tags:{tag}"
+
+        match_sql = match_sql.lstrip(" AND ")
+
+        if match_sql:
             return int(self._selectFirst(
-                """SELECT count(*)
-                FROM transactions t, json_each(t.tags)
-                WHERE json_each.value=?""",
-                (tag,)))
+                f"""
+                SELECT count(*)
+                FROM transactions_fts
+                WHERE transactions_fts MATCH '{match_sql}'"""))
 
         return int(self._selectFirst("SELECT count(*) FROM transactions"))
 
@@ -307,7 +316,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         q = kwargs.get("q", "")
         account = int(kwargs.get("account", 0))
 
-        count = self.count_transactions(q, tag)
+        count = self.count_transactions(account, q, tag)
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
