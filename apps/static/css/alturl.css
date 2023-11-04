@@ -81,7 +81,7 @@ code {
 
 .comment summary {
     margin: 0 -1em;
-    padding: 1em;
+    padding: 0.75em;
     background-color: var(--tertiary);
     font-size: .75em;
 }
@@ -117,17 +117,13 @@ code {
 }
 
 .comment blockquote {
+    font-size: 1rem;
     border-left: .25em solid var(--grey);
     font-style: italic;
     padding-left: 0.5em;
     font-family: monospace;
     margin: 1.5em 0;
-    font-size: .85em;
     line-height: 1.2;
-}
-
-.comment blockquote p {
-    line-height: inherit;
 }
 
 .intro {
@@ -148,6 +144,10 @@ code {
 
 .intro .title {
     font-size: 1.25em;
+}
+
+.intro p:last-of-type {
+    margin-bottom: 0;
 }
 
 .unbookmark > * {
@@ -177,10 +177,6 @@ code {
 
     .comment summary {
         margin: 0;
-    }
-
-    .comment blockquote {
-        font-size: 1em;
     }
 
     .comment .comment {
