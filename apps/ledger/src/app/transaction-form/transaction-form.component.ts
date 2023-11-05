@@ -112,7 +112,7 @@ export class TransactionFormComponent implements OnInit {
         }
 
         while (this.tags.controls.length < this.autocompleteFrom.tags.length) {
-            this.tagFieldPush();
+            this.tagFieldPush('', false);
         }
 
         this.transactionForm.patchValue({
@@ -126,9 +126,11 @@ export class TransactionFormComponent implements OnInit {
         this.autocompleteFrom = null;
     }
 
-    tagFieldPush(value = '') {
+    tagFieldPush(value = '', markDirty = true) {
         this.tags.push(this.formBuilder.control(value));
-        this.transactionForm.markAsDirty();
+        if (markDirty) {
+            this.transactionForm.markAsDirty();
+        }
     }
 
     tagFieldPop() {
@@ -156,7 +158,7 @@ export class TransactionFormComponent implements OnInit {
         });
 
         while (this.tags.controls.length < transaction.tags.length) {
-            this.tagFieldPush();
+            this.tagFieldPush('', false);
         }
 
         this.tags.patchValue(transaction.tags);
