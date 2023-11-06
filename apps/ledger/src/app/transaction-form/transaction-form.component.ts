@@ -10,6 +10,17 @@ import { LedgerService } from '../ledger.service';
 import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
 
+function atLeastOneAccount(group: AbstractControl): ValidationErrors | null {
+    const accountId = group.get('account_id')!.value;
+    const destinationId = group.get('destination_id')!.value;
+
+    if (accountId || destinationId) {
+        return null;
+    }
+
+    return { 'atLeastOneAccount': true }
+}
+
 function dateRange(group: AbstractControl): ValidationErrors | null {
     const occurredOn = group.get('occurred_on')!.value;
     const clearedOn = group.get('cleared_on')!.value;
@@ -54,8 +65,10 @@ export class TransactionFormComponent implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.transactionForm = this.formBuilder.group({
-            account_id: [null, {validators: [Validators.required, Validators.min(1)]}],
-            destination_id: [null],
+            accounts: this.formBuilder.group({
+                account_id: [null],
+                destination_id: [null],
+            }, {validators: atLeastOneAccount}),
             payee: ['', {validators: Validators.required}],
             amount: ['', {validators: [Validators.required, Validators.min(0.01)]}],
             dates: this.formBuilder.group({
@@ -86,10 +99,11 @@ export class TransactionFormComponent implements OnInit {
         }
     }
 
-    get accountId() { return this.transactionForm.controls['account_id'] as FormControl }
-    get destinationId() { return this.transactionForm.controls['destination_id'] as FormControl }
+    get accountId() { return this.accounts.controls['account_id'] as FormControl }
+    get destinationId() { return this.accounts.controls['destination_id'] as FormControl }
     get payee() { return this.transactionForm.controls['payee'] }
     get amount() { return this.transactionForm.controls['amount'] }
+    get accounts() { return this.transactionForm.controls['accounts'] as FormGroup }
     get dates() { return this.transactionForm.controls['dates'] as FormGroup }
     get occurredOn() { return this.dates.controls['occurred_on'] }
     get clearedOn() { return this.dates.controls['cleared_on'] }
@@ -148,8 +162,10 @@ export class TransactionFormComponent implements OnInit {
         this.transactionForm.patchValue({
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
-            account_id: transaction.account?.uid || 0,
-            destination_id: transaction.destination?.uid || 0,
+            accounts: {
+                account_id: transaction.account?.uid || 0,
+                destination_id: transaction.destination?.uid || 0,
+            },
             dates: {
                 occurred_on: transaction.occurredOnYMD(),
                 cleared_on: transaction.clearedOnYMD(),
