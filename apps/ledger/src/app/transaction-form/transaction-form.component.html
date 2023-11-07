@@ -73,16 +73,16 @@
 
     <div formGroupName="accounts">
         <div class="field-group">
-            <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
+            <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')" [class.valid]="accountId.valid">
                 <app-account-menu fieldId="accountId" [control]="accountId" label="Withdraw from"></app-account-menu>
                 <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
+                <p *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')" class="validation-message">At least one account is needed.</p>
             </div>
 
-            <div class="field">
+            <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')">
                 <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Deposit To"></app-account-menu>
             </div>
         </div>
-        <p *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')" class="validation-message">At least one account is needed.</p>
     </div>
 
     <div class="field" [class.valid]="tags.length > 0 && !tags.value.includes('')">
