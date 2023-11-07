@@ -125,8 +125,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         AFTER UPDATE ON transactions
         BEGIN
           INSERT INTO transactions_fts(
-              transactions_fts, rowid, occurred_on, account_id, destination_id,
-              amount, payee, note, tags
+              transactions_fts, rowid, account_id, destination_id,
+              occurred_on, amount, payee, note, tags
           ) VALUES (
               'delete', old.rowid, old.account_id, old.destination_id,
               old.occurred_on, old.amount, old.payee, old.note, old.tags);
