@@ -290,8 +290,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if account > 0:
             match_sql += f" AND (account_id:{account} OR destination_id:{account})"
 
-        if q:
+        if q and ":" not in q:
             match_sql += f" AND (payee:{q} OR note:{q})"
+
+        if q and ":" in q:
+            match_sql += q
 
         if tag:
             match_sql += f" AND tags:{tag}"
