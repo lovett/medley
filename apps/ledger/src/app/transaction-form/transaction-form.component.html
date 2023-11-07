@@ -113,7 +113,6 @@
     </div>
 
     <footer>
-        {{ transactionForm.valid }} {{ transactionForm.pristine }}
         <button type="submit" [disabled]="transactionForm.invalid || transactionForm.pristine">Save</button>
     </footer>
 </form>
