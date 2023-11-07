@@ -182,9 +182,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 timezone(local_timezone)
             )
         except UnknownTimeZoneError:
-            dt = dt.astimezone(
-                datetime.now(UTC).astimezone().tzinfo
-            )
+            dt = dt.astimezone()
 
         return dt
 
