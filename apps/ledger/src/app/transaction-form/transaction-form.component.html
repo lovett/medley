@@ -71,7 +71,7 @@
         </div>
     </div>
 
-    <div formGroupName="acounts">
+    <div formGroupName="accounts">
         <div class="field-group">
             <div class="field" [class.invalid]="(accountId.dirty || accountId.touched) && accountId.invalid" [class.valid]="accountId.valid">
                 <app-account-menu fieldId="accountId" [control]="accountId" label="Withdraw from"></app-account-menu>
