@@ -3,13 +3,11 @@
 import os.path
 import pathlib
 import socket
+import maxminddb
 from typing import Any
 from typing import Optional
 from typing import Dict
 import cherrypy
-import geoip2.database
-import geoip2.errors
-import geoip2.models
 
 
 class Plugin(cherrypy.process.plugins.SimplePlugin):
@@ -76,43 +74,39 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         geodb_path = self.db_path()
 
-        result: Optional[geoip2.models.City] = None
         try:
-            reader = geoip2.database.Reader(str(geodb_path))
-            result = reader.city(ip_address)
-        except FileNotFoundError:
-            pass
-        except geoip2.errors.AddressNotFoundError:
+            reader = maxminddb.open_database(str(geodb_path))
+            result = reader.get(ip_address)
+        except (ValueError, FileNotFoundError):
             pass
 
         if result:
+
             try:
-                facts["geo"]["city"] = result.city.name
-            except AttributeError:
+                facts["geo"]["city"] = result["city"]["names"]["en"]
+            except KeyError:
                 pass
 
             try:
-                facts["geo"]["country_code"] = result.country.iso_code
-            except AttributeError:
+                facts["geo"]["country_code"] = result["country"]["iso_code"]
+            except KeyError:
                 pass
 
             try:
-                facts["geo"]["country_name"] = result.country.name
-            except AttributeError:
+                facts["geo"]["country_name"] = result["country"]["names"]["en"]
+            except KeyError:
                 pass
 
             try:
-                subdivision = result.subdivisions.most_specific
-                facts["geo"]["region_code"] = subdivision.iso_code
-            except AttributeError:
+                facts["geo"]["region_code"] = result["subdivisions"][0]["iso_code"]
+            except (IndexError, KeyError):
                 pass
 
             try:
-                location = result.location
-                facts["geo"]["latitude"] = location.latitude
-                facts["geo"]["longitude"] = location.longitude
-                facts["geo"]["metro_code"] = location.metro_code
-            except (AttributeError, geoip2.errors.AddressNotFoundError):
+                facts["geo"]["latitude"] = result["location"]["latitude"]
+                facts["geo"]["longitude"] = result["location"]["longitude"]
+                facts["geo"]["metro_code"] = result["location"]["metro_code"]
+            except (KeyError):
                 pass
 
         # Google charts
