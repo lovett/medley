@@ -5,6 +5,7 @@ See https://googleapis.dev/python/storage/latest/client.html
 
 import json
 import pathlib
+from datetime import datetime, UTC
 from typing import Any
 from typing import Iterable
 from typing import List
@@ -160,17 +161,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             payload["httpVersion"]
         ))
 
-        parsed_timestamp = cherrypy.engine.publish(
-            "clock:from_format",
-            payload["startTime"],
-            "%Y-%m-%dT%H:%M:%S.%f%z"
-        ).pop()
+        formats = (
+            "%Y-%m-%dT%H:%M:%S.%f%z",
+            "%Y-%m-%dT%H:%M:%S%z"
+        )
 
-        formatted_timestamp = cherrypy.engine.publish(
-            "clock:format",
-            parsed_timestamp,
+        for format in formats:
+            try:
+                parsed_timestamp = datetime.strptime(
+                    payload["startTime"],
+                    format
+                ).replace(tzinfo=UTC)
+                break
+            except ValueError:
+                pass
+
+        formatted_timestamp = parsed_timestamp.strftime(
             "%d/%b/%Y:%H:%M:%S:%f %z"
-        ).pop()
+        )
 
         fields = (
             payload["ip"],
