@@ -191,6 +191,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             j.value ->> '$.title' as title
             FROM unexpired u, json_each(u.value, '$.articles') j
             WHERE u.prefix=? AND u.key=?
+            AND j.value ->> '$.title' <> '[Removed]'
             """,
             (prefix, rest)
         )
