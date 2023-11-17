@@ -50,7 +50,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def start(self) -> None:
         """Define the CherryPy messages to listen for.
 
-        This plugin owns the cdr prefix.
+        This plugin owns the cache prefix.
         """
 
         self.bus.subscribe("server:ready", self.setup)
