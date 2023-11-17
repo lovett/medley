@@ -9,7 +9,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display a list of recent log entries"""
 
         offset = int(kwargs.get("offset", 0))

@@ -64,8 +64,7 @@ class Controller:
 
     # pylint: disable=too-many-return-statements
     @cherrypy.tools.provides(formats=("html",))
-    def GET(
-            self,
+    def GET(self,
             uid: str = "",
             subresource: str = "",
             resource: str = "",

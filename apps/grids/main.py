@@ -11,10 +11,10 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, grid_name: str = "", **kwargs: str) -> bytes:
+    def GET(self, grid: str = "", **kwargs: str) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
-        if not grid_name:
+        if not grid:
             return self.index()
 
         start_date = datetime.today().replace(day=1)
@@ -32,7 +32,7 @@ class Controller:
             except ValueError as exc:
                 raise cherrypy.HTTPError(400, "Invalid start date") from exc
 
-        return self.show(grid_name, start_date)
+        return self.show(grid, start_date)
 
     @staticmethod
     def index() -> bytes:

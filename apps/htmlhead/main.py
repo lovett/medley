@@ -10,7 +10,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(**_kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Present a form for specifying a URL to fetch."""
 
         return cherrypy.engine.publish(

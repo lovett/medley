@@ -9,7 +9,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def GET(*_args: str, **_kwargs: str) -> None:
+    def GET(**kwargs: str) -> None:
         """Request the country code list and populate the registry"""
 
         source_url = "https://pkgstore.datahub.io" \

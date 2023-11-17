@@ -32,7 +32,7 @@ class Controller:
                              flags=re.UNICODE)
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self) -> bytes:
+    def GET(self, **kwargs: str) -> bytes:
         """Present an interface for on-demand muting of the speech service."""
 
         muted_temporarily = cherrypy.engine.publish(

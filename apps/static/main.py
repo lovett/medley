@@ -10,7 +10,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.etag()
-    def GET(*args: str, **_kwargs: str) -> bytes:
+    def GET(*args: str, **kwargs: str) -> bytes:
         """Serve static assets from the filesystem.
 
         This is an alternative to CherryPy's staticdir tool that

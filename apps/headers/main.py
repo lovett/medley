@@ -10,7 +10,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html", "json", "text"))
-    def GET(*_args: str, **_kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display the headers of the current request"""
 
         headers = sorted(

@@ -23,8 +23,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @cherrypy.tools.provides(formats=("html", "json"))
-    def GET(
-            self,
+    def GET(self,
             uid: str = "",
             subresource: str = "",
             **kwargs: str

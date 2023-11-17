@@ -14,7 +14,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(latlong: str = "", **_kwargs: str) -> bytes:
+    def GET(latlong: str = "", **kwargs: str) -> bytes:
         """Display current and upcoming weather conditions."""
 
         latitude = ""

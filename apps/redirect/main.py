@@ -9,7 +9,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **_kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Perform a client-side redirect to the URL specified in the
         querystring.
 

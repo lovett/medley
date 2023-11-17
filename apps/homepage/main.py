@@ -14,7 +14,7 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html", "org"))
     @cherrypy.tools.etag()
-    def GET(self, *args: str, **_kwargs: str) -> bytes:
+    def GET(self, *args: str, **kwargs: str) -> bytes:
         """List all available applications.
 
         Apps can be excluded from this list by setting

@@ -14,11 +14,10 @@ class Controller:
 
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
-    def GET(
-            self,
+    def GET(self,
             page: str = "default",
             subresource: str = "",
-            **_kwargs: str
+            **kwargs: str
     ) -> bytes:
         """Render a page or present the edit form."""
 

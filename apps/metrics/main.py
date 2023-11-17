@@ -11,7 +11,7 @@ class Controller:
     show_on_homepage = True
 
     @cherrypy.tools.provides(formats=("html",))
-    def GET(self, metric: str = "", **_kwargs: str) -> bytes:
+    def GET(self, metric: str = "", **kwargs: str) -> bytes:
         """Dispatch to a sub-handler."""
 
         if metric:

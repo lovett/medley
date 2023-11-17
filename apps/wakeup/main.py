@@ -11,7 +11,7 @@ class Controller:
 
     @staticmethod
     @cherrypy.tools.provides(formats=("html",))
-    def GET(*_args: str, **kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Display the list of hosts eligible for wakeup."""
 
         sent = bool(kwargs.get("sent", False))

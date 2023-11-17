@@ -26,8 +26,7 @@ class Controller:
         cherrypy.response.status = 204
 
     @cherrypy.tools.etag()
-    def GET(
-            self,
+    def GET(self,
             *args: str,
             **kwargs: str
     ) -> Union[bytes, Iterator[bytes]]:

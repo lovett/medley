@@ -9,8 +9,7 @@ class Controller:
 
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("html",))
-    def GET(
-            self,
+    def GET(self,
             uid: str = "",
             subresource: str = "",
             **kwargs: str

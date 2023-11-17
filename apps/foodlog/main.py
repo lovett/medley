@@ -34,7 +34,8 @@ class Controller:
     def GET(self,
             uid: str = "",
             subresource: str = "",
-            **kwargs: str) -> bytes:
+            **kwargs: str
+    ) -> bytes:
         """Dispatch to a subhandler based on the URL path."""
 
         try:

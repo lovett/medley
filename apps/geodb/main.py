@@ -8,7 +8,7 @@ class Controller:
     show_on_homepage = False
 
     @staticmethod
-    def GET(**_kwargs: str) -> bytes:
+    def GET(**kwargs: str) -> bytes:
         """Determine the timestamp of the currently-installed database."""
 
         modified_timestamp = cherrypy.engine.publish(
