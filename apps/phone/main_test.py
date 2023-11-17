@@ -77,7 +77,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                 "geography:unabbreviate_state": [
                     (None, "Unabbreviated State")
                 ],
-                "cdr:history": [([], 0)],
             }
             if args[0] == "jinja:render":
                 return [""]
@@ -103,8 +102,6 @@ class TestPhone(BaseCherryPyTestCase, ResponseAssertions):
                         "Unabbreviated State"
                     )
                 }]
-            if args[0] == "cdr:history":
-                return [[{"clid": "test"}, 1]]
             if args[0] == "jinja:render":
                 return [""]
             return mock.DEFAULT

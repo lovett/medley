@@ -67,11 +67,6 @@ class Controller:
                 }
             )
 
-        call_history, _ = cherrypy.engine.publish(
-            "cdr:history",
-            number
-        ).pop()
-
         sparql = [
             lookup[0]
             for lookup in
@@ -81,7 +76,6 @@ class Controller:
         response: bytes = cherrypy.engine.publish(
             "jinja:render",
             "apps/phone/phone.jinja.html",
-            history=call_history,
             number=number,
             state_abbreviation=state_lookup[1],
             comment=state_lookup[2],

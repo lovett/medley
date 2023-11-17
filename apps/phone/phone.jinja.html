@@ -52,35 +52,6 @@
             </section>
         {% endif %}
 
-        {% if history %}
-            <section>
-                <h2>Call History</h2>
-
-                <div class="table-sleeve">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Direction</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in history %}
-                                <tr>
-                                    <td>{{ entry["date"]|dateformat("%Y-%m-%d") }}</td>
-                                    <td>{{ entry["date"]|dateformat("%-I:%M %p")}}</td>
-                                    <td>{{ entry["direction"] }}</td>
-                                    <td>{{ entry["duration"] }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        {% endif %}
-
         {% if number %}
             <section>
                 <details>

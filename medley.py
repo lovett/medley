@@ -27,7 +27,6 @@ import plugins.audio
 import plugins.bookmarks
 import plugins.cache
 import plugins.capture
-import plugins.cdr
 import plugins.clock
 import plugins.converters
 import plugins.decorators
@@ -236,7 +235,6 @@ def setup() -> None:
     plugins.bookmarks.Plugin(cherrypy.engine).subscribe()
     plugins.cache.Plugin(cherrypy.engine).subscribe()
     plugins.capture.Plugin(cherrypy.engine).subscribe()
-    plugins.cdr.Plugin(cherrypy.engine).subscribe()
     plugins.clock.Plugin(cherrypy.engine).subscribe()
     plugins.converters.Plugin(cherrypy.engine).subscribe()
     plugins.filesystem.Plugin(cherrypy.engine).subscribe()

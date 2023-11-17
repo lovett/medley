@@ -332,24 +332,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["cdr:history"],
-        number: str,
-        limit: int = 50,
-) -> List[Tuple[List[Row], int]]: ...
-
-
-@overload
-def publish(
-        channel: Literal["cdr:timeline"],
-        src_exclude: List[str] = [],
-        dst_exclude: List[str] = [],
-        offset: int = 0,
-        limit: int = 50,
-) -> List[Tuple[List[Row], int]]: ...
-
-
-@overload
-def publish(
         channel: Literal["clock:ago"],
         value: datetime,
 ) -> List[str]: ...
