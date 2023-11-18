@@ -37,7 +37,7 @@
                                 <a class="title"
                                    href="{{ article["url"].anonymized }}"
                                    rel="noreferrer"
-                                   data-search-href="{{ bing }}/search/?q={{ article["title"]|urlencode }}"
+                                   data-search-href="{{ bing }}/search/?q={{ article["title"]|urlencode }}&form=QBLH&pq={{ article["title"]|urlencode }}"
                                 >{{ article["title"] }}</a>
                             </li>
                         {% endfor %}
