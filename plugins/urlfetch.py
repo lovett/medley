@@ -174,7 +174,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 exception
             )
 
-            return None
+            return (None, None)
 
         cherrypy.engine.publish(
             "applog:add",
