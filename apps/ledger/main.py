@@ -27,6 +27,7 @@ class Controller:
     def GET(self,
             resource: Resource = Resource.NONE,
             uid: str = "",
+            *args: str,
             **kwargs: str
     ) -> bytes:
         """Serve the application UI or dispatch to JSON subhandlers."""
