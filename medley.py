@@ -393,7 +393,6 @@ def main() -> None:
     if cherrypy.config.get("notify_systemd"):
         sdnotify.SystemdNotifier().notify("READY=1")
 
-    cherrypy.engine.publish("assets:publish")
     cherrypy.engine.publish("server:ready")
     cherrypy.engine.block()
 

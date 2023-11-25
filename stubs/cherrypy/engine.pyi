@@ -114,13 +114,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["assets:publish"],
-        reset: Optional[bool] = False,
-) -> List[None]: ...
-
-
-@overload
-def publish(
         channel: Literal["audio:play:asset"],
         name: str,
 ) -> List[None]: ...
