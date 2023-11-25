@@ -12,9 +12,3 @@ HEADER {
 .tag {
     max-width: 10em;
 }
-
-.valid label:after {
-    content: '✓';
-    color: green;
-    padding-left: .25em;
-}
