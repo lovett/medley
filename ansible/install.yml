@@ -69,8 +69,6 @@
         - files/medley-geodb.timer
         - files/medley-maintenance.service
         - files/medley-maintenance.timer
-        - files/medley-headlines.service
-        - files/medley-headlines.timer
         - files/medley-bucketpull.service
         - files/medley-bucketpull.timer
 
@@ -94,7 +92,6 @@
       with_items:
         - medley-geodb.timer
         - medley-maintenance.timer
-        - medley-headlines.timer
         - medley-bucketpull.timer
 
     - name: Group membership
