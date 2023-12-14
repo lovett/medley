@@ -255,7 +255,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if entry_id > 0:
             self._execute(
-                """UPDATE foodlog SET consumed_on=?, foods_eaten=?, overate=?
+                """UPDATE foodlog SET consumed_on=datetime(?, 'utc'), foods_eaten=?, overate=?
                 WHERE id=?""",
                 (consumed_on, foods_eaten, overate, entry_id)
             )
