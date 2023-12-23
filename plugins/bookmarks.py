@@ -378,6 +378,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY {order_sql}
         LIMIT ? OFFSET ?"""  # nosec
 
+
         placeholder_values += (
             str(limit),
             str(offset)
@@ -401,9 +402,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Get a newest-first list of recently bookmarked URLs."""
 
         sql = """SELECT rowid, url as 'url [url]', domain, title,
-        added as 'added [timestamp]',
-        updated as 'updated [timestamp]',
-        retrieved 'retrieved [timestamp]',
+        added as 'added [local_datetime]',
+        updated as 'updated [local_datetime]',
+        retrieved 'retrieved [local_datetime]',
         comments, tags as 'tags [comma_delimited]'
         FROM bookmarks
         WHERE substr(added, 0, 11) >= date('now', ?)
