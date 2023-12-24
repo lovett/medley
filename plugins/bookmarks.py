@@ -378,7 +378,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY {order_sql}
         LIMIT ? OFFSET ?"""  # nosec
 
-
         placeholder_values += (
             str(limit),
             str(offset)
@@ -395,13 +394,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             self,
             limit: int = 20,
             offset: int = 0,
+            order: str = "date-desc",
             max_days: int = 180
     ) -> Tuple[
         List[sqlite3.Row], int, List[str]
     ]:
         """Get a newest-first list of recently bookmarked URLs."""
 
-        sql = """SELECT rowid, url as 'url [url]', domain, title,
+        order_sql = "added DESC"
+        if order == "date-asc":
+            order_sql = "added ASC"
+
+        sql = f"""SELECT rowid, url as 'url [url]', domain, title,
         added as 'added [local_datetime]',
         updated as 'updated [local_datetime]',
         retrieved 'retrieved [local_datetime]',
@@ -409,7 +413,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM bookmarks
         WHERE substr(added, 0, 11) >= date('now', ?)
         AND deleted IS NULL
-        ORDER BY added DESC
+        ORDER BY {order_sql}
         LIMIT ? OFFSET ?"""
 
         max_days_clause = f"-{max_days} day"

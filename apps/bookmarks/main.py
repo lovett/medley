@@ -123,6 +123,7 @@ class Controller:
             "bookmarks:recent",
             limit=per_page,
             offset=offset,
+            order=order,
             max_days=max_days
         ).pop()
 
