@@ -76,12 +76,18 @@
                                 <a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%B %d, %Y") }}</a>
                                 <br/>
                                 {{ entry.consumed_on|dateformat("%-I:%M %p") }}
+                                <br/>{{ entry.day_of_year }}
                             </td>
                             <td>
                                 <div>{{ entry.foods_eaten }}</div>
                                 {% if entry.overate %}<div class="warning badge">Overate</div>{% endif %}
                             </td>
                         </tr>
+                        {% if not loop.last %}
+                            <tr class="delta">
+                                <td colspan="2">↕ {{ entry.delta }}</td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

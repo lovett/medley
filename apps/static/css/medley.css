@@ -244,6 +244,14 @@ TABLE TR:last-child {
     border-bottom: none;
 }
 
+TABLE TR.delta {
+    border: 9;
+}
+
+TABLE TR.delta TD {
+    background-color: #eee;
+}
+
 TABLE TH {
     background-color: var(--black);
     font-weight: bold;

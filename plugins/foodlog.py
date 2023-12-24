@@ -190,7 +190,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         placeholders: PlaceholderTuple = ()
         if date_range and query:
             sql = f"""SELECT f.id, f.foods_eaten, f.overate,
-            f.consumed_on as 'consumed_on [local_datetime]'
+            f.consumed_on as 'consumed_on [local_datetime]',
+            f.previous_consumed_on as '[local_datetime]',
             FROM foodlog AS f, foodlog_fts
             WHERE f.id=foodlog_fts.rowid
             AND foodlog_fts MATCH ?
@@ -202,7 +203,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if date_range and not query:
             sql = f"""SELECT f.id, f.foods_eaten, f.overate,
-            f.consumed_on as 'consumed_on [local_datetime]'
+            f.consumed_on as 'consumed_on [local_datetime]',
+            unixepoch(f.consumed_on) - lag(unixepoch(f.consumed_on))
+              OVER (ORDER BY f.id)
+              AS 'delta [duration]'
             FROM foodlog AS f
             WHERE 1=1
             {date_range_sql}
@@ -213,7 +217,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if query and not date_range:
             sql = """SELECT f.id, f.foods_eaten, f.overate,
-            f.consumed_on as 'consumed_on [local_datetime]'
+            f.consumed_on as 'consumed_on [local_datetime]',
+            unixepoch(f.consumed_on) - lag(unixepoch(f.consumed_on))
+              OVER (ORDER BY f.id)
+              AS 'delta [duration]'
             FROM foodlog AS f, foodlog_fts
             WHERE f.id=foodlog_fts.rowid
             AND foodlog_fts MATCH ?
@@ -224,7 +231,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if not sql:
             sql = """SELECT f.id, f.foods_eaten, f.overate,
-            f.consumed_on as 'consumed_on [local_datetime]'
+            f.consumed_on as 'consumed_on [local_datetime]',
+            unixepoch(f.consumed_on) - lag(unixepoch(f.consumed_on))
+              OVER (ORDER BY f.consumed_on)
+              AS 'delta [duration]'
             FROM foodlog AS f
             ORDER BY f.consumed_on DESC
             LIMIT ? OFFSET ?"""

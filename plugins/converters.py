@@ -113,9 +113,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         if 60 < seconds <= 90:
             return f"{seconds} seconds"
 
+        months_label = "month"
+        weeks_label = "week"
+        days_label = "day"
         hours_label = "hour"
         minutes_label = "minute"
         seconds_label = "second"
+
+        months = seconds // (86400 * 30)
+        if months > 0:
+            seconds -= months * (86400 * 30)
+            if months != 1:
+                months_label += "s"
+
+        weeks = seconds // (86400 * 7)
+        if weeks > 0:
+            seconds -= weeks * (86400 * 7)
+            if weeks != 1:
+                weeks_label += "s"
+
+        days = seconds // 86400
+        if days > 0:
+            seconds -= days * 86400
+            if days != 1:
+                days_label += "s"
 
         hours = seconds // 3600
         seconds -= hours * 3600
@@ -132,6 +153,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             seconds_label += "s"
 
         result = []
+
+        if months > 0:
+            result.append(f"{months} {months_label}")
+
+        if weeks > 0:
+            result.append(f"{weeks} {weeks_label}")
+
+        if days > 0:
+            result.append(f"{days} {days_label}")
 
         if hours > 0:
             result.append(f"{hours} {hours_label}")
