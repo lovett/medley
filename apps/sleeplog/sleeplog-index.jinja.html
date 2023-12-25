@@ -182,11 +182,11 @@
                                             {{ entry.end|dateformat("%-I:%M %p") }}
                                         </p>
 
-                                        {% if not entry.surplus.startswith("0") %}
+                                        {% if entry.surplus %}
                                             <p>{{ entry.surplus }} surplus</p>
                                         {% endif %}
 
-                                        {% if not entry.deficit.startswith("0") %}
+                                        {% if entry.deficit %}
                                             <p>{{ entry.deficit }} deficit</p>
                                         {% endif %}
 

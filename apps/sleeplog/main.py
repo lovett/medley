@@ -155,10 +155,10 @@ class Controller:
                 stats["good_start"] += 1
                 start_verdict[entry["start"]] = 1
 
-            if not entry["surplus"].startswith("0"):
+            if entry["surplus"]:
                 stats["days_with_surplus"] += 1
                 duration_verdict[entry["start"]] = 1
-            elif entry["deficit"].startswith("0"):
+            elif entry["deficit"]:
                 stats["good_days"] += 1
                 duration_verdict[entry["start"]] = 0
             else:
