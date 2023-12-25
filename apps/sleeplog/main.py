@@ -160,9 +160,9 @@ class Controller:
                 duration_verdict[entry["start"]] = 1
             elif entry["deficit"]:
                 stats["good_days"] += 1
-                duration_verdict[entry["start"]] = 0
-            else:
                 duration_verdict[entry["start"]] = -1
+            else:
+                duration_verdict[entry["start"]] = 0
 
         if stats["total_days"] > 0:
             stats["surplus_percent"] = round(
