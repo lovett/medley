@@ -154,9 +154,14 @@ TD P {
 
 /* Extra large devices */
 @media (min-width: 1200px) {
+    MAIN {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 80em;
+
+    }
+
     #stats SPAN.primary {
         font-size: 3em;
     }
-
-
 }
