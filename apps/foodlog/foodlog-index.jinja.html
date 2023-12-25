@@ -65,7 +65,8 @@
             <table id="matches">
                 <thead>
                     <tr>
-                        <th width="25%">Date</th>
+                        <th>Date</th>
+                        <th>Window</th>
                         <th>Foods Eaten</th>
                     </tr>
                 </thead>
@@ -73,11 +74,10 @@
                     {% for entry in entries %}
                         <tr>
                             <td>
-                                <a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%B %d, %Y") }}</a>
-                                <br/>
-                                {{ entry.consumed_on|dateformat("%-I:%M %p") }}
-                                <br/>{{ entry.day_of_year }}
+                                <a href="{{ app_url }}/{{ entry.id }}/edit">{{ entry.consumed_on|dateformat("%-I:%M %p") }}</a>
+                                on {{ entry.consumed_on|dateformat("%B %d, %Y") }}
                             </td>
+                            <td>{{ entry.window or "start" }}</td>
                             <td>
                                 <div>{{ entry.foods_eaten }}</div>
                                 {% if entry.overate %}<div class="warning badge">Overate</div>{% endif %}
@@ -85,7 +85,7 @@
                         </tr>
                         {% if not loop.last %}
                             <tr class="delta">
-                                <td colspan="2">↕ {{ entry.delta }}</td>
+                                <td colspan="3">↕ {{ entry.delta }}</td>
                             </tr>
                         {% endif %}
                     {% endfor %}

@@ -102,7 +102,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return cast(datetime, dt)
 
     @staticmethod
-    def duration(value: bytes) -> str:
+    def duration(value: bytes) -> Optional[str]:
         """Convert a number of seconds into a human-readable string."""
 
         seconds = int(value)
@@ -173,7 +173,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             result.append(f"{seconds} {seconds_label}")
 
         if not result:
-            result.append(f"0 {seconds_label}")
+            return None
 
         return ", ".join(result)
 
