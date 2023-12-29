@@ -46,11 +46,6 @@ class TestConverters(unittest.TestCase):
         result = self.plugin.duration(b"604800")
         self.assertEqual(result, "168 hours")
 
-    def test_callerid(self) -> None:
-        """The callerid name is correctly extracted from a callerid string"""
-        result = self.plugin.callerid(b'"Name" <123>')
-        self.assertEqual(result, "Name")
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -32,7 +32,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         register_converter("date_with_hour", self.date_with_hour)
         register_converter("json", self.json)
         register_converter("duration", self.duration)
-        register_converter("clid", self.callerid)
         register_converter("querystring", self.querystring)
         register_converter("comma_delimited", self.comma_delimited)
         register_converter("slug", self.slug)
@@ -176,12 +175,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             return None
 
         return ", ".join(result)
-
-    @staticmethod
-    def callerid(value: bytes) -> str:
-        """De-quote a caller ID string from an Asterisk CDR database."""
-
-        return re.sub(r'"(.*?)".*', r"\1", value.decode("utf-8"))
 
     @staticmethod
     def querystring(value: bytes) -> Dict[str, List[str]]:
