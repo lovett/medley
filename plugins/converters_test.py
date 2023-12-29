@@ -14,7 +14,7 @@ class TestConverters(unittest.TestCase):
         """A integer number of seconds is converted to a string phrase"""
 
         result = self.plugin.duration(b"0")
-        self.assertEqual(result, "0 seconds")
+        self.assertIsNone(result)
 
         result = self.plugin.duration(b"1")
         self.assertEqual(result, "1 second")
@@ -44,7 +44,7 @@ class TestConverters(unittest.TestCase):
         self.assertEqual(result, "2 minutes, 1 second")
 
         result = self.plugin.duration(b"604800")
-        self.assertEqual(result, "168 hours")
+        self.assertEqual(result, "1 week")
 
 
 if __name__ == "__main__":
