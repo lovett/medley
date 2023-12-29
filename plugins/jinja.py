@@ -56,7 +56,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         self.env.filters["hostname_truncate"] = self.hostname_truncate_filter
         self.env.filters["logline_with_links"] = self.logline_with_links_filter
         self.env.filters["slug"] = self.slug_filter
-        self.env.filters["sane_callerid"] = self.sane_callerid_filter
         self.env.filters["autolink"] = self.autolink_filter
         self.env.filters["optional_qs_param"] = self.optional_qs_param_filter
         self.env.filters["unescape"] = self.unescape_filter
@@ -390,22 +389,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         slug = value.lower()
 
         return re.sub(r"\s+", "-", slug)
-
-    @staticmethod
-    def sane_callerid_filter(
-            value: str,
-            default: str = "unknown caller"
-    ) -> str:
-        """Prevent Google Voice callerid strings from being displayed.
-
-        Example: +12223334444@voice.google.com/srvenc-abc123/def456/
-
-        """
-
-        if "@voice.google.com" in value:
-            return default
-
-        return value
 
     @staticmethod
     def autolink_filter(
