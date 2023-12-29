@@ -349,3 +349,6 @@ reset:
 # Push the repository to GitHub.
 mirror:
 	git push --force git@github.com:lovett/medley.git master:master
+
+tags:
+	etags medley.py apps/*.py plugins/*.py parsers/*.py resources/*.py tools/*.py testing/*.py http/*.py
