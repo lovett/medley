@@ -3,6 +3,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 import json
+import re
 from typing import Any
 from typing import Dict
 from typing import DefaultDict
@@ -104,7 +105,7 @@ class Controller:
     def index(self, **kwargs: str) -> bytes:
         """The default view."""
 
-        q = kwargs.get("q", "").strip().lower()
+        q = re.sub(r"\W+", "", kwargs.get("q", "").lower())
         limit = 14
         offset = int(kwargs.get("offset", 0))
 
