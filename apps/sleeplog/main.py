@@ -136,22 +136,22 @@ class Controller:
         for entry in entries:
             stats["total_days"] += 1
 
-            local_start = cherrypy.engine.publish(
+            entry_start = cherrypy.engine.publish(
                 "clock:local",
                 entry["start"]
             ).pop()
 
             ideal_start = config["ideal_start"].replace(
-                year=local_start.year,
-                month=local_start.month,
-                day=local_start.day,
-                tzinfo=local_start.tzinfo
+                year=entry_start.year,
+                month=entry_start.month,
+                day=entry_start.day,
+                tzinfo=entry_start.tzinfo
             )
 
-            if local_start.hour < 12 < config["ideal_start"].hour:
+            if entry_start.hour < 12 < config["ideal_start"].hour:
                 ideal_start -= timedelta(days=1)
 
-            if ideal_start > local_start:
+            if entry_start < ideal_start:
                 stats["good_start"] += 1
                 start_verdict[entry["start"]] = 1
 
@@ -159,9 +159,9 @@ class Controller:
                 stats["days_with_surplus"] += 1
                 duration_verdict[entry["start"]] = 1
             elif entry["deficit"]:
-                stats["good_days"] += 1
                 duration_verdict[entry["start"]] = -1
             else:
+                stats["good_days"] += 1
                 duration_verdict[entry["start"]] = 0
 
         if stats["total_days"] > 0:
