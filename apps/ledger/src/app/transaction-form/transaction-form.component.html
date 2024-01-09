@@ -3,30 +3,34 @@
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
-    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid">
-        <label for="payee">Payee</label>
+    <div class="field" [class.invalid]="payee.touched && payee.invalid">
+        <label for="payee">
+            Payee
+            <span class="validation-message arrow-down" *ngIf="payee.touched && payee.invalid">This field is required.</span>
+        </label>
+
         <input
             id="payee"
             type="text"
             formControlName="payee"
         />
         <p *ngIf="autocompleteFrom"><a href="#" (click)="applyAutocompletedTransaction($event)">Autocomplete</a> from transaction #{{ autocompleteFrom.uid }} of {{ autocompleteFrom.occurred_on |date:'longDate' }}</p>
-
-        <p *ngIf="payee.hasError('required')" class="validation-message">A payee is required.</p>
     </div>
 
     <div class="field-group">
-        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid">
-            <label for="amount">Amount</label>
+        <div class="field" [class.invalid]="amount.touched && amount.invalid">
+            <label for="amount">
+                Amount
+                <span class="validation-message arrow-down" *ngIf="amount.touched && amount.hasError('required')">An amount is required.</span>
+                <span class="validation-message arrow-down" *ngIf="amount.touched && amount.hasError('pattern')">The amount should be numeric.</span>
+                <span class="validation-message arrow-down" *ngIf="amount.touched && amount.hasError('min')">The amount should be greater than zero.</span>
+            </label>
             <input
                 id="amount"
                 type="text"
                 formControlName="amount"
             />
 
-            <p *ngIf="amount.hasError('required')" class="validation-message">An amount is required.</p>
-            <p *ngIf="amount.hasError('pattern')" class="validation-message">The amount should be numeric.</p>
-            <p *ngIf="amount.hasError('min')" class="validation-message">The amount should be greater than zero.</p>
         </div>
     </div>
 
@@ -73,13 +77,13 @@
 
     <div formGroupName="accounts">
         <div class="field-group">
-            <div class="field" [class.invalid]="accountId.dirty && accounts.hasError('atLeastOneAccount')">
+            <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')">
                 <app-account-menu fieldId="accountId" [control]="accountId" [disabledValue]="destinationId.value" label="Withdraw from"></app-account-menu>
                 <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
-                <p *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')" class="validation-message">At least one account is needed.</p>
+                <p class="validation-message arrow-up"  *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')">At least one account is needed.</p>
             </div>
 
-            <div class="field" [class.invalid]="destinationId.dirty && accounts.hasError('atLeastOneAccount')">
+            <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')">
                 <app-account-menu fieldId="destinationId" [control]="destinationId" [disabledValue]="accountId.value" label="Deposit To"></app-account-menu>
             </div>
         </div>
@@ -112,7 +116,8 @@
         ></textarea>
     </div>
 
-    <footer>
-        <button type="submit" [disabled]="transactionForm.invalid || transactionForm.pristine">Save</button>
-    </footer>
+    <div class="field">
+        <button type="submit">Save</button>
+        <p *ngIf="errorMessage" class="validation-message">{{ errorMessage }}</p>
+    </div>
 </form>

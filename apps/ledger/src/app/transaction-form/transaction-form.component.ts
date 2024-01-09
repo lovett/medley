@@ -11,10 +11,14 @@ import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
 
 function atLeastOneAccount(group: AbstractControl): ValidationErrors | null {
-    const accountId = group.get('account_id')!.value;
-    const destinationId = group.get('destination_id')!.value;
+    const accountId = group.get('account_id')!;
+    const destinationId = group.get('destination_id')!;
 
-    if (accountId || destinationId) {
+    if (accountId.pristine && destinationId.pristine) {
+        return null;
+    }
+
+    if (accountId.value || destinationId.value) {
         return null;
     }
 
@@ -213,12 +217,12 @@ export class TransactionFormComponent implements OnInit {
 
     save(): void {
         if (!this.transactionForm.valid) {
-            this.errorMessage = 'Cannot save your changes because the form is incomplete.';
+            this.errorMessage = 'Cannot save because the form is incomplete.';
             return;
         }
 
         if (!this.transactionForm.dirty) {
-            this.errorMessage = 'Cannot save your changes because nothing has changed.';
+            this.errorMessage = 'Cannot save because nothing has changed.';
             return;
         }
 
