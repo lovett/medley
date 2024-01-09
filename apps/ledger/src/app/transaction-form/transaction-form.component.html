@@ -3,7 +3,7 @@
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
-    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid" [class.valid]="payee.valid">
+    <div class="field" [class.invalid]="(payee.dirty || payee.touched) && payee.invalid">
         <label for="payee">Payee</label>
         <input
             id="payee"
@@ -16,7 +16,7 @@
     </div>
 
     <div class="field-group">
-        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid" [class.valid]="amount.valid">
+        <div class="field" [class.invalid]="(amount.dirty || amount.touched) && amount.invalid">
             <label for="amount">Amount</label>
             <input
                 id="amount"
@@ -42,7 +42,7 @@
 
     <div formGroupName="dates">
         <div class="field-group">
-            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)" [class.valid]="occurredOn.valid">
+            <div class="field" [class.invalid]="occurredOn.invalid && (occurredOn.dirty || occurredOn.touched)">
                 <label for="occurredOn">Date</label>
                 <input
                     id="occurredOn"
@@ -53,7 +53,7 @@
                 <p *ngIf="occurredOn.hasError('required')" class="validation-message">A date is required.</p>
             </div>
 
-            <div *ngIf="datesExpanded" class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)" [class.valid]="clearedOn.valid">
+            <div *ngIf="datesExpanded" class="field" [class.invalid]="(clearedOn.dirty || clearedOn.touched) && (clearedOn.invalid || dates.invalid)">
                 <label for="clearedOn">Cleared On</label>
                 <input
                     id="clearedOn"
@@ -73,7 +73,7 @@
 
     <div formGroupName="accounts">
         <div class="field-group">
-            <div class="field" [class.invalid]="accountId.dirty && accounts.hasError('atLeastOneAccount')" [class.valid]="accountId.valid">
+            <div class="field" [class.invalid]="accountId.dirty && accounts.hasError('atLeastOneAccount')">
                 <app-account-menu fieldId="accountId" [control]="accountId" [disabledValue]="destinationId.value" label="Withdraw from"></app-account-menu>
                 <p *ngIf="accountId.disabled">The account cannot be changed because it is closed.</p>
                 <p *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')" class="validation-message">At least one account is needed.</p>
@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <div class="field" [class.valid]="tags.length > 0 && !tags.value.includes('')">
+    <div class="field">
         <label for="tag-">Tags</label>
         <div class="tag-grid" formArrayName="tags">
             <div *ngFor="let tags of tags.controls; let i=index">
