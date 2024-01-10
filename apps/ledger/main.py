@@ -119,17 +119,19 @@ class Controller:
 
         if resource == Resource.ACCOUNTS:
             self.store_account(0, cherrypy.request.json)
+            self.clear_etag(resource)
             return None
 
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(0, cherrypy.request.json)
+            self.clear_etag(resource)
             return None
 
         if resource == Resource.ACK:
             self.process_acknowledgment(cherrypy.request.json)
+            self.clear_etag(resource)
             return None
 
-        self.clear_etag(resource)
         raise cherrypy.HTTPError(404)
 
     @cherrypy.tools.capture()
