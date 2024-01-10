@@ -352,7 +352,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         LEFT JOIN accounts a ON t.account_id=a.id
         LEFT JOIN accounts a2 ON t.destination_id=a2.id
         {where_sql}
-        ORDER BY t.occurred_on DESC
+        ORDER BY t.occurred_on DESC, t.id DESC
         LIMIT ? OFFSET ?"""
         placeholders += (limit, offset)
 
@@ -589,7 +589,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         FROM transactions_fts
         JOIN transactions t ON transactions_fts.rowid=t.id
         WHERE transactions_fts MATCH (?)
-        ORDER BY t.occurred_on DESC
+        ORDER BY t.occurred_on DESC, t.id DESC
         LIMIT 1"""
 
         # Match on payee and amount
