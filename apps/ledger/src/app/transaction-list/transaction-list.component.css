@@ -62,6 +62,7 @@ TR, TD {
     text-align: center;
     font-weight: bold;
     background-color: lemonchiffon;
+    white-space: nowrap;
 }
 
 .pager {
