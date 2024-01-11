@@ -226,6 +226,11 @@ export class TransactionFormComponent implements OnInit {
             return;
         }
 
+        if (!this.accountId.value && !this.destinationId.value) {
+            this.errorMessage = 'Cannot save because an account has not been specified.';
+            return;
+        }
+
         const primitive: TransactionPrimitive = {
             'uid': this.transaction!.uid,
             'account_id': this.accountId.value,

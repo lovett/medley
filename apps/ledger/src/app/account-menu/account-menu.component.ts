@@ -2,6 +2,7 @@ import { Attribute, Component, Input, OnInit, EventEmitter } from '@angular/core
 import { FormGroup, FormControl } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
+import { AccountList } from '../types/accountList';
 
 @Component({
   selector: 'app-account-menu[control]',
@@ -22,17 +23,17 @@ export class AccountMenuComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.ledgerService.getAccounts().subscribe(
-            (accounts: Account[]) => {
-                for (let account of accounts) {
-                    if (account.closed_on && account.uid !== this.control.value) {
+        this.ledgerService.getAccounts().subscribe({
+            next: (accountList: AccountList) => {
+                for (let primitive of accountList.accounts) {
+                    const  a = new Account(primitive);
+                    if (a.closed_on && a.uid !== this.control.value) {
                         continue;
                     }
-                    this.accounts.push(account);
+                    this.accounts.push(a);
                 }
             },
-            (err: any) => console.log(err),
-            () => console.log('All done getting accounts for menu')
-        );
+            error: (err: any) => console.log(err),
+        });
     }
 }

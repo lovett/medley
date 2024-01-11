@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
+import { AccountList } from '../types/accountList';
 import { MoneyPipe } from '../money.pipe';
 
 @Component({
@@ -9,6 +10,7 @@ import { MoneyPipe } from '../money.pipe';
   styleUrls: ['./account-list.component.css']
 })
 export class AccountListComponent implements OnInit {
+    count = 0;
     accounts: Account[] = [];
     singularResourceName: string;
 
@@ -19,11 +21,15 @@ export class AccountListComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.ledgerService.getAccounts().subscribe(
-            (accounts: Account[]) => this.accounts = accounts,
-            (err: any) => console.log(err),
-            () => console.log('All done getting accounts')
-        );
+        this.ledgerService.getAccounts().subscribe({
+            next: (accountList: AccountList) => {
+                this.count = accountList.count;
+                this.accounts = accountList.accounts.map((primitive) => {
+                    return new Account(primitive);
+                });
+            },
+            error: (err: any) => console.log(err),
+        });
     }
 
     activeAccounts(): Account[] {

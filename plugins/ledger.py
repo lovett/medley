@@ -221,7 +221,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def accounts_json(self) -> str:
         """Rows from the accounts table as JSON."""
 
-        sql = """SELECT json_group_array(
+        count = self.count_accounts()
+
+        sql = """SELECT json_object(
+        'count', ?,
+        'accounts', json_group_array(
             json_object('uid', id,
                         'name', name,
                         'opened_on', opened_on,
@@ -232,7 +236,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'total_pending', pending_deposits - pending_withdrawls,
                         'last_active', last_active
                        )
-            ) AS json_result
+            )
+        ) AS json_result
             FROM (
             SELECT a.*,
                 (SELECT COALESCE(sum(amount), 0)
@@ -259,7 +264,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             ORDER BY a.closed_on IS NOT NULL, LOWER(a.name)
             )"""
 
-        return cast(str, self._selectFirst(sql))
+        return cast(str, self._selectFirst(sql, (count,)))
 
     def tags_json(self) -> str:
         """All known tags as JSON."""
@@ -276,6 +281,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         ORDER BY lower(json_each.value))"""
 
         return cast(str, self._selectFirst(sql,))
+
+    def count_accounts(self) -> int:
+        """Count of rows from the accounts table."""
+        return int(self._selectFirst("SELECT count(*) FROM accounts"))
 
     def count_transactions(
             self,
