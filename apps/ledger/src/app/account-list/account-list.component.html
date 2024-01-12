@@ -23,14 +23,8 @@
                     {{ account.balance!|money }}
                 </li>
 
-                <li *ngIf="account.total_pending! > 0">{{ account.total_pending!|money }} pending</li>
-
-                <li>
-                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
-                    Transactions
-                    </a>
-                </li>
-
+                <li class="deposit"  *ngIf="account.total_pending! > 0">{{ account.total_pending!|money }} pending</li>
+                <li class="withdrawl" *ngIf="account.total_pending! < 0">{{ account.total_pending!|money }} pending</li>
                 <li>
                     <a *ngIf="account.url">
                         <a href="{{ account.url }}" target="_blank" rel="noopener noreferer">Log In</a>
@@ -39,6 +33,13 @@
             </ul>
 
             <footer>
+                <p>
+                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                        Transactions
+                    </a>
+                </p>
+
+
                 <p *ngIf="account.opened_on">Opened {{ account.opened_on|date: 'longDate' }}</p>
 
                 <p *ngIf="account.note">{{ account.note }}</p>

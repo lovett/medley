@@ -63,3 +63,11 @@ HEADER {
 .card footer details {
     white-space: pre-line;
 }
+
+.deposit {
+    color: green;
+}
+
+.withdrawl {
+    color: red;
+}
