@@ -261,7 +261,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                  WHERE t.account_id=a.id OR t.destination_id=a.id
                  ORDER BY occurred_on DESC LIMIT 1) as last_active
             FROM accounts a
-            ORDER BY a.closed_on IS NOT NULL, LOWER(a.name)
+            ORDER BY a.closed_on IS NOT NULL, a.closed_on DESC, LOWER(a.name)
             )"""
 
         return cast(str, self._selectFirst(sql, (count,)))
