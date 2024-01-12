@@ -5,7 +5,7 @@
 <p *ngIf="accounts.length == 0">There are no accounts.</p>
 
 <section class="accounts" *ngIf="accounts.length > 0">
-    <h1>Active Accounts</h1>
+    <h1>Accounts</h1>
     <div class="cards">
         <div class="card" [class.inactive]="account.closed_on" *ngFor="let account of accounts">
             <div class="title">
