@@ -55,7 +55,9 @@ HEADER {
 }
 
 .card footer {
-    padding: 1em;
+    margin: 1em;
+    font-size: .85em;
+    border-top: 1px dashed #333;
 }
 
 .card footer details {

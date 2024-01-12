@@ -39,10 +39,9 @@
             </ul>
 
             <footer>
-                <details *ngIf="account.note">
-                    <summary>Details</summary>
-                    {{ account.note }}
-                </details>
+                <p *ngIf="account.opened_on">Opened {{ account.opened_on|date: 'longDate' }}</p>
+
+                <p *ngIf="account.note">{{ account.note }}</p>
             </footer>
         </div>
     </div>
