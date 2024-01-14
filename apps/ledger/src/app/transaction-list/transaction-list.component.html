@@ -19,7 +19,7 @@
 
 <div class="pager">
     <div></div>
-    <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count }}</div>
+    <div *ngIf="count > 0">{{ this.offset + 1}} to {{ this.offset + transactions.length }} of {{ count|number }}</div>
     <div></div>
 </div>
 

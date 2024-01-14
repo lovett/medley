@@ -8,7 +8,7 @@
     <ul class="tags">
         <li *ngFor="let tag of tags">
             <a [routerLink]="['/transactions']" [queryParams]="{q: 'tags:' + tag.name}">{{ tag.name }}</a>
-            → {{ tag.transaction_count }}
+            → {{ tag.transaction_count|number }}
         </li>
     </ul>
 </section>
