@@ -460,7 +460,7 @@ def publish(
 def publish(
         channel: Literal["foodlog:activity"],
         **kwargs: Any,
-) -> List[Iterator[Row]]: ...
+) -> List[Optional[Iterator[Row]]]: ...
 
 
 @overload

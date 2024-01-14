@@ -104,10 +104,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             (entry_id,)
         )
 
-    def activity(self, **kwargs: Any) -> Iterator[sqlite3.Row]:
+    def activity(self, **kwargs: Any) -> Optional[Iterator[sqlite3.Row]]:
         """Visualize a keyword search as an GitHub-style activity chart."""
 
         query = kwargs.get("query", "")
+
+        if re.search(r"\d{2,}", query):
+            return None
 
         sql = """WITH RECURSIVE calendar(days_ago, dt) AS
         (SELECT 0, datetime('now')
