@@ -6,12 +6,12 @@ HEADER {
 
 FORM {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto;
+
 }
 
-FORM .field.reset A {
-    margin-left: 1em;
-    line-height: 2.25em;
+FORM INPUT[type=search] {
+    min-width: 30em;
 }
 
 TABLE {
