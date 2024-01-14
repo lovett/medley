@@ -294,30 +294,31 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     ) -> int:
         """Count of rows from the transactions table."""
 
-        match_sql = ""
+        where_sql = "WHERE 1=1"
+        placeholders = ()
 
         if account > 0:
-            match_sql += f" AND (account_id:{account} OR destination_id:{account})"
+            where_sql += f" AND (account_id=? OR destination_id=?)"
+            placeholders += (account, account)
 
-        if q and ":" not in q:
-            match_sql += f" AND (payee:{q} OR note:{q})"
-
-        if q and ":" in q:
-            match_sql += q
+        if q:
+            where_sql += f" AND (transactions_fts MATCH ?)"
+            if ":" in q:
+                placeholders += (q,)
+            else:
+                placeholders += f"payee:{q} OR note:{q}"
 
         if tag:
-            match_sql += f" AND tags:{tag}"
+            where_sql += f" AND (transactions_fts MATCH ?)"
+            placeholders += (f"tags:{tag}",)
 
-        match_sql = match_sql.lstrip(" AND ")
-
-        if match_sql:
-            return int(self._selectFirst(
-                f"""
-                SELECT count(*)
-                FROM transactions_fts
-                WHERE transactions_fts MATCH '{match_sql}'"""))
-
-        return int(self._selectFirst("SELECT count(*) FROM transactions"))
+        return int(self._selectFirst(
+            f"""
+            SELECT count(*)
+            FROM transactions_fts
+            {where_sql}""",
+            placeholders
+        ))
 
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
