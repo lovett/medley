@@ -305,7 +305,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             if ":" in q:
                 placeholders += (q,)
             else:
-                placeholders += f"payee:{q} OR note:{q}"
+                placeholders += (f"payee:{q} OR note:{q}",)
 
         return int(self._selectFirst(
             f"""
@@ -313,17 +313,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             FROM transactions_fts
             {where_sql}""",
             placeholders
-        ))
+        ) or 0)
 
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
 
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
-        q = kwargs.get("q", "")
+        q = self.clean_query(kwargs.get("q", ""))
         account = int(kwargs.get("account", 0))
 
         count = self.count_transactions(account, q)
+
+        if count == 0:
+            return "{count: 0, transactions: {}}"
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
@@ -607,3 +610,25 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         )
 
         print(result)
+
+    def clean_query(self, query: str) -> str:
+        """Convert user-friendly facet names to schema columns and remove problematic characters."""
+
+        q = query.replace("tag:", "tags:")
+        q = q.replace("date:", "occurred_on:")
+        q = q.replace(".", "")
+        q = q.replace("$", "")
+        q = q.replace("-", "")
+
+        rows = self._select("""
+        SELECT name
+        FROM pragma_table_info('transactions_fts')""")
+
+        whitelist = tuple(row["name"] for row in rows)
+
+        for match in re.finditer(r"(\w+):", q):
+            facet = match.group(1)
+            if facet not in whitelist:
+                q = q.replace(f"{facet }:", "")
+
+        return q
