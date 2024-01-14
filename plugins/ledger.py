@@ -289,8 +289,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def count_transactions(
             self,
             account: int = 0,
-            q: str = "",
-            tag: str = ""
+            q: str = ""
     ) -> int:
         """Count of rows from the transactions table."""
 
@@ -308,10 +307,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             else:
                 placeholders += f"payee:{q} OR note:{q}"
 
-        if tag:
-            where_sql += f" AND (transactions_fts MATCH ?)"
-            placeholders += (f"tags:{tag}",)
-
         return int(self._selectFirst(
             f"""
             SELECT count(*)
@@ -323,13 +318,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def transactions_json(self, **kwargs: str) -> str:
         """Rows from the transactions table as JSON."""
 
-        tag = kwargs.get("tag", "")
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
         q = kwargs.get("q", "")
         account = int(kwargs.get("account", 0))
 
-        count = self.count_transactions(account, q, tag)
+        count = self.count_transactions(account, q)
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
@@ -346,11 +340,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             """
             where_sql += " AND transactions_fts MATCH ?"
             placeholders += (q,)
-
-        if tag:
-            from_sql += ", json_each(t.tags)"
-            where_sql += " AND json_each.value=?"
-            placeholders += (tag,)
 
         select_sql = f"""
         SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
