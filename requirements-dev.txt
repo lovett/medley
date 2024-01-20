@@ -1,7 +1,7 @@
 bandit==1.7.6
 coverage==7.4.0
 httpx==0.26.0
-lxml==5.0.1
+lxml==5.1.0
 memory-profiler==0.61.0
 mypy==1.8.0
 mypy-extensions==1.0.0
@@ -13,7 +13,7 @@ pytest-timeout==2.2.0
 python-lsp-server==1.9.0
 requests-mock==1.11.0
 responses==0.24.1
-ruff==0.1.11
+ruff==0.1.14
 types-pytz==2023.3.1.1
 types-requests==2.31.0.20240106
 typing-extensions==4.9.0
