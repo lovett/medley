@@ -11,10 +11,10 @@
       "prefix": "ledger",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "outputPath": "apps/static/js/ledger",
-            "index": "",
+            "index": false,
             "main": "apps/ledger/src/main.ts",
             "polyfills": [
               "zone.js"
@@ -45,7 +45,6 @@
             "development": {
               "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
