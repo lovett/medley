@@ -40,7 +40,7 @@ class Controller:
         offset = int(kwargs.get("offset", 0))
         max_days = int(kwargs.get("max_days", 180))
         per_page = int(kwargs.get("per_page", 20))
-        order = kwargs.get("order", "rank")
+        order = kwargs.get("order", "date-desc")
 
         if q:
             return self.search(q, per_page, offset, order)

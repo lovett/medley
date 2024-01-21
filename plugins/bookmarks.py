@@ -301,7 +301,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
     def search(
             self,
             query: str,
-            order: str = "rank",
+            order: str = "date-desc",
             limit: int = 20,
             offset: int = 0
     ) -> Tuple[
@@ -362,12 +362,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             where_sql += """ AND bookmarks_fts.rowid=b.rowid
             AND bookmarks_fts MATCH ?"""
 
-            if order == "rank":
-                order_sql = "bookmarks_fts.rank"
-            if order == "date-asc":
-                order_sql = "b.added ASC"
-
             placeholder_values += (query,)
+
+        if order == "date-asc":
+            order_sql = "b.added ASC"
+
+        if order == "rank" and "bookmarks_fs" in from_sql:
+            order_sql = "bookmarks_fts.rank"
 
         sql = f"""SELECT b.rowid, b.url as 'url [url]', b.title,
         b.comments, b.tags as 'tags [comma_delimited]',

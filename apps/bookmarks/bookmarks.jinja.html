@@ -42,17 +42,6 @@
                 <div class="options">
                     <div class="field">
                         Order by:
-                        <label for="order-rank">
-                            <input type="radio"
-                                   id="order-rank"
-                                   name="order"
-                                   value="rank"
-                                   {% if order == "rank" %}checked="checked"{% endif %}
-                            />
-                            By Rank
-                        </label>
-                    </div>
-                    <div class="field">
                         <label for="order-date-desc">
                             <input type="radio"
                                    id="order-date-desc"
@@ -60,7 +49,7 @@
                                    value="date-desc"
                                    {% if order == "date-desc" %}checked="checked"{% endif %}
                             />
-                            Newest first
+                            Newest
                         </label>
                     </div>
                     <div class="field">
@@ -71,7 +60,18 @@
                                    value="date-asc"
                                    {% if order == "date-asc" %}checked="checked"{% endif %}
                             />
-                            Oldest first
+                            Oldest
+                        </label>
+                    </div>
+                    <div class="field">
+                        <label for="order-rank">
+                            <input type="radio"
+                                   id="order-rank"
+                                   name="order"
+                                   value="rank"
+                                   {% if order == "rank" %}checked="checked"{% endif %}
+                            />
+                            Rank
                         </label>
                     </div>
                 </div>
