@@ -41,6 +41,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             note TEXT
         );
 
+        CREATE UNIQUE INDEX IF NOT EXISTS index_unique_name
+            ON accounts(name);
+
         CREATE VIRTUAL TABLE IF NOT EXISTS accounts_fts USING fts5 (
             name, opened_on, closed_on, note,
             content='accounts',
