@@ -18,10 +18,10 @@
             <p>
                 {% if bookmark.updated %}
                     Last updated
-                    {{ bookmark.updated|dateformat("%B %m, %Y") }}.
+                    {{ bookmark.updated|dateformat("%B %-d, %Y") }}.
                 {% else %}
                     This URL was bookmarked on
-                    {{ bookmark.added|dateformat("%b, %m, %Y") }}.
+                    {{ bookmark.added|dateformat("%B %-d, %Y") }}.
                 {% endif %}
 
                 <a href="{{ bookmarks_url }}">Switch to bookmarks</a>.
