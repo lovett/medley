@@ -4,14 +4,16 @@
 
 <form (ngSubmit)="save()" [formGroup]="accountForm" autocomplete="off">
     <div class="field" [class.invalid]="(name.dirty || name.touched) && name.invalid">
-        <label for="accountName">Account Name</label>
+        <label for="accountName">
+            Account Name
+            <span class="validation-message arrow-down" *ngIf="name.touched && name.invalid">This field is required.</span>
+        </label>
         <input
             id="accountName"
             type="text"
             formControlName="name"
         />
 
-        <p *ngIf="name.hasError('required')" class="validation-message">The account needs a name.</p>
     </div>
 
     <div class="field" [class.invalid]="(url.dirty || url.touched) && url.invalid">
@@ -23,9 +25,8 @@
         />
     </div>
 
-
     <div formGroupName="dates">
-        <div class="field" [class.invalid]="openedOn.invalid && (openedOn.dirty || openedOn.touched)">
+        <div class="field" [class.invalid]="(openedOn.dirty || openedOn.touched) && openedOn.invalid">
             <label for="accountOpened">Opened On</label>
             <input
                 id="accountOpened"
