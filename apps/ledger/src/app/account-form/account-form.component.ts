@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { Account } from '../models/account';
 import { AccountPrimitive } from '../types/accountPrimitive';
+import { AccountList } from '../types/accountList';
 import { LedgerService } from '../ledger.service';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, switchMap, pipe, map, of } from 'rxjs';
 import { isObject, omitBy } from "lodash-es"
 
 
@@ -22,6 +23,27 @@ function dateRange(group: FormGroup): {[key: string]: boolean} | null {
     }
 
     return { 'daterange': true }
+}
+
+function uniqueName(id: number, ledgerService: LedgerService): AsyncValidatorFn {
+    const sanitizer = (value: string) => value.toLowerCase().replace(/\s+/g, '');
+    return (control: AbstractControl): Observable<ValidationErrors | null> => {
+        if (id !== 0) {
+            return of(null);
+        }
+
+        const needle = sanitizer(control.value);
+        return ledgerService.getAccounts().pipe(
+            map(accountList => {
+                for (let primitive of accountList.accounts) {
+                    if (sanitizer(primitive.name) === needle) {
+                        return {'unique': true}
+                    }
+                }
+                return null;
+            })
+        );
+    }
 }
 
 @Component({
@@ -49,7 +71,14 @@ export class AccountFormComponent implements OnInit {
         const id = Number(this.route.snapshot.paramMap.get('id') || 0)
 
         this.accountForm = this.formBuilder.group({
-            name: [null, {validators: [Validators.required]}],
+            name: [
+                null,
+                {
+                    validators: Validators.required,
+                    asyncValidators: uniqueName(id, this.ledgerService),
+                    updateOn: 'blur',
+                }
+            ],
             url: [null],
             dates: this.formBuilder.group({
                 opened_on: this.today(),

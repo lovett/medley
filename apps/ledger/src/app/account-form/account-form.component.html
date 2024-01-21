@@ -6,7 +6,8 @@
     <div class="field" [class.invalid]="(name.dirty || name.touched) && name.invalid">
         <label for="accountName">
             Account Name
-            <span class="validation-message arrow-down" *ngIf="name.touched && name.invalid">This field is required.</span>
+            <span class="validation-message arrow-down" *ngIf="name.touched && name.hasError('required')">This field is required.</span>
+            <span class="validation-message arrow-down" *ngIf="name.touched && name.hasError('unique')">An account with this name already exists.</span>
         </label>
         <input
             id="accountName"
