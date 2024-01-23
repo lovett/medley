@@ -320,12 +320,6 @@ def main() -> None:
     )
 
     argparser.add_argument(
-        "--watchables",
-        help="generate the list of file paths to watch during development",
-        action="store_true"
-    )
-
-    argparser.add_argument(
         "--lintpass",
         help="mark a file as successfully linted"
     )
@@ -353,39 +347,6 @@ def main() -> None:
             print("yes")
         else:
             print("no")
-        sys.exit()
-
-    if args.watchables:
-        filesystem = plugins.filesystem.Plugin(cherrypy.engine)
-
-        wanted_extensions = (".css", ".jinja.html", ".js", ".py")
-
-        excluded_files = ("_test.py",)
-
-        excluded_dirs = (
-            "__pycache__",
-            "ansible",
-            "build",
-            "coverage",
-            "db",
-            "hooks",
-            "http",
-            "mypy",
-            "node_modules",
-            "stubs",
-            "testing",
-            "venv",
-        )
-
-        path_iterator = filesystem.walk_fs(
-            wanted_extensions,
-            excluded_dirs,
-            excluded_files
-        )
-
-        for path in path_iterator:
-            print(path)
-
         sys.exit()
 
     setup()

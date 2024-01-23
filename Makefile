@@ -81,7 +81,7 @@ setup: venv
 # This is isolated from the setup target for the benefit of CI, where
 # dev packages are unused.
 setup-dev: setup
-	sudo dnf install python3-evdev entr
+	sudo dnf install python3-evdev
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
 
 # Build the application
@@ -103,15 +103,12 @@ install: medley
 	ansible-playbook --skip-tags "firstrun" ansible/install.yml
 
 # Run a local development webserver.
-#
-# The entr utility ensures the server can be restarted if there is a
-# fatal error like bad syntax. It is a substitute for CherryPy's autoreload.
 serve: export MEDLEY_memorize_hashes=False
 serve: export MEDLEY_etags=True
 serve: export MEDLEY_tracebacks=True
 serve: export MEDLEY_prefetch=False
 serve:
-	python medley.py --watchables | entr -r python medley.py
+	python medley.py
 
 # Rename coverage files to comply with coverage utility's
 # expectations.
