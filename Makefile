@@ -313,6 +313,15 @@ favicon: dummy
 	cd apps/static && optipng -quiet -o 3 *.png
 
 
+ng: dummy
+	ng build --watch --configuration development ledger
+
+ngtest: dummy
+	ng test
+
+ngbuild: dummy
+	ng build
+
 # Tmux automation
 workspace:
 # 0: Editor
@@ -324,7 +333,7 @@ workspace:
 	tmux send-keys -t "$(TMUX_SESSION_NAME)" "source $(VENV_ACTIVATE)" C-m
 
 # 2: Npm
-	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "npm" "npm run ledger-watch"
+	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "ng" "make ng"
 
 # 3: Dev server
 	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "devserver" "source $(VENV_ACTIVATE); make serve"
