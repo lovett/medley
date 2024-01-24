@@ -125,6 +125,7 @@ class Controller:
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(0, cherrypy.request.json)
             self.clear_etag(resource)
+            self.clear_etag(Resource.TAGS.value)
             return None
 
         if resource == Resource.ACK:
@@ -153,6 +154,7 @@ class Controller:
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(record_id, cherrypy.request.json)
             self.clear_etag(resource)
+            self.clear_etag(Resource.TAGS.value)
             return
 
         raise cherrypy.HTTPError(400)
