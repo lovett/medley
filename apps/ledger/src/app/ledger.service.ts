@@ -55,13 +55,27 @@ export class LedgerService {
     }
 
     getTransactions(query: string, limit: number, offset: number, account: number, tag: string): Observable<TransactionList> {
-         let params = {
-             limit,
-             offset,
-             account,
-             tag: tag || '',
-             q: query || '',
-         };
+        let params = {};
+
+        if (query) {
+            params = {...params, 'q': query }
+        }
+
+        if (limit) {
+            params = {...params, limit, }
+        }
+
+        if (offset) {
+            params = {...params, offset, }
+        }
+
+        if (account) {
+            params = {...params, account, }
+        }
+
+        if (tag) {
+            params = {...params, tag, }
+        }
 
         return this.http.get<TransactionList>('/ledger/transactions', {params,});
     }
