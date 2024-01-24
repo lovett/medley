@@ -123,4 +123,8 @@ export class LedgerService {
             `/ledger/transactions?q=payee:${payee}&limit=1`
         );
     }
+
+    renameTag(tag: Tag, name: string): Observable<void> {
+        return this.http.patch<void>(`/ledger/tags/${tag.name}`, {name,});
+    }
 }

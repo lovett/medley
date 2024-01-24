@@ -168,6 +168,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("ledger:remove:transaction",
                            self.remove_transaction)
         self.bus.subscribe("ledger:remove:account", self.remove_account)
+        self.bus.subscribe("ledger:tag:rename", self.rename_tag)
         self.bus.subscribe("ledger:store:transaction", self.upsert_transaction)
         self.bus.subscribe("ledger:store:account", self.upsert_account)
 
@@ -635,3 +636,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 q = q.replace(f"{facet }:", "")
 
         return q
+
+    def rename_tag(self, name: str, new_name) -> None:
+        """Give an existing tag a new name."""
+
+        rows = self._select_generator(
+            """SELECT t.id, json_replace(tags, json_each.fullkey, ?)
+            AS newtags
+            FROM transactions t, json_each(t.tags)
+            WHERE json_each.value=?""",
+            (new_name, name)
+        )
+
+        for row in rows:
+            self._execute(
+                """UPDATE transactions SET tags=? WHERE id=?""",
+                (row["newtags"], row["id"])
+            )

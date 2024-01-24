@@ -159,6 +159,30 @@ class Controller:
 
         raise cherrypy.HTTPError(400)
 
+    @cherrypy.tools.capture()
+    @cherrypy.tools.provides(formats=("json",))
+    @cherrypy.tools.json_in()
+    def PATCH(self, resource: str, tag: str, **kwargs) -> None:
+        """Rename a tag."""
+
+        if resource == Resource.TAGS:
+            new_name = cherrypy.request.json.get("name")
+
+            if not new_name:
+                raise cherrypy.HTTPError(400)
+
+            cherrypy.engine.publish(
+                "ledger:tag:rename",
+                tag,
+                new_name=new_name,
+            ).pop()
+            self.clear_etag(resource)
+            cherrypy.response.status = 204
+            return
+
+
+        raise cherrypy.HTTPError(400)
+
     def DELETE(self, resource: Resource, uid: str) -> None:
         """Delete a transaction or account."""
 

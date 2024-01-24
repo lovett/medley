@@ -25,4 +25,24 @@ export class TagListComponent {
             () => this.tagsLoaded = true,
         );
     }
+
+    renameTag(event: Event, tag: Tag) {
+        event.preventDefault();
+        var newName = prompt(`Rename ${tag.name} to:`);
+
+        if (newName) {
+            newName = newName.trim();
+        }
+
+        if (!newName) {
+            return;
+        }
+
+        this.ledgerService.renameTag(tag, newName).subscribe({
+            next: () => {
+                this.ngOnInit();
+            },
+            error: (err: any) => console.log(err),
+        });
+    }
 }
