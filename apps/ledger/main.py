@@ -120,12 +120,14 @@ class Controller:
         if resource == Resource.ACCOUNTS:
             self.store_account(0, cherrypy.request.json)
             self.clear_etag(resource)
+            self.clear_etag(Resource.TRANSACTIONS.value)
             return None
 
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(0, cherrypy.request.json)
             self.clear_etag(resource)
             self.clear_etag(Resource.TAGS.value)
+            self.clear_etag(Resource.ACCOUNTS.value)
             return None
 
         if resource == Resource.ACK:
@@ -149,12 +151,14 @@ class Controller:
         if resource == Resource.ACCOUNTS:
             self.store_account(record_id, cherrypy.request.json)
             self.clear_etag(resource)
+            self.clear_etag(Resource.TRANSACTIONS.value)
             return
 
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(record_id, cherrypy.request.json)
             self.clear_etag(resource)
             self.clear_etag(Resource.TAGS.value)
+            self.clear_etag(Resource.ACCOUNTS.value)
             return
 
         raise cherrypy.HTTPError(400)
@@ -208,6 +212,8 @@ class Controller:
             raise cherrypy.HTTPError(500)
 
         self.clear_etag(resource)
+        self.clear_etag(Resource.ACCOUNTS.value)
+        self.clear_etag(Resource.TAGS.value)
         cherrypy.response.status = 204
 
     @staticmethod
