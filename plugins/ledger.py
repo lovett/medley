@@ -321,6 +321,12 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
         q = self.clean_query(kwargs.get("q", ""))
+
+        q = q.replace("-", "")
+        q = re.sub(r"(\d{4,})", "\\1*", q)
+        q = q.replace("date:", "occurred_on:")
+        q = q.replace("tag:", "tags:")
+
         account = int(kwargs.get("account", 0))
 
         count = self.count_transactions(account, q)
