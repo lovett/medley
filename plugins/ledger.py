@@ -98,7 +98,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             account_id, destination_id, occurred_on, amount, payee, note, tags,
             content='transactions',
             content_rowid='id',
-            tokenize='trigram'
+            tokenize='porter'
         );
 
         CREATE TRIGGER IF NOT EXISTS transactions_after_insert
@@ -108,7 +108,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 rowid, account_id, destination_id, occurred_on, amount,
                 payee, note, tags
             ) VALUES (
-                new.rowid, new.account_id, new.destination_id, new.occurred_on,
+                new.rowid, new.account_id, new.destination_id, REPLACE(new.occurred_on, '-', ''),
                 new.amount, new.payee, new.note, new.tags);
         END;
 
@@ -137,7 +137,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
               rowid, account_id, destination_id, occurred_on, amount, payee,
               note, tags
           ) VALUES (
-              new.rowid, new.account_id, new.destination_id, new.occurred_on,
+              new.rowid, new.account_id, new.destination_id, REPLACE(new.occurred_on, '-', ''),
               new.amount, new.payee, new.note, new.tags);
         END;
         """)
@@ -305,10 +305,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         if q:
             where_sql += f" AND (transactions_fts MATCH ?)"
-            if ":" in q:
-                placeholders += (q,)
-            else:
-                placeholders += (f"payee:{q} OR note:{q}",)
+            placeholders += (q,)
 
         return int(self._selectFirst(
             f"""
