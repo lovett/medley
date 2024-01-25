@@ -90,7 +90,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             payee TEXT,
             tags TEXT,
             note TEXT,
-            related_transaction_id INTEGER DEFAULT 0,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
             ON DELETE CASCADE
         );
@@ -506,8 +505,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Delete a row from the transactions table."""
 
         return self._execute(
-            "DELETE FROM transactions WHERE id=? OR related_transaction_id=?",
-            (transaction_id, transaction_id)
+            "DELETE FROM transactions WHERE id=?",
+            (transaction_id,)
         )
 
     def upsert_transaction(
@@ -528,49 +527,24 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         queries: List[Tuple[str, Any]] = []
         if transaction_id == 0:
-            queries.append(("""INSERT INTO transactions
-            (account_id, destination_id, occurred_on, cleared_on,
-            amount, payee, note, tags)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (account_id, destination_id, occurred, cleared,
-                  amount, payee, note, tags)))
-
-            if destination_id > 0:
-                queries.append(("""INSERT INTO transactions
+            self._execute(
+                """INSERT INTO transactions
                 (account_id, destination_id, occurred_on, cleared_on,
-                amount, payee, note, tags, related_transaction_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, last_insert_rowid())
-                """, (destination_id, account_id, occurred, cleared,
-                      amount * -1, payee, note, tags)))
-
-                queries.append(("""UPDATE transactions
-                SET related_transaction_id=last_insert_rowid()
-                WHERE id=(SELECT related_transaction_id
-                FROM transactions WHERE id=last_insert_rowid())
-                """, ()))
+                amount, payee, note, tags)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (account_id, destination_id, occurred, cleared,
+                 amount, payee, note, tags)
+            )
 
         if transaction_id > 0:
-            queries.append(("""UPDATE transactions
-            SET account_id=?, destination_id=?, occurred_on=?,
-            cleared_on=?, amount=?, payee=?, note=?, tags=?
-            WHERE id=?""", (
-                account_id, destination_id, occurred, cleared,
-                amount, payee, note, tags, transaction_id)))
-
-            if destination_id and destination_id > 0:
-                queries.append(("""DELETE FROM transactions WHERE
-                related_transaction_id=?""", (transaction_id,)))
-
-                queries.append(
-                    ("""INSERT INTO transactions
-                    (account_id, destination_id, occurred_on, cleared_on,
-                    amount, payee, note, tags, related_transaction_id)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                     (destination_id, account_id, occurred, cleared,
-                      amount * -1, payee, note, tags, transaction_id))
-                )
-
-        self._multi(queries)
+            self._execute(
+                """UPDATE transactions
+                SET account_id=?, destination_id=?, occurred_on=?,
+                cleared_on=?, amount=?, payee=?, note=?, tags=?
+                WHERE id=?""",
+                (account_id, destination_id, occurred, cleared,
+                 amount, payee, note, tags, transaction_id)
+            )
 
     @staticmethod
     def extract_amount(value: str) -> int:
