@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
 import { AccountList } from '../types/accountList';
-import { MoneyPipe } from '../money.pipe';
 
 @Component({
   selector: 'app-account-list',
@@ -28,7 +27,7 @@ export class AccountListComponent implements OnInit {
                     return new Account(primitive);
                 });
             },
-            error: (err: any) => console.log(err),
+            error: (err: Error) => console.log(err),
         });
     }
 

@@ -274,6 +274,9 @@ lint-pylint: dummy
 	--rcfile=.pylintrc \
 	apps parsers plugins testing tools medley.py
 
+lint-eslint: dummy
+	eslint apps/ledger
+
 
 # Empty the logindex database and re-index
 #

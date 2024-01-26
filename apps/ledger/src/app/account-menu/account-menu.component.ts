@@ -1,5 +1,5 @@
-import { Attribute, Component, Input, OnInit, EventEmitter } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
 import { AccountList } from '../types/accountList';
@@ -25,7 +25,7 @@ export class AccountMenuComponent implements OnInit {
     ngOnInit() {
         this.ledgerService.getAccounts().subscribe({
             next: (accountList: AccountList) => {
-                for (let primitive of accountList.accounts) {
+                for (const primitive of accountList.accounts) {
                     const  a = new Account(primitive);
                     if (a.closed_on && a.uid !== this.control.value) {
                         continue;
@@ -33,7 +33,7 @@ export class AccountMenuComponent implements OnInit {
                     this.accounts.push(a);
                 }
             },
-            error: (err: any) => console.log(err),
+            error: (err: Error) => console.log(err),
         });
     }
 }

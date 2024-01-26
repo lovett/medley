@@ -1,13 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors, AsyncValidatorFn } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { Account } from '../models/account';
 import { AccountPrimitive } from '../types/accountPrimitive';
-import { AccountList } from '../types/accountList';
 import { LedgerService } from '../ledger.service';
-import { Observable, switchMap, pipe, map, of } from 'rxjs';
-import { isObject, omitBy } from "lodash-es"
+import { Observable, map, of } from 'rxjs';
 
 
 function dateRange(group: FormGroup): {[key: string]: boolean} | null {
@@ -35,7 +33,7 @@ function uniqueName(id: number, ledgerService: LedgerService): AsyncValidatorFn 
         const needle = sanitizer(control.value);
         return ledgerService.getAccounts().pipe(
             map(accountList => {
-                for (let primitive of accountList.accounts) {
+                for (const primitive of accountList.accounts) {
                     if (sanitizer(primitive.name) === needle) {
                         return {'unique': true}
                     }
@@ -89,7 +87,7 @@ export class AccountFormComponent implements OnInit {
 
         this.ledgerService.getAccount(id).subscribe(
             (account: Account) => this.populate(account),
-            (err: any) => console.log(err),
+            (err: Error) => console.log(err),
             () => console.log('All done getting account'),
         );
     }

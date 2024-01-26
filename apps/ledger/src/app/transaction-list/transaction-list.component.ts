@@ -56,7 +56,9 @@ export class TransactionListComponent implements OnDestroy {
         this.ledgerService.transactionSelection(null);
     }
 
-    get query() { return this.searchForm.controls['query'] };
+    get query() {
+        return this.searchForm.controls['query'];
+    }
 
     getTransactions() {
         this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account, this.tag).subscribe({
@@ -74,7 +76,7 @@ export class TransactionListComponent implements OnDestroy {
                 this.nextOffset = Math.min(this.offset + this.transactions.length, this.count);
                 this.previousOffset = Math.max(0, this.offset - this.transactions.length);
             },
-            error: (err: any) => console.log(err),
+            error: (err: Error) => console.log(err),
         });
     }
 
@@ -100,7 +102,7 @@ export class TransactionListComponent implements OnDestroy {
         event.preventDefault();
         transaction.cleared_on = new Date();
         this.ledgerService.updateTransaction(transaction.toPrimitive()).subscribe({
-            error: (err: any) => console.log(err),
+            error: (err: Error) => console.log(err),
         });
     }
 

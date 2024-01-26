@@ -21,28 +21,30 @@ export class TagListComponent {
     ngOnInit() {
         this.ledgerService.getTags().subscribe(
             (tags: Tag[]) => this.tags = tags,
-            (err: any) => console.log(err),
+            (err: Error) => console.log(err),
             () => this.tagsLoaded = true,
         );
     }
 
     renameTag(event: Event, tag: Tag) {
         event.preventDefault();
-        var newName = prompt(`Rename ${tag.name} to:`);
+        const promptResponse = prompt(`Rename ${tag.name} to:`);
 
-        if (newName) {
-            newName = newName.trim();
-        }
-
-        if (!newName) {
+        if (!promptResponse) {
             return;
         }
+
+        if (promptResponse.trim() === '') {
+            return;
+        }
+
+        const newName = promptResponse.trim();
 
         this.ledgerService.renameTag(tag, newName).subscribe({
             next: () => {
                 this.ngOnInit();
             },
-            error: (err: any) => console.log(err),
+            error: (err: Error) => console.log(err),
         });
     }
 }

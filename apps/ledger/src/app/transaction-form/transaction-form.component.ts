@@ -193,13 +193,6 @@ export class TransactionFormComponent implements OnInit {
         this.datesExpanded = (transaction.cleared_on instanceof Date);
     }
 
-    toggleTransfer(event: Event) {
-        this.transactionForm.markAsDirty();
-
-        this.destinationId.setValue(null);
-    }
-
-
     toggleTransactionCleared(event: Event) {
         this.datesExpanded = (event.target as HTMLInputElement).checked;
         this.transactionForm.markAsDirty();

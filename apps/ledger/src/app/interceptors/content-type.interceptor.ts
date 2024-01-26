@@ -18,7 +18,7 @@ export class ContentTypeInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
         console.log('JsonInterceptor', req.url);
 
-        let headers: {[name: string]: string} = {};
+        const headers: {[name: string]: string} = {};
 
         if (req.method === 'GET') {
             headers['Accept'] = req.context.get(CONTENT_TYPE);
@@ -26,7 +26,7 @@ export class ContentTypeInterceptor implements HttpInterceptor {
             headers['Content-Type'] = req.context.get(CONTENT_TYPE);
         }
 
-        let jsonRequest: HttpRequest<any> = req.clone({
+        const jsonRequest: HttpRequest<unknown> = req.clone({
             setHeaders: headers,
         });
 
