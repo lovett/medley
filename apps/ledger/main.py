@@ -37,7 +37,9 @@ class Controller:
             resource = Resource.NONE
 
         try:
-            record_id = int(args[1] or -1)
+            record_id = int(args[1])
+        except IndexError:
+            record_id = -1
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
