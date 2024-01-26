@@ -4,7 +4,6 @@ import re
 from datetime import datetime
 from typing import Any
 from typing import Dict
-from typing import cast
 from collections import defaultdict
 import cherrypy
 

@@ -44,14 +44,8 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
         LINTABLE=$(./venv/bin/python3 medley.py --lintcheck "$STAGED_FILE")
 
         if [[ "$LINTABLE" == "yes" ]]; then
-            echo "Linting $STAGED_FILE with mypy..."
-            ./venv/bin/mypy "$WORK_DIR/$STAGED_FILE"
-
             echo "Linting $STAGED_FILE with ruff..."
             ./venv/bin/ruff "$WORK_DIR/$STAGED_FILE"
-
-            echo "Linting $STAGED_FILE with pylint..."
-            ./venv/bin/pylint --rcfile=.pylintrc "$WORK_DIR/$STAGED_FILE"
 
             ./venv/bin/python3 medley.py --lintpass "$STAGED_FILE"
         fi

@@ -4,6 +4,7 @@ from enum import Enum
 from datetime import datetime
 from typing import Dict
 from typing import Union
+from typing import cast
 import cherrypy
 from resources.url import Url
 
@@ -25,15 +26,18 @@ class Controller:
     @cherrypy.tools.provides(formats=("html", "json"))
     @cherrypy.tools.etag()
     def GET(self,
-            resource: Resource = Resource.NONE,
-            uid: str = "",
             *args: str,
             **kwargs: str
     ) -> bytes:
         """Serve the application UI or dispatch to JSON subhandlers."""
 
         try:
-            record_id = int(uid or -1)
+            resource = args[0]
+        except IndexError:
+            resource = Resource.NONE
+
+        try:
+            record_id = int(args[1] or -1)
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
@@ -166,11 +170,11 @@ class Controller:
     @cherrypy.tools.capture()
     @cherrypy.tools.provides(formats=("json",))
     @cherrypy.tools.json_in()
-    def PATCH(self, resource: str, tag: str, **kwargs) -> None:
+    def PATCH(self, resource: str, tag: str, **kwargs: str) -> None:
         """Rename a tag."""
 
         if resource == Resource.TAGS:
-            new_name = cherrypy.request.json.get("name")
+            new_name = cast(str, cherrypy.request.json.get("name", ""))
 
             if not new_name:
                 raise cherrypy.HTTPError(400)
@@ -179,7 +183,7 @@ class Controller:
                 "ledger:tag:rename",
                 tag,
                 new_name=new_name,
-            ).pop()
+            )
             self.clear_etag(resource)
             cherrypy.response.status = 204
             return

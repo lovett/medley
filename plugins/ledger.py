@@ -11,6 +11,7 @@ from typing import Tuple
 from typing import cast
 import cherrypy
 from plugins import mixins
+from apptypes import QueryData
 
 SearchResult = Tuple[
     List[sqlite3.Row], int
@@ -297,22 +298,22 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Count of rows from the transactions table."""
 
         where_sql = "WHERE 1=1"
-        placeholders = ()
+        query_data: QueryData = ()
 
         if account > 0:
-            where_sql += f" AND (account_id=? OR destination_id=?)"
-            placeholders += (account, account)
+            where_sql += " AND (account_id=? OR destination_id=?)"
+            query_data += (account, account)
 
         if q:
-            where_sql += f" AND (transactions_fts MATCH ?)"
-            placeholders += (q,)
+            where_sql += " AND (transactions_fts MATCH ?)"
+            query_data += (q,)
 
         return int(self._selectFirst(
             f"""
             SELECT count(*)
             FROM transactions_fts
             {where_sql}""",
-            placeholders
+            query_data
         ) or 0)
 
     def transactions_json(self, **kwargs: str) -> str:
@@ -528,7 +529,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         note = kwargs.get("note", "")
         tags = json.dumps(kwargs.get("tags", []))
 
-        queries: List[Tuple[str, Any]] = []
         if transaction_id == 0:
             self._execute(
                 """INSERT INTO transactions
@@ -614,7 +614,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         return q
 
-    def rename_tag(self, name: str, new_name) -> None:
+    def rename_tag(self, name: str, new_name: str) -> None:
         """Give an existing tag a new name."""
 
         rows = self._select_generator(

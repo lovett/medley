@@ -14,7 +14,6 @@ import importlib
 import logging
 import os
 import os.path
-from pathlib import Path
 import sys
 import cherrypy
 import portend

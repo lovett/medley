@@ -175,6 +175,7 @@ def publish(
         channel: Literal["bookmarks:recent"],
         limit: int = 20,
         offset: int = 0,
+        order: str = "date-desc",
         max_days: int = 180,
 ) -> List[Tuple[Iterator[Row], int, List[str]]]: ...
 
@@ -644,6 +645,14 @@ def publish(
         earliest_id: int,
         count: int,
 ) -> List[None]: ...
+
+
+@overload
+def publish(
+        channel: Literal["ledger:tag:rename"],
+        tag: str,
+        new_name: str,
+) -> None: ...
 
 
 @overload

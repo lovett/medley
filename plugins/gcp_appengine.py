@@ -166,11 +166,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             "%Y-%m-%dT%H:%M:%S%z"
         )
 
-        for format in formats:
+        for fmt in formats:
             try:
                 parsed_timestamp = datetime.strptime(
                     payload["startTime"],
-                    format
+                    fmt
                 ).replace(tzinfo=UTC)
                 break
             except ValueError:

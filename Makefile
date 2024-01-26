@@ -255,10 +255,24 @@ $(HTTP_SCRIPTS):
 #
 # These commands are also present in the Git pre-commit hook, but
 # are only applied to changed files.
-lint: dummy
-	mypy --html-report apps/static/mypy apps parsers plugins testing tools medley.py
+lint: lint-mypy lint-ruff lint-pylint
+
+lint-mypy: dummy
+	mypy \
+	--sqlite-cache \
+	--html-report  apps/static/mypy \
+	apps parsers plugins testing tools medley.py \
+	| grep -v "note:"
+
+
+lint-ruff: dummy
 	ruff apps parsers plugins testing tools medley.py
-	pylint --rcfile=.pylintrc apps parsers plugins testing tools medley.py
+
+
+lint-pylint: dummy
+	pylint \
+	--rcfile=.pylintrc \
+	apps parsers plugins testing tools medley.py
 
 
 # Empty the logindex database and re-index

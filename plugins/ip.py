@@ -3,10 +3,9 @@
 import os.path
 import pathlib
 import socket
-import maxminddb
 from typing import Any
-from typing import Optional
 from typing import Dict
+import maxminddb
 import cherrypy
 
 
@@ -106,7 +105,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 facts["geo"]["latitude"] = result["location"]["latitude"]
                 facts["geo"]["longitude"] = result["location"]["longitude"]
                 facts["geo"]["metro_code"] = result["location"]["metro_code"]
-            except (KeyError):
+            except KeyError:
                 pass
 
         # Google charts

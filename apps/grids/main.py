@@ -49,13 +49,9 @@ class Controller:
                 "app_url", key
             ).pop()
 
-        app_url = cherrypy.engine.publish(
-            "app_url"
-        ).pop()
-
         edit_url = cherrypy.engine.publish(
             "app_url",
-            f"/registry",
+            "/registry",
             {"q": "grids"}
         ).pop()
 
