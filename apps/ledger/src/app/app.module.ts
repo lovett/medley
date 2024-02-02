@@ -13,7 +13,6 @@ import { DeleteButtonComponent } from './delete-button/delete-button.component';
 import { AddButtonComponent } from './add-button/add-button.component';
 import { TransactionFormComponent } from './transaction-form/transaction-form.component';
 import { MoneyPipe } from './money.pipe';
-import { ContentTypeInterceptor } from './interceptors/content-type.interceptor';
 import { CacheInterceptor } from './interceptors/cache.interceptor';
 import { TagListComponent } from './tag-list/tag-list.component';
 import { SelectionSummaryComponent } from './selection-summary/selection-summary.component';
@@ -41,7 +40,6 @@ import { SelectionSummaryComponent } from './selection-summary/selection-summary
     ],
     providers: [
         MoneyPipe,
-        {provide: HTTP_INTERCEPTORS, useClass: ContentTypeInterceptor, multi: true},
         {provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true},
     ],
     bootstrap: [AppComponent]
