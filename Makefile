@@ -356,7 +356,7 @@ workspace:
 
 satellite:
 	tmux new-session -d -s "$(TMUX_SESSION_NAME)-satellite"
-	tmux link-window -s '$(TMUX_SESSION_NAME):npm' -t '$(TMUX_SESSION_NAME)-satellite:1'
+	tmux link-window -s '$(TMUX_SESSION_NAME):ng' -t '$(TMUX_SESSION_NAME)-satellite:1'
 	tmux link-window -s '$(TMUX_SESSION_NAME):devserver' -t '$(TMUX_SESSION_NAME)-satellite:2'
 	tmux kill-window -t :0
 
