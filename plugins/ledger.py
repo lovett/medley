@@ -337,7 +337,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         count = self.count_transactions(account, q)
 
         if count == 0:
-            return "{count: 0, transactions: {}}"
+            return '{"count": 0, "transactions": []}'
 
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
