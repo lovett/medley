@@ -74,6 +74,9 @@ var MEDLEY = (function () {
 
     function preSubmit(e) {
         const form = e.target;
+        if (form.hasAttribute("ng-reflect-form")) {
+            return;
+        }
         const fields = form.querySelectorAll('input, textarea');
 
         Array.from(fields).forEach((field) => {
