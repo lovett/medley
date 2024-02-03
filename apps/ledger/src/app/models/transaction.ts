@@ -12,6 +12,7 @@ export class Transaction {
     note?: string;
     tags: string[];
     selected: boolean;
+    receipt_name?: string;
 
     constructor(primitive: TransactionPrimitive) {
         this.uid = primitive.uid;
@@ -41,6 +42,7 @@ export class Transaction {
         this.tags = (primitive.tags || []).filter((tag) => tag);
 
         this.selected = false
+        this.receipt_name = primitive.receipt_name;
     }
 
     get accountId(): number {

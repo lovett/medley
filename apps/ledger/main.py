@@ -5,19 +5,26 @@ from datetime import datetime
 from typing import Dict
 from typing import Union
 from typing import cast
+from typing import List
 import cherrypy
 from resources.url import Url
 
 Json = Dict[str, Union[str, int, float]]
 
+# pylint: disable=protected-access
+Attachment = Union[
+    None,
+    cherrypy._cpreqbody.Part,
+    List[cherrypy._cpreqbody.Part]
+]
 
 class Resource(str, Enum):
     ACCOUNTS = "accounts"
     ACK = "ack"
     NONE = ""
     TAGS = "tags"
+    RECEIPTS = "receipts"
     TRANSACTIONS = "transactions"
-
 
 class Controller:
     exposed = True
@@ -47,6 +54,7 @@ class Controller:
             if resource == Resource.ACCOUNTS:
                 return self.json_accounts(record_id)
 
+
             if resource == Resource.TRANSACTIONS:
                 return self.json_transactions(record_id, **kwargs)
 
@@ -54,6 +62,9 @@ class Controller:
                 return self.json_tags()
 
             raise cherrypy.HTTPError(400)
+
+        if resource == Resource.RECEIPTS:
+            return self.receipt(record_id)
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -143,10 +154,7 @@ class Controller:
 
         raise cherrypy.HTTPError(404)
 
-    @cherrypy.tools.capture()
-    @cherrypy.tools.provides(formats=("json",))
-    @cherrypy.tools.json_in()
-    def PUT(self, resource: str, uid: str) -> None:
+    def PUT(self, resource: str, uid: str, **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         try:
@@ -154,14 +162,14 @@ class Controller:
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
-        if resource == Resource.ACCOUNTS:
-            self.store_account(record_id, cherrypy.request.json)
-            self.clear_etag(resource)
-            self.clear_etag(Resource.TRANSACTIONS.value)
-            return
+        # if resource == Resource.ACCOUNTS:
+        #     self.store_account(record_id, cherrypy.request.json)
+        #     self.clear_etag(resource)
+        #     self.clear_etag(Resource.TRANSACTIONS.value)
+        #     return
 
         if resource == Resource.TRANSACTIONS:
-            self.store_transaction(record_id, cherrypy.request.json)
+            self.store_transaction(record_id, **kwargs)
             self.clear_etag(resource)
             self.clear_etag(Resource.TAGS.value)
             self.clear_etag(Resource.ACCOUNTS.value)
@@ -268,17 +276,35 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def store_transaction(transaction_id: int, json: Json) -> None:
+    def store_transaction(transaction_id: int, **kwargs: str) -> None:
         """Upsert a transaction record."""
 
-        account_id = int(json.get("account_id", 0))
-        destination_id = int(json.get("destination_id", 0))
-        occurred_on = str(json.get("occurred_on") or "")
-        cleared_on = str(json.get("cleared_on") or "")
-        amount = int(json.get("amount", 0))
-        payee = json.get("payee", "")
-        note = json.get("note", "")
-        tags = json.get("tags", "")
+        try:
+            account_id = int(kwargs.get("account_id"))
+        except ValueError:
+            account_id = None
+
+        try:
+            destination_id = int(kwargs.get("destination_id"))
+        except ValueError:
+            destination_id = None
+
+        occurred_on = kwargs.get("occurred_on", "")
+        cleared_on = kwargs.get("cleared_on", "")
+
+        try:
+            amount = int(kwargs.get("amount"))
+        except ValueError:
+            amount = None
+
+        payee = kwargs.get("payee")
+        note = kwargs.get("note")
+
+        tags: List | str | None  = kwargs.get("tags")
+        if not type(tags) is list:
+            tags = [tags]
+
+        receipt: Attachment = kwargs.get("receipt")
         date_format = "%Y-%m-%d"
 
         occurred = None
@@ -288,6 +314,15 @@ class Controller:
         cleared = None
         if cleared_on:
             cleared = datetime.strptime(cleared_on, date_format)
+
+        receipt_bytes = None
+        receipt_name = None
+        receipt_mime = None
+
+        if receipt:
+            receipt_bytes = receipt.file.read()
+            receipt_name = receipt.filename.lower()
+            receipt_mime = receipt.content_type.value
 
         cherrypy.engine.publish(
             "ledger:store:transaction",
@@ -299,7 +334,10 @@ class Controller:
             amount=amount,
             payee=payee,
             note=note,
-            tags=tags
+            tags=tags,
+            receipt=receipt_bytes,
+            receipt_name=receipt_name,
+            receipt_mime=receipt_mime
         ).pop()
 
         cherrypy.response.status = 204
@@ -339,3 +377,18 @@ class Controller:
             "memorize:clear",
             url.etag_key + ":json"
         )
+
+    @staticmethod
+    def receipt(record_id: int) -> bytes:
+        """A previously-uploaded file."""
+
+        (_, mime_type, content) = cherrypy.engine.publish(
+            "ledger:receipt",
+            transaction_id=record_id,
+        ).pop()
+
+        if not content:
+            raise cherrypy.HTTPError(404)
+
+        cherrypy.response.headers["Content-Type"] = mime_type
+        return content

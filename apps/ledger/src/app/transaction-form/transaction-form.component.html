@@ -108,12 +108,22 @@
     </div>
 
     <div class="field" [class.invalid]="(note.dirty || note.touched) && note.invalid">
-        <label for="accountNote">Notes</label>
+        <label for="transactionNote">Notes</label>
         <textarea
-            id="accountNote"
+            id="transactionNote"
             type="text"
             formControlName="note"
         ></textarea>
+    </div>
+
+    <div class="field">
+        <label for="transactionReceipt">Receipt</label>
+
+        <p *ngIf="transaction && transaction.receipt_name">
+            Currently {{ transaction.receipt_name }}
+        </p>
+
+        <input type="file" (change)="receiptChange($event)" />
     </div>
 
     <div class="field">

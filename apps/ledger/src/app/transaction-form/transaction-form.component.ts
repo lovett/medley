@@ -52,6 +52,7 @@ export class TransactionFormComponent implements OnInit {
     datesExpanded = false;
     singularResourceName: string;
     autocompleteFrom: Transaction | null;
+    receipt: File | null;
 
     constructor(
         private router: Router,
@@ -63,6 +64,7 @@ export class TransactionFormComponent implements OnInit {
     ) {
         this.singularResourceName = 'transaction';
         this.autocompleteFrom = null;
+        this.receipt = null;
     }
 
     ngOnInit(): void {
@@ -164,6 +166,7 @@ export class TransactionFormComponent implements OnInit {
         this.transactionForm.reset();
 
         this.transactionForm.patchValue({
+            uid: transaction.uid,
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             accounts: {
@@ -236,6 +239,10 @@ export class TransactionFormComponent implements OnInit {
             'tags': this.tags.value,
         };
 
+        if (this.receipt) {
+            primitive.receipt = this.receipt;
+        }
+
         if (primitive.uid === 0) {
             this.ledgerService.addTransaction(primitive).subscribe({
                 next: () => this.saved(),
@@ -278,5 +285,12 @@ export class TransactionFormComponent implements OnInit {
             next: () => this.deleted(),
             error: (err) => this.errorMessage = err,
         });
+    }
+
+    receiptChange(event: Event) {
+        const file = (event.target as HTMLInputElement).files![0];
+        if (file) {
+            this.receipt = file;
+        }
     }
 }

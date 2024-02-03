@@ -67,6 +67,10 @@
             <td class="align-right" *ngIf="!transaction.cleared_on">
                 <div class="minibanner">Pending</div>
                 <p *ngIf="!transaction.cleared_on"><a href="#" (click)="clearTransaction($event, transaction)">Clear Now</a></p>
+
+                <p *ngIf="transaction.receipt_name">
+                    <a target="_blank" href="/ledger/receipts/{{ transaction.uid }}">{{ transaction.receipt_name }}</a>
+                </p>
             </td>
         </tr>
     </tbody>

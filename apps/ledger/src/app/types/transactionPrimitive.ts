@@ -12,4 +12,6 @@ export type TransactionPrimitive = {
     cleared_on?: string;
     note?: string;
     tags: string[];
+    receipt_name?: string;
+    receipt?: File;
 }

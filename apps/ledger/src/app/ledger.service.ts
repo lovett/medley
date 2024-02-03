@@ -106,8 +106,31 @@ export class LedgerService {
     }
 
     updateTransaction(primitive: TransactionPrimitive): Observable<void> {
-        const url = `/ledger/transactions/${primitive.uid}`;
-        return this.http.put<void>(url, primitive);
+        const formData = new FormData();
+        formData.set('account_id', (primitive.account_id || '').toString());
+        formData.set('destination_id', (primitive.destination_id || '').toString());
+        formData.set('payee', primitive.payee);
+        formData.set('amount', primitive.amount.toString());
+        formData.set('occurred_on', primitive.occurred_on);
+
+        formData.set('cleared_on', primitive.cleared_on || '');
+
+        if (primitive.note) {
+            formData.set('note', primitive.note);
+        }
+
+        for (const tag of primitive.tags) {
+            formData.append('tags', tag);
+        }
+
+        if (primitive.receipt) {
+            formData.set('receipt', primitive.receipt);
+        }
+
+        return this.http.put<void>(
+            `/ledger/transactions/${primitive.uid}`,
+            formData
+        );
     }
 
     deleteAccount(uid: number): Observable<void> {

@@ -91,6 +91,9 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             payee TEXT,
             tags TEXT,
             note TEXT,
+            receipt BLOB DEFAULT NULL,
+            receipt_name TEXT DEFAULT NULL,
+            receipt_mime TEXT DEFAULT NULL,
             FOREIGN KEY(account_id) REFERENCES accounts(id)
             ON DELETE CASCADE
         );
@@ -153,6 +156,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("ledger:acknowledgment", self.acknowledgment)
         self.bus.subscribe("ledger:transaction", self.find_transaction)
         self.bus.subscribe("ledger:json:transactions", self.transactions_json)
+        self.bus.subscribe("ledger:receipt", self.receipt)
         self.bus.subscribe(
             "ledger:json:transactions:single",
             self.transaction_json
@@ -354,7 +358,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         select_sql = f"""
         SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
             t.cleared_on, t.amount, t.payee, t.note,
-            IFNULL(t.tags, '[]') as tags,
+            IFNULL(t.tags, '[]') as tags, t.receipt_name,
             a.name as account_name, a.closed_on as account_closed_on,
             a2.name as destination_name
         {from_sql}
@@ -386,7 +390,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                     'amount', amount,
                     'payee', payee,
                     'note', note,
-                    'tags', json(tags)
+                    'tags', json(tags),
+                    'receipt_name', receipt_name
                 )
             )
         ) FROM ({select_sql})
@@ -418,12 +423,13 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             'amount', amount,
             'payee', payee,
             'note', note,
-            'tags', json(tags)
+            'tags', json(tags),
+            'receipt_name', receipt_name
         )
         FROM (
             SELECT t.id, t.account_id, t.destination_id, t.occurred_on,
                 t.cleared_on, t.amount, t.payee, t.note,
-                IFNULL(t.tags, '[]') as tags,
+                IFNULL(t.tags, '[]') as tags, receipt_name,
                 a.name as account_name, a.closed_on as account_closed_on,
                 a2.name as destination_name
             FROM transactions t
@@ -528,25 +534,30 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         payee = kwargs.get("payee", "")
         note = kwargs.get("note", "")
         tags = json.dumps(kwargs.get("tags", []))
+        receipt = kwargs.get("receipt")
+        receipt_name = kwargs.get("receipt_name")
+        receipt_mime = kwargs.get("receipt_mime")
 
         if transaction_id == 0:
             self._execute(
                 """INSERT INTO transactions
                 (account_id, destination_id, occurred_on, cleared_on,
-                amount, payee, note, tags)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                amount, payee, note, tags, receipt, receipt_name, receipt_mime)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (account_id, destination_id, occurred, cleared,
-                 amount, payee, note, tags)
+                 amount, payee, note, tags, receipt, receipt_name, receipt_mime)
             )
 
         if transaction_id > 0:
             self._execute(
                 """UPDATE transactions
                 SET account_id=?, destination_id=?, occurred_on=?,
-                cleared_on=?, amount=?, payee=?, note=?, tags=?
+                cleared_on=?, amount=?, payee=?, note=?, tags=?,
+                receipt=IFNULL(?, receipt), receipt_name=IFNULL(?, receipt_name), receipt_mime=IFNULL(?, receipt_mime)
                 WHERE id=?""",
                 (account_id, destination_id, occurred, cleared,
-                 amount, payee, note, tags, transaction_id)
+                 amount, payee, note, tags, receipt, receipt_name, receipt_mime,
+                 transaction_id)
             )
 
     @staticmethod
@@ -630,3 +641,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 """UPDATE transactions SET tags=? WHERE id=?""",
                 (row["newtags"], row["id"])
             )
+
+    def receipt(self, transaction_id: int) -> Tuple[str, str, bytes]:
+        """Retrieve a file attached to a recipe."""
+
+        row = self._selectOne(
+            """SELECT receipt_name, receipt_mime, receipt
+            FROM transactions
+            WHERE id=?""",
+            (transaction_id,)
+        )
+
+        if row:
+            return (row["receipt_name"], row["receipt_mime"], row["receipt"])
+
+        return ("", "", b"")
