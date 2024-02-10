@@ -128,10 +128,7 @@ class Controller:
             "ledger:json:tags"
         ).pop().encode()
 
-    @cherrypy.tools.capture()
-    @cherrypy.tools.provides(formats=("json",))
-    @cherrypy.tools.json_in()
-    def POST(self, resource: str) -> None:
+    def POST(self, resource: str, **kwargs) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
@@ -141,7 +138,7 @@ class Controller:
             return None
 
         if resource == Resource.TRANSACTIONS:
-            self.store_transaction(0, cherrypy.request.json)
+            self.store_transaction(0, **kwargs)
             self.clear_etag(resource)
             self.clear_etag(Resource.TAGS.value)
             self.clear_etag(Resource.ACCOUNTS.value)
@@ -286,7 +283,7 @@ class Controller:
 
         try:
             destination_id = int(kwargs.get("destination_id"))
-        except ValueError:
+        except TypeError:
             destination_id = None
 
         occurred_on = kwargs.get("occurred_on", "")

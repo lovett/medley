@@ -14,7 +14,7 @@ export class AccountMenuComponent implements OnInit {
     @Input() fieldId?: string;
     @Input() label?: string;
     @Input() account?: Account;
-    @Input() disabledValue?: string;
+    @Input() disabledValue?: Account;
 
     accounts: Account[] = [];
 
@@ -35,5 +35,12 @@ export class AccountMenuComponent implements OnInit {
             },
             error: (err: Error) => console.log(err),
         });
+    }
+
+    compareFn(a1: Account, a2: Account): boolean {
+        if (a1 && a2) {
+            return a1.uid === a2.uid;
+        }
+        return false;
     }
 }

@@ -2,47 +2,68 @@ import { Account } from '../models/account';
 import { TransactionPrimitive } from '../types/transactionPrimitive';
 
 export class Transaction {
-    uid: number;
-    account?: Account
-    destination?: Account
-    payee: string;
-    amount: number;
-    occurred_on: Date;
+    uid: number = 0;
+    account: Account | null = null;
+    destination: Account | null = null;
+    payee: string = '';
+    amount: number = 0;
+    occurred_on: Date = new Date();
     cleared_on?: Date;
     note?: string;
-    tags: string[];
-    selected: boolean;
+    tags: string[] = [];
+    selected: boolean = false;
     receipt_name?: string;
+    receipt?: File;
 
-    constructor(primitive: TransactionPrimitive) {
-        this.uid = primitive.uid;
+    constructor() {
+    }
+
+    static fromTransaction(transaction: Transaction): Transaction {
+        const t = new Transaction();
+        t.uid = transaction.uid;
+        t.account = transaction.account;
+        t.destination = transaction.destination;
+        t.payee = transaction.payee;
+        t.amount = transaction.amount;
+        t.occurred_on = transaction.occurred_on;
+        t.cleared_on = transaction.cleared_on;
+        t.note = transaction.note;
+        t.tags = transaction.tags;
+        return t;
+    }
+
+    static fromPrimitive(primitive: TransactionPrimitive): Transaction {
+        const t = new Transaction();
+        t.uid = primitive.uid;
 
         if (primitive.account) {
-            this.account = new Account(primitive.account);
+            t.account = new Account(primitive.account);
         }
 
         if (primitive.destination) {
-            this.destination = new Account(primitive.destination);
+            t.destination = new Account(primitive.destination);
         }
 
-        this.payee = primitive.payee;
+        t.payee = primitive.payee;
 
-        this.amount = primitive.amount
+        t.amount = primitive.amount
 
-        this.occurred_on = new Date(primitive.occurred_on);
+        t.occurred_on = new Date(primitive.occurred_on);
 
         if (primitive.cleared_on) {
-            this.cleared_on = new Date(primitive.cleared_on);
+            t.cleared_on = new Date(primitive.cleared_on);
         }
 
         if (primitive.note) {
-            this.note = primitive.note;
+            t.note = primitive.note;
         }
 
-        this.tags = (primitive.tags || []).filter((tag) => tag);
+        t.tags = (primitive.tags || []).filter((tag) => tag);
 
-        this.selected = false
-        this.receipt_name = primitive.receipt_name;
+        if (primitive.receipt_name) {
+            t.receipt_name = primitive.receipt_name;
+        }
+        return t;
     }
 
     get accountId(): number {
@@ -81,5 +102,41 @@ export class Transaction {
             note: this.note,
             tags: this.tags,
         };
+    }
+
+    asFormData(): FormData {
+        const formData = new FormData();
+        if (this.account) {
+            formData.set('account_id', this.account.uid.toString());
+        }
+
+        if (this.destination && this.destination.uid) {
+            formData.set('destination_id', this.destination.uid.toString());
+        }
+
+        formData.set('payee', this.payee);
+        formData.set('amount', this.amount.toString());
+        formData.set('occurred_on', this.occurred_on.toString());
+
+        if (this.cleared_on) {
+            formData.set('cleared_on', this.cleared_on.toString());
+        } else {
+            formData.set('cleared_on', '');
+        }
+
+        if (this.note) {
+            formData.set('note', this.note);
+        }
+
+        for (const tag of this.tags) {
+            formData.append('tags', tag);
+        }
+
+        if (this.receipt) {
+            formData.set('receipt', this.receipt);
+        }
+
+        return formData;
+
     }
 }

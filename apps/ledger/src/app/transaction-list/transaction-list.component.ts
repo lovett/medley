@@ -65,7 +65,7 @@ export class TransactionListComponent implements OnDestroy {
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
                 this.transactions = transactionList.transactions.map((primitive) => {
-                    const t = new Transaction(primitive);
+                    const t = Transaction.fromPrimitive(primitive);
                     const index = this.ledgerService.selectedTransactions.findIndex(
                         selectedTransaction => selectedTransaction.uid === t.uid
                     );
@@ -101,7 +101,7 @@ export class TransactionListComponent implements OnDestroy {
     clearTransaction(event: MouseEvent, transaction: Transaction){
         event.preventDefault();
         transaction.cleared_on = new Date();
-        this.ledgerService.updateTransaction(transaction.toPrimitive()).subscribe({
+        this.ledgerService.saveTransaction(transaction).subscribe({
             error: (err: Error) => console.log(err),
         });
     }

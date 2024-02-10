@@ -11,14 +11,14 @@ import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
 
 function atLeastOneAccount(group: AbstractControl): ValidationErrors | null {
-    const accountId = group.get('account_id')!;
-    const destinationId = group.get('destination_id')!;
+    const account = group.get('account')!;
+    const destination = group.get('destination')!;
 
-    if (accountId.pristine && destinationId.pristine) {
+    if (account.pristine && destination.pristine) {
         return null;
     }
 
-    if (accountId.value || destinationId.value) {
+    if (account.value || destination.value) {
         return null;
     }
 
@@ -47,7 +47,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
 })
 export class TransactionFormComponent implements OnInit {
     transactionForm!: FormGroup;
-    transaction: Transaction | undefined;
+    transaction: Transaction | null;
     errorMessage = '';
     datesExpanded = false;
     singularResourceName: string;
@@ -65,6 +65,7 @@ export class TransactionFormComponent implements OnInit {
         this.singularResourceName = 'transaction';
         this.autocompleteFrom = null;
         this.receipt = null;
+        this.transaction = null;
     }
 
     ngOnInit(): void {
@@ -72,8 +73,8 @@ export class TransactionFormComponent implements OnInit {
 
         this.transactionForm = this.formBuilder.group({
             accounts: this.formBuilder.group({
-                account_id: [null],
-                destination_id: [null],
+                account: [null],
+                destination: [null],
             }, {validators: atLeastOneAccount}),
             payee: ['', {validators: Validators.required}],
             amount: ['', {validators: [Validators.required, Validators.min(0.01)]}],
@@ -105,8 +106,8 @@ export class TransactionFormComponent implements OnInit {
         }
     }
 
-    get accountId() { return this.accounts.controls['account_id'] as FormControl }
-    get destinationId() { return this.accounts.controls['destination_id'] as FormControl }
+    get account() { return this.accounts.controls['account'] as FormControl }
+    get destination() { return this.accounts.controls['destination'] as FormControl }
     get payee() { return this.transactionForm.controls['payee'] }
     get amount() { return this.transactionForm.controls['amount'] }
     get accounts() { return this.transactionForm.controls['accounts'] as FormGroup }
@@ -122,7 +123,7 @@ export class TransactionFormComponent implements OnInit {
             return;
         }
 
-        this.autocompleteFrom = new Transaction(searchResult.transactions[0]);
+        this.autocompleteFrom = Transaction.fromPrimitive(searchResult.transactions[0]);
     }
 
     applyAutocompletedTransaction(e: MouseEvent) {
@@ -136,7 +137,7 @@ export class TransactionFormComponent implements OnInit {
         }
 
         this.transactionForm.patchValue({
-            account_id: this.autocompleteFrom.account?.uid || 0,
+            account: this.autocompleteFrom.account || null,
             payee: this.autocompleteFrom.payee,
             amount: this.moneyPipe.transform(this.autocompleteFrom.amount, 'plain'),
             note: this.autocompleteFrom.note,
@@ -170,8 +171,8 @@ export class TransactionFormComponent implements OnInit {
             payee: transaction.payee,
             amount: this.moneyPipe.transform(transaction.amount, 'plain'),
             accounts: {
-                account_id: transaction.account?.uid || 0,
-                destination_id: transaction.destination?.uid || 0,
+                account: transaction.account,
+                destination: transaction.destination,
             },
             dates: {
                 occurred_on: transaction.occurredOnYMD(),
@@ -187,9 +188,9 @@ export class TransactionFormComponent implements OnInit {
         this.tags.patchValue(transaction.tags);
 
         if (transaction.account?.closed_on) {
-            this.accountId.disable();
+            this.account.disable();
         } else {
-            this.accountId.enable();
+            this.account.enable();
         }
 
         this.transaction = transaction;
@@ -207,7 +208,7 @@ export class TransactionFormComponent implements OnInit {
 
     changeAccount(account: Account) {
         this.transactionForm.patchValue({
-            account_id: account.uid,
+            account: account,
         });
     }
 
@@ -222,40 +223,30 @@ export class TransactionFormComponent implements OnInit {
             return;
         }
 
-        if (!this.accountId.value && !this.destinationId.value) {
+        if (!this.account.value && !this.destination.value) {
             this.errorMessage = 'Cannot save because an account has not been specified.';
             return;
         }
 
-        const primitive: TransactionPrimitive = {
-            'uid': this.transaction!.uid,
-            'account_id': this.accountId.value,
-            'destination_id': this.destinationId.value,
-            'payee': this.payee.value,
-            'amount': this.amount.value * 100,
-            'occurred_on': this.occurredOn.value,
-            'cleared_on': this.clearedOn.value || null,
-            'note': this.note.value,
-            'tags': this.tags.value,
-        };
+        const transaction = Transaction.fromTransaction(this.transaction!);
+
+        transaction.account = this.account.value;
+        transaction.destination = this.destination.value;
+        transaction.payee = this.payee.value;
+        transaction.amount = this.amount.value * 100;
+        transaction.occurred_on = this.occurredOn.value;
+        transaction.cleared_on = this.clearedOn.value || null;
+        transaction.note = this.note.value;
+        transaction.tags = this.tags.value;
 
         if (this.receipt) {
-            primitive.receipt = this.receipt;
+            transaction.receipt = this.receipt;
         }
 
-        if (primitive.uid === 0) {
-            this.ledgerService.addTransaction(primitive).subscribe({
-                next: () => this.saved(),
-                error: (err) => this.errorMessage = err,
-            });
-        }
-
-        if (primitive.uid > 0) {
-            this.ledgerService.updateTransaction(primitive).subscribe({
-                next: () => this.saved(),
-                error: (err) => this.errorMessage = err,
-            });
-        }
+        this.ledgerService.saveTransaction(transaction).subscribe({
+            next: () => this.saved(),
+            error: (err) => this.errorMessage = err,
+        });
     }
 
     saved() {
@@ -288,9 +279,10 @@ export class TransactionFormComponent implements OnInit {
     }
 
     receiptChange(event: Event) {
-        const file = (event.target as HTMLInputElement).files![0];
-        if (file) {
-            this.receipt = file;
+        const files = (event.target as HTMLInputElement).files!;
+        if (files.length > 0) {
+            this.receipt = files[0];
+            this.transactionForm.markAsDirty();
         }
     }
 }

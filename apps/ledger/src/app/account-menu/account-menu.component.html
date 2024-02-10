@@ -1,10 +1,10 @@
 <div>
     <label *ngIf="label" for="{{ fieldId}} ">{{ label }}</label>
-    <select id="{{ fieldId }}" name="{{ fieldId }}" [formControl]="control">
+    <select id="{{ fieldId }}" [formControl]="control" [compareWith]="compareFn">
          <option value=""></option>
          <option
-             [ngValue]="account.uid"
-             [disabled]="account.uid.toString() == disabledValue"
+             [ngValue]="account"
+             [disabled]="disabledValue && disabledValue.uid === account.uid"
              *ngFor="let account of accounts"
          >{{ account.name }}</option>
     </select>

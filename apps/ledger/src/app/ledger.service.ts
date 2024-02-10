@@ -88,7 +88,7 @@ export class LedgerService {
 
     getTransaction(uid: number): Observable<Transaction> {
         return this.http.get<TransactionPrimitive>(`/ledger/transactions/${uid}`).pipe(
-            map((primitive) => new Transaction(primitive))
+            map((primitive) => Transaction.fromPrimitive(primitive))
         );
     }
 
@@ -96,41 +96,18 @@ export class LedgerService {
         return this.http.post<Account>('/ledger/accounts', primitive)
     }
 
-    addTransaction(primitive: TransactionPrimitive): Observable<Transaction> {
-        return this.http.post<Transaction>('/ledger/transactions', primitive);
-    }
-
     updateAccount(primitive: AccountPrimitive): Observable<void> {
         const url = `/ledger/accounts/${primitive.uid}`;
         return this.http.put<void>(url, primitive);
     }
 
-    updateTransaction(primitive: TransactionPrimitive): Observable<void> {
-        const formData = new FormData();
-        formData.set('account_id', (primitive.account_id || '').toString());
-        formData.set('destination_id', (primitive.destination_id || '').toString());
-        formData.set('payee', primitive.payee);
-        formData.set('amount', primitive.amount.toString());
-        formData.set('occurred_on', primitive.occurred_on);
-
-        formData.set('cleared_on', primitive.cleared_on || '');
-
-        if (primitive.note) {
-            formData.set('note', primitive.note);
+    saveTransaction(transaction: Transaction): Observable<void> {
+        const formData = transaction.asFormData();
+        if (transaction.uid === 0) {
+            return this.http.post<void>('/ledger/transactions', formData);
         }
 
-        for (const tag of primitive.tags) {
-            formData.append('tags', tag);
-        }
-
-        if (primitive.receipt) {
-            formData.set('receipt', primitive.receipt);
-        }
-
-        return this.http.put<void>(
-            `/ledger/transactions/${primitive.uid}`,
-            formData
-        );
+        return this.http.put<void>(`/ledger/transactions/${transaction.uid}`, formData);
     }
 
     deleteAccount(uid: number): Observable<void> {
