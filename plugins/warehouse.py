@@ -42,7 +42,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         self.bus.subscribe("warehouse:add:chunk", self.add_chunk)
         self.bus.subscribe("warehouse:remove", self.remove_file)
-        self.bus.subscribe("warehouse:get:chunks", self.get_chunk)
+        self.bus.subscribe("warehouse:chunks:get", self.get_chunks)
+        self.bus.subscribe("warehouse:chunks:count", self.count_chunks)
         self.bus.subscribe("warehouse:get:type", self.get_type)
         self.bus.subscribe("warehouse:list", self.list_files)
 
@@ -75,7 +76,16 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             )
         )
 
-    def get_chunk(self, path: Path) -> Iterator[bytes]:
+    def count_chunks(self, path: Path) -> int:
+        """Count the number of rows holding pieces of a stored file."""
+        return self._selectFirst(
+            """SELECT count(*)
+            FROM warehouse
+            WHERE path=?""",
+            (path.as_posix(),)
+        )
+
+    def get_chunks(self, path: Path) -> Iterator[bytes]:
         """Retrieve a previously-stored file."""
 
         rows = self._select_generator(

@@ -1394,9 +1394,16 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["warehouse:get:chunks"],
+        channel: Literal["warehouse:chunks:get"],
         path: Path,
 ) -> List[Iterator[bytes]]: ...
+
+
+@overload
+def publish(
+        channel: Literal["warehouse:chunks:count"],
+        path: Path,
+) -> List[int]: ...
 
 
 @overload

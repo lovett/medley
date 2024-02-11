@@ -131,6 +131,14 @@ class Controller:
     def serve_file(path: Path) -> Iterator[bytes]:
         """Send back a previously-stored file."""
 
+        count = cherrypy.engine.publish(
+            "warehouse:chunks:count",
+            path
+        ).pop()
+
+        if count == 0:
+            raise cherrypy.NotFound()
+
         content_type = cherrypy.engine.publish(
             "warehouse:get:type",
             path
@@ -139,13 +147,14 @@ class Controller:
         if not content_type:
             content_type = "application/octet-stream"
 
-        cherrypy.response.stream = True
-        cherrypy.response.headers["Content-Type"] = content_type
-
-        return cherrypy.engine.publish(
-            "warehouse:get:chunks",
+        chunks = cherrypy.engine.publish(
+            "warehouse:chunks:get",
             path
         ).pop()
+
+        cherrypy.response.stream = True
+        cherrypy.response.headers["Content-Type"] = content_type
+        return chunks
 
     @staticmethod
     def index(**kwargs: str) -> bytes:
