@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-  selector: 'app-delete-button',
+  selector: 'ledger-delete-button',
   templateUrl: './delete-button.component.html',
   styleUrls: ['./delete-button.component.css']
 })

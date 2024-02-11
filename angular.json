@@ -20,10 +20,8 @@
               "zone.js"
             ],
             "tsConfig": "apps/ledger/tsconfig.app.json",
-            "assets": [
-            ],
-            "styles": [
-            ],
+            "assets": [],
+            "styles": [],
             "scripts": []
           },
           "configurations": {
@@ -79,14 +77,26 @@
               "zone.js/testing"
             ],
             "tsConfig": "apps/ledger/tsconfig.spec.json",
-            "assets": [
-            ],
-            "styles": [
-            ],
+            "assets": [],
+            "styles": [],
             "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "apps/ledger/**/*.ts",
+              "apps/ledger/**/*.html"
+            ]
           }
         }
       }
     }
+  },
+  "cli": {
+    "schematicCollections": [
+      "@angular-eslint/schematics"
+    ]
   }
 }

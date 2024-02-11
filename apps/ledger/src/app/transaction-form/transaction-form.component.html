@@ -1,5 +1,5 @@
 <header>
-    <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteTransaction()" [resourceName]="singularResourceName"></app-delete-button>
+    <ledger-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteTransaction()" [resourceName]="singularResourceName"></ledger-delete-button>
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="transactionForm" autocomplete="off">
@@ -78,13 +78,13 @@
     <div formGroupName="accounts">
         <div class="field-group">
             <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')">
-                <app-account-menu fieldId="account" [control]="account" [disabledValue]="destination.value" label="Withdraw from"></app-account-menu>
+                <ledger-account-menu fieldId="account" [control]="account" [disabledValue]="destination.value" label="Withdraw from"></ledger-account-menu>
                 <p *ngIf="account.disabled">The account cannot be changed because it is closed.</p>
                 <p class="validation-message arrow-up"  *ngIf="transactionForm.dirty && accounts.hasError('atLeastOneAccount')">At least one account is needed.</p>
             </div>
 
             <div class="field" [class.invalid]="accounts.hasError('atLeastOneAccount')">
-                <app-account-menu fieldId="destination" [control]="destination" [disabledValue]="account.value" label="Deposit To"></app-account-menu>
+                <ledger-account-menu fieldId="destination" [control]="destination" [disabledValue]="account.value" label="Deposit To"></ledger-account-menu>
             </div>
         </div>
     </div>

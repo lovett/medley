@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Tag } from '../models/tag';
 import { Router }  from '@angular/router';
@@ -8,7 +8,7 @@ import { Router }  from '@angular/router';
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.css']
 })
-export class TagListComponent {
+export class TagListComponent implements OnInit {
     tags: Tag[] = [];
     tagsLoaded: boolean = false;
 

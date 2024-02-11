@@ -1,7 +1,9 @@
 {
   "name": "medley",
   "version": "0.0.0",
-  "scripts": {},
+  "scripts": {
+    "lint": "ng lint"
+  },
   "private": true,
   "dependencies": {
     "@angular/animations": "^17.1.0",
@@ -19,12 +21,17 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^17.1.0",
+    "@angular-eslint/builder": "17.2.1",
+    "@angular-eslint/eslint-plugin": "17.2.1",
+    "@angular-eslint/eslint-plugin-template": "17.2.1",
+    "@angular-eslint/schematics": "17.2.1",
+    "@angular-eslint/template-parser": "17.2.1",
     "@angular/cli": "~17.1.0",
     "@angular/compiler-cli": "^17.1.0",
     "@types/jasmine": "~4.3.0",
     "@types/lodash-es": "^4.17.6",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
-    "@typescript-eslint/parser": "^6.19.1",
+    "@typescript-eslint/eslint-plugin": "6.19.0",
+    "@typescript-eslint/parser": "6.19.0",
     "eslint": "^8.56.0",
     "jasmine-core": "~4.5.0",
     "karma": "~6.4.0",

@@ -44,7 +44,7 @@ function uniqueName(id: number, ledgerService: LedgerService): AsyncValidatorFn 
 }
 
 @Component({
-  selector: 'app-account-form',
+  selector: 'ledger-account-form',
   templateUrl: './account-form.component.html',
   styleUrls: ['./account-form.component.css']
 })
@@ -89,9 +89,6 @@ export class AccountFormComponent implements OnInit {
             (err: Error) => console.log(err),
             () => console.log('All done getting account'),
         );
-    }
-
-    ngOnDestroy(): void {
     }
 
     get name() { return this.accountForm.controls['name'] }

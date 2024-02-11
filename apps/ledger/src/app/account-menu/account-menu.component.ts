@@ -5,7 +5,7 @@ import { Account } from '../models/account';
 import { AccountList } from '../types/AccountList';
 
 @Component({
-  selector: 'app-account-menu[control]',
+  selector: 'ledger-account-menu[control]',
   templateUrl: './account-menu.component.html',
   styleUrls: ['./account-menu.component.css'],
 })

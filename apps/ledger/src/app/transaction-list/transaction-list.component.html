@@ -10,7 +10,7 @@
             <a href="#" (click)="clearSearch($event)">Clear Search</a>
         </div>
     </form>
-    <app-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
+    <ledger-add-button [routerLink]="['/transactions', 0, 'form']" [resourceName]="singularResourceName"></ledger-add-button>
 </header>
 
 <section>
@@ -106,5 +106,5 @@
 
 
 
-<p *ngIf="transactions.length == 0">There are no transactions.</p>
+<p *ngIf="transactions.length === 0">There are no transactions.</p>
 </section>

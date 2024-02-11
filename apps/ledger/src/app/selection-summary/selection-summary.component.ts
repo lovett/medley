@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 
 @Component({
-  selector: 'app-selection-summary',
+  selector: 'ledger-selection-summary',
   templateUrl: './selection-summary.component.html',
   styleUrls: ['./selection-summary.component.css']
 })

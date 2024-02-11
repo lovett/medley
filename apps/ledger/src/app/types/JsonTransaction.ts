@@ -1,5 +1,4 @@
 import { JsonAccount } from './JsonAccount';
-import { JsonTag } from './JsonTag';
 
 export type JsonTransaction = {
     uid: number;

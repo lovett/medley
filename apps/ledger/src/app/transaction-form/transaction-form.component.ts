@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormGroup, FormControl, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
-import { JsonTransaction } from '../types/JsonTransaction';
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/TransactionList';
 import { Account } from '../models/account';
@@ -41,7 +40,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
 
 }
 @Component({
-  selector: 'app-transaction-form',
+  selector: 'ledger-transaction-form',
   templateUrl: './transaction-form.component.html',
   styleUrls: ['./transaction-form.component.css']
 })

@@ -6,7 +6,7 @@ import { TransactionList } from '../types/TransactionList';
 import { Router, ActivatedRoute}  from '@angular/router';
 
 @Component({
-  selector: 'app-transaction-list',
+  selector: 'ledger-transaction-list',
   templateUrl: './transaction-list.component.html',
   styleUrls: ['./transaction-list.component.css']
 })

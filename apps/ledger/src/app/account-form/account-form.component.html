@@ -1,5 +1,5 @@
 <header>
-    <app-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteAccount()" [resourceName]="singularResourceName"></app-delete-button>
+    <ledger-delete-button *ngIf="canDelete()" (deletionConfirmed)="deleteAccount()" [resourceName]="singularResourceName"></ledger-delete-button>
 </header>
 
 <form (ngSubmit)="save()" [formGroup]="accountForm" autocomplete="off">

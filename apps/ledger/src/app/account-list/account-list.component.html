@@ -1,8 +1,8 @@
 <header>
-    <app-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></app-add-button>
+    <ledger-add-button [routerLink]="['/accounts', 0, 'form']" [resourceName]="singularResourceName"></ledger-add-button>
 </header>
 
-<p *ngIf="accounts.length == 0">There are no accounts.</p>
+<p *ngIf="accounts.length === 0">There are no accounts.</p>
 
 <section class="accounts" *ngIf="accounts.length > 0">
     <h1>Accounts</h1>

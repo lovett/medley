@@ -4,7 +4,7 @@ import { Account } from '../models/account';
 import { AccountList } from '../types/AccountList';
 
 @Component({
-  selector: 'app-account-list',
+  selector: 'ledger-account-list',
   templateUrl: './account-list.component.html',
   styleUrls: ['./account-list.component.css']
 })
