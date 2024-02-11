@@ -2,7 +2,7 @@ import { Component, EventEmitter, Output, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Transaction } from '../models/transaction';
-import { TransactionList } from '../types/transactionList';
+import { TransactionList } from '../types/TransactionList';
 import { Router, ActivatedRoute}  from '@angular/router';
 
 @Component({
@@ -64,8 +64,8 @@ export class TransactionListComponent implements OnDestroy {
         this.ledgerService.getTransactions(this.query.value, this.limit, this.offset, this.account, this.tag).subscribe({
             next: (transactionList: TransactionList) => {
                 this.count = transactionList.count;
-                this.transactions = transactionList.transactions.map((primitive) => {
-                    const t = Transaction.fromPrimitive(primitive);
+                this.transactions = transactionList.transactions.map((jsonTransaction) => {
+                    const t = Transaction.fromJson(jsonTransaction);
                     const index = this.ledgerService.selectedTransactions.findIndex(
                         selectedTransaction => selectedTransaction.uid === t.uid
                     );

@@ -1,27 +1,28 @@
 import { Account } from '../models/account';
-import { TransactionPrimitive } from '../types/transactionPrimitive';
+import { Tag } from '../models/tag';
+import { JsonTransaction } from '../types/JsonTransaction';
 
 export class Transaction {
     uid: number = 0;
-    account: Account | null = null;
-    destination: Account | null = null;
+    account: Account;
+    destination?: Account;
     payee: string = '';
     amount: number = 0;
     occurred_on: Date = new Date();
     cleared_on?: Date;
     note?: string;
-    tags: string[] = [];
+    tags: Tag[] = [];
     selected: boolean = false;
     receipt_name?: string;
     receipt?: File;
 
-    constructor() {
+    constructor(account: Account) {
+        this.account = account;
     }
 
-    static fromTransaction(transaction: Transaction): Transaction {
-        const t = new Transaction();
+    static clone(transaction: Transaction): Transaction {
+        const t = new Transaction(transaction.account);
         t.uid = transaction.uid;
-        t.account = transaction.account;
         t.destination = transaction.destination;
         t.payee = transaction.payee;
         t.amount = transaction.amount;
@@ -32,36 +33,33 @@ export class Transaction {
         return t;
     }
 
-    static fromPrimitive(primitive: TransactionPrimitive): Transaction {
-        const t = new Transaction();
-        t.uid = primitive.uid;
+    static fromJson(json: JsonTransaction): Transaction {
+        const account = Account.fromJson(json.account);
+        const t = new Transaction(account);
+        t.uid = json.uid;
 
-        if (primitive.account) {
-            t.account = new Account(primitive.account);
+        if (json.destination) {
+            t.destination = Account.fromJson(json.destination);
         }
 
-        if (primitive.destination) {
-            t.destination = new Account(primitive.destination);
+        t.payee = json.payee;
+
+        t.amount = json.amount
+
+        t.occurred_on = new Date(json.occurred_on);
+
+        if (json.cleared_on) {
+            t.cleared_on = new Date(json.cleared_on);
         }
 
-        t.payee = primitive.payee;
-
-        t.amount = primitive.amount
-
-        t.occurred_on = new Date(primitive.occurred_on);
-
-        if (primitive.cleared_on) {
-            t.cleared_on = new Date(primitive.cleared_on);
+        if (json.note) {
+            t.note = json.note;
         }
 
-        if (primitive.note) {
-            t.note = primitive.note;
-        }
+        t.tags = json.tags.map((tag) => Tag.fromString(tag));
 
-        t.tags = (primitive.tags || []).filter((tag) => tag);
-
-        if (primitive.receipt_name) {
-            t.receipt_name = primitive.receipt_name;
+        if (json.receipt_name) {
+            t.receipt_name = json.receipt_name;
         }
         return t;
     }
@@ -90,20 +88,6 @@ export class Transaction {
         return d.toISOString().split('T')[0];
     }
 
-    toPrimitive(): TransactionPrimitive {
-        return {
-            uid: this.uid,
-            account_id: this.accountId,
-            destination_id: this.destinationId,
-            payee: this.payee,
-            amount: this.amount,
-            occurred_on: this.occurred_on.toISOString().split('T')[0],
-            cleared_on: (this.cleared_on)? this.cleared_on.toISOString().split('T')[0] : undefined,
-            note: this.note,
-            tags: this.tags,
-        };
-    }
-
     asFormData(): FormData {
         const formData = new FormData();
         if (this.account) {
@@ -129,7 +113,7 @@ export class Transaction {
         }
 
         for (const tag of this.tags) {
-            formData.append('tags', tag);
+            formData.append('tags', tag.name);
         }
 
         if (this.receipt) {

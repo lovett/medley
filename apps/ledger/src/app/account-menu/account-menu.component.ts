@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
-import { AccountList } from '../types/accountList';
+import { AccountList } from '../types/AccountList';
 
 @Component({
   selector: 'app-account-menu[control]',
@@ -25,8 +25,8 @@ export class AccountMenuComponent implements OnInit {
     ngOnInit() {
         this.ledgerService.getAccounts().subscribe({
             next: (accountList: AccountList) => {
-                for (const primitive of accountList.accounts) {
-                    const  a = new Account(primitive);
+                for (const jsonAccount of accountList.accounts) {
+                    const  a = Account.fromJson(jsonAccount);
                     if (a.closed_on && a.uid !== this.control.value) {
                         continue;
                     }

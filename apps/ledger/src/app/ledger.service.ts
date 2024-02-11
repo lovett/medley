@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Account } from './models/account';
-import { AccountList } from './types/accountList';
+import { AccountList } from './types/AccountList';
 import { Tag } from './models/tag';
-import { TagPrimitive } from './types/tagPrimitive';
+import { JsonTag } from './types/JsonTag';
 import { Transaction } from './models/transaction';
-import { TransactionPrimitive }  from './types/transactionPrimitive';
-import { AccountPrimitive }  from './types/accountPrimitive';
-import { TransactionList } from './types/transactionList';
+import { JsonTransaction }  from './types/JsonTransaction';
+import { JsonAccount }  from './types/JsonAccount';
+import { TransactionList } from './types/TransactionList';
 import { ReplaySubject } from 'rxjs';
 
 
@@ -49,8 +49,8 @@ export class LedgerService {
     }
 
     getTags(): Observable<Tag[]> {
-        return this.http.get<TagPrimitive[]>('/ledger/tags').pipe(
-            map(primitives => primitives.map(primitive => new Tag(primitive)))
+        return this.http.get<JsonTag[]>('/ledger/tags').pipe(
+            map(jsonTags => jsonTags.map(jsonTag => Tag.fromJson(jsonTag)))
         );
     }
 
@@ -81,24 +81,28 @@ export class LedgerService {
     }
 
     getAccount(uid: number): Observable<Account> {
-        return this.http.get<AccountPrimitive>(`/ledger/accounts/${uid}`).pipe(
-            map((primitive) => new Account(primitive))
+        return this.http.get<JsonAccount>(`/ledger/accounts/${uid}`).pipe(
+            map((jsonAccount) => Account.fromJson(jsonAccount))
         );
     }
 
     getTransaction(uid: number): Observable<Transaction> {
-        return this.http.get<TransactionPrimitive>(`/ledger/transactions/${uid}`).pipe(
-            map((primitive) => Transaction.fromPrimitive(primitive))
+        return this.http.get<JsonTransaction>(`/ledger/transactions/${uid}`).pipe(
+            map((jsonTransaction) => Transaction.fromJson(jsonTransaction))
         );
     }
 
-    addAccount(primitive: AccountPrimitive): Observable<Account> {
-        return this.http.post<Account>('/ledger/accounts', primitive)
+    saveAccount(account: Account): Observable<void> {
+        const formData = account.asFormData();
+        if (account.uid === 0) {
+            return this.http.post<void>('/ledger/accounts', formData);
+        }
+        return this.http.put<void>(`/ledger/accounts/${account.uid}`, formData);
     }
 
-    updateAccount(primitive: AccountPrimitive): Observable<void> {
-        const url = `/ledger/accounts/${primitive.uid}`;
-        return this.http.put<void>(url, primitive);
+    renameTag(oldTag: Tag, newTag: Tag): Observable<void> {
+        const formData = newTag.asFormData();
+        return this.http.put<void>(`/ledger/tags/${oldTag.name}`, formData);
     }
 
     saveTransaction(transaction: Transaction): Observable<void> {
@@ -122,9 +126,5 @@ export class LedgerService {
         return this.http.get<TransactionList>(
             `/ledger/transactions?q=payee:${payee}&limit=1`
         );
-    }
-
-    renameTag(tag: Tag, name: string): Observable<void> {
-        return this.http.patch<void>(`/ledger/tags/${tag.name}`, {name,});
     }
 }

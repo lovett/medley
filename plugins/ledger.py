@@ -374,8 +374,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             'transactions', json_group_array(
                 json_object(
                     'uid', id,
-                    'account_id', account_id,
-                    'destination_id', destination_id,
                     'account', json_object(
                         'uid', account_id,
                         'name', account_name,

@@ -3,7 +3,6 @@ import { FormGroup, FormBuilder, Validators, AbstractControl, ValidationErrors, 
 import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
 import { Account } from '../models/account';
-import { AccountPrimitive } from '../types/accountPrimitive';
 import { LedgerService } from '../ledger.service';
 import { Observable, map, of } from 'rxjs';
 
@@ -107,28 +106,17 @@ export class AccountFormComponent implements OnInit {
     }
 
     save(): void {
-        const primitive: AccountPrimitive = {
-            uid: this.account!.uid,
-            name: this.name.value,
-            opened_on: this.openedOn.value || null,
-            closed_on: this.closedOn.value || null,
-            note: this.note.value,
-            url: this.url.value,
-        }
+        const a = Account.clone(this.account!);
+        a.name = this.name.value;
+        a.opened_on = this.openedOn.value || null;
+        a.closed_on = this.closedOn.value || null;
+        a.note = this.note.value;
+        a.url = this.url.value;
 
-        if (primitive.uid === 0) {
-            this.ledgerService.addAccount(primitive).subscribe(
-                () => this.saved(),
-                (err) => this.errorMessage = err,
-            );
-        }
-
-        if (primitive.uid > 0) {
-            this.ledgerService.updateAccount(primitive).subscribe(
-                () => this.saved(),
-                (err) => this.errorMessage = err,
-            );
-        }
+        this.ledgerService.saveAccount(a).subscribe({
+            next: () => this.saved(),
+            error: (err) => this.errorMessage = err,
+        });
     }
 
     saved() {

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormArray, FormGroup, FormControl, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common'
-import { TransactionPrimitive } from '../types/transactionPrimitive';
+import { JsonTransaction } from '../types/JsonTransaction';
 import { Transaction } from '../models/transaction';
-import { TransactionList } from '../types/transactionList';
+import { TransactionList } from '../types/TransactionList';
 import { Account } from '../models/account';
 import { LedgerService } from '../ledger.service';
 import { switchMap, debounceTime, filter } from 'rxjs';
@@ -123,7 +123,7 @@ export class TransactionFormComponent implements OnInit {
             return;
         }
 
-        this.autocompleteFrom = Transaction.fromPrimitive(searchResult.transactions[0]);
+        this.autocompleteFrom = Transaction.fromJson(searchResult.transactions[0]);
     }
 
     applyAutocompletedTransaction(e: MouseEvent) {
@@ -228,22 +228,22 @@ export class TransactionFormComponent implements OnInit {
             return;
         }
 
-        const transaction = Transaction.fromTransaction(this.transaction!);
+        const t = Transaction.clone(this.transaction!);
 
-        transaction.account = this.account.value;
-        transaction.destination = this.destination.value;
-        transaction.payee = this.payee.value;
-        transaction.amount = this.amount.value * 100;
-        transaction.occurred_on = this.occurredOn.value;
-        transaction.cleared_on = this.clearedOn.value || null;
-        transaction.note = this.note.value;
-        transaction.tags = this.tags.value;
+        t.account = this.account.value;
+        t.destination = this.destination.value;
+        t.payee = this.payee.value;
+        t.amount = this.amount.value * 100;
+        t.occurred_on = this.occurredOn.value;
+        t.cleared_on = this.clearedOn.value || null;
+        t.note = this.note.value;
+        t.tags = this.tags.value;
 
         if (this.receipt) {
-            transaction.receipt = this.receipt;
+            t.receipt = this.receipt;
         }
 
-        this.ledgerService.saveTransaction(transaction).subscribe({
+        this.ledgerService.saveTransaction(t).subscribe({
             next: () => this.saved(),
             error: (err) => this.errorMessage = err,
         });

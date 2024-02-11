@@ -28,19 +28,16 @@ export class TagListComponent {
 
     renameTag(event: Event, tag: Tag) {
         event.preventDefault();
-        const promptResponse = prompt(`Rename ${tag.name} to:`);
+        const promptResponse = prompt(`Rename ${tag} to:`);
 
-        if (!promptResponse) {
+        if (!promptResponse || promptResponse.trim() === '') {
             return;
         }
 
-        if (promptResponse.trim() === '') {
-            return;
-        }
+        const newTag = Tag.clone(tag);
+        newTag.name = promptResponse.trim();
 
-        const newName = promptResponse.trim();
-
-        this.ledgerService.renameTag(tag, newName).subscribe({
+        this.ledgerService.renameTag(tag, newTag).subscribe({
             next: () => {
                 this.ngOnInit();
             },

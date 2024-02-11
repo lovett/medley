@@ -132,7 +132,7 @@ class Controller:
         """Dispatch to a subhandler based on the URL path."""
 
         if resource == Resource.ACCOUNTS:
-            self.store_account(0, cherrypy.request.json)
+            self.store_account(0, **kwargs)
             self.clear_etag(resource)
             self.clear_etag(Resource.TRANSACTIONS.value)
             return None
@@ -145,7 +145,7 @@ class Controller:
             return None
 
         if resource == Resource.ACK:
-            self.process_acknowledgment(cherrypy.request.json)
+            self.process_acknowledgment(**kwargs)
             self.clear_etag(resource)
             return None
 
@@ -154,45 +154,30 @@ class Controller:
     def PUT(self, resource: str, uid: str, **kwargs: str) -> None:
         """Dispatch to a subhandler based on the URL path."""
 
+        # A tag can only be renamed. The uid will be the old name.
+        if resource == Resource.TAGS:
+            self.rename_tag(uid, **kwargs)
+            self.clear_etag(resource)
+            self.clear_etag(Resource.TRANSACTIONS.value)
+            cherrypy.response.status = 204
+            return
+
         try:
             record_id = int(uid)
         except ValueError as exc:
             raise cherrypy.HTTPError(400, "Invalid uid") from exc
 
-        # if resource == Resource.ACCOUNTS:
-        #     self.store_account(record_id, cherrypy.request.json)
-        #     self.clear_etag(resource)
-        #     self.clear_etag(Resource.TRANSACTIONS.value)
-        #     return
+        if resource == Resource.ACCOUNTS:
+            self.store_account(record_id, **kwargs)
+            self.clear_etag(resource)
+            self.clear_etag(Resource.TRANSACTIONS.value)
+            return
 
         if resource == Resource.TRANSACTIONS:
             self.store_transaction(record_id, **kwargs)
             self.clear_etag(resource)
             self.clear_etag(Resource.TAGS.value)
             self.clear_etag(Resource.ACCOUNTS.value)
-            return
-
-        raise cherrypy.HTTPError(400)
-
-    @cherrypy.tools.capture()
-    @cherrypy.tools.provides(formats=("json",))
-    @cherrypy.tools.json_in()
-    def PATCH(self, resource: str, tag: str, **kwargs: str) -> None:
-        """Rename a tag."""
-
-        if resource == Resource.TAGS:
-            new_name = cast(str, cherrypy.request.json.get("name", ""))
-
-            if not new_name:
-                raise cherrypy.HTTPError(400)
-
-            cherrypy.engine.publish(
-                "ledger:tag:rename",
-                tag,
-                new_name=new_name,
-            )
-            self.clear_etag(resource)
-            cherrypy.response.status = 204
             return
 
 
@@ -228,14 +213,14 @@ class Controller:
         cherrypy.response.status = 204
 
     @staticmethod
-    def store_account(account_id: int, json: Json) -> None:
+    def store_account(account_id: int, **kwargs: str) -> None:
         """Upsert an account record."""
 
-        name = str(json.get("name") or "")
-        opened_on = str(json.get("opened_on") or "")
-        closed_on = str(json.get("closed_on") or "")
-        url = str(json.get("url") or "")
-        note = str(json.get("note") or "")
+        name = kwargs.get("name")
+        opened_on = kwargs.get("opened_on")
+        closed_on = kwargs.get("closed_on")
+        url = kwargs.get("url")
+        note = kwargs.get("note")
         date_format = "%Y-%m-%d"
 
         opened = None
@@ -271,6 +256,19 @@ class Controller:
             raise cherrypy.HTTPRedirect(redirect_url)
 
         cherrypy.response.status = 204
+
+    @staticmethod
+    def rename_tag(tag: str, **kwargs: str) -> None:
+        new_name = kwargs.get("name")
+        if not new_name:
+            raise cherrypy.HTTPError(400)
+
+        cherrypy.engine.publish(
+            "ledger:tag:rename",
+            tag,
+            new_name=new_name,
+        )
+
 
     @staticmethod
     def store_transaction(transaction_id: int, **kwargs: str) -> None:

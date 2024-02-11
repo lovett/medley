@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LedgerService } from '../ledger.service';
 import { Account } from '../models/account';
-import { AccountList } from '../types/accountList';
+import { AccountList } from '../types/AccountList';
 
 @Component({
   selector: 'app-account-list',
@@ -23,8 +23,8 @@ export class AccountListComponent implements OnInit {
         this.ledgerService.getAccounts().subscribe({
             next: (accountList: AccountList) => {
                 this.count = accountList.count;
-                this.accounts = accountList.accounts.map((primitive) => {
-                    return new Account(primitive);
+                this.accounts = accountList.accounts.map((jsonAccount) => {
+                    return Account.fromJson(jsonAccount);
                 });
             },
             error: (err: Error) => console.log(err),
