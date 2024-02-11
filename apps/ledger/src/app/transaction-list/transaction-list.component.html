@@ -26,10 +26,12 @@
 <table *ngIf="transactions.length > 0">
     <thead>
         <tr>
+            <th>ID</th>
+            <th class="align-right">Amount</th>
             <th>Date</th>
             <th>Account</th>
+            <th>Type</th>
             <th>Details</th>
-            <th class="align-right">Amount</th>
             <th class="align-right">Status</th>
         </tr>
     </thead>
@@ -38,33 +40,37 @@
             [class.cleared]="transaction.cleared_on"
             [class.selected]="transaction.selected"
             (click)="toggleSelection($event, transaction)">
-            <td><a class="unbroken" [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.occurred_on|date:'longDate' }}</a></td>
             <td>
-                <div class="unbroken" *ngIf="transaction.accountId > 0">
-                    {{ transaction.account!.name }} withdrawl
+                <a class="unbroken" [routerLink]="['/transactions', transaction.uid, 'form']">{{ transaction.uid }}</a>
+            </td>
+            <td class="align-right unbroken">
+                {{ transaction.amount|money }}
+            </td>
+            <td class="unbroken">
+                {{ transaction.occurred_on|date:'longDate' }}
+            </td>
+            <td>
+                <div class="unbroken" *ngIf="transaction.account">
+                    {{ transaction.account.name }}
                 </div>
-                <div class="unbroken" *ngIf="transaction.destinationId > 0">
-                    {{ transaction.destination!.name }} deposit
+                <div *ngIf="transaction.isTransfer">↓</div>
+                <div class="unbroken" *ngIf="transaction.destination">
+                    {{ transaction.destination.name }}
                 </div>
             </td>
+            <td class="unbroken">{{ transaction.transactionType }}</td>
             <td>
                 {{ transaction.payee }}
                 <p *ngIf="transaction.note">
                     <em>{{ transaction.note }}</em>
                 </p>
-
                 <ul class="tag-list" *ngIf="transaction.tags">
                     <li *ngFor="let tag of transaction.tags; first as isFirst">
                         <svg *ngIf="isFirst" class="icon"><use xlink:href="#icon-tag"></use></svg>
                         <a [routerLink]="['/transactions']" [queryParams]="{q: 'tags:' + tag}">{{ tag }}</a>
                     </li>
                 </ul>
-            </td>
-            <td class="align-right unbroken">
-                {{ transaction.amount|money }}
-                <p *ngIf="transaction.receipt_name">
-                    <a target="_blank" href="/ledger/receipts/{{ transaction.uid }}">{{ transaction.receipt_name }}</a>
-                </p>
+
             </td>
             <td class="align-right" *ngIf="transaction.cleared_on">
                 <div class="minibanner">Cleared</div>

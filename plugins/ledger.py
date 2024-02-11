@@ -374,15 +374,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             'transactions', json_group_array(
                 json_object(
                     'uid', id,
-                    'account', json_object(
-                        'uid', account_id,
-                        'name', account_name,
-                        'closed_on', account_closed_on
-                    ),
-                    'destination', json_object(
-                        'uid', destination_id,
-                        'name', destination_name
-                    ),
+                    'account', IIF(account_id, json_object(
+                            'uid', account_id,
+                            'name', account_name,
+                            'closed_on', account_closed_on
+                            ), NULL),
+                    'destination', IIF(destination_id, json_object(
+                            'uid', destination_id,
+                            'name', destination_name
+                            ), NULL),
                     'occurred_on', datetime(occurred_on),
                     'cleared_on', datetime(cleared_on),
                     'amount', amount,

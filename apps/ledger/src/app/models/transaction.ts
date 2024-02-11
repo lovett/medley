@@ -4,8 +4,8 @@ import { JsonTransaction } from '../types/JsonTransaction';
 
 export class Transaction {
     uid: number = 0;
-    account: Account;
-    destination?: Account;
+    account: Account | null = null;
+    destination: Account | null = null;
     payee: string = '';
     amount: number = 0;
     occurred_on: Date = new Date();
@@ -16,13 +16,13 @@ export class Transaction {
     receipt_name?: string;
     receipt?: File;
 
-    constructor(account: Account) {
-        this.account = account;
+    constructor() {
     }
 
     static clone(transaction: Transaction): Transaction {
-        const t = new Transaction(transaction.account);
+        const t = new Transaction();
         t.uid = transaction.uid;
+        t.account = transaction.account;
         t.destination = transaction.destination;
         t.payee = transaction.payee;
         t.amount = transaction.amount;
@@ -34,9 +34,12 @@ export class Transaction {
     }
 
     static fromJson(json: JsonTransaction): Transaction {
-        const account = Account.fromJson(json.account);
-        const t = new Transaction(account);
+        const t = new Transaction();
         t.uid = json.uid;
+
+        if (json.account) {
+            t.account = Account.fromJson(json.account);
+        }
 
         if (json.destination) {
             t.destination = Account.fromJson(json.destination);
@@ -62,6 +65,22 @@ export class Transaction {
             t.receipt_name = json.receipt_name;
         }
         return t;
+    }
+
+    get transactionType(): string {
+        if (this.account && this.destination) {
+            return 'transfer';
+        }
+
+        if (this.account && !this.destination) {
+            return 'withdrawl';
+        }
+
+        return 'deposit';
+    }
+
+    get isTransfer(): boolean {
+        return Boolean(this.account) && Boolean(this.destination);
     }
 
     get accountId(): number {
