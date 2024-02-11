@@ -24,10 +24,15 @@ export class LedgerService {
         private http: HttpClient
     ) {}
 
+    clearSelections() {
+        this.selectedTransactions.forEach(t => t.selected = false);
+        this.selectedTransactions = [];
+        this.selectedSubject.next(Infinity);
+    }
+
     transactionSelection(target: Transaction|null) {
         if (target == null) {
-            this.selectedTransactions = [];
-            this.selectedSubject.next(Infinity);
+            this.clearSelections();
             return;
         }
 

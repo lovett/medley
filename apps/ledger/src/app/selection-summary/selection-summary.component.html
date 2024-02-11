@@ -1,4 +1,4 @@
-<span *ngIf="count > 0" [ngPlural]="count">
+<aside *ngIf="count > 0" [ngPlural]="count">
     <ng-template ngPluralCase="=1">
         1 transaction selected
     </ng-template>
@@ -7,4 +7,6 @@
     </ng-template>
     <br/>
     <strong>{{ amount|money }}</strong>
-</span>
+
+    <a href="#" class="close" (click)="clear($event)">×</a>
+</aside>

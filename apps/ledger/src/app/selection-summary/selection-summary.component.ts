@@ -28,4 +28,9 @@ export class SelectionSummaryComponent {
             this.count += 1;
         });
     }
+
+    clear(event: Event) {
+        event.preventDefault();
+        this.ledgerService.clearSelections();
+    }
 }

@@ -1,0 +1,14 @@
+ASIDE {
+    background-color: lemonchiffon;
+    border: 1px solid #E6C700;
+    padding: 1em;
+    position: relative;
+}
+
+ASIDE .close {
+    position: absolute;
+    top: -0.1em;
+    right: 0.25em;
+    font-size: 1.25em;
+    text-decoration: none;
+}

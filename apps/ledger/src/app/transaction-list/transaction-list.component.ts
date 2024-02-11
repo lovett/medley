@@ -82,6 +82,7 @@ export class TransactionListComponent implements OnDestroy {
 
     clearSearch(event: Event) {
         event.preventDefault();
+        this.ledgerService.clearSelections();
         this.searchForm.patchValue({query: ''});
         this.router.navigate([], {
             relativeTo: this.route,

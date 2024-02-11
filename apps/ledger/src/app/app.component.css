@@ -6,7 +6,7 @@
     margin: auto;
 }
 
-#shell > NAV UL {
+#shell NAV UL {
     position: sticky;
     top: 1em;
     list-style-type: none;
@@ -14,7 +14,7 @@
     padding-left: 0;
 }
 
-#shell > NAV LI {
+#shell NAV LI {
     margin-bottom: 1em;
 }
 
