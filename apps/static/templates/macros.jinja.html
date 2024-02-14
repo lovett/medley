@@ -180,6 +180,10 @@ in the argument list are returned.  #}
     </svg>
 {% endmacro %}
 
+{%- macro js_module(static_path) -%}
+    <script src="/static/{{ static_path }}" type="module"></script>
+{%- endmacro %}
+
 {%- macro asset(static_path, cache_bust=True) -%}
     {%- if cache_bust -%}
         {%- set url_path = "/static/{}".format(static_path)|cache_bust -%}

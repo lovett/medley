@@ -4,8 +4,8 @@
 {% endblock %}
 
 {% block scripts %}
-    {{ macros.asset("js/ledger/polyfills.js") }}
-    {{ macros.asset("js/ledger/main.js") }}
+    {{ macros.js_module("js/ledger/polyfills.js") }}
+    {{ macros.js_module("js/ledger/main.js") }}
 {% endblock %}
 
 {% block page_body %}
