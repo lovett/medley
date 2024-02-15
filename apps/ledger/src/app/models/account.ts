@@ -10,6 +10,8 @@ export class Account {
     balance: number = 0;
     total_pending: number = 0;
     last_active?: Date;
+    logo_name?: string;
+    logo?: File;
 
     constructor() {
     }
@@ -25,6 +27,7 @@ export class Account {
         a.balance = account.balance;
         a.total_pending = account.total_pending;
         a.last_active = account.last_active;
+        a.logo = account.logo;
         return a;
     }
 
@@ -55,6 +58,10 @@ export class Account {
             a.note = json.note;
         }
 
+        if (json.logo_name) {
+            a.logo_name = json.logo_name;
+        }
+
         return a;
     }
 
@@ -73,6 +80,10 @@ export class Account {
 
         if (this.note) {
             formData.set('note', this.note);
+        }
+
+        if (this.logo) {
+            formData.set('logo', this.logo);
         }
 
         return formData;

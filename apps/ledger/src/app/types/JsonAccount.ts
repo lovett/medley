@@ -8,4 +8,6 @@ export type JsonAccount = {
     balance: number,
     total_pending: number,
     last_active?: string,
+    logo_name?: string,
+    logo?: File,
 }

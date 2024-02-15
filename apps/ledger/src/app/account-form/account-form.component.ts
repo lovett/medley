@@ -50,10 +50,11 @@ function uniqueName(id: number, ledgerService: LedgerService): AsyncValidatorFn 
 })
 export class AccountFormComponent implements OnInit {
     accountForm!: FormGroup;
-    account: Account | undefined;
+    account: Account | null;
     errorMessage = '';
     datesExpanded = false;
     singularResourceName: string;
+    logo: File | null;
 
     constructor(
         private router: Router,
@@ -62,6 +63,8 @@ export class AccountFormComponent implements OnInit {
         private ledgerService: LedgerService
     ) {
         this.singularResourceName = 'account';
+        this.logo = null;
+        this.account = null;
     }
 
     ngOnInit(): void {
@@ -109,6 +112,10 @@ export class AccountFormComponent implements OnInit {
         a.closed_on = this.closedOn.value || null;
         a.note = this.note.value;
         a.url = this.url.value;
+
+        if (this.logo) {
+            a.logo = this.logo;
+        }
 
         this.ledgerService.saveAccount(a).subscribe({
             next: () => this.saved(),
@@ -174,5 +181,13 @@ export class AccountFormComponent implements OnInit {
             () => this.deleted(),
             (err) => this.errorMessage = err,
         );
+    }
+
+    logoChange(event: Event) {
+        const files = (event.target as HTMLInputElement).files!;
+        if (files.length > 0) {
+            this.logo = files[0];
+            this.accountForm.markAsDirty();
+        }
     }
 }

@@ -39,7 +39,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             opened_on TEXT,
             closed_on TEXT,
             url TEXT DEFAULT NULL,
-            note TEXT
+            note TEXT,
+            logo BLOB DEFAULT NULL,
+            logo_name TEXT DEFAULT NULL,
+            logo_mime TEXT DEFAULT NULL
         );
 
         CREATE UNIQUE INDEX IF NOT EXISTS index_unique_name
@@ -157,6 +160,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("ledger:transaction", self.find_transaction)
         self.bus.subscribe("ledger:json:transactions", self.transactions_json)
         self.bus.subscribe("ledger:receipt", self.receipt)
+        self.bus.subscribe("ledger:logo", self.logo)
         self.bus.subscribe(
             "ledger:json:transactions:single",
             self.transaction_json
@@ -242,7 +246,8 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                         'note', note,
                         'balance', cleared_deposits - cleared_withdrawls,
                         'total_pending', pending_deposits - pending_withdrawls,
-                        'last_active', last_active
+                        'last_active', last_active,
+                        'logo_name', logo_name
                        )
             )
         ) AS json_result
@@ -475,7 +480,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             opened: Optional[date],
             closed: Optional[date],
             url: str,
-            note: str
+            note: str,
+            logo: Optional[bytes],
+            logo_name = Optional[str],
+            logo_mime = Optional[str]
     ) -> int:
         """Insert or update an account."""
 
@@ -485,16 +493,20 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
 
         insert_id = self._insert(
             """INSERT INTO accounts (
-                id, name, url, opened_on, closed_on, note
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                id, name, url, opened_on, closed_on, note,
+                logo, logo_name, logo_mime
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT (id) DO UPDATE SET
             name=excluded.name,
             url=excluded.url,
             opened_on=excluded.opened_on,
             closed_on=excluded.closed_on,
-            note=excluded.note
+            note=excluded.note,
+            logo=IFNULL(?, logo), logo_name=IFNULL(?, logo_name), logo_mime=IFNULL(?, logo_mime)
             """,
-            (upsert_id, name, url, opened, closed, note)
+            (upsert_id, name, url, opened, closed, note,
+             logo, logo_name, logo_mime,
+             logo, logo_name, logo_mime,)
         )
 
         if account_id == 0:
@@ -640,17 +652,32 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
                 (row["newtags"], row["id"])
             )
 
-    def receipt(self, transaction_id: int) -> Tuple[str, str, bytes]:
-        """Retrieve a file attached to a recipe."""
+    def receipt(self, record_id: int) -> Tuple[str, str, bytes]:
+        """Retrieve a file attached to a transaction."""
 
         row = self._selectOne(
             """SELECT receipt_name, receipt_mime, receipt
             FROM transactions
             WHERE id=?""",
-            (transaction_id,)
+            (record_id,)
         )
 
         if row:
             return (row["receipt_name"], row["receipt_mime"], row["receipt"])
+
+        return ("", "", b"")
+
+    def logo(self, record_id: int) -> Tuple[str, str, bytes]:
+        """Retrieve a file attached to an account."""
+
+        row = self._selectOne(
+            """SELECT logo_name, logo_mime, logo
+            FROM accounts
+            WHERE id=?""",
+            (record_id,)
+        )
+
+        if row:
+            return (row["logo_name"], row["logo_mime"], row["logo"])
 
         return ("", "", b"")

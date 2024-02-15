@@ -26,14 +26,25 @@ HEADER {
     background-color: #ccc;
 }
 
+.card.inactive IMG {
+    opacity: 0.25;
+}
+
 .card .title {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 1em;
     background-color: #e5e5e5;
     border-radius: 10px 10px 0 0;
     line-height: 1.5;
     font-weight: bold;
+}
+
+.card IMG {
+    display: block;
+    margin: 1em auto 0 auto;
+    max-height: 3em;
 }
 
 .card ul {

@@ -72,6 +72,17 @@
         ></textarea>
     </div>
 
+    <div class="field">
+        <label for="transactionReceipt">Logo</label>
+
+        <p *ngIf="account && account.logo">
+            Currently XXX
+        </p>
+
+        <input type="file" (change)="logoChange($event)" />
+    </div>
+
+
     <footer>
         <button type="submit" [disabled]="!accountForm.valid || !accountForm.dirty">Save</button>
     </footer>

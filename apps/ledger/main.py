@@ -24,6 +24,7 @@ class Resource(str, Enum):
     NONE = ""
     TAGS = "tags"
     RECEIPTS = "receipts"
+    LOGO = "logo"
     TRANSACTIONS = "transactions"
 
 class Controller:
@@ -64,7 +65,10 @@ class Controller:
             raise cherrypy.HTTPError(400)
 
         if resource == Resource.RECEIPTS:
-            return self.receipt(record_id)
+            return self.asset(Resource.RECEIPTS, record_id)
+
+        if resource == Resource.LOGO:
+            return self.asset(Resource.LOGO, record_id)
 
         return cherrypy.engine.publish(
             "jinja:render",
@@ -223,6 +227,17 @@ class Controller:
         note = kwargs.get("note")
         date_format = "%Y-%m-%d"
 
+        logo: Attachment = kwargs.get("logo")
+
+        logo_bytes = None
+        logo_name = None
+        logo_mime = None
+
+        if logo:
+            logo_bytes = logo.file.read()
+            logo_name = logo.filename.lower()
+            logo_mime = logo.content_type.value
+
         opened = None
         if opened_on:
             try:
@@ -245,6 +260,9 @@ class Controller:
             closed=closed,
             url=url,
             note=note,
+            logo=logo_bytes,
+            logo_name=logo_name,
+            logo_mime=logo_mime
         ).pop()
 
         if account_id == 0:
@@ -300,7 +318,6 @@ class Controller:
             tags = []
         if not type(tags) is list:
             tags = [tags]
-        print(tags)
 
         receipt: Attachment = kwargs.get("receipt")
         date_format = "%Y-%m-%d"
@@ -377,12 +394,19 @@ class Controller:
         )
 
     @staticmethod
-    def receipt(record_id: int) -> bytes:
+    def asset(resource: Resource, record_id: int) -> bytes:
         """A previously-uploaded file."""
 
+        if resource == Resource.RECEIPTS:
+            topic = "ledger:receipt"
+        if resource == Resource.LOGO:
+            topic = "ledger:logo"
+        if not topic:
+            raise cherrypy.HTTPError(404)
+
         (_, mime_type, content) = cherrypy.engine.publish(
-            "ledger:receipt",
-            transaction_id=record_id,
+            topic,
+            record_id=record_id,
         ).pop()
 
         if not content:
