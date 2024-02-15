@@ -120,7 +120,7 @@
         <label for="transactionReceipt">Receipt</label>
 
         <p *ngIf="transaction && transaction.receipt_name">
-            Currently {{ transaction.receipt_name }}
+            Currently <a target="_blank" href="/ledger/receipts/{{ transaction.uid }}">{{ transaction.receipt_name }}</a>
         </p>
 
         <input type="file" (change)="receiptChange($event)" />

@@ -64,6 +64,13 @@
                 <p *ngIf="transaction.note">
                     <em>{{ transaction.note }}</em>
                 </p>
+
+                <p *ngIf="transaction.receipt_name">
+                    <a target="_blank" href="/ledger/receipts/{{ transaction.uid }}">
+                        <svg class="icon"><use xlink:href="#icon-file"></use></svg> receipt
+                    </a>
+                </p>
+
                 <ul class="tag-list" *ngIf="transaction.tags">
                     <li *ngFor="let tag of transaction.tags; first as isFirst">
                         <svg *ngIf="isFirst" class="icon"><use xlink:href="#icon-tag"></use></svg>

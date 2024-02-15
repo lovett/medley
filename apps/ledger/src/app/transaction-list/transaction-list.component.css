@@ -18,7 +18,7 @@ TABLE {
     margin-bottom: 0;
 }
 
-gfTR, TD {
+TR, TD {
     border-left: 0;
     border-right: 0;
 }
