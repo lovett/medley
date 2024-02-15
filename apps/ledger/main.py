@@ -296,8 +296,11 @@ class Controller:
         note = kwargs.get("note")
 
         tags: List | str | None  = kwargs.get("tags")
+        if not tags:
+            tags = []
         if not type(tags) is list:
             tags = [tags]
+        print(tags)
 
         receipt: Attachment = kwargs.get("receipt")
         date_format = "%Y-%m-%d"

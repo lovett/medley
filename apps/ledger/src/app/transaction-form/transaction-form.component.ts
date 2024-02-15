@@ -5,6 +5,7 @@ import { formatDate } from '@angular/common'
 import { Transaction } from '../models/transaction';
 import { TransactionList } from '../types/TransactionList';
 import { Account } from '../models/account';
+import { Tag } from '../models/tag';
 import { LedgerService } from '../ledger.service';
 import { switchMap, debounceTime, filter } from 'rxjs';
 import { MoneyPipe } from '../money.pipe';
@@ -184,7 +185,7 @@ export class TransactionFormComponent implements OnInit {
             this.tagFieldPush('', false);
         }
 
-        this.tags.patchValue(transaction.tags);
+        this.tags.patchValue(transaction.tags.map((tag: Tag) => tag.name));
 
         if (transaction.account?.closed_on) {
             this.account.disable();
@@ -236,7 +237,10 @@ export class TransactionFormComponent implements OnInit {
         t.occurred_on = this.occurredOn.value;
         t.cleared_on = this.clearedOn.value || null;
         t.note = this.note.value;
-        t.tags = this.tags.value;
+        console.log(this.tags.value);
+        t.tags = this.tags.value
+            .filter((tag: string) => tag && tag.length > 0)
+            .map((tag: string) => Tag.fromString(tag));
 
         if (this.receipt) {
             t.receipt = this.receipt;
