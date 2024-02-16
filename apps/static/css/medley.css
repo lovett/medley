@@ -262,6 +262,10 @@ TABLE TH {
     vertical-align: top;
 }
 
+TABLE TH .normal {
+    font-weight: normal;
+}
+
 TABLE TD {
     padding: .75em;
     background-color: var(--white);
