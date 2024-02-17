@@ -36,7 +36,6 @@
           - python3
           - python3-cryptography
           - python3-evdev
-          - httpd
           - g++
           - python3-devel
         state: present
@@ -46,13 +45,6 @@
         src: "../medley"
         dest: "{{ medley_root }}/medley"
         mode: 0700
-
-    - name: Install Apache vhost
-      become: true
-      template:
-        src: "templates/medley-vhost.conf.j2"
-        dest: "/etc/httpd/conf.d/medley.conf"
-      notify: Restart Apache
 
     - name: Install primary systemd service
       template:
@@ -109,10 +101,3 @@
       until: this.status == 200
       retries: 6
       delay: 10
-
-  handlers:
-    - name: Restart Apache
-      become: true
-      service:
-        name: httpd
-        state: restarted
