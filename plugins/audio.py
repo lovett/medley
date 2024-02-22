@@ -31,9 +31,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         audio_player = cherrypy.engine.publish(
             "registry:first:value",
             "config:audio_player",
-            memorize=True,
-            default="/usr/bin/aplay -q"
+            memorize=True
         ).pop()
+
+        if not audio_player:
+            return
 
         subprocess.run(
             audio_player.split(" "),
