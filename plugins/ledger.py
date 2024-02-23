@@ -263,19 +263,11 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         """Count of rows from the accounts table."""
         return int(self._selectFirst("SELECT count(*) FROM accounts"))
 
-    def count_transactions(
-            self,
-            account: int = 0,
-            q: str = ""
-    ) -> int:
+    def count_transactions(self, q: str = "") -> int:
         """Count of rows from the transactions table."""
 
         where_sql = "WHERE 1=1"
         query_data: QueryData = ()
-
-        if account > 0:
-            where_sql += " AND (account_id=? OR destination_id=?)"
-            query_data += (account, account)
 
         if q:
             where_sql += " AND (transactions_fts MATCH ?)"
@@ -300,10 +292,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         q = re.sub(r"(\d{4,})", "\\1*", q)
         q = q.replace("date:", "occurred_on:")
         q = q.replace("tag:", "tags:")
+        q = q.replace("account:", "account_id:")
+        q = q.replace("destination:", "destination_id:")
 
-        account = int(kwargs.get("account", 0))
-
-        count = self.count_transactions(account, q)
+        count = self.count_transactions(q)
 
         if count == 0:
             return '{"count": 0, "transactions": []}'
@@ -311,10 +303,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         from_sql = "FROM transactions t"
         where_sql = "WHERE 1=1"
         placeholders: Tuple[int | str, ...] = ()
-
-        if account > 0:
-            where_sql += " AND (a.id=? OR a2.id=?)"
-            placeholders += (account, account)
 
         if q:
             from_sql = """

@@ -36,7 +36,7 @@
 
             <footer>
                 <p>
-                    <a [routerLink]="['/transactions']" [queryParams]="{account: account.uid}">
+                    <a [routerLink]="['/transactions']" [queryParams]="{q: 'account:' + account.uid}">
                         Transactions
                     </a>
                 </p>

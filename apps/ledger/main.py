@@ -102,7 +102,6 @@ class Controller:
         tag = kwargs.get("tag", "").strip()
         limit = int(kwargs.get("limit", 50))
         offset = int(kwargs.get("offset", 0))
-        account = int(kwargs.get("account", 0))
 
         if record_id < 0:
             return cherrypy.engine.publish(
@@ -111,7 +110,6 @@ class Controller:
                 tag=tag,
                 limit=limit,
                 offset=offset,
-                account=account
             ).pop().encode()
 
         if record_id == 0:
