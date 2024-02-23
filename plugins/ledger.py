@@ -48,42 +48,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         CREATE UNIQUE INDEX IF NOT EXISTS index_unique_name
             ON accounts(name);
 
-        CREATE VIRTUAL TABLE IF NOT EXISTS accounts_fts USING fts5 (
-            name, opened_on, closed_on, note,
-            content='accounts',
-            content_rowid='id',
-            tokenize=trigram
-        );
-
-        CREATE TRIGGER IF NOT EXISTS accounts_after_insert
-        AFTER INSERT ON accounts
-        BEGIN
-            INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
-            VALUES (new.rowid, new.name, new.opened_on, new.closed_on,
-                new.note);
-        END;
-
-        CREATE TRIGGER IF NOT EXISTS accounts_after_delete
-        AFTER DELETE ON accounts
-        BEGIN
-          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on,
-              closed_on, note)
-          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on,
-              old.note);
-        END;
-
-        CREATE TRIGGER IF NOT EXISTS accounts_after_update
-        AFTER UPDATE ON accounts
-        BEGIN
-          INSERT INTO accounts_fts(accounts_fts, rowid, name, opened_on,
-              closed_on, note)
-          VALUES ('delete', old.rowid, old.name, old.opened_on, old.closed_on,
-              old.note);
-
-          INSERT INTO accounts_fts(rowid, name, opened_on, closed_on, note)
-          VALUES (new.rowid, new.name, new.opened_on, new.closed_on, new.note);
-        END;
-
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY,
             account_id INTEGER,
