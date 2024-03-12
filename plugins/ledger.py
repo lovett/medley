@@ -11,7 +11,8 @@ from typing import Tuple
 from typing import cast
 import cherrypy
 from plugins import mixins
-from apptypes import QueryData
+
+QueryData = Tuple[int | str, ...]
 
 SearchResult = Tuple[
     List[sqlite3.Row], int
