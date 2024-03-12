@@ -301,54 +301,6 @@ curl -i -d "key=test" -d "value=text" "$host/registry"
 curl -i -d "key=test UPDATED" -d "value=test UPDATED"  "$host/registry/1728"
 #+END_SRC
 
-* Speak
-** GET
-Display the current mute status.
-
-#+NAME: speak_get
-#+BEGIN_SRC sh :wrap export http
-curl -i "$host/speak"
-#+END_SRC
-
-** POST
-Submit text to be spoken by the server.
-
-#+NAME: speak_post
-#+BEGIN_SRC sh :wrap EXPORT http
-curl -i -d "statement=hello world" "$host/speak"
-#+END_SRC
-
-#+NAME: speak_post_confirmation
-#+BEGIN_SRC sh :wrap EXPORT http
-curl -i -d "statement=hello world" -d "confirm=1" "$host/speak"
-#+END_SRC
-
-#+NAME: speak_post_toggle_mute
-#+BEGIN_SRC sh :wrap EXPORT http
-curl -i -d "statement=hello world" -d "action=toggle" "$host/speak"
-#+END_SRC
-
-#+NAME: speak_post_notification_input
-#+BEGIN_EXAMPLE
-{
-  "deliveryStyle": "normal",
-  "body": "",
-  "localId": "test",
-  "title": "📦 test 📦",
-  "group": "",
-  "source": "",
-  "url": "http://example.com",
-  "publicId": "abcde123",
-  "badge": ""
-}
-#+END_EXAMPLE
-
-#+NAME: speak_post_notification
-#+HEADER: :stdin speak_post_notification_input
-#+BEGIN_SRC sh :wrap EXPORT json
-curl -i --data-binary @-  -H "Accept: $json" -H "Content-Type: $json" "$host/speak/notification"
-#+END_SRC
-
 * Weather
 ** POST
 
