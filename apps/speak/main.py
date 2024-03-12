@@ -93,7 +93,7 @@ class Controller:
         """Transform POST parameters to speech-ready statement."""
 
         action = kwargs.get("action", "")
-        confirm = bool(kwargs.get("bool", False))
+        confirm = bool(kwargs.get("confirm", False))
         noadjust = bool(kwargs.get("noadjust", False))
         statement = kwargs.get("statement", "").strip()
 
@@ -121,6 +121,7 @@ class Controller:
             raise cherrypy.HTTPError(400, "Missing statement")
 
         if confirm:
+            print("playing confirmation")
             cherrypy.engine.publish(
                 "audio:play:asset",
                 "attention"
