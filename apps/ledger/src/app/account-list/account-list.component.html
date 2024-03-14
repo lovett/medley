@@ -16,7 +16,7 @@
                 </a>
             </div>
 
-            <img *ngIf="account.logo_name" src="/ledger/logo/{{ account.uid}}" />
+            <img *ngIf="account.logo_name" src="/ledger/logo/{{ account.uid}}" alt="" />
 
             <ul>
                 <li *ngIf="account.closed_on">Closed {{ account.closed_on|date:'longDate' }}</li>
