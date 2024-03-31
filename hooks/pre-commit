@@ -45,7 +45,7 @@ for STAGED_FILE in $(git diff --cached --name-only --diff-filter=dcr); do
 
         if [[ "$LINTABLE" == "yes" ]]; then
             echo "Linting $STAGED_FILE with ruff..."
-            ./venv/bin/ruff "$WORK_DIR/$STAGED_FILE"
+            ./venv/bin/ruff check "$WORK_DIR/$STAGED_FILE"
 
             ./venv/bin/python3 medley.py --lintpass "$STAGED_FILE"
         fi
