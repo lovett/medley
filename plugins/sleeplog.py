@@ -34,7 +34,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             start_utc TEXT,
             end_utc TEXT DEFAULT NULL,
             duration_seconds INT,
-            notes TEXT DEFAULT NULL
+            notes TEXT DEFAULT NULL,
+            hours GENERATED ALWAYS AS (
+                COALESCE(duration_seconds / 3600.0, 0)
+            )
         );
 
         CREATE VIRTUAL TABLE IF NOT EXISTS sleeplog_fts USING fts5 (
@@ -203,7 +206,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         UNION ALL SELECT days_ago+1, date(dt, '-1 day')
         FROM calendar LIMIT ?)
         SELECT days_ago, dt as 'date [date]',
-        SUM(COALESCE(duration_seconds / 3600.0, 0)) as hours
+        SUM(hours) as hours
         FROM calendar
         LEFT JOIN sleeplog ON date(start_utc)=dt
         AND end_utc IS NOT NULL
