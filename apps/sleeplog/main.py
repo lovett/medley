@@ -189,7 +189,7 @@ class Controller:
             history_chart = cherrypy.engine.publish(
                 "plotter:sleep",
                 (history,),
-                data_key="hours",
+                data_keys=("hours", "avg7"),
                 label_key="date",
                 label_date_format="%b %-d",
                 ideal_duration=config["ideal_duration"],

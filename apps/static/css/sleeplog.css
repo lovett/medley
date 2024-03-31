@@ -23,8 +23,13 @@
     stroke-linejoin: round;
 }
 
+.sleeplog polyline:nth-of-type(2) {
+    stroke: purple;
+}
+
+
 .sleeplog .ideal {
-    fill: green;
+    fill: mediumseagreen;
     opacity: 0.5;
 }
 
@@ -53,6 +58,20 @@ td.negative {
 
 td.positive {
     background-color: palegreen;
+}
+
+#history-legend {
+    display: flex;
+    flex-flow: row wrap;
+    padding-bottom: 2em;
+}
+
+#history-legend div:first-letter {
+   font-size: 1.25em;
+}
+
+#history-legend div:nth-of-type(2):first-letter {
+    color: purple;
 }
 
 #stats {

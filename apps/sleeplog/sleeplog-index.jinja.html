@@ -56,6 +56,10 @@
         {% if history_chart %}
             <section>
                 <h1>Sleep Hours Per Day</h1>
+                <div id="history-legend">
+                    <div>■ 1-day total</div>
+                    <div>■ 7-day average</div>
+                </div>
                 {{ history_chart|safe }}
             </section>
         {% endif %}

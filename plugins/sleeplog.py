@@ -204,16 +204,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         sql = """WITH RECURSIVE calendar(days_ago, dt) AS
         (SELECT 1, date('now', '-1 day')
         UNION ALL SELECT days_ago+1, date(dt, '-1 day')
-        FROM calendar LIMIT ?)
+         FROM calendar LIMIT ? + 7)
         SELECT days_ago, dt as 'date [date]',
-        SUM(hours) as hours
+        SUM(hours) as hours,
+        AVG(hours) OVER (
+            ORDER BY dt ROWS BETWEEN 7 PRECEDING AND CURRENT ROW
+        ) AS avg7
         FROM calendar
         LEFT JOIN sleeplog ON date(start_utc)=dt
         AND end_utc IS NOT NULL
         GROUP BY dt
-        ORDER BY dt"""
+        ORDER BY dt LIMIT ? OFFSET 7"""
 
-        placeholders = (days,)
+        placeholders = (days, days)
 
         return self._select(sql, placeholders)
 

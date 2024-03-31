@@ -26,14 +26,14 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
     def sleep_plot(self,
                    datasets: Tuple[Any],
                    *,
-                   data_key: str,
+                   data_keys: Tuple[str],
                    label_key: str,
                    label_date_format: str = "",
                    ideal_duration: Union[Tuple[()], Tuple[int, int]] = ()
                    ) -> str:
         """A graph with datasets drawn as lines."""
-        data_max = ceil(max([x[data_key] for x in datasets[0]]))
-        data_min = floor(min([x[data_key] for x in datasets[0]]))
+        data_max = ceil(max([x[data_keys[0]] for x in datasets[0]]))
+        data_min = floor(min([x[data_keys[0]] for x in datasets[0]]))
         data_span = data_max - data_min
 
         if data_span == 0:
@@ -109,17 +109,18 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         polylines = ""
         for dataset in datasets:
-            points = []
-            for i in range(x_tick_count):
-                item = dataset[i]
-                offset_from_min = abs(item[data_key] - data_min)
-                x = min_x + (i * x_step)
-                y = max_y - (offset_from_min / data_span) * (max_y - min_y)
-                points.append(f"{x},{y}")
+            for data_key in data_keys:
+              points = []
+              for i in range(x_tick_count):
+                  item = dataset[i]
+                  offset_from_min = abs(item[data_key] - data_min)
+                  x = min_x + (i * x_step)
+                  y = max_y - (offset_from_min / data_span) * (max_y - min_y)
+                  points.append(f"{x},{y}")
 
-            polylines += f"""<polyline class="dataset"
-                                     points="{" ".join(points)}"
-                            />"""
+              polylines += f"""<polyline class="dataset"
+                                       points="{" ".join(points)}"
+                              />"""
 
         ideal_rect = ""
         if ideal_duration:
