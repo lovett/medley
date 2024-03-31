@@ -48,6 +48,21 @@ class TestUrlResource(unittest.TestCase):
         url = Url(address)
         self.assertEqual(url.domain, "")
 
+    def test_pesudo_protocol_removal(self) -> None:
+        """Non-http protocols are removed."""
+
+        candidates = (
+            "view-source:https://example.com",
+            "view-source:http://example.com",
+            "newtab:https://example.com",
+            "madeup:http://example.com",
+
+        )
+
+        for candidate in candidates:
+            url = Url(candidate)
+            self.assertEqual(url.domain, "example.com")
+
     def test_querystring_create(self) -> None:
         """A querystring can be created."""
 

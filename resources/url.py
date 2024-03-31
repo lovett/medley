@@ -1,5 +1,6 @@
 """Data class for URLs."""
 
+import re
 from dataclasses import dataclass, field
 from urllib.parse import urlparse, quote, urlencode, parse_qs
 from typing import Dict, Any, Optional
@@ -30,6 +31,7 @@ class Url():
 
     def __post_init__(self) -> None:
         self.address = self.address.strip()
+        self.address = re.sub(r"^.*http(s?):", "http\\1:", self.address)
 
         if self.query:
             nonempty_query = {

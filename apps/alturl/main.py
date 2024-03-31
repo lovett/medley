@@ -18,7 +18,7 @@ class Controller:
     @cherrypy.tools.provides(formats=("html",))
     @cherrypy.tools.etag()
     def GET(self, *args: str, **kwargs: str) -> bytes:
-        """Topmost dispatcher for GET requests."""
+        """Top-most dispatcher for GET requests."""
 
         if not args:
             return self.render_index()
