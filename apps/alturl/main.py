@@ -67,11 +67,25 @@ class Controller:
                 **view_vars
             ).pop()
 
-        url.content_type = cherrypy.engine.publish(
+        content_type, final_url = cherrypy.engine.publish(
             "urlfetch:header",
             url.address,
             "content-type"
         ).pop()
+
+        if url.address != final_url:
+            url = Url(final_url)
+            if view_vars["bookmark_id"]:
+                cherrypy.engine.publish(
+                    "registry:update",
+                    view_vars["bookmark_id"],
+                    "alturl:bookmark",
+                    url.address
+                ).pop()
+
+            raise cherrypy.HTTPRedirect(url.alt)
+
+        url.content_type = content_type
 
         if "xml" in url.content_type:
             try:

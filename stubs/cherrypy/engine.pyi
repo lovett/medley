@@ -1292,7 +1292,7 @@ def publish(
         channel: Literal["urlfetch:header"],
         url: str,
         header: str,
-) -> List[str]: ...
+) -> List[Tuple[str, str]]: ...
 
 
 @overload

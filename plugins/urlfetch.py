@@ -85,7 +85,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         return True
 
-    def get_header(self, url: str, header: str) -> str:
+    def get_header(self, url: str, header: str) -> Tuple[str, str]:
         """Extract a value from a HEAD request."""
 
         cache_key = f"header:{url}:{header}"
@@ -97,7 +97,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         ).pop() or ""
 
         if cached_value:
-            return cached_value
+            return (cached_value, url)
 
         response, _ = self.get(url, head_request=True, as_object=True)
 
@@ -110,7 +110,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             lifespan_seconds=lifespan_seconds
         )
 
-        return value
+        return (value, response.url)
 
     def get_feed(
             self,
