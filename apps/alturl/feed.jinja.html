@@ -6,19 +6,34 @@
 {% block content %}
     <header id="page-title">
         <h2>{{ feed_title }}</h2>
+
+        <ul>
+            {% if not active_bookmark %}
+                <li>
+                    <a id="remove-bookmark" href="#" data-bookmark-id="{{ bookmark_id }}" {% if bookmark_id == 0 %}hidden{% endif %}>
+                        <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
+                        Remove bookmark
+                    </a>
+                </li>
+
+                <li>
+                    <a id="add-bookmark" href="#" data-url="{{ url.address }}" {% if bookmark_id > 0 %}hidden{% endif %}>
+                        <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
+                        Bookmark
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if feed_link %}
+                <li>
+                    <a href="{{ feed_link.anonymized}}">
+                        <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                        {{ feed_link.domain }}
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
     </header>
-
-    {% if not active_bookmark %}
-        <a id="remove-bookmark" href="#" data-bookmark-id="{{ bookmark_id }}" {% if bookmark_id == 0 %}hidden{% endif %}>
-            <svg class="icon"><use xlink:href="#icon-delete"></use></svg>
-            Remove bookmark
-        </a>
-
-        <a id="add-bookmark" href="#" data-url="{{ url.address }}" {% if bookmark_id > 0 %}hidden{% endif %}>
-            <svg class="icon"><use xlink:href="#icon-new-item"></use></svg>
-            Bookmark
-        </a>
-    {% endif %}
 
     <div id="collection">
         <ul>

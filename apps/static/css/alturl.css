@@ -150,10 +150,6 @@ code {
     margin-bottom: 0;
 }
 
-.unbookmark > * {
-    display: inline-block;
-}
-
 /* Small devices */
 @media (min-width: 576px) {
 }

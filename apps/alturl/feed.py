@@ -63,11 +63,17 @@ def render(url: Url, **kwargs: str) -> bytes:
             "authors": authors,
         })
 
+    feed_dict = feed.get("feed", {})
+
+    if feed_dict.get("link"):
+        feed_link = Url(feed_dict.get("link"))
+
     return cherrypy.engine.publish(
         "jinja:render",
         "apps/alturl/feed.jinja.html",
         stories=stories,
-        feed_title=feed.get("feed", {}).get("title"),
+        feed_title=feed_dict.get("title"),
+        feed_link=feed_link,
         url=url,
         cached_on=cached_on,
         **kwargs

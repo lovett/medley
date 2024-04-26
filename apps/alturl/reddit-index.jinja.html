@@ -6,6 +6,13 @@
 {% block content %}
     <header id="page-title">
         <h2>{{ url.display_domain }}</h2>
+
+        <ul>
+            <li><a href="{{ url.anonymized }}">
+                <svg class="icon"><use xlink:href="#icon-globe"></use></svg>
+                original</a>
+            </li>
+        </ul>
     </header>
 
     <header id="app-nav">
