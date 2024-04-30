@@ -220,7 +220,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         hourly_tomorrow = hourly[end_hour_index:end_hour_index+24]
         result["hourly_tomorrow"] = hourly_tomorrow[6:21]
         result["today"] = daily[0]
-        result["upcoming"] = daily[1:]
+        result["upcoming"] = daily[2:]
 
         result["currently"]["weather_groups"] = [
             item.get("main").lower()

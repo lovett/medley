@@ -237,7 +237,7 @@
                             <tr>
                                 <th>
                                     {{ day.dt|date(local=True)|dateformat("%A") }}<br/>
-                                    <span class="normal">{{ day.dt|date(local=True)|dateformat("%b %d") }}</span><br/>
+                                    <span class="normal">{{ day.dt|date(local=True)|dateformat("%b %e") }}</span><br/>
                                 </th>
                                 <td nowrap>
                                     {{ day.temp.min|round|int }}° F -
