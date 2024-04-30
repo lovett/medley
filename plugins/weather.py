@@ -19,10 +19,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def setup() -> None:
-        """Start a recurring timer to prefetch weather forecasts.
+        """Start a recurring timer to prefetch forecasts.
 
-        This is the one-time call that starts the timer. Further calls
-        will occur recursively from prefetch().
+        This is called once at startup. Further calls will happen
+        recursively in prefetch().
 
         The 5-second delay provides some post-server-start breathing
         room but is otherwise not important."""
@@ -47,7 +47,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def get_config(latitude: str = "", longitude: str = "") -> Config:
-        """Load the application configuration."""
+        """Load application configuration."""
 
         config: Config = cherrypy.engine.publish(
             "registry:search:dict",
@@ -81,12 +81,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         return config
 
     def prefetch(self) -> None:
-        """Request forecasts from OpenWeather on a recurring basis.
+        """Request forecasts on a recurring basis.
 
-        This provides a caching benefit and also provides a convenient
-        place for sending notifications about alerts.
-
-        """
+        This approach provides a caching benefit as well as a
+        convenient place to sending notifications about alerts."""
 
         wait_interval_seconds = 3600
 
@@ -155,8 +153,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
         )
 
     def get_forecast(self, config: Config) -> Forecast:
-
-        """Request current weather data from OpenWeather."""
+        """Request current and upcoming weather details."""
 
         latitude = config.get("latitude")
         longitude = config.get("longitude")
@@ -202,7 +199,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
     @staticmethod
     def shape_forecast(forecast: Forecast) -> Forecast:
-        """Reduce an API response object to wanted values"""
+        """Transform an API response to wanted values"""
 
         result: Forecast = defaultdict()
         result["unavailable"] = False
