@@ -2,8 +2,8 @@
 Description=Timer for Medley database maintenance
 
 [Timer]
-# First Sunday of the month at 7:45 AM
-OnCalendar=Sunday *-*-1..7 07:45:00
+OnBootSec=15min
+OnUnitActiveSec=1d
 
 # Skip missed runs
 Persistent=false
