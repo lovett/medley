@@ -10,6 +10,7 @@ Environment=MEDLEY_database_dir={{ medley_root }}/db
 WorkingDirectory={{ medley_root }}
 ExecStart={{ medley_root }}/medley
 TimeoutStartSec=180
+Restart=on-failure
 
 [Install]
 WantedBy=default.target
