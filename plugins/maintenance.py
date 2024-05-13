@@ -1,10 +1,6 @@
 """Perform maintenance tasks."""
 
 import gc
-import glob
-import os
-import os.path
-import time
 import cherrypy
 from plugins import mixins
 from plugins import decorators
@@ -56,38 +52,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("capture:prune")
         cherrypy.engine.publish("metrics:prune")
         cherrypy.engine.publish("recipes:prune")
-
-        cherrypy.engine.publish("bookmarks:repair")
-        cherrypy.engine.publish("logindex:repair")
-
-        file_paths = glob.glob(self._path("*.sqlite"), recursive=False)
-
-        for file_path in file_paths:
-            stat = os.stat(file_path)
-            age = time.time() - stat.st_mtime
-            name = os.path.basename(file_path)
-
-            # Databases that haven't changed in the past 24 hours
-            # don't need maintenance.
-            if age > 86400:
-                cherrypy.engine.publish(
-                    "applog:add",
-                    "maintenance",
-                    f"Skipped {name}"
-                )
-
-                continue
-
-            self.db_path = file_path
-            self._execute("vacuum")
-            self._execute("analyze")
-            self._execute("PRAGMA wal_checkpoint(TRUNCATE)")
-
-            cherrypy.engine.publish(
-                "applog:add",
-                "maintenance",
-                f"Finished {name}"
-            )
 
         cherrypy.engine.publish(
             "applog:add",

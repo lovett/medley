@@ -113,7 +113,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         self.bus.subscribe("bookmarks:recent", self.recent)
         self.bus.subscribe("bookmarks:tags:all", self.all_tags)
         self.bus.subscribe("bookmarks:remove", self.remove)
-        self.bus.subscribe("bookmarks:repair", self.repair)
 
     def find_id(self, uid: int) -> Optional[sqlite3.Row]:
         """Locate a bookmark by ID."""
@@ -491,20 +490,4 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             cherrypy.engine.publish(
                 "cache:clear",
                 "bookmarks:all_tags"
-            )
-
-    @decorators.log_runtime
-    def repair(self) -> None:
-        """Correct wrong or missing values."""
-
-        rows_without_domain = self._select_generator(
-            """SELECT rowid, url as 'url [url]'
-            FROM bookmarks
-            WHERE domain IS NULL"""
-        )
-
-        for row in rows_without_domain:
-            self._execute(
-                "UPDATE bookmarks SET domain=? WHERE rowid=?",
-                (row["url"].domain, row["id"])
             )
