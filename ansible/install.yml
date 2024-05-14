@@ -54,15 +54,15 @@
 
     - name: Install supplemental systemd services
       copy:
-        src: "{{ item }}"
-        dest: ".config/systemd/user/"
+        src: "files/{{ item }}"
+        dest: "~/.config/systemd/user/{{ item }}"
       with_items:
-        - files/medley-geodb.service
-        - files/medley-geodb.timer
-        - files/medley-maintenance.service
-        - files/medley-maintenance.timer
-        - files/medley-bucketpull.service
-        - files/medley-bucketpull.timer
+        - medley-geodb.service
+        - medley-geodb.timer
+        - medley-maintenance.service
+        - medley-maintenance.timer
+        - medley-bucketpull.service
+        - medley-bucketpull.timer
 
     - name: Enable primary systemd service
       systemd:
