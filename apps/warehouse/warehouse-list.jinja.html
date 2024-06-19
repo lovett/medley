@@ -74,7 +74,7 @@
                     <td>
                         {% if file.path.text == added_file %}<div class="new">NEW</div>{% endif %}
                         <svg class="icon"><use xlink:href="#icon-calendar"></use></svg>
-                        {{ file.created|dateformat("%B %d at %-I:%M:%S %p") }}
+                        {{ file.created|dateformat("%Y-%m-%d at %-I:%M %p") }}
                     </td>
                     <td>
                         {{ macros.deleteButton(file.path.address, "tr", "Delete this file") }}
