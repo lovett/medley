@@ -205,7 +205,6 @@ class Controller:
             "notifier:build",
             group="timer",
             title=notification_title,
-            body=message,
             localId=local_id,
             expiresAt=f"{minutes} minutes",
             badge=badge
