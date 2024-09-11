@@ -266,7 +266,7 @@ lint-mypy: dummy
 
 
 lint-ruff: dummy
-	ruff apps parsers plugins testing tools medley.py
+	ruff check apps parsers plugins testing tools medley.py
 
 
 lint-pylint: dummy
