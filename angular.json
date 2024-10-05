@@ -11,18 +11,21 @@
       "prefix": "ledger",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser-esbuild",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "apps/static/js/ledger",
+            "outputPath": {
+              "base": "apps/static/js",
+              "browser": "ledger"
+            },
             "index": false,
-            "main": "apps/ledger/src/main.ts",
             "polyfills": [
               "zone.js"
             ],
             "tsConfig": "apps/ledger/tsconfig.app.json",
             "assets": [],
             "styles": [],
-            "scripts": []
+            "scripts": [],
+            "browser": "apps/ledger/src/main.ts"
           },
           "configurations": {
             "production": {
@@ -41,7 +44,6 @@
               "outputHashing": "none"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
