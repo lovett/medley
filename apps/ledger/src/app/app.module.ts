@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -17,8 +17,7 @@ import { CacheInterceptor } from './interceptors/cache.interceptor';
 import { TagListComponent } from './tag-list/tag-list.component';
 import { SelectionSummaryComponent } from './selection-summary/selection-summary.component';
 
-@NgModule({
-    declarations: [
+@NgModule({ declarations: [
         AppComponent,
         AccountMenuComponent,
         TransactionListComponent,
@@ -32,16 +31,11 @@ import { SelectionSummaryComponent } from './selection-summary/selection-summary
         TagListComponent,
         SelectionSummaryComponent
     ],
-    imports: [
-        BrowserModule,
-        HttpClientModule,
+    bootstrap: [AppComponent], imports: [BrowserModule,
         AppRoutingModule,
-        ReactiveFormsModule
-    ],
-    providers: [
+        ReactiveFormsModule], providers: [
         MoneyPipe,
-        {provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true},
-    ],
-    bootstrap: [AppComponent]
-})
+        { provide: HTTP_INTERCEPTORS, useClass: CacheInterceptor, multi: true },
+        provideHttpClient(withInterceptorsFromDi()),
+    ] })
 export class AppModule { }
