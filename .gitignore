@@ -22,4 +22,4 @@ build
 flycheck_*
 node_modules
 .angular
-apps/static/js/ledger
+apps/static/js/spa

@@ -14,7 +14,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": {
-              "base": "apps/static/js",
+              "base": "apps/static/js/spa",
               "browser": "ledger"
             },
             "index": false,
