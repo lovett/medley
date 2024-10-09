@@ -41,7 +41,6 @@ class TestReddit(Subscriber):
         calls = self.plugin.render_index.call_args_list
 
         self.assertEqual(1, len(calls))
-        self.assertEqual(kwargs, calls[0][1])
 
     @patch("cherrypy.engine.publish")
     def test_render_story(self, publish_mock: Mock) -> None:

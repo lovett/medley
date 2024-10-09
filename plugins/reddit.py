@@ -58,10 +58,15 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
                 **cache_info
             )
 
+        q = None
+        if url.query:
+            q = url.query.get("q")
+
         return self.render_index(
             endpoint,
             **kwargs,
-            **cache_info
+            **cache_info,
+            q=q
         )
 
     def render_index(self, endpoint: Url, **kwargs: str) -> bytes:
@@ -83,13 +88,19 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
             if before := pagination.get("before"):
                 before_url = Url(
                     endpoint.derived_from.alt,
-                    query={"before": before}
+                    query={
+                        "before": before,
+                        "q": kwargs.get("q")
+                    }
                 )
 
             if after := pagination.get("after"):
                 after_url = Url(
                     endpoint.derived_from.alt,
-                    query={"after": after}
+                    query={
+                        "after": after,
+                        "q": kwargs.get("q")
+                    }
                 )
 
         return cherrypy.engine.publish(
