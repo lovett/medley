@@ -10,3 +10,4 @@ pytz==2024.1
 requests==2.32.3
 sdnotify==0.3.2
 shiv==1.0.6
+typing-extensions==4.12.2

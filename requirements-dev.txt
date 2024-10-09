@@ -17,5 +17,4 @@ ruff==0.6.4
 types-maxminddb==1.5.0
 types-pytz==2024.1.0.20240417
 types-requests==2.32.0.20240905
-typing-extensions==4.12.2
 types-Pygments==2.18.0.20240506
