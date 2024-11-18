@@ -43,6 +43,11 @@
             </li>
 
             <li>
+                {{ inline_bookmarklet("location='https://www.archive.is/' + location.href", "archive") }}
+                <p>Look for an archived version of the current page</p>
+            </li>
+
+            <li>
                 {{ bookmarklet_url("/static/js/validate.js", "validate") }}
                 <p>Submit the current page to the W3C HTML validator</p>
             </li>
