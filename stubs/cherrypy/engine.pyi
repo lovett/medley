@@ -1383,49 +1383,6 @@ def publish(
 ) -> List[None]: ...
 
 
-@overload
-def publish(
-        channel: Literal["warehouse:add:chunk"],
-        path: Path,
-        content_type: str,
-        chunk: bytes,
-) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["warehouse:chunks:get"],
-        path: Path,
-) -> List[Iterator[bytes]]: ...
-
-
-@overload
-def publish(
-        channel: Literal["warehouse:chunks:count"],
-        path: Path,
-) -> List[int]: ...
-
-
-@overload
-def publish(
-        channel: Literal["warehouse:get:type"],
-        path: Path,
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["warehouse:list"]
-) -> List[Row]: ...
-
-
-@overload
-def publish(
-        channel: Literal["warehouse:remove"],
-        path: Path,
-) -> List[None]: ...
-
-
 def start() -> None: ...
 
 
