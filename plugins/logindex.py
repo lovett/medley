@@ -390,13 +390,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if unreversed_ips == 0:
             return
 
-        cherrypy.engine.publish(
-            "metrics:add",
-            "logindex:unreversed_ips",
-            unreversed_ips,
-            "count"
-        )
-
         for record in records[1:]:
             facts = cherrypy.engine.publish(
                 "ip:reverse",
@@ -449,13 +442,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         if records[0]["value"] == 0:
             cherrypy.engine.publish("scheduler:add", 1, "logindex:reversal")
             return
-
-        cherrypy.engine.publish(
-            "metrics:add",
-            "logindex:unparsed_rows",
-            records[0]['value'],
-            "rows"
-        )
 
         parser = parsers.combined_log.Parser()
 

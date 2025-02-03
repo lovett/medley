@@ -22,13 +22,6 @@ def log_runtime(func: Func) -> Func:
         start = perf_counter()
         result = func(*args, **kwargs)
 
-        cherrypy.engine.publish(
-            "metrics:add",
-            f"runtime:{func.__module__}:{func.__name__}",
-            round((perf_counter() - start) * 1000),
-            "ms"
-        )
-
         return result
 
     return cast(Func, wrapper)

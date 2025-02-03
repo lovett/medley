@@ -771,41 +771,6 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["metrics:add"],
-        key: str,
-        value: float,
-        unit: str,
-) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["metrics:dataset"],
-        key: str
-) -> List[Iterator[Row]]: ...
-
-
-@overload
-def publish(
-        channel: Literal["metrics:inventory"],
-) -> List[Iterator[Row]]: ...
-
-
-@overload
-def publish(
-        channel: Literal["metrics:prune"],
-        cutoff_months: int = 6,
-) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["metrics:pull"],
-) -> List[None]: ...
-
-
-@overload
-def publish(
         channel: Literal["notifier:build"],
         **kwargs: Any
 ) -> List[Dict[str, Any]]: ...

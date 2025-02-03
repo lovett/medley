@@ -50,7 +50,6 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
         cherrypy.engine.publish("bookmarks:prune")
         cherrypy.engine.publish("cache:prune")
         cherrypy.engine.publish("capture:prune")
-        cherrypy.engine.publish("metrics:prune")
         cherrypy.engine.publish("recipes:prune")
 
         cherrypy.engine.publish(
