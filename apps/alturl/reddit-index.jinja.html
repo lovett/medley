@@ -45,7 +45,7 @@
 
     <div id="collection">
         <ul>
-            {% for story in stories %}
+            {% for story in stories if (story.num_comments > 0 or "self" not in story.domain) %}
                 <li class="headline {% if story.created_utc|is_today %}today{% endif %}">
                     <h2 class="title">
                         {% if story.num_comments == 0 and not story.selftext %}

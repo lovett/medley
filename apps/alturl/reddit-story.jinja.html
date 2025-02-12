@@ -3,7 +3,7 @@
 {% set default_date_format = "%Y-%m-%d %-I:%M %p" %}
 
 {% macro commentBlock(comment) %}
-    {% if comment.author %}
+    {% if comment.author and "[deleted]" not in comment.author and "[removed]" not in comment.body_html %}
         <details id="t1_{{ comment.id }}" open class="comment {% if comment.author == story.author %}from-author{% endif %}">
             <summary>
                 <time>{{ comment.created_utc|relative_datetime }}</time>
