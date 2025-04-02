@@ -20,6 +20,3 @@ venv
 medley
 build
 flycheck_*
-node_modules
-.angular
-apps/static/js/spa

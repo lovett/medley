@@ -274,10 +274,6 @@ lint-pylint: dummy
 	--rcfile=.pylintrc \
 	apps parsers plugins testing tools medley.py
 
-lint-eslint: dummy
-	eslint apps/ledger
-
-
 # Empty the logindex database and re-index
 #
 # For use when changes to the logindex or visitors apps require a
@@ -327,15 +323,6 @@ favicon: dummy
 	cd apps/static && optipng -quiet -o 3 *.png
 
 
-ng: dummy
-	ng build --watch --configuration development ledger
-
-ngtest: dummy
-	ng test
-
-ngbuild: dummy
-	ng build
-
 # Tmux automation
 workspace:
 # 0: Editor
@@ -346,21 +333,15 @@ workspace:
 	tmux new-window -a -t "$(TMUX_SESSION_NAME)" "$$SHELL"
 	tmux send-keys -t "$(TMUX_SESSION_NAME)" "source $(VENV_ACTIVATE)" C-m
 
-# 2: Npm
-	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "ng" "make ng"
-
-# 3: Dev server
+# 2: Dev server
 	tmux new-window -a -t "$(TMUX_SESSION_NAME)" -n "devserver" "source $(VENV_ACTIVATE); make serve"
 	tmux select-window -t "$(TMUX_SESSION_NAME)":0
 	tmux attach-session -t "$(TMUX_SESSION_NAME)"
 
 satellite:
 	tmux new-session -d -s "$(TMUX_SESSION_NAME)-satellite"
-	tmux link-window -s '$(TMUX_SESSION_NAME):ng' -t '$(TMUX_SESSION_NAME)-satellite:1'
-	tmux link-window -s '$(TMUX_SESSION_NAME):devserver' -t '$(TMUX_SESSION_NAME)-satellite:2'
+	tmux link-window -s '$(TMUX_SESSION_NAME):devserver' -t '$(TMUX_SESSION_NAME)-satellite:1'
 	tmux kill-window -t :0
-
-	# tmux select-window -t "$(TMUX_SESSION_NAME)-satellite":2
 	tmux attach-session -t "$(TMUX_SESSION_NAME)-satellite"
 
 # Perform sundry cleanup tasks.

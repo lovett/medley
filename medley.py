@@ -38,7 +38,6 @@ import plugins.hasher
 import plugins.input
 import plugins.ip
 import plugins.jinja
-import plugins.ledger
 import plugins.logindex
 import plugins.mail
 import plugins.maintenance
@@ -242,7 +241,6 @@ def setup() -> None:
     plugins.hasher.Plugin(cherrypy.engine).subscribe()
     plugins.ip.Plugin(cherrypy.engine).subscribe()
     plugins.jinja.Plugin(cherrypy.engine).subscribe()
-    plugins.ledger.Plugin(cherrypy.engine).subscribe()
     plugins.logindex.Plugin(cherrypy.engine).subscribe()
     plugins.maintenance.Plugin(cherrypy.engine).subscribe()
     plugins.markup.Plugin(cherrypy.engine).subscribe()

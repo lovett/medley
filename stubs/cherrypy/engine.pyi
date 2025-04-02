@@ -555,104 +555,10 @@ def publish(
 
 @overload
 def publish(
-        channel: Literal["ledger:acknowledgment"],
-        amount: float,
-        payee: str,
-        source: str
-) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:accounts:single"],
-        account_id: int
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:accounts:new"]
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:accounts"],
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:transactions"],
-        q: str,
-        tag: str,
-        limit: int,
-        offset: int,
-        account: int
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:transactions:single"],
-        transaction_id: int
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:transactions:new"]
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:remove:account"],
-        account_id: int
-) -> List[bool]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:remove:transaction"],
-        transaction_id: int
-) -> List[bool]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:store:account"],
-        account_id: int,
-        name: str,
-        opened_on: Optional[date],
-        closed_on: Optional[date],
-        url: Optional[str],
-        note: Optional[str],
-) -> List[int]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:store:transaction"],
-        transaction_id: int,
-        **kwargs: Any
-) -> List[None]: ...
-
-
-@overload
-def publish(
         channel: Literal["logindex:alert"],
         earliest_id: int,
         count: int,
 ) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:tag:rename"],
-        tag: str,
-        new_name: str,
-) -> None: ...
 
 
 @overload
@@ -1183,34 +1089,6 @@ def publish(
 def publish(
         channel: Literal["speak:voices"],
 ) -> List[Dict[str, str]]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:json:tags"],
-) -> List[str]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:acknowledgment"],
-        date: str,
-        account: str,
-        amount: float,
-        payee: str
-) -> List[None]: ...
-
-
-@overload
-def publish(
-        channel: Literal["ledger:store:account"],
-        account_id: int,
-        name: str,
-        opened: Optional[date],
-        closed: Optional[date],
-        url: str,
-        note: str
-) -> List[None]: ...
 
 
 @overload
