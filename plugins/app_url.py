@@ -49,7 +49,7 @@ class Plugin(cherrypy.process.plugins.SimplePlugin):
 
         # A non-root path is treated as a sub-path of the current app.
         if not path.startswith("/"):
-            path = f"{cherrypy.request.script_name}/{path}"
+            path = f"{cherrypy.request.script_name}{cherrypy.request.path_info}{path}"
 
         # Trailing slash enforcement.
         if not any((path.endswith("/"), "?" in path, "." in path)):
