@@ -32,7 +32,7 @@
         {% for section in page.sections() if not section.startswith("-") %}
             <section>
                 <h1>
-                    <a href="#{{ section|slug }}"
+                    <a href="{{page_url}}#{{ section|slug }}"
                        title="#{{ section|slug }}"
                        class="hash-focus-candidate"
                        data-hash-focus-id="{{ section|slug }}"

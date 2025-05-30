@@ -164,11 +164,20 @@ class Controller:
             f"{page}/edit"
         ).pop()
 
+        if row["key"].endswith(":default"):
+            page_url = ""
+        else:
+            page_url = cherrypy.engine.publish(
+                "app_url",
+                f"{page}"
+            ).pop().rstrip("/")
+
         return cherrypy.engine.publish(
             "jinja:render",
             "apps/startpage/startpage.jinja.html",
             created=row["created"],
             anonymizer_url=anonymizer_url,
             edit_url=edit_url,
-            page=page_content
+            page=page_content,
+            page_url=page_url
         ).pop()
