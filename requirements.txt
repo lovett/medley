@@ -4,10 +4,10 @@ PyJWT~=1.7
 feedparser==6.0.11
 httplib2==0.22.0
 importlib-resources==6.5.2
-maxminddb==2.6.3
+maxminddb==2.7.0
 mistletoe==1.4.0
 pytz==2025.2
-requests==2.32.3
+requests==2.32.4
 sdnotify==0.3.2
 shiv==1.0.8
-typing-extensions==4.13.2
+typing-extensions==4.14.1
