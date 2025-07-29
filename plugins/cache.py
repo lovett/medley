@@ -263,6 +263,10 @@ class Plugin(cherrypy.process.plugins.SimplePlugin, mixins.Sqlite):
             AND j.key='data'
             AND j.value ->> '$.id' <> ''
             AND j.value ->> '$.author' != 'AutoModerator'
+            AND j.value ->> '$.author' != 'RemindMeBot'
+            AND j.value ->> '$.author' != '[deleted]'
+            AND j.value ->> '$.body_html' != '[removed]'
+            AND j.value ->> '$.body_html' NOT LIKE  '%RemindMe!%'
             """,
             (prefix, rest)
         )
