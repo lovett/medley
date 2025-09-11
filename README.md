@@ -11,7 +11,7 @@ Medley is written in Python and targets version 3.11. Setup is driven by `make`.
 make venv
 
 # Install third-party libraries
-make setup
+make setup setup-dev
 
 # Start the server on localhost:8085
 make serve
