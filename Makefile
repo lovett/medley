@@ -81,7 +81,6 @@ setup: venv
 # This is isolated from the setup target for the benefit of CI, where
 # dev packages are unused.
 setup-dev: setup
-	sudo dnf install python3-evdev
 	./venv/bin/python -m pip install --quiet --disable-pip-version-check -r requirements-dev.txt
 
 # Build the application

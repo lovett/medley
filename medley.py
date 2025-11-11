@@ -35,7 +35,6 @@ import plugins.gcp_appengine
 import plugins.gcp_storage
 import plugins.geography
 import plugins.hasher
-import plugins.input
 import plugins.ip
 import plugins.jinja
 import plugins.logindex
@@ -264,7 +263,6 @@ def setup() -> None:
         cherrypy.engine.start()
         return
 
-    plugins.input.Plugin(cherrypy.engine).subscribe()
     plugins.scheduler.Plugin(cherrypy.engine).subscribe()
 
     # Disable access logging to the console
