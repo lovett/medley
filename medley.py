@@ -70,7 +70,6 @@ ServerConfig = TypedDict("ServerConfig", {
     "error_log": str,
     "log_headers": bool,
     "etags": bool,
-    "gzip": bool,
     "log_screen": bool,
     "log_screen_access": bool,
     "memorize_hashes": bool,
@@ -96,7 +95,6 @@ ServerConfigAliases = TypedDict("ServerConfigAliases", {
     "server.socket_port": int,
     "tools.log_headers.on": bool,
     "tools.encode.on": bool,
-    "tools.gzip.on": bool,
 })
 
 
@@ -146,7 +144,6 @@ def setup() -> None:
         encode=env_boolean("encode", False),
         error_log=env_string("error_log", ""),
         etags=env_boolean("etags", True),
-        gzip=env_boolean("gzip", True),
         log_headers=env_boolean("log_headers", False),
         log_screen=env_boolean("log_screen", True),
         log_screen_access=env_boolean("log_screen_access", False),
@@ -173,7 +170,6 @@ def setup() -> None:
         "server.socket_host": config["server_host"],
         "server.socket_port": config["server_port"],
         "tools.encode.on": config["encode"],
-        "tools.gzip.on": config["gzip"],
     }  # type: ServerConfigAliases
 
     cherrypy.config.update(aliases)

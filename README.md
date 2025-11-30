@@ -46,8 +46,6 @@ systemd (use `journalctl` instead). Default: Not set
 `MEDLEY_etags`: Whether to use `ETag` HTTP headers for caching.
 Default: `True`
 
-`MEDLEY_gzip`: Whether to enable gzip compression. Default: `True`
-
 `MEDLEY_log_headers`: Whether error logging should include HTTP
 request headers. Default: `False`
 

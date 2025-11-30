@@ -124,6 +124,8 @@ class Controller:
     def POST(**kwargs: str) -> None:
         """Queue a new reminders for delivery."""
 
+        print(kwargs)
+
         message = kwargs.get("message", "").strip()
         badge = kwargs.get("badge", "").strip()
         minutes = int(kwargs.get("minutes", 0))
